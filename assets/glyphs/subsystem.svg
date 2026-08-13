@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img">
+  <title>Subsystem</title>
+  <!-- Stacked isometric layers. No upstream logo exists for this set, so the
+       glyph is drawn in the ocx cube language rather than borrowed. Monochrome
+       on purpose; the generator paints it. -->
+  <path d="M12 1 L21 5.5 L12 10 L3 5.5 Z"/>
+  <path d="M3 10.5 L12 15 L21 10.5 L21 12.5 L12 17 L3 12.5 Z"/>
+  <path d="M3 15.5 L12 20 L21 15.5 L21 17.5 L12 22 L3 17.5 Z"/>
+</svg>
