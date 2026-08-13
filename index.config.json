@@ -10,6 +10,6 @@
   },
   "ci": {
     "forge": "github",
-    "publish": "tag"
+    "publish": "default-branch"
   }
 }

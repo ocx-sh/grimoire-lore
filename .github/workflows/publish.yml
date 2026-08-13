@@ -31,7 +31,7 @@ name: publish
 
 on:
   push:
-    tags: ["v*"]
+    branches: [main]
   workflow_dispatch:
 
 # Default-deny at the top; the job pays for exactly what it needs.
