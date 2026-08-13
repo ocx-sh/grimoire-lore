@@ -52,7 +52,8 @@ def namespace_ids(markup: str, prefix: str) -> str:
 
 
 def compose(name: str, glyph_svg: str, disc: str, ink: str, base_svg: str,
-            span: float = GLYPH_SPAN, fill: str | None = None) -> str:
+            span: float = GLYPH_SPAN, fill: str | None = None,
+            stroke: str | None = None) -> str:
     cx, cy, r = DISC
     _, _, gw, gh = viewbox_of(glyph_svg)
     scale = span / max(gw, gh)
@@ -62,7 +63,13 @@ def compose(name: str, glyph_svg: str, disc: str, ink: str, base_svg: str,
     glyph = namespace_ids(body_of(glyph_svg), name)
     # A monochrome glyph (simple-icons and friends) carries no fill and would
     # render black; a full-colour logo brings its own and ignores this.
-    paint = f' fill="{fill}"' if fill else ""
+    # Stroke sets (lucide) put fill/stroke on the <svg> element itself, which
+    # is exactly the tag dropped on the way in — so restate them on the wrapper.
+    if stroke:
+        paint = (f' fill="none" stroke="{stroke}" stroke-width="2"'
+                 ' stroke-linecap="round" stroke-linejoin="round"')
+    else:
+        paint = f' fill="{fill}"' if fill else ""
 
     return (
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {BOX} {BOX}" '
@@ -103,6 +110,7 @@ def main() -> None:
     p.add_argument("--span", type=float, default=GLYPH_SPAN,
                    help=f"glyph width across its viewBox (default: {GLYPH_SPAN})")
     p.add_argument("--glyph-fill", help="fill for a monochrome glyph that carries none")
+    p.add_argument("--glyph-stroke", help="stroke colour for a stroke-drawn glyph (lucide et al)")
     p.add_argument("--selftest", action="store_true")
     a = p.parse_args()
 
@@ -121,6 +129,7 @@ def main() -> None:
             (ROOT / "assets" / "lore.svg").read_text(),
             a.span,
             a.glyph_fill,
+            a.glyph_stroke,
         )
     )
     # A hand-authored glyph can be malformed in ways only a parser catches — a
