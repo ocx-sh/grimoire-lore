@@ -51,6 +51,21 @@ def namespace_ids(markup: str, prefix: str) -> str:
     return markup
 
 
+BLACK = re.compile(r'\b(fill|stroke)="(#000|#000000|black)"', re.I)
+
+
+def repaint_black(markup: str, colour: str) -> str:
+    """Retarget hard-coded black paint on the glyph's own elements.
+
+    An element's own `fill`/`stroke` beats anything inherited from the wrapper,
+    so a glyph that paints itself black ignores a paint override entirely. The
+    Rust logo is one path with `stroke="#000"`: overriding only `fill` left the
+    gear teeth black. Scoped to black on purpose — a full-colour logo asked to
+    be repainted should keep its own colours.
+    """
+    return BLACK.sub(lambda m: f'{m.group(1)}="{colour}"', markup)
+
+
 def compose(name: str, glyph_svg: str, disc: str, ink: str, base_svg: str,
             span: float = GLYPH_SPAN, fill: str | None = None,
             stroke: str | None = None) -> str:
@@ -63,6 +78,9 @@ def compose(name: str, glyph_svg: str, disc: str, ink: str, base_svg: str,
     tx = cx - (gw * scale) / 2 - gx * scale
     ty = cy - (gh * scale) / 2 - gy * scale
     glyph = namespace_ids(body_of(glyph_svg), name)
+    paint_colour = stroke or fill
+    if paint_colour:
+        glyph = repaint_black(glyph, paint_colour)
     # A monochrome glyph (simple-icons and friends) carries no fill and would
     # render black; a full-colour logo brings its own and ignores this.
     # Stroke sets (lucide) put fill/stroke on the <svg> element itself, which
@@ -104,6 +122,15 @@ def selftest() -> None:
 
     # Stroke glyphs must not be handed a fill, or lucide icons render solid.
     assert 'fill="none"' in compose("t", glyph, "#FFF", "#000", base, stroke="#123456")
+
+    # A glyph that paints itself black wins over the wrapper, so an explicit
+    # paint has to reach inside it (the Rust logo's stroke="#000" gear teeth).
+    selfpainted = '<svg viewBox="0 0 10 10"><path stroke="#000" fill="black" d="M0 0h1"/></svg>'
+    out = compose("t", selfpainted, "#FFF", "#000", base, fill="#ABCDEF")
+    assert 'stroke="#ABCDEF"' in out and 'fill="#ABCDEF"' in out and '#000' not in out.split("<g")[-1]
+    # ...but only black. A full-colour logo keeps its own paint.
+    colour = '<svg viewBox="0 0 10 10"><path fill="#FFD43B" d="M0 0h1"/></svg>'
+    assert '#FFD43B' in compose("t", colour, "#FFF", "#000", base, fill="#ABCDEF")
     print("selftest ok")
 
 
