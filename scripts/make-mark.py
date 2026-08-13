@@ -98,6 +98,8 @@ def main() -> None:
     p.add_argument("--ink", default="#3A1008", help="disc stroke (default: deep coral)")
     # Scaling off the viewBox means a glyph with generous padding lands small.
     # Nudge per glyph rather than parsing paths for a real content bbox.
+    # A square glyph needs a smaller span than a round one: its corners sit at
+    # span * 0.707 from the centre, so 34 already touches the r=25 disc.
     p.add_argument("--span", type=float, default=GLYPH_SPAN,
                    help=f"glyph width across its viewBox (default: {GLYPH_SPAN})")
     p.add_argument("--glyph-fill", help="fill for a monochrome glyph that carries none")
