@@ -1,0 +1,44 @@
+# `grim publish` manifest - this repo holds both its own skills (under
+# `skills/`) and the index that lists them, the combined layout
+# `grim-indexer init --with-skills` scaffolds.
+#
+# The default layout is a standalone index repo instead: an index is a
+# distribution database that N separate skill repos announce into. Use
+# this combined form when one team owns both sides.
+#
+# Publish with `grim publish`, then announce into this index. Schema:
+# `grim schema --kind publish`.
+registry = "ghcr.io"
+# Flat: every artifact publishes as ghcr.io/ocx-sh/lore/<name>, whatever its
+# kind. The conventional {skills,rules,agents,bundles}/ segment is a namespace
+# partition, not a type tag — kind travels in the manifest as
+# `com.grimoire.kind`. Our names are unique across kinds, so the segment would
+# only lengthen every reference. Decided before the first publish, because a
+# repository path is public the moment it lands in someone's grimoire.lock.
+repository_prefix = "ocx-sh/lore"
+version = "0.1.0"
+
+# Where `grim publish --announce` opens its PR/MR. This repo *is* the index,
+# so it announces into itself. Never drop these keys: with no `[announce]`
+# table grim falls back to the public first-party index
+# (`github.com/grimoire-rs/index`) and proposes your packages into a repo you
+# do not own.
+#
+# `repository` is this repo's https clone URL. `namespace` is the
+# `index/<host>/<namespace>/` your entries land under - the contribution gate
+# refuses a namespace whose forge owner is not you. A literal `REPLACE-ME`
+# means the scaffold had nothing to derive it from: `--announce` then stops
+# with "cannot derive the index host" rather than announcing anywhere.
+[announce]
+repository = "https://github.com/ocx-sh/grimoire-lore"
+namespace = "ocx-sh"
+
+# One table per package. `repository_prefix` above supplies the path, so an
+# entry needs nothing but its name. Do not set a per-entry `repository` — it
+# is used verbatim and would reintroduce a kind segment.
+#
+# [skills.example]                 # → ghcr.io/ocx-sh/lore/example
+# [bundles.essentials]             # → ghcr.io/ocx-sh/lore/essentials
+#
+# Flat bundles name members same-directory: `./example:0`, not
+# `../skills/example:0`.

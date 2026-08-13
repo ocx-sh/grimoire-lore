@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "registryHosts": [
+    "ghcr.io"
+  ],
+  "reservedNamespaces": [
+    "grim",
+    "grimoire",
+    "index"
+  ],
+  "trustedBots": []
+}
