@@ -1,8 +1,7 @@
 {
   "site": "https://lore.ocx.sh",
-  "brand": "ocx lore",
-  "brandMark": "ocx",
-  "description": "ocx lore, a Grimoire package index.",
+  "brand": "OCX lore",
+  "description": "OCX lore, a Grimoire package index.",
   "logo": "/logo.svg",
   "repoUrl": "https://github.com/ocx-sh/grimoire-lore",
   "registry": {
