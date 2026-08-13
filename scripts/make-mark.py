@@ -55,11 +55,13 @@ def compose(name: str, glyph_svg: str, disc: str, ink: str, base_svg: str,
             span: float = GLYPH_SPAN, fill: str | None = None,
             stroke: str | None = None) -> str:
     cx, cy, r = DISC
-    _, _, gw, gh = viewbox_of(glyph_svg)
+    gx, gy, gw, gh = viewbox_of(glyph_svg)
     scale = span / max(gw, gh)
-    # centre the glyph's own box on the disc centre
-    tx = cx - (gw * scale) / 2
-    ty = cy - (gh * scale) / 2
+    # Centre the glyph's own box on the disc centre. Subtract the viewBox
+    # origin: it is 0 0 for most icon sets, but not all (the Python logo starts
+    # at 0.21 -0.077), and ignoring it shifts the glyph off centre.
+    tx = cx - (gw * scale) / 2 - gx * scale
+    ty = cy - (gh * scale) / 2 - gy * scale
     glyph = namespace_ids(body_of(glyph_svg), name)
     # A monochrome glyph (simple-icons and friends) carries no fill and would
     # render black; a full-colour logo brings its own and ignores this.
@@ -89,12 +91,25 @@ def selftest() -> None:
     out = compose("t", glyph, "#FFF", "#000", base)
     ET.fromstring(out)                              # well-formed
     assert 'id="t-b"' in out and 'id="b"' in out    # glyph ids namespaced, base's left alone
-    m = re.search(r"translate\(([\d.]+) ([\d.]+)\) scale\(([\d.]+)\)", out)
-    tx, ty, s = (float(v) for v in m.groups())
+    tx, ty, s = _transform_of(out)
     assert abs(s * 20 - GLYPH_SPAN) < 1e-6          # longest side fills the span
     assert abs(tx + s * 10 / 2 - DISC[0]) < 1e-6    # centred on the disc
     assert abs(ty + s * 20 / 2 - DISC[1]) < 1e-6
+
+    # A viewBox that does not start at the origin still lands centred.
+    off = '<svg viewBox="5 -3 10 20"><path d="M0 0h1"/></svg>'
+    tx, ty, s = _transform_of(compose("t", off, "#FFF", "#000", base))
+    assert abs(tx + s * (5 + 10 / 2) - DISC[0]) < 1e-6
+    assert abs(ty + s * (-3 + 20 / 2) - DISC[1]) < 1e-6
+
+    # Stroke glyphs must not be handed a fill, or lucide icons render solid.
+    assert 'fill="none"' in compose("t", glyph, "#FFF", "#000", base, stroke="#123456")
     print("selftest ok")
+
+
+def _transform_of(svg: str) -> tuple[float, float, float]:
+    m = re.search(r"translate\((-?[\d.]+) (-?[\d.]+)\) scale\(([\d.]+)\)", svg)
+    return tuple(float(v) for v in m.groups())
 
 
 def main() -> None:
