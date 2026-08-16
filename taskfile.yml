@@ -55,12 +55,21 @@ tasks:
       - "{{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --self-test"
 
   artifacts:
-    desc: Validate the rules, skills and bundle against the artifact contract
+    desc: Validate the rules and bundle against the artifact contract
     cmds:
       # `--root` must point at a repository that actually contains the language
       # being checked: this catalog holds no Rust, so glob liveness is
       # meaningless against `.` and every scoped rule would read as dead.
-      - "{{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --root {{.CONSUMER}} rules .claude/skills/research-lang"
+      #
+      # CI has no consumer checked out. Rather than fail or — worse — quietly
+      # pass a check that never ran, drop only the glob check and say so.
+      - |
+        if [ -d "{{.CONSUMER}}" ]; then
+          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --root {{.CONSUMER}} rules .claude/skills/research-lang
+        else
+          echo "note: no consumer at {{.CONSUMER}} — glob liveness NOT checked; run locally against a Rust repo"
+          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py rules .claude/skills/research-lang
+        fi
     vars:
       CONSUMER: '{{.CONSUMER | default "../ocx"}}'
 
@@ -74,7 +83,10 @@ tasks:
     cmds:
       - npm run ci:check
 
-  verify:
+  # What CI can run: no `grim` on the runner, so `build` is local-only. The
+  # `validate` workflow that grim-indexer generates is what covers the build
+  # side on a push.
+  ci:
     desc: Everything the CI gate runs
     cmds:
       - task: lint
@@ -82,4 +94,9 @@ tasks:
       - task: test
       - task: selftest
       - task: artifacts
+
+  verify:
+    desc: The full local gate — `ci` plus the artifact build
+    cmds:
+      - task: ci
       - task: build

@@ -3,9 +3,13 @@
 # workflow beside them is not drift. Verified with a probe file and
 # `npm run ci:check`.
 #
-# What this guards: the Python that validates this catalog and the linter that
-# ships inside the `rust-quality` layer. `rules/rust-quality/check.py` travels
-# with the published rule, so it is held to the same bar as the Rust it checks.
+# What this guards: the Python that validates this catalog before it is
+# published — `check-artifacts.py` and its tests. None of it ships to a
+# consumer; it is the gate on what does.
+#
+# It runs `task ci`, not `task verify`: `verify` also runs `grim publish
+# --dry-run`, and there is no grim on this runner. The generated `validate`
+# workflow covers the build side.
 #
 # Tool versions come from `ocx.toml`, not from this file. A workflow that pins
 # its own ruff drifts from what a contributor runs locally, and the first
@@ -60,4 +64,4 @@ jobs:
       - uses: ocx-sh/setup-ocx@25fa771f8572572dc64528db89560de68a163a0e # v1.4.0
 
       - name: Verify
-        run: ocx run task -- task verify RUFF_FORMAT=github
+        run: ocx run task -- task ci RUFF_FORMAT=github

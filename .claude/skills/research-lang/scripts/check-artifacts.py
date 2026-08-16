@@ -143,9 +143,14 @@ def _mini_yaml(raw: str) -> dict:
         indented = line[0] in " \t"
         stripped = line.strip()
         if indented and stripped.startswith("- ") and key:
-            out.setdefault(key, [])
-            if isinstance(out[key], list):
-                out[key].append(stripped[2:].strip().strip("\"'"))
+            # A valueless key below parsed as `{}` because a map was the more
+            # common case; the first `- ` item is what proves it is a list.
+            # Committing to the dict here silently dropped every item, which
+            # made `check_globs` skip its `isinstance(..., list)` guard and
+            # report no dead globs at all wherever PyYAML was absent.
+            if not isinstance(out.get(key), list):
+                out[key] = []
+            out[key].append(stripped[2:].strip().strip("\"'"))
             continue
         if indented and ":" in stripped and key:
             sub, _, val = stripped.partition(":")

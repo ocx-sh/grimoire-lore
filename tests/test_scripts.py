@@ -89,6 +89,46 @@ class RgPathOperands(unittest.TestCase):
         self.assertIsNone(self.operands("cargo deny check bans"))
 
 
+class MiniYaml(unittest.TestCase):
+    """The no-dependency frontmatter parser, exercised directly.
+
+    `split_frontmatter` prefers PyYAML and falls back to `_mini_yaml` only
+    when the import fails, so on a machine with PyYAML installed the fallback
+    is never reached and every test that goes through the front door passes
+    for the wrong reason. It shipped returning `{}` for `paths:` — which made
+    `check_globs` skip its `isinstance(..., list)` guard and report no dead
+    globs at all in CI, where nothing is installed. Call it directly.
+    """
+
+    def test_block_sequence_parses_as_a_list(self):
+        got = artifacts._mini_yaml('paths:\n  - "**/*.rs"\n  - "**/Cargo.toml"\n')
+        self.assertEqual(got, {"paths": ["**/*.rs", "**/Cargo.toml"]})
+
+    def test_nested_map_still_parses_as_a_map(self):
+        got = artifacts._mini_yaml("metadata:\n  summary: a thing\n  keywords: a,b\n")
+        self.assertEqual(got, {"metadata": {"summary": "a thing", "keywords": "a,b"}})
+
+    def test_list_and_map_and_scalar_together(self):
+        got = artifacts._mini_yaml(
+            'name: rust-quality\npaths:\n  - "**/*.rs"\nmetadata:\n  summary: s\n'
+        )
+        self.assertEqual(
+            got,
+            {"name": "rust-quality", "paths": ["**/*.rs"], "metadata": {"summary": "s"}},
+        )
+
+    def test_dead_glob_is_reachable_through_the_fallback_parser(self):
+        """The end-to-end path the bug actually broke."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "real.rs").write_text("fn main() {}\n")
+            fm = artifacts._mini_yaml('paths:\n  - "**/*.nope"\n')
+            findings: list[artifacts.Finding] = []
+            artifacts.check_globs(Path("r.md"), fm.get("paths"), root, findings)
+        self.assertEqual(len(findings), 1, findings)
+        self.assertIn("*.nope", findings[0].message)
+
+
 class CellDetectors(unittest.TestCase):
     """Each detector against the defect that produced it."""
 
