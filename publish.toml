@@ -53,7 +53,28 @@ namespace = "ocx-sh"
 
 # The Rust quality set. `rust-quality` is the index rule; its support directory
 # carries the depth files it routes to.
+# Description companions - what `grim describe` prints and what the index site
+# renders for each package.
+#
+# WITHOUT these, grim falls back to a conventional probe: it finds the repo
+# `README.md` and fans the identical payload to every entry. That shipped once
+# - all three companions had the same digest, and all three described the
+# *index* ("OCX lore, a Grimoire package index") rather than the artifact
+# someone had just installed.
+#
+# A per-entry table REPLACES the top-level one rather than merging with it, so
+# each repeats `logo`. Paths are manifest-relative; well-known members are
+# renamed on the wire (`readme` -> `README.md`, `logo` -> `logo.<ext>`), which
+# is why the sources can live under `docs/` and `assets/`.
+[description]
+readme = "README.md"
+logo = "assets/lore-rust.svg"
+
 [rules.rust-quality]
+description = { readme = "docs/rust-quality.md", logo = "assets/lore-rust.svg" }
+
 [rules.rust-cargo]
+description = { readme = "docs/rust-cargo.md", logo = "assets/lore-rust.svg" }
 
 [bundles.rust-essentials]
+description = { readme = "docs/rust-essentials.md", logo = "assets/lore-rust.svg" }
