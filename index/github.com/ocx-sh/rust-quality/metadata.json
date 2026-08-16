@@ -1,0 +1,27 @@
+{
+  "description": "Rust Quality",
+  "keywords": [
+    "rust",
+    "quality",
+    "standards",
+    "review",
+    "async",
+    "errors",
+    "exit-codes",
+    "cli",
+    "security",
+    "testing",
+    "architecture",
+    "idioms"
+  ],
+  "kind": "rule",
+  "name": "rust-quality",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/rust-quality",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "The Rust quality index — non-negotiables, the verification gate, the pinned exit-code contract, and where the depth lives"
+}
