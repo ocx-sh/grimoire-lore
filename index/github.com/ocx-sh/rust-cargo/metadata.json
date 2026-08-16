@@ -1,0 +1,25 @@
+{
+  "description": "Rust Cargo, Lints and CI",
+  "keywords": [
+    "rust",
+    "cargo",
+    "clippy",
+    "lints",
+    "msrv",
+    "toolchain",
+    "ci",
+    "cargo-deny",
+    "release",
+    "supply-chain"
+  ],
+  "kind": "rule",
+  "name": "rust-cargo",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/rust-cargo",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "Lint policy, toolchain pinning, dependency gates, CI and release settings for Rust"
+}

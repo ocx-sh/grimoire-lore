@@ -1,0 +1,25 @@
+{
+  "description": "Everything an agent needs to write, review and restructure Rust the way the OCX family does: the quality index and its depth files, the pinned exit-code and stream contract, the diff-review and diff-integrity checklists, the restructuring playbook, and the lint, toolchain and supply-chain policy.",
+  "keywords": [
+    "rust",
+    "quality",
+    "review",
+    "standards",
+    "cli",
+    "cargo",
+    "async",
+    "security",
+    "testing",
+    "architecture"
+  ],
+  "kind": "bundle",
+  "name": "rust-essentials",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/rust-essentials",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "The OCX Rust quality set — standards, CLI contract, review checklists, cargo and CI policy"
+}
