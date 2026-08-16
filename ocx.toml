@@ -1,0 +1,8 @@
+#:schema https://ocx.sh/schemas/project/v1.json
+# OCX project toolchain — managed by `ocx add` / `ocx remove`
+
+[tools]
+cli = "ocx.sh/grimoire/cli:latest"
+ruff = "ocx.sh/astral-sh/ruff:latest"
+uv = "ocx.sh/astral-sh/uv:latest"
+task = "ocx.sh/go-task/task:latest"

@@ -1,0 +1,22 @@
+summary = "The OCX Rust quality set — standards, CLI contract, review checklists, cargo and CI policy"
+keywords = "rust,quality,review,standards,cli,cargo,async,security,testing,architecture"
+description = "Everything an agent needs to write, review and restructure Rust the way the OCX family does: the quality index and its depth files, the pinned exit-code and stream contract, the diff-review and diff-integrity checklists, the restructuring playbook, and the lint, toolchain and supply-chain policy."
+license = "Apache-2.0"
+repository = "https://github.com/ocx-sh/grimoire-lore"
+
+# Members are same-directory relative: this catalog publishes flat under
+# ghcr.io/ocx-sh/lore/<name>, so `./rust-quality` resolves against wherever the
+# bundle itself was pulled from — a mirror keeps working.
+#
+# MEMBERS CARRY NO TAG. Not a digest, not an exact version, not a floating
+# major, not `latest` — `latest` is a tag like any other and naming it is still
+# a pin. A bundle is a *set*, not a snapshot: its job is to say "these belong
+# together", and the consumer's own `grimoire.lock` is what freezes them.
+# Pinning here duplicates that lock one layer up, where nobody can see it, and
+# turns every member fix into a bundle re-release.
+#
+# Do not pass --pin when releasing this bundle.
+
+[rules]
+rust-quality = "./rust-quality"
+rust-cargo = "./rust-cargo"

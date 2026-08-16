@@ -1,0 +1,85 @@
+# Every tool this repository needs is pinned in `ocx.toml` and resolved through
+# `ocx run <tool> -- <argv>`, so a contributor and CI run the same version of
+# ruff and the same version of uv. Nothing here reaches for a floating release
+# or expects a tool to be on PATH already — that is the whole point of pinning.
+#
+#     ocx run task -- task            # list what is available
+#     ocx run task -- task verify     # everything the CI gate runs
+version: "3"
+
+silent: true
+
+vars:
+  # The scripts declare `requires-python = ">=3.11"` in their PEP 723 headers.
+  # Running the floor is what makes that declaration true rather than
+  # aspirational: newer-only syntax fails here, not at a consumer.
+  PY: python3
+
+tasks:
+  default:
+    desc: List the available tasks
+    cmds:
+      - ocx run task -- task --list
+
+  lint:
+    desc: Lint every Python file with the pinned ruff
+    cmds:
+      - ocx run ruff -- ruff check --output-format {{.RUFF_FORMAT | default "concise"}} .
+
+  lint:fix:
+    desc: Apply ruff's safe fixes
+    cmds:
+      - ocx run ruff -- ruff check --fix .
+
+  format:
+    desc: Format every Python file
+    cmds:
+      - ocx run ruff -- ruff format .
+
+  format:check:
+    desc: Fail when a Python file is not formatted
+    cmds:
+      - ocx run ruff -- ruff format --check .
+
+  test:
+    desc: Run the Python test suite (stdlib unittest, no runner to install)
+    cmds:
+      - "{{.PY}} -m unittest discover -s tests {{.UNITTEST_ARGS}}"
+
+  # The validator also carries its own `--self-test`, which needs nothing
+  # installed. It can regress while the suite above still passes, so it is a
+  # separate gate rather than a step inside it.
+  selftest:
+    desc: Run the validator's own self-test
+    cmds:
+      - "{{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --self-test"
+
+  artifacts:
+    desc: Validate the rules, skills and bundle against the artifact contract
+    cmds:
+      # `--root` must point at a repository that actually contains the language
+      # being checked: this catalog holds no Rust, so glob liveness is
+      # meaningless against `.` and every scoped rule would read as dead.
+      - "{{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --root {{.CONSUMER}} rules .claude/skills/research-lang"
+    vars:
+      CONSUMER: '{{.CONSUMER | default "../ocx"}}'
+
+  build:
+    desc: Build every publishable artifact without pushing anything
+    cmds:
+      - grim publish --dry-run
+
+  ci:check:
+    desc: Fail when a generated CI file has drifted from index.config.json
+    cmds:
+      - npm run ci:check
+
+  verify:
+    desc: Everything the CI gate runs
+    cmds:
+      - task: lint
+      - task: format:check
+      - task: test
+      - task: selftest
+      - task: artifacts
+      - task: build

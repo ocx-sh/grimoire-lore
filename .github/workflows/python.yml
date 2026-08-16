@@ -1,0 +1,63 @@
+# Hand-written, and deliberately so: `verify-ci` re-renders and diffs only the
+# four files `grim-indexer` generates from index.config.json, so an extra
+# workflow beside them is not drift. Verified with a probe file and
+# `npm run ci:check`.
+#
+# What this guards: the Python that validates this catalog and the linter that
+# ships inside the `rust-quality` layer. `rules/rust-quality/check.py` travels
+# with the published rule, so it is held to the same bar as the Rust it checks.
+#
+# Tool versions come from `ocx.toml`, not from this file. A workflow that pins
+# its own ruff drifts from what a contributor runs locally, and the first
+# symptom is a lint failure nobody can reproduce. One pin, one place: the same
+# argument the rules make about `--locked`.
+name: python
+
+on:
+  pull_request:
+    paths:
+      - "**/*.py"
+      - ruff.toml
+      - taskfile.yml
+      - ocx.toml
+      - ocx.lock
+      - .github/workflows/python.yml
+  push:
+    branches: [main]
+    paths:
+      - "**/*.py"
+      - ruff.toml
+      - taskfile.yml
+      - ocx.toml
+      - ocx.lock
+      - .github/workflows/python.yml
+
+permissions: {}
+
+concurrency:
+  group: python-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # 3.11 is the floor the scripts declare in their PEP 723 headers, and the
+      # tests are stdlib-only, so this is the whole Python setup.
+      - uses: actions/setup-python@e9d6f990972a57673cdb72ec29e19d42ba28880f # v6.0.0
+        with:
+          python-version: "3.11"
+
+      # Finding `ocx.toml`, the action runs `ocx pull` and activates the
+      # project, so ruff, uv and task arrive at the versions in `ocx.lock` —
+      # the same ones a contributor gets locally. No separate install step.
+      - uses: ocx-sh/setup-ocx@25fa771f8572572dc64528db89560de68a163a0e # v1.4.0
+
+      - name: Verify
+        run: ocx run task -- task verify RUFF_FORMAT=github

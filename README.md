@@ -14,6 +14,22 @@ available in `ghcr.io`, served at https://lore.ocx.sh.
 | `package.json` / `package-lock.json` | The renderer this index runs, pinned |
 | `dist/` | Build output (`all.json`, per-path copies, the rendered site) - not committed |
 
+This repository is the combined layout: it holds the index *and* the packages
+the index lists.
+
+| Path | Purpose |
+|---|---|
+| `rules/<name>.md` (+ optional `rules/<name>/`) | Glob-scoped rules; the sibling directory is the rule's on-demand depth |
+| `skills/<name>/SKILL.md` | Skills, with `references/` and `scripts/` beside them |
+| `bundles/<name>.toml` | Curated member sets, published after their members |
+| `publish.toml` | What `grim publish` pushes, and where it announces |
+| `.agents/research/` | The cited research each artifact was distilled from - `<topic>.md` is the consolidated position, `<topic>/<worker>.md` the sources behind it |
+
+Artifacts are validated before release with `ocx run task -- task verify`
+(name parity, context budgets, link resolution, dead globs, rule-table
+completeness, then `grim publish --dry-run`). Tools are pinned in
+`ocx.toml`, so CI and a contributor run identical versions.
+
 ## Getting set up
 
 ```sh

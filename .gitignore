@@ -14,4 +14,26 @@ node_modules/
 # NOT ignored: `package-lock.json` is what pins the renderer this index builds
 # and validates with. Committing it is what makes `npm ci` in CI reproducible.
 
+# Per-session agent telemetry written by the model-routing hook, not config.
+.claude/state/
+
+# Skills `grim install` vendors in from `grimoire.toml`. They are dependencies,
+# not sources: `grimoire.lock` pins each to a digest, so committing the
+# unpacked copies is the node_modules mistake. `research-lang` beside them IS
+# tracked - it is authored here and appears in no lockfile.
+.claude/skills/ai-config-authoring/
+.claude/skills/grim-authoring/
+.claude/skills/grim-usage/
+
+# Python bytecode and tooling caches. `.claude/skills/research-lang/scripts/`
+# and `tests/` are tracked, so a stray `__pycache__` would be committed next
+# to them. `grim build` already excludes them from a published layer (the
+# digest is identical with and without), but nothing should get that far.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+
 .DS_Store

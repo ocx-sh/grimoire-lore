@@ -15,12 +15,13 @@ import argparse
 import re
 import sys
 import xml.etree.ElementTree as ET
+from dataclasses import dataclass
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-BOX = 128            # base mark viewBox
+BOX = 128  # base mark viewBox
 DISC = (99, 99, 25)  # badge centre and radius — arcana's hex geometry
-GLYPH_SPAN = 34      # glyph width inside the disc
+GLYPH_SPAN = 34  # glyph width inside the disc
 
 
 def body_of(svg: str) -> str:
@@ -51,7 +52,7 @@ def namespace_ids(markup: str, prefix: str) -> str:
     return markup
 
 
-BLACK = re.compile(r'\b(fill|stroke)="(#000|#000000|black)"', re.I)
+BLACK = re.compile(r'\b(fill|stroke)="(#000|#000000|black)"', re.IGNORECASE)
 
 
 def repaint_black(markup: str, colour: str) -> str:
@@ -66,9 +67,25 @@ def repaint_black(markup: str, colour: str) -> str:
     return BLACK.sub(lambda m: f'{m.group(1)}="{colour}"', markup)
 
 
-def compose(name: str, glyph_svg: str, disc: str, ink: str, base_svg: str,
-            span: float = GLYPH_SPAN, fill: str | None = None,
-            stroke: str | None = None) -> str:
+@dataclass(frozen=True)
+class Style:
+    """How the badge is painted. Grouped because these five travel together.
+
+    Eight positional parameters is how a `span`/`fill` transposition reaches
+    a call site unnoticed; keeping them in one value makes each one named at
+    every call.
+    """
+
+    disc: str
+    ink: str
+    span: float = GLYPH_SPAN
+    fill: str | None = None
+    stroke: str | None = None
+
+
+def compose(name: str, glyph_svg: str, base_svg: str, style: Style) -> str:
+    disc, ink, span = style.disc, style.ink, style.span
+    fill, stroke = style.fill, style.stroke
     cx, cy, r = DISC
     gx, gy, gw, gh = viewbox_of(glyph_svg)
     scale = span / max(gw, gh)
@@ -86,8 +103,10 @@ def compose(name: str, glyph_svg: str, disc: str, ink: str, base_svg: str,
     # Stroke sets (lucide) put fill/stroke on the <svg> element itself, which
     # is exactly the tag dropped on the way in — so restate them on the wrapper.
     if stroke:
-        paint = (f' fill="none" stroke="{stroke}" stroke-width="2"'
-                 ' stroke-linecap="round" stroke-linejoin="round"')
+        paint = (
+            f' fill="none" stroke="{stroke}" stroke-width="2"'
+            ' stroke-linecap="round" stroke-linejoin="round"'
+        )
     else:
         paint = f' fill="{fill}"' if fill else ""
 
@@ -103,34 +122,46 @@ def compose(name: str, glyph_svg: str, disc: str, ink: str, base_svg: str,
     )
 
 
+def expect(condition: bool, what: str) -> None:
+    """`assert` is stripped by `python -O`; a self-test must not be."""
+    if not condition:
+        raise SystemExit(f"selftest: {what}")
+
+
 def selftest() -> None:
     base = '<svg viewBox="0 0 128 128"><rect id="b" width="1" height="1"/></svg>'
     glyph = '<svg viewBox="0 0 10 20"><path id="b" d="M0 0h1"/></svg>'
-    out = compose("t", glyph, "#FFF", "#000", base)
-    ET.fromstring(out)                              # well-formed
-    assert 'id="t-b"' in out and 'id="b"' in out    # glyph ids namespaced, base's left alone
+    plain = Style(disc="#FFF", ink="#000")
+    out = compose("t", glyph, base, plain)
+    ET.fromstring(out)  # noqa: S314 - input is composed two lines above, not untrusted
+    expect('id="t-b"' in out and 'id="b"' in out, "glyph ids namespaced, base's left alone")
     tx, ty, s = _transform_of(out)
-    assert abs(s * 20 - GLYPH_SPAN) < 1e-6          # longest side fills the span
-    assert abs(tx + s * 10 / 2 - DISC[0]) < 1e-6    # centred on the disc
-    assert abs(ty + s * 20 / 2 - DISC[1]) < 1e-6
+    expect(abs(s * 20 - GLYPH_SPAN) < 1e-6, "longest side fills the span")
+    expect(abs(tx + s * 10 / 2 - DISC[0]) < 1e-6, "centred on the disc horizontally")
+    expect(abs(ty + s * 20 / 2 - DISC[1]) < 1e-6, "centred on the disc vertically")
 
     # A viewBox that does not start at the origin still lands centred.
     off = '<svg viewBox="5 -3 10 20"><path d="M0 0h1"/></svg>'
-    tx, ty, s = _transform_of(compose("t", off, "#FFF", "#000", base))
-    assert abs(tx + s * (5 + 10 / 2) - DISC[0]) < 1e-6
-    assert abs(ty + s * (-3 + 20 / 2) - DISC[1]) < 1e-6
+    tx, ty, s = _transform_of(compose("t", off, base, plain))
+    expect(abs(tx + s * (5 + 10 / 2) - DISC[0]) < 1e-6, "offset viewBox centred horizontally")
+    expect(abs(ty + s * (-3 + 20 / 2) - DISC[1]) < 1e-6, "offset viewBox centred vertically")
 
     # Stroke glyphs must not be handed a fill, or lucide icons render solid.
-    assert 'fill="none"' in compose("t", glyph, "#FFF", "#000", base, stroke="#123456")
+    stroked = Style(disc="#FFF", ink="#000", stroke="#123456")
+    expect('fill="none"' in compose("t", glyph, base, stroked), "stroke glyphs get no fill")
 
     # A glyph that paints itself black wins over the wrapper, so an explicit
     # paint has to reach inside it (the Rust logo's stroke="#000" gear teeth).
     selfpainted = '<svg viewBox="0 0 10 10"><path stroke="#000" fill="black" d="M0 0h1"/></svg>'
-    out = compose("t", selfpainted, "#FFF", "#000", base, fill="#ABCDEF")
-    assert 'stroke="#ABCDEF"' in out and 'fill="#ABCDEF"' in out and '#000' not in out.split("<g")[-1]
+    filled = Style(disc="#FFF", ink="#000", fill="#ABCDEF")
+    out = compose("t", selfpainted, base, filled)
+    expect(
+        'stroke="#ABCDEF"' in out and 'fill="#ABCDEF"' in out and "#000" not in out.split("<g")[-1],
+        "an explicit paint reaches inside a self-painted glyph",
+    )
     # ...but only black. A full-colour logo keeps its own paint.
     colour = '<svg viewBox="0 0 10 10"><path fill="#FFD43B" d="M0 0h1"/></svg>'
-    assert '#FFD43B' in compose("t", colour, "#FFF", "#000", base, fill="#ABCDEF")
+    expect("#FFD43B" in compose("t", colour, base, filled), "a full-colour logo keeps its paint")
     print("selftest ok")
 
 
@@ -149,35 +180,43 @@ def main() -> None:
     # Nudge per glyph rather than parsing paths for a real content bbox.
     # A square glyph needs a smaller span than a round one: its corners sit at
     # span * 0.707 from the centre, so 34 already touches the r=25 disc.
-    p.add_argument("--span", type=float, default=GLYPH_SPAN,
-                   help=f"glyph width across its viewBox (default: {GLYPH_SPAN})")
+    p.add_argument(
+        "--span",
+        type=float,
+        default=GLYPH_SPAN,
+        help=f"glyph width across its viewBox (default: {GLYPH_SPAN})",
+    )
     p.add_argument("--glyph-fill", help="fill for a monochrome glyph that carries none")
     p.add_argument("--glyph-stroke", help="stroke colour for a stroke-drawn glyph (lucide et al)")
     p.add_argument("--selftest", action="store_true")
     a = p.parse_args()
 
     if a.selftest:
-        return selftest()
+        selftest()
+        return
     if not (a.name and a.glyph):
         p.error("name and glyph are required")
 
     out = ROOT / "assets" / f"lore-{a.name}.svg"
-    composed = (
-        compose(
-            a.name,
-            Path(a.glyph).read_text(),
-            a.disc,
-            a.ink,
-            (ROOT / "assets" / "lore.svg").read_text(),
-            a.span,
-            a.glyph_fill,
-            a.glyph_stroke,
-        )
+    composed = compose(
+        a.name,
+        Path(a.glyph).read_text(),
+        (ROOT / "assets" / "lore.svg").read_text(),
+        Style(
+            disc=a.disc,
+            ink=a.ink,
+            span=a.span,
+            fill=a.glyph_fill,
+            stroke=a.glyph_stroke,
+        ),
     )
     # A hand-authored glyph can be malformed in ways only a parser catches — a
     # literal `--` inside an XML comment, say. Fail here, not at render time.
     try:
-        ET.fromstring(composed)
+        # `composed` is built by this script from a local glyph and the
+        # committed base mark — a well-formedness probe on our own output, not
+        # a parse of anything a stranger sent.
+        ET.fromstring(composed)  # noqa: S314
     except ET.ParseError as e:
         sys.exit(f"{a.glyph}: composed mark is not well-formed XML: {e}")
     out.write_text(composed)

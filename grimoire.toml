@@ -1,0 +1,10 @@
+#:schema https://grimoire.rs/schemas/grimoire-config.schema.json
+[options]
+clients = ["claude"]
+
+[bundles]
+grim-essentials = "ghcr.io/grimoire-rs/bundles/grim-essentials:latest"
+
+[skills]
+
+[rules]

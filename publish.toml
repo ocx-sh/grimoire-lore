@@ -42,3 +42,18 @@ namespace = "ocx-sh"
 #
 # Flat bundles name members same-directory: `./example:0`, not
 # `../skills/example:0`.
+#
+# Conventional source paths, used when an entry sets no `path`:
+# `skills/<name>/`, `rules/<name>.md`, `agents/<name>.md`, `bundles/<name>.toml`.
+# A rule's sibling `rules/<name>/` support directory is discovered automatically
+# and ships in the same layer.
+#
+# Publish order is fixed by kind (skills → rules → agents → mcp → bundles), so
+# `rust-essentials` always lands after the members it references.
+
+# The Rust quality set. `rust-quality` is the index rule; its support directory
+# carries the depth files it routes to.
+[rules.rust-quality]
+[rules.rust-cargo]
+
+[bundles.rust-essentials]

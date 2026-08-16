@@ -1,0 +1,51 @@
+# Lint and format config for the Python in this repository: the artifact
+# validator under `.claude/skills/research-lang/scripts/`, and the index
+# scripts under `scripts/`.
+#
+# Nothing here is published — the catalog ships Markdown. This is the local
+# gate on what gets published, so it is held to the bar the rules describe:
+# no dependencies, no dead branches, no silently swallowed errors.
+
+target-version = "py311"
+line-length = 100
+
+exclude = ["node_modules", "dist", ".index-*"]
+
+[lint]
+select = [
+    "F",      # pyflakes - real errors
+    "E", "W", # pycodestyle
+    "I",      # import order
+    "UP",     # pyupgrade - the target-version is the contract
+    "B",      # bugbear
+    "SIM",    # simplify
+    "RET",    # return-path clarity
+    "PTH",    # prefer pathlib over os.path
+    "PL",     # pylint subset
+    "RUF",    # ruff's own
+    "S",      # bandit
+    "ISC",    # implicit string concatenation
+    "FURB",   # modernisation
+]
+ignore = [
+    # Long single-line explanatory strings in findings are deliberate; the
+    # message is read by an agent, not wrapped in a terminal.
+    "E501",
+    # A validator legitimately has many branches over artifact shapes.
+    "PLR0912", "PLR0915", "PLR0911",
+    # Threshold constants are named where it helps and inline where the name
+    # would say less than the number.
+    "PLR2004",
+]
+
+[lint.per-file-ignores]
+# Tests assert; that is what they are for.
+# Tests assert, and the one subprocess they spawn is this repository's own
+# script under `sys.executable`.
+"tests/*" = ["S101", "PLR2004", "S603"]
+# The validator carries a `--self-test` so it can be proved with nothing
+# installed. Those asserts are the proof.
+".claude/skills/research-lang/scripts/*" = ["S101"]
+
+[format]
+quote-style = "double"
