@@ -78,8 +78,13 @@ tasks:
     cmds:
       - grim publish --dry-run
 
+  # Informational, NOT a gate — it is in no task's dependency list, and it is
+  # expected to exit non-zero. `index.config.json` sets `allowManualEdits`
+  # because `publish.yml` needs a hand-edited `contents: write`, so that one
+  # file reports drift by design. Read the diff when upgrading grim-indexer:
+  # any file *other* than publish.yml drifting is a real finding.
   ci:check:
-    desc: Fail when a generated CI file has drifted from index.config.json
+    desc: "Show how the generated CI files differ from index.config.json (publish.yml drifts by design)"
     cmds:
       - npm run ci:check
 

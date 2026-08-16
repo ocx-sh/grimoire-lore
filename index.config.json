@@ -10,6 +10,7 @@
   },
   "ci": {
     "forge": "github",
-    "publish": "default-branch"
+    "publish": "default-branch",
+    "allowManualEdits": true
   }
 }
