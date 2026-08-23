@@ -17,8 +17,10 @@ used when importable, otherwise a minimal frontmatter parser is used).
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import shlex
+import signal
 import sys
 import tempfile
 from dataclasses import dataclass
@@ -65,6 +67,18 @@ NOT_A_TEMPLATE = re.compile(
 # A shell glob in a bare path operand. `crates/*/Cargo.toml` is expanded by the
 # shell, so it aborts the whole command on a repo with no `crates/`.
 BARE_GLOB_RE = re.compile(r"(?<![\w'\"/-])(?:[\w.-]+/)+\*")
+# `rg -L` is --follow (symlinks). The files-without-match flag is
+# --files-without-match, which has no short alias — so `-L` written for it
+# inverts the check: the output becomes the compliant files.
+RG_DASH_L_RE = re.compile(r"(?<!\S)-L(?!\S)")
+# `**` outside quotes is expanded by the shell, and bash without
+# `shopt -s globstar` treats it as a single `*` — one directory level, not a
+# recursive descent. The command runs, finds a subset, and reads as clean.
+# Quoted, it reaches rg's own glob engine, which does honour `**`.
+QUOTED_SPAN_RE = re.compile(r"'[^']*'|\"[^\"]*\"")
+# A backtick span that is a runnable search command, not a pattern being
+# discussed in prose.
+SEARCH_COMMANDS = ("rg ", "grep ", "git grep ", "find ")
 # Command substitution: when the inner command finds nothing the outer one is
 # left with zero path operands, which inverts or hangs it.
 SUBST_RE = re.compile(r"\$\(")
@@ -249,7 +263,9 @@ def rg_path_operands(span: str) -> list[str] | None:
     return operands if used_e else operands[1:]
 
 
-def check_runnable_spans(path: Path, line: str, lineno: int, findings: list[Finding]) -> None:
+def check_runnable_spans(
+    path: Path, line: str, lineno: int, findings: list[Finding], *, in_table: bool = True
+) -> None:
     """A command in a table cell must survive being pasted into a shell.
 
     A Markdown table cell cannot hold a bare ``|``, so an author writes
@@ -263,20 +279,51 @@ def check_runnable_spans(path: Path, line: str, lineno: int, findings: list[Find
     Restate the command without a pipe: ``rg -e 'a' -e 'b'``.
     """
     for span in CODE_SPAN_RE.findall(line):
-        if "|" in span:
-            findings.append(
-                Finding(
-                    path,
-                    f"line {lineno}: command span in a table cell contains a pipe, "
-                    f"which an agent pastes as a literal: `{span[:70]}`",
-                )
-            )
+        # Only ripgrep is bitten. GNU grep's default BRE reads `\|` as real
+        # alternation, so `grep 'a\|b'` works when pasted — flagging it is a
+        # false positive. And an UNQUOTED pipe is a shell pipeline, which
+        # fails loudly rather than silently, so it is not this defect either.
+        if in_table and span.startswith("rg "):
+            for quoted in QUOTED_RE.findall(span):
+                if "\\|" in quoted:
+                    findings.append(
+                        Finding(
+                            path,
+                            f"line {lineno}: rg pattern in a table cell contains an escaped pipe `\\|`. "
+                            f"Rendered that is alternation, but an agent reads the raw "
+                            f"file and pastes a literal `|`, so the search silently "
+                            f"matches nothing and the check can never go red. Use "
+                            f"separate commands: `{span[:70]}`",
+                        )
+                    )
         if BAD_TYPE_RE.search(span):
             findings.append(
                 Finding(
                     path,
                     f"line {lineno}: `-tn <lang>` is not --type; rg parses it as type 'n' "
                     f"and exits 2. Use `--type <lang>`: `{span[:70]}`",
+                )
+            )
+        if span.startswith("rg ") and RG_DASH_L_RE.search(span):
+            findings.append(
+                Finding(
+                    path,
+                    f"line {lineno}: `rg -L` is --follow (symlinks), not files-without-match. "
+                    f"Written for the latter it prints the COMPLIANT files, inverting the "
+                    f"check. Use `--files-without-match`: `{span[:70]}`",
+                )
+            )
+        # Only a span that is actually a command can be pasted into a shell.
+        # A backtick span is far more often a glob *pattern* being discussed
+        # (`**/*.py`), or Python syntax (`**kwargs`) — neither is a defect.
+        if span.startswith(SEARCH_COMMANDS) and "**" in QUOTED_SPAN_RE.sub("", span):
+            findings.append(
+                Finding(
+                    path,
+                    f"line {lineno}: unquoted `**` is expanded by the shell, and bash without "
+                    f"`shopt -s globstar` reads it as a single `*` — one level, not a recursive "
+                    f"descent, so the command silently searches a subset. Quote it so rg's own "
+                    f"glob engine handles it: `{span[:70]}`",
                 )
             )
         operands = rg_path_operands(span)
@@ -289,7 +336,7 @@ def check_runnable_spans(path: Path, line: str, lineno: int, findings: list[Find
                     f"for an agent. Append ` .`: `{span[:70]}`",
                 )
             )
-        if not span.startswith(("rg ", "grep ", "git grep ")):
+        if not span.startswith(SEARCH_COMMANDS[:3]):
             continue
         for quoted in QUOTED_RE.findall(span):
             template = next(
@@ -345,8 +392,11 @@ def check_rule_tables(path: Path, body: str, findings: list[Finding], seen_ids: 
             CITED.setdefault(cite, path)
         if not line.startswith("|"):
             columns, verify_at = None, None
+            # A verification written in prose (`*Verify:* `…``) is just as
+            # runnable as one in a table cell, and was previously unchecked.
+            check_runnable_spans(path, line, lineno, findings, in_table=False)
             continue
-        check_runnable_spans(path, line, lineno, findings)
+        check_runnable_spans(path, line, lineno, findings, in_table=True)
         cells = [c.strip() for c in line.strip().strip("|").split("|")]
         if columns is None:
             columns = [c.lower() for c in cells]
@@ -498,6 +548,12 @@ def check_citations(seen_ids: dict, findings: list[Finding]) -> None:
         findings.append(Finding(path, f"cites {rule_id}, which no rule table defines"))
 
 
+def expect(condition: bool, what: object) -> None:
+    """`assert` is stripped by `python -O`; a self-test must not be."""
+    if not condition:
+        raise SystemExit(f"self-test: {what}")
+
+
 def self_test() -> int:
     with tempfile.TemporaryDirectory() as tmp:
         base = Path(tmp)
@@ -511,7 +567,11 @@ def self_test() -> int:
         rule = base / "bad-rule.md"
         rule.write_text(
             '---\npaths:\n  - "**/*.nonexistent"\nmetadata:\n  summary: misplaced\n---\n\n'
-            "| ID | Rule | Verification |\n|---|---|---|\n| X-01 | do a thing, see X-99 |  |\n",
+            "| ID | Rule | Verification |\n|---|---|---|\n| X-01 | do a thing, see X-99 |  |\n"
+            "| X-02 | invert me | `rg -L 'thing' .` |\n"
+            "| X-03 | truncate me | `rg 'thing' docs/**/*.md` |\n"
+            "| X-04 | literal pipe | `rg 'alpha\\|beta' .` |\n"
+            "| X-05 | grep BRE is fine | `grep 'alpha\\|beta' .` |\n",
             encoding="utf-8",
         )
         findings: list[Finding] = []
@@ -520,13 +580,18 @@ def self_test() -> int:
         walk(base, base, [], findings, seen)
         check_citations(seen, findings)
         messages = " ".join(f.message for f in findings)
-        assert "!= directory name" in messages, messages
-        assert "workflow verb" in messages, messages
-        assert "broken relative link" in messages, messages
-        assert "dead glob" in messages, messages
-        assert "belongs at the top level" in messages, messages
-        assert "empty verification cell" in messages, messages
-        assert "cites X-99" in messages, messages
+        expect("!= directory name" in messages, messages)
+        expect("workflow verb" in messages, messages)
+        expect("broken relative link" in messages, messages)
+        expect("dead glob" in messages, messages)
+        expect("belongs at the top level" in messages, messages)
+        expect("empty verification cell" in messages, messages)
+        expect("cites X-99" in messages, messages)
+        expect("files-without-match" in messages, messages)
+        expect("globstar" in messages, messages)
+        expect("never go red" in messages, messages)
+        # …but GNU grep's BRE alternation is legitimate, so X-05 must NOT fire.
+        expect(messages.count("never go red") == 1, messages)
 
         good = base / "good-skill"
         good.mkdir()
@@ -539,7 +604,7 @@ def self_test() -> int:
         clean: list[Finding] = []
         CITED.clear()
         walk(good, base, [], clean, {})
-        assert not clean, [str(f) for f in clean]
+        expect(not clean, [str(f) for f in clean])
     print("self-test: ok")
     return 0
 
@@ -585,4 +650,16 @@ def main(argv: list[str]) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:]))
+    # `… | head` closes the pipe early. Python installs SIG_IGN for SIGPIPE, so
+    # the write fails with EPIPE — and because stdout to a pipe is block
+    # buffered, it fails at the interpreter's *shutdown* flush, past any
+    # handler here. That prints a traceback and exits 120. Restoring the
+    # default disposition makes this die like a normal Unix filter instead.
+    # Windows has no SIGPIPE; there BrokenPipeError does surface, so keep both.
+    if hasattr(signal, "SIGPIPE"):
+        signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+    try:
+        sys.exit(main(sys.argv[1:]))
+    except BrokenPipeError:
+        os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno())
+        sys.exit(1)

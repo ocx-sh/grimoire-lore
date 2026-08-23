@@ -1,3 +1,148 @@
+# Handoff — language quality artifact programs
+
+Two programs have run in this repository, both with
+`.claude/skills/research-lang/`. The Rust one shipped 2026-08-16; the Python
+one shipped 2026-08-23. The Rust sections below are unchanged and still
+authoritative for the decisions they record — most of them are
+language-agnostic and the Python program inherited them rather than
+re-deciding.
+
+---
+
+# Python quality artifact program
+
+Written 2026-08-23, for a cold resume.
+
+## What shipped
+
+| Artifact | Path | Notes |
+|---|---|---|
+| `python-quality` (rule) | `rules/python-quality.md` + `rules/python-quality/` | 123-line index, globs `**/*.py`. 12 depth files, 100 depth rules + 8 index-owned `PY-CORE` rules |
+| `python-packaging` (rule) | `rules/python-packaging.md` | 78 lines, 10 rules. Globs `**/pyproject.toml` and `**/uv.lock` |
+| `python-essentials` (bundle) | `bundles/python-essentials.toml` | Members carry **no tag** |
+| Description companions | `docs/python-{quality,packaging,essentials}.md` | `assets/lore-python.svg` already existed |
+
+Wired in `publish.toml`. `ocx run task -- task verify` is green including
+`grim publish --dry-run`. **Merging to `main` publishes.**
+
+Research corpus: `.agents/research/python-*`, ~35 files.
+`python-topic-map.md` is the index — 193 rows, the deferred backlog, and the
+"explicitly not a defect" list.
+
+## Decisions that are load-bearing
+
+1. **Python rule IDs are `PY-<FAMILY>-nn`.** Rust took 31 bare prefixes
+   (`ERR`, `TEST`, `ASYNC`, `SEC`…) and a prefix belongs to exactly one rule
+   set. `PY-` keeps review output unambiguous forever. Families: `CORE`,
+   `TEST`, `TYP`, `PROC`, `CLI`, `ASYNC`, `HTTP`, `SEC`, `OBS`, `SURF`,
+   `MODEL`, `SOLO`, `GATE`, `PKG`.
+2. **One package, twelve depth files.** `testing` and `security` both glob
+   `**/*.py`, so splitting them into sibling rules rebuilds the monolith
+   with extra steps. Same reasoning as the Rust `cli-contract` decision.
+3. **`python-packaging` globs only `**/pyproject.toml` and `**/uv.lock`** —
+   the two names a build system guarantees. `ruff.toml` and
+   `pyrightconfig.json` were rejected as globs: both are dead against ocx.
+4. **The index's Non-Negotiables contain only MUST-severity rules.** Three
+   SHOULD rules were removed from that table rather than promoted — the
+   depth file is the definition site and its severity wins.
+
+## Python is four shapes, not one
+
+Measured, and it is the fact the whole rule set turns on: a subprocess-driven
+pytest acceptance harness (~130k LOC, `ocx/test` + `grimoire/test`, replicated
+byte-identically in three more repos); `ocx-sdk-python` (typed library,
+zero runtime dependencies, pyright strict, 100% real coverage);
+`index/bot` (automation, pyright full strict, pure httpx, **zero** asyncio and
+**zero** `logging` imports); and stdlib-only single-file tools. A rule that
+serves one serves none of the others unless it says which it binds.
+
+## What the program found in this repository, and fixed
+
+- **`check-artifacts.py --self-test` was defeated by `python -O`**, which
+  strips every bare `assert`. A planted regression printed `self-test: ok`,
+  exit 0. Now uses `expect()` raising `SystemExit`, matching `make-mark.py`.
+  This was the publishing gate, and it could not go red.
+- **`BrokenPipeError`**: 82KB through `head -1` produced a traceback and exit
+  120. Python installs `SIG_IGN` for SIGPIPE so the failure surfaces at the
+  interpreter's shutdown flush, past any handler; the fix is restoring
+  `SIG_DFL`, with the `BrokenPipeError` guard kept for Windows.
+- **Two new validator detectors**, from mechanisms the corpus sweep found by
+  running commands rather than reading them: `rg -L` (which is `--follow`,
+  not `--files-without-match`, so the check prints the compliant files) and
+  unquoted `**` (bash without `globstar` reads it as one level).
+- **A pre-existing scope bug**: `check_runnable_spans` only ran on lines
+  starting with `|`, so any verification written in prose was unchecked for
+  every mechanism. Now checked, with the escaped-pipe check kept table-only
+  because a pipe in prose is a real pipe.
+- **The escaped-pipe check was too broad**: GNU grep's BRE treats `\|` as real
+  alternation, so only `rg` is bitten. Narrowed; corpus findings 86 → 51.
+- `python.yml` pinned `actions/setup-python` to an unreviewed README commit
+  labelled `# v6.0.0`; the real v6.0.0 SHA is `e797f83bcb11…`.
+- `python.yml` claimed the scripts declare a floor in PEP 723 headers. Zero
+  exist; CI pins 3.11 because `ruff.toml` targets `py311`.
+
+## Verification discipline — six mechanisms, not four
+
+The Rust program documented four ways a check silently passes forever. The
+Python program found three more and retired one:
+
+| Mechanism | Status |
+|---|---|
+| Dead glob; `\|` table escaping; `-e A -e B` union; `rg` with no path operand | Rust's four, all still real |
+| `rg -L` mistaken for `--files-without-match` | New — inverts the check |
+| Unquoted `**` truncated by bash without `globstar` | New — measured 95% blindness in one case |
+| `--pcre2` `\s*` backtracking defeating its own negative lookahead | New — not automated, needs regex analysis |
+| A bare-`assert` self-test under `python -O` | New — applies to any tool carrying its own proof |
+| `grep '\|'` | **Retired as a false positive** — GNU BRE alternation works |
+
+A **placeholder in a path operand** (`<file>`, `<dir>`) is acceptable: it
+fails loudly with exit 2. A placeholder inside a *search pattern* is the
+silent trap, and the validator catches that one.
+
+## Live defects in the audited codebases — not fixed here
+
+This repo ships config, not code. All measured, all cited in
+`.agents/research/python-audit/fleet-fix-list.md` (19 rows).
+
+- `ocx/test` and `grimoire/test` declare `requires-python = ">=3.10"` and
+  **fail collection on it** — 4 and 6 errors. Real floors 3.12 and 3.11.
+  Byte-identical trees in ocx-sion, ocx-soraka, ocx-evelynn multiply it.
+- 11 undefined-name forward references, caught by `ruff check --select F821`
+  with zero configuration. Neither harness runs ruff at all.
+- A missing `assert` keyword at `ocx/test/.../test_update.py:389` — a bare
+  tuple expression silently discarding its message.
+- `grimoire/test/tests/test_fix_locking.py:102` — live pipe deadlock, N
+  concurrent `Popen(PIPE)` reaped by a bare `wait()`, 64KiB threshold measured.
+- `index/bot`'s `github_api.py::_paginate` follows `Link: rel=next` on the
+  authenticated client with **no host check** (CVE-2018-20060 shape); the
+  sibling `registry_v2.py` has the guard and tests it.
+- `${{ }}` interpolated into `run:` in four workflows across ocx-save, ocx and
+  grimoire — script-injection shape, zizmor auto-fixes it.
+- `ocx-mirror-sdk`: reachable `idna` vulnerability via httpx.
+- `ocx-mirror-sdk/.claude/rules/{quality-errors,quality-enums}.md` ship with
+  no `paths:` frontmatter, so 192 lines load always-on there.
+
+## The adopted rule this set supersedes
+
+`quality-python.md` (114 lines) exists as **four byte-identical copies** in
+ocx, grimoire, ocx-mirror-sdk and ocx-sdk-python; `quality-tests.md` (303
+lines) in two. `.agents/research/python-audit/existing-rules-ledger.md`
+grades all 94 of their normative claims. Its Block tier leads with a **false**
+rule — that `except Exception` swallows `KeyboardInterrupt` and `SystemExit`
+(both inherit `BaseException`) — cited to `E722`, which does not check the
+claim the prose makes. Nobody owns the four copies; removing them is four PRs.
+
+## Open, deliberately
+
+- Five of the map's twelve owner questions are unanswered; they are listed at
+  the end of `python-topic-map.md`.
+- The four AST checker scripts `exemplar-patterns.md` depends on lived in a
+  worker scratchpad and are gone. Either rebuild them or drop those rules.
+- `scout-agent-legibility.md` is graded C (40% unsound verification cells).
+  Nothing sourced only to it exceeds CONSIDER. Re-check before promoting.
+
+---
+
 # Handoff — Rust quality artifact program
 
 Written 2026-08-14, last revised 2026-08-16, for a cold resume.

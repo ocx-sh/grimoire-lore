@@ -1,7 +1,10 @@
-# Rust Research Corpus
+# Research Corpus
 
-The cited research the `rust-*` rules and skills in this repository were
-distilled from. Nothing here ships with the packages — the artifacts are
+The cited research the `rust-*` and `python-*` rules in this repository were
+distilled from. Two programs have run here, both with
+`.claude/skills/research-lang/`: Rust (2026-08-16) and Python (2026-08-23).
+The Python tree indexes from `python-topic-map.md`; the Rust tree from
+`topic-map.md`. Nothing here ships with the packages — the artifacts are
 deliberately short, and this is where the evidence and the discarded
 alternatives live.
 

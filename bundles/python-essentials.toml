@@ -1,0 +1,20 @@
+summary = "The OCX Python quality set — standards for typed libraries, subprocess-driven test harnesses, automation bots and dependency-free tools, plus the manifest and distribution policy"
+keywords = "python,quality,review,standards,typing,pytest,subprocess,asyncio,httpx,security,logging,packaging,uv,ruff,pyright"
+description = "Everything an agent needs to write and review Python the way the OCX family does: the quality index and its twelve depth files, the pinned exit-code and stream contract, the process-control and pytest-harness rules, typing and annotation-evaluation policy, HTTP and untrusted-input handling, the dependency-free single-file tool rules, gate adoption mechanics, and the manifest and publishing policy."
+license = "Apache-2.0"
+repository = "https://github.com/ocx-sh/grimoire-lore"
+
+# Members are same-directory relative: this catalog publishes flat under
+# ghcr.io/ocx-sh/lore/<name>, so `./python-quality` resolves against wherever
+# the bundle itself was pulled from — a mirror keeps working.
+#
+# MEMBERS CARRY NO TAG. Not a digest, not an exact version, not a floating
+# major, not `latest` — `latest` is a tag like any other and naming it is still
+# a pin. A bundle is a *set*, not a snapshot: its job is to say "these belong
+# together", and the consumer's own `grimoire.lock` is what freezes them.
+#
+# Do not pass --pin when releasing this bundle.
+
+[rules]
+python-quality = "./python-quality"
+python-packaging = "./python-packaging"

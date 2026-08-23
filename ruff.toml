@@ -44,8 +44,10 @@ ignore = [
 # script under `sys.executable`.
 "tests/*" = ["S101", "PLR2004", "S603"]
 # The validator carries a `--self-test` so it can be proved with nothing
-# installed. Those asserts are the proof.
-".claude/skills/research-lang/scripts/*" = ["S101"]
+# installed. It asserts through `expect()`, which raises `SystemExit` — a bare
+# `assert` is stripped by `python -O`, so the proof would silently pass on a
+# regression. No S101 exemption is needed here, and reintroducing one would
+# reopen that hole.
 
 [format]
 quote-style = "double"
