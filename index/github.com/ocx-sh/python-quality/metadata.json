@@ -1,0 +1,30 @@
+{
+  "description": "Python Quality",
+  "keywords": [
+    "python",
+    "quality",
+    "standards",
+    "review",
+    "typing",
+    "async",
+    "subprocess",
+    "pytest",
+    "exit-codes",
+    "cli",
+    "security",
+    "logging",
+    "packaging",
+    "ruff",
+    "pyright"
+  ],
+  "kind": "rule",
+  "name": "python-quality",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/python-quality",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "The Python quality index — the gate, the non-negotiables, the pinned exit-code contract, and where the depth lives"
+}
