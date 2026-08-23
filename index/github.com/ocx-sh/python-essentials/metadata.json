@@ -1,0 +1,30 @@
+{
+  "description": "Everything an agent needs to write and review Python the way the OCX family does: the quality index and its twelve depth files, the pinned exit-code and stream contract, the process-control and pytest-harness rules, typing and annotation-evaluation policy, HTTP and untrusted-input handling, the dependency-free single-file tool rules, gate adoption mechanics, and the manifest and publishing policy.",
+  "keywords": [
+    "python",
+    "quality",
+    "review",
+    "standards",
+    "typing",
+    "pytest",
+    "subprocess",
+    "asyncio",
+    "httpx",
+    "security",
+    "logging",
+    "packaging",
+    "uv",
+    "ruff",
+    "pyright"
+  ],
+  "kind": "bundle",
+  "name": "python-essentials",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/python-essentials",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "The OCX Python quality set — standards for typed libraries, subprocess-driven test harnesses, automation bots and dependency-free tools, plus the manifest and distribution policy"
+}

@@ -1,0 +1,27 @@
+{
+  "description": "Python Packaging",
+  "keywords": [
+    "python",
+    "pyproject",
+    "packaging",
+    "uv",
+    "lockfile",
+    "requires-python",
+    "classifiers",
+    "py.typed",
+    "dependency-groups",
+    "trusted-publishing",
+    "hatchling",
+    "deptry"
+  ],
+  "kind": "rule",
+  "name": "python-packaging",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/python-packaging",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "Python manifests and distribution — the version floor that must actually run, dependency declaration, lockfiles, wheel contents, and publishing credentials"
+}
