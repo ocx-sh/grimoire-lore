@@ -16,7 +16,21 @@ registry = "ghcr.io"
 # only lengthen every reference. Decided before the first publish, because a
 # repository path is public the moment it lands in someone's grimoire.lock.
 repository_prefix = "ocx-sh/lore"
-version = "0.1.0"
+
+# NO CATALOG-WIDE `version`. Each entry carries its own, because publishing is
+# triggered by a push to `main` and `grim publish` skips a version already in
+# the registry — so the version key IS the release lever, and one shared key
+# means every package re-releases whenever any one of them changes. That
+# republishes unchanged bytes under a new tag, and it makes a consumer's
+# `grimoire.lock` churn for packages that did not move.
+#
+# Omitting the top-level key is deliberate rather than an oversight: with no
+# fallback, a new entry that forgets its `version` fails the manifest instead
+# of silently inheriting a number nobody chose for it.
+#
+# To release: bump the `version` of the entries whose content changed, and
+# only those. A bundle is content too — bump it when its member SET changes,
+# not when a member's own version does, since members are named without tags.
 
 # Where `grim publish --announce` opens its PR/MR. This repo *is* the index,
 # so it announces into itself. Never drop these keys: with no `[announce]`
@@ -71,12 +85,15 @@ readme = "README.md"
 logo = "assets/lore-rust.svg"
 
 [rules.rust-quality]
+version = "0.1.0"
 description = { readme = "docs/rust-quality.md", logo = "assets/lore-rust.svg" }
 
 [rules.rust-cargo]
+version = "0.1.0"
 description = { readme = "docs/rust-cargo.md", logo = "assets/lore-rust.svg" }
 
 [bundles.rust-essentials]
+version = "0.1.0"
 description = { readme = "docs/rust-essentials.md", logo = "assets/lore-rust.svg" }
 
 # The Python quality set. `python-quality` is the index rule; its support
@@ -84,10 +101,13 @@ description = { readme = "docs/rust-essentials.md", logo = "assets/lore-rust.svg
 # is a separate rule only because its glob genuinely differs — it loads on
 # manifests and lockfiles, not on source.
 [rules.python-quality]
+version = "0.1.0"
 description = { readme = "docs/python-quality.md", logo = "assets/lore-python.svg" }
 
 [rules.python-packaging]
+version = "0.1.0"
 description = { readme = "docs/python-packaging.md", logo = "assets/lore-python.svg" }
 
 [bundles.python-essentials]
+version = "0.1.0"
 description = { readme = "docs/python-essentials.md", logo = "assets/lore-python.svg" }
