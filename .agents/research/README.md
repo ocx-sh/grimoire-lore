@@ -1,10 +1,11 @@
 # Research Corpus
 
-The cited research the `rust-*` and `python-*` rules in this repository were
-distilled from. Two programs have run here, both with
-`.claude/skills/research-lang/`: Rust (2026-08-16) and Python (2026-08-23).
-The Python tree indexes from `python-topic-map.md`; the Rust tree from
-`topic-map.md`. Nothing here ships with the packages — the artifacts are
+The cited research the `rust-*`, `python-*` and `typescript-*` rules in this
+repository were distilled from. Three programs have run here, all with
+`.claude/skills/research-lang/`: Rust (2026-08-16), Python (2026-08-23) and
+TypeScript (2026-08-29). The TypeScript tree indexes from
+`typescript-topic-map.md`; the Python tree from `python-topic-map.md`; the
+Rust tree from `topic-map.md`. Nothing here ships with the packages — the artifacts are
 deliberately short, and this is where the evidence and the discarded
 alternatives live.
 
@@ -47,6 +48,34 @@ against it.
 | [rust-ecosystem](rust-ecosystem.md) | The tooling of record, the crate-of-record table, and publishing, versioning and distribution |
 | [ai-agentic-coding](ai-agentic-coding.md) | How LLMs fail at Rust specifically, agent-config practice in real Rust repos, and verification loops an agent cannot fake |
 | [large-scale-ports](large-scale-ports.md) | The Bun Zig→Rust port and other migrations into Rust, and the playbook for a restructure that keeps working |
+
+## TypeScript
+
+Indexed by [typescript-topic-map.md](typescript-topic-map.md) — 212
+deduplicated candidates, the conflicts wave 1 resolved, and the deferred
+backlog. [typescript-frame.md](typescript-frame.md) states the phase-0 frame
+and, below it, every premise the grounding wave overturned — read the
+corrections, not the body, where they disagree.
+
+| Topic | Covers |
+|---|---|
+| [ts-gate](ts-gate.md) | Type-aware lint wiring, `projectService` vs `project`, preset choice, ESLint/Biome parity, and what the gate costs |
+| [ts-modules](ts-modules.md) | `moduleResolution` per shape, extension discipline, `import type`, ESM/CJS interop, cycles, barrels, package boundaries |
+| [ts-async](ts-async.md) | Floating and misused promises, `void` as a marker, deadlines and cancellation, concurrency bounds, per-runtime rejection semantics |
+| [ts-resources](ts-resources.md) | `using`/`await using`, disposal protocols, child processes and process-group termination, timers, file handles |
+| [ts-errors-boundaries](ts-errors-boundaries.md) | `Error.cause`, when a typed error class is earned, one classifier, and where `unknown` becomes typed |
+| [ts-extension-host](ts-extension-host.md) | VS Code and Electron: activation ordering, workspace trust, the webview boundary, esbuild-to-CJS semantics, typed host-API doubles |
+| [typescript-tooling-landscape](typescript-tooling-landscape.md) | 99 tools with an adopt/keep/drop/watch verdict — linters, test runners, static analysis, benchmarking, web performance, build and CI |
+
+`typescript-audit/` holds the four grounding audits: the config inventory
+and its strictness matrix, the measured code shape, the contracts the code
+actually honours, and the runtime posture.
+
+Two findings are worth knowing before reading anything else. TypeScript 7.0
+is current, but `@typescript-eslint/eslint-plugin` declares a peer range
+that excludes it — so "upgrade to latest" breaks linting, and the corpus
+says to pin. And `any` is not the escape hatch anyone expects: it is nearly
+absent, while `as unknown as T` is pervasive, concentrated in test doubles.
 
 ## Method
 

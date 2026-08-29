@@ -50,6 +50,7 @@ _ID = r"[A-Z][A-Z0-9]*(?:-[A-Z][A-Z0-9]*)*-\d+"
 ID_RE = re.compile(rf"^\|\s*({_ID})\s*\|")
 # A prose mention of a rule ID anywhere but its own defining row.
 CITE_RE = re.compile(rf"\b({_ID})\b")
+RETIRED_RE = re.compile(r"\bis retired\b|\bretired\b[^.]*\bnot reused\b", re.IGNORECASE)
 # A backtick-delimited code span; in a table row these are runnable commands.
 CODE_SPAN_RE = re.compile(r"`([^`]+)`")
 # `-tn rust` reads as --type n, not --type-not; rg exits 2.
@@ -247,6 +248,10 @@ def rg_path_operands(span: str) -> list[str] | None:
     except ValueError:
         return None
     operands, index, used_e = [], 1, False
+    # `--files` lists matching filenames and takes NO pattern at all, so its
+    # first bare argument is already a path. Treating it like a normal search
+    # discards that path and reports a false "no path operand".
+    no_pattern = "--files" in tokens
     while index < len(tokens):
         arg = tokens[index]
         if arg in RG_VALUED:
@@ -258,9 +263,9 @@ def rg_path_operands(span: str) -> list[str] | None:
             continue
         operands.append(arg)
         index += 1
-    # Without -e the first bare arg is the pattern; with it, every bare arg
-    # is a path.
-    return operands if used_e else operands[1:]
+    # Without -e the first bare arg is the pattern; with it — or in --files
+    # mode, which has no pattern — every bare arg is a path.
+    return operands if (used_e or no_pattern) else operands[1:]
 
 
 def check_runnable_spans(
@@ -388,7 +393,13 @@ def check_rule_tables(path: Path, body: str, findings: list[Finding], seen_ids: 
     columns: list[str] | None = None
     verify_at: int | None = None
     for lineno, line in enumerate(body.splitlines(), 1):
+        # A line that explicitly RETIRES an ID is not a dead pointer — the
+        # ID-stability contract requires naming a retired ID so nobody reuses
+        # the number. Recording it would report the notice as its own defect.
+        retirement = RETIRED_RE.search(line) is not None
         for cite in CITE_RE.findall(line):
+            if retirement:
+                continue
             CITED.setdefault(cite, path)
         if not line.startswith("|"):
             columns, verify_at = None, None

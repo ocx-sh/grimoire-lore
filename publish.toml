@@ -111,3 +111,22 @@ description = { readme = "docs/python-packaging.md", logo = "assets/lore-python.
 [bundles.python-essentials]
 version = "0.1.0"
 description = { readme = "docs/python-essentials.md", logo = "assets/lore-python.svg" }
+
+# The TypeScript quality set. `typescript-quality` is the index rule; its
+# support directory carries the twelve depth files it routes to.
+# `typescript-packaging` is a separate rule only because its glob genuinely
+# differs — it loads on manifests and toolchain config, not on source. Its
+# `**/tsconfig*.json` is deliberately wider than `**/tsconfig.json`: the narrow
+# form was measured to miss 40% of real tsconfigs, including the ones carrying
+# the load-bearing decisions.
+[rules.typescript-quality]
+version = "0.1.0"
+description = { readme = "docs/typescript-quality.md", logo = "assets/lore-typescript.svg" }
+
+[rules.typescript-packaging]
+version = "0.1.0"
+description = { readme = "docs/typescript-packaging.md", logo = "assets/lore-typescript.svg" }
+
+[bundles.typescript-essentials]
+version = "0.1.0"
+description = { readme = "docs/typescript-essentials.md", logo = "assets/lore-typescript.svg" }

@@ -1,14 +1,127 @@
 # Handoff — language quality artifact programs
 
-Two programs have run in this repository, both with
+Three programs have run in this repository, all with
 `.claude/skills/research-lang/`. The Rust one shipped 2026-08-16; the Python
-one shipped 2026-08-23. The Rust sections below are unchanged and still
-authoritative for the decisions they record — most of them are
-language-agnostic and the Python program inherited them rather than
-re-deciding.
+one shipped 2026-08-23; the TypeScript one shipped 2026-08-29. The Rust and
+Python sections below are unchanged and still authoritative for the decisions
+they record — most of them are language-agnostic and each later program
+inherited them rather than re-deciding.
 
 ---
 
+# TypeScript quality artifact program
+
+Written 2026-08-29, for a cold resume.
+
+## What shipped
+
+| Artifact | Path | Notes |
+|---|---|---|
+| `typescript-quality` (rule) | `rules/typescript-quality.md` + `rules/typescript-quality/` | 142-line index, globs `**/*.{ts,tsx,mts,cts}`. 12 depth files, 166 rules total (116 MUST / 48 SHOULD / 2 CONSIDER) plus 3 index-owned `TS-CORE` rules |
+| `typescript-packaging` (rule) | `rules/typescript-packaging.md` | 158 lines. Globs `**/package.json`, `**/tsconfig*.json`, `**/eslint.config.*`, `**/biome.json{,c}` |
+| `typescript-essentials` (bundle) | `bundles/typescript-essentials.toml` | Members carry **no tag** |
+| Description companions | `docs/typescript-{quality,packaging,essentials}.md` | `assets/lore-typescript.svg` already existed |
+
+Wired in `publish.toml`. `grim publish --dry-run` shows exactly the three new
+packages and skips every other. **Merging to `main` publishes.**
+
+Research corpus: `.agents/research/typescript-*` and `ts-*`, ~50 files.
+`typescript-topic-map.md` is the index — 212 deduplicated candidates, the
+resolved conflicts, and the deferred backlog.
+
+## Decisions that are load-bearing
+
+1. **Rule IDs are `TS-<FAMILY>-nn`**, following the Python `PY-` decision — a
+   bare prefix belongs to exactly one rule set forever. Families: `CORE`,
+   `CFG`, `GATE`, `MOD`, `PKG`, `TYP`, `ASYNC`, `RES`, `ERR`, `CLI`, `HOST`,
+   `WEB`, `SEC`, `TEST`, `OBS`, `TOOL`.
+2. **`typescript-packaging` globs `**/tsconfig*.json`, never `**/tsconfig.json`.**
+   Measured: 15 tsconfigs in the fleet, 9 named `tsconfig.json` and 6 not. The
+   narrow form misses 40%, including the mixed-resolution exemplar and the one
+   place the Biome repo states a strictness posture. It also globs the lint
+   configs, because the fleet's largest finding *is* a lint-config defect and a
+   rule scoped to `**/*.ts` never loads while that file is open.
+3. **`TS-ERR-15` is retired and must not be reused.** The validator was taught
+   to recognise a retirement notice rather than report it as a dead citation.
+4. **The gate validates per language.** `taskfile.yml`'s `artifacts` task now
+   runs twice: Rust and Python against `../ocx`, TypeScript against the fleet
+   root `..`. One consumer cannot serve a polyglot catalog — `.tsx` lives only
+   in the React app, `.mts` only in a VitePress site, `biome.jsonc` only in the
+   one Biome repo.
+
+## The era, and the trap in it
+
+TypeScript **7.0.2** is current (`npm view typescript dist-tags`, 2026-08-29);
+6.0 shipped 2026-03-23 and 7.0 on 2026-07-08, the Go rewrite.
+
+**Do not bump any repo running typescript-eslint past `typescript@^6.0.x`.**
+`@typescript-eslint/eslint-plugin@8.68.0` declares
+`peerDependencies.typescript: >=4.8.4 <6.1.0` — a hard install failure on 7.0
+*and* on 6.1. TS 7.0 shipped without a stable programmatic API; 7.1 is expected
+to carry a new one, with no announced date. `tsgolint` (oxc) sidesteps this by
+driving `typescript-go` directly and is stable at 59-of-61 rule parity, but it
+*requires* TS 7 — so it is the destination, adopted per repo and gated on that
+repo's own TS 7 migration, never fleet-wide on a date.
+
+oxlint stays watch-only. Its 12–18× speed claims are measured on
+vscode-scale repositories; the one report covering small codebases records
+**regressions of −11% to −49%**, and every repo in this fleet is 10–193 files.
+
+## What the program found, and what it overturned
+
+Grounding contradicted the frame in five places, and later waves overturned
+the grounding twice — the corrections are appended to `typescript-frame.md`
+and recorded in each consolidation's Verdict.
+
+- **`any` is not the escape hatch.** 4 occurrences fleet-wide, 0 in seven of
+  eight repos, and `@ts-ignore`/`@ts-nocheck` are zero across ~130k LOC. The
+  real one is `as unknown as T` — 164, with 84 in the two Mocha/Electron
+  extensions and 79 in a single 6,899-line file faking `vscode.*` objects.
+- **Type-aware linting runs in 1 repo of 9.** Everything else runs
+  `tseslint.configs.recommended`, which structurally cannot see a floating
+  promise. Two repos' own rule files *claim* type-aware rules their configs do
+  not wire — documents are intent, never practice.
+- **The published packages are the laxest configs**, not the strictest, and
+  neither is a library: both entry points are `export {}` stubs.
+- **The extension host does not crash on an unhandled rejection.** An audit
+  asserted it did; VS Code's `extensionHostProcess.ts` installs its own
+  handlers before extension code runs. Overturned on a source read.
+- **`vscode-ocx`'s `Node16` setting is inert, not violated.** The `.js`-extension
+  rule is triggered by module *format*, and that package declares no
+  `"type": "module"` — so 11 extensionless imports type-check clean today and
+  all 11 turn red on one unrelated `"type"` edit.
+- Three dead gates, all the same silent-pass class: a `lint` script pointing at
+  a config that does not exist; a lint config whose rules all run at `warn`
+  with no `--max-warnings 0`; and a `bunfig.toml` using singular coverage
+  threshold keys against Bun's documented plurals.
+
+## Two live bugs found in passing
+
+Neither is fixed — both are the owner's call:
+
+- `ocx-catalog/src/theme/utils/version.ts:167,188,196` — `compareVersions()`
+  documents itself as mirroring Rust's `Ord` but uses `localeCompare()`, so the
+  published catalog can pick the wrong "latest".
+- `setup-ocx/src/setup.ts:19` — the overridable `github-token` input never
+  reaches `core.setSecret()` before it is used as a Bearer credential. Safe only
+  because the *default* token is auto-masked; a custom PAT would not be.
+
+## Validator changes
+
+`check-artifacts.py` gained two fixes, both false positives this program hit:
+`rg --files` takes no pattern, so its first bare argument is a path and was
+being discarded as one; and a line that explicitly retires a rule ID is a
+definition-of-absence, not a dead citation.
+
+## Known-open, deliberately
+
+`typescript-topic-map.md`'s Deferred section is the wave-4 backlog. The
+tsconfig strictness floor and the era question sit there marked *ready to
+author* — wave 1 researched both to authoring depth and no dive was needed.
+Each consolidation's `## Open questions` separates what needs more research
+from what needs a decision only the owner can make.
+
+---
 # Python quality artifact program
 
 Written 2026-08-23, for a cold resume.

@@ -61,17 +61,35 @@ tasks:
       # being checked: this catalog holds no Rust, so glob liveness is
       # meaningless against `.` and every scoped rule would read as dead.
       #
+      # ONE root cannot serve a polyglot catalog. `../ocx` carries Rust and the
+      # Python harnesses, but no TypeScript at all — validating the TS rules
+      # against it reports every one of their globs as dead. The TypeScript set
+      # is deliberately checked against the *fleet* root instead, because its
+      # globs span shapes no single repository has: `.tsx` lives only in the
+      # React app, `.mts` only in a VitePress site, `biome.jsonc` only in the
+      # one Biome repo. An extension glob for the language itself cannot be a
+      # typo, so a narrower root would only manufacture findings.
+      #
       # CI has no consumer checked out. Rather than fail or — worse — quietly
       # pass a check that never ran, drop only the glob check and say so.
       - |
         if [ -d "{{.CONSUMER}}" ]; then
-          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --root {{.CONSUMER}} rules .claude/skills/research-lang
+          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --root {{.CONSUMER}} rules/rust-quality.md rules/rust-cargo.md rules/python-quality.md rules/python-packaging.md .claude/skills/research-lang
         else
-          echo "note: no consumer at {{.CONSUMER}} — glob liveness NOT checked; run locally against a Rust repo"
-          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py rules .claude/skills/research-lang
+          echo "note: no consumer at {{.CONSUMER}} — glob liveness NOT checked for rust/python; run locally against a Rust repo"
+          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py rules/rust-quality.md rules/rust-cargo.md rules/python-quality.md rules/python-packaging.md .claude/skills/research-lang
+        fi
+      - |
+        if [ -d "{{.TS_CONSUMER}}" ]; then
+          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --root {{.TS_CONSUMER}} rules/typescript-quality.md rules/typescript-packaging.md
+        else
+          echo "note: no consumer at {{.TS_CONSUMER}} — glob liveness NOT checked for typescript; run locally against a tree containing TypeScript"
+          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py rules/typescript-quality.md rules/typescript-packaging.md
         fi
     vars:
       CONSUMER: '{{.CONSUMER | default "../ocx"}}'
+      # The fleet root, not a single repo — see the comment above.
+      TS_CONSUMER: '{{.TS_CONSUMER | default ".."}}'
 
   build:
     desc: Build every publishable artifact without pushing anything
