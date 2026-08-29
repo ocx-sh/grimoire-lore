@@ -79,11 +79,15 @@ tasks:
           echo "note: no consumer at {{.CONSUMER}} — glob liveness NOT checked for rust/python; run locally against a Rust repo"
           {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py rules/rust-quality.md rules/rust-cargo.md rules/python-quality.md rules/python-packaging.md .claude/skills/research-lang
         fi
+      #
+      # The guard probes for CONTENT, not for the directory: `..` always
+      # exists, so `-d` would never fall through and CI would report every
+      # TypeScript glob as dead against a runner's parent directory.
       - |
-        if [ -d "{{.TS_CONSUMER}}" ]; then
+        if [ -d "{{.TS_CONSUMER}}" ] && [ -n "$(find "{{.TS_CONSUMER}}" -name '*.ts' -not -path '*/node_modules/*' -print -quit 2>/dev/null)" ]; then
           {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --root {{.TS_CONSUMER}} rules/typescript-quality.md rules/typescript-packaging.md
         else
-          echo "note: no consumer at {{.TS_CONSUMER}} — glob liveness NOT checked for typescript; run locally against a tree containing TypeScript"
+          echo "note: no TypeScript under {{.TS_CONSUMER}} — glob liveness NOT checked for typescript; run locally against a tree containing TypeScript"
           {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py rules/typescript-quality.md rules/typescript-packaging.md
         fi
     vars:
