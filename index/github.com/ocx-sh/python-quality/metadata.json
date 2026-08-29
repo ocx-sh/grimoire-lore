@@ -18,6 +18,7 @@
     "pyright"
   ],
   "kind": "rule",
+  "license": "Apache-2.0",
   "name": "python-quality",
   "owner": {
     "github": "ocx-sh",

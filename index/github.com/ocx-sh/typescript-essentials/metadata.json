@@ -1,0 +1,38 @@
+{
+  "created": "2026-08-29T17:58:38+02:00",
+  "description": "Everything an agent needs to write and review TypeScript the way the OCX family does: the type-aware lint gate that most repositories never actually wire, sixteen merge-blocking non-negotiables, twelve depth files covering types, async, errors, the CLI exit-code and stream contract, resources, modules and resolution, security, testing, observability, browser SPAs and the editor extension host — plus the tsconfig strictness floor per project shape, version-gated compiler flags, and the manifest and publish-verification rules for a package that ships a bin.",
+  "keywords": [
+    "typescript",
+    "quality",
+    "review",
+    "standards",
+    "types",
+    "async",
+    "errors",
+    "exit-codes",
+    "security",
+    "modules",
+    "testing",
+    "eslint",
+    "biome",
+    "tsconfig",
+    "package.json",
+    "nodenext",
+    "publint",
+    "attw",
+    "node",
+    "browser",
+    "vscode"
+  ],
+  "kind": "bundle",
+  "license": "Apache-2.0",
+  "name": "typescript-essentials",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/typescript-essentials",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "The OCX TypeScript quality set — standards for Node CLIs, published packages, browser SPAs and editor extension hosts, plus the tsconfig strictness floor and manifest policy"
+}

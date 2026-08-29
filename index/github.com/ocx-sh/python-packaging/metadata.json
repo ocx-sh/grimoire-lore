@@ -15,6 +15,7 @@
     "deptry"
   ],
   "kind": "rule",
+  "license": "Apache-2.0",
   "name": "python-packaging",
   "owner": {
     "github": "ocx-sh",

@@ -13,6 +13,7 @@
     "supply-chain"
   ],
   "kind": "rule",
+  "license": "Apache-2.0",
   "name": "rust-cargo",
   "owner": {
     "github": "ocx-sh",

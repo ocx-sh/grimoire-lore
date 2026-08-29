@@ -13,6 +13,7 @@
     "architecture"
   ],
   "kind": "bundle",
+  "license": "Apache-2.0",
   "name": "rust-essentials",
   "owner": {
     "github": "ocx-sh",
