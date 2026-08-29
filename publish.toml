@@ -43,6 +43,44 @@ repository_prefix = "ocx-sh/lore"
 # refuses a namespace whose forge owner is not you. A literal `REPLACE-ME`
 # means the scaffold had nothing to derive it from: `--announce` then stops
 # with "cannot derive the index host" rather than announcing anywhere.
+# Catalog-wide annotation defaults, filled in per entry only where the entry's
+# own file does not author the value. Our rules already carry `license` and
+# `repository` in their frontmatter, so those stay authoritative; these add the
+# facts no artifact file has a place for.
+#
+# `vendor` would default to the release namespace (`ocx-sh`) and `url` to the
+# repository, but both are worth stating: the catalog is served as a site, and
+# that site — not the git repo — is where a reader should land.
+[metadata]
+authors = "The OCX Authors"
+vendor = "OCX"
+url = "https://lore.ocx.sh"
+documentation = "https://lore.ocx.sh"
+
+# Repository support channels. These ride the DESCRIPTION COMPANION, not the
+# versioned manifest, and that is deliberate: they answer "who maintains this
+# and where do I reach them", which is a property of the repository and changes
+# over time. On a version they would freeze — a moved chat link would leave
+# every already-published tag pointing at a dead invite, fixable only by
+# re-releasing history. The companion tag is mutable, so one `grim publish`
+# re-run updates the answer for every version at once.
+#
+# Manifest-level, so they fan out to every companion this run pushes. A
+# per-entry `[<kind>.<name>.description]` table replaces the file set, never
+# these.
+#
+# `chat` is the Discord invite rather than GitHub Discussions, which are not
+# enabled on this repository. `contact` is deliberately unset: only a personal
+# mailbox exists, and a manifest is readable by anyone who can pull it.
+#
+# Needs grim >= 0.14.0 — 0.13.0 rejects `[support]` outright with
+# `unknown field`, so this is a loud failure on an old binary, never a silent
+# no-op.
+[support]
+issues = "https://github.com/ocx-sh/grimoire-lore/issues"
+chat = "https://discord.gg/mT2UCF8CVe"
+security = "https://github.com/ocx-sh/grimoire-lore/security"
+
 [announce]
 repository = "https://github.com/ocx-sh/grimoire-lore"
 namespace = "ocx-sh"
