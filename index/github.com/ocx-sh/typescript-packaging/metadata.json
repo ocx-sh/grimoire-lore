@@ -1,0 +1,31 @@
+{
+  "created": "2026-08-29T17:58:38+02:00",
+  "description": "TypeScript Packaging and Configuration",
+  "keywords": [
+    "typescript",
+    "tsconfig",
+    "package.json",
+    "strict",
+    "engines",
+    "exports",
+    "bin",
+    "publint",
+    "attw",
+    "npm",
+    "lockfile",
+    "dependencies",
+    "scripts",
+    "nodenext"
+  ],
+  "kind": "rule",
+  "license": "Apache-2.0",
+  "name": "typescript-packaging",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/typescript-packaging",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "The declared contract — the tsconfig strictness floor per shape, the manifest, and verifying a package that ships a bin"
+}

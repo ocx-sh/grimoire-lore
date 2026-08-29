@@ -15,6 +15,7 @@
     "idioms"
   ],
   "kind": "rule",
+  "license": "Apache-2.0",
   "name": "rust-quality",
   "owner": {
     "github": "ocx-sh",

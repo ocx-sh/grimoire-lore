@@ -1,0 +1,34 @@
+{
+  "created": "2026-08-29T17:58:38+02:00",
+  "description": "TypeScript Quality",
+  "keywords": [
+    "typescript",
+    "quality",
+    "standards",
+    "review",
+    "types",
+    "async",
+    "errors",
+    "exit-codes",
+    "security",
+    "modules",
+    "testing",
+    "eslint",
+    "biome",
+    "tsconfig",
+    "node",
+    "browser",
+    "vscode"
+  ],
+  "kind": "rule",
+  "license": "Apache-2.0",
+  "name": "typescript-quality",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/typescript-quality",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "The TypeScript quality index — the gate, the non-negotiables, and where the depth lives"
+}
