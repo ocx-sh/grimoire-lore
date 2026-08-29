@@ -51,6 +51,20 @@ repository_prefix = "ocx-sh/lore"
 # `vendor` would default to the release namespace (`ocx-sh`) and `url` to the
 # repository, but both are worth stating: the catalog is served as a site, and
 # that site — not the git repo — is where a reader should land.
+#
+# INERT UNTIL THE NEXT VERSION BUMP, and that is the design, not a bug. These
+# become `org.opencontainers.image.*` annotations on the VERSIONED manifest,
+# so an entry already in the registry at its current version is `skipped` and
+# keeps the annotations it was pushed with. Verified 2026-08-29: after adding
+# this table, every artifact manifest still reported `vendor = ocx-sh` and
+# `url = <repository>` — the defaults — while `[support]` applied immediately
+# because it rides the mutable companion instead.
+#
+# Deliberately NOT force-releasing all nine entries to apply them: that
+# republishes unchanged bytes under a new tag and churns every consumer's
+# `grimoire.lock` for packages that did not move, which is the exact failure
+# the no-catalog-wide-`version` decision above exists to prevent. Each entry
+# picks these up on its own next real release.
 [metadata]
 authors = "The OCX Authors"
 vendor = "OCX"
