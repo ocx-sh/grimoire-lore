@@ -1,0 +1,41 @@
+{
+  "created": "2026-08-30T15:44:27+02:00",
+  "description": "CSS Theming",
+  "keywords": [
+    "css",
+    "theming",
+    "design-tokens",
+    "custom-properties",
+    "cascade-layers",
+    "specificity",
+    "forced-colors",
+    "dark-mode",
+    "light-dark",
+    "shadow-dom",
+    "scoped-styles",
+    "overrides",
+    "sass",
+    "less",
+    "astro",
+    "vue",
+    "svelte",
+    "angular",
+    "tailwind",
+    "css-modules",
+    "css-in-js",
+    "web-components",
+    "vitepress",
+    "webview"
+  ],
+  "kind": "rule",
+  "license": "Apache-2.0",
+  "name": "css-theming",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/css-theming",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "The CSS theming index — why a consumer's override loses, the one layer that fixes it, the token contract, forced-colors, and where the per-framework depth lives"
+}
