@@ -1,0 +1,318 @@
+{
+ "engine": "Chromium 151.0.7922.34 (playwright 1.62.1)",
+ "main": [
+  {
+   "id": "1-unlayered-beats-layered",
+   "expected": "A",
+   "observed": "A",
+   "verdict": "PASS"
+  },
+  {
+   "id": "2-important-reverses",
+   "expected": "B",
+   "observed": "B",
+   "verdict": "PASS"
+  },
+  {
+   "id": "3a-layer-statement-order",
+   "expected": "B",
+   "observed": "B",
+   "verdict": "PASS"
+  },
+  {
+   "id": "3b-reopen-keeps-position",
+   "expected": "B",
+   "observed": "B",
+   "verdict": "PASS"
+  },
+  {
+   "id": "3c-first-appearance-sets-order",
+   "expected": "A",
+   "observed": "A",
+   "verdict": "PASS"
+  },
+  {
+   "id": "4a-inline-normal-vs-unlayered-normal",
+   "expected": "A",
+   "observed": "A",
+   "verdict": "PASS"
+  },
+  {
+   "id": "4b-inline-normal-vs-layered-important",
+   "expected": "B",
+   "observed": "B",
+   "verdict": "PASS"
+  },
+  {
+   "id": "4c-inline-normal-vs-unlayered-important",
+   "expected": "B",
+   "observed": "B",
+   "verdict": "PASS"
+  },
+  {
+   "id": "4d-inline-important-vs-unlayered-important",
+   "expected": "A",
+   "observed": "A",
+   "verdict": "PASS"
+  },
+  {
+   "id": "4e-inline-important-vs-layered-important",
+   "expected": "A",
+   "observed": "A",
+   "verdict": "PASS"
+  },
+  {
+   "id": "5a-outer-class-does-not-pierce",
+   "expected": "A",
+   "observed": "A",
+   "verdict": "PASS"
+  },
+  {
+   "id": "5b-custom-prop-inherits-in",
+   "expected": "B",
+   "observed": "B",
+   "verdict": "PASS"
+  },
+  {
+   "id": "5c-part-beats-higher-specificity-inner",
+   "expected": "B",
+   "observed": "B",
+   "verdict": "PASS"
+  },
+  {
+   "id": "5d-part-nth-child-invalid",
+   "expected": "A",
+   "observed": "A",
+   "verdict": "PASS"
+  },
+  {
+   "id": "5e-part-part-invalid",
+   "expected": "A",
+   "observed": "A",
+   "verdict": "PASS"
+  },
+  {
+   "id": "5f-slotted-loses-to-outer-normal",
+   "expected": "B",
+   "observed": "B",
+   "verdict": "PASS"
+  },
+  {
+   "id": "5g-slotted-applies",
+   "expected": "A",
+   "observed": "A",
+   "verdict": "PASS"
+  },
+  {
+   "id": "5h-slotted-no-descendants",
+   "expected": "rgb(0, 0, 0)",
+   "observed": "rgb(0, 0, 0)",
+   "verdict": "PASS"
+  },
+  {
+   "id": "5i-host-loses-to-outer-type",
+   "expected": "B",
+   "observed": "B",
+   "verdict": "PASS"
+  },
+  {
+   "id": "5j-host-fn-loses-to-outer-type",
+   "expected": "B",
+   "observed": "B",
+   "verdict": "PASS"
+  },
+  {
+   "id": "5k-host-fn-beats-host-same-context",
+   "expected": "A",
+   "observed": "A",
+   "verdict": "PASS"
+  },
+  {
+   "id": "5l-host-context-supported",
+   "expected": "A",
+   "observed": "A",
+   "verdict": "PASS"
+  },
+  {
+   "id": "5m-root-in-shadow-matches-nothing",
+   "expected": "rgb(0, 0, 0)",
+   "observed": "rgb(0, 0, 0)",
+   "verdict": "PASS"
+  },
+  {
+   "id": "5n-inner-cannot-reach-out",
+   "expected": "rgb(0, 0, 0)",
+   "observed": "rgb(0, 0, 0)",
+   "verdict": "PASS"
+  },
+  {
+   "id": "6a-inner-important-beats-outer-important-part",
+   "expected": "A",
+   "observed": "A",
+   "verdict": "PASS"
+  },
+  {
+   "id": "6b-outer-important-beats-inner-normal",
+   "expected": "B",
+   "observed": "B",
+   "verdict": "PASS"
+  },
+  {
+   "id": "6c-inner-important-beats-outer-normal",
+   "expected": "A",
+   "observed": "A",
+   "verdict": "PASS"
+  },
+  {
+   "id": "6d-host-inner-important-beats-outer-important",
+   "expected": "A",
+   "observed": "A",
+   "verdict": "PASS"
+  },
+  {
+   "id": "7a-layer-works-inside-shadow",
+   "expected": "A",
+   "observed": "A",
+   "verdict": "PASS"
+  },
+  {
+   "id": "7b-outer-layered-beats-inner-unlayered",
+   "expected": "B",
+   "observed": "B",
+   "verdict": "PASS"
+  },
+  {
+   "id": "7c-same-layer-name-does-not-merge",
+   "expected": "B",
+   "observed": "B",
+   "verdict": "PASS"
+  },
+  {
+   "id": "8a-adopted-unlayered-beats-inner-layered",
+   "expected": "B",
+   "observed": "B",
+   "verdict": "PASS"
+  },
+  {
+   "id": "8b-adopted-ordered-after-style-element",
+   "expected": "B",
+   "observed": "B",
+   "verdict": "PASS"
+  },
+  {
+   "id": "8c-adopted-loses-to-inner-important",
+   "expected": "A",
+   "observed": "A",
+   "verdict": "PASS"
+  },
+  {
+   "id": "8d-closed-root-blocks-adoption",
+   "expected": "null",
+   "observed": "null",
+   "verdict": "PASS"
+  },
+  {
+   "id": "9a-scope-proximity-beats-source-order",
+   "expected": "A",
+   "observed": "A",
+   "verdict": "PASS"
+  },
+  {
+   "id": "9b-scope-proximity-beats-later-source-order",
+   "expected": "A",
+   "observed": "A",
+   "verdict": "PASS"
+  },
+  {
+   "id": "9c-layer-outranks-scope-proximity",
+   "expected": "B",
+   "observed": "B",
+   "verdict": "PASS"
+  },
+  {
+   "id": "9d-scope-does-not-lower-specificity",
+   "expected": "A",
+   "observed": "A",
+   "verdict": "PASS"
+  },
+  {
+   "id": "10a-missing-prop-uses-fallback",
+   "expected": "B",
+   "observed": "B",
+   "verdict": "PASS"
+  },
+  {
+   "id": "10b-invalid-value-is-IACVT-not-fallback",
+   "expected": "A",
+   "observed": "A",
+   "verdict": "PASS"
+  },
+  {
+   "id": "10c-empty-prop-is-valid-not-fallback",
+   "expected": "A",
+   "observed": "A",
+   "verdict": "PASS"
+  },
+  {
+   "id": "10d-IACVT-on-non-inherited-prop-uses-initial",
+   "expected": "rgba(0, 0, 0, 0)",
+   "observed": "rgba(0, 0, 0, 0)",
+   "verdict": "PASS"
+  },
+  {
+   "id": "5o-part-prefix-specificity-accumulates",
+   "expected": "A",
+   "observed": "A",
+   "verdict": "PASS"
+  },
+  {
+   "id": "5p-equal-part-selectors-source-order",
+   "expected": "B",
+   "observed": "B",
+   "verdict": "PASS"
+  }
+ ],
+ "forced": [
+  {
+   "id": "11a-forced-colors-overrides-author-important",
+   "expected": "not-A",
+   "observed": "not-A",
+   "verdict": "PASS"
+  },
+  {
+   "id": "11b-forced-color-adjust-none-restores-author",
+   "expected": "A",
+   "observed": "A",
+   "verdict": "PASS"
+  },
+  {
+   "id": "11c-forced-colors-media-query-matches",
+   "expected": "true",
+   "observed": "true",
+   "verdict": "PASS"
+  }
+ ],
+ "red": [
+  {
+   "id": "1-unlayered-beats-layered",
+   "expected": "B",
+   "observed": "A",
+   "verdict": "FAIL",
+   "note": "case 1 asserted with the INVERTED expectation"
+  },
+  {
+   "id": "RED-2-typo-selector-never-applies",
+   "expected": "A",
+   "observed": "rgb(0, 0, 0)",
+   "verdict": "FAIL",
+   "note": "selector typo: rule cannot match, so a \"pass\" would prove the harness reads nothing"
+  },
+  {
+   "id": "RED-3-shadow-read-of-wrong-node",
+   "expected": "B",
+   "observed": "rgb(0, 0, 0)",
+   "verdict": "FAIL",
+   "note": "reads the HOST while the rule targets the inner part; must not report the part colour"
+  }
+ ]
+}

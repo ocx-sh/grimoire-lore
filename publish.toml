@@ -171,6 +171,16 @@ description = { readme = "docs/python-essentials.md", logo = "assets/lore-python
 # `**/tsconfig*.json` is deliberately wider than `**/tsconfig.json`: the narrow
 # form was measured to miss 40% of real tsconfigs, including the ones carrying
 # the load-bearing decisions.
+# The CSS theming set. One index rule plus ten depth files — the depth is
+# per-framework because the mechanics genuinely diverge: CSS Modules does not
+# inflate specificity, Shadow DOM reverses `!important`, and VitePress 1.x makes
+# a layered rule lose. A single flat rule would have to state all of that as
+# exceptions in every paragraph. No `css-essentials` bundle: this set has no
+# sibling to bundle with, and a one-member bundle is a second name for one thing.
+[rules.css-theming]
+version = "0.1.0"
+description = { readme = "docs/css-theming.md", logo = "assets/lore-css.svg" }
+
 [rules.typescript-quality]
 version = "0.1.0"
 description = { readme = "docs/typescript-quality.md", logo = "assets/lore-typescript.svg" }

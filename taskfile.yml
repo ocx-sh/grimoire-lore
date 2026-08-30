@@ -80,6 +80,16 @@ tasks:
           {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py rules/rust-quality.md rules/rust-cargo.md rules/python-quality.md rules/python-packaging.md .claude/skills/research-lang
         fi
       #
+      # CSS is checked WITHOUT a root, deliberately. No single tree — not this
+      # repo, not the fleet — carries Less, Stylus, Svelte, `.stylex.ts`, Panda
+      # or a v3 `tailwind.config`, so glob liveness against any root reports
+      # fourteen dead globs for dialects and CSS-in-JS conventions the rule
+      # correctly covers. Per the reasoning above, an extension glob for a
+      # stylesheet dialect cannot be a typo. The residual risk is a mistyped
+      # *convention* glob (`*.styles.ts` and friends); those are listed in the
+      # rule's own glob rationale, so a reviewer can read them against the file.
+      - "{{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py rules/css-theming.md rules/css-theming"
+      #
       # The guard probes for CONTENT, not for the directory: `..` always
       # exists, so `-d` would never fall through and CI would report every
       # TypeScript glob as dead against a runner's parent directory.

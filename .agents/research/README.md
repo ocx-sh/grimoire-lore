@@ -49,6 +49,20 @@ against it.
 | [ai-agentic-coding](ai-agentic-coding.md) | How LLMs fail at Rust specifically, agent-config practice in real Rust repos, and verification loops an agent cannot fake |
 | [large-scale-ports](large-scale-ports.md) | The Bun Zig→Rust port and other migrations into Rust, and the playbook for a restructure that keeps working |
 
+## CSS
+
+A two-round program (2026-08-30) behind the `css-theming` rule set, indexed by
+[css-theming.md](css-theming.md). Round 1 researched 11 frameworks from
+documentation; its own completeness critic returned `needs-another-round`, and
+round 2 reproduced every load-bearing claim against real production builds and
+Chromium 151 — overturning ten of them. Unlike the language programs, the
+re-runnable probe scripts are committed alongside the artifacts in
+`css-theming/probes/`.
+
+| Topic | Covers |
+|---|---|
+| [css-theming](css-theming.md) | The consolidated position: 16 rules with a verification each, the correction ledger, the planned annexes, and what nobody looked at |
+
 ## TypeScript
 
 Indexed by [typescript-topic-map.md](typescript-topic-map.md) — 212
