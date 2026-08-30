@@ -121,6 +121,17 @@ RG_VALUED = {
 # not punished for it.
 CITED: dict[str, Path] = {}
 
+# Globs a caller has declared correct-but-absent from `--root`. A root is ONE
+# repository; a rule may rightly glob a file that repository has no reason to
+# contain — `clippy.toml` in a workspace that declares its lints in
+# `Cargo.toml`. Without this, the only ways out are deleting a load-bearing
+# glob or dropping liveness for every glob in the file, and both are worse
+# than one declared exception.
+# ponytail: module state, cleared per run like CITED above, because `walk`
+# already threads four parameters. Make it a parameter if this ever needs to
+# run more than one configuration in a process.
+ALLOW_ABSENT: set[str] = set()
+
 
 @dataclass
 class Finding:
@@ -434,7 +445,7 @@ def check_globs(
     if root is None or not isinstance(paths_value, list):
         return
     for glob in paths_value:
-        if not isinstance(glob, str):
+        if not isinstance(glob, str) or glob in ALLOW_ABSENT:
             continue
         pattern = glob.removeprefix("**/")
         if not any(root.rglob(pattern)):
@@ -604,6 +615,22 @@ def self_test() -> int:
         # …but GNU grep's BRE alternation is legitimate, so X-05 must NOT fire.
         expect(messages.count("never go red") == 1, messages)
 
+        # --allow-absent suppresses exactly the glob named, and nothing else.
+        two = base / "two-globs.md"
+        two.write_text(
+            '---\npaths:\n  - "**/*.nonexistent"\n  - "**/*.alsomissing"\n---\n\n# Two\n',
+            encoding="utf-8",
+        )
+        ALLOW_ABSENT.clear()
+        ALLOW_ABSENT.add("**/*.nonexistent")
+        scoped: list[Finding] = []
+        CITED.clear()
+        walk(two, base, [], scoped, {})
+        dead = " ".join(f.message for f in scoped if "dead glob" in f.message)
+        expect("nonexistent" not in dead, dead)
+        expect("alsomissing" in dead, dead)  # red control: the other still fires
+        ALLOW_ABSENT.clear()
+
         good = base / "good-skill"
         good.mkdir()
         (good / "SKILL.md").write_text(
@@ -637,6 +664,13 @@ def main(argv: list[str]) -> int:
         metavar="STRING",
         help="fail if this string appears in any artifact (repeatable)",
     )
+    parser.add_argument(
+        "--allow-absent",
+        action="append",
+        default=[],
+        metavar="GLOB",
+        help="do not report this glob as dead; it is correct but absent from --root (repeatable)",
+    )
     parser.add_argument("--self-test", action="store_true", help="run the built-in checks and exit")
     args = parser.parse_args(argv)
 
@@ -647,6 +681,8 @@ def main(argv: list[str]) -> int:
 
     findings: list[Finding] = []
     seen_ids: dict = {}
+    ALLOW_ABSENT.clear()
+    ALLOW_ABSENT.update(args.allow_absent)
     for target in args.paths:
         if not target.exists():
             print(f"error: no such path: {target}", file=sys.stderr)
