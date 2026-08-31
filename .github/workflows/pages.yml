@@ -60,6 +60,13 @@ jobs:
       - name: Install
         run: npm ci --ignore-scripts
 
+      # Ahead of the build, not after it: it only resolves this repository's
+      # Pages URL and sets outputs, and a step that runs before the build - the
+      # ratings seed - cross-checks `site` against that URL before it reads the
+      # published sidecar.
+      - id: pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+
       # The index stores pointers; everything a reader looks at - README,
       # changelog, logo, version list - lives in the registry, and grim is
       # what reads a registry. `ci.grimVersion` pins the binary.
@@ -82,14 +89,20 @@ jobs:
       # the site to pointers-only, never block a deploy that is otherwise
       # ready. `enrich` itself keeps any sidecar it fails to refresh. Set
       # `"enrich": false` in the `ci` block to drop these two steps entirely.
+      #
+      # `--seed` restores enrich/ from `<site>/enrich.json` - the checkpoint the
+      # last deploy published - before refreshing. Nothing is committed here, so
+      # without it this job starts from an empty tree every run: every digest
+      # probe compares against nothing, every README and payload is downloaded
+      # again, and every artifact without a `created` of its own is re-dated to
+      # this build. A checkpoint that cannot be read is a warning, not a
+      # failure; the run just does the full download it used to do.
       - name: Refresh package metadata
         run: |
-          npm run enrich ||
+          npm run enrich -- --seed ||
             echo "::warning::enrich failed - building without READMEs, logos and version lists"
       - name: Build index
         run: npm run build
-
-      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
 
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
