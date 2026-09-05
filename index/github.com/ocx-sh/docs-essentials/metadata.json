@@ -1,0 +1,36 @@
+{
+  "created": "2026-09-05T18:35:49+02:00",
+  "description": "Everything a repository needs to plan, write and gate its documentation the way the OCX family does: the docs-quality rule with its 18 non-negotiables and seven depth files (page types, plain English, tested examples, navigation, observability, machine readers, the checks), the docs-plan skill that turns a project's own evidence into a tiered use-case list and typed page inventory, and the docs-instrument skill that retrofits the type declaration and wires every check into CI without turning every open pull request red.",
+  "keywords": [
+    "documentation",
+    "docs",
+    "technical-writing",
+    "diataxis",
+    "plain-english",
+    "readability",
+    "tested-examples",
+    "doc-type",
+    "doc-tier",
+    "information-architecture",
+    "navigation",
+    "link-checking",
+    "observability",
+    "agent-readable",
+    "llms-txt",
+    "mkdocs",
+    "vitepress",
+    "mdbook",
+    "docusaurus"
+  ],
+  "kind": "bundle",
+  "license": "Apache-2.0",
+  "name": "docs-essentials",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/docs-essentials",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "The documentation design set, a merge gate for documentation, a discovery skill, and the gate-adoption skill that wires the gate into CI"
+}
