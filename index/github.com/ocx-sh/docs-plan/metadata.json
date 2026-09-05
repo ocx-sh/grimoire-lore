@@ -1,0 +1,31 @@
+{
+  "created": "2026-09-05T18:35:49+02:00",
+  "description": "Documentation discovery and information architecture for a repository, in three tiers (first steps, everyday, integration), with user needs, a page inventory, a coverage table, a delete list, and seeded doc_type and doc_tier declarations. Use when someone asks what documentation a project needs, wants a docs plan, docs audit, docs roadmap, docs IA, page inventory, coverage table, delete list, or content gap analysis, when scoping a quickstart, getting-started page, first-steps page or tutorial, when asked which pages to write, merge, split or delete, when someone mentions user needs, top tasks, friction logs, doc_type, doc_tier, product shape, or \"what should the docs cover\". Not for wording one page. The docs-quality rules cover prose, examples and navigation.",
+  "keywords": [
+    "documentation",
+    "docs-plan",
+    "information-architecture",
+    "use-cases",
+    "user-needs",
+    "friction-log",
+    "quickstart",
+    "first-steps",
+    "doc-type",
+    "doc-tier",
+    "content-audit",
+    "coverage",
+    "delete-list",
+    "tiers",
+    "diataxis"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "docs-plan",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/docs-plan",
+  "schema": 1,
+  "summary": "Discovery procedure that turns a repository's own evidence into tiered use cases, a typed page inventory, and an IA plan in one durable artifact"
+}
