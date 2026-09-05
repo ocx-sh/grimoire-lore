@@ -1,0 +1,32 @@
+summary = "The documentation design set, a merge gate for documentation, a discovery skill, and the gate-adoption skill that wires the gate into CI"
+keywords = "documentation,docs,technical-writing,diataxis,plain-english,readability,tested-examples,doc-type,doc-tier,information-architecture,navigation,link-checking,observability,agent-readable,llms-txt,mkdocs,vitepress,mdbook,docusaurus"
+description = "Everything a repository needs to plan, write and gate its documentation the way the OCX family does: the docs-quality rule with its 18 non-negotiables and seven depth files (page types, plain English, tested examples, navigation, observability, machine readers, the checks), the docs-plan skill that turns a project's own evidence into a tiered use-case list and typed page inventory, and the docs-instrument skill that retrofits the type declaration and wires every check into CI without turning every open pull request red."
+license = "Apache-2.0"
+repository = "https://github.com/ocx-sh/grimoire-lore"
+
+# Members are same-directory relative: this catalog publishes flat under
+# ghcr.io/ocx-sh/lore/<name>, so `./docs-quality` resolves against wherever
+# the bundle itself was pulled from. A mirror keeps working.
+#
+# MEMBERS CARRY NO TAG. Not a digest, not an exact version, not a floating
+# major, not `latest`. `latest` is a tag like any other, and naming it is
+# still a pin. A bundle is a *set*, not a snapshot: its job is to say "these
+# belong together", and the consumer's own `grimoire.lock` is what freezes
+# them.
+#
+# Do not pass --pin when releasing this bundle.
+#
+# One rule and two skills, not three rules or one skill, because the work
+# splits by how often it runs. docs-quality loads on every docs edit and
+# blocks on counted limits, which is a rule's shape. docs-plan and
+# docs-instrument each run once per project (discover, then wire the gate)
+# and leave behind an artifact or a CI config, not a standing per-edit check,
+# which is a skill's shape. Splitting them keeps the rule's own context
+# budget from carrying a one-off procedure on every file it loads for.
+
+[rules]
+docs-quality = "./docs-quality"
+
+[skills]
+docs-plan = "./docs-plan"
+docs-instrument = "./docs-instrument"

@@ -1,0 +1,122 @@
+[
+  {
+    "file": "/home/mherwig/dev/ocx/website/src/index.md",
+    "words_total_scanned": 1639,
+    "frontmatter_ctas": 3,
+    "first_action_word_pos": 22,
+    "first_action_kind": "fenced block",
+    "DOC-TYPE-11_pass": true,
+    "cta_button_count": 7,
+    "task_link_items": 3,
+    "DOC-TYPE-12_cta_ok": false,
+    "DOC-TYPE-12_tasklinks_ok": true
+  },
+  {
+    "file": "/home/mherwig/dev/ocx-catalog/docs/index.md",
+    "words_total_scanned": 375,
+    "frontmatter_ctas": 0,
+    "first_action_word_pos": 146,
+    "first_action_kind": "all-linked list (menu)",
+    "DOC-TYPE-11_pass": true,
+    "cta_button_count": 0,
+    "task_link_items": 5,
+    "DOC-TYPE-12_cta_ok": true,
+    "DOC-TYPE-12_tasklinks_ok": true
+  },
+  {
+    "file": "/home/mherwig/dev/grimoire-indexer/docs/index.md",
+    "words_total_scanned": 251,
+    "frontmatter_ctas": 0,
+    "first_action_word_pos": 80,
+    "first_action_kind": "all-linked list (menu)",
+    "DOC-TYPE-11_pass": true,
+    "cta_button_count": 0,
+    "task_link_items": 4,
+    "DOC-TYPE-12_cta_ok": true,
+    "DOC-TYPE-12_tasklinks_ok": true
+  },
+  {
+    "file": "/home/mherwig/dev/ocx-mcp/docs/index.md",
+    "words_total_scanned": 290,
+    "frontmatter_ctas": 0,
+    "first_action_word_pos": 186,
+    "first_action_kind": "fenced block",
+    "DOC-TYPE-11_pass": false,
+    "cta_button_count": 0,
+    "task_link_items": 6,
+    "DOC-TYPE-12_cta_ok": true,
+    "DOC-TYPE-12_tasklinks_ok": true
+  },
+  {
+    "file": "/home/mherwig/dev/ocx-sdk-python/docs/index.md",
+    "words_total_scanned": 225,
+    "frontmatter_ctas": 0,
+    "first_action_word_pos": 79,
+    "first_action_kind": "all-linked list (menu)",
+    "DOC-TYPE-11_pass": true,
+    "cta_button_count": 0,
+    "task_link_items": 7,
+    "DOC-TYPE-12_cta_ok": true,
+    "DOC-TYPE-12_tasklinks_ok": true
+  },
+  {
+    "file": "/home/mherwig/dev/ocx-mirror-sdk/docs/index.md",
+    "words_total_scanned": 166,
+    "frontmatter_ctas": 0,
+    "first_action_word_pos": 73,
+    "first_action_kind": "all-linked list (menu)",
+    "DOC-TYPE-11_pass": true,
+    "cta_button_count": 0,
+    "task_link_items": 8,
+    "DOC-TYPE-12_cta_ok": true,
+    "DOC-TYPE-12_tasklinks_ok": true
+  },
+  {
+    "file": "/home/mherwig/dev/ocx-mirror/docs/index.md",
+    "words_total_scanned": 359,
+    "frontmatter_ctas": 0,
+    "first_action_word_pos": 176,
+    "first_action_kind": "all-linked list (menu)",
+    "DOC-TYPE-11_pass": false,
+    "cta_button_count": 0,
+    "task_link_items": 9,
+    "DOC-TYPE-12_cta_ok": true,
+    "DOC-TYPE-12_tasklinks_ok": true
+  },
+  {
+    "file": "/home/mherwig/dev/ocx-indexbot/docs/index.md",
+    "words_total_scanned": 196,
+    "frontmatter_ctas": 0,
+    "first_action_word_pos": 148,
+    "first_action_kind": "fenced block",
+    "DOC-TYPE-11_pass": true,
+    "cta_button_count": 0,
+    "task_link_items": 0,
+    "DOC-TYPE-12_cta_ok": true,
+    "DOC-TYPE-12_tasklinks_ok": true
+  },
+  {
+    "file": "/home/mherwig/dev/ocx-save/website/src/index.md",
+    "words_total_scanned": 40,
+    "frontmatter_ctas": 3,
+    "first_action_word_pos": 8,
+    "first_action_kind": "fenced block",
+    "DOC-TYPE-11_pass": true,
+    "cta_button_count": 3,
+    "task_link_items": 0,
+    "DOC-TYPE-12_cta_ok": false,
+    "DOC-TYPE-12_tasklinks_ok": true
+  },
+  {
+    "file": "/home/mherwig/dev/grimoire/docs/src/introduction.md",
+    "words_total_scanned": 319,
+    "frontmatter_ctas": 0,
+    "first_action_word_pos": 215,
+    "first_action_kind": "all-linked list (menu)",
+    "DOC-TYPE-11_pass": false,
+    "cta_button_count": 0,
+    "task_link_items": 5,
+    "DOC-TYPE-12_cta_ok": true,
+    "DOC-TYPE-12_tasklinks_ok": true
+  }
+]

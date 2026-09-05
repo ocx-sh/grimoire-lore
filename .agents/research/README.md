@@ -91,6 +91,39 @@ that excludes it — so "upgrade to latest" breaks linting, and the corpus
 says to pin. And `any` is not the escape hatch anyone expects: it is nearly
 absent, while `as unknown as T` is pervasive, concentrated in test doubles.
 
+## Documentation design
+
+A two-wave program (2026-09-05) behind the `docs-quality` rule, the
+`docs-plan` skill and the `docs-instrument` skill, indexed by
+[docs-topic-map.md](docs-topic-map.md). [docs-frame.md](docs-frame.md) states
+the phase-0 frame and, below it, every premise the grounding wave
+overturned. Read the corrections, not the body, where they disagree.
+
+| Topic | Covers |
+|---|---|
+| [docs-use-case-discovery](docs-use-case-discovery.md) | The discovery procedure, the product-shape axis, and the tier model a first-steps page branches on |
+| [docs-page-types](docs-page-types.md) | The nine-type declaration contract, the landing, reference, how-to and explanation shapes, and the README and changelog rules |
+| [docs-plain-english](docs-plain-english.md) | Sentence and paragraph limits, the readability floor per page type, the AI-tell wordlist, and the punctuation ban |
+| [docs-examples](docs-examples.md) | The tested-example gate, the recording layer as an optional view on a passing test, and the interactive-element contract |
+| [docs-navigation-search](docs-navigation-search.md) | Sidebar depth and the page-length split trigger, explicit anchors, and the zero-result search loop |
+| [docs-observability](docs-observability.md) | The minimum instrumentation set, staleness and drift gates, and the signal manifest |
+| [docs-machine-readers-and-prior-art](docs-machine-readers-and-prior-art.md) | What a site owes an agent reader, the Markdown-twin mechanism, and `llms.txt` as an index rather than a requirement |
+
+`docs-audit/` holds the four grounding audits: the generator and config
+inventory, the measured page shape and stub rate, the tested-examples
+mechanism, and the observability posture across nine real sites.
+
+Two convergence critics gated the program.
+[wave1-critique.md](docs-topic-map/wave1-critique.md) called the first pass
+needs-another-round. [wave2-critique.md](docs-topic-map/wave2-critique.md)
+called the second pass ready-to-draft, with three open research questions
+left at an honest lower severity rather than blocking the ship.
+
+One number is worth knowing before reading anything else. The fleet's 248
+pages carry about 92 prose rules and two runnable checks between them, and
+zero pages declare a type. The corpus exists to close that gap with scripts,
+not a style guide.
+
 ## Method
 
 The corpus was built with the `research-lang` skill in

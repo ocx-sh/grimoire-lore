@@ -107,6 +107,33 @@ tasks:
           echo "note: no TypeScript under {{.TS_CONSUMER}} — glob liveness NOT checked for typescript; run locally against a tree containing TypeScript"
           {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py rules/typescript-quality.md rules/typescript-packaging.md
         fi
+      #
+      # Docs is checked WITHOUT a root too, mirroring the CSS reasoning above.
+      # `docs-quality`'s glob set names directory shapes and generator config
+      # filenames (`docs/**`, `website/**`, `mkdocs.yml`, `.vitepress/config.*`
+      # and the rest), not one file extension. No root, not this repo and not
+      # the fleet, carries every one of those generators at once, so checking
+      # against a root would report several dead globs for generators the rule
+      # correctly covers. A directory-shaped or config-filename glob cannot be
+      # a typo, the same reasoning the CSS step above already applies.
+      - "{{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py rules/docs-quality.md skills/docs-plan skills/docs-instrument"
+      #
+      # Every checks/*.py script carries its own fixtures and its own
+      # --self-test mode. Run all eight here, so a broken check is caught next
+      # to the artifact validation above, not only the first time a real page
+      # hits it.
+      - |
+        for s in rules/docs-quality/checks/*.py; do
+          {{.PY}} "$s" --self-test || exit 1
+        done
+      #
+      # Dogfood: this rule set is held to the plain-English limits it
+      # prescribes, run over its own index, its depth files, both skills and
+      # their own description companions. Findings fail the task.
+      # Named files, not the directory: `rules/docs-quality/checks/fixtures/`
+      # holds planted violations by design, and a directory walk would report
+      # every one of them as a finding against the rule set.
+      - "{{.PY}} rules/docs-quality/checks/prose.py rules/docs-quality.md rules/docs-quality/*.md skills/docs-plan/SKILL.md skills/docs-plan/references/*.md skills/docs-instrument/SKILL.md skills/docs-instrument/references/*.md docs/docs-*.md"
     vars:
       CONSUMER: '{{.CONSUMER | default "../ocx"}}'
       # The fleet root, not a single repo — see the comment above.

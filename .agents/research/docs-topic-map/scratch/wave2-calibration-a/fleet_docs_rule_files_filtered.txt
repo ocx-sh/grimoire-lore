@@ -1,0 +1,14 @@
+/home/mherwig/dev/bob/.claude/rules/rust-quality/docs-and-tracing.md
+/home/mherwig/dev/creeptd-ng/.claude/rules/doc-sync.md
+/home/mherwig/dev/grimoire/.claude/rules/docs-style.md
+/home/mherwig/dev/grimoire-vscode/.claude/agents/worker-doc-reviewer.md
+/home/mherwig/dev/grimoire-vscode/.claude/agents/worker-doc-writer.md
+/home/mherwig/dev/ocx/.claude/agents/worker-doc-reviewer.md
+/home/mherwig/dev/ocx/.claude/agents/worker-doc-writer.md
+/home/mherwig/dev/ocx/.claude/rules/docs-style.md
+/home/mherwig/dev/ocx/.claude/rules/rust-quality/docs-and-tracing.md
+/home/mherwig/dev/ocx-mcp/.claude/agents/worker-doc-reviewer.md
+/home/mherwig/dev/ocx-mirror/.claude/agents/worker-doc-reviewer.md
+/home/mherwig/dev/ocx-mirror/.claude/rules/rust-quality/docs-and-tracing.md
+/home/mherwig/dev/setup-ocx/.claude/rules/update-docs.md
+/home/mherwig/dev/www-setup/.claude/rules/update-docs.md

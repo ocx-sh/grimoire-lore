@@ -1,0 +1,1 @@
+{ "name": "decl-test", "private": true, "devDependencies": { "vitepress": "^2.0.0-alpha.16" } }

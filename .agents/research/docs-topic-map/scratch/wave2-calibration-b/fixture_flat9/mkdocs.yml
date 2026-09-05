@@ -1,0 +1,11 @@
+site_name: Fixture
+nav:
+  - Home: index.md
+  - Page1: p1.md
+  - Page2: p2.md
+  - Page3: p3.md
+  - Page4: p4.md
+  - Page5: p5.md
+  - Page6: p6.md
+  - Page7: p7.md
+  - Page8: p8.md

@@ -1,11 +1,128 @@
 # Handoff — language quality artifact programs
 
-Three programs have run in this repository, all with
-`.claude/skills/research-lang/`. The Rust one shipped 2026-08-16; the Python
-one shipped 2026-08-23; the TypeScript one shipped 2026-08-29. The Rust and
-Python sections below are unchanged and still authoritative for the decisions
-they record — most of them are language-agnostic and each later program
-inherited them rather than re-deciding.
+# Documentation-design artifact program
+
+Written 2026-09-05, for a cold resume. Ran with `research-lang` adapted to a
+non-language domain: the corpora were style guides, design systems, exemplar
+sites, lint catalogs, the docs-UX and observability literature, and the
+2024 to 2026 tooling shift, not a language's canon.
+
+## What shipped
+
+| Artifact | Path | Notes |
+|---|---|---|
+| `docs-quality` (rule) | `rules/docs-quality.md` + `rules/docs-quality/` | 198-line index, 18 non-negotiables, six depth files (`page-types`, `plain-english`, `examples`, `navigation`, `observability`, `machine-readers`), `checks.md`, and `checks/` with 8 stdlib scripts, 3 configs and planted fixtures. Globs: `README.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, `docs/**`, `doc/**`, `website/**`, `site/**`, `mkdocs.yml`, `book.toml`, `.vitepress/config.*`, `docusaurus.config.*` |
+| `docs-plan` (skill) | `skills/docs-plan/` | The discovery procedure: tiered use cases from the project's own evidence, user needs, typed page inventory, delete list, IA plan, seeded declarations. Owns `DOC-DISC-01` to `12` and `23` |
+| `docs-instrument` (skill) | `skills/docs-instrument/` | Stands up the gate: declaration retrofit, lint tiers, link checking, tested-example harness per language, reader signals per generator, ratchets |
+| `docs-essentials` (bundle) | `bundles/docs-essentials.toml` | Three members, **no tag** |
+| Companions and mark | `docs/docs-{quality,plan,instrument,essentials}.md`, `assets/lore-docs.svg` (+ `assets/glyphs/docs.svg`) | |
+
+Wired in `publish.toml` and `taskfile.yml` (validator over all three, every
+`checks/*.py --self-test`, and a dogfood run of `checks/prose.py` over the
+shipped prose). `grim publish --dry-run` shows exactly the four new packages.
+**Merging to `main` publishes.** Nothing is committed yet.
+
+Research corpus: `.agents/research/docs-*`, 4 audits, 6 scouts, 28 dives, 7
+consolidations with families `DOC-TYPE`, `DOC-DISC`, `DOC-PLAIN`, `DOC-EX`,
+`DOC-NAV`, `DOC-OBS`, `DOC-AGENT`, 179 IDs (7 retired in place). Index:
+`docs-topic-map.md` (51 deferred rows). The frame with its corrections and the
+orchestrator's decisions is `docs-frame.md`. The two critiques are
+`docs-topic-map/wave1-critique.md` (`needs-another-round`) and
+`wave2-critique.md` (`ready-to-draft`, and its Authoring notes were binding on
+the drafters). Rescued measurement scripts sit under `docs-topic-map/scratch/`.
+
+## Decisions that are load-bearing
+
+1. **The declaration is a comment line, never YAML front matter.** Measured on
+   built fixtures: mdBook 0.5.3 renders a front matter block as a fake `<h2>`
+   and indexes it, an HTML comment above existing front matter breaks that
+   front matter on all three fleet generators, and an HTML comment is a hard
+   build error under MDX 3.1.1. So: `<!-- doc_type: V -->` within the first 12
+   lines and after any front matter, with `{/* */}` for MDX, `..` for rST, `%`
+   for MyST. Nine `doc_type` values, three `doc_tier` values, tier required only
+   on `tutorial`, `how-to`, `landing`. `checks/doc_declaration.py --seed`
+   proposes types from nav labels at 94 percent accuracy.
+2. **Rule IDs are `DOC-<FAMILY>-nn`.** Retired: `DOC-TYPE-16`, `DOC-TYPE-21`,
+   `DOC-PLAIN-06`, `DOC-EX-19`, `DOC-NAV-08`, `DOC-AGENT-02`, `DOC-AGENT-09`.
+   `DOC-EX-33` and `DOC-EX-34` were misfiled as `DOC-TYPE-28/29` in the corpus
+   and renumbered. Not shipped: `DOC-PLAIN-17/18/19/21`, `DOC-OBS-15`,
+   `DOC-AGENT-10` to `20` (they govern the rule set itself), `DOC-EX-22/28/31`
+   (vendor status that ages).
+3. **Plain English is a house rule, not an AI detector.** The em-dash and
+   semicolon ban ships as `DOC-PLAIN-01`, SHOULD, pinned, on GitLab's
+   translation and terminal-rendering rationale. `DOC-PLAIN-09` forbids
+   wording any finding as a claim about who or what wrote a page. The
+   checkable numbers are GOV.UK's: 25 words per sentence, 5 sentences per
+   paragraph, Flesch reading ease 50 on stripped prose with per-type
+   carve-outs. The shipped set passes its own `prose.py`.
+4. **Tested examples are the gate, the cast is an opt-in view.** The fleet's
+   own numbers overturned the frame: 31 of ocx's 66 gated doc scripts ship no
+   recording, and ocx-sdk-python tests every example with Sybil and records
+   nothing. Commit policy for casts is a branching rule, not a default.
+5. **Tiers and types are two axes.** The frame's three-kind split was
+   overturned by every canonical source. Landing is a navigation layer, not a
+   peer type. uv and Astro run both axes at once.
+6. **Rollout for every rule: error on changed files from the first commit,
+   warn on the whole tree until the backfill lands.** 181 of 181 corpus pages
+   fail the declaration rows today. Structural and drift checks go red,
+   readability and tell counts warn with a ratchet.
+7. **The glob is config-anchored, not `**/*.md`.** Measured: a naive
+   markdown walk loaded 420 Lighthouse reports and 257 stale-worktree files.
+   `astro.config.*` and `docs/conf.py` are absent from the glob because no
+   fixture verified those carriers.
+
+## What the program found, and what it overturned
+
+- The frame's fleet table was wrong in method: it counted whole-repo markdown.
+  Real surface: 9 docs sites (7 MkDocs Material, 1 VitePress, 1 mdBook), 23
+  surfaces, 248 pages. ocx-catalog and grimoire-indexer are MkDocs, not
+  VitePress and Astro. `ocx-save` is a stale clone of ocx.
+- Docs observability is absent, not weak: 0 of 9 sites log zero-result
+  searches, run analytics or carry a feedback widget. 0 of 248 pages are
+  tutorials. ~92 existing prose rules carry 2 runnable checks.
+- llms.txt: 97 percent of published files receive zero requests. The
+  Markdown twin is what agents fetch. An "if you are an agent" label changed
+  nothing in a controlled test; an unambiguous instruction did.
+- Every wave-1 grep was measured against the corpus before shipping.
+  `DOC-PLAIN-07`'s identifier pattern fired on 184 of 186 pages and was
+  replaced; `DOC-TYPE-05`'s comparison arm was 6 for 6 false positives.
+
+## Validator changes
+
+`check-artifacts.py` gained three fixes this program forced: `fixtures/`
+under a support directory is exempt from routing and link checks (planted
+violations are the point), a markdown link inside a fenced block is an
+example and not checked, and `\|` inside a `grep -E` pattern is flagged
+exactly like the `rg` case. The last one caught a pre-existing defect in
+`css-theming/rules.md` (`CSS-TOK-01`'s census command), fixed in place. That
+fix ships only when `css-theming`'s version is bumped, since an unbumped entry
+is skipped by `grim publish`. `ruff.toml` now excludes `.agents/research/`:
+the corpus quotes measurement scripts inline and ruff would reformat the
+evidence. The `build` step of `task verify` needs `grim` on PATH, which the
+task runner did not have in the authoring session, so the dry-run was run
+directly and shows exactly the four new packages.
+
+## Owner decisions still open
+
+Recorded in `docs-frame.md` and in each consolidation's Open questions:
+whether the published rule supersedes the two hand-forked `docs-style.md`
+files in ocx and grimoire; whether default-class documentation drift blocks
+a merge fleet-wide (`DOC-OBS-04` ships non-blocking with a tracked issue);
+whether Vale becomes a fleet dependency (the gate works without it); where
+the zero-result beacon's sink lives (8 of 9 sites are on GitHub Pages, which
+exposes no logs); whether to retrofit declarations across 248 pages now
+(325 to 358 added lines, 95 mechanical); and whether `grimoire-lore` adds a
+`LICENSE` file, the one README gap the program found in its own repository.
+
+## Known-open, deliberately
+
+`wave2-critique.md` lists four load-bearing open questions. The one
+research-shaped question is whether MkDocs Material, VitePress and mdBook can
+emit a per-page Markdown twin without a custom plugin, which would move
+`DOC-AGENT-01` from SHOULD to MUST. Page-level accessibility (alt text,
+contrast, keyboard order) is declared out of scope in every depth file rather
+than covered badly. No real tutorial or runbook page has ever been run
+through its contract.
 
 ---
 

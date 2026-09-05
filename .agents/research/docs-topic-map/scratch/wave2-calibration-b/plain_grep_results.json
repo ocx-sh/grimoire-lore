@@ -1,0 +1,236 @@
+{
+  "DOC-PLAIN-01": {
+    "desc": "em/en dash, semicolon, curly quotes (stripped prose)",
+    "total_hits": 6668,
+    "files_hit": 228,
+    "files_total": 248,
+    "sample": [
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "line": 5,
+        "text": "re-litigate an entry here \u2014 supersede it with a dated follow-up entry."
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "line": 14,
+        "text": "legitimately forces that action (Buck2   analog; Bazel"
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "line": 16,
+        "text": "knowable only per frontier \u2014 a different config means re-expansion. Bazel"
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "line": 17,
+        "text": "has the identical residue ( ); it hides it behind the phase wall."
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "line": 21,
+        "text": "( / ; optional branches = selective-functor shape) \u2014 the"
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "line": 23,
+        "text": "3. Full monadic expansion (arbitrary graph from data) \u2014 shape known only by"
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "line": 24,
+        "text": "evaluating the expander. The engine and caches treat all three identically;"
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "line": 25,
+        "text": "only tooling power differs. The dialect makes tiers 1\u20132 the ergonomic"
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "line": 31,
+        "text": "- **Node definitions** \u2014 carry a  ; a stream is just a port"
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "line": 32,
+        "text": "type; each instance is its own cache boundary."
+      }
+    ]
+  },
+  "DOC-PLAIN-07": {
+    "desc": "bare identifier (hyphen/underscore token, or letters+digits)",
+    "total_hits": 7419,
+    "files_hit": 242,
+    "files_total": 248,
+    "sample": [
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "line": 3,
+        "text": "Append-only record of discussion-settled decisions that are not (yet) full"
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "line": 4,
+        "text": "sections in AGENTS.md or graph-ir.md. One entry per topic, terse. Do not"
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "line": 5,
+        "text": "re-litigate an entry here \u2014 supersede it with a dated follow-up entry."
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "line": 10,
+        "text": "There is no static-analysis subsystem and no phase split machinery. \"Check\""
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "line": 11,
+        "text": "is the same demand-driven evaluation with a different root question:"
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "line": 15,
+        "text": "forbids this and pays with out-of-build generators). Residue: the graph is"
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "line": 16,
+        "text": "knowable only per frontier \u2014 a different config means re-expansion. Bazel"
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "line": 21,
+        "text": "( / ; optional branches = selective-functor shape) \u2014 the"
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "line": 35,
+        "text": "is no flattening layer, which is what kills Bazel's macro-vs-rule"
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "line": 37,
+        "text": "- **Constants** \u2014 typed content-addressed values (flag presets, toolchain"
+      }
+    ]
+  },
+  "DOC-PLAIN-08": {
+    "desc": "chatbot artifact phrases",
+    "total_hits": 0,
+    "files_hit": 0,
+    "files_total": 248,
+    "sample": []
+  },
+  "DOC-PLAIN-11": {
+    "desc": "time-relative words",
+    "total_hits": 373,
+    "files_hit": 104,
+    "files_total": 248,
+    "sample": [
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "line": 112,
+        "text": "and D1\u2013D11 before any of it was committed to. Status vocabulary from now"
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "line": 135,
+        "text": "now registers a small constructor set into the rhai"
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/graph-ir.md",
+        "line": 443,
+        "text": "computed against is now the scope the tool was physically confined to."
+      },
+      {
+        "file": "/home/mherwig/dev/grimoire/docs/src/installation.md",
+        "line": 35,
+        "text": "toolchain to its newest release,   included:"
+      },
+      {
+        "file": "/home/mherwig/dev/grimoire/docs/src/installation.md",
+        "line": 114,
+        "text": "[CycloneDX][cyclonedx] software bill of materials. Download the latest from the"
+      },
+      {
+        "file": "/home/mherwig/dev/grimoire/docs/src/artifacts.md",
+        "line": 5,
+        "text": "validation rules, and until now those details lived scattered across the"
+      },
+      {
+        "file": "/home/mherwig/dev/grimoire/docs/src/artifacts.md",
+        "line": 439,
+        "text": "feature; an older grim fails such a bundle cleanly as invalid."
+      },
+      {
+        "file": "/home/mherwig/dev/grimoire/docs/src/quickstart.md",
+        "line": 44,
+        "text": "tracks the newest   release, which is what makes"
+      },
+      {
+        "file": "/home/mherwig/dev/grimoire/docs/src/quickstart.md",
+        "line": 83,
+        "text": "When the publisher ships a newer version behind the same floating tag,"
+      },
+      {
+        "file": "/home/mherwig/dev/grimoire/docs/src/ratings.md",
+        "line": 248,
+        "text": "Discussions since 3.6; an older instance cannot host ratings."
+      }
+    ]
+  },
+  "DOC-PLAIN-12": {
+    "desc": "marketing superlatives",
+    "total_hits": 9,
+    "files_hit": 7,
+    "files_total": 248,
+    "sample": [
+      {
+        "file": "/home/mherwig/dev/grimoire/docs/src/json-interface.md",
+        "line": 701,
+        "text": "report at all. A robust consumer therefore branches on the top-level"
+      },
+      {
+        "file": "/home/mherwig/dev/grimoire-vscode/docs/manual-testing.md",
+        "line": 128,
+        "text": "A row that opted in carries an unlock mark beside its alias. The host matches"
+      },
+      {
+        "file": "/home/mherwig/dev/kate-middlechild/docs/research/research-05-auth-social-backend.md",
+        "line": 17,
+        "text": "Today it is hand-written static HTML/CSS/vanilla-JS (SVG map, filterable cards, recipe modal, en/de/"
+      },
+      {
+        "file": "/home/mherwig/dev/kate-middlechild/docs/research/research-05-auth-social-backend.md",
+        "line": 58,
+        "text": "- **Supabase Auth:** Issues a JWT **access + refresh token** pair. The same pair works in the browse"
+      },
+      {
+        "file": "/home/mherwig/dev/kate-middlechild/docs/research/research-05-auth-social-backend.md",
+        "line": 108,
+        "text": "- Cons: RLS authorization logic lives in SQL policies (powerful but a distinct skill); platform lock"
+      },
+      {
+        "file": "/home/mherwig/dev/kate-middlechild/docs/research/research-03-components-design-system.md",
+        "line": 64,
+        "text": "- **Park UI:** Pre-styled components on top of Ark UI + **Panda CSS**, distributed as **source code*"
+      },
+      {
+        "file": "/home/mherwig/dev/kate-middlechild/docs/research/research-04-content-model.md",
+        "line": 85,
+        "text": "- **Sanity** is powerful but **abandons static-first/git-native** \u2014 content lives in their cloud, qu"
+      },
+      {
+        "file": "/home/mherwig/dev/kate-middlechild/docs/research/research-01-web-frameworks.md",
+        "line": 71,
+        "text": "- **TypeScript:** Excellent; auto-generated   give seamless server\u2192page type flow."
+      },
+      {
+        "file": "/home/mherwig/dev/ocx/website/src/docs/reference/command-line.md",
+        "line": 1099,
+        "text": "[Serving a local index snapshot][in-depth-indices-servable] for what that unlocks."
+      }
+    ]
+  }
+}

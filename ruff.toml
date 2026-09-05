@@ -9,7 +9,12 @@
 target-version = "py311"
 line-length = 100
 
-exclude = ["node_modules", "dist", ".index-*"]
+# `.agents/research/` is the research corpus: measurement scripts a wave wrote
+# and ran once, kept as evidence beside the numbers they produced, and Python
+# fences inline in the artifacts that quote them. None of it is maintained
+# code and none of it is published, so the gate neither lints nor reformats
+# it. Reformatting a quoted script would change the evidence.
+exclude = ["node_modules", "dist", ".index-*", ".agents/research"]
 
 [lint]
 select = [

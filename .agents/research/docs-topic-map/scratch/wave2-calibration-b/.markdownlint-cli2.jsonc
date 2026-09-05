@@ -1,0 +1,11 @@
+{
+  "config": {
+    "default": false,
+    "MD001": true,
+    "MD025": true,
+    "MD036": true,
+    "MD054": { "inline": true, "full": false, "collapsed": false, "shortcut": false, "autolink": true },
+    "MD040": { "allowed_languages": ["sh", "shell", "bash", "console", "python", "rust", "toml", "yaml", "json", "jsonc", "ts", "typescript", "powershell", "dockerfile", "text", "wit", "python-no-run"] }
+  },
+  "noInlineConfig": false
+}

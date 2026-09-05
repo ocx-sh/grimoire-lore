@@ -1,0 +1,118 @@
+{
+  "DOC-PLAIN-02": {
+    "desc": ">25-word sentence",
+    "total_hits": 4686,
+    "files_hit": 210,
+    "files_total": 248,
+    "sample": [
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "words": 33,
+        "text": "Export kinds: - **Node definitions** \u2014 carry a ; a stream is just a port type; each instance is its own cache boundary. "
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "words": 36,
+        "text": "Rule: **a constructor returns a sealed box, never a flattened splat** \u2014 there is no flattening layer, which is what kill"
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "words": 32,
+        "text": "Binding some inputs of a node yields a new node: identity = wrapped node hash + captured value digests (closure hashing,"
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "words": 26,
+        "text": "Resolution never escapes the box/package root \u2014 past the boundary is a hidden channel and is refused (the part of CMake'"
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "words": 27,
+        "text": "Artifact = one WASM component, media-typed, digest-addressed; the component embeds its own WIT world, so digest pins byt"
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "words": 29,
+        "text": "Resolving a floating ref (HEAD, branch, moving tag) is a tiny uncached resolve step whose result is an input *event* in "
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "words": 51,
+        "text": "The ingredients are younger than the incumbents (\u00e0 la Carte 2018, OCaml 5 effects 2022, Buck2 open-sourced 2023, WASM co"
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "words": 39,
+        "text": "Status vocabulary from now on: **Proven** = the POC demonstrates the claim (named test/demo); **Proposed** = design inte"
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "words": 32,
+        "text": "It contains none of the timely/differential machinery the design assumes \u2014 no typed event log, no logical time (the watc"
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "words": 31,
+        "text": "Decide before implementing folds: (a) differential dataflow as the kernel, (b) memoized recomputation as the kernel with"
+      }
+    ]
+  },
+  "DOC-PLAIN-03": {
+    "desc": ">5-sentence paragraph",
+    "total_hits": 153,
+    "files_hit": 69,
+    "files_total": 248,
+    "sample": [
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "sentences": 9,
+        "text": "1. Static wiring. 2. Static template over dynamic cardinality ( / ; optional branches = selective-fu"
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/decisions.md",
+        "sentences": 7,
+        "text": "Double-check finding (2026-09-02). The POC validates a DICE/Buck2-shaped kernel: demand-driven, memo"
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/graph-ir.md",
+        "sentences": 6,
+        "text": "- **Streams never error.** They *close* \u2014 frontier advances to \u221e (the empty antichain) \u2014 or they *st"
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/graph-ir.md",
+        "sentences": 7,
+        "text": "**Enforcement (v1.5): the ceiling is a wall, not a rule.** A leaf runs inside a Landlock domain gran"
+      },
+      {
+        "file": "/home/mherwig/dev/bob/docs/design/graph-ir.md",
+        "sentences": 9,
+        "text": "- **Distribution** \u2014 no scheduling, placement, partition ownership, or remote execution. Serial, sin"
+      },
+      {
+        "file": "/home/mherwig/dev/grimoire/docs/src/ci.md",
+        "sentences": 6,
+        "text": "- **Your own or your organization's index** \u2014 a fine-grained PAT or GitHub App installation token wi"
+      },
+      {
+        "file": "/home/mherwig/dev/grimoire/docs/src/ratings.md",
+        "sentences": 6,
+        "text": "- ** is never read, and is not a fallback.** It inherits the triggering user's role, so a thread cre"
+      },
+      {
+        "file": "/home/mherwig/dev/grimoire/docs/src/commands.md",
+        "sentences": 6,
+        "text": "additionally lists every supported key that is unset or at its default (plain: empty cell; JSON: nul"
+      },
+      {
+        "file": "/home/mherwig/dev/grimoire/docs/src/commands.md",
+        "sentences": 9,
+        "text": "The JSON document is a single object: `{version, scope, workspace, config_path, config_exists, lock_"
+      },
+      {
+        "file": "/home/mherwig/dev/grimoire/docs/src/commands.md",
+        "sentences": 7,
+        "text": "validates, packs, and pushes an artifact. By default a full semver reference (e.g. ) applies cascade"
+      }
+    ]
+  }
+}

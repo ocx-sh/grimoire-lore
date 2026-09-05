@@ -1,0 +1,7 @@
+{
+  "name": "vitepress-fence-test",
+  "private": true,
+  "scripts": {
+    "build": "vitepress build docs"
+  }
+}

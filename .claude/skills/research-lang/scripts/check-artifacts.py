@@ -83,6 +83,35 @@ SEARCH_COMMANDS = ("rg ", "grep ", "git grep ", "find ")
 # Command substitution: when the inner command finds nothing the outer one is
 # left with zero path operands, which inverts or hangs it.
 SUBST_RE = re.compile(r"\$\(")
+# A fenced code block. A markdown link inside one is an example being shown,
+# not a link the reader follows, so the link check skips it.
+FENCE_RE = re.compile(r"^(`{3,}|~{3,})[^\n]*\n.*?^\1[ \t]*$", re.MULTILINE | re.DOTALL)
+
+
+def is_ere_grep(span: str) -> bool:
+    """True for `egrep` or a `grep` whose flag cluster carries `-E`.
+
+    GNU grep's default BRE reads ``\\|`` as alternation, so ``grep 'a\\|b'``
+    survives a paste. Under ``-E`` the same ``\\|`` is a literal pipe, exactly
+    as under ripgrep, so the pasted check can never match.
+    """
+    args = span.split()
+    if not args:
+        return False
+    if args[0] == "egrep":
+        return True
+    if args[0] != "grep":
+        return False
+    for arg in args[1:]:
+        if arg[0] in "'\"":
+            break
+        if arg == "--extended-regexp" or (
+            arg.startswith("-") and not arg.startswith("--") and "E" in arg
+        ):
+            return True
+    return False
+
+
 # ripgrep flags that consume the following arg, so it is not a path operand.
 RG_VALUED = {
     "-e",
@@ -235,7 +264,7 @@ def check_toc(path: Path, body: str, findings: list[Finding]) -> None:
 
 
 def check_links(path: Path, body: str, findings: list[Finding]) -> None:
-    for target in LINK_RE.findall(body):
+    for target in LINK_RE.findall(FENCE_RE.sub("", body)):
         if target.startswith(("http://", "https://", "mailto:")):
             continue
         if not (path.parent / target).exists():
@@ -295,17 +324,19 @@ def check_runnable_spans(
     Restate the command without a pipe: ``rg -e 'a' -e 'b'``.
     """
     for span in CODE_SPAN_RE.findall(line):
-        # Only ripgrep is bitten. GNU grep's default BRE reads `\|` as real
-        # alternation, so `grep 'a\|b'` works when pasted — flagging it is a
-        # false positive. And an UNQUOTED pipe is a shell pipeline, which
-        # fails loudly rather than silently, so it is not this defect either.
-        if in_table and span.startswith("rg "):
+        # ripgrep and `grep -E` are bitten. GNU grep's default BRE reads `\|`
+        # as real alternation, so `grep 'a\|b'` works when pasted — flagging
+        # it is a false positive. And an UNQUOTED pipe is a shell pipeline,
+        # which fails loudly rather than silently, so it is not this defect
+        # either.
+        if in_table and (span.startswith("rg ") or is_ere_grep(span)):
+            tool = "rg" if span.startswith("rg ") else "grep -E"
             for quoted in QUOTED_RE.findall(span):
                 if "\\|" in quoted:
                     findings.append(
                         Finding(
                             path,
-                            f"line {lineno}: rg pattern in a table cell contains an escaped pipe `\\|`. "
+                            f"line {lineno}: {tool} pattern in a table cell contains an escaped pipe `\\|`. "
                             f"Rendered that is alternation, but an agent reads the raw "
                             f"file and pastes a literal `|`, so the search silently "
                             f"matches nothing and the check can never go red. Use "
@@ -529,6 +560,12 @@ def check_rule(
     support = path.with_suffix("")
     if support.is_dir():
         for md in sorted(support.rglob("*.md")):
+            if "fixtures" in md.relative_to(support).parts:
+                # A fixture is a planted violation a shipped check must reject:
+                # test data, not depth an agent reads. Dead links and missing
+                # routing are the point. Only the leak scan applies.
+                check_forbidden(md, md.read_text(encoding="utf-8"), forbid, findings)
+                continue
             inner_text = md.read_text(encoding="utf-8")
             _, inner_body = split_frontmatter(inner_text)
             check_toc(md, inner_body, findings)
@@ -583,7 +620,8 @@ def self_test() -> int:
         skill.mkdir()
         (skill / "SKILL.md").write_text(
             "---\nname: wrong-name\ndescription: Runs the thing and fixes it.\n---\n\n"
-            "# Bad\n\n[dangling](references/nope.md)\n",
+            "# Bad\n\n[dangling](references/nope.md)\n\n"
+            "```markdown\n[shown, not followed](references/gone.md)\n```\n",
             encoding="utf-8",
         )
         rule = base / "bad-rule.md"
@@ -593,7 +631,8 @@ def self_test() -> int:
             "| X-02 | invert me | `rg -L 'thing' .` |\n"
             "| X-03 | truncate me | `rg 'thing' docs/**/*.md` |\n"
             "| X-04 | literal pipe | `rg 'alpha\\|beta' .` |\n"
-            "| X-05 | grep BRE is fine | `grep 'alpha\\|beta' .` |\n",
+            "| X-05 | grep BRE is fine | `grep 'alpha\\|beta' .` |\n"
+            "| X-06 | grep ERE is not | `grep -rniE 'alpha\\|beta' .` |\n",
             encoding="utf-8",
         )
         findings: list[Finding] = []
@@ -605,6 +644,7 @@ def self_test() -> int:
         expect("!= directory name" in messages, messages)
         expect("workflow verb" in messages, messages)
         expect("broken relative link" in messages, messages)
+        expect("gone.md" not in messages, messages)  # a link inside a fence is an example
         expect("dead glob" in messages, messages)
         expect("belongs at the top level" in messages, messages)
         expect("empty verification cell" in messages, messages)
@@ -612,8 +652,10 @@ def self_test() -> int:
         expect("files-without-match" in messages, messages)
         expect("globstar" in messages, messages)
         expect("never go red" in messages, messages)
-        # …but GNU grep's BRE alternation is legitimate, so X-05 must NOT fire.
-        expect(messages.count("never go red") == 1, messages)
+        # …but GNU grep's BRE alternation is legitimate, so X-05 must NOT fire,
+        # while `grep -E` (X-06) is bitten exactly like rg (X-04).
+        expect(messages.count("never go red") == 2, messages)
+        expect("grep -E pattern" in messages, messages)
 
         # --allow-absent suppresses exactly the glob named, and nothing else.
         two = base / "two-globs.md"
@@ -643,6 +685,23 @@ def self_test() -> int:
         CITED.clear()
         walk(good, base, [], clean, {})
         expect(not clean, [str(f) for f in clean])
+
+        # A support dir's fixtures/ holds planted violations: unrouted, with
+        # dead links, by design. Only the leak scan may fire on them.
+        fixtured = base / "fixtured.md"
+        fixtured.write_text("# Fixtured\n\nSee [depth](fixtured/depth.md).\n", encoding="utf-8")
+        (base / "fixtured" / "checks" / "fixtures" / "x").mkdir(parents=True)
+        (base / "fixtured" / "depth.md").write_text("# Depth\n", encoding="utf-8")
+        (base / "fixtured" / "checks" / "fixtures" / "x" / "fail.md").write_text(
+            "# Planted\n\n[dead](./nope.md) at /home/someone\n", encoding="utf-8"
+        )
+        quiet: list[Finding] = []
+        CITED.clear()
+        walk(fixtured, base, ["/home/"], quiet, {})
+        messages = " ".join(f.message for f in quiet)
+        expect("not routed" not in messages, messages)
+        expect("broken relative link" not in messages, messages)
+        expect("forbidden string" in messages, messages)  # red control
     print("self-test: ok")
     return 0
 

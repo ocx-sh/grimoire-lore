@@ -1,0 +1,7 @@
+[book]
+title = "Fixture"
+
+[output.html.search]
+boost-title = 1
+boost-hierarchy = 1
+boost-paragraph = 1

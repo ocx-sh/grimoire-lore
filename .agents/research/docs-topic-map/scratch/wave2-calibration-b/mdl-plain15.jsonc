@@ -1,0 +1,6 @@
+{
+  "config": {
+    "default": false,
+    "MD054": { "inline": true, "full": false, "collapsed": false, "shortcut": false, "autolink": true }
+  }
+}

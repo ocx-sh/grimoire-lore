@@ -1,0 +1,91 @@
+Files scanned: 249, total prose words: 331368
+
+=== DOC-PLAIN-01 ===
+pages with hits: 229/249  raw hits: 8462
+by surface: {'ocx': 41, 'kate-middlechild': 25, 'ocx-mirror-sdk': 25, 'ocx-catalog': 23, 'grimoire': 22, 'grimoire-indexer': 22, 'ocx-sdk-python': 18, 'grimoire-lore': 10, 'ocx-indexbot': 9, 'ocx-save': 8, 'ocx-mirror': 7, 'ocx-mcp': 5, 'rules_ocx': 3, 'bob': 2, 'creeptd-ng': 2, 'grimoire-vscode': 1, 'grimoire-components': 1, 'grimoire-index': 1, 'setup-grimoire': 1, 'setup-ocx': 1, 'vscode-ocx': 1, 'www-setup': 1}
+ sample: bob/docs/design/decisions.md:5: '—'
+ sample: bob/docs/design/decisions.md:14: ';'
+ sample: bob/docs/design/decisions.md:16: '—'
+ sample: bob/docs/design/decisions.md:17: ';'
+ sample: bob/docs/design/decisions.md:21: ';'
+ sample: bob/docs/design/decisions.md:21: '—'
+ sample: bob/docs/design/decisions.md:23: '—'
+ sample: bob/docs/design/decisions.md:24: ';'
+ sample: bob/docs/design/decisions.md:25: '–'
+ sample: bob/docs/design/decisions.md:31: '—'
+
+=== DOC-PLAIN-08 ===
+pages with hits: 0/249  raw hits: 0
+by surface: {}
+
+=== DOC-PLAIN-11 ===
+pages with hits: 104/249  raw hits: 398
+by surface: {'ocx': 30, 'kate-middlechild': 17, 'grimoire': 16, 'grimoire-indexer': 6, 'ocx-mirror': 5, 'ocx-save': 5, 'ocx-catalog': 4, 'ocx-indexbot': 4, 'ocx-sdk-python': 4, 'bob': 2, 'grimoire-lore': 2, 'ocx-mcp': 2, 'ocx-mirror-sdk': 2, 'rules_ocx': 1, 'grimoire-components': 1, 'setup-ocx': 1, 'vscode-ocx': 1, 'www-setup': 1}
+ sample: bob/docs/design/decisions.md:112: 'now'
+ sample: bob/docs/design/decisions.md:135: 'now'
+ sample: bob/docs/design/graph-ir.md:443: 'now'
+ sample: grimoire/docs/src/installation.md:35: 'newest'
+ sample: grimoire/docs/src/installation.md:114: 'latest'
+ sample: grimoire/docs/src/artifacts.md:5: 'now'
+ sample: grimoire/docs/src/artifacts.md:439: 'older'
+ sample: grimoire/docs/src/quickstart.md:44: 'newest'
+ sample: grimoire/docs/src/quickstart.md:83: 'newer'
+ sample: grimoire/docs/src/ratings.md:248: 'older'
+
+=== DOC-PLAIN-12 ===
+pages with hits: 6/249  raw hits: 8
+by surface: {'kate-middlechild': 3, 'grimoire': 1, 'grimoire-vscode': 1, 'ocx': 1}
+ sample: grimoire/docs/src/json-interface.md:701: 'robust'
+ sample: grimoire-vscode/docs/manual-testing.md:128: 'unlock'
+ sample: kate-middlechild/docs/research/research-05-auth-social-backend.md:17: 'unlocks'
+ sample: kate-middlechild/docs/research/research-05-auth-social-backend.md:58: 'powerful'
+ sample: kate-middlechild/docs/research/research-05-auth-social-backend.md:108: 'powerful'
+ sample: kate-middlechild/docs/research/research-03-components-design-system.md:64: 'robust'
+ sample: kate-middlechild/docs/research/research-04-content-model.md:85: 'powerful'
+ sample: ocx/website/src/docs/reference/command-line.md:1099: 'unlocks'
+
+=== DOC-PLAIN-02 (long sentences >25w) ===
+pages with hits: 211/249  raw hits: 4674
+by surface: {'ocx': 42, 'kate-middlechild': 24, 'grimoire': 23, 'ocx-catalog': 23, 'grimoire-indexer': 21, 'ocx-sdk-python': 18, 'ocx-mirror-sdk': 11, 'grimoire-lore': 10, 'ocx-indexbot': 8, 'ocx-save': 8, 'ocx-mirror': 7, 'ocx-mcp': 3, 'bob': 2, 'creeptd-ng': 2, 'rules_ocx': 2, 'grimoire-vscode': 1, 'grimoire-components': 1, 'grimoire-index': 1, 'setup-grimoire': 1, 'setup-ocx': 1, 'vscode-ocx': 1, 'www-setup': 1}
+ sample: bob/docs/design/decisions.md (28w): Export kinds: - **Node definitions** — carry a ; a stream is just a port type; each instance is its 
+ sample: bob/docs/design/decisions.md (36w): Rule: **a constructor returns a sealed box, never a flattened splat** — there is no flattening layer
+ sample: bob/docs/design/graph-ir.md (50w): The composition law from AGENTS.md is the axis this whole document turns on: *a node is a function, 
+ sample: bob/docs/design/graph-ir.md (27w): Content stays un-domained on purpose: a blob digest is a plain content address, comparable with any 
+ sample: creeptd-ng/docs/dev-infra/play-full.md (36w): - Vue web shell loads and renders (Bevy WASM canvas if has run). - Standalone single-player WASM gam
+ sample: creeptd-ng/docs/dev-infra/play-lan.md (37w): The port numbers ( , , ) are injected at build time via the , , and Vite env vars. sets all three to
+ sample: creeptd-ng/docs/dev-infra/play-lan.md (61w): Use the "Dev Login" button (visible in dev mode) which bypasses OAuth entirely. - The web client mus
+ sample: grimoire/docs/src/ci.md (42w): The natural home for publishing is CI: every merge to the default branch (or every tag) re-publishes
+ sample: grimoire/docs/src/ci.md (26w): This page shows the full setup for each — publishing to a registry, announcing to the [package index
+ sample: grimoire/docs/src/installation.md (28w): It is the recommended way to install : ocx resolves the right build for your platform, keeps the bin
+
+=== DOC-PLAIN-03 (paragraphs >5 sentences) ===
+pages with hits: 69/249  raw hits: 153
+by surface: {'kate-middlechild': 20, 'ocx': 20, 'grimoire': 12, 'ocx-indexbot': 3, 'ocx-mirror-sdk': 3, 'bob': 2, 'ocx-mirror': 2, 'ocx-sdk-python': 2, 'grimoire-vscode': 1, 'ocx-catalog': 1, 'ocx-save': 1, 'grimoire-index': 1, 'www-setup': 1}
+
+=== DOC-PLAIN-05 (Flesch Reading Ease) ===
+pages scored: 249  median: 49.0  mean: 48.1
+pages below floor 50: 132/249 (53.0%)
+ sample below floor: ocx/website/src/docs/roadmap.md = -24.5
+ sample below floor: grimoire/docs/src/SUMMARY.md = -16.4
+ sample below floor: grimoire-indexer/docs/reference/index.md = -13.7
+ sample below floor: ocx/website/src/docs/reference/dependencies.md = 9.1
+ sample below floor: kate-middlechild/docs/decisions/0001-stack.md = 14.4
+ sample below floor: ocx/website/src/team.md = 16.4
+ sample below floor: kate-middlechild/docs/research/research-00-RECOMMENDATION.md = 24.1
+ sample below floor: ocx-catalog/docs/explanation/index.md = 24.1
+ sample below floor: ocx-save/website/src/team.md = 26.4
+ sample below floor: kate-middlechild/docs/research/README.md = 27.4
+
+=== DOC-PLAIN-10 (tell density per 1000 words) ===
+pages with >=1 hit: 14/249
+pages over density 3: 1/249
+ sample: ocx-sdk-python/docs/reference/api.md density=8.47 raw=1
+ sample: kate-middlechild/docs/research/research-02-cross-platform-mobile.md density=1.15 raw=3
+ sample: ocx/website/src/docs/docker.md density=1.15 raw=1
+ sample: grimoire-vscode/docs/manual-testing.md density=0.92 raw=1
+ sample: ocx-save/website/src/docs/user-guide.md density=0.55 raw=2
+ sample: kate-middlechild/docs/research/research-05-auth-social-backend.md density=0.52 raw=1
+ sample: kate-middlechild/docs/research/research-01-web-frameworks.md density=0.4 raw=1
+ sample: kate-middlechild/docs/research/research-03-components-design-system.md density=0.38 raw=1
+ sample: ocx/website/src/docs/in-depth/storage.md density=0.35 raw=1
+ sample: grimoire/docs/src/json-interface.md density=0.25 raw=1

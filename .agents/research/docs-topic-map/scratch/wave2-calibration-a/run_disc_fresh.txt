@@ -1,0 +1,75 @@
+
+=== DOC-DISC-13 === scanned 248 files, 248 hits
+   ('/home/mherwig/dev/bob/docs/design/decisions.md', 1, "no 'tier:' frontmatter line")
+   ('/home/mherwig/dev/bob/docs/design/graph-ir.md', 1, "no 'tier:' frontmatter line")
+   ('/home/mherwig/dev/creeptd-ng/docs/dev-infra/play-full.md', 1, "no 'tier:' frontmatter line")
+   ('/home/mherwig/dev/creeptd-ng/docs/dev-infra/play-lan.md', 1, "no 'tier:' frontmatter line")
+   ('/home/mherwig/dev/grimoire/docs/README.md', 1, "no 'tier:' frontmatter line")
+   ('/home/mherwig/dev/grimoire/docs/src/ci.md', 1, "no 'tier:' frontmatter line")
+   ('/home/mherwig/dev/grimoire/docs/src/installation.md', 1, "no 'tier:' frontmatter line")
+   ('/home/mherwig/dev/grimoire/docs/src/artifacts.md', 1, "no 'tier:' frontmatter line")
+   ('/home/mherwig/dev/grimoire/docs/src/quickstart.md', 1, "no 'tier:' frontmatter line")
+   ('/home/mherwig/dev/grimoire/docs/src/ratings.md', 1, "no 'tier:' frontmatter line")
+
+=== DOC-DISC-15 === scanned 248 files, 1 hits
+   ('/home/mherwig/dev/ocx/website/src/docs/installation.md', 1, '16 steps/fences (>9) with no external-systems justification')
+
+=== DOC-DISC-16 === scanned 248 files, 4 hits
+   ('/home/mherwig/dev/grimoire/docs/src/installation.md', 1, '118 words before first fence (>100)')
+   ('/home/mherwig/dev/grimoire/docs/src/quickstart.md', 1, '138 words before first fence (>100)')
+   ('/home/mherwig/dev/ocx/website/src/docs/getting-started.md', 1, '2019 words before first fence (>100) with a deferrable callout')
+   ('/home/mherwig/dev/ocx-save/website/src/docs/getting-started.md', 1, '120 words before first fence (>100)')
+
+=== DOC-DISC-22 === scanned 248 files, 0 hits
+
+=== DOC-DISC-17 (scoped: doc_type=tutorial declared) === 0 pages declare doc_type:tutorial fleet-wide
+=== DOC-DISC-17 (informational: getting-started/tutorial path proxy) ===
+   ('/home/mherwig/dev/ocx/website/src/docs/installation.md', 9, '::: code-group')
+   ('/home/mherwig/dev/ocx-catalog/docs/how-to/quickstart.md', 12, '=== "')
+   ('/home/mherwig/dev/ocx-save/website/src/docs/installation.md', 11, '::: code-group')
+
+=== DOC-DISC-21 ===
+   ('bob', "no generator nav config found -- skip (rule's own precondition)", None)
+   ('creeptd-ng', "no generator nav config found -- skip (rule's own precondition)", None)
+   ('grimoire', 'SUMMARY.md has 1 H1 groups', None)
+   ('grimoire-indexer', '5 top-level nav groups', ['- Home: index.md', '- How-To:', '- Reference:', '- Explanation:', '- Ops:'])
+   ('grimoire-lore', "no generator nav config found -- skip (rule's own precondition)", None)
+   ('grimoire-vscode', "no generator nav config found -- skip (rule's own precondition)", None)
+   ('kate-middlechild', "no generator nav config found -- skip (rule's own precondition)", None)
+   ('ocx', "no generator nav config found -- skip (rule's own precondition)", None)
+   ('ocx-catalog', '5 top-level nav groups', ['- Home: index.md', '- How-To:', '- Reference:', '- Explanation:', '- Ops:'])
+   ('ocx-indexbot', '5 top-level nav groups', ['- Home: index.md', '- Guide:', '- Reference:', '- Contributing:', '- Changelog: changelog.md'])
+   ('ocx-mcp', '4 top-level nav groups', ['- Home: index.md', '- Getting Started: getting-started.md', '- Reference:', '- Changelog: changelog.md'])
+   ('ocx-mirror', '4 top-level nav groups', ['- Home: index.md', '- Getting Started: getting-started.md', '- Reference:', '- Changelog: changelog.md'])
+   ('ocx-mirror-sdk', '9 top-level nav groups', ['- Home: index.md', '- Getting started:', '- Concepts:', '- Guide:', '- Recipes:', '- API reference:', '- Schema:', '- Contributing:'])
+   ('ocx-save', "no generator nav config found -- skip (rule's own precondition)", None)
+   ('ocx-sdk-python', '3 top-level nav groups', ['- Home: index.md', '- Guide:', '- Reference:'])
+   ('rules_ocx', "no generator nav config found -- skip (rule's own precondition)", None)
+   ('grimoire-components', "no generator nav config found -- skip (rule's own precondition)", None)
+   ('grimoire-index', "no generator nav config found -- skip (rule's own precondition)", None)
+   ('setup-grimoire', "no generator nav config found -- skip (rule's own precondition)", None)
+   ('setup-ocx', "no generator nav config found -- skip (rule's own precondition)", None)
+   ('vscode-ocx', "no generator nav config found -- skip (rule's own precondition)", None)
+   ('www-setup', "no generator nav config found -- skip (rule's own precondition)", None)
+
+=== DOC-DISC-03 (simulated) === 2964 tokens from fleet headings + ocx CLI flags
+  [FP] legit=True flagged=True tokens=['new', 'need', 'fast', 'i', 'get']
+        As a developer new to the tool, I need to get a working install fast, so that I can try it before committing.
+  [FP] legit=True flagged=True tokens=['need', 'same', 'artifact', 'which', 'i']
+        As a CI engineer, I need every build to produce the same binary regardless of which machine ran it, so that a security audit can trust the artifact.
+  [FP] legit=True flagged=True tokens=['new', 'need', 'what', 'level', 'see']
+        As a platform maintainer, I need to see who is allowed to change what, so that I can grant the right level of trust to a new contributor.
+  [FP] legit=True flagged=True tokens=['version', 'need', 'package', 'our', 'i']
+        As an operator, I need to know when a package version moves, so that our deployments do not silently drift.
+  [FP] legit=True flagged=True tokens=['need', 'what', 'project', 'i', 'this']
+        As a newcomer, I need one place that tells me what this project is for, so that I can decide if it fits my problem.
+  [TP] legit=False flagged=True tokens=['need', 'user', 'package', 'run', 'i']
+        As a user, I need to run add to install a package, so that I get the binary on PATH.
+  [TP] legit=False flagged=True tokens=['need', 'user', 'pull', 'digest', 'i']
+        As a user, I need to configure the lock file, so that pull resolves the right digest.
+  [TP] legit=False flagged=True tokens=['need', 'i', 'every', 'to', 'reference']
+        As a maintainer, I need the reference page to list every option, so that users do not have to guess a flag.
+  [TP] legit=False flagged=True tokens=['push', 'need', 'user', 'work', 'i']
+        As a user, I need push to work reliably, so that CI does not fail.
+  [TP] legit=False flagged=True tokens=['errors', 'need', 'i', 'to', 'that']
+        As a contributor, I need the troubleshooting page to explain errors, so that I stop filing duplicate issues.

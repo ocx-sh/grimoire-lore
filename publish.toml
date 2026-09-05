@@ -192,3 +192,28 @@ description = { readme = "docs/typescript-packaging.md", logo = "assets/lore-typ
 [bundles.typescript-essentials]
 version = "0.1.0"
 description = { readme = "docs/typescript-essentials.md", logo = "assets/lore-typescript.svg" }
+
+# The documentation design set: one rule plus two skills, not three rules or
+# one skill, because the split follows how often each piece runs. `docs-quality`
+# loads on every docs edit and blocks on counted limits, which is a rule's job.
+# `docs-plan` and `docs-instrument` each run once per project, discover or wire
+# the gate, and leave behind an artifact or a CI config rather than a standing
+# per-edit check, which is a skill's job. Two skills rather than one because
+# their evidence does not overlap: `docs-plan` reads the repository, its
+# issues and its logs, and `docs-instrument` reads the docs-quality rule set
+# and the repository's own CI runner.
+[rules.docs-quality]
+version = "0.1.0"
+description = { readme = "docs/docs-quality.md", logo = "assets/lore-docs.svg" }
+
+[skills.docs-plan]
+version = "0.1.0"
+description = { readme = "docs/docs-plan.md", logo = "assets/lore-docs.svg" }
+
+[skills.docs-instrument]
+version = "0.1.0"
+description = { readme = "docs/docs-instrument.md", logo = "assets/lore-docs.svg" }
+
+[bundles.docs-essentials]
+version = "0.1.0"
+description = { readme = "docs/docs-essentials.md", logo = "assets/lore-docs.svg" }
