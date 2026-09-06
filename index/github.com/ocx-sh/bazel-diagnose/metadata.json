@@ -1,0 +1,37 @@
+{
+  "created": "2026-09-06T11:47:40+02:00",
+  "description": "Symptom-routed diagnosis procedure for a Bazel build that is already wrong, covering slow builds and slow analysis, unexpected cache misses, cache or BES outages, non-hermetic and nondeterministic actions, flaky tests, repository-rule and module-extension refetches, target-selection misses, and flags that appear not to exist. Use when someone says the build got slow, analysis takes forever, CI never hits the cache, this rebuilt for no reason, why did this action re-run, the remote cache is down, exit code 39, lost inputs, this test passes locally and fails in CI, the sandbox is not hermetic, Bazel keeps refetching an external repo, the diff tool skipped a target, or unrecognized option after a version bump. Not for deciding whether to adopt Bazel or for standing a workspace up, which is bazel-adopt, and not for the standards themselves, which the bazel-quality rules carry.",
+  "keywords": [
+    "bazel",
+    "diagnose",
+    "debugging",
+    "slow-build",
+    "profile",
+    "cache-miss",
+    "execution-log",
+    "execlog",
+    "remote-cache",
+    "cache-eviction",
+    "exit-39",
+    "hermeticity",
+    "sandbox",
+    "nondeterminism",
+    "flaky-test",
+    "repository-rule",
+    "module-extension",
+    "lockfile",
+    "target-selection",
+    "bazel-diff",
+    "flags"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "bazel-diagnose",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/bazel-diagnose",
+  "schema": 1,
+  "summary": "Routes a wrong Bazel build by symptom to the one measurement that names its root cause, on 8.7.0 and 9.2.0 alike"
+}

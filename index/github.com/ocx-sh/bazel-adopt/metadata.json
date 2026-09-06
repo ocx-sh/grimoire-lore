@@ -1,0 +1,36 @@
+{
+  "created": "2026-09-06T11:47:40+02:00",
+  "description": "Go/no-go gate and staged migration procedure for moving a repository onto Bazel, covering the measured adoption signals, the pilot choice, MODULE.bazel and lockfile setup, the .bazelversion pin and the 8.x-versus-9.x call, rc-file layering, cache wiring order, CI lanes, and one branch per language for Rust, Python, TypeScript and C++. Use when someone asks whether a repo should move to Bazel, wants a Bazel migration plan or adoption plan, asks how to start with Bazel, how to add a MODULE.bazel, which Bazel version to pin, how to set up a remote cache or remote execution for the first time, what to migrate first, or whether Bazel is worth it against Nx, Turborepo, Pants, sccache or plain cargo and uv caching. Not for diagnosing or speeding up a build that is already on Bazel, which is bazel-diagnose, and not for the standards themselves, which are the bazel-quality rules.",
+  "keywords": [
+    "bazel",
+    "adoption",
+    "migration",
+    "go-no-go",
+    "monorepo",
+    "bzlmod",
+    "module-bazel",
+    "lockfile",
+    "bazelversion",
+    "bazelrc",
+    "remote-cache",
+    "rbe",
+    "ci-lanes",
+    "gazelle",
+    "pilot",
+    "rules_rust",
+    "rules_python",
+    "rules_js",
+    "rules_ts",
+    "rules_cc"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "bazel-adopt",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/bazel-adopt",
+  "schema": 1,
+  "summary": "Decides whether a repository should adopt Bazel from signals you measure, then migrates it in an order that keeps the tree green"
+}
