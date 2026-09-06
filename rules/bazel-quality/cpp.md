@@ -116,7 +116,7 @@ are blind to generated-repo content:
 `grep -rn 'hdrs_check\|includes\s*=' --include='BUILD*' --include='*.bzl' .` —
 empty is the pass, every hit is read by hand.
 
-```python
+```starlark
 # wrong — one entry mutates every reverse dependency's compile line, for as long as the edge exists
 cc_library(name = "foo", hdrs = ["inc/foo.h"], includes = ["inc"])
 # right — relabels how this target's own headers are addressed, and never leaves the target

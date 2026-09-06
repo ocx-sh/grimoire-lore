@@ -56,8 +56,10 @@ directory. EMPTY = PASS.
 | BZL-TEST-13 | Never mutate the runfiles tree during a test run, and never let an assertion or a cache key depend on filesystem atimes. | Both are explicit prohibitions in the normative spec — the runfiles tree "must not change during test execution", and tests "must not assume that atimes are enabled for any mounted filesystem". A test that writes beside its data dep passes locally and corrupts the next test sharing that tree; an atime assertion passes on one mount option and fails on another with no code change. | The block grep for `st_atime`, plus a grep for `chmod`/`chgrp`/`touch`/open-for-write against a path under `$TEST_SRCDIR` or `*.runfiles`. EMPTY = PASS. | MUST |
 
 ```python
-tmp = os.path.join(os.path.dirname(__file__), "tmp")   # unspecified path; may be read-only, may be shared
-tmp = os.environ["TEST_TMPDIR"]                        # the only guaranteed-private writable directory
+# wrong — an unspecified path; may be read-only, may be shared
+tmp = os.path.join(os.path.dirname(__file__), "tmp")
+# right — the only guaranteed-private writable directory
+tmp = os.environ["TEST_TMPDIR"]
 ```
 
 ## Tags, Sandbox and Network

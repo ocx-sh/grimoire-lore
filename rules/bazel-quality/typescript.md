@@ -124,13 +124,13 @@ grep is never a clearance.
 | BZL-JS-19 | Answer `TS2786` or `TS7016` by fixing the offending package's declared dependencies, or with a scoped `pnpm.packageExtensions` entry, never by turning on `skipLibCheck` repo-wide. | The error is a real defect that npm's flat hoisting used to hide — a package exposing a type from its own `devDependency`. A blanket `skipLibCheck` disables checking inside *every* dependency to silence one, and it is a plausible one-line diff. | Reading heuristic on the named package's own `package.json`: does the `@types/*` entry belong in `dependencies`? **No grep substitutes and there is no empty-output reading.** A new repo-wide `skipLibCheck` appearing in the same diff as the error is the finding. | SHOULD |
 | BZL-JS-26 | Read a framework's own config for output-layout assumptions — Next.js `output: "standalone"`, Astro, SvelteKit dev codegen — before wiring it to `js_binary` or `js_run_binary`. | These tools write into their own idea of `node_modules` and `src`, and fail Bazel's tree-artifact validation with a symlink-resolution error rather than a recognisable import error. No blanket fix exists, so the diagnosis has to happen before the target is written. | Reading heuristic: grep the framework config for `output: "standalone"`, an `outDir` inside `src`, or documentation requiring a real `node_modules`. **No single grep covers every framework, so empty output is not a clearance.** | SHOULD |
 
-```python
+```starlark
 # wrong — the same .ts in two targets: conflicting outputs, or last-writer-wins
 ts_project(name = "lib", srcs = glob(["src/**/*.ts"]), transpiler = "tsc")
 ts_project(name = "cli", srcs = glob(["src/**/*.ts"]) + ["bin/main.ts"], transpiler = "tsc")
 ```
 
-```python
+```starlark
 # right — disjoint srcs, one edge between them
 ts_project(name = "lib", srcs = glob(["src/**/*.ts"]), transpiler = "tsc")
 ts_project(name = "cli", srcs = ["bin/main.ts"], deps = [":lib"], transpiler = "tsc")
