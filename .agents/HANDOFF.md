@@ -1,5 +1,106 @@
 # Handoff — language quality artifact programs
 
+# Bazel expertise artifact program
+
+Written 2026-09-06, for a cold resume. Ran with `research-lang` against a
+build system plus its per-language rulesets: nine scouts, five research
+waves, a measurement wave that ran the contested claims on real 8.7.0, 8.8.0,
+9.0.0, 9.1.0 and 9.2.0 binaries, and a convergence round. Committed and
+pushed to `main` on 2026-09-06 in one commit (merging to `main` publishes
+the four packages at `0.1.0`).
+
+## What shipped
+
+| Artifact | Path | Notes |
+|---|---|---|
+| `bazel-quality` (rule) | `rules/bazel-quality.md` + `rules/bazel-quality/` | 165-line index: the four-line gate, 19 non-negotiables, three `BZL-CORE` rules, a routing table by task. Twelve depth files (`starlark`, `bzlmod`, `hermeticity`, `caching`, `testing`, `ci`, `architecture`, `flags`, `rust`, `python`, `typescript`, `cpp`), 186 to 247 lines each, 328 rules (246 MUST; BZL-LARK-13 retired in review as a duplicate of BZL-ARCH-08) under the corpus IDs `BZL-LARK/MOD/HERM/CACHE/TEST/CI/ARCH/FLAG/RUST/PY/JS/CC` |
+| `bazel-adopt` (skill) | `skills/bazel-adopt/` | Go/no-go from measured signals (no published threshold exists), then the migration order; five references: `go-no-go`, `workspace-setup`, `cache-and-ci`, `branch-rust`, `branches-python-ts-cpp`. 415 lines |
+| `bazel-diagnose` (skill) | `skills/bazel-diagnose/` | Symptom-routed; six references: `slow-build`, `cache-miss`, `outage-and-eviction`, `nondeterminism`, `flaky-test`, `fetch-and-selection`. 479 lines |
+| `bazel-essentials` (bundle) | `bundles/bazel-essentials.toml` | Three members, **no tag** |
+| Companions and mark | `docs/bazel-{quality,adopt,diagnose,essentials}.md`, `assets/lore-bazel.svg` (+ `assets/glyphs/bazel.svg`, lucide "boxes", not the trademarked logo) | |
+
+Wired in `publish.toml` (four entries at `0.1.0`) and `taskfile.yml`
+(`artifacts` step against `BAZEL_CONSUMER`, default `../rules_ocx`, with
+`--allow-absent` for the six correct-but-absent globs and `--forbid` for a
+workstation path, the cache host and a corpus link). Glob set: the fifteen
+build-system-guaranteed names plus `**/.bazelrc.*` (the fleet's
+`.bazelrc.user` matches nothing narrower). `.agents/research/README.md` gained
+a Bazel section.
+
+## Validation
+
+`check-artifacts.py --self-test` ok; the Bazel `artifacts` step clean after a
+15-file sonnet fixer wave (47 structural findings: bare shell globs, `\|`
+alternation in `-E` patterns, `<placeholder>` search patterns, `$(…)`
+operands, unquoted `**`, a skill table re-defining IDs, three dropped HERM IDs
+still cited); `task selftest artifacts` clean end to end; `grim publish
+--dry-run` shows the four Bazel packages at `0.1.0` and no warnings.
+Content review: the contradiction and era sweep found 3 blockers (a
+SHOULD/MUST duplicate pair, an index preamble over-stating four SHOULD
+rows, a cquery verification with stderr suppressed), 11 warns and 4 notes;
+the verification-honesty run exercised 12 MUST verifications on real 8.7.0
+and 9.2.0 binaries and found two `attr(stamp, -1, …)` queries that are
+parse errors reading as pass, a flag-existence grep blind to every boolean
+(`--[no]` rendering) and missing the UNDOCUMENTED probe, and one
+evidence-losing `grep -c`; the trigger eval routed 12 of 12 utterances
+correctly with no description findings; a second sweep over the eleven
+skill references found 6 blockers, 12 warns, 3 notes (a seven-cache table
+differing from BZL-CACHE-15, an execlog parser built in the wrong
+repository, suppressed-stderr checks, unversioned claims). Every finding was
+applied by a sonnet fixer with the reviewer's verbatim fix; the validator
+was clean after each wave. Not exercised: remote-cache, darwin and Windows
+verifications (13 listed by the honesty run as needing hardware this host
+lacks).
+
+## Corpus
+
+`.agents/research/bazel-frame.md` (nine Corrections blocks; later wins),
+`bazel-topic-map.md`, twelve `bazel-<topic>.md` consolidations (each
+`revised: 2026-09-06`, six also `revised_wave5:`), `bazel-audit/` (4),
+`bazel-topic-map/` (9 scouts), 25 dive dirs, `bazel-followups/` (15),
+`bazel-measurements/` (9). Every consolidation ends with open questions
+that ship as documented gaps in its depth file.
+
+## Running Bazel for measurements
+
+bazelisk is provisioned through rules_ocx's OCX toolchain and runs from ANY
+directory:
+
+```sh
+USE_BAZEL_VERSION=9.2.0 ocx --project /home/mherwig/dev/rules_ocx/ocx.toml exec -- \
+  bazelisk --output_user_root=<scratch>/out <command>
+```
+
+Never run Bazel inside `rules_ocx` itself; copy it with `git archive HEAD |
+tar -x` (drops the untracked `.bazelrc.user`, which holds a cache credential
+that no artifact may quote). Never create a WORKSPACE file. Host is WSL2 with
+`linux-sandbox`; `/tmp` is a shared 16 GB tmpfs, so output roots go under
+`~/.cache/bazel-measure-scratch/<slug>/` on real disk.
+
+## Owner decisions the corpus could not make
+
+Pilot repository (default none; `bob` named); moving the `rules_ocx` pin off
+8.7.0 (8.7.0 to 8.8.0 already crosses lockFileVersion 24 to 28); migrating
+the cache credential to `--credential_helper` (MUST for new setups, SHOULD
+for existing); whether a silent local build on a cache outage is acceptable
+(measured: no flag changes it); `--remote_timeout=60`; a `bazel_compatibility`
+floor for rules_ocx; the `ocx/BUILD.bazel` and `ocx/private/BUILD.bazel`
+`default_visibility = public` (BZL-MOD-34 finding); the stale
+`.claude/rules/release.md:10-12`; the examples job's missing cache step;
+C++ toolchain and sanitizer defaults for a set with no fleet consumer.
+
+## Scratch left on disk
+
+`~/.cache/bazel-measure-scratch/` (measurement output roots, the review's
+`review-honesty/` planted-violation workspaces, a blobless bazel clone,
+several GB), `/tmp/bazel-{8.8.0,9.0.0,9.1.0,9.2.0}*` source
+trees and `/tmp/bq-out-{870,920}` (a worker's), `.agents/tmp-946b/` (a
+worker's source scratch, untracked; `rm -r` denied to this session), the
+session scratchpad. Nothing holds a Bazel server.
+
+---
+
+
 # Documentation-design artifact program
 
 Written 2026-09-05, for a cold resume. Ran with `research-lang` adapted to a

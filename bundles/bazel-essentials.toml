@@ -1,0 +1,32 @@
+summary = "The Bazel set: a merge gate for Starlark and Bazel config, the adoption procedure, and the diagnosis procedure"
+keywords = "bazel,starlark,bzlmod,module-extension,repository-rule,remote-cache,remote-execution,rbe,hermeticity,sandbox,determinism,bazel-diff,target-determinator,buildifier,gazelle,rules_rust,rules_python,rules_js,rules_ts,rules_cc,protobuf,monorepo,ci,lockfile,migration"
+description = "Everything a repository needs to adopt, write and keep Bazel honest the way the OCX family does: the bazel-quality rule with its non-negotiables and twelve depth files (Starlark and BUILD shape, Bzlmod and repository rules, hermeticity, caching and remote execution, testing, CI and target selection, monorepo architecture, flags and versions, and one file each for Rust, Python, TypeScript and C++), the bazel-adopt skill that runs the go/no-go gate and the per-language migration order, and the bazel-diagnose skill that routes a slow build, a cache miss, a nondeterministic action, a flaky test or a repository-rule miss to the measurement that settles it."
+license = "Apache-2.0"
+repository = "https://github.com/ocx-sh/grimoire-lore"
+
+# Members are same-directory relative: this catalog publishes flat under
+# ghcr.io/ocx-sh/lore/<name>, so `./bazel-quality` resolves against wherever
+# the bundle itself was pulled from. A mirror keeps working.
+#
+# MEMBERS CARRY NO TAG. Not a digest, not an exact version, not a floating
+# major, not `latest`. `latest` is a tag like any other, and naming it is
+# still a pin. A bundle is a *set*, not a snapshot: its job is to say "these
+# belong together", and the consumer's own `grimoire.lock` is what freezes
+# them.
+#
+# Do not pass --pin when releasing this bundle.
+#
+# One rule and two skills because the work splits by how often it runs.
+# bazel-quality loads on every BUILD, .bzl, MODULE.bazel and rc edit and
+# blocks on verifications, which is a rule's shape. bazel-adopt runs once per
+# repository (decide, then migrate in an order) and bazel-diagnose runs when
+# something is already wrong (a symptom, then the measurement that settles
+# it); both leave behind a file or a fixed build, not a standing per-edit
+# check, which is a skill's shape.
+
+[rules]
+bazel-quality = "./bazel-quality"
+
+[skills]
+bazel-adopt = "./bazel-adopt"
+bazel-diagnose = "./bazel-diagnose"

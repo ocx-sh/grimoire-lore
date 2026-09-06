@@ -134,10 +134,31 @@ tasks:
       # holds planted violations by design, and a directory walk would report
       # every one of them as a finding against the rule set.
       - "{{.PY}} rules/docs-quality/checks/prose.py rules/docs-quality.md rules/docs-quality/*.md skills/docs-plan/SKILL.md skills/docs-plan/references/*.md skills/docs-instrument/SKILL.md skills/docs-instrument/references/*.md docs/docs-*.md"
+      #
+      # Bazel is checked against a single Bazel consumer (`../rules_ocx` by
+      # default), the same way Rust is. The glob set is the fifteen names the
+      # build system guarantees, so liveness is meaningful — but six of them
+      # are correct and absent from any Bzlmod-only tree: `BUILD` (the fleet
+      # uses `BUILD.bazel`), the three legacy `WORKSPACE*` names the rule
+      # exists to catch, `REPO.bazel`, and `*.scl` (PROJECT.scl is unadopted).
+      # `*.star` matches nothing in rules_ocx and 150+ files across the fleet's
+      # mirrors, so it is allowed-absent here rather than validated against a
+      # root that happens to carry Starlark scripts. `--forbid` keeps a
+      # workstation path, the fleet's cache host and a corpus link out of a
+      # shareable artifact; a bare '/home/' would flag the rules that tell the
+      # reader to grep for hardcoded home paths.
+      - |
+        if [ -d "{{.BAZEL_CONSUMER}}" ] && [ -f "{{.BAZEL_CONSUMER}}/MODULE.bazel" ]; then
+          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --root {{.BAZEL_CONSUMER}} --forbid '/home/mherwig' --forbid 'bazel-cache.ocx.sh' --forbid '.agents/research' --allow-absent '**/BUILD' --allow-absent '**/WORKSPACE' --allow-absent '**/WORKSPACE.bazel' --allow-absent '**/WORKSPACE.bzlmod' --allow-absent '**/REPO.bazel' --allow-absent '**/*.scl' --allow-absent '**/*.star' rules/bazel-quality.md skills/bazel-adopt skills/bazel-diagnose
+        else
+          echo "note: no Bazel consumer at {{.BAZEL_CONSUMER}} — glob liveness NOT checked for bazel; run locally against a Bzlmod repository"
+          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid 'bazel-cache.ocx.sh' --forbid '.agents/research' rules/bazel-quality.md skills/bazel-adopt skills/bazel-diagnose
+        fi
     vars:
       CONSUMER: '{{.CONSUMER | default "../ocx"}}'
       # The fleet root, not a single repo — see the comment above.
       TS_CONSUMER: '{{.TS_CONSUMER | default ".."}}'
+      BAZEL_CONSUMER: '{{.BAZEL_CONSUMER | default "../rules_ocx"}}'
 
   build:
     desc: Build every publishable artifact without pushing anything

@@ -138,3 +138,21 @@ strongest one.
 The loop ran until a wave stopped producing new merge-blocking rules. The
 `## Open questions` section of each topic records what is left — some of
 it needs a human decision rather than more research, and those are marked.
+
+## Bazel
+
+A five-wave program (2026-09-05 to 2026-09-06) behind the `bazel-quality`
+rule and the `bazel-adopt` and `bazel-diagnose` skills, indexed by
+[bazel-topic-map.md](bazel-topic-map.md) and framed by
+[bazel-frame.md](bazel-frame.md), whose nine appended Corrections blocks
+record what each wave overturned (later blocks win). Twelve consolidations
+(`bazel-<topic>.md`, one per rule family `BZL-LARK`, `BZL-MOD`, `BZL-HERM`,
+`BZL-CACHE`, `BZL-TEST`, `BZL-CI`, `BZL-ARCH`, `BZL-FLAG`, `BZL-RUST`,
+`BZL-PY`, `BZL-JS`, `BZL-CC`) sit over 25 dives, 15 follow-ups under
+`bazel-followups/`, four grounding audits under `bazel-audit/`, and nine
+measurement artifacts under `bazel-measurements/` that ran the contested
+claims on real 8.7.0, 8.8.0, 9.0.0, 9.1.0 and 9.2.0 binaries. Unlike the
+language programs, most corrections came from those measurements: flag
+names, exit codes, tag semantics and cache-outage behaviour in the shipped
+docs, ruleset READMEs and release notes were each found wrong at least once.
+

@@ -17,6 +17,9 @@ node_modules/
 # Per-session agent telemetry written by the model-routing hook, not config.
 .claude/state/
 
+# Parallel workspaces for agents, not source.
+.agents/worktrees
+
 # Skills `grim install` vendors in from `grimoire.toml`. They are dependencies,
 # not sources: `grimoire.lock` pins each to a digest, so committing the
 # unpacked copies is the node_modules mistake. `research-lang` beside them IS

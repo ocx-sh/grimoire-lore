@@ -217,3 +217,30 @@ description = { readme = "docs/docs-instrument.md", logo = "assets/lore-docs.svg
 [bundles.docs-essentials]
 version = "0.1.0"
 description = { readme = "docs/docs-essentials.md", logo = "assets/lore-docs.svg" }
+
+# The Bazel set: one rule plus two skills. `bazel-quality` is the index rule;
+# its support directory carries the twelve depth files it routes to — eight by
+# concern (Starlark, Bzlmod, hermeticity, caching, testing, CI, architecture,
+# flags) and four by language (Rust, Python, TypeScript, C++), because the
+# rulesets genuinely diverge per language and a single flat file would restate
+# every exception in every paragraph. The glob set is the fifteen names the
+# build system itself guarantees (BUILD, .bzl, MODULE.bazel, the rc files, the
+# lockfile, .bazelversion, .bazelignore, the legacy WORKSPACE names, .star and
+# .scl); it deliberately does not touch Cargo.toml, pyproject or package.json,
+# which the language sets own. `bazel-adopt` runs once per repository and
+# `bazel-diagnose` runs on a symptom; neither belongs on every edit.
+[rules.bazel-quality]
+version = "0.1.0"
+description = { readme = "docs/bazel-quality.md", logo = "assets/lore-bazel.svg" }
+
+[skills.bazel-adopt]
+version = "0.1.0"
+description = { readme = "docs/bazel-adopt.md", logo = "assets/lore-bazel.svg" }
+
+[skills.bazel-diagnose]
+version = "0.1.0"
+description = { readme = "docs/bazel-diagnose.md", logo = "assets/lore-bazel.svg" }
+
+[bundles.bazel-essentials]
+version = "0.1.0"
+description = { readme = "docs/bazel-essentials.md", logo = "assets/lore-bazel.svg" }
