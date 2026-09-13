@@ -30,7 +30,7 @@ Two more pins in the same chain:
   `.bazeliskrc`; only a matrix or env reference. `USE_BAZEL_VERSION` resolves
   **ahead of** `.bazelversion`, so a literal silently overrides every future bump
   to the committed file (BZL-FLAG-03).
-  `grep -rn --include=*.yml -e 'USE_BAZEL_VERSION' .github/workflows .bazeliskrc` — **empty =
+  `grep -rn --include='*.yml' -e 'USE_BAZEL_VERSION' .github/workflows .bazeliskrc` — **empty =
   pass, the committed file is the single source.**
 - Pin the launcher itself as explicitly as the Bazel version. The pin chain has
   two links and only one of them is `.bazelversion`.

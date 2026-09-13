@@ -195,7 +195,7 @@ as unchanged and is wrongly skipped. Tag it and pass the tag to
 `bazel-diff --alwaysAffectedTags`; `target-determinator` publishes no equivalent
 flag, so on that tool the same target needs a different mitigation (BZL-CI-24).
 
-**The backstop is not optional.** `grep -rn -e 'schedule:\|cron' --include=*.yml .github/workflows`
+**The backstop is not optional.** `grep -rn -e 'schedule:\|cron' --include='*.yml' .github/workflows`
 for an unrestricted `bazel test //...`. EMPTY on a repo already using selection is
 itself the finding (BZL-CI-27): both miss classes are silent by construction, so a
 periodic full run is the only check that does not depend on the tool being right.
