@@ -3952,3 +3952,7 @@ The opus review pass (5 reviewers, ~1.45M tokens) ran verification commands agai
 - Rule trigger evals in a fresh client session (validation.md) need a consumer with Java or Kotlin files; none exists in the fleet. Skill trigger evals were judged from utterances by the reviewer, not run against a client.
 - Q6 (`java.md` into `bazel-quality`) remains the owner's; the handoff file is ready.
 - Dated re-checks listed under Residue and Wave 4 stand.
+
+### Q6 resolved (2026-09-13): Bazel-Java ships in `bazel-quality`
+
+Owner said yes. `handoff/bazel-quality-java.md` moved to `rules/bazel-quality/java.md` (BZL-JAVA, 25 IDs, 15 MUST) with its routing row in the index, the manifest and source rows of "Where the Depth Is" and "Siblings" extended to the JVM sets, and the Bazel companions and bundle description updated to thirteen depth files and 353 depth rules. The `handoff/` directory is gone.

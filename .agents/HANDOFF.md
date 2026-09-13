@@ -57,7 +57,7 @@ not an in-flight one.
 3. If it does not: re-run phase 3 from `references/wave-plan.md` over the 13
    wave-1 artifacts.
 4. Budget: research phases 1–6 cost ~12.0M subagent tokens (wave 1 2.3M, map 0.5M, wave 2 3.2M, harvest 0.3M, wave 3 3.6M, converge 0.5M, wave 4 1.6M). Authoring and validation cost ~9.3M (draft a 3.1M, draft b 2.8M, review 1.45M, fix 1.35M, docs and lints ~0.5M). Total ~21M; no session limit hit.
-5. What is left is the owner's: commit on `cmake`, rebase onto `main` (this file conflicts: `main` gained the Bazel section), open the PR; merging publishes 0.1.0 of all seven. Q6 (`java.md` into `bazel-quality`) is still open; the file is `.agents/research/handoff/bazel-quality-java.md` plus one routing row in `bazel-quality-index-row.md`.
+5. Committed, rebased onto `main`, pushed as branch `cmake` with a PR; merging publishes 0.1.0 of all seven and republishes `bazel-quality` with its new `java.md` (Q6 answered yes on 2026-09-13).
 6. Rule trigger evals in a fresh client session were not run: no consumer tree with Java or Kotlin exists in the fleet. First adopter should open a `.java`, a `.kt`, a `build.gradle.kts` and a `pom.xml` and confirm the right index is in context.
 
 # Handoff — language quality artifact programs

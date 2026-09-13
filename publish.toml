@@ -230,7 +230,7 @@ description = { readme = "docs/docs-essentials.md", logo = "assets/lore-docs.svg
 # which the language sets own. `bazel-adopt` runs once per repository and
 # `bazel-diagnose` runs on a symptom; neither belongs on every edit.
 [rules.bazel-quality]
-version = "0.1.0"
+version = "0.2.0"
 description = { readme = "docs/bazel-quality.md", logo = "assets/lore-bazel.svg" }
 
 [skills.bazel-adopt]
@@ -242,7 +242,7 @@ version = "0.1.0"
 description = { readme = "docs/bazel-diagnose.md", logo = "assets/lore-bazel.svg" }
 
 [bundles.bazel-essentials]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/bazel-essentials.md", logo = "assets/lore-bazel.svg" }
 # The JVM set: four rules split by what the file under edit is, not by
 # language family alone. `java-quality` and `kotlin-quality` load on source and
