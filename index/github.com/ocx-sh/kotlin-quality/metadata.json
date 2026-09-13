@@ -1,0 +1,38 @@
+{
+  "created": "2026-09-13T18:55:44+02:00",
+  "description": "Kotlin Quality",
+  "keywords": [
+    "kotlin",
+    "jvm",
+    "quality",
+    "standards",
+    "review",
+    "coroutines",
+    "cancellation",
+    "dispatchers",
+    "detekt",
+    "ktlint",
+    "kover",
+    "explicit-api",
+    "binary-compatibility",
+    "abi",
+    "jvmtarget",
+    "ksp",
+    "kapt",
+    "java-interop",
+    "jspecify",
+    "runtest",
+    "gradle"
+  ],
+  "kind": "rule",
+  "license": "Apache-2.0",
+  "name": "kotlin-quality",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/kotlin-quality",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "The Kotlin quality index — the gate, the non-negotiables, and where the depth lives"
+}

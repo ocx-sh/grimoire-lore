@@ -1,0 +1,38 @@
+{
+  "created": "2026-09-13T18:55:44+02:00",
+  "description": "Java Quality",
+  "keywords": [
+    "java",
+    "jvm",
+    "quality",
+    "standards",
+    "review",
+    "nullness",
+    "jspecify",
+    "nullaway",
+    "error-prone",
+    "concurrency",
+    "virtual-threads",
+    "records",
+    "exceptions",
+    "security",
+    "deserialization",
+    "junit",
+    "jacoco",
+    "japicmp",
+    "jdk",
+    "gradle",
+    "maven"
+  ],
+  "kind": "rule",
+  "license": "Apache-2.0",
+  "name": "java-quality",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/java-quality",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "The Java quality index — the gate, the non-negotiables, and where the depth lives"
+}

@@ -1,0 +1,34 @@
+{
+  "created": "2026-09-13T18:55:44+02:00",
+  "description": "Maven Build",
+  "keywords": [
+    "maven",
+    "pom",
+    "mvn",
+    "mvnw",
+    "enforcer",
+    "surefire",
+    "jacoco",
+    "toolchains",
+    "annotation-processing",
+    "central",
+    "sonatype",
+    "portal",
+    "gpg",
+    "reproducible-builds",
+    "ant",
+    "ivy",
+    "maven4"
+  ],
+  "kind": "rule",
+  "license": "Apache-2.0",
+  "name": "maven-build",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/maven-build",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "The Maven build index: the gate, the non-negotiables, and where the depth lives for POMs, the .mvn directory, the wrapper, and Ant"
+}

@@ -1,0 +1,35 @@
+{
+  "created": "2026-09-13T18:55:44+02:00",
+  "description": "Three-entry-point triage for JVM dependency problems, with the exact Gradle, Maven and rules_jvm_external commands and what each output shape means. Use when a resolved version is not the one that was declared, when a dependency sits on the wrong configuration or scope, when NoClassDefFoundError appears at runtime but the build compiled clean, when a version bump or a Dependabot or Renovate pull request needs review, when Gradle and Maven disagree about which version wins, or when a coordinate has to be checked against the real repository before it is written down. Not for choosing a library. The gradle-build and maven-build rules carry the standards this procedure enforces.",
+  "keywords": [
+    "dependency",
+    "triage",
+    "gradle",
+    "maven",
+    "bazel",
+    "dependencyInsight",
+    "dependency-tree",
+    "mediation",
+    "version-conflict",
+    "api-implementation",
+    "compileOnly",
+    "dependency-analysis",
+    "projectHealth",
+    "version-bump",
+    "dependency-locking",
+    "verification-metadata",
+    "enforcer",
+    "dependabot",
+    "renovate"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "jvm-dependency-triage",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/jvm-dependency-triage",
+  "schema": 1,
+  "summary": "Ordered triage for the three dependency questions an agent gets wrong, keyed to the tool that reports the reason rather than the tool that reports the list"
+}

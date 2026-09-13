@@ -1,6 +1,6 @@
 {
-  "created": "2026-09-06T11:47:40+02:00",
-  "description": "Everything a repository needs to adopt, write and keep Bazel honest the way the OCX family does: the bazel-quality rule with its non-negotiables and twelve depth files (Starlark and BUILD shape, Bzlmod and repository rules, hermeticity, caching and remote execution, testing, CI and target selection, monorepo architecture, flags and versions, and one file each for Rust, Python, TypeScript and C++), the bazel-adopt skill that runs the go/no-go gate and the per-language migration order, and the bazel-diagnose skill that routes a slow build, a cache miss, a nondeterministic action, a flaky test or a repository-rule miss to the measurement that settles it.",
+  "created": "2026-09-13T18:55:44+02:00",
+  "description": "Everything a repository needs to adopt, write and keep Bazel honest the way the OCX family does: the bazel-quality rule with its non-negotiables and thirteen depth files (Starlark and BUILD shape, Bzlmod and repository rules, hermeticity, caching and remote execution, testing, CI and target selection, monorepo architecture, flags and versions, and one file each for Rust, Python, TypeScript, C++, and Java with Kotlin), the bazel-adopt skill that runs the go/no-go gate and the per-language migration order, and the bazel-diagnose skill that routes a slow build, a cache miss, a nondeterministic action, a flaky test or a repository-rule miss to the measurement that settles it.",
   "keywords": [
     "bazel",
     "starlark",
