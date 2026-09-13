@@ -1,0 +1,33 @@
+{
+  "created": "2026-09-13T18:55:44+02:00",
+  "description": "Gradle Build",
+  "keywords": [
+    "gradle",
+    "kotlin-dsl",
+    "build-logic",
+    "convention-plugin",
+    "version-catalog",
+    "configuration-cache",
+    "build-cache",
+    "toolchain",
+    "wrapper",
+    "dependency-locking",
+    "verification-metadata",
+    "shadow",
+    "publishing",
+    "central-portal",
+    "testkit",
+    "ci"
+  ],
+  "kind": "rule",
+  "license": "Apache-2.0",
+  "name": "gradle-build",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/gradle-build",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "The Gradle build index: the gate, the non-negotiables, and where the depth lives for build scripts, settings files, catalogs, the wrapper and lockfiles"
+}

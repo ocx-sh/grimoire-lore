@@ -1,0 +1,38 @@
+{
+  "created": "2026-09-13T18:55:44+02:00",
+  "description": "Ordered runbook for publishing a Java or Kotlin artifact to Maven Central through the Central Portal, covering Gradle and Maven side by side, from namespace verification and the tag-versus-version gate through the binary-compatibility gate, the required per-file set, signing, and the exit semantics that decide whether a green job means live. Use when cutting a release, publishing or staging to Maven Central or the Central Portal, writing or reviewing a release workflow, wiring nmcp, the vanniktech plugin, maven-publish or central-publishing-maven-plugin, deciding whether a release job's green means published or only validated, or asking how to fix an artifact that is already on Central. Not for choosing dependency versions, and not for Gradle Plugin Portal publishing.",
+  "keywords": [
+    "jvm",
+    "java",
+    "kotlin",
+    "release",
+    "maven-central",
+    "central-portal",
+    "publishing",
+    "gradle",
+    "maven",
+    "nmcp",
+    "vanniktech",
+    "signing",
+    "pgp",
+    "sigstore",
+    "japicmp",
+    "binary-compatibility",
+    "abi",
+    "sources-jar",
+    "javadoc-jar",
+    "pom",
+    "autopublish",
+    "ossrh"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "jvm-release",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/jvm-release",
+  "schema": 1,
+  "summary": "Gate-ordered Maven Central release procedure for Gradle and Maven, built around Central's immutability, with the dead OSSRH paths named"
+}
