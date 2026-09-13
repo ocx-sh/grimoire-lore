@@ -68,6 +68,19 @@ NOT_A_TEMPLATE = re.compile(
 # A shell glob in a bare path operand. `crates/*/Cargo.toml` is expanded by the
 # shell, so it aborts the whole command on a repo with no `crates/`.
 BARE_GLOB_RE = re.compile(r"(?<![\w'\"/-])(?:[\w.-]+/)+\*")
+# `--include=`, `--exclude=`, `--exclude-dir=` take a glob as their value.
+# Left unquoted, the shell expands it before grep/rg ever runs; under zsh a
+# glob word that matches nothing aborts the whole command before the search
+# executes, so a verification that treats empty output as the pass reads
+# green without examining anything.
+INCLUDE_EXCLUDE_RE = re.compile(r"--(include|exclude(?:-dir)?)=(\S+)")
+GLOB_META_RE = re.compile(r"[*?\[]")
+# An unescaped `|` in a table row. `\|` is how a Markdown cell holds a
+# literal pipe; a backticked command with a raw, un-escaped `|` (an
+# alternation the author forgot to escape) still splits the row exactly
+# like Markdown does, so every column after it silently shifts — a
+# Verification cell reads as the next column over.
+UNESCAPED_PIPE_RE = re.compile(r"(?<!\\)\|")
 # `rg -L` is --follow (symlinks). The files-without-match flag is
 # --files-without-match, which has no short alias — so `-L` written for it
 # inverts the check: the output becomes the compliant files.
@@ -423,6 +436,20 @@ def check_runnable_spans(
                     f"`--glob '**/…'`: `{span[:70]}`",
                 )
             )
+        for flag, value in INCLUDE_EXCLUDE_RE.findall(span):
+            if len(value) >= 2 and value[0] in "'\"" and value[-1] == value[0]:
+                continue
+            if GLOB_META_RE.search(value):
+                findings.append(
+                    Finding(
+                        path,
+                        f"line {lineno}: unquoted glob {value!r} after `--{flag}=` — the shell "
+                        f"expands it before the search runs, and a non-matching glob word aborts "
+                        f"the command outright under zsh, so a verification that treats empty "
+                        f"output as the pass reads green without examining anything. Quote it: "
+                        f"`{span[:70]}`",
+                    )
+                )
 
 
 def check_rule_tables(path: Path, body: str, findings: list[Finding], seen_ids: dict) -> None:
@@ -434,6 +461,7 @@ def check_rule_tables(path: Path, body: str, findings: list[Finding], seen_ids: 
     """
     columns: list[str] | None = None
     verify_at: int | None = None
+    header_pipes: int | None = None
     for lineno, line in enumerate(body.splitlines(), 1):
         # A line that explicitly RETIRES an ID is not a dead pointer — the
         # ID-stability contract requires naming a retired ID so nobody reuses
@@ -444,19 +472,32 @@ def check_rule_tables(path: Path, body: str, findings: list[Finding], seen_ids: 
                 continue
             CITED.setdefault(cite, path)
         if not line.startswith("|"):
-            columns, verify_at = None, None
+            columns, verify_at, header_pipes = None, None, None
             # A verification written in prose (`*Verify:* `…``) is just as
             # runnable as one in a table cell, and was previously unchecked.
             check_runnable_spans(path, line, lineno, findings, in_table=False)
             continue
         check_runnable_spans(path, line, lineno, findings, in_table=True)
         cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        row_pipes = len(UNESCAPED_PIPE_RE.findall(line))
         if columns is None:
             columns = [c.lower() for c in cells]
             verify_at = next((i for i, c in enumerate(columns) if "verif" in c), None)
+            header_pipes = row_pipes
             continue
         if set("".join(cells)) <= set("-: "):
             continue
+        if header_pipes is not None and row_pipes != header_pipes:
+            label = cells[0][:40]
+            findings.append(
+                Finding(
+                    path,
+                    f"line {lineno}: row '{label}' has {row_pipes} unescaped '|' but the header "
+                    f"has {header_pipes} — a literal '|' inside a cell (often a backticked "
+                    f"command) splits it like Markdown does, shifting every column after it. "
+                    f"Escape it as `\\|`, or use a separate `-e` per alternative.",
+                )
+            )
         match = ID_RE.match(line)
         if match:
             rule_id = match.group(1)
@@ -632,7 +673,10 @@ def self_test() -> int:
             "| X-03 | truncate me | `rg 'thing' docs/**/*.md` |\n"
             "| X-04 | literal pipe | `rg 'alpha\\|beta' .` |\n"
             "| X-05 | grep BRE is fine | `grep 'alpha\\|beta' .` |\n"
-            "| X-06 | grep ERE is not | `grep -rniE 'alpha\\|beta' .` |\n",
+            "| X-06 | grep ERE is not | `grep -rniE 'alpha\\|beta' .` |\n"
+            "| X-07 | unescaped pipe shifts cells | `rg 'a|b' .` |\n"
+            "| X-08 | unquoted include glob | `grep -rn --include=*.java 'foo' .` |\n"
+            "| X-09 | quoted include glob | `grep -rn --include='*.java' 'foo' .` |\n",
             encoding="utf-8",
         )
         findings: list[Finding] = []
@@ -656,6 +700,15 @@ def self_test() -> int:
         # while `grep -E` (X-06) is bitten exactly like rg (X-04).
         expect(messages.count("never go red") == 2, messages)
         expect("grep -E pattern" in messages, messages)
+        # X-07: an unescaped `|` inside a cell shifts every column after it —
+        # the header has 4 pipes, the row has 5. X-04's escaped `\|` must not
+        # count (it stays at 4, matching the header).
+        expect("shifting every column" in messages, messages)
+        expect(messages.count("shifting every column") == 1, messages)
+        # X-08/X-09: a glob after --include= must be quoted or the shell
+        # expands it before the search runs; X-09 is quoted and stays clean.
+        expect("unquoted glob" in messages, messages)
+        expect(messages.count("unquoted glob") == 1, messages)
 
         # --allow-absent suppresses exactly the glob named, and nothing else.
         two = base / "two-globs.md"

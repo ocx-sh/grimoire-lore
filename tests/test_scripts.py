@@ -171,6 +171,16 @@ class CellDetectors(unittest.TestCase):
     def test_a_correct_cell_is_silent(self):
         self.assertEqual(self.findings_for("`rg -n --type rust -e 'a' -e 'b' .`"), [])
 
+    def test_unquoted_include_glob(self):
+        messages = self.findings_for("`grep -rn --include=*.java 'foo' .`")
+        self.assertTrue(any("unquoted glob" in m for m in messages), messages)
+
+    def test_quoted_include_glob_is_silent(self):
+        self.assertEqual(self.findings_for("`grep -rn --include='*.java' 'foo' .`"), [])
+
+    def test_include_glob_without_metachar_is_silent(self):
+        self.assertEqual(self.findings_for("`grep -rn --include=pom.xml 'foo' .`"), [])
+
 
 class RuleIdIntegrity(unittest.TestCase):
     def test_cited_but_undefined_id_is_reported(self):
@@ -203,6 +213,26 @@ class RuleIdIntegrity(unittest.TestCase):
         body = "| ID | Rule | Verification | Severity |\n|---|---|---|---|\n| X-01 | do it |  | MUST |\n"
         artifacts.check_rule_tables(Path("t.md"), body, findings, {})
         self.assertTrue(any("empty verification" in f.message for f in findings))
+
+
+class TableRowShape(unittest.TestCase):
+    """A literal `|` inside a table cell splits the row like Markdown does,
+    shifting every column after it — a Verification cell reads as the next
+    column over, and nothing else catches it."""
+
+    def test_unescaped_pipe_shifts_the_row(self):
+        findings: list[artifacts.Finding] = []
+        body = "| ID | Rule | Verification |\n|---|---|---|\n| X-01 | a rule | `rg 'a|b' .` |\n"
+        artifacts.check_rule_tables(Path("t.md"), body, findings, {})
+        messages = [f.message for f in findings]
+        self.assertTrue(any("shifting every column" in m for m in messages), messages)
+
+    def test_escaped_pipe_keeps_the_row_count(self):
+        findings: list[artifacts.Finding] = []
+        body = "| ID | Rule | Verification |\n|---|---|---|\n| X-01 | a rule | `rg 'a\\|b' .` |\n"
+        artifacts.check_rule_tables(Path("t.md"), body, findings, {})
+        messages = [f.message for f in findings]
+        self.assertFalse(any("shifting every column" in m for m in messages), messages)
 
 
 class Descriptions(unittest.TestCase):
