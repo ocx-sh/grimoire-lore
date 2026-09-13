@@ -1,0 +1,910 @@
+{
+  "summary": "JVM research program phase 7: opus drafters write the depth files of each rule from the consolidations, pipelined into one index drafter per rule; skills and the Bazel-Java handoff draft alongside",
+  "agentCount": 18,
+  "logs": [
+    "Authoring batch a: 2 rules, 13 depth files, 3 standalone",
+    "Batch done: 2/2 indexes · 24 IDs dropped at authoring · 0 files still unclean"
+  ],
+  "result": {
+    "rules": [
+      {
+        "rule": "java-quality",
+        "depth": [
+          {
+            "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/java-quality/api-and-evolution.md",
+            "lines": 190,
+            "rule_ids_shipped": [
+              "JAVA-API-01",
+              "JAVA-API-02",
+              "JAVA-API-03",
+              "JAVA-API-04",
+              "JAVA-API-05",
+              "JAVA-API-06",
+              "JAVA-API-07",
+              "JAVA-API-08",
+              "JAVA-API-09",
+              "JAVA-API-10",
+              "JAVA-API-11",
+              "JAVA-API-12",
+              "JAVA-API-14",
+              "JAVA-API-15"
+            ],
+            "rule_ids_dropped": [
+              "JAVA-API-13: dropped as a duplicate per authoring note 6 and cross-consolidation contradiction 2 (same glob, same index, worse verification cell than JAVA-PLAT-01; MVN-BUILD-01 carries the Maven-only half). The file states the ID is retired and not reused, and routes the --release decision to JAVA-PLAT-01 and MVN-BUILD-01."
+            ],
+            "checker_clean": true,
+            "routing_row": "Changing a published signature, annotating nullness on an API, choosing a return type, deciding what a library exposes, or wiring the binary-compatibility gate",
+            "hoist_to_index": [
+              "JAVA-API-01: never change a published method's parameter or return type in place, add an overload, and run japicmp on every pull request that touches a public signature (JAVA-API-02 binds it to check/verify and upstream of publish).",
+              "JAVA-API-09 + JAVA-API-10: the published surface is JSpecify-annotated with @NullMarked declared once in module-info.java, and no file mixes nullness flavours.",
+              "JAVA-API-12: ship a real module-info.java whose exports names the public packages; Automatic-Module-Name is a name with no encapsulation and is never offered as a lighter substitute."
+            ]
+          },
+          {
+            "checker_clean": true,
+            "hoist_to_index": [
+              "JAVA-DATA-01: A record component that is an array, collection, map or `Date` is copied in the compact constructor (`List.copyOf`, `.clone()`) — a record is not immutable by declaration.",
+              "JAVA-DATA-07: A pattern `switch` throws `NullPointerException` on a null selector exactly as a pre-21 switch did — write a `case null ->` arm or prove the selector non-null.",
+              "JAVA-DATA-08: No `default` label on a switch over an enum this repository declares; promote `-Xep:UnnecessaryDefaultInEnumSwitch:ERROR`, which ships disabled and so reports nothing until it is."
+            ],
+            "lines": 152,
+            "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/java-quality/data-and-patterns.md",
+            "routing_row": "Writing a record, a sealed hierarchy, a `switch` over a closed type, an `equals`/`hashCode` pair, or an `Optional`",
+            "rule_ids_dropped": [
+              "M-L-05 (DOP v1.1 versus the 2022 four principles): fails selection tests 2 and 3 — no verification and no diff changes, since the whole content is which article a rationale cites. Kept as failure mode 9 in What Agents Get Wrong Here, which is where a citation error actually surfaces.",
+              "M-L-07 (Gatherer instead of a hand-rolled mid-pipeline Collector): JEP 485 is final in JDK 24, above the program's pinned floor 17 (JAVA-PLAT-02), so the rule cannot fire on the baseline it ships against; the map itself calls it idiom modernisation, not a correctness gate. No prose line, nothing is lost by silence.",
+              "M-L-08 (JEP 513 flexible constructor bodies, JDK 25): the early-construction-context restriction is a javac compile error, so the rule only repeats what the compiler already denies — rule-distillation's explicit drop case. The residual half (delete the static-helper workaround) is idiom churn.",
+              "Enum-switch `default` as a second statement of the sealed-switch rule: not shipped as a restatement. JAVA-DATA-08 is scoped to enum selectors only and cites `JAVA-API-07` for the sealed selector, whose snippet pair in api-and-evolution.md is deliberately not reproduced here.",
+              "`Optional` as a field, constructor parameter or record component: owned by `JAVA-API-06` (SHOULD) in api-and-evolution.md. Cited in one prose line under Optional as a Value rather than redefined, since a record component is a field and the two rows would be the same rule on one glob."
+            ],
+            "rule_ids_shipped": [
+              "JAVA-DATA-01",
+              "JAVA-DATA-02",
+              "JAVA-DATA-03",
+              "JAVA-DATA-04",
+              "JAVA-DATA-05",
+              "JAVA-DATA-06",
+              "JAVA-DATA-07",
+              "JAVA-DATA-08",
+              "JAVA-DATA-09"
+            ]
+          },
+          {
+            "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/java-quality/nullness.md",
+            "lines": 135,
+            "rule_ids_shipped": [
+              "JAVA-NULL-01",
+              "JAVA-NULL-02",
+              "JAVA-NULL-03",
+              "JAVA-NULL-04",
+              "JAVA-NULL-05",
+              "JAVA-NULL-06"
+            ],
+            "rule_ids_dropped": [
+              "M-M-02: owned by JAVA-LINT-04 (OnlyNullMarked vs AnnotatedPackages exclusivity) per the authoring notes' family table. Cited in Scope, not restated.",
+              "M-M-03: owned by JAVA-LINT-05 (the jspecifyMode JDK/vendor precondition). Cited in Scope and in JAVA-NULL-06's rationale, not restated.",
+              "M-M-06: the three nullness-adjacent Error Prone DISABLED_CHECKS (EqualsMissingNullable, FieldMissingNullable, VoidMissingNullable) are already members of JAVA-LINT-02's nine-check promotion list. A second row on one glob would be the duplicate the contradictions table exists to prevent. Named in Scope as owned there.",
+              "M-M-01 (published-surface half): JAVA-API-09 owns 'annotate the published surface with JSpecify and declare @NullMarked once in module-info.java' and JAVA-API-10 owns 'never mix flavours in one file'. Only the flavour choice itself (shipped as the pinned JAVA-NULL-04) and the package/module granularity (JAVA-NULL-02, JAVA-NULL-05) are taken here.",
+              "M-M-07 (file-level half): JAVA-LINT-06 owns the 'no import javax.annotation.Nullable under jspecifyMode' check. Shipped here only as the package-granularity migration rule JAVA-NULL-05 plus the dated flavour table.",
+              "Kotlin-side severity knobs (-Xjspecify-annotations, -Xjsr305, -Xnullability-annotations, map row M-V-02): KT-INTEROP's, in the kotlin-quality set. Cited by family in the flavour table, no number invented.",
+              "Candidate 'jsr305 splits the javax.annotation package under JPMS': dropped, no support in the two named consolidations or the topic map. Not invented."
+            ],
+            "checker_clean": true,
+            "hoist_to_index": [
+              "JAVA-NULL-01: every package a Kotlin module calls or a published surface exposes sits inside a `@NullMarked` scope. An unannotated Java type reaches Kotlin as an unchecked platform type.",
+              "JAVA-NULL-02: `@NullMarked` at module scope cascades to every package the module declares. At package scope it does not cascade to subpackages, so a module without `module-info.java` needs one `package-info.java` per package, added with the package."
+            ],
+            "routing_row": "Adding a nullness annotation, choosing between JSpecify and an older flavour, marking a package or module `@NullMarked`, or tracing a null that reached Kotlin"
+          },
+          {
+            "checker_clean": true,
+            "hoist_to_index": [
+              "JAVA-CONC-10: Drain a child process's stdout and stderr concurrently, never one to completion before touching the other.",
+              "JAVA-CONC-01: Never construct a fixed-size pool of virtual threads; bound concurrency with a Semaphore and keep one virtual thread per task.",
+              "JAVA-CONC-05: No preview API (StructuredTaskScope, Joiner) on the main sourceset compile path of any published module."
+            ],
+            "lines": 203,
+            "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/java-quality/concurrency.md",
+            "routing_row": "Starting a thread or a virtual thread, choosing a lock, bounding a fan-out, spawning or reaping a subprocess, or reaching for a preview concurrency API",
+            "rule_ids_dropped": [],
+            "rule_ids_shipped": [
+              "JAVA-CONC-01",
+              "JAVA-CONC-02",
+              "JAVA-CONC-03",
+              "JAVA-CONC-04",
+              "JAVA-CONC-05",
+              "JAVA-CONC-06",
+              "JAVA-CONC-07",
+              "JAVA-CONC-08",
+              "JAVA-CONC-09",
+              "JAVA-CONC-10",
+              "JAVA-CONC-11",
+              "JAVA-CONC-12",
+              "JAVA-CONC-13",
+              "JAVA-CONC-14",
+              "JAVA-CONC-15",
+              "JAVA-CONC-16",
+              "JAVA-CONC-17"
+            ]
+          },
+          {
+            "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/java-quality/errors-and-resources.md",
+            "lines": 185,
+            "rule_ids_shipped": [
+              "JAVA-ERR-01",
+              "JAVA-ERR-02",
+              "JAVA-ERR-03",
+              "JAVA-ERR-04",
+              "JAVA-ERR-05",
+              "JAVA-ERR-06",
+              "JAVA-ERR-07",
+              "JAVA-ERR-08"
+            ],
+            "rule_ids_dropped": [
+              "JAVA-ERR-09: dropped at authoring time per authoring notes §6 (CONSIDER, reading heuristic only, contested by two named practitioners with neither displacing the other). Ships as one prose paragraph in \"No Gate Exists\" carrying both positions, with no ID, so no citation can resolve to it."
+            ],
+            "checker_clean": true,
+            "hoist_to_index": [
+              "JAVA-ERR-01: a caught InterruptedException, including one caught by a wider catch (Exception), re-interrupts or propagates. Never log it like any other exception.",
+              "JAVA-ERR-03: every Closeable and AutoCloseable is acquired inside try-with-resources, including the Stream from Files.walk/list/lines/find/newDirectoryStream and a wrapper whose inner stream is closed separately.",
+              "JAVA-ERR-04: never construct a new exception from a caught one without passing it as the cause. new SomeException(\"...\" + e.getMessage()) is always wrong."
+            ],
+            "routing_row": "Throwing, catching, rethrowing or logging a failure; closing a stream, a pool or any handle; handling InterruptedException; ending a process"
+          },
+          {
+            "checker_clean": true,
+            "hoist_to_index": [
+              "JAVA-SEC-01: Never readObject()/readUnshared() bytes that crossed a trust boundary without an ObjectInputFilter allow-list on that stream."
+            ],
+            "lines": 168,
+            "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/java-quality/security-and-untrusted-input.md",
+            "routing_row": "Parsing or deserialising outside data, hardening an XML factory, building a path or a command from a caller's string, picking a random source, or wiring find-sec-bugs",
+            "rule_ids_dropped": [],
+            "rule_ids_shipped": [
+              "JAVA-SEC-01",
+              "JAVA-SEC-02",
+              "JAVA-SEC-03",
+              "JAVA-SEC-04",
+              "JAVA-SEC-05",
+              "JAVA-SEC-06",
+              "JAVA-SEC-07",
+              "JAVA-SEC-08",
+              "JAVA-SEC-09",
+              "JAVA-SEC-10"
+            ]
+          },
+          {
+            "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/java-quality/platform-and-versions.md",
+            "lines": 178,
+            "rule_ids_shipped": [
+              "JAVA-PLAT-01",
+              "JAVA-PLAT-02",
+              "JAVA-PLAT-03",
+              "JAVA-PLAT-05",
+              "JAVA-PLAT-06",
+              "JAVA-PLAT-07",
+              "JAVA-PLAT-08",
+              "JAVA-PLAT-09",
+              "JAVA-PLAT-10",
+              "JAVA-PLAT-11",
+              "JAVA-PLAT-14",
+              "JAVA-PLAT-15",
+              "JAVA-PLAT-18"
+            ],
+            "rule_ids_dropped": [
+              "JAVA-PLAT-04: duplicate of JAVA-API-12 per contradictions table row 3 (authoring notes section 6). The module-descriptor section now opens by citing JAVA-API-12 as the owner and carries only JAVA-PLAT-05.",
+              "JAVA-PLAT-12: source-encoding row, edit site is a build file, relocated to GRADLE-TOOL (Gradle half) and MVN-BUILD (Maven half) per frame correction 72 and the depth-file table. Named in the scope paragraph by subject, not by ID, so no dead pointer ships.",
+              "JAVA-PLAT-13: org.gradle.jvmargs=-Dfile.encoding=UTF-8, relocated to GRADLE-TOOL per frame correction 72. Survives here only as failure mode 8, which states the daemon-vs-task-JVM trap and names GRADLE-TOOL as owner without citing the retired ID.",
+              "JAVA-PLAT-16: duplicate of MVN-BUILD-10 per contradictions table row 4; java-quality does not glob **/pom.xml, so the row could never fire on the file it governs.",
+              "JAVA-PLAT-17: dropped to one prose line per contradictions table row 11. The file states that timezone pinning is not a rule here and cites JAVA-TEST-11 as the owner of the do-not-invent list. JAVA-PLAT-18 (the positive, guava-evidenced locale job) survives at CONSIDER."
+            ],
+            "checker_clean": true,
+            "hoist_to_index": [
+              "JAVA-PLAT-01: toolchain JDK and bytecode floor are two separate explicit numbers, and the floor is options.release / maven.compiler.release, never sourceCompatibility or a source/target pair alone.",
+              "JAVA-PLAT-10: pass an explicit StandardCharsets constant at every charset-less overload, even on a JDK 18+ floor. (Authoring notes section 4 duplicates this one line into kotlin-quality too.)",
+              "JAVA-PLAT-02: pinned default, floor 17 / toolchain 25 / CI matrix 17-21-25, moved when the frameworks move and not on the LTS calendar, overridable once by the adopter."
+            ],
+            "routing_row": "Choosing a JDK floor or `--release`, writing or packaging `module-info.java`, passing a charset or locale at a call site, or reacting to a removed or disabled JDK API"
+          },
+          {
+            "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/java-quality/lint-gate.md",
+            "lines": 154,
+            "rule_ids_shipped": [
+              "JAVA-LINT-01",
+              "JAVA-LINT-02",
+              "JAVA-LINT-03",
+              "JAVA-LINT-04",
+              "JAVA-LINT-05",
+              "JAVA-LINT-06",
+              "JAVA-LINT-07",
+              "JAVA-LINT-08",
+              "JAVA-LINT-09",
+              "JAVA-LINT-10",
+              "JAVA-LINT-11"
+            ],
+            "rule_ids_dropped": [],
+            "checker_clean": true,
+            "hoist_to_index": [
+              "JAVA-LINT-02: promote the nine named Error Prone checks to ERROR on every new module, since eight ship disabled and none fires without an explicit switch",
+              "JAVA-LINT-01: every compiled and shipped Java module wires Error Prone and NullAway, and a Checkstyle or SpotBugs block without them is a style gate, not a lint gate",
+              "JAVA-LINT-06: no `import javax.annotation.Nullable` survives in a module whose build sets `jspecifyMode = true`"
+            ],
+            "routing_row": "Wiring or changing what fails the build: Error Prone, NullAway, `-Xlint` keys and `-Werror`, Checkstyle, SpotBugs, Spotless, or writing a suppression"
+          },
+          {
+            "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/java-quality/testing.md",
+            "lines": 144,
+            "rule_ids_shipped": [
+              "JAVA-TEST-01",
+              "JAVA-TEST-02",
+              "JAVA-TEST-03",
+              "JAVA-TEST-04",
+              "JAVA-TEST-05",
+              "JAVA-TEST-06",
+              "JAVA-TEST-07",
+              "JAVA-TEST-08",
+              "JAVA-TEST-09",
+              "JAVA-TEST-10",
+              "JAVA-TEST-11",
+              "JAVA-TEST-12"
+            ],
+            "rule_ids_dropped": [],
+            "checker_clean": true,
+            "hoist_to_index": [
+              "JAVA-TEST-08: A coverage floor exists only where jacocoTestCoverageVerification with violationRules is wired into check (Gradle) or an execution binds JaCoCo's check goal (Maven) - the plugin id and a report task are never evidence, and Kover is the one inverse default.",
+              "JAVA-TEST-04: parallel.enabled=true without a paired parallel.mode.default is a silent no-op, and every key in junit-platform.properties carries its junit.jupiter./junit.platform. prefix (JAVA-TEST-03).",
+              "JAVA-TEST-02: junit-platform-runner was removed in JUnit 6.0.0 without replacement - any hit blocks a JUnit 6 bump outright."
+            ],
+            "routing_row": "Writing or reviewing a test, parallelising a suite, picking a JUnit major, or deciding whether a coverage number means anything"
+          }
+        ],
+        "index": {
+          "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/java-quality.md",
+          "lines": 146,
+          "non_negotiables": 16,
+          "core_rule_ids": [
+            "JAVA-CORE-01",
+            "JAVA-CORE-02",
+            "JAVA-CORE-03"
+          ],
+          "checker_clean": true,
+          "globs": [
+            "**/*.java"
+          ]
+        }
+      },
+      {
+        "rule": "maven-build",
+        "depth": [
+          {
+            "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/maven-build/dependencies.md",
+            "lines": 182,
+            "rule_ids_shipped": [
+              "MVN-DEP-01",
+              "MVN-DEP-02",
+              "MVN-DEP-03",
+              "MVN-DEP-04",
+              "MVN-DEP-05",
+              "MVN-DEP-06",
+              "MVN-DEP-07",
+              "MVN-DEP-08",
+              "MVN-DEP-09",
+              "MVN-DEP-10",
+              "MVN-DEP-11"
+            ],
+            "rule_ids_dropped": [],
+            "checker_clean": true,
+            "hoist_to_index": [
+              "MVN-DEP-01, MVN-DEP-02: Maven mediates by nearest definition by depth, never by highest version, and a matching dependencyManagement entry decides before mediation runs at all. Force a version with a direct declaration or dependencyManagement, never by editing a deeper transitive.",
+              "MVN-DEP-03: maven-enforcer-plugin enforces nothing until an execution declaring the enforce goal is bound. A rules block or a pluginManagement version pin alone is inert. (pinned)",
+              "MVN-DEP-10: Every version in a POM you publish is a concrete resolved string, verified against the POM the repository serves, not the one in the working tree."
+            ],
+            "routing_row": "Declaring a Maven dependency or a BOM import, changing a scope, diagnosing why Maven resolved the version it did, or adding an enforcer rule"
+          },
+          {
+            "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/maven-build/lifecycle-and-plugins.md",
+            "lines": 188,
+            "rule_ids_shipped": [
+              "MVN-BUILD-01",
+              "MVN-BUILD-02",
+              "MVN-BUILD-03",
+              "MVN-BUILD-04",
+              "MVN-BUILD-05",
+              "MVN-BUILD-06",
+              "MVN-BUILD-07",
+              "MVN-BUILD-08",
+              "MVN-BUILD-09",
+              "MVN-BUILD-10",
+              "MVN-BUILD-11",
+              "MVN-BUILD-12",
+              "MVN-BUILD-13",
+              "MVN-BUILD-14",
+              "MVN-BUILD-15",
+              "MVN-BUILD-16",
+              "MVN-BUILD-17",
+              "MVN-BUILD-18",
+              "MVN-BUILD-19",
+              "MVN-BUILD-20"
+            ],
+            "rule_ids_dropped": [],
+            "checker_clean": true,
+            "hoist_to_index": [
+              "MVN-BUILD-01: Set the bytecode and API floor with `maven.compiler.release` in exactly one place per module, never as `<source>`/`<target>` (unset defaults to 8 regardless of the JDK running Maven).",
+              "MVN-BUILD-03: pinned. `verify` is the last Maven goal of every CI gate, never `install`, `test`, `package` or a hyphenated phase (a `-DskipTests install` bootstrap before a `verify` gate is permitted).",
+              "MVN-BUILD-16: Any module declaring an annotation processor sets `maven.compiler.proc` to `full` on maven-compiler-plugin 3.13.0+, and is verified by the generated-sources artifact, because on JDK 23+ a processor-less build exits 0 with no diagnostic."
+            ],
+            "routing_row": "Setting the compiler release or an annotation processor, binding a plugin to a phase, pinning Surefire or a toolchain, editing `.mvn` or the wrapper, or preparing a reactor for Maven 4"
+          },
+          {
+            "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/maven-build/publishing.md",
+            "lines": 165,
+            "rule_ids_shipped": [
+              "MVN-PUB-01",
+              "MVN-PUB-02",
+              "MVN-PUB-03",
+              "MVN-PUB-04",
+              "MVN-PUB-05",
+              "MVN-PUB-06",
+              "MVN-PUB-07",
+              "MVN-PUB-08",
+              "MVN-PUB-09",
+              "MVN-PUB-10"
+            ],
+            "rule_ids_dropped": [
+              "GRADLE-PUB-03 (Maven parallel): not written as a rule. Per authoring notes section 6 the immutability statement is the jvm-release skill's opening line, not a row with an ID. Ships as the opening prose of the first section so the reader meets it before any gate.",
+              "MVN-BUILD-10 (reproducible project.build.outputTimestamp): named in this file's routing brief but owned by MVN-BUILD in lifecycle-and-plugins.md per cross-consolidation contradiction 4, which gives MVN-BUILD-10 the text, the MUST and the artifact:check-buildplan verification. Cited in the scope paragraph by family, not redefined here.",
+              "MVN-BUILD-14 (maven-wrapper.properties checksums): map row M-J-14 is labelled MVN-PUB in the topic map, but authoring notes section 1 assigns .mvn/wrapper/maven-wrapper.properties to MVN-BUILD-14. Left to lifecycle-and-plugins.md, not duplicated.",
+              "Sigstore and build-provenance Maven parallel (GRADLE-PUB-17/-18): no Maven-side mechanism, no version floor and no corpus evidence in the consolidation. Inventing one would fail the checkable test, so nothing shipped.",
+              "Maven consumability-probe rule (GRADLE-PUB-13 parallel): the probe IS a pom.xml, so a rule telling a pom.xml author to write a pom.xml changes no diff. Kept as failure mode 8 (do not mistake the probe for a second release pipeline), which is the half an agent gets wrong."
+            ],
+            "checker_clean": true,
+            "hoist_to_index": [
+              "MVN-PUB-03: never write oss.sonatype.org, s01.oss.sonatype.org or nexus-staging-maven-plugin into a POM. OSSRH died 2025-06-30 and central-publishing-maven-plugin is the pinned Portal path.",
+              "MVN-PUB-06: never a literal username or password element in pom.xml. The Portal token lives in a settings.xml server entry named by publishingServerId.",
+              "MVN-PUB-10: a release job whose exit code means live on Central sets autoPublish true and waitUntil published. The default exits at VALIDATED, which still needs a human click."
+            ],
+            "routing_row": "Publishing a Maven build to Central: the Portal plugin and its floor, namespace and tag preconditions, credentials, signing, sources and javadoc jars, and what a green release job means"
+          },
+          {
+            "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/maven-build/ant-legacy.md",
+            "lines": 151,
+            "rule_ids_shipped": [
+              "MVN-ANT-01",
+              "MVN-ANT-02",
+              "MVN-ANT-03",
+              "MVN-ANT-04",
+              "MVN-ANT-05",
+              "MVN-ANT-06"
+            ],
+            "rule_ids_dropped": [],
+            "checker_clean": true,
+            "hoist_to_index": [
+              "MVN-ANT-02: Never introduce ant.importBuild() — one line disables the whole build's configuration cache, permanently and beyond the imported targets; bridge via an Exec task or ant.<task>() inside a task action.",
+              "MVN-ANT-03: Never re-declare an Ant property to change it — properties are write-once and the second declaration is discarded silently, so the override reports success and does nothing."
+            ],
+            "routing_row": "Opening a build.xml or an Ivy file, bridging an Ant build into Gradle, or porting an Ant target to another build system"
+          }
+        ],
+        "index": {
+          "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/maven-build.md",
+          "lines": 162,
+          "non_negotiables": 18,
+          "core_rule_ids": [
+            "MVN-CORE-01",
+            "MVN-CORE-02",
+            "MVN-CORE-03"
+          ],
+          "checker_clean": true,
+          "globs": [
+            "**/pom.xml",
+            "**/.mvn/**",
+            "**/mvnw",
+            "**/mvnw.cmd",
+            "**/build.xml",
+            "**/ivy.xml",
+            "**/ivysettings.xml"
+          ]
+        }
+      }
+    ],
+    "standalone": [
+      {
+        "paths": [
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/skills/jvm-release/SKILL.md"
+        ],
+        "checker_clean": true,
+        "notes": [
+          "checker: python3 .claude/skills/research-lang/scripts/check-artifacts.py skills/jvm-release --root . -> clean, exit 0. One finding fixed before return: an angle-bracket placeholder '<skip>true' inside a quoted grep pattern in step 3, rewritten as grep -rnE -e 'ignoreMissingClasses' -e '<(skip)>true'.",
+          "Body is 399 lines (brief budget 400, checker limit 500). No references/ file added: the SKILL.md fits.",
+          "Frontmatter copies skills/docs-plan/SKILL.md shape: name=jvm-release (= directory), third-person description with a 'Use when' clause (~780 chars, does not open with a workflow verb), license Apache-2.0, metadata.summary + metadata.keywords.",
+          "Structure: immutability statement first (the dropped GRADLE-PUB-03, as prose with no ID), Contents line, Scope, Pinned defaults, 8-step runbook, Dead paths, Bazel, Gradle/Maven side-by-side, MUST table, 10 agent failure modes.",
+          "Runbook order as briefed: namespace -> tag vs declared version before any build -> binary-compatibility gate (japicmp / BCV / abiValidation) before sign, checksum, upload -> required per-file set -> sign every publication -> autoPublish + waitUntil=published -> consumability probe -> terminal state.",
+          "MUST duplication table is | # | Finding | Rule | with the rule ID LAST, 16 rows, every row's first cell a number so no row reads as a rule definition.",
+          "IDs cited (all confirmed survivors of the contradictions table and the drop list): GRADLE-PUB-01, -02, -04, -05, -06, -08, -09, -14, -15, -16; MVN-PUB-01, -02, -03; JAVA-API-01, -02; KT-API-03; MVN-BUILD-10.",
+          "DROPPED / OMITTED, by ID: GRADLE-PUB-03 (dropped as a rule per authoring notes 6, ships as this skill's opening paragraph); GRADLE-PUB-11 (Shadow 'shadow' configuration vs pom.withXml) and GRADLE-PUB-12 (java-platform api/runtime constraint collapse) omitted entirely as shading/BOM depth owned by gradle-build/publishing.md and distribution.md, not release-procedure steps; GRADLE-PUB-07, -10, -13, -17, -18 carried as prose inside their steps rather than as MUST rows, because none is MUST.",
+          "No BZL-JAVA ID cited: wave 4 left java_export/maven_publish open, so the Bazel line ships dagger's hand-off answer plus an explicit 'not established as of 2026-09-12' instead of a citation.",
+          "Open questions handled rather than papered over: release-gate ordering (the consolidation's open question) is answered by the skill's own ordering and marked pinned; step 8 refuses to claim a VALIDATED deployment can be dropped without burning the version number, and tells the reader to treat the number as spent; the 42-file mavenLocal() count is NOT shipped per authoring notes 12, only the mechanism and the carve-out.",
+          "Pinned defaults section marks four decisions pinned with the override named: Gradle publishing plugin (nmcp / vanniktech, against the 18/32 raw maven-publish majority), Maven plugin (central-publishing-maven-plugin >= 0.7.0), Java ABI gate (japicmp), Kotlin ABI gate (exactly one, standalone BCV by default).",
+          "Prose constraints verified by script: zero em dashes, zero semicolons outside code spans and fences, no fleet paths, no OCX-internal strings, no repo@sha citations. Gradle snippets fenced kotlin, shell fenced bash, no python blocks.",
+          "Verification-cell shape: every check states whether empty output is the pass or the finding; greps use a directory operand with --include, one -e per alternative, no bare shell globs, no $(...) operands, xargs -r -0 on the staged-bundle pipeline.",
+          "Version dating: Central Portal 0.7.0 floor and 0.9.x current line, maven-core 4.0.0-rc-6 ceiling, OSSRH EOL 2025-06-30, Portal Sigstore validation 2025-01-28, Kotlin 2.2.0 for abiValidation() - all stamped verified 2026-09-12 via one Scope sentence plus per-row dates.",
+          "Cross-family references name the rule ID and say the depth lives in the rule set, with no markdown links to rules/ files (those files do not exist in this worktree yet, so a link would break the checker's link resolution once run repo-wide)."
+        ]
+      },
+      {
+        "paths": [
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/skills/jvm-dependency-triage/SKILL.md"
+        ],
+        "checker_clean": true,
+        "notes": [
+          "Checker: `python3 .claude/skills/research-lang/scripts/check-artifacts.py skills/jvm-dependency-triage --root .` -> clean, exit 0. Running it over all of `skills/` reports 2 findings, both pre-existing in other drafters' files (docs-instrument cites DOC-DISC-13, docs-plan/references/discovery-artifact.md cites DOC-DISC-25) and untouched by me.",
+          "Body is 348 lines (brief cap 350, checker cap 500). Frontmatter matches skills/docs-plan/SKILL.md: name, description (with a 'Use when' trigger clause), license, metadata.summary, metadata.keywords.",
+          "Three entry points as ordered procedures, each with Gradle and Maven commands and an output-shape reading: (1) dependencyInsight / dependency:tree -Dverbose / help:effective-pom, with a 7-row table mapping each output shape to the deciding mechanism and where the fix goes -- Gradle highest-wins vs Maven nearest-by-depth vs rules_jvm_external version_conflict_policy default/pinned; the listenablefuture 9999.0-empty-to-avoid-conflict-with-guava case ships as its own bolded warning; plus the unexpected-repository check (GRADLE-DEP-11). (2) projectHealth/buildHealth vs mvn dependency:analyze, api-vs-implementation, the compileOnly-reached-at-runtime check via runtimeClasspath, provided/optional as the Maven equivalents, annotationProcessor pairing, fixDependencies --upgrade, and the four wrong-by-kind greps. (3) resolve-before-emitting (gradlew --refresh-dependencies / mvn dependency:get / Central solrsearch), registry-not-vendor-banner, before-and-after re-run of entry point 1, --write-locks and --write-verification-metadata diff discipline, the dynamic-version gate, and Dependabot-vs-Renovate as one sentence (13/32 each, zero overlap, 2026-09-05).",
+          "MUST duplication ships as `| # | Finding | Rule |` with the rule ID last, 22 rows: GRADLE-DEP-01, -02, -03, -05, -06, -07, -08, -09, -11, -12, -13, -15, -16, -18 and MVN-DEP-01, -02, -03, -04, -05, -08, -10, -11.",
+          "Dropped from the MUST duplication, with reasons (rule-distillation test 3, 'changes a diff', applied to THIS skill's steps -- none of these is dropped from the rule set itself): GRADLE-DEP-17 (wrapper-jar checksum validation in CI -- fires when a wrapper is upgraded, never during a dependency triage; owned by gradle-build/dependencies.md); GRADLE-DEP-10 (SHOULD, and it is a settings-hygiene standard rather than a triage step); GRADLE-DEP-04 (SHOULD; its substance ships as the entry-point-2 precondition 'wire DAGP with severity(\"fail\") before concluding the declarations are correct' rather than as a duplicated row); GRADLE-DEP-14 (SHOULD; ships as the '--write-locks in a gated job, read the diff not the presence' prose in 3.2); MVN-DEP-06, -07 (SHOULD) and MVN-DEP-09 (CONSIDER) -- non-MUST, and the duplication contract is 'duplicate the MUST list, never the depth'.",
+          "Pinned decisions marked as such in a `Pinned defaults` table and written as defaults an adopter overrides once: locking MUST for a hard-release-boundary repo / SHOULD for an adopter (0/32 precedent), verification MUST alongside locking / CONSIDER for an adopter (1/32), and the wrong-configuration gate being projectHealth rather than a local build.",
+          "Verification-cell shape: every grep carries `-r` plus a directory operand and `--include=`, one `-e` per alternative with no `\\|`, no angle-bracket placeholder inside a quoted pattern (`grep -rnE -e '</?systemPath>'` per authoring note 9), no `$(...)` operands, no unquoted `**`, and every check states whether empty output is the pass or the finding. Settings-shaped greps include `*.settings.gradle.kts` explicitly.",
+          "Portability: no fleet paths, no OCX hostnames, no repo@sha citations. Corpus counts appear only as bare N/32 with the 2026-09-05 measurement date. The one named exemplar is Guava's public listenablefuture placeholder, which is load-bearing for the rule. Version rows carry version plus verification date (rules_jvm_external 7.1 2026-07-23 verified 2026-09-12; enforcer 3.6.3 2026-05-15 verified 2026-09-12; Maven 4.0.0-rc-6 queried 2026-09-12). The stale Surefire banner example was not reproduced -- wave 4 marked it stale on the numbers, so only the method rule ships.",
+          "No em dashes in prose. The single semicolon in the file is inside a Kotlin DSL code span (`exclusiveContent { forRepository { ... }; filter { ... } }`), not prose. Shell blocks are fenced bash; no python or Starlark blocks were needed."
+        ]
+      },
+      {
+        "paths": [
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/handoff/bazel-quality-java.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/handoff/bazel-quality-index-row.md"
+        ],
+        "checker_clean": true,
+        "notes": [
+          "Checker: clean at the destination path. Simulated rules/bazel-quality/java.md with the routing row inserted after the cpp.md row and ran the checker on rules/bazel-quality.md -> `clean`, EXIT=0. Run standalone the file reports only `body is 277 lines (max 200)`, which is the rule-INDEX cap; the shipped exemplar rules/bazel-quality/rust.md reports the identical finding standalone (244 lines) and is clean in its support-dir context. Body 277 lines, under the 300 depth-file ceiling.",
+          "Dropped per Authoring notes §6: BZL-JAVA-17 (artifact() macro vs literal label, CONSIDER, explicitly 'tooling cost, not a correctness bug') and BZL-JAVA-20 (KotlinCompile worker state, CONSIDER, no primary source states a defect). Each survives as one prose sentence, BZL-JAVA-17 in the maven.install section preamble and BZL-JAVA-20 split between the Kotlin section's closing line and a Gaps bullet. Neither ID is cited anywhere, so check_citations stays clean. No other rule dropped: 25 of 27 IDs ship (01-16, 18, 19, 21-27).",
+          "Contradiction 17 fixed: BZL-JAVA-14 now cites `GRADLE-DEP-12` for 'pinning locks resolution, never legitimacy', not GRADLE-DEP-09.",
+          "DEVIATION from Authoring notes §11, flagged for the owner: §11 says 'Groups A-F', but it was written before wave 4 added Group G (testing and coverage) to the consolidation. I shipped all seven groups, because dropping G would silently drop BZL-JAVA-24/26/27 (three MUSTs) and BZL-JAVA-25, none of which §6 drops. Section 7 is 'Running Tests and Reading Coverage'.",
+          "DEVIATION on the dagger .bazelrc line numbers: §11 says to carry the dive's line-number corrections, but Portability forbids repo@sha citations in shipped text. Resolved by writing no line numbers and no SHAs at all — dagger is named as a public exemplar in BZL-JAVA-03 and BZL-JAVA-19 only, where the fact is load-bearing. The correction cannot be mis-propagated because no number is written.",
+          "STYLE CONFLICT resolved toward the brief, not the exemplar: the brief forbids em dashes and semicolons in prose, but rules/bazel-quality/rust.md uses both heavily, including in its `summary` frontmatter and its `**pinned** — ` marker and its ``command` — **empty output is the pass**` verification connector. I followed the brief: zero em dashes and zero semicolons in the file. The verification connector is now `command`. **Empty output is the pass**, and the marker is `**pinned**:`. Flagging it because the file will read slightly differently from its sibling rust.md.",
+          "Verification-cell shape: every cell states what empty output means; no bare shell-glob operands; one -e per alternative with no `\\|`; no angle-bracket placeholder inside a quoted pattern (BZL-JAVA-15 binds EXCLUDED=... first, then uses a double-quoted bazel query); no $(...) inside any grep span (the coverage report path in BZL-JAVA-26 is written as prose naming `bazel info output_path`); every multi-alternative group check lives in a fenced bash block, and no table cell contains a pipe.",
+          "Second file bazel-quality-index-row.md contains only the one routing row, verbatim from §11, for insertion immediately after the cpp.md row. Run standalone the checker reports `broken relative link: bazel-quality/java.md`, which is correct and expected — the row is a fragment whose link resolves only once pasted into rules/bazel-quality.md, where the simulation confirms it resolves.",
+          "No `paths` in the handoff file's frontmatter (title + summary only), no links to sibling depth files (siblings are cited by family ID with the shipped filename in backticks), and no fleet paths, internal hostnames or repo@sha citations anywhere."
+        ]
+      }
+    ],
+    "dropped_ids": [
+      "JAVA-API-13: dropped as a duplicate per authoring note 6 and cross-consolidation contradiction 2 (same glob, same index, worse verification cell than JAVA-PLAT-01; MVN-BUILD-01 carries the Maven-only half). The file states the ID is retired and not reused, and routes the --release decision to JAVA-PLAT-01 and MVN-BUILD-01.",
+      "M-L-05 (DOP v1.1 versus the 2022 four principles): fails selection tests 2 and 3 — no verification and no diff changes, since the whole content is which article a rationale cites. Kept as failure mode 9 in What Agents Get Wrong Here, which is where a citation error actually surfaces.",
+      "M-L-07 (Gatherer instead of a hand-rolled mid-pipeline Collector): JEP 485 is final in JDK 24, above the program's pinned floor 17 (JAVA-PLAT-02), so the rule cannot fire on the baseline it ships against; the map itself calls it idiom modernisation, not a correctness gate. No prose line, nothing is lost by silence.",
+      "M-L-08 (JEP 513 flexible constructor bodies, JDK 25): the early-construction-context restriction is a javac compile error, so the rule only repeats what the compiler already denies — rule-distillation's explicit drop case. The residual half (delete the static-helper workaround) is idiom churn.",
+      "Enum-switch `default` as a second statement of the sealed-switch rule: not shipped as a restatement. JAVA-DATA-08 is scoped to enum selectors only and cites `JAVA-API-07` for the sealed selector, whose snippet pair in api-and-evolution.md is deliberately not reproduced here.",
+      "`Optional` as a field, constructor parameter or record component: owned by `JAVA-API-06` (SHOULD) in api-and-evolution.md. Cited in one prose line under Optional as a Value rather than redefined, since a record component is a field and the two rows would be the same rule on one glob.",
+      "M-M-02: owned by JAVA-LINT-04 (OnlyNullMarked vs AnnotatedPackages exclusivity) per the authoring notes' family table. Cited in Scope, not restated.",
+      "M-M-03: owned by JAVA-LINT-05 (the jspecifyMode JDK/vendor precondition). Cited in Scope and in JAVA-NULL-06's rationale, not restated.",
+      "M-M-06: the three nullness-adjacent Error Prone DISABLED_CHECKS (EqualsMissingNullable, FieldMissingNullable, VoidMissingNullable) are already members of JAVA-LINT-02's nine-check promotion list. A second row on one glob would be the duplicate the contradictions table exists to prevent. Named in Scope as owned there.",
+      "M-M-01 (published-surface half): JAVA-API-09 owns 'annotate the published surface with JSpecify and declare @NullMarked once in module-info.java' and JAVA-API-10 owns 'never mix flavours in one file'. Only the flavour choice itself (shipped as the pinned JAVA-NULL-04) and the package/module granularity (JAVA-NULL-02, JAVA-NULL-05) are taken here.",
+      "M-M-07 (file-level half): JAVA-LINT-06 owns the 'no import javax.annotation.Nullable under jspecifyMode' check. Shipped here only as the package-granularity migration rule JAVA-NULL-05 plus the dated flavour table.",
+      "Kotlin-side severity knobs (-Xjspecify-annotations, -Xjsr305, -Xnullability-annotations, map row M-V-02): KT-INTEROP's, in the kotlin-quality set. Cited by family in the flavour table, no number invented.",
+      "Candidate 'jsr305 splits the javax.annotation package under JPMS': dropped, no support in the two named consolidations or the topic map. Not invented.",
+      "JAVA-ERR-09: dropped at authoring time per authoring notes §6 (CONSIDER, reading heuristic only, contested by two named practitioners with neither displacing the other). Ships as one prose paragraph in \"No Gate Exists\" carrying both positions, with no ID, so no citation can resolve to it.",
+      "JAVA-PLAT-04: duplicate of JAVA-API-12 per contradictions table row 3 (authoring notes section 6). The module-descriptor section now opens by citing JAVA-API-12 as the owner and carries only JAVA-PLAT-05.",
+      "JAVA-PLAT-12: source-encoding row, edit site is a build file, relocated to GRADLE-TOOL (Gradle half) and MVN-BUILD (Maven half) per frame correction 72 and the depth-file table. Named in the scope paragraph by subject, not by ID, so no dead pointer ships.",
+      "JAVA-PLAT-13: org.gradle.jvmargs=-Dfile.encoding=UTF-8, relocated to GRADLE-TOOL per frame correction 72. Survives here only as failure mode 8, which states the daemon-vs-task-JVM trap and names GRADLE-TOOL as owner without citing the retired ID.",
+      "JAVA-PLAT-16: duplicate of MVN-BUILD-10 per contradictions table row 4; java-quality does not glob **/pom.xml, so the row could never fire on the file it governs.",
+      "JAVA-PLAT-17: dropped to one prose line per contradictions table row 11. The file states that timezone pinning is not a rule here and cites JAVA-TEST-11 as the owner of the do-not-invent list. JAVA-PLAT-18 (the positive, guava-evidenced locale job) survives at CONSIDER.",
+      "GRADLE-PUB-03 (Maven parallel): not written as a rule. Per authoring notes section 6 the immutability statement is the jvm-release skill's opening line, not a row with an ID. Ships as the opening prose of the first section so the reader meets it before any gate.",
+      "MVN-BUILD-10 (reproducible project.build.outputTimestamp): named in this file's routing brief but owned by MVN-BUILD in lifecycle-and-plugins.md per cross-consolidation contradiction 4, which gives MVN-BUILD-10 the text, the MUST and the artifact:check-buildplan verification. Cited in the scope paragraph by family, not redefined here.",
+      "MVN-BUILD-14 (maven-wrapper.properties checksums): map row M-J-14 is labelled MVN-PUB in the topic map, but authoring notes section 1 assigns .mvn/wrapper/maven-wrapper.properties to MVN-BUILD-14. Left to lifecycle-and-plugins.md, not duplicated.",
+      "Sigstore and build-provenance Maven parallel (GRADLE-PUB-17/-18): no Maven-side mechanism, no version floor and no corpus evidence in the consolidation. Inventing one would fail the checkable test, so nothing shipped.",
+      "Maven consumability-probe rule (GRADLE-PUB-13 parallel): the probe IS a pom.xml, so a rule telling a pom.xml author to write a pom.xml changes no diff. Kept as failure mode 8 (do not mistake the probe for a second release pipeline), which is the half an agent gets wrong."
+    ],
+    "unclean": []
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Depth"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 2,
+      "title": "Index"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 3,
+      "title": "Standalone"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "skill:jvm-release/SKILL.md",
+      "phaseIndex": 3,
+      "phaseTitle": "Standalone",
+      "agentId": "acb5a515c7b605434",
+      "model": "claude-opus-5[1m]",
+      "state": "done",
+      "startedAt": 1789307064840,
+      "queuedAt": 1789307064819,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "promptPreview": "Model rationale: opus — a procedure agents run unattended; its steps and its refusal conditions are decisions.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- You are a drafter in phase 7 (Author) of the research-lang program for the JVM ecosystem, run from /home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake (a git worktree — treat it as the repository root; never cd to /home/m…",
+      "promptFramed": false,
+      "lastProgressAt": 1789307463988,
+      "tokens": 190718,
+      "toolCalls": 38,
+      "durationMs": 399146,
+      "resultPreview": "{\"paths\":[\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/skills/jvm-release/SKILL.md\"],\"checker_clean\":true,\"notes\":[\"checker: python3 .claude/skills/research-lang/scripts/check-artifacts.py skills/jvm-release --root . -> clean, exit 0. One finding fixed before return: an angle-bracket placeholder '<skip>true' inside a quoted grep pattern in step 3, rewritten as grep -rnE -e 'ignoreMissi…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "skill:jvm-dependency-triage/SKILL.md",
+      "phaseIndex": 3,
+      "phaseTitle": "Standalone",
+      "agentId": "ac89b52fe539f7666",
+      "model": "claude-opus-5[1m]",
+      "state": "done",
+      "startedAt": 1789307064841,
+      "queuedAt": 1789307064819,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "promptPreview": "Model rationale: opus — a procedure agents run unattended; its steps and its refusal conditions are decisions.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- You are a drafter in phase 7 (Author) of the research-lang program for the JVM ecosystem, run from /home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake (a git worktree — treat it as the repository root; never cd to /home/m…",
+      "promptFramed": false,
+      "lastProgressAt": 1789308040150,
+      "tokens": 286699,
+      "toolCalls": 76,
+      "durationMs": 974322,
+      "resultPreview": "{\"paths\":[\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/skills/jvm-dependency-triage/SKILL.md\"],\"checker_clean\":true,\"notes\":[\"Checker: `python3 .claude/skills/research-lang/scripts/check-artifacts.py skills/jvm-dependency-triage --root .` -> clean, exit 0. Running it over all of `skills/` reports 2 findings, both pre-existing in other drafters' files (docs-instrument cites DOC-DISC-13,…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 3,
+      "label": "handoff:handoff/bazel-quality-java.md",
+      "phaseIndex": 3,
+      "phaseTitle": "Standalone",
+      "agentId": "a679a000a1ab3a018",
+      "model": "claude-opus-5[1m]",
+      "state": "done",
+      "startedAt": 1789307064842,
+      "queuedAt": 1789307064819,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "promptPreview": "Model rationale: opus — a depth file offered to a published sibling set; it must match that set's contract exactly.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- You are a drafter in phase 7 (Author) of the research-lang program for the JVM ecosystem, run from /home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake (a git worktree — treat it as the repository root; never cd to /h…",
+      "promptFramed": false,
+      "lastProgressAt": 1789307572284,
+      "tokens": 196559,
+      "toolCalls": 43,
+      "durationMs": 506456,
+      "resultPreview": "{\"paths\":[\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/handoff/bazel-quality-java.md\",\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/handoff/bazel-quality-index-row.md\"],\"checker_clean\":true,\"notes\":[\"Checker: clean at the destination path. Simulated rules/bazel-quality/java.md with the routing row inserted after the cpp.md row and ran the ch…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 4,
+      "label": "depth:java-quality/api-and-evolution.md",
+      "phaseIndex": 1,
+      "phaseTitle": "Depth",
+      "agentId": "ab11c6b20b5dae890",
+      "model": "claude-opus-5[1m]",
+      "state": "done",
+      "startedAt": 1789307064860,
+      "queuedAt": 1789307064847,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rul…",
+      "promptPreview": "Model rationale: opus — text that becomes an enforced rule; a wrong MUST propagates into every future diff.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- You are a drafter in phase 7 (Author) of the research-lang program for the JVM ecosystem, run from /home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake (a git worktree — treat it as the repository root; never cd to /home/mher…",
+      "promptFramed": false,
+      "lastProgressAt": 1789307426007,
+      "tokens": 175939,
+      "toolCalls": 23,
+      "durationMs": 361143,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/java-quality/api-and-evolution.md\",\"lines\":190,\"rule_ids_shipped\":[\"JAVA-API-01\",\"JAVA-API-02\",\"JAVA-API-03\",\"JAVA-API-04\",\"JAVA-API-05\",\"JAVA-API-06\",\"JAVA-API-07\",\"JAVA-API-08\",\"JAVA-API-09\",\"JAVA-API-10\",\"JAVA-API-11\",\"JAVA-API-12\",\"JAVA-API-14\",\"JAVA-API-15\"],\"rule_ids_dropped\":[\"JAVA-API-13: dropped as a duplicate per auth…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 5,
+      "label": "depth:java-quality/data-and-patterns.md",
+      "phaseIndex": 1,
+      "phaseTitle": "Depth",
+      "agentId": "ad830da8b90c45cce",
+      "model": "claude-opus-5[1m]",
+      "state": "done",
+      "startedAt": 1789307064860,
+      "queuedAt": 1789307064848,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rul…",
+      "promptPreview": "Model rationale: opus — text that becomes an enforced rule; a wrong MUST propagates into every future diff.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- You are a drafter in phase 7 (Author) of the research-lang program for the JVM ecosystem, run from /home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake (a git worktree — treat it as the repository root; never cd to /home/mher…",
+      "promptFramed": false,
+      "lastProgressAt": 1789307559391,
+      "tokens": 199311,
+      "toolCalls": 45,
+      "durationMs": 493560,
+      "resultPreview": "{\"checker_clean\":true,\"hoist_to_index\":[\"JAVA-DATA-01: A record component that is an array, collection, map or `Date` is copied in the compact constructor (`List.copyOf`, `.clone()`) — a record is not immutable by declaration.\",\"JAVA-DATA-07: A pattern `switch` throws `NullPointerException` on a null selector exactly as a pre-21 switch did — write a `case null ->` arm or prove the selector non-nul…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 6,
+      "label": "depth:java-quality/nullness.md",
+      "phaseIndex": 1,
+      "phaseTitle": "Depth",
+      "agentId": "a21dd802bfd312c1c",
+      "model": "claude-opus-5[1m]",
+      "state": "done",
+      "startedAt": 1789307064861,
+      "queuedAt": 1789307064848,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rul…",
+      "promptPreview": "Model rationale: opus — text that becomes an enforced rule; a wrong MUST propagates into every future diff.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- You are a drafter in phase 7 (Author) of the research-lang program for the JVM ecosystem, run from /home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake (a git worktree — treat it as the repository root; never cd to /home/mher…",
+      "promptFramed": false,
+      "lastProgressAt": 1789307407694,
+      "tokens": 178913,
+      "toolCalls": 28,
+      "durationMs": 341862,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/java-quality/nullness.md\",\"lines\":135,\"rule_ids_shipped\":[\"JAVA-NULL-01\",\"JAVA-NULL-02\",\"JAVA-NULL-03\",\"JAVA-NULL-04\",\"JAVA-NULL-05\",\"JAVA-NULL-06\"],\"rule_ids_dropped\":[\"M-M-02: owned by JAVA-LINT-04 (OnlyNullMarked vs AnnotatedPackages exclusivity) per the authoring notes' family table. Cited in Scope, not restated.\",\"M-M-03: …"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 7,
+      "label": "depth:java-quality/concurrency.md",
+      "phaseIndex": 1,
+      "phaseTitle": "Depth",
+      "agentId": "a9fa5bd1123bdc59a",
+      "model": "claude-opus-5[1m]",
+      "state": "done",
+      "startedAt": 1789307064861,
+      "queuedAt": 1789307064848,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rul…",
+      "promptPreview": "Model rationale: opus — text that becomes an enforced rule; a wrong MUST propagates into every future diff.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- You are a drafter in phase 7 (Author) of the research-lang program for the JVM ecosystem, run from /home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake (a git worktree — treat it as the repository root; never cd to /home/mher…",
+      "promptFramed": false,
+      "lastProgressAt": 1789307584894,
+      "tokens": 193952,
+      "toolCalls": 47,
+      "durationMs": 519062,
+      "resultPreview": "{\"checker_clean\":true,\"hoist_to_index\":[\"JAVA-CONC-10: Drain a child process's stdout and stderr concurrently, never one to completion before touching the other.\",\"JAVA-CONC-01: Never construct a fixed-size pool of virtual threads; bound concurrency with a Semaphore and keep one virtual thread per task.\",\"JAVA-CONC-05: No preview API (StructuredTaskScope, Joiner) on the main sourceset compile path…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 8,
+      "label": "depth:java-quality/errors-and-resources.md",
+      "phaseIndex": 1,
+      "phaseTitle": "Depth",
+      "agentId": "a4fa24b2c1152a11d",
+      "model": "claude-opus-5[1m]",
+      "state": "done",
+      "startedAt": 1789307064862,
+      "queuedAt": 1789307064848,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rul…",
+      "promptPreview": "Model rationale: opus — text that becomes an enforced rule; a wrong MUST propagates into every future diff.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- You are a drafter in phase 7 (Author) of the research-lang program for the JVM ecosystem, run from /home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake (a git worktree — treat it as the repository root; never cd to /home/mher…",
+      "promptFramed": false,
+      "lastProgressAt": 1789307351608,
+      "tokens": 170533,
+      "toolCalls": 31,
+      "durationMs": 285776,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/java-quality/errors-and-resources.md\",\"lines\":185,\"rule_ids_shipped\":[\"JAVA-ERR-01\",\"JAVA-ERR-02\",\"JAVA-ERR-03\",\"JAVA-ERR-04\",\"JAVA-ERR-05\",\"JAVA-ERR-06\",\"JAVA-ERR-07\",\"JAVA-ERR-08\"],\"rule_ids_dropped\":[\"JAVA-ERR-09: dropped at authoring time per authoring notes §6 (CONSIDER, reading heuristic only, contested by two named pract…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 9,
+      "label": "depth:java-quality/security-and-untrusted-input.md",
+      "phaseIndex": 1,
+      "phaseTitle": "Depth",
+      "agentId": "aadd5b6cc480f011d",
+      "model": "claude-opus-5[1m]",
+      "state": "done",
+      "startedAt": 1789307064862,
+      "queuedAt": 1789307064848,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rul…",
+      "promptPreview": "Model rationale: opus — text that becomes an enforced rule; a wrong MUST propagates into every future diff.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- You are a drafter in phase 7 (Author) of the research-lang program for the JVM ecosystem, run from /home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake (a git worktree — treat it as the repository root; never cd to /home/mher…",
+      "promptFramed": false,
+      "lastProgressAt": 1789307385075,
+      "tokens": 147512,
+      "toolCalls": 35,
+      "durationMs": 319243,
+      "resultPreview": "{\"checker_clean\":true,\"hoist_to_index\":[\"JAVA-SEC-01: Never readObject()/readUnshared() bytes that crossed a trust boundary without an ObjectInputFilter allow-list on that stream.\"],\"lines\":168,\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/java-quality/security-and-untrusted-input.md\",\"routing_row\":\"Parsing or deserialising outside data, hardening an XML factory, building a…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 10,
+      "label": "depth:java-quality/platform-and-versions.md",
+      "phaseIndex": 1,
+      "phaseTitle": "Depth",
+      "agentId": "aeb24b9bbaf664374",
+      "model": "claude-opus-5[1m]",
+      "state": "done",
+      "startedAt": 1789307064862,
+      "queuedAt": 1789307064848,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rul…",
+      "promptPreview": "Model rationale: opus — text that becomes an enforced rule; a wrong MUST propagates into every future diff.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- You are a drafter in phase 7 (Author) of the research-lang program for the JVM ecosystem, run from /home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake (a git worktree — treat it as the repository root; never cd to /home/mher…",
+      "promptFramed": false,
+      "lastProgressAt": 1789307436480,
+      "tokens": 159049,
+      "toolCalls": 32,
+      "durationMs": 370648,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/java-quality/platform-and-versions.md\",\"lines\":178,\"rule_ids_shipped\":[\"JAVA-PLAT-01\",\"JAVA-PLAT-02\",\"JAVA-PLAT-03\",\"JAVA-PLAT-05\",\"JAVA-PLAT-06\",\"JAVA-PLAT-07\",\"JAVA-PLAT-08\",\"JAVA-PLAT-09\",\"JAVA-PLAT-10\",\"JAVA-PLAT-11\",\"JAVA-PLAT-14\",\"JAVA-PLAT-15\",\"JAVA-PLAT-18\"],\"rule_ids_dropped\":[\"JAVA-PLAT-04: duplicate of JAVA-API-12 pe…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 11,
+      "label": "depth:java-quality/lint-gate.md",
+      "phaseIndex": 1,
+      "phaseTitle": "Depth",
+      "agentId": "a1c5076af34571250",
+      "model": "claude-opus-5[1m]",
+      "state": "done",
+      "startedAt": 1789307064863,
+      "queuedAt": 1789307064848,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rul…",
+      "promptPreview": "Model rationale: opus — text that becomes an enforced rule; a wrong MUST propagates into every future diff.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- You are a drafter in phase 7 (Author) of the research-lang program for the JVM ecosystem, run from /home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake (a git worktree — treat it as the repository root; never cd to /home/mher…",
+      "promptFramed": false,
+      "lastProgressAt": 1789307384354,
+      "tokens": 143607,
+      "toolCalls": 41,
+      "durationMs": 318521,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/java-quality/lint-gate.md\",\"lines\":154,\"rule_ids_shipped\":[\"JAVA-LINT-01\",\"JAVA-LINT-02\",\"JAVA-LINT-03\",\"JAVA-LINT-04\",\"JAVA-LINT-05\",\"JAVA-LINT-06\",\"JAVA-LINT-07\",\"JAVA-LINT-08\",\"JAVA-LINT-09\",\"JAVA-LINT-10\",\"JAVA-LINT-11\"],\"rule_ids_dropped\":[],\"checker_clean\":true,\"hoist_to_index\":[\"JAVA-LINT-02: promote the nine named Error…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 12,
+      "label": "depth:java-quality/testing.md",
+      "phaseIndex": 1,
+      "phaseTitle": "Depth",
+      "agentId": "a366b2d520d6d50bc",
+      "model": "claude-opus-5[1m]",
+      "state": "done",
+      "startedAt": 1789307064863,
+      "queuedAt": 1789307064848,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rul…",
+      "promptPreview": "Model rationale: opus — text that becomes an enforced rule; a wrong MUST propagates into every future diff.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- You are a drafter in phase 7 (Author) of the research-lang program for the JVM ecosystem, run from /home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake (a git worktree — treat it as the repository root; never cd to /home/mher…",
+      "promptFramed": false,
+      "lastProgressAt": 1789307395102,
+      "tokens": 177465,
+      "toolCalls": 26,
+      "durationMs": 329269,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/java-quality/testing.md\",\"lines\":144,\"rule_ids_shipped\":[\"JAVA-TEST-01\",\"JAVA-TEST-02\",\"JAVA-TEST-03\",\"JAVA-TEST-04\",\"JAVA-TEST-05\",\"JAVA-TEST-06\",\"JAVA-TEST-07\",\"JAVA-TEST-08\",\"JAVA-TEST-09\",\"JAVA-TEST-10\",\"JAVA-TEST-11\",\"JAVA-TEST-12\"],\"rule_ids_dropped\":[],\"checker_clean\":true,\"hoist_to_index\":[\"JAVA-TEST-08: A coverage floo…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 13,
+      "label": "depth:maven-build/dependencies.md",
+      "phaseIndex": 1,
+      "phaseTitle": "Depth",
+      "agentId": "a73893a15cea9280e",
+      "model": "claude-opus-5[1m]",
+      "state": "done",
+      "startedAt": 1789307064867,
+      "queuedAt": 1789307064866,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rul…",
+      "promptPreview": "Model rationale: opus — text that becomes an enforced rule; a wrong MUST propagates into every future diff.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- You are a drafter in phase 7 (Author) of the research-lang program for the JVM ecosystem, run from /home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake (a git worktree — treat it as the repository root; never cd to /home/mher…",
+      "promptFramed": false,
+      "lastProgressAt": 1789307382049,
+      "tokens": 150648,
+      "toolCalls": 20,
+      "durationMs": 316216,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/maven-build/dependencies.md\",\"lines\":182,\"rule_ids_shipped\":[\"MVN-DEP-01\",\"MVN-DEP-02\",\"MVN-DEP-03\",\"MVN-DEP-04\",\"MVN-DEP-05\",\"MVN-DEP-06\",\"MVN-DEP-07\",\"MVN-DEP-08\",\"MVN-DEP-09\",\"MVN-DEP-10\",\"MVN-DEP-11\"],\"rule_ids_dropped\":[],\"checker_clean\":true,\"hoist_to_index\":[\"MVN-DEP-01, MVN-DEP-02: Maven mediates by nearest definition b…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 14,
+      "label": "depth:maven-build/lifecycle-and-plugins.md",
+      "phaseIndex": 1,
+      "phaseTitle": "Depth",
+      "agentId": "a8ffdc15d5b988bf6",
+      "model": "claude-opus-5[1m]",
+      "state": "done",
+      "startedAt": 1789307064867,
+      "queuedAt": 1789307064866,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rul…",
+      "promptPreview": "Model rationale: opus — text that becomes an enforced rule; a wrong MUST propagates into every future diff.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- You are a drafter in phase 7 (Author) of the research-lang program for the JVM ecosystem, run from /home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake (a git worktree — treat it as the repository root; never cd to /home/mher…",
+      "promptFramed": false,
+      "lastProgressAt": 1789307440198,
+      "tokens": 164342,
+      "toolCalls": 26,
+      "durationMs": 374365,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/maven-build/lifecycle-and-plugins.md\",\"lines\":188,\"rule_ids_shipped\":[\"MVN-BUILD-01\",\"MVN-BUILD-02\",\"MVN-BUILD-03\",\"MVN-BUILD-04\",\"MVN-BUILD-05\",\"MVN-BUILD-06\",\"MVN-BUILD-07\",\"MVN-BUILD-08\",\"MVN-BUILD-09\",\"MVN-BUILD-10\",\"MVN-BUILD-11\",\"MVN-BUILD-12\",\"MVN-BUILD-13\",\"MVN-BUILD-14\",\"MVN-BUILD-15\",\"MVN-BUILD-16\",\"MVN-BUILD-17\",\"MVN…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 15,
+      "label": "depth:maven-build/publishing.md",
+      "phaseIndex": 1,
+      "phaseTitle": "Depth",
+      "agentId": "ab334a033baa0d9cd",
+      "model": "claude-opus-5[1m]",
+      "state": "done",
+      "startedAt": 1789307064868,
+      "queuedAt": 1789307064866,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rul…",
+      "promptPreview": "Model rationale: opus — text that becomes an enforced rule; a wrong MUST propagates into every future diff.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- You are a drafter in phase 7 (Author) of the research-lang program for the JVM ecosystem, run from /home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake (a git worktree — treat it as the repository root; never cd to /home/mher…",
+      "promptFramed": false,
+      "lastProgressAt": 1789307415636,
+      "tokens": 139785,
+      "toolCalls": 32,
+      "durationMs": 349803,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/maven-build/publishing.md\",\"lines\":165,\"rule_ids_shipped\":[\"MVN-PUB-01\",\"MVN-PUB-02\",\"MVN-PUB-03\",\"MVN-PUB-04\",\"MVN-PUB-05\",\"MVN-PUB-06\",\"MVN-PUB-07\",\"MVN-PUB-08\",\"MVN-PUB-09\",\"MVN-PUB-10\"],\"rule_ids_dropped\":[\"GRADLE-PUB-03 (Maven parallel): not written as a rule. Per authoring notes section 6 the immutability statement is the…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 16,
+      "label": "depth:maven-build/ant-legacy.md",
+      "phaseIndex": 1,
+      "phaseTitle": "Depth",
+      "agentId": "aa315d12980250121",
+      "model": "claude-opus-5[1m]",
+      "state": "done",
+      "startedAt": 1789307064868,
+      "queuedAt": 1789307064866,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rul…",
+      "promptPreview": "Model rationale: opus — text that becomes an enforced rule; a wrong MUST propagates into every future diff.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- You are a drafter in phase 7 (Author) of the research-lang program for the JVM ecosystem, run from /home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake (a git worktree — treat it as the repository root; never cd to /home/mher…",
+      "promptFramed": false,
+      "lastProgressAt": 1789307304000,
+      "tokens": 138713,
+      "toolCalls": 28,
+      "durationMs": 238166,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/maven-build/ant-legacy.md\",\"lines\":151,\"rule_ids_shipped\":[\"MVN-ANT-01\",\"MVN-ANT-02\",\"MVN-ANT-03\",\"MVN-ANT-04\",\"MVN-ANT-05\",\"MVN-ANT-06\"],\"rule_ids_dropped\":[],\"checker_clean\":true,\"hoist_to_index\":[\"MVN-ANT-02: Never introduce ant.importBuild() — one line disables the whole build's configuration cache, permanently and beyond t…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 17,
+      "label": "index:maven-build",
+      "phaseIndex": 2,
+      "phaseTitle": "Index",
+      "agentId": "ac698a5e3d421d650",
+      "model": "claude-opus-5[1m]",
+      "state": "done",
+      "startedAt": 1789307440213,
+      "queuedAt": 1789307440199,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rul…",
+      "promptPreview": "Model rationale: opus — the index is the always-loaded surface; every line is paid for in every session.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- You are a drafter in phase 7 (Author) of the research-lang program for the JVM ecosystem, run from /home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake (a git worktree — treat it as the repository root; never cd to /home/mherwig…",
+      "promptFramed": false,
+      "lastProgressAt": 1789307678611,
+      "tokens": 125959,
+      "toolCalls": 30,
+      "durationMs": 238398,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/maven-build.md\",\"lines\":162,\"non_negotiables\":18,\"core_rule_ids\":[\"MVN-CORE-01\",\"MVN-CORE-02\",\"MVN-CORE-03\"],\"checker_clean\":true,\"globs\":[\"**/pom.xml\",\"**/.mvn/**\",\"**/mvnw\",\"**/mvnw.cmd\",\"**/build.xml\",\"**/ivy.xml\",\"**/ivysettings.xml\"]}"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 18,
+      "label": "index:java-quality",
+      "phaseIndex": 2,
+      "phaseTitle": "Index",
+      "agentId": "afe7ff734a8594aee",
+      "model": "claude-opus-5[1m]",
+      "state": "done",
+      "startedAt": 1789307584898,
+      "queuedAt": 1789307584896,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rul…",
+      "promptPreview": "Model rationale: opus — the index is the always-loaded surface; every line is paid for in every session.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- You are a drafter in phase 7 (Author) of the research-lang program for the JVM ecosystem, run from /home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake (a git worktree — treat it as the repository root; never cd to /home/mherwig…",
+      "promptFramed": false,
+      "lastProgressAt": 1789307872210,
+      "tokens": 199122,
+      "toolCalls": 32,
+      "durationMs": 287312,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/java-quality.md\",\"lines\":146,\"non_negotiables\":16,\"core_rule_ids\":[\"JAVA-CORE-01\",\"JAVA-CORE-02\",\"JAVA-CORE-03\"],\"checker_clean\":true,\"globs\":[\"**/*.java\"]}"
+    }
+  ],
+  "totalTokens": 3138826,
+  "totalToolCalls": 633
+}

@@ -1,0 +1,15 @@
+android__nowinandroid	versions=64	libraries=103	bundles=1	plugins=35
+cashapp__sqldelight	versions=15	libraries=62	bundles=0	plugins=17
+detekt__detekt	versions=9	libraries=41	bundles=0	plugins=0
+diffplug__spotless	versions=6	libraries=49	bundles=0	plugins=12
+google__dagger	versions=21	libraries=56	bundles=0	plugins=9
+GradleUp__shadow	versions=4	libraries=21	bundles=0	plugins=7
+grpc__grpc-java	versions=1	libraries=81	bundles=0	plugins=0
+JetBrains__Exposed	versions=51	libraries=75	bundles=0	plugins=10
+junit-team__junit-framework	versions=18	libraries=64	bundles=3	plugins=16
+ktorio__ktor	versions=74	libraries=124	bundles=0	plugins=3
+micronaut-projects__micronaut-core	versions=92	libraries=169	bundles=0	plugins=5
+mockito__mockito	versions=14	libraries=38	bundles=0	plugins=3
+pinterest__ktlint	versions=4	libraries=19	bundles=0	plugins=3
+square__okhttp	versions=60	libraries=83	bundles=0	plugins=21
+uber__NullAway	versions=52	libraries=47	bundles=2	plugins=6

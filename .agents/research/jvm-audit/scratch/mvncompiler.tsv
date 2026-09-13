@@ -1,0 +1,5 @@
+apache__maven	<maven.compiler.release>${javaVersion}	<maven.compiler.source>${javaVersion}	<maven.compiler.target>${javaVersion}
+assertj__assertj	<maven.compiler.release>${java.version}	<maven.compiler.source>${java.version}	<maven.compiler.target>${java.version}
+FasterXML__jackson-databind	none	none	none
+google__error-prone	none	none	none
+google__guava	none	none	none

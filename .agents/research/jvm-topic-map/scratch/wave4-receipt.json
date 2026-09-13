@@ -1,0 +1,447 @@
+{
+ "wave": 4,
+ "groups": [
+  {
+   "group": "java-runtime-safety",
+   "dives": [
+    {
+     "slug": "find-sec-bugs-viability",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-java-runtime-safety/find-sec-bugs-viability.md",
+     "sources_count": 16,
+     "top_rules": [
+      "JAVA-SEC-08 stays SHOULD: find-sec-bugs is maintained (commits into 2026-03), not abandoned \u2014 verify via grep for `findsecbugs` alongside a bound SpotBugs execution.",
+      "Add a version-pin clause: never let `com.github.spotbugs` Gradle plugin resolve to 6.4.1/6.4.2 (SpotBugs 4.9.5/4.9.6) with find-sec-bugs on the classpath \u2014 confirmed `NoSuchMethodError` crash, fixed only on 6.4.3+/SpotBugs 4.9.7+.",
+      "All eight XXE_* rules stay MUST but add a reading heuristic: hardening call must be in the same method as the factory construction \u2014 find-sec-bugs and SonarJava both miss cross-method hardening (maintainer-confirmed, issue #738).",
+      "COMMAND_INJECTION stays MUST with a grep-only fallback that fully substitutes for the tool: Runtime.exec/ProcessBuilder with concatenated or formatted single-string args.",
+      "PATH_TRAVERSAL_IN/OUT stay MUST; carry the tool's own 'potential finding' caveat into the rule \u2014 verify attacker control of the path before treating a hit as real, and grep archive-extraction loops directly since under-reporting is possible.",
+      "PREDICTABLE_RANDOM stays MUST but demote tool dependency to optional \u2014 neither Semgrep p/java nor the verified SonarJava subset has an equivalent rule; the grep is a complete standalone check.",
+      "Require CI to fail loudly (not ignoreFailures) on spotbugsMain/spotbugsTest \u2014 find-sec-bugs is provided-scope, so a transitive SpotBugs core bump can reintroduce the crash with no local diff to review.",
+      "Do not cite SonarJava as covering PREDICTABLE_RANDOM/COMMAND_INJECTION/PATH_TRAVERSAL until each rule key is individually fetched \u2014 only S2755 (XXE) was verified live in this pass."
+     ],
+     "surprises": [
+      "find-sec-bugs 1.14.0 has a confirmed, reproduced NoSuchMethodError crash (not just a false-positive/staleness issue) against SpotBugs 4.9.5/4.9.6, caused by SpotBugs itself deleting a method it depended on \u2014 SpotBugs reverted the deletion within weeks, citing find-sec-bugs by name in its own PR.",
+      "The deprecated method SpotBugs restored is scheduled for permanent removal ~1 year after 2025-10-08 (i.e. around October 2026, about a month after this research date), and find-sec-bugs's own unreleased master has already removed its usage \u2014 but no release has shipped that fix, so the public artifact will likely break again on schedule.",
+      "Semgrep's public java ruleset explicitly cites find-sec-bugs.github.io/bugs.htm as the source-rule-url for ~24 of its 60 rules \u2014 Semgrep is not an independent alternative but a partial port of find-sec-bugs's own taxonomy, and it has zero rules for SchemaFactory/Validator/XMLReader/XPath XXE or PREDICTABLE_RANDOM.",
+      "find-sec-bugs ships its SpotBugs dependency as provided scope, meaning the consumer's own toolVersion pin \u2014 not find-sec-bugs's declared version \u2014 determines actual runtime compatibility; the tool's own pom.xml version number is nearly irrelevant to whether it will crash.",
+      "The exact same XXE cross-method false-negative (hardening applied in a helper method is invisible to the detector) was independently confirmed in both find-sec-bugs (#738) and SonarJava (S2755 community thread) \u2014 it's a structural limitation of single-method dataflow analysis shared across tools, not a find-sec-bugs-specific defect."
+     ],
+     "ok": true
+    },
+    {
+     "slug": "kotlin-errors-resources-and-throws",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-java-runtime-safety/kotlin-errors-resources-and-throws.md",
+     "sources_count": 15,
+     "top_rules": [
+      "Verdict: ship kotlin-quality/errors-and-resources.md as a 28th depth file, family KT-ERR, rows KT-ERR-01..05 \u2014 five rows clears the 'not two or three' bar",
+      "KT-ERR-01: never wrap Error-propagating or test-assertion code in runCatching{} \u2014 it catches Throwable not Exception, and is inline so no catch-clause lint ever sees inside it",
+      "KT-ERR-02: re-interrupt/rethrow a caught InterruptedException even via runCatching \u2014 detekt's SwallowedException whitelists InterruptedException by default, so no promotion closes this gap; reading-heuristic only",
+      "KT-ERR-03: use{} never reaches Sequence or Flow (neither implements AutoCloseable) \u2014 keep and close the underlying Stream/handle explicitly",
+      "KT-ERR-03: a suspending close() called from finally/onCompletion after cancellation must be wrapped in withContext(NonCancellable){} or it never runs",
+      "KT-ERR-04: keep detekt's SwallowedException/ThrowingNewInstanceOfSameException active \u2014 they already catch throw X(e.message) instead of throw X(e), active by default unlike Java's UnusedException",
+      "KT-ERR-05: promote detekt's ExitOutsideMain (ships active:false) to catch System.exit/Runtime.exit/Runtime.halt/exitProcess outside main in one rule",
+      "@Throws placement is M-V-04/KT-INTEROP's row and Result-as-public-return-type is M-V-07/KT-API's row \u2014 cite both, add no new KT-ERR rows for them"
+     ],
+     "surprises": [
+      "detekt's SwallowedException default config whitelists InterruptedException as 'nonexceptional' \u2014 the opposite gap direction from Java, where JAVA-ERR-01's mistake at least has an off-by-default Error Prone check to promote; no detekt rule ID exists for this at all",
+      "detekt's default gate is stronger than Java's for exception-chaining: SwallowedException (catches throw X(e.message)) is active by default, while Java's equivalent UnusedException is in Error Prone's DISABLED_CHECKS and must be promoted",
+      "runCatching's inlining means it never appears as a KtCatchClause at the call site, so every catch-clause-keyed detekt rule (SwallowedException, TooGenericExceptionCaught, EmptyCatchBlock) is structurally blind to it regardless of activation state",
+      "SuspendFunSwallowedCancellation (KT-CORO-01's sibling measurement) only fires when a suspend call happens inside runCatching's lambda \u2014 a non-suspend runCatching swallowing an Error/AssertionError has zero coverage under any detekt config",
+      "kotlin.Result's -Xallow-result-return-type restriction is fully historical (removed in Kotlin 1.5, 2021) yet still shows up in search results as if live \u2014 worth flagging explicitly so drafters don't cite it as current",
+      "ktlint's 404'd public rules-doc page required falling back to reading the actual rule-class directory in the pinned exemplar clone, which is a stronger source anyway"
+     ],
+     "ok": true
+    }
+   ],
+   "consolidation": {
+    "conflicts_resolved": [
+     "8 \u2014 find-sec-bugs demoted from \"the check\" to \"the automated check where wired\": the wave-3 text made a 15-month-stale, provided-scope plugin with a confirmed NoSuchMethodError load-bearing for six MUSTs; every Group 2 rule now carries its grep as the severity floor, so no MUST depends on a tool being installed. Severities unchanged.",
+     "9 \u2014 JAVA-SEC-08's floor corrected from an unsourced `com.github.spotbugs` 6.4.8+ to the measured 6.4.3+ (SpotBugs 4.9.7+), with 6.4.1/6.4.2 named as the forbidden crash window and 6.5.6 as current; decided on the plugin's own README compatibility table.",
+     "10 \u2014 OVERCLAIM FIX: JAVA-SEC-03 said \"an adjacent setFeature block\" and implied the eight XXE_* detectors covered the family. Neither find-sec-bugs nor SonarJava does interprocedural dataflow, so hardening in a helper is invisible to both. Rule text now requires hardening in the SAME METHOD as construction, and verification states that absence of a tool finding is not evidence of safety.",
+     "11 \u2014 27 vs 28 depth files: resolved as 28. `kotlin-quality/errors-and-resources.md` (family KT-ERR, rows 01-05) joins the six; the map's depth-file table and its twenty-seven-families count are amended by this file. Index budget resolved at two KT-ERR rows (KT-ERR-01, KT-ERR-03) in `rules/kotlin-quality.md`, the map's reserved JAVA-SEC-01 line unchanged.",
+     "12 \u2014 ID-MAPPING CORRECTION: the Kotlin dive cross-references JAVA-ERR by the sub-artifact's numbering, not this consolidation's (its \"JAVA-ERR-05\"=chaining, \"-08\"=System.exit, \"-11\"=sneaky-throw). Mapping recorded once so the later author does not propagate it: chaining\u2192JAVA-ERR-04, System.exit\u2192JAVA-ERR-07, try-with-resources\u2192JAVA-ERR-03, catch(Throwable)\u2192JAVA-ERR-02, sneaky-throw\u2192JAVA-ERR-09.",
+     "13 \u2014 `-Xallow-result-return-type` is historical-only (lifted in Kotlin 1.5, flag later removed); any rule text presenting it as a live gate is wrong. KT-ERR gets no row; the live question stays M-V-07's.",
+     "Header note \u2014 the sentence declaring Kotlin's exception model \"uncovered\" is now false and was replaced in place by the KT-ERR scope statement plus the cite-don't-restate list (M-U-04, M-V-04, M-V-07).",
+     "JAVA-SEC-07 \u2014 SonarJava S2245 was cited as a gate on catalogue strength alone; the viability dive did not verify it. Now marked unverified as of 2026-09-12, grep promoted from fallback to primary check, and Semgrep confirmed to carry no equivalent rule at all."
+    ],
+    "must_count": 21,
+    "needs_another_round": [
+     "SonarJava rule keys \u2014 for S2245, S2076, the path-traversal key, S1181, S2095 and S2142, fetched from rules.sonarsource.com or sonar-java metadata rather than search: is each (a) Community-tier or commercial-only, (b) an Issue or a Security Hotspot (the S4507 trap), and (c) what does it actually match? Five verification columns currently cite them on catalogue strength alone.",
+     "Subprocess trust boundary with no live upstream \u2014 does the OCX Gradle plugin's `ocx --format json inspect --closure` read, which may run entirely against a local OCX_HOME cache, sit on the same side of the deserialization line as the SDK's (Verdict 3), or does decision (c) mean it must be re-derived?",
+     "(Not a round \u2014 dated re-checks noted in the file) whether find-sec-bugs 1.15.0 ships before SpotBugs removes the restored IO.close(InputStream) around Oct 2026, and whether jackson-databind's three floors move."
+    ],
+    "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-java-runtime-safety.md",
+    "rule_ids": [
+     "JAVA-SEC-01 \u2014 Never readObject() bytes that crossed a trust boundary without an ObjectInputFilter allow-list; prefer not using Java serialization there at all. (MUST, unchanged)",
+     "JAVA-SEC-02 \u2014 Resolve jackson-databind to \u22652.18.8/2.21.4/3.1.4 AND configure an allow-list PTV wherever polymorphic typing exists; check the resolved version, never the config. (MUST, unchanged)",
+     "JAVA-SEC-03 \u2014 Harden every XML parser factory independently and IN THE SAME METHOD that constructs it; a clean tool run is not evidence of safety. (MUST, CHANGED \u2014 overclaim fix)",
+     "JAVA-SEC-04 \u2014 Never pass an attacker-influenced string to Context.lookup() or any javax.naming/JDO/JMX/rowset lookup API. (MUST, unchanged)",
+     "JAVA-SEC-05 \u2014 Resolve-and-verify containment before opening any stream over a caller-supplied path segment; treat find-sec-bugs hits as \"potential\" and its silence as no clearance. (MUST, CHANGED)",
+     "JAVA-SEC-06 \u2014 Build every subprocess command with the array/varargs ProcessBuilder form; never Runtime.exec(String), never \"sh\",\"-c\",cmd+arg. (MUST, CHANGED \u2014 grep stated as the severity floor)",
+     "JAVA-SEC-07 \u2014 Never use Random/Math.random/ThreadLocalRandom/SplittableRandom for anything whose predictability costs something; grep is the primary check. (MUST, CHANGED)",
+     "JAVA-SEC-08 \u2014 Add find-sec-bugs wherever SpotBugs gates a module handling untrusted input, scoped to those modules, treating the tool as maintained-but-fragile. (SHOULD, CHANGED \u2014 floor corrected to plugin 6.4.3+)",
+     "JAVA-SEC-09 \u2014 Never emit SecurityManager/doPrivileged/AccessController/.policy guidance for a JDK-24+ target; reject on sight. (MUST, unchanged)",
+     "JAVA-SEC-10 \u2014 Where find-sec-bugs is wired, pin the SpotBugs core it runs against (never plugin 6.4.1/6.4.2) and never let ignoreFailures/failOnError swallow the gate. (MUST where wired, NEW)",
+     "JAVA-ERR-01 \u2014 Re-interrupt or propagate every caught InterruptedException, including one caught implicitly by a wider catch. (MUST, CHANGED \u2014 names KT-ERR-02)",
+     "JAVA-ERR-02 \u2014 Do not catch Throwable or Error except at one documented top-level boundary; in tests it makes the test unable to fail. (MUST, CHANGED \u2014 names KT-ERR-01)",
+     "JAVA-ERR-03 \u2014 Acquire every Closeable/AutoCloseable inside try-with-resources, including Files.walk/list/lines/find streams and wrapping streams. (MUST, CHANGED \u2014 names KT-ERR-03)",
+     "JAVA-ERR-04 \u2014 Never construct a new exception from a caught one without passing it as the cause. (MUST, CHANGED \u2014 names KT-ERR-04)",
+     "JAVA-ERR-05 \u2014 Shut down every ExecutorService on every exit path; JDK 19+ close() blocks indefinitely with no timeout parameter. (MUST, unchanged)",
+     "JAVA-ERR-06 \u2014 Do not override finalize(); use try-with-resources or java.lang.ref.Cleaner. (MUST, unchanged)",
+     "JAVA-ERR-07 \u2014 Library code never calls System.exit() and never printStackTrace()s in place of the logger. (MUST for library/SDK/plugin, CHANGED \u2014 names KT-ERR-05)",
+     "JAVA-ERR-08 \u2014 Every Serializable class declares an explicit private static final long serialVersionUID. (SHOULD, unchanged)",
+     "JAVA-ERR-09 \u2014 Prefer a standard unchecked wrapper over a sneaky-throw helper; reserve sneaky-throw for a functional interface or an override. (CONSIDER, CHANGED \u2014 records that Kotlin has no analogue)",
+     "KT-ERR-01 \u2014 Never wrap code that must propagate a JVM Error or a test assertion in runCatching { }; it catches Throwable and no detekt rule can see inside it. (MUST, NEW)",
+     "KT-ERR-02 \u2014 Re-interrupt or rethrow every caught InterruptedException in Kotlin, and state in the rule that no detekt rule ID exists for it. (MUST, NEW)",
+     "KT-ERR-03 \u2014 Call .use { } on every AutoCloseable; close the handle explicitly behind any Sequence or Flow, and wrap a suspending close() in withContext(NonCancellable). (MUST, NEW)",
+     "KT-ERR-04 \u2014 Never write SomeException(e.message) where SomeException(e) is meant; keep detekt's SwallowedException and ThrowingNewInstanceOfSameException active. (MUST, NEW)",
+     "KT-ERR-05 \u2014 Library code never calls System.exit/Runtime.exit/Runtime.halt/exitProcess; promote detekt's ExitOutsideMain to active: true. (MUST, NEW)"
+    ]
+   }
+  },
+  {
+   "group": "maven-and-ant",
+   "dives": [
+    {
+     "slug": "maven-annotation-processing-and-toolchains",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-maven-and-ant/maven-annotation-processing-and-toolchains.md",
+     "sources_count": 19,
+     "top_rules": [
+      "Pair every annotationProcessorPaths declaration with <maven.compiler.proc>full</maven.compiler.proc> (compiler-plugin >=3.13.0) or JDK 23+ silently runs zero processors",
+      "Verification for that rule must assert target/generated-sources/annotations/ is non-empty, not just grep the POM -- a green mvn verify cannot distinguish processors-ran from processors-silently-skipped",
+      "Never say 'JDK 21' disables implicit annotation processing -- JDK 21/22 only warn; JDK 23 (JDK-8321319) is the release that actually flips the default to -proc:none",
+      "<proc>full</proc> is only a legal value from maven-compiler-plugin 3.13.0 (MCOMPILER-548) even though the proc parameter itself dates to 2.2",
+      "Gradle needs no matching GRADLE-TOOL row: gradle/gradle's JavaCompilerArgumentsBuilder.java unconditionally emits -proc:none or -processorpath on every JavaCompile, immune since the 5.0 annotationProcessor/classpath split",
+      "Apache's own maven-toolchains-plugin only selects from toolchains.xml and never downloads a JDK (confirmed from ToolchainMojo.java source: no skip param, no fetch code) -- auto-provisioning needs a different, third-party plugin",
+      "Name org.mvnsearch:toolchains-maven-plugin (Foojay-backed download) explicitly and never transpose it with org.apache.maven.plugins:maven-toolchains-plugin (select-only) -- the names are word-order swaps of each other",
+      "-Dtoolchain.skip belongs only to org.mvnsearch:toolchains-maven-plugin; Apache's official plugin has no skip parameter at all, so the flag is a silent no-op unless that specific plugin is bound"
+     ],
+     "surprises": [
+      "The JDK-23 policy change was deferred mid-flight: proposed for JDK 22 (JDK-8306819), reverted to warning-only for that release (JDK-8321321), then reinstated a full release later for JDK 23 (JDK-8321319) -- three bug IDs for what reads as one release-note line",
+      "The origin motive is a supply-chain security concern (an unwitting dependency-shipped annotation processor auto-executing at compile time), not a build-hygiene cleanup",
+      "apache/maven's own POM shows both sides of the fix in one repo: pom.xml:135 sets proc=full reactor-wide, and submodule api/maven-api-di/pom.xml:34 explicitly overrides back to proc=none because that module only defines annotations and never processes them",
+      "Maven's toolchain story needs two rules, not one, because guava genuinely runs javac/javadoc on JDK 26 while Surefire tests the same build on JDK 8/11/17/25 via jdkToolchain -- a real, not hypothetical, split-JDK build",
+      "guava's own CI comment reveals the mechanism itself: -Dtoolchain.skip only works because actions/setup-java pre-installs every JDK the org.mvnsearch plugin would otherwise fetch -- a bare local mvn verify still needs that plugin (or a hand-built toolchains.xml)",
+      "org.mvnsearch:toolchains-maven-plugin's Central metadata last-updated timestamp (April 2023) is years older than every other plugin queried here despite guava pinning its newest version, flagging an ecosystem-maturity risk for a mechanism the rule set would otherwise recommend as the standard fix"
+     ],
+     "ok": true
+    }
+   ],
+   "consolidation": {
+    "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-maven-and-ant.md",
+    "rule_ids": [
+     "MVN-BUILD-01 \u2014 Set the bytecode target with `<maven.compiler.release>` in exactly one place; never `<source>`/`<target>`.",
+     "MVN-BUILD-02 \u2014 Declare every annotation processor in `<annotationProcessorPaths>` with an explicit version, and pair it with MVN-BUILD-16 (REVISED: rationale now version-stamped JDK \u226422 vs 23+; verification gained the artifact check).",
+     "MVN-BUILD-03 \u2014 Make `verify` the last Maven goal of every CI gate; a `-DskipTests install` bootstrap before it is permitted.",
+     "MVN-BUILD-04 \u2014 Compose `argLine` additively with `@{argLine}` in any module binding JaCoCo's `prepare-agent`.",
+     "MVN-BUILD-05 \u2014 Pin `maven-surefire-plugin` from Central, never the doc-site banner, and confirm tests actually ran (REVISED: 3.6.0 is now GA; frame correction 38's numbers superseded).",
+     "MVN-BUILD-06 \u2014 Before any Maven-4 move, de-duplicate every plugin declared in both `<build>` and a `<profile><build>`.",
+     "MVN-BUILD-07 \u2014 Exercise Maven 4 as a separate non-blocking CI job at a pinned RC; never bump the committed `distributionUrl`.",
+     "MVN-BUILD-08 \u2014 State \"(Maven 3)\", \"(Maven 4)\" or \"(both)\" on every Maven mechanic, and re-verify GA before any unconditional Maven-4 claim.",
+     "MVN-BUILD-09 \u2014 Run the four-item Maven-4 readiness checklist (Java 17 runtime, Plexus removal, directory properties, `pre-`/`post-` aliasing), each with its own check.",
+     "MVN-BUILD-10 \u2014 Set `<project.build.outputTimestamp>` to an explicit ISO-8601 UTC instant in every POM that publishes.",
+     "MVN-BUILD-11 \u2014 Read every `aether.*` property in `.mvn/maven.config` against the wrapper's pinned Maven version; resolver-1.x names under Maven 4 are a silent no-op.",
+     "MVN-BUILD-12 \u2014 Never describe Maven checksum configuration as a supply-chain or security control; name `maven-gpg-plugin` for trust.",
+     "MVN-BUILD-13 \u2014 Do not remove `smartChecksums=false` when tidying build flags.",
+     "MVN-BUILD-14 \u2014 Set both `wrapperSha256Sum` and `distributionSha256Sum` in every committed `maven-wrapper.properties`.",
+     "MVN-BUILD-15 \u2014 Check for build extensions in CI as well as in the tree; a workflow-written `.mvn/extensions.xml` is invisible to a file census.",
+     "MVN-BUILD-16 \u2014 NEW: set `<maven.compiler.proc>full</maven.compiler.proc>` (plugin \u2265 3.13.0, else `-proc:full` in `<compilerArgs>`) in every module declaring a processor, and verify by asserting `target/generated-sources/annotations/` is non-empty, never by the POM alone.",
+     "MVN-BUILD-17 \u2014 NEW: name JDK 23 as the release where implicit annotation processing stops; never \"JDK 21\", never \"modern JDKs\"; `<proc>none</proc>` is the explicit opt-out.",
+     "MVN-BUILD-18 \u2014 NEW: wire all three toolchain parts (`toolchains.xml` + bound `maven-toolchains-plugin` `toolchain` goal + a toolchain-aware plugin) whenever the build must compile or test off the launching JVM; never infer a toolchain from a `<release>` pin.",
+     "MVN-BUILD-19 \u2014 NEW: keep `org.apache.maven.plugins:maven-toolchains-plugin` (select-only) and `org.mvnsearch:toolchains-maven-plugin` (Foojay downloader) apart; never claim Apache's plugin provisions a JDK and never write `-Dtoolchain.skip` unless the mvnsearch plugin is bound.",
+     "MVN-BUILD-20 \u2014 NEW: set `<jdkToolchain>` inside `maven-surefire-plugin`'s own configuration to test on another JDK; never widen the reactor toolchain and never hardcode `<jvm>`.",
+     "MVN-ANT-01 \u2014 Set `includeantruntime=\"false\"` explicitly on every live `<javac>` before any other change to the file.",
+     "MVN-ANT-02 \u2014 Never introduce `ant.importBuild()`; bridge via an external process or `ant.<task>()` inside a real task action.",
+     "MVN-ANT-03 \u2014 Never \"change\" an Ant property by re-declaring it; properties are write-once.",
+     "MVN-ANT-04 \u2014 Do not read a `depends` chain as proof a target ran.",
+     "MVN-ANT-05 \u2014 Port leaf targets first and verify each ported artifact against the Ant build's own jar before deleting the Ant target.",
+     "MVN-ANT-06 \u2014 Pin `digestalg`/`sigalg` on `<signjar>` and set `preservelastmodified=\"true\"`."
+    ],
+    "conflicts_resolved": [
+     "MVN-BUILD-02 overclaimed the mechanism: it asserted javac's compile-classpath processor scan unconditionally. That scan is JDK \u226422 only \u2014 JDK-8321319 removed it in JDK 23. Rationale rewritten in place and version-stamped; rule text and meaning unchanged, with the dangerous implication (\"declaring paths controls processing\") replaced by the explicit split: -02 controls WHICH processors run, MVN-BUILD-16 controls WHETHER any run.",
+     "MVN-BUILD-05's evidence was stale: Surefire 3.6.0 is GA on Central as of 2026-09-12 (lastUpdated 20260903221843), superseding frame correction 38's 3.5.6-GA/3.6.0-M1 snapshot. Rule, severity and meaning unchanged; the banner/Central example is now the rule's strongest support rather than its illustration (the banner text never changed while the artifact went from milestone to GA). Frame correction 38 is now stale on the numbers, correct on the method \u2014 noted in the Revision log, frame not edited.",
+     "Verdict 7 rewritten to match the new Surefire evidence; Verdicts 8 (annotation processing) and 9 (toolchain-acquisition gap) added.",
+     "The follow-up proposed folding proc=full into MVN-BUILD-02 as a \"second conjunct\". Rejected under ID stability: -02 keeps its number and meaning, the conjunct ships as new MVN-BUILD-16 with a cross-reference in both directions.",
+     "Two of the dive's ten normative candidates were folded rather than given IDs: the artifact-level verification (\u00a72) lives in MVN-BUILD-16's Verification column, and \u00a76/\u00a77/\u00a79 (Apache's plugin does not download, the transposed names, -Dtoolchain.skip ownership) are one rule, MVN-BUILD-19 \u2014 three separate rows would have been three statements of the same confusion."
+    ],
+    "needs_another_round": [
+     "Gradle-side handback (GRADLE-TOOL / JAVA-PLAT, not MVN-BUILD) \u2014 given that Gradle emits -proc:none or -processorpath unconditionally on every JavaCompile and so was never exposed to the JDK-23 policy, is the only Gradle-side rule the narrow one, that -processorpath/--processor-path in compilerArgs is rejected outright so an agent must use the typed annotationProcessorPath? Evidence is settled at gradle__gradle@ea17004a31:.../JavaCompilerArgumentsBuilder.java:110-112,209-216; the decision is the map's.",
+     "maven-antrun-plugin \u2014 Ant inside Maven: what does a rule say about <target> blocks embedded in a POM, the one Ant surface that appears in live Maven builds? MVN-ANT as written only fires on a build.xml. (Carried unchanged from the previous round.)",
+     "Maven build extensions as a resolution mechanism: does MVN-BUILD-15 become a MUST, and what does a rule say about an extension that replaces the local repository (apache/maven's Mimir) for CI only? (Carried unchanged.)"
+    ],
+    "must_count": 18
+   }
+  },
+  {
+   "group": "gradle-settings",
+   "dives": [
+    {
+     "slug": "settings-plugin-testkit-verification",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-gradle-settings/settings-plugin-testkit-verification.md",
+     "sources_count": 14,
+     "top_rules": [
+      "withPluginClasspath() DOES reach settings scope \u2014 the injected-classpath resolver is wired at Scope.Build and consulted by DefaultPluginRequestApplicator regardless of PluginManagerInternal target type (source-confirmed; zero exemplars actually use it)",
+      "The compileOnly x withPluginClasspath trap (GRADLE-PLUG-14) is the identical defect object at settings scope, not an analogue \u2014 one shared ClassPath, one shared resolver, same ClassNotFoundException naming the wrong class",
+      "No API or build-scan value reports BuildService instantiation count; 'created exactly once' can only be proven via a marker file the service writes on first use, read back after build() \u2014 never a static counter",
+      "GradleRunner.withDebug(true) breaks TestKit's process isolation and would make an in-process static readable, but is a rejected pattern \u2014 a debug aid, not a sanctioned assertion path",
+      "GRADLE-PLUG-10's existing --configuration-cache functional-test leg structurally already covers GRADLE-PLUG-23's 'Reusing configuration cache.' verification for a Settings plugin, since the settings file is the only place it can ever be applied",
+      "GRADLE-PLUG-24 (sha256 enforcement) needs a runnable negative test \u2014 tamper the pin, assert buildAndFail() \u2014 because a grep for MessageDigest proves the check exists, not that anything ever calls .get() on it",
+      "Isolated Projects diagnostics mode routes through the same store-then-discard configuration-cache reporting pipeline, making BuildResult.output a legal TestKit assertion surface for GRADLE-PLUG-27, though the exact console phrase is an unpinned dated re-check",
+      "GRADLE-PLUG-22 and GRADLE-PLUG-26 keep pure reading heuristics, explicitly labeled as such \u2014 no dynamic TestKit assertion adds independent signal over a source grep for those two"
+     ],
+     "surprises": [
+      "No corpus exemplar (ktor's build-settings-logic, junit-framework's settings-conventions) and no gradle/gradle-own TestKit integration test ever applies a plugin from a functional test's generated settings.gradle \u2014 the mechanism is real but completely unexercised anywhere in the ecosystem read",
+      "Gradle's own ConfigurationCacheTestKitIntegrationTest.groovy carries a doc comment explicitly naming both plugin-resolution routes (INJECTED_CLASSPATH via DefaultInjectedClasspathPluginResolver, MAVEN_REPO via DefaultScriptClassPathResolver) and parametrizes every test case over both \u2014 direct source confirmation of Q1/Q4 nobody had to infer",
+      "There is no Gradle API, javadoc, or build-scan surface anywhere that reports how many times a shared BuildService was instantiated \u2014 registerIfAbsent's 'exactly once' is a construction-time guarantee, not an introspectable fact, so the assertion pattern (a marker file) had to be constructed rather than found",
+      "GradleRunner.withDebug(true) genuinely breaks TestKit's process-isolation guarantee (same-JVM execution for IDE debugging) and would make an in-process static field readable \u2014 a real, previously undocumented loophole worth explicitly rejecting rather than ignoring",
+      "Isolated Projects diagnostics mode doesn't have its own reporting channel \u2014 gradle/gradle's own IsolatedProjectsFixture shows it forwards to assertStateStoredAndDiscarded, i.e. it reuses the configuration-cache problem pipeline, which is what makes it TestKit-assertable at all via BuildResult.output",
+      "sha256 enforcement (GRADLE-PLUG-24) has a laziness failure mode a static grep can never catch: a Provider computed inside a ValueSource that nothing ever calls .get() on passes every grep while enforcing nothing at runtime, which only a tamper-and-assert-buildAndFail() negative test exposes"
+     ],
+     "ok": true
+    }
+   ],
+   "consolidation": {
+    "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-gradle-settings.md",
+    "rule_ids": [
+     "GRADLE-PLUG-22 \u2014 Never implement `JavaToolchainResolver` or add a `toolchainManagement` entry to provision a non-JDK tool. (MUST, unchanged; verification now labelled a reading heuristic)",
+     "GRADLE-PLUG-23 \u2014 Provision a pinned binary from one `registerIfAbsent(\u2026)` `BuildService` in `Plugin<Settings>.apply()`, downloading only in the service's execution-time method. (MUST, unchanged; verification gains a marker-file 'created once' leg and the doubled `--configuration-cache` leg)",
+     "GRADLE-PLUG-24 \u2014 Enforce a provisioned binary's sha256 by throwing from execution-time code, never from a `ValueSource`. (MUST, unchanged; verification rewritten to a tampered-pin `buildAndFail()` negative test)",
+     "GRADLE-PLUG-25 \u2014 Cache the provisioned binary outside `build/` and key the skip on the sha256, not file presence. (MUST, unchanged; verification rewritten to two runnable legs: survives `clean`, rejects a right-name/wrong-content file)",
+     "GRADLE-PLUG-26 \u2014 Set a shared `BuildService`'s parameters inline at registration and read it back only via `findByName`. (MUST, unchanged; verification explicitly labelled a reading heuristic)",
+     "GRADLE-PLUG-27 \u2014 Run IP diagnostics against the plugin's functional-test build each release; never make `org.gradle.isolated-projects=true` a required CI job. (SHOULD, unchanged; verification corrected \u2014 output is never empty, phrase is a dated re-check, `BuildResult.output` is a legal surface)",
+     "GRADLE-PLUG-28 \u2014 Treat a JSR-305 \u2192 JSpecify swap on exported types as a major-version, migration-note change. (MUST, unchanged; verification gains a consumer fixture that must flip `build()` \u2192 `buildAndFail()`)",
+     "GRADLE-PLUG-29 \u2014 NEW (MUST): apply a Settings plugin's functional test from the generated test project's `settings.gradle(.kts)` `plugins {}` block, preferring the `MAVEN_REPO` route; never from a generated `build.gradle(.kts)`.",
+     "GRADLE-STRUCT-10 \u2014 Never create two projects with the same path leaf in a build that also assigns a uniform explicit `group`. (MUST, untouched)",
+     "GRADLE-STRUCT-11 \u2014 Never put an `org.gradle.*` key in a `gradle.properties` that is not a build root. (MUST, untouched)",
+     "GRADLE-STRUCT-12 \u2014 Gate remote build-cache push on a write credential read through `providers.environmentVariable`, never on CI-ness. (MUST, untouched)"
+    ],
+    "conflicts_resolved": [
+     "F (new) \u2014 GRADLE-PLUG-27's old cell claimed 'diagnostics output reports no violation (empty is the pass)'. gradle/gradle's `IsolatedProjectsFixture.groovy:124-132` routes `IsolatedProjectsMode.DIAGNOSTICS` to `assertStateStoredAndDiscarded`, so diagnostics always stores-then-discards and prints through the configuration-cache problem pipeline: output is never empty. Resolved against the old cell as an overclaim; cell now asserts presence/absence of a violation report, carries a dated re-check for the wording, and records that `BuildResult.output` is a legal TestKit surface.",
+     "Verification overclaim, GRADLE-PLUG-24 \u2014 a grep proves where the hash check lives, not that it fires; a `Provider` nothing `.get()`s passes it. Replaced with a tampered-pin `buildAndFail()` test plus a `--configuration-cache` repeat.",
+     "Verification overclaim, GRADLE-PLUG-25 \u2014 a source read cannot distinguish `exists()` from a hash compare whose result is discarded. Replaced with two runnable legs.",
+     "Verification gap, GRADLE-PLUG-23 \u2014 the 'registered exactly once' guarantee was asserted with no way to observe it; no Gradle API or build-scan value reports instantiation count. Resolved with a marker-file leg, and `withDebug(true)`/static counters explicitly rejected (they defeat the process isolation GRADLE-PLUG-15 requires).",
+     "Wave-3 framing retired \u2014 'every GRADLE-PLUG rule is verified by reading source' is false: `withPluginClasspath()` reaches settings scope (`DefaultPluginRequestApplicator` never branches on target type; `SettingsScopeServices` builds the same `DefaultPluginManager`). Recorded as verdict 11.",
+     "Conflicts A\u2013E (wave-3 corpus re-measurements) carried forward unchanged; the follow-up contradicts none of them."
+    ],
+    "needs_another_round": [
+     "Settings-plugin test route default \u2014 absent the `compileOnly` trap, should `MAVEN_REPO` (local publish + `pluginManagement { repositories { maven(\u2026) } }`) or `withPluginClasspath()` be the default, given the local-publish step's cost and its `maven-publish` \u00d7 configuration-cache interaction (gradle/gradle#24040)? GRADLE-PLUG-29 ships a preference, not a measurement \u2014 no corpus repo, no gradle/gradle test and no primary doc settles it at settings scope.",
+     "Cold-runner cost of execution-time provisioning \u2014 what does GRADLE-PLUG-23's first-task-pays download cost on a GitHub-hosted runner versus a `setup-ocx`-style CI step, and does that change whether the Gradle plugin should provision at all when a CI action already did? (carried forward, unanswered)",
+     "Latent-collision detection for GRADLE-STRUCT-10 \u2014 is there a Gradle-side way to detect an actually-losing project (resolution-result walk, build-scan dependency view, `dependencies` report diff) so the rule reports a real defect rather than a latent one? (carried forward, unanswered)",
+     "Dated re-check, not a research round \u2014 Isolated Projects' diagnostics console wording is unpinned by any primary source (IP incubating since 9.7.0, 2026-08-06); re-confirm and freeze a literal string in GRADLE-PLUG-27 when IP leaves incubating."
+    ],
+    "must_count": 10
+   }
+  },
+  {
+   "group": "concurrency",
+   "dives": [
+    {
+     "slug": "java-concurrency-residual-rows",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-concurrency/java-concurrency-residual-rows.md",
+     "sources_count": 19,
+     "top_rules": [
+      "Size pools by workload regime: CPU-bound stays on a pool sized to availableProcessors() (or the common pool); blocking-style I/O goes one-virtual-thread-per-task \u2014 JEP 444 states the CPU-bound exclusion verbatim, not an inference (new JAVA-CONC-15)",
+      "Annotate shared mutable state with @GuardedBy from com.google.errorprone.annotations.concurrent or javax.annotation.concurrent \u2014 never net.jcip.annotations.GuardedBy, which compiles but the checker silently ignores (new JAVA-CONC-16)",
+      "@Immutable (ImmutableChecker) and @GuardedBy (GuardedByChecker) are both ENABLED_ERRORS already \u2014 zero config, on by default; @ThreadSafe has no working checker in the public distribution despite its own javadoc's claim",
+      "Bound ReentrantReadWriteLock reader fan-out under virtual threads below 65,535 (its own javadoc's documented ceiling, not a newsletter claim) or use StampedLock directly \u2014 asReadWriteLock() drops Condition support, reentrancy, and ownership (new JAVA-CONC-17)",
+      "Bump DoubleCheckedLocking, DateFormatConstant, and FutureReturnValueIgnored to -Xep:Name:ERROR \u2014 all three are ENABLED_WARNINGS already, so this is a severity bump, not an activation (extends JAVA-LINT-02)",
+      "DC_DOUBLECHECK runs automatically the moment JAVA-LINT-10 wires SpotBugs at all \u2014 findbugs.xml's FindDoubleCheck detector carries no disabled=\"true\" (extends JAVA-LINT-10, no new config needed)",
+      "Drop M-N-06 as a standalone rule: close() semantics is JAVA-ERR-05, VT admission control is JAVA-CONC-01/02, pool-sizing regime is the new JAVA-CONC-15 \u2014 nothing left to write",
+      "A CompletableFuture chain returned to a caller (not discarded as a bare statement) is correct without a terminal handler \u2014 FutureReturnValueIgnored targets the fire-and-forget-statement shape specifically, confirmed against a real exemplar"
+     ],
+     "surprises": [
+      "@ThreadSafe's own javadoc claims ThreadSafeChecker validation, but ThreadSafeChecker is never imported into BuiltInCheckerSuppliers.java (0 matches vs. 8 wired sibling threadsafety.* checkers) \u2014 the annotation's documented enforcement does not actually ship",
+      "GuardedByChecker recognizes exactly five annotation packages, and net.jcip.annotations.GuardedBy \u2014 the package from Java Concurrency in Practice, the textbook most training data quotes \u2014 is not one of them",
+      "GuardedByChecker and ImmutableChecker are both ENABLED_ERRORS (fully on, zero config) already; the real gap for M-N-10 is that nothing makes an agent write the annotation, not enforcement",
+      "The ReentrantReadWriteLock 65,535 ceiling has a primary source right in its own JDK javadoc's 'Implementation Notes' \u2014 the newsletter the topic map flagged as thin didn't need to be the citation at all",
+      "FutureReturnValueIgnored's real target is a discarded fire-and-forget statement, not every CompletableFuture chain lacking a terminal handler \u2014 a chain returned to a caller transfers responsibility and is correct, confirmed in micronaut-core's AsyncInterceptor",
+      "M-N-06 fully dissolves into three existing/new rules (JAVA-ERR-05, JAVA-CONC-01/02, new JAVA-CONC-15) with nothing left over for its own row"
+     ],
+     "ok": true
+    }
+   ],
+   "consolidation": {
+    "conflicts_resolved": [
+     "JAVA-CONC-13 overclaimed: 'Do not use ForkJoinPool.commonPool() for a blocking callback' was unconditional, but the JDK ships ForkJoinPool.ManagedBlocker as a sanctioned escape hatch that expands pool parallelism for the blocking call's duration. Rule text amended in place to name it as the one exception; rationale now also records that CompletableFuture's no-Executor ...Async default IS that same common pool.",
+     "Wrong number corrected: this file's old open question 1 called it the 'ReentrantReadWriteLock 65,536-reader ceiling'. The lock's own javadoc ('Implementation Notes', JDK 21, unchanged since JDK 5) says 65535 recursive write locks and 65535 read locks, and the failure is an Error throw. Corrected everywhere; the wrong figure's only home (open question 1) was removed.",
+     "Residual dive vs. virtual-threads dive on structured-concurrency status: the residual's Contested section says 'still preview as of JDK 25, JEP 505 in JDK 25'. The vt dive read the full seven-preview changelog (JEP 505/25, 525/26, 533/27, finalisation targeted at 28). Primary-source changelog outranks a passing status aside; JAVA-CONC-05/06 unchanged, conflict recorded in verdict 16.",
+     "Map row M-N-07's framing ('CompletableFuture chains with no terminal handler') narrowed: a chain RETURNED to a caller or assigned to a field transfers exception-handling responsibility and is correct (micronaut-core AsyncInterceptor:100-102 confirms). Only a bare unassigned statement is the bug. Row therefore lands as a JAVA-LINT severity bump, not a reading-heuristic rule here.",
+     "Enable-vs-bump, third instance: DoubleCheckedLocking, DateFormatConstant and FutureReturnValueIgnored are ENABLED_WARNINGS (BuiltInCheckerSuppliers.java:982, 972, 1015), not DISABLED_CHECKS. 'Enable it' asks an agent to do nothing; the action is -Xep:<Name>:ERROR. Same shape as frame correction 30's StringCaseLocaleUsage.",
+     "@ThreadSafe's own javadoc contradicted by source: it claims validation by ThreadSafeChecker, which is imported into none of BuiltInCheckerSuppliers.java's three built-in sets (0 matches vs 8 wired threadsafety.* siblings). Resolved against the javadoc; JAVA-CONC-16 states it is prose only, and verdict 12 records it as a documented GAP."
+    ],
+    "must_count": 25,
+    "needs_another_round": [
+     "Kotlin Flow (map rows M-U-07, M-U-10) \u2014 does Flow need its own depth section with the catch-operator placement rule and the StateFlow conflation contract, or do two rows in coroutines.md cover it? Unchanged from the previous round; this dive did not touch Kotlin.",
+     "JDK 27 GA re-verification \u2014 JDK 27 reached GA 2026-09-15, after every JEP 533 claim here was written against the RC. Did the 7th preview's shape (R_X type parameter, timeout(), awaitAll() removed) ship unchanged, and is structured concurrency still targeted at JDK 28?",
+     "detekt activation defaults \u2014 the audited snapshot is a main-branch build mid-package-rename (dev.detekt.*). Do the four coroutine rules stay active:false in the first stable release from that branch? KT-CORO-01's whole premise depends on it.",
+     "Error Prone ThreadSafeChecker registration \u2014 re-read BuiltInCheckerSuppliers.java's import list on any Error Prone bump past 2.36.0. If ThreadSafeChecker appears, JAVA-CONC-16's '@ThreadSafe is prose only' clause inverts. New question opened by this round."
+    ],
+    "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-concurrency.md",
+    "rule_ids": [
+     "JAVA-CONC-01 \u2014 Never construct a fixed-size pool of virtual threads; bound concurrency with a Semaphore instead. (unchanged)",
+     "JAVA-CONC-02 \u2014 Bound fan-out at the downstream resource's real capacity, never at the task count. (unchanged)",
+     "JAVA-CONC-03 \u2014 State synchronized-vs-ReentrantLock conditionally on the module's minimum JDK, never as one sentence. (unchanged)",
+     "JAVA-CONC-04 \u2014 Never use -Djdk.tracePinnedThreads; read the jdk.VirtualThreadPinned JFR event instead. (unchanged)",
+     "JAVA-CONC-05 \u2014 Keep every preview API off the main sourceset compile path of any published module. (unchanged)",
+     "JAVA-CONC-06 \u2014 Stamp every StructuredTaskScope/Joiner member you emit with the JDK it was verified against. (unchanged)",
+     "JAVA-CONC-07 \u2014 Carry context with ScopedValue, not ThreadLocal, and never pass a literal null to orElse. (unchanged)",
+     "JAVA-CONC-08 \u2014 State a strategy for every static final ThreadLocal cache before scaling onto virtual threads; do not default to a lock-free pool. (unchanged)",
+     "JAVA-CONC-09 \u2014 Inject a ProcessLauncher at every spawn point; never call new ProcessBuilder().start() outside the one real implementation. (unchanged)",
+     "JAVA-CONC-10 \u2014 Drain getInputStream() and getErrorStream() concurrently; never read one to completion first. (unchanged)",
+     "JAVA-CONC-11 \u2014 Run the destroy/waitFor/destroyForcibly ladder from a finally on every spawn path, walking descendants() if the CLI forks. (unchanged)",
+     "JAVA-CONC-12 \u2014 clear() ProcessBuilder.environment() before writing to it, and read System.getenv() in exactly one classified place. (unchanged)",
+     "JAVA-CONC-13 \u2014 Make Process.onExit() the async path and pass an explicit bounded Executor to every blocking stage; the common pool's only exception is a ManagedBlocker. (AMENDED \u2014 ManagedBlocker carve-out added, shared-common-pool rationale added)",
+     "JAVA-CONC-14 \u2014 Retry sysexit 75 inside the spawn call, before any exception object for that attempt is constructed. (unchanged)",
+     "JAVA-CONC-15 \u2014 Size a pool by its workload's regime: CPU-bound on availableProcessors(), blocking I/O one-virtual-thread-per-task, never the reverse. (NEW)",
+     "JAVA-CONC-16 \u2014 Annotate guarded state with a checker-recognised @GuardedBy package, never net.jcip.annotations, and treat @ThreadSafe as prose only. (NEW)",
+     "JAVA-CONC-17 \u2014 Bound readers below ReentrantReadWriteLock's 65535-hold ceiling under virtual-thread fan-out, and audit before swapping in asReadWriteLock(). (NEW)",
+     "KT-CORO-01 \u2014 Explicitly activate detekt's four coroutine rules in the committed config; 'detekt is applied' is not 'these run'. (unchanged)",
+     "KT-CORO-02 \u2014 Fix bare GlobalScope.launch/async; the context-carrying adapter form is the one named exception. (unchanged)",
+     "KT-CORO-03 \u2014 Never call runBlocking from inside a suspend fun. (unchanged)",
+     "KT-CORO-04 \u2014 Install a CoroutineExceptionHandler only on a root coroutine, never on async and never nested. (unchanged)",
+     "KT-CORO-05 \u2014 Rethrow CancellationException from every catch wide enough to observe it, runCatching included. (unchanged)",
+     "KT-CORO-06 \u2014 Give each blocking call site a Dispatchers.IO.limitedParallelism(n) view sized to the resource it guards. (unchanged)",
+     "KT-CORO-07 \u2014 Fix a shared-mutable-state race with atomics, confinement or Mutex.withLock \u2014 never with @Volatile. (unchanged)",
+     "KT-CORO-08 \u2014 Wrap must-complete suspending cleanup in withContext(NonCancellable). (unchanged)",
+     "KT-CORO-09 \u2014 Put a suspension point or an explicit isActive/ensureActive() check in every long-running coroutine loop. (unchanged)",
+     "KT-CORO-10 \u2014 Inject the dispatcher in a library or SDK rather than hardcoding it at the call site. (unchanged)",
+     "KT-CORO-11 \u2014 Back any thread-safety claim with a real-dispatcher stress test; runTest alone cannot fail on a race. (unchanged)",
+     "KT-CORO-12 \u2014 Launch anything that must outlive a runTest body on backgroundScope. (unchanged)",
+     "KT-CORO-13 \u2014 Pick StandardTestDispatcher when the test asserts dispatch order; UnconfinedTestDispatcher only when it does not. (unchanged)"
+    ]
+   }
+  },
+  {
+   "group": "bazel-java",
+   "dives": [
+    {
+     "slug": "bazel-java-testing-and-coverage",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-bazel-java/bazel-java-testing-and-coverage.md",
+     "sources_count": 15,
+     "top_rules": [
+      "Use contrib_rules_jvm's java_junit5_test / java_test_suite(runner=\"junit5\") for JUnit 5 under Bazel \u2014 no first-party rules_java equivalent exists",
+      "A hand-rolled java_test + custom launcher main_class is viable but must reimplement XML_OUTPUT_FILE, TESTBRIDGE_TEST_ONLY, TEST_PREMATURE_EXIT_FILE and TEST_SHARD_* to behave like a real Bazel test",
+      "java_test_suite's runner attribute defaults to \"junit4\", not \"junit5\" \u2014 always pass it explicitly for Jupiter sources",
+      "Adopting java_junit5_test/java_test_suite never requires calling lint_setup()/linter.register() \u2014 apple_rules_lint is only load-bearing for the checkstyle/PMD/SpotBugs wrappers (BZL-JAVA-23's CONSIDER), not the test rules",
+      "apple_rules_lint is transitively fetched once contrib_rules_jvm is a bazel_dep (its own MODULE.bazel deps on it unconditionally) but fetching is not using \u2014 no lint targets generate without an explicit lint_setup call",
+      "bazel coverage --combined_report=lcov //... is the only Java coverage path; output is one merged lcov file at $(bazel info output_path)/_coverage/_coverage_report.dat, never JaCoCo XML/CSV",
+      "Bazel has no coverage-threshold flag at all (no --fail_under/--minimum_coverage) and no per-target coverage signal \u2014 any numeric floor is necessarily a CI-side script over the combined lcov report",
+      "A JaCoCo-BRANCH-percentage-style floor (JAVA-TEST-10) cannot read Bazel's lcov output directly \u2014 the artifact shapes don't match, so Gradle-side coverage-gate patterns don't transfer to Bazel"
+     ],
+     "surprises": [
+      "java_junit5_test is literally java_test underneath (main_class=JUnit5Runner + a -javaagent blocking System.exit) \u2014 reading the macro source directly settles the 'hand-rolled second path' question: contrib_rules_jvm's own ActualRunner.java IS that second path, and it's ~150 lines to be Bazel-protocol-correct, not five.",
+      "apple_rules_lint is still transitively resolved via bzlmod even though the test rules don't need it \u2014 a nuance beyond the README's clean 'linting is opt-in' framing (fetched vs. used are different things).",
+      "Bazel's own coverage doc for Java is a single sentence with zero mention of JaCoCo; the actual JaCoCo wiring (JacocoCoverageRunner, JACOCO_METADATA_JAR) exists only in Bazel's source, never in any prose doc.",
+      "bazelbuild/bazel#12159 (richer JVM coverage format) was closed not_planned in 2024 \u2014 the coverage-format gap this dive documents is a deliberate, acknowledged non-goal for Bazel core, not an oversight.",
+      "0/6 Bazel-carrying exemplars, including bazelbuild/bazel building itself, set any coverage flag in .bazelrc \u2014 the one repo best positioned to need custom Java coverage wiring has none.",
+      "Bazel coverage output is lcov-only ('At this point only LCOV is supported') \u2014 a genuine format mismatch with every other JVM coverage tool this program covers (JaCoCo, Kover), with no first-party bridge."
+     ],
+     "ok": true
+    }
+   ],
+   "consolidation": {
+    "conflicts_resolved": [
+     "BZL-JAVA-23 overclaimed what the apple_rules_lint dependency means \u2014 its old text required 'record the apple_rules_lint dependency explicitly' and its grep flagged a bare `bazel_dep(name = \"contrib_rules_jvm\")` / `bazel_dep(name = \"apple_rules_lint\")` as a review finding. That would have made the JUnit 5 adoption BZL-JAVA-24 now requires a finding against itself. Rewritten in place: the decision is the `lint_setup()`/`linter.register()` call only, a transitive fetch is explicitly not evidence of adoption, severity stays CONSIDER.",
+     "BZL-JAVA-23's dangling clause 'Its java_test_suite and java_junit5_test are a separate, unblocked decision' removed \u2014 that decision is now settled by BZL-JAVA-24 (use them) and BZL-JAVA-25 (they carry no lint coupling).",
+     "Open question 7 ('Bazel-Java testing and coverage') answered and removed. Its testing half became rules BZL-JAVA-24/25/27; its coverage half had no mechanism to regulate, so it moved into the Verdict as documented gap item 13 (lcov-only, one combined report, no threshold flag in Bazel at all, bazelbuild/bazel#12159 closed not_planned) rather than being dropped or left open.",
+     "JAVA-TEST-10's JaCoCo-BRANCH coverage floor was implicitly assumed portable to Bazel; BZL-JAVA-26 records it is not \u2014 the artifact shapes do not match and a CI step globbing jacocoTestReport.xml after `bazel coverage` passes vacuously.",
+     "Evidence class made explicit rather than averaged: new 'Unmeasured in the corpus' subsection records that BZL-JAVA-24/25/27 have zero exemplars on either side (0/6 reference contrib_rules_jvm, apple_rules_lint, junit.jupiter or junit5) and that BZL-JAVA-26's evidence is one-sided, so a reader cannot mistake source-reading guidance for measured practice."
+    ],
+    "must_count": 15,
+    "needs_another_round": [
+     "java_export / Maven Central publishing from Bazel \u2014 does rules_jvm_external's java_export/maven_publish produce a Central-Portal-acceptable bundle (sources jar, javadoc jar, per-file GPG signature, complete POM), or is Bazel a non-publisher that always hands off to Gradle or Maven? Load-bearing for the OCX SDK's jvm-release skill. (carried, unchanged)",
+     "KotlinCompile worker-state reproducibility \u2014 does building twice with and without --strategy=KotlinCompile=local produce byte-identical jars? Would promote BZL-JAVA-20 from CONSIDER to SHOULD or retire it. Below the line for this program. (carried, unchanged)",
+     "contrib_rules_jvm stability \u2014 the ruleset is pre-1.0 (0.31.0, no tagged GitHub releases) and 0/6 exemplars exercise it, yet BZL-JAVA-24/27 are MUSTs resting entirely on reading its source. A round measuring its adoption outside this corpus, or its API churn across recent BCR versions, would tell us whether a MUST on a pre-1.0 dependency is defensible.",
+     "lcov\u2192JaCoCo conversion ownership \u2014 BZL-JAVA-26 says any numeric floor is a CI script over the merged .dat, but names no tool. Whether a maintained lcov\u2192Cobertura/JaCoCo converter exists that a dual Gradle+Bazel shop could standardise on was not run down; without one, a JVM shop needs two coverage toolchains with no bridge."
+    ],
+    "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-bazel-java.md",
+    "rule_ids": [
+     "BZL-JAVA-01 \u2014 Pin all four JDK version flags in the root .bazelrc; never write the nonexistent --java_version/--tool_java_version. (MUST, unchanged)",
+     "BZL-JAVA-02 \u2014 Give both runtime flags a remotejdk_* value; treat local_jdk as a finding absent a comment. (MUST, unchanged)",
+     "BZL-JAVA-03 \u2014 Express a below-toolchain bytecode target as --javacopt \"-source N -target N\", never by lowering --java_language_version. (MUST, unchanged)",
+     "BZL-JAVA-04 \u2014 Never read an absent strict-deps flag as 'not enforced', and never write =off/=warn to make a build pass. (MUST, unchanged)",
+     "BZL-JAVA-05 \u2014 Write --experimental_strict_java_deps and confirm the spelling on the pinned binary before relying on it. (SHOULD, unchanged)",
+     "BZL-JAVA-06 \u2014 Wire Error Prone through --javacopt -Xep or java_package_configuration, never as a bazel_dep or maven coordinate. (MUST, unchanged)",
+     "BZL-JAVA-07 \u2014 Never disable header compilation without a recorded reason, and never call Bazel's header compiler 'ijar-based' \u2014 it is turbine. (SHOULD, unchanged)",
+     "BZL-JAVA-08 \u2014 Register the intended default JVM toolchain first and say so in a comment; never rely on 'more specific wins'. (SHOULD, unchanged)",
+     "BZL-JAVA-09 \u2014 Give a processor reading com.sun.tools.javac.* its own --add-exports jvmopt; never try to change JavaBuilder's --patch_module. (MUST where such a processor exists, unchanged)",
+     "BZL-JAVA-10 \u2014 Set lock_file on every maven.install call and commit the file; one lock file per install tag. (MUST, unchanged)",
+     "BZL-JAVA-11 \u2014 Set fail_if_repin_required = True on every pinned maven.install; the default False makes both lock-file self-checks advisory. (MUST, unchanged)",
+     "BZL-JAVA-12 \u2014 Never hand-edit or line-merge maven_install.json; discard both sides and regenerate with REPIN=1 bazel run @maven//:pin. (MUST, unchanged)",
+     "BZL-JAVA-13 \u2014 Set strict_visibility = True on maven.install. (SHOULD, unchanged)",
+     "BZL-JAVA-14 \u2014 Set version_conflict_policy = \"pinned\" wherever the build claims deterministic resolution. (SHOULD, unchanged)",
+     "BZL-JAVA-15 \u2014 Scope every exclusion to the narrowest correct mechanism: per-artifact exclusions vs global excluded_artifacts. (SHOULD, unchanged)",
+     "BZL-JAVA-16 \u2014 Mark codegen-only coordinates neverlink and test-only ones testonly via maven.amend_artifact, never by hand-editing the generated target. (SHOULD, unchanged)",
+     "BZL-JAVA-17 \u2014 Prefer the literal @maven//:group_artifact label over the artifact() macro in any BUILD file buildozer will touch. (CONSIDER, unchanged)",
+     "BZL-JAVA-18 \u2014 Never let a Maven-resolved Kotlin jar reach a hand-rolled java_import; ijar strips inline-function bodies. (MUST, unchanged)",
+     "BZL-JAVA-19 \u2014 Set kt_kotlinc_options(x_lambdas = \"indy\") wherever the same Kotlin sources are also compiled by Gradle. (MUST with a Gradle leg, unchanged)",
+     "BZL-JAVA-20 \u2014 Know Kotlin compile actions run under persistent multiplexed workers by default; reach for --strategy=<mnemonic>=local first when triaging a Kotlin flake. (CONSIDER, unchanged)",
+     "BZL-JAVA-21 \u2014 Name every _deploy.jar you ship explicitly; a green bazel build //... never builds it. (MUST for CLI/application consumers, unchanged)",
+     "BZL-JAVA-22 \u2014 In a dual Gradle+Bazel repo, require one prose line naming the canonical build; do not require a graph-parity verifier. (SHOULD, unchanged)",
+     "BZL-JAVA-23 \u2014 Decide contrib_rules_jvm's checkstyle/PMD/SpotBugs wrappers at the lint_setup()/linter.register() call, not at the bazel_dep; a transitive apple_rules_lint fetch is not adoption. (CONSIDER, REWRITTEN \u2014 scope narrowed, overclaim removed)",
+     "BZL-JAVA-24 \u2014 Run JUnit 5 under Bazel through contrib_rules_jvm's java_junit5_test or java_test_suite(runner = \"junit5\") with JUNIT5_DEPS added explicitly; a hand-rolled main_class must honour XML_OUTPUT_FILE, TESTBRIDGE_TEST_ONLY, TEST_PREMATURE_EXIT_FILE and TEST_SHARD_*. (MUST where a JUnit 5 suite runs under Bazel, NEW)",
+     "BZL-JAVA-25 \u2014 Never treat a transitively fetched apple_rules_lint as a linting adoption, and never add lint_setup()/linter.register() as part of a JUnit 5 change. (SHOULD, NEW)",
+     "BZL-JAVA-26 \u2014 Treat the single merged lcov _coverage_report.dat as Bazel's only Java coverage artifact and enforce any numeric floor as a CI step over it \u2014 never a Bazel flag, never per-target, never JaCoCo XML. (MUST where a coverage gate is claimed, NEW)",
+     "BZL-JAVA-27 \u2014 Pass runner = \"junit5\" explicitly on every java_test_suite over JUnit 5 sources; the default is junit4 and the failure is a green build that discovered zero tests. (MUST, NEW)"
+    ]
+   }
+  }
+ ],
+ "surprises": [
+  "java-runtime-safety/find-sec-bugs-viability: find-sec-bugs 1.14.0 has a confirmed, reproduced NoSuchMethodError crash (not just a false-positive/staleness issue) against SpotBugs 4.9.5/4.9.6, caused by SpotBugs itself deleting a method it depended on \u2014 SpotBugs reverted the deletion within weeks, citing find-sec-bugs by name in its own PR.",
+  "java-runtime-safety/find-sec-bugs-viability: The deprecated method SpotBugs restored is scheduled for permanent removal ~1 year after 2025-10-08 (i.e. around October 2026, about a month after this research date), and find-sec-bugs's own unreleased master has already removed its usage \u2014 but no release has shipped that fix, so the public artifact will likely break again on schedule.",
+  "java-runtime-safety/find-sec-bugs-viability: Semgrep's public java ruleset explicitly cites find-sec-bugs.github.io/bugs.htm as the source-rule-url for ~24 of its 60 rules \u2014 Semgrep is not an independent alternative but a partial port of find-sec-bugs's own taxonomy, and it has zero rules for SchemaFactory/Validator/XMLReader/XPath XXE or PREDICTABLE_RANDOM.",
+  "java-runtime-safety/find-sec-bugs-viability: find-sec-bugs ships its SpotBugs dependency as provided scope, meaning the consumer's own toolVersion pin \u2014 not find-sec-bugs's declared version \u2014 determines actual runtime compatibility; the tool's own pom.xml version number is nearly irrelevant to whether it will crash.",
+  "java-runtime-safety/find-sec-bugs-viability: The exact same XXE cross-method false-negative (hardening applied in a helper method is invisible to the detector) was independently confirmed in both find-sec-bugs (#738) and SonarJava (S2755 community thread) \u2014 it's a structural limitation of single-method dataflow analysis shared across tools, not a find-sec-bugs-specific defect.",
+  "java-runtime-safety/kotlin-errors-resources-and-throws: detekt's SwallowedException default config whitelists InterruptedException as 'nonexceptional' \u2014 the opposite gap direction from Java, where JAVA-ERR-01's mistake at least has an off-by-default Error Prone check to promote; no detekt rule ID exists for this at all",
+  "java-runtime-safety/kotlin-errors-resources-and-throws: detekt's default gate is stronger than Java's for exception-chaining: SwallowedException (catches throw X(e.message)) is active by default, while Java's equivalent UnusedException is in Error Prone's DISABLED_CHECKS and must be promoted",
+  "java-runtime-safety/kotlin-errors-resources-and-throws: runCatching's inlining means it never appears as a KtCatchClause at the call site, so every catch-clause-keyed detekt rule (SwallowedException, TooGenericExceptionCaught, EmptyCatchBlock) is structurally blind to it regardless of activation state",
+  "java-runtime-safety/kotlin-errors-resources-and-throws: SuspendFunSwallowedCancellation (KT-CORO-01's sibling measurement) only fires when a suspend call happens inside runCatching's lambda \u2014 a non-suspend runCatching swallowing an Error/AssertionError has zero coverage under any detekt config",
+  "java-runtime-safety/kotlin-errors-resources-and-throws: kotlin.Result's -Xallow-result-return-type restriction is fully historical (removed in Kotlin 1.5, 2021) yet still shows up in search results as if live \u2014 worth flagging explicitly so drafters don't cite it as current",
+  "java-runtime-safety/kotlin-errors-resources-and-throws: ktlint's 404'd public rules-doc page required falling back to reading the actual rule-class directory in the pinned exemplar clone, which is a stronger source anyway",
+  "maven-and-ant/maven-annotation-processing-and-toolchains: The JDK-23 policy change was deferred mid-flight: proposed for JDK 22 (JDK-8306819), reverted to warning-only for that release (JDK-8321321), then reinstated a full release later for JDK 23 (JDK-8321319) -- three bug IDs for what reads as one release-note line",
+  "maven-and-ant/maven-annotation-processing-and-toolchains: The origin motive is a supply-chain security concern (an unwitting dependency-shipped annotation processor auto-executing at compile time), not a build-hygiene cleanup",
+  "maven-and-ant/maven-annotation-processing-and-toolchains: apache/maven's own POM shows both sides of the fix in one repo: pom.xml:135 sets proc=full reactor-wide, and submodule api/maven-api-di/pom.xml:34 explicitly overrides back to proc=none because that module only defines annotations and never processes them",
+  "maven-and-ant/maven-annotation-processing-and-toolchains: Maven's toolchain story needs two rules, not one, because guava genuinely runs javac/javadoc on JDK 26 while Surefire tests the same build on JDK 8/11/17/25 via jdkToolchain -- a real, not hypothetical, split-JDK build",
+  "maven-and-ant/maven-annotation-processing-and-toolchains: guava's own CI comment reveals the mechanism itself: -Dtoolchain.skip only works because actions/setup-java pre-installs every JDK the org.mvnsearch plugin would otherwise fetch -- a bare local mvn verify still needs that plugin (or a hand-built toolchains.xml)",
+  "maven-and-ant/maven-annotation-processing-and-toolchains: org.mvnsearch:toolchains-maven-plugin's Central metadata last-updated timestamp (April 2023) is years older than every other plugin queried here despite guava pinning its newest version, flagging an ecosystem-maturity risk for a mechanism the rule set would otherwise recommend as the standard fix",
+  "gradle-settings/settings-plugin-testkit-verification: No corpus exemplar (ktor's build-settings-logic, junit-framework's settings-conventions) and no gradle/gradle-own TestKit integration test ever applies a plugin from a functional test's generated settings.gradle \u2014 the mechanism is real but completely unexercised anywhere in the ecosystem read",
+  "gradle-settings/settings-plugin-testkit-verification: Gradle's own ConfigurationCacheTestKitIntegrationTest.groovy carries a doc comment explicitly naming both plugin-resolution routes (INJECTED_CLASSPATH via DefaultInjectedClasspathPluginResolver, MAVEN_REPO via DefaultScriptClassPathResolver) and parametrizes every test case over both \u2014 direct source confirmation of Q1/Q4 nobody had to infer",
+  "gradle-settings/settings-plugin-testkit-verification: There is no Gradle API, javadoc, or build-scan surface anywhere that reports how many times a shared BuildService was instantiated \u2014 registerIfAbsent's 'exactly once' is a construction-time guarantee, not an introspectable fact, so the assertion pattern (a marker file) had to be constructed rather than found",
+  "gradle-settings/settings-plugin-testkit-verification: GradleRunner.withDebug(true) genuinely breaks TestKit's process-isolation guarantee (same-JVM execution for IDE debugging) and would make an in-process static field readable \u2014 a real, previously undocumented loophole worth explicitly rejecting rather than ignoring",
+  "gradle-settings/settings-plugin-testkit-verification: Isolated Projects diagnostics mode doesn't have its own reporting channel \u2014 gradle/gradle's own IsolatedProjectsFixture shows it forwards to assertStateStoredAndDiscarded, i.e. it reuses the configuration-cache problem pipeline, which is what makes it TestKit-assertable at all via BuildResult.output",
+  "gradle-settings/settings-plugin-testkit-verification: sha256 enforcement (GRADLE-PLUG-24) has a laziness failure mode a static grep can never catch: a Provider computed inside a ValueSource that nothing ever calls .get() on passes every grep while enforcing nothing at runtime, which only a tamper-and-assert-buildAndFail() negative test exposes",
+  "concurrency/java-concurrency-residual-rows: @ThreadSafe's own javadoc claims ThreadSafeChecker validation, but ThreadSafeChecker is never imported into BuiltInCheckerSuppliers.java (0 matches vs. 8 wired sibling threadsafety.* checkers) \u2014 the annotation's documented enforcement does not actually ship",
+  "concurrency/java-concurrency-residual-rows: GuardedByChecker recognizes exactly five annotation packages, and net.jcip.annotations.GuardedBy \u2014 the package from Java Concurrency in Practice, the textbook most training data quotes \u2014 is not one of them",
+  "concurrency/java-concurrency-residual-rows: GuardedByChecker and ImmutableChecker are both ENABLED_ERRORS (fully on, zero config) already; the real gap for M-N-10 is that nothing makes an agent write the annotation, not enforcement",
+  "concurrency/java-concurrency-residual-rows: The ReentrantReadWriteLock 65,535 ceiling has a primary source right in its own JDK javadoc's 'Implementation Notes' \u2014 the newsletter the topic map flagged as thin didn't need to be the citation at all",
+  "concurrency/java-concurrency-residual-rows: FutureReturnValueIgnored's real target is a discarded fire-and-forget statement, not every CompletableFuture chain lacking a terminal handler \u2014 a chain returned to a caller transfers responsibility and is correct, confirmed in micronaut-core's AsyncInterceptor",
+  "concurrency/java-concurrency-residual-rows: M-N-06 fully dissolves into three existing/new rules (JAVA-ERR-05, JAVA-CONC-01/02, new JAVA-CONC-15) with nothing left over for its own row",
+  "bazel-java/bazel-java-testing-and-coverage: java_junit5_test is literally java_test underneath (main_class=JUnit5Runner + a -javaagent blocking System.exit) \u2014 reading the macro source directly settles the 'hand-rolled second path' question: contrib_rules_jvm's own ActualRunner.java IS that second path, and it's ~150 lines to be Bazel-protocol-correct, not five.",
+  "bazel-java/bazel-java-testing-and-coverage: apple_rules_lint is still transitively resolved via bzlmod even though the test rules don't need it \u2014 a nuance beyond the README's clean 'linting is opt-in' framing (fetched vs. used are different things).",
+  "bazel-java/bazel-java-testing-and-coverage: Bazel's own coverage doc for Java is a single sentence with zero mention of JaCoCo; the actual JaCoCo wiring (JacocoCoverageRunner, JACOCO_METADATA_JAR) exists only in Bazel's source, never in any prose doc.",
+  "bazel-java/bazel-java-testing-and-coverage: bazelbuild/bazel#12159 (richer JVM coverage format) was closed not_planned in 2024 \u2014 the coverage-format gap this dive documents is a deliberate, acknowledged non-goal for Bazel core, not an oversight.",
+  "bazel-java/bazel-java-testing-and-coverage: 0/6 Bazel-carrying exemplars, including bazelbuild/bazel building itself, set any coverage flag in .bazelrc \u2014 the one repo best positioned to need custom Java coverage wiring has none.",
+  "bazel-java/bazel-java-testing-and-coverage: Bazel coverage output is lcov-only ('At this point only LCOV is supported') \u2014 a genuine format mismatch with every other JVM coverage tool this program covers (JaCoCo, Kover), with no first-party bridge."
+ ],
+ "needs_another_round": [
+  "java-runtime-safety: SonarJava rule keys \u2014 for S2245, S2076, the path-traversal key, S1181, S2095 and S2142, fetched from rules.sonarsource.com or sonar-java metadata rather than search: is each (a) Community-tier or commercial-only, (b) an Issue or a Security Hotspot (the S4507 trap), and (c) what does it actually match? Five verification columns currently cite them on catalogue strength alone.",
+  "java-runtime-safety: Subprocess trust boundary with no live upstream \u2014 does the OCX Gradle plugin's `ocx --format json inspect --closure` read, which may run entirely against a local OCX_HOME cache, sit on the same side of the deserialization line as the SDK's (Verdict 3), or does decision (c) mean it must be re-derived?",
+  "java-runtime-safety: (Not a round \u2014 dated re-checks noted in the file) whether find-sec-bugs 1.15.0 ships before SpotBugs removes the restored IO.close(InputStream) around Oct 2026, and whether jackson-databind's three floors move.",
+  "maven-and-ant: Gradle-side handback (GRADLE-TOOL / JAVA-PLAT, not MVN-BUILD) \u2014 given that Gradle emits -proc:none or -processorpath unconditionally on every JavaCompile and so was never exposed to the JDK-23 policy, is the only Gradle-side rule the narrow one, that -processorpath/--processor-path in compilerArgs is rejected outright so an agent must use the typed annotationProcessorPath? Evidence is settled at gradle__gradle@ea17004a31:.../JavaCompilerArgumentsBuilder.java:110-112,209-216; the decision is the map's.",
+  "maven-and-ant: maven-antrun-plugin \u2014 Ant inside Maven: what does a rule say about <target> blocks embedded in a POM, the one Ant surface that appears in live Maven builds? MVN-ANT as written only fires on a build.xml. (Carried unchanged from the previous round.)",
+  "maven-and-ant: Maven build extensions as a resolution mechanism: does MVN-BUILD-15 become a MUST, and what does a rule say about an extension that replaces the local repository (apache/maven's Mimir) for CI only? (Carried unchanged.)",
+  "gradle-settings: Settings-plugin test route default \u2014 absent the `compileOnly` trap, should `MAVEN_REPO` (local publish + `pluginManagement { repositories { maven(\u2026) } }`) or `withPluginClasspath()` be the default, given the local-publish step's cost and its `maven-publish` \u00d7 configuration-cache interaction (gradle/gradle#24040)? GRADLE-PLUG-29 ships a preference, not a measurement \u2014 no corpus repo, no gradle/gradle test and no primary doc settles it at settings scope.",
+  "gradle-settings: Cold-runner cost of execution-time provisioning \u2014 what does GRADLE-PLUG-23's first-task-pays download cost on a GitHub-hosted runner versus a `setup-ocx`-style CI step, and does that change whether the Gradle plugin should provision at all when a CI action already did? (carried forward, unanswered)",
+  "gradle-settings: Latent-collision detection for GRADLE-STRUCT-10 \u2014 is there a Gradle-side way to detect an actually-losing project (resolution-result walk, build-scan dependency view, `dependencies` report diff) so the rule reports a real defect rather than a latent one? (carried forward, unanswered)",
+  "gradle-settings: Dated re-check, not a research round \u2014 Isolated Projects' diagnostics console wording is unpinned by any primary source (IP incubating since 9.7.0, 2026-08-06); re-confirm and freeze a literal string in GRADLE-PLUG-27 when IP leaves incubating.",
+  "concurrency: Kotlin Flow (map rows M-U-07, M-U-10) \u2014 does Flow need its own depth section with the catch-operator placement rule and the StateFlow conflation contract, or do two rows in coroutines.md cover it? Unchanged from the previous round; this dive did not touch Kotlin.",
+  "concurrency: JDK 27 GA re-verification \u2014 JDK 27 reached GA 2026-09-15, after every JEP 533 claim here was written against the RC. Did the 7th preview's shape (R_X type parameter, timeout(), awaitAll() removed) ship unchanged, and is structured concurrency still targeted at JDK 28?",
+  "concurrency: detekt activation defaults \u2014 the audited snapshot is a main-branch build mid-package-rename (dev.detekt.*). Do the four coroutine rules stay active:false in the first stable release from that branch? KT-CORO-01's whole premise depends on it.",
+  "concurrency: Error Prone ThreadSafeChecker registration \u2014 re-read BuiltInCheckerSuppliers.java's import list on any Error Prone bump past 2.36.0. If ThreadSafeChecker appears, JAVA-CONC-16's '@ThreadSafe is prose only' clause inverts. New question opened by this round.",
+  "bazel-java: java_export / Maven Central publishing from Bazel \u2014 does rules_jvm_external's java_export/maven_publish produce a Central-Portal-acceptable bundle (sources jar, javadoc jar, per-file GPG signature, complete POM), or is Bazel a non-publisher that always hands off to Gradle or Maven? Load-bearing for the OCX SDK's jvm-release skill. (carried, unchanged)",
+  "bazel-java: KotlinCompile worker-state reproducibility \u2014 does building twice with and without --strategy=KotlinCompile=local produce byte-identical jars? Would promote BZL-JAVA-20 from CONSIDER to SHOULD or retire it. Below the line for this program. (carried, unchanged)",
+  "bazel-java: contrib_rules_jvm stability \u2014 the ruleset is pre-1.0 (0.31.0, no tagged GitHub releases) and 0/6 exemplars exercise it, yet BZL-JAVA-24/27 are MUSTs resting entirely on reading its source. A round measuring its adoption outside this corpus, or its API churn across recent BCR versions, would tell us whether a MUST on a pre-1.0 dependency is defensible.",
+  "bazel-java: lcov\u2192JaCoCo conversion ownership \u2014 BZL-JAVA-26 says any numeric floor is a CI script over the merged .dat, but names no tool. Whether a maintained lcov\u2192Cobertura/JaCoCo converter exists that a dual Gradle+Bazel shop could standardise on was not run down; without one, a JVM shop needs two coverage toolchains with no bridge."
+ ],
+ "must_count": 89
+}

@@ -1,0 +1,705 @@
+{
+  "summary": "JVM research program phase 8: opus content reviewers apply the validation reference (deletion test, contradiction sweep, verification honesty against planted fixtures, era check, portability) and skill trigger evals to the drafted kotlin-quality and gradle-build sets; findings only, no edits",
+  "agentCount": 2,
+  "logs": [
+    "Review done: 2/2 sets · blockers 4 · fixes 12 · nits 10 · verdicts fix-then-ship,fix-then-ship"
+  ],
+  "result": {
+    "results": [
+      {
+        "set": "rules/kotlin-quality.md + rules/kotlin-quality/ (7 depth files) — JVM research-lang phase 8, review B",
+        "files_read": [
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.claude/skills/research-lang/references/validation.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.claude/skills/research-lang/references/rule-distillation.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-topic-map.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-topic-map/canonical-kotlin.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-topic-map/codified-lint-catalogue.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-topic-map/practitioner-and-conferences.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-language-api.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-concurrency.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-quality-gates.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-java-runtime-safety.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-platform-and-toolchains.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-audit/exemplar-quality-gates.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/kotlin-quality.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/kotlin-quality/api-and-abi.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/kotlin-quality/compiler-and-toolchain.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/kotlin-quality/coroutines.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/kotlin-quality/errors-and-resources.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/kotlin-quality/java-interop.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/kotlin-quality/lint-gate.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/kotlin-quality/testing.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/typescript-quality.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/typescript-quality/async.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/java-quality/api-and-evolution.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/java-quality/concurrency.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/java-quality/data-and-patterns.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/java-quality/errors-and-resources.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/java-quality/lint-gate.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/java-quality/nullness.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/java-quality/platform-and-versions.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/java-quality/security-and-untrusted-input.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/java-quality/testing.md"
+        ],
+        "findings": [
+          {
+            "file": "rules/kotlin-quality/lint-gate.md",
+            "line": 104,
+            "severity": "blocker",
+            "kind": "contradiction",
+            "finding": "KT-LINT-06 mandates extraWarnings while KT-COMP-12 forbids requiring it. KT-LINT-06 (SHOULD) says \"Turn on `extraWarnings` in exactly one convention plugin\" and its verification says \"Empty output means the bundle is off, which is the finding on a module you author\". KT-COMP-12 (compiler-and-toolchain.md:136, CONSIDER) says the opposite in the same words: \"Do not add `extraWarnings` or `-Wextra` to a build as a hardening step, and never state either as a requirement... Absence is **never** a finding, and a review comment demanding it is the invented pattern\", and compiler-and-toolchain.md failure mode 9 lists adding `extraWarnings = true` as a thing agents get wrong. Both files load on the same `**/*.kt` glob and the index routes compiler work to one and lint work to the other, so the reader gets opposite instructions for the same knob. KT-COMP-12 is the consolidation-backed side (jvm-platform-and-toolchains.md KT-COMP-12: \"Treat `extraWarnings` / `-Wextra` as opt-in, never a MUST... absence is not a violation\"); KT-LINT has no consolidation.",
+            "fix": "In rules/kotlin-quality/lint-gate.md line 104, replace the Rule cell's first two sentences \"Turn on `extraWarnings` in exactly one convention plugin, on the same `compilerOptions` block that sets `jvmTarget`. Treat it as an opt-in that carries its Kotlin version, because it is Experimental as of Kotlin 2.1 and still Experimental at 2026-09-12.\" with \"Where a build opts in to `extraWarnings`, declare it in exactly one convention plugin, on the same `compilerOptions` block that sets `jvmTarget`, and carry its Kotlin version. Whether to opt in at all is `KT-COMP-12`'s, which forbids stating it as a requirement, because it is Experimental as of Kotlin 2.1 and still Experimental at 2026-09-12.\" In the same row's Verification cell, replace \"Empty output means the bundle is off, which is the finding on a module you author and informational on an adopter's.\" with \"Empty output means the bundle is off, which is never a finding (`KT-COMP-12`).\""
+          },
+          {
+            "file": "rules/kotlin-quality/lint-gate.md",
+            "line": 59,
+            "severity": "blocker",
+            "kind": "verification-dishonest",
+            "finding": "Unquoted `--include=*.x` aborts the whole grep under zsh. Every verification cell in this file writes `--include=` unquoted (lines 58, 59, 60, 104, 105, 122), e.g. `grep -rn -e 'detekt-formatting' -e 'detekt-rules-ktlint-wrapper' --include=*.gradle.kts --include=*.gradle --include=*.toml .`. Ran verbatim under zsh (the project shell) against a planted violating fixture: zsh's nomatch aborts the command before grep runs — `zsh:1: no matches found: --include=*.gradle.kts`, rc=1, no output. KT-LINT-02 reads \"Empty output from the first is the pass\" and KT-LINT-03 reads \"empty output is the pass\", so both report a pass on a tree that violates them: these two verifications cannot go red. KT-LINT-01, -06, -07 and -08 fail the other way (false finding). `check-artifacts.py` reports the set clean, so nothing catches this. Every other depth file in the set quotes its `--include` arguments; this file is the only one that does not.",
+            "fix": "In rules/kotlin-quality/lint-gate.md, quote every `--include=` argument that contains a `*`, on lines 58, 59, 60, 104, 105 and 122: replace `--include=*.gradle.kts` with `--include='*.gradle.kts'`, `--include=*.gradle` with `--include='*.gradle'`, `--include=*.toml` with `--include='*.toml'`, `--include=*.kt` with `--include='*.kt'`, and `--include=*.kts` with `--include='*.kts'`. Leave `--include=.editorconfig` on lines 85 and 86 unchanged — it carries no glob character and already runs correctly."
+          },
+          {
+            "file": "rules/kotlin-quality.md",
+            "line": 83,
+            "severity": "fix",
+            "kind": "notes-violation",
+            "finding": "The index carries five KT-ERR IDs where the notes bind it to two. The wave-4 authoring decision (jvm-topic-map.md \"Decision carried into authoring\" and \"Conflicts resolved in revision\" item 11) reads: \"Index budget resolved at two KT-ERR rows (KT-ERR-01, KT-ERR-03) in `rules/kotlin-quality.md`\", and jvm-java-runtime-safety.md restates it with the reason: \"`KT-ERR-02` is reviewer-facing, and `KT-ERR-04`/`KT-ERR-05` are detekt-config facts\". The shipped index carries three KT-ERR non-negotiable rows citing five IDs: row 10 (KT-ERR-01, KT-ERR-02), row 11 (KT-ERR-03), row 12 (KT-ERR-04, KT-ERR-05). Three of the five reach the always-loaded list against an explicit budget decision.",
+            "fix": "In rules/kotlin-quality.md, in row 10 replace the Rule cell with \"Never wrap code that may throw a JVM `Error` or a test assertion in `runCatching { }`, because it catches `Throwable`, not `Exception`.\" and the ID cell with \"KT-ERR-01\". Delete row 12 entirely (the `| 12 | An exception constructed from a caught one passes it as the cause... | KT-ERR-04, KT-ERR-05 |` line) and renumber the following rows 13-18 down to 12-17."
+          },
+          {
+            "file": "rules/kotlin-quality/errors-and-resources.md",
+            "line": 18,
+            "severity": "fix",
+            "kind": "contradiction",
+            "finding": "KT-ERR routes `kotlin.Result` to KT-API, but the rule lives in KT-INTEROP-08. Three places in this file send the reader to `KT-API` / `api-and-abi.md` for `kotlin.Result` as a public return type: line 17-18 (\"`kotlin.Result<T>` as a public return type is `KT-API`'s (`api-and-abi.md`)\"), line 57 (\"The live question is the API-design one `KT-API` owns\") and line 158 (\"it lives in `KT-API`\"). api-and-abi.md contains no `Result` rule and does not claim the topic in its scope paragraph. The rule is KT-INTEROP-08 in java-interop.md, which is where authoring notes §2 and topic-map row M-V-07 put it (\"M-V-07 | Is `kotlin.Result<T>` used as a public return type... | KT-INTEROP\"). A reader following the pointer reaches a file that does not say what was claimed.",
+            "fix": "In rules/kotlin-quality/errors-and-resources.md: line 18, replace \"type is `KT-API`'s (`api-and-abi.md`).\" with \"type is `KT-INTEROP`'s (`java-interop.md`).\"; line 57, replace \"`KT-API` owns.\" with \"`KT-INTEROP` owns.\"; line 158, replace \"API-design one and it lives in `KT-API`.\" with \"API-design one and it lives in `KT-INTEROP`.\""
+          },
+          {
+            "file": "rules/kotlin-quality.md",
+            "line": 68,
+            "severity": "fix",
+            "kind": "contradiction",
+            "finding": "The index says six JAVA-* IDs; the table cites seven, and not one line each. The preamble to Non-Negotiables says \"The six `JAVA-*` IDs are defined in the `java-quality` sibling set and duplicated here as one line each\". The table cites seven distinct JAVA-* IDs — JAVA-PLAT-01 (row 4), JAVA-PLAT-10 and JAVA-LINT-02 (row 16), JAVA-API-09, JAVA-API-10, JAVA-API-12 and JAVA-SEC-01 (row 17) — and they are not one line each: rows 16 and 17 each bundle several. Authoring notes §4 counts six shared *facts* (JSpecify is one fact carried by two IDs), not six IDs.",
+            "fix": "In rules/kotlin-quality.md line 68, replace \"The six `JAVA-*` IDs are defined in the `java-quality` sibling\" / \"set and duplicated here as one line each, because a Kotlin-only adopter never\" / \"loads that set.\" with \"The six shared facts below are defined in the `java-quality` sibling set and duplicated here as a bare line citing their IDs, because a Kotlin-only adopter never loads that set.\""
+          },
+          {
+            "file": "rules/kotlin-quality/java-interop.md",
+            "line": 62,
+            "severity": "fix",
+            "kind": "unsupported-claim",
+            "finding": "KT-INTEROP-03 asserts \"Checker Framework, JetBrains, Android, Eclipse, Lombok, RxJava3 and Vert.x are all in that set\" and gives `-Xnullability-annotations=@org.checkerframework.checker.nullness.qual:strict` as the worked example. The only admissible source for this file (canonical-kotlin.md §13, the page-by-page read of kotlinlang's interop docs, which authoring notes §2 names as `java-interop.md`'s sole source) lists the flavours as \"JetBrains, JSpecify, Android, JSR-305, FindBugs, Eclipse, Lombok, RxJava3, Vert.x\" — Checker Framework is not among them and FindBugs has been dropped from the shipped list. SHOULD row, so fix rather than blocker.",
+            "fix": "In rules/kotlin-quality/java-interop.md line 62, replace \"Checker Framework, JetBrains, Android, Eclipse, Lombok, RxJava3 and Vert.x are all in that set.\" with \"JetBrains, Android, FindBugs, Eclipse, Lombok, RxJava3 and Vert.x are all in that set, and any flavour outside it — Checker Framework included — needs the same treatment.\""
+          },
+          {
+            "file": "rules/kotlin-quality/coroutines.md",
+            "line": 14,
+            "severity": "nit",
+            "kind": "unsupported-claim",
+            "finding": "The scope paragraph says \"The published signature of a `suspend fun` is `KT-API-07`, in `KT-API`.\" The shipped KT-API-07 is about `@JvmOverloads` versus `@IntroducedAt` for a default-valued parameter and never mentions `suspend`. The signature rule is KT-API-04 (\"Never add a parameter to a published function... never widen *or* narrow a published return type\"); the Java-callability half is KT-INTEROP-07. jvm-concurrency.md's own cite-list glosses KT-API-07 the same loose way, so the drafter followed the consolidation, but the shipped cross-reference resolves to a rule that does not make the claim.",
+            "fix": "In rules/kotlin-quality/coroutines.md line 14, replace \"`suspend fun` is `KT-API-07`, in `KT-API`.\" with \"`suspend fun` is `KT-API-04`, in `KT-API`, and its Java-callable wrapper is `KT-INTEROP-07`.\""
+          },
+          {
+            "file": "rules/kotlin-quality.md",
+            "line": 33,
+            "severity": "nit",
+            "kind": "contradiction",
+            "finding": "\"None of them fires on a settings file\" is false for rows 2 and 18. The double-load note says \"Rows 1, 4, 5, 6 and 15 below are the build-script rows and are the ones that bind there. Every other row is scoped in its own text to the source shape it governs, so none of them fires on a settings file.\" Row 2 (explicit API strict mode plus an ABI gate wired into `check`) and row 18 (KT-CORE-01/KT-CORE-02, which explicitly forbid editing the gate's own convention plugin) are both build-script rows and do bind on a `*.gradle.kts`. Authoring notes §1 requires exactly this list to be accurate, since its whole purpose is that a reader editing a settings file is not trained to skim.",
+            "fix": "In rules/kotlin-quality.md line 33, replace \"Rows 1, 4, 5, 6 and 15 below are the build-script rows and are\" with \"Rows 1, 2, 4, 5, 6, 15 and 18 below are the build-script rows and are\"."
+          },
+          {
+            "file": "rules/kotlin-quality.md",
+            "line": 154,
+            "severity": "nit",
+            "kind": "deletion-candidate",
+            "finding": "Deletion test on the index: the `gradle-build` bullet ends \"`gradle-build` shares the `**/*.gradle.kts` glob with this set deliberately, because a build script is Kotlin source, so a build-script edit loads both indexes and a `.kt` source edit loads only this one.\" That is the same statement the file already makes at lines 32-35, sixteen lines below the top where a partial read is most likely to reach it. Removing it causes no mistake. It is the only line in the index that fails the deletion test — the rest (the gate block, the wrapper sentence, the \"narration is not evidence\" close, the Block-list-stays-short close) all match the house shape in rules/typescript-quality.md and are earning their tokens.",
+            "fix": "In rules/kotlin-quality.md, delete the sentence spanning lines 154-157 from \"`gradle-build` shares the `**/*.gradle.kts` glob\" through \"a `.kt` source edit loads only this one.\", leaving the bullet ending at \"distribution and publishing.\""
+          },
+          {
+            "file": "rules/kotlin-quality/coroutines.md",
+            "line": 81,
+            "severity": "nit",
+            "kind": "style",
+            "finding": "The second gate command, `grep -rl --include='*.kt' 'suspend fun' . | xargs -r grep -nE -e 'runCatching\\s*\\{' -e 'catch\\s*\\([^)]*:\\s*(Exception|Throwable)\\)'`, is cited by KT-CORO-05 (MUST) as its fallback check. Run against a planted violation it printed `2:    return runCatching { fetch() }.getOrDefault(\"\")` — no filename, because grep omits the prefix when xargs hands it exactly one file. The finding is unlocatable on a small module, which is the case where a reviewer is most likely to run it.",
+            "fix": "In rules/kotlin-quality/coroutines.md line 81, replace `| xargs -r grep -nE \\` with `| xargs -r grep -HnE \\`."
+          }
+        ],
+        "verifications_exercised": [
+          {
+            "id": "KT-CORO-02",
+            "went_red": true,
+            "went_green": true,
+            "note": "`grep -rnE --include='*.kt' 'GlobalScope\\.(launch|async|writer)\\s*\\{' .` hit the bare `GlobalScope.launch { }` fixture and stayed silent on `GlobalScope.launch(parentContext, start = …) { }`. Cell's \"every hit is the finding, and empty output is the pass\" is true, and the regex genuinely discriminates the two forms the rule distinguishes."
+          },
+          {
+            "id": "KT-API-05",
+            "went_red": true,
+            "went_green": true,
+            "note": "`grep -rnE --include='*.kt' '^[[:space:]]*(public )?data class' .` matched `public data class Result(...)` and not the hand-written `public class Result(...)`. \"Any hit is a finding... empty output is the pass\" holds."
+          },
+          {
+            "id": "KT-ERR-04",
+            "went_red": true,
+            "went_green": true,
+            "note": "Backstop `grep -rnE --include='*.kt' '[A-Za-z]+Exception\\( *[a-z][A-Za-z0-9]*\\.message *\\)' .` matched `ServiceException(e.message)` and not `ServiceException(\"read failed\", e)`. The yml half is inverted correctly: with `SwallowedException: active: true` present the grep prints a hit, and the cell reads a hit as the violation only where the block sets `active: false`."
+          },
+          {
+            "id": "KT-COMP-02",
+            "went_red": true,
+            "went_green": true,
+            "note": "`grep -rn --include='*.gradle.kts' -e 'Xjvm-default' .` matched the `freeCompilerArgs.add(\"-Xjvm-default=all\")` fixture and not the typed `jvmDefault = JvmDefaultMode.NO_COMPATIBILITY`. \"Empty output is the pass\" holds."
+          },
+          {
+            "id": "KT-LINT-04",
+            "went_red": true,
+            "went_green": true,
+            "note": "Inverted check, and correctly stated. `grep -rn 'ktlint_code_style' --include=.editorconfig .` was silent on the `.editorconfig` lacking the key (the cell calls that the finding) and printed the hit on the one setting it (the pass). This is the one KT-LINT cell whose unquoted `--include` carries no glob character, so it is also the only one in lint-gate.md that survives zsh."
+          },
+          {
+            "id": "KT-ERR-05",
+            "went_red": true,
+            "went_green": true,
+            "note": "Both halves exercised. `grep -rn --include='*.yml' -e 'ExitOutsideMain' .` was empty on the config that omits the promotion (cell: \"empty output is **the finding**\") and hit on the one that promotes it. The call-site grep with four `-e` alternatives matched `exitProcess(1)` and not the typed throw. Both empty-output clauses are true and they point opposite ways, which the cell says explicitly."
+          },
+          {
+            "id": "KT-CORO-11",
+            "went_red": true,
+            "went_green": true,
+            "note": "`grep -rlniE --include='*.kt' -e 'concurrent' -e 'thread-?safe' -e 'race' src/test | xargs -r grep -L -e 'Dispatchers.Default' -e 'Dispatchers.IO'` printed the `runTest`-only thread-safety test and printed nothing for the `runBlocking(Dispatchers.Default)` stress test. \"Every file it prints is the finding, and empty output is the pass\" holds. xargs -r present as the notes require."
+          },
+          {
+            "id": "KT-ERR-02",
+            "went_red": true,
+            "went_green": true,
+            "note": "`grep -rnE --include='*.kt' -e 'catch *\\([^)]*: *InterruptedException' -e 'catch *\\([^)]*: *Exception\\b' .` matched the `catch (e: Exception) { throw IllegalStateException(e) }` around `waitFor` and stayed silent on the version that lets it propagate. One `-e` per alternative, as the notes require."
+          },
+          {
+            "id": "KT-CORO-05",
+            "went_red": true,
+            "went_green": true,
+            "note": "Fallback pipeline matched `runCatching { fetch() }` inside a `suspend fun` and stayed silent on the same function rewritten with `catch (e: IOException)`. Discriminates correctly; the only defect is the missing filename prefix when one file survives xargs (reported as a nit)."
+          },
+          {
+            "id": "KT-TEST-02",
+            "went_red": true,
+            "went_green": true,
+            "note": "`grep -rn -B5 -A5 --include='*.gradle.kts' -e 'koverVerify' -e 'minValue' -e 'onCheck' .` printed the floor plus the adjacent `if (!providers.gradleProperty(...)) kover { disable() }` on the bad fixture and the floor alone on the good one. The cell judges the printed window, not emptiness, so the discrimination is real: \"A printed window carrying ... `disable()` ... is the finding\" fired, and did not fire on the compliant floor."
+          },
+          {
+            "id": "KT-LINT-01/02/03",
+            "went_red": false,
+            "went_green": false,
+            "note": "Cannot go red. Run verbatim under zsh against a violating fixture, the unquoted `--include=*.gradle.kts` aborts the command with `zsh: no matches found` before grep executes: rc=1, no output, on both the violating and the compliant tree. KT-LINT-02 and KT-LINT-03 read empty output as the pass, so they launder a violating tree as clean. Reported as a blocker."
+          }
+        ],
+        "unresolved_ids": [],
+        "trigger_evals": [],
+        "verdict": "fix-then-ship"
+      },
+      {
+        "set": "rules/gradle-build.md + rules/gradle-build/*.md (GRADLE-CORE index and eight GRADLE-STRUCT / DEP / CACHE / TOOL / PLUG / DIST / PUB / CI depth files)",
+        "files_read": [
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.claude/skills/research-lang/references/validation.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.claude/skills/research-lang/references/rule-distillation.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-topic-map.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/gradle-build.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/gradle-build/structure-and-conventions.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/gradle-build/dependencies.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/gradle-build/caching-and-correctness.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/gradle-build/toolchains-and-compilation.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/gradle-build/plugin-authoring.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/gradle-build/distribution.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/gradle-build/publishing.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/gradle-build/ci.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-gradle-core.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-gradle-plugin-dev.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-dependencies.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-distribution.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-gradle-settings.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-publishing.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-platform-and-toolchains.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-audit/exemplar-publishing-ci-bazel.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-audit/exemplar-quality-gates.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/typescript-quality.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/typescript-quality/async.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/maven-build/ant-legacy.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/maven-build/dependencies.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/maven-build/lifecycle-and-plugins.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/maven-build/publishing.md",
+          "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/rules/java-quality/platform-and-versions.md"
+        ],
+        "findings": [
+          {
+            "file": "rules/gradle-build/publishing.md",
+            "line": 90,
+            "severity": "blocker",
+            "kind": "verification-dishonest",
+            "finding": "GRADLE-PUB-04's verification cannot go red for the one element its own rationale singles out. Planted and run: a generated POM carrying name/description/licenses/developers/scm but NO project-level <url> printed nothing — the loop passed. `grep -qE \"</?url>\"` matches the `<url>` inside the `<scm>` block, which every compliant POM has, so the check is satisfied by the scm URL alone. The rationale says \"`url` is the element that goes missing: present in 8 of 32\", i.e. the row exists precisely for the case the check cannot detect. The cell's \"empty output is the pass\" statement is therefore false. Same defect in MVN-PUB-07's `grep -q \"<$e>\"`, which is out of this set.",
+            "fix": "Replace the verification cell with: `for e in name description url licenses developers scm; do [ \"$(xmllint --xpath \"boolean(/*/*[local-name()='$e'])\" build/publications/mavenJava/pom-default.xml 2>/dev/null)\" = true ] \\|\\| echo \"MISSING $e\"; done`. Any output is the finding, empty output is the pass. A grep on the element name cannot work here: `<url>` also appears inside `<scm>`, so a POM missing the project-level `url` — the element this row exists for — passes a grep. Run it against every publication that is deployed, not only the primary one."
+          },
+          {
+            "file": "rules/gradle-build/distribution.md",
+            "line": 102,
+            "severity": "blocker",
+            "kind": "contradiction",
+            "finding": "GRADLE-DIST-12 (MUST) states \"Shadow 9.3.0 and above require Gradle 9.0 and Java 17, current line 9.6.1\". GRADLE-PLUG-21 in plugin-authoring.md:151 states \"Shadow 9.5.0 and later need Gradle 9.2 and Java 17\". Both are copied verbatim from their consolidations (jvm-distribution.md DIST-12 floor column; jvm-gradle-plugin-dev.md PLUG-21 floor column) and the topic map's Cross-consolidation contradictions table never resolved them. As shipped, DIST-12's \"and above\" is falsified for 9.5.0+ by its own sibling, and it names 9.6.1 as the current line in the same breath — so an agent on Gradle 9.0 reading distribution.md adopts Shadow 9.6.1 and the build hard-fails.",
+            "fix": "In GRADLE-DIST-12's Rationale, replace \"Shadow 9.3.0 and above require Gradle 9.0 and Java 17, current line 9.6.1 (2026-07-22, verified 2026-09-12).\" with \"Shadow 9.3.0 requires Gradle 9.0 and Java 17, and 9.5.0 and later raise that to Gradle 9.2 (`GRADLE-PLUG-21` carries the same floor); current line 9.6.1 (2026-07-22, verified 2026-09-12).\""
+          },
+          {
+            "file": "rules/gradle-build/publishing.md",
+            "line": 117,
+            "severity": "fix",
+            "kind": "style",
+            "finding": "GRADLE-PUB-13's verification cell contains an unescaped `|` (`find . -maxdepth 3 -iname pom.xml | xargs -r dirname`), which ends the markdown cell. The row renders with six columns instead of five, so the Severity column shows `xargs -r dirname` and the real severity is lost. A 5-column table parse does not see this line as a rule definition at all, which is why GRADLE-PUB-13 reads as an undefined ID to any tool that scans rule rows. GRADLE-PUB-04:90 has the same defect via its `||`.",
+            "fix": "Escape the pipe: change `` `find . -maxdepth 3 -iname pom.xml | xargs -r dirname` `` to `` `find . -maxdepth 3 -iname pom.xml \\| xargs -r dirname` ``. Apply the same `\\|\\|` escaping to GRADLE-PUB-04's cell at line 90."
+          },
+          {
+            "file": "rules/gradle-build/dependencies.md",
+            "line": 65,
+            "severity": "fix",
+            "kind": "verification-dishonest",
+            "finding": "GRADLE-DEP-07 forbids four things and the rationale calls the grep \"the whole gate\", but the grep detects only three. Planted and run: a fixture declaring `implementation(\"com.acme:widget:[1.0,2.0)\")` — a version range, the rule's first named violation — produced no output, i.e. the MUST reads as a pass. The `+` suffix, `latest.*` and `-SNAPSHOT` fixtures all went red correctly and the compliant fixture went green. Separately, `-e '\\-SNAPSHOT'` makes GNU grep 3.8+ print `grep: warning: stray \\ before -` on every run, so a clean pass is never actually clean output.",
+            "fix": "Replace the command with: `grep -rnE --include='*.gradle.kts' --include='*.gradle' --include='*.versions.toml' -e '[0-9]\\.\\+' -e 'latest\\.release' -e 'latest\\.integration' -e '[-]SNAPSHOT' -e ':[[:space:]]*\\[[0-9]' -e ':[[:space:]]*\\([0-9]' .`"
+          },
+          {
+            "file": "rules/gradle-build/distribution.md",
+            "line": 65,
+            "severity": "fix",
+            "kind": "verification-dishonest",
+            "finding": "GRADLE-DIST-05's static half is an inverted check with no empty-output clause, which is exactly what GRADLE-CORE-03 (SHOULD, same rule set) forbids. `grep -n -e '.RSA' build.gradle.kts` printing nothing means there is no signature-exclusion list at all — the violation — not the pass. It also takes a bare root-file operand rather than a directory plus `--include`, against authoring note 9, so it never reaches the shading module in a multi-module build, which is where every shadowJar in the measured corpus lives.",
+            "fix": "Replace \"Statically, `grep -n -e '.RSA' build.gradle.kts` and confirm `.EC` sits in the same list.\" with \"Statically, `grep -rn --include='build.gradle.kts' --include='build.gradle' --include='pom.xml' -e 'META-INF/\\*\\.RSA' .` and confirm `.EC` sits in the same list. **Empty output here is the finding, not the pass**, because it means no signature exclusion exists anywhere.\""
+          },
+          {
+            "file": "rules/gradle-build/plugin-authoring.md",
+            "line": 82,
+            "severity": "fix",
+            "kind": "verification-dishonest",
+            "finding": "GRADLE-PLUG-24's grep half states only what a hit means (\"A hit inside a class implementing `ValueSource` is a violation on sight\") and never what empty output means. Empty output from `grep -rn -e 'MessageDigest' -e 'sha256' src` on a plugin that provisions a binary means no hash is computed anywhere, which is the MUST violated outright — the strongest possible finding read as a clean pass. GRADLE-CORE-03 names this defect class and this cell is an instance of it.",
+            "fix": "After \"...and the `check(...)` must sit in the service or a task action.\" insert: \"**Empty grep output is the finding, not the pass, on a plugin that provisions a binary: it means no hash is computed at all.**\""
+          },
+          {
+            "file": "rules/gradle-build/ci.md",
+            "line": 127,
+            "severity": "fix",
+            "kind": "verification-dishonest",
+            "finding": "GRADLE-CI-09's verification writes `uses-lines.txt` into the working tree (an untracked artifact a reviewer then has to clean up, and one that lands in the diff if the check runs before `git add -A`), and `-h` strips the filename so the printed findings carry a bare line number that cannot be traced to a workflow file. Run against a planted tag-pinned fixture it did go red and against a SHA-pinned one it went green, but in both runs it also printed the `./`-prefixed local action the cell has to except by hand.",
+            "fix": "Replace the two-command form with a single pipeline that needs no temp file and applies the local-action exemption mechanically: `grep -rn --include='*.yml' --include='*.yaml' -e 'uses:' .github/workflows/ \\| grep -vE -e '@[0-9a-f]{40}' -e 'uses:[[:space:]]*\\./'`. Every line printed is the finding, and empty output is the pass."
+          },
+          {
+            "file": "rules/gradle-build/plugin-authoring.md",
+            "line": 151,
+            "severity": "fix",
+            "kind": "contradiction",
+            "finding": "GRADLE-PLUG-21 (SHOULD) and GRADLE-DIST-12 (MUST, distribution.md:102) define the same finding — a `com.github.johnrengelman.shadow` hit — at two severities, and both verification cells say \"a `johnrengelman` hit is the violation\". A review of a plugin module inherits MUST or SHOULD purely from which depth file happened to load, which is the tiering breakage rule-distillation's Severity section exists to prevent. The topic map's contradiction 1 named PLUG-21 as the surviving text for the *shading-is-opt-in* claim only and never adjudicated the dead-id half.",
+            "fix": "In GRADLE-PLUG-21's Rule, replace \"Shading a plugin's own dependencies is opt-in through `com.gradleup.shadow`, never the dead `com.github.johnrengelman.shadow` id, and it does not imply relocation.\" with \"Shading a plugin's own dependencies is opt-in through `com.gradleup.shadow` (`GRADLE-DIST-12` owns the dead-id rule at MUST), and it does not imply relocation.\" In its Verification, replace \"A `johnrengelman` hit is the violation and empty output is the pass.\" with \"A `johnrengelman` hit is `GRADLE-DIST-12`'s finding, not this row's; empty output is the pass.\""
+          },
+          {
+            "file": "rules/gradle-build.md",
+            "line": 168,
+            "severity": "fix",
+            "kind": "unsupported-claim",
+            "finding": "The Siblings bullet states \"Bazel does not publish to Central itself\" as settled fact. The topic map's Wave 4 landed section lists it as still open: \"java_export / Maven Central publishing from Bazel — does rules_jvm_external's java_export/maven_publish produce a Central-Portal-acceptable bundle ... or is Bazel a non-publisher that always hands off to Gradle or Maven? (carried, unchanged)\". An open question stated flatly in an always-loaded index is the shape the program elsewhere flags as teaching a fiction.",
+            "fix": "Replace \"Bazel does not publish to Central itself, and that half is governed here.\" with \"Whether `rules_jvm_external`'s `java_export` can produce a Portal-acceptable bundle was unresolved as of 2026-09-12; the hand-off-to-Gradle path, which is dagger's own answer, is governed here.\""
+          },
+          {
+            "file": "rules/gradle-build/distribution.md",
+            "line": 21,
+            "severity": "nit",
+            "kind": "notes-violation",
+            "finding": "The topic map's Cross-consolidation contradictions row 18 requires that \"`distribution.md` carries one pointer line\" for BZL-JAVA-21's deploy-jar question, so a reader hitting a Bazel deploy jar is routed out of this taxonomy. No such line exists anywhere in the file, and no other line in the set mentions deploy jars. (Omitting the bare ID is defensible — BZL-JAVA is conditional on owner Q6 and a citation would dangle — but the routing line itself is still owed.)",
+            "fix": "Append to the owns/does-not-own paragraph: \"A Bazel `_deploy.jar` is an implicit output of `java_binary` and is governed by the `bazel-quality` set, never by a row here, because no rule in this file loads on a `BUILD.bazel`.\""
+          },
+          {
+            "file": "rules/maven-build/lifecycle-and-plugins.md",
+            "line": 137,
+            "severity": "fix",
+            "kind": "contradiction",
+            "finding": "Cross-set check on a JVM fact, not a build-system fact: gradle-build makes explicit source encoding merge-blocking (index non-negotiable 3, JAVA-PLAT-12 MUST in toolchains-and-compilation.md:85) on the ground that javac's source-reading default is a separate fallback point from JEP 400. jvm-platform-and-toolchains.md's JAVA-PLAT-12 states both halves — `options.encoding` for Gradle AND `<project.build.sourceEncoding>` for Maven — but the Maven half ships nowhere: `grep -rni 'encoding|utf-8' rules/maven-build*` returns zero hits across the index and all four depth files. A Maven-only adopter, who by the set's own design never loads `gradle-build` or `java-quality`, gets no encoding rule at all, so the two sets answer one JVM fact with MUST and with silence.",
+            "fix": "Add a row to the MVN-BUILD table: `| MVN-BUILD-20 | Set `<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>` in every published POM or its parent, regardless of the JDK floor. | `javac`'s source-reading default is a separate fallback point from the runtime default [JEP 400](https://openjdk.org/jeps/400) changed, so a JDK 25 toolchain still reads sources in the host's charset and a non-ASCII literal compiles differently on Windows than on Linux. Maven warns \"platform encoding ... is platform dependent\" and builds anyway. | `grep -rn --include='pom.xml' -e 'project.build.sourceEncoding' .` **Empty output is the finding, not the pass.** A value other than `UTF-8` is a second finding. `JAVA-PLAT-12` is the Gradle statement of the same decision, on a glob a Maven-only adopter never loads. | MUST |`"
+          },
+          {
+            "file": "rules/gradle-build/structure-and-conventions.md",
+            "line": 80,
+            "severity": "nit",
+            "kind": "verification-dishonest",
+            "finding": "GRADLE-STRUCT-04's cell states the hit/empty semantics but omits the vacuous case its two neighbours both state. Run against a fixture with `build-logic` but no `buildSrc`, `grep -rn -e 'org.gradle.accessors.dm' build-logic buildSrc 2>/dev/null` exits 2 on both the violating and the compliant tree (the missing-directory error is swallowed by the redirect but the exit code survives), so a CI gate keyed on exit code reports failure on a clean repo and a repo with neither directory prints nothing while exiting non-zero. Output-based reading is correct; the cell should say so, as STRUCT-03 and STRUCT-05 do.",
+            "fix": "Append to the Verification cell: \"Read the output, never the exit code: a missing `buildSrc` or `build-logic` makes grep exit 2 while printing nothing. A repo with neither directory passes vacuously.\""
+          },
+          {
+            "file": "rules/gradle-build/distribution.md",
+            "line": 29,
+            "severity": "nit",
+            "kind": "era-unlabelled",
+            "finding": "distribution.md is the only depth file in the set with no corpus-and-date statement, while carrying corpus counts throughout (\"0 of 32\", \"12 of 32 against 1 of 32\", \"6 of 32\", \"exactly one artifact in the 32-repository corpus\"). Every sibling states it once up front: structure-and-conventions.md \"Measured against Gradle 9.0.0 through 9.7.1 and a 32-repo survey ... verified 2026-09-12\", caching-and-correctness.md the same, toolchains-and-compilation.md a \"Measurement and Floors\" section, plugin-authoring.md \"Every version below was verified 2026-09-12\", ci.md a \"What Was Measured\" section. Authoring note 7 makes the date mandatory on version-specific content.",
+            "fix": "Insert a paragraph after the Contents line: \"Corpus counts below are over the 32-repository JVM exemplar set, and every tool version named in a row was verified 2026-09-12. Re-read the applied Shadow version before relying on any default this file describes.\""
+          },
+          {
+            "file": "rules/gradle-build.md",
+            "line": 145,
+            "severity": "nit",
+            "kind": "deletion-candidate",
+            "finding": "Deletion test, Severity section: \"The two deliberate exceptions are `GRADLE-PUB`, where published coordinates are immutable and a bad release is unrecoverable, and `GRADLE-CACHE`, where the defect never surfaces as a failure and is paid for as a stale artifact instead.\" This defends the author's MUST-density choice to a future rule author; it names no action and changes no diff. The preceding two sentences are the house-shape line (typescript-quality.md carries them verbatim) and stay.",
+            "fix": "Delete from \"The two\" on line 145 through \"stale artifact instead.\" on line 148, leaving the paragraph ending at \"...negotiate with all of it.\""
+          },
+          {
+            "file": "rules/gradle-build.md",
+            "line": 163,
+            "severity": "nit",
+            "kind": "duplication",
+            "finding": "Deletion test, Siblings: \"Two rows in `toolchains-and-compilation.md` keep their `JAVA-PLAT` IDs for the same reason, since the edit site is a build file and the decision is the language's.\" The same statement opens toolchains-and-compilation.md (lines 20-22: \"Two rows below keep `JAVA-PLAT` IDs: their edit site is a build file so they load from here, and a shipped ID is never renumbered\"), which is the file a reader reaches before ever needing the fact. Two copies of one fact in one package is the divergence risk validation.md's single-source-of-truth check names, and the index pays for it on every build-file edit.",
+            "fix": "Delete from \"Two\" on line 163 through \"language's.\" on line 166, ending the bullet at \"...editing a `.kt` source file loads only theirs.\""
+          },
+          {
+            "file": "rules/gradle-build.md",
+            "line": 156,
+            "severity": "nit",
+            "kind": "deletion-candidate",
+            "finding": "Deletion test, Siblings: \"Where the two ecosystems genuinely disagree it says so: `MVN-BUILD-12` carries the contrast with `GRADLE-DEP-16` on what a checksum proves, and Maven has no analogue of `verification-metadata.xml` at all.\" The bullet has already established that the two sets never load together. This sentence describes the contents of a rule the reader is not loading and cannot act on from a `.gradle.kts` edit, and `MVN-BUILD-12` states the contrast itself where it is needed. Removing it causes no mistake.",
+            "fix": "Delete from \"Where the two\" on line 156 through \"at all.\" on line 159, ending the bullet at \"...so the two rules never load together.\""
+          }
+        ],
+        "verifications_exercised": [
+          {
+            "id": "GRADLE-PUB-04",
+            "went_red": false,
+            "went_green": true,
+            "note": "FAILED. Violating fixture: pom-default.xml with name/description/licenses/developers/<scm><url>u</url></scm> but no project-level <url>. The loop printed nothing — a pass. Compliant fixture also printed nothing. The check cannot go red for the missing element the rationale calls out (url, 8/32), because `grep -qE \"</?url>\"` is satisfied by the scm URL. The cell's 'empty output is the pass' is false."
+          },
+          {
+            "id": "GRADLE-DEP-07",
+            "went_red": true,
+            "went_green": true,
+            "note": "PARTIAL. Red on 2.+ / 1.0.0-SNAPSHOT / latest.release (3 hits, exit 0); green on 2.3.1 / 1.0.0 (exit 1). But a bracket-range fixture (implementation(\"com.acme:widget:[1.0,2.0)\")) — the rule's first named violation — printed nothing, exit 1: a pass on a violation. Every run also emitted 'grep: warning: stray \\ before -' on GNU grep 3.8+. 'Empty output is the pass' is true only for the three classes the pattern list covers."
+          },
+          {
+            "id": "GRADLE-CI-10",
+            "went_red": true,
+            "went_green": true,
+            "note": "HONEST. Violating fixture (permissions only at job level) printed .github/workflows/build.yml; compliant fixture (root-level permissions:) printed nothing. The cell's statement that grep -L prints the files WITHOUT a root block and that every file printed is the finding is exactly right, and the inverted semantics are stated."
+          },
+          {
+            "id": "GRADLE-CI-09",
+            "went_red": true,
+            "went_green": true,
+            "note": "HONEST on detection, defective in shape. Violating fixture (actions/checkout@v4) printed the tag-pinned line; compliant fixture (40-hex SHA) printed only the './'-prefixed local action, which the cell excepts in words. Both runs created uses-lines.txt in the working tree and -h stripped the filename, so a finding in a multi-workflow repo carries an untraceable bare line number."
+          },
+          {
+            "id": "GRADLE-CACHE-09",
+            "went_red": true,
+            "went_green": true,
+            "note": "HONEST. Violating gradle.properties (org.gradle.unsafe.isolated-projects=true) printed the hit, exit 0; compliant (org.gradle.isolated-projects=true) printed nothing, exit 1. 'Any hit is the finding. Empty output is the pass' is true as written."
+          },
+          {
+            "id": "GRADLE-STRUCT-04",
+            "went_red": true,
+            "went_green": true,
+            "note": "HONEST on output, misleading on exit code. Violating build-logic file importing org.gradle.accessors.dm printed the hit; compliant file printed nothing. Both exited 2 because the fixture has no buildSrc directory and 2>/dev/null hides the error but not the status. The cell's output-based claim ('Any hit is the finding, empty output is the pass') holds; it omits the vacuous case its two neighbours state."
+          },
+          {
+            "id": "GRADLE-TOOL-03",
+            "went_red": true,
+            "went_green": true,
+            "note": "HONEST. Violating wrapper (distributionUrl only) produced one file from find and zero grep hits; compliant wrapper produced one file and one hit. 'One hit per listed file is the pass, and any file without one is the finding' is true as written, and the two-command correlation is stated explicitly."
+          },
+          {
+            "id": "GRADLE-DEP-16",
+            "went_red": true,
+            "went_green": true,
+            "note": "HONEST, including the subtle regex. Violating verification-metadata.xml (16-hex short key id + <sha1 value=...>) printed both hits and `grep -rcE -e '<sha256' gradle/` returned 0; compliant file (full 40-hex fingerprint + <sha256>) printed no hits and a count of 1. Confirmed that id=\"[0-9A-Fa-f]{1,39}\" does NOT false-positive on a real 40-character fingerprint. Both empty-output clauses ('Any hit is the finding' / 'a zero count is the finding, not the pass') are true."
+          }
+        ],
+        "unresolved_ids": [],
+        "trigger_evals": [],
+        "verdict": "fix-then-ship"
+      }
+    ],
+    "findings": [
+      {
+        "set": "rules/kotlin-quality.md + rules/kotlin-quality/ (7 depth files) — JVM research-lang phase 8, review B",
+        "file": "rules/kotlin-quality/lint-gate.md",
+        "line": 104,
+        "severity": "blocker",
+        "kind": "contradiction",
+        "finding": "KT-LINT-06 mandates extraWarnings while KT-COMP-12 forbids requiring it. KT-LINT-06 (SHOULD) says \"Turn on `extraWarnings` in exactly one convention plugin\" and its verification says \"Empty output means the bundle is off, which is the finding on a module you author\". KT-COMP-12 (compiler-and-toolchain.md:136, CONSIDER) says the opposite in the same words: \"Do not add `extraWarnings` or `-Wextra` to a build as a hardening step, and never state either as a requirement... Absence is **never** a finding, and a review comment demanding it is the invented pattern\", and compiler-and-toolchain.md failure mode 9 lists adding `extraWarnings = true` as a thing agents get wrong. Both files load on the same `**/*.kt` glob and the index routes compiler work to one and lint work to the other, so the reader gets opposite instructions for the same knob. KT-COMP-12 is the consolidation-backed side (jvm-platform-and-toolchains.md KT-COMP-12: \"Treat `extraWarnings` / `-Wextra` as opt-in, never a MUST... absence is not a violation\"); KT-LINT has no consolidation.",
+        "fix": "In rules/kotlin-quality/lint-gate.md line 104, replace the Rule cell's first two sentences \"Turn on `extraWarnings` in exactly one convention plugin, on the same `compilerOptions` block that sets `jvmTarget`. Treat it as an opt-in that carries its Kotlin version, because it is Experimental as of Kotlin 2.1 and still Experimental at 2026-09-12.\" with \"Where a build opts in to `extraWarnings`, declare it in exactly one convention plugin, on the same `compilerOptions` block that sets `jvmTarget`, and carry its Kotlin version. Whether to opt in at all is `KT-COMP-12`'s, which forbids stating it as a requirement, because it is Experimental as of Kotlin 2.1 and still Experimental at 2026-09-12.\" In the same row's Verification cell, replace \"Empty output means the bundle is off, which is the finding on a module you author and informational on an adopter's.\" with \"Empty output means the bundle is off, which is never a finding (`KT-COMP-12`).\""
+      },
+      {
+        "set": "rules/kotlin-quality.md + rules/kotlin-quality/ (7 depth files) — JVM research-lang phase 8, review B",
+        "file": "rules/kotlin-quality/lint-gate.md",
+        "line": 59,
+        "severity": "blocker",
+        "kind": "verification-dishonest",
+        "finding": "Unquoted `--include=*.x` aborts the whole grep under zsh. Every verification cell in this file writes `--include=` unquoted (lines 58, 59, 60, 104, 105, 122), e.g. `grep -rn -e 'detekt-formatting' -e 'detekt-rules-ktlint-wrapper' --include=*.gradle.kts --include=*.gradle --include=*.toml .`. Ran verbatim under zsh (the project shell) against a planted violating fixture: zsh's nomatch aborts the command before grep runs — `zsh:1: no matches found: --include=*.gradle.kts`, rc=1, no output. KT-LINT-02 reads \"Empty output from the first is the pass\" and KT-LINT-03 reads \"empty output is the pass\", so both report a pass on a tree that violates them: these two verifications cannot go red. KT-LINT-01, -06, -07 and -08 fail the other way (false finding). `check-artifacts.py` reports the set clean, so nothing catches this. Every other depth file in the set quotes its `--include` arguments; this file is the only one that does not.",
+        "fix": "In rules/kotlin-quality/lint-gate.md, quote every `--include=` argument that contains a `*`, on lines 58, 59, 60, 104, 105 and 122: replace `--include=*.gradle.kts` with `--include='*.gradle.kts'`, `--include=*.gradle` with `--include='*.gradle'`, `--include=*.toml` with `--include='*.toml'`, `--include=*.kt` with `--include='*.kt'`, and `--include=*.kts` with `--include='*.kts'`. Leave `--include=.editorconfig` on lines 85 and 86 unchanged — it carries no glob character and already runs correctly."
+      },
+      {
+        "set": "rules/kotlin-quality.md + rules/kotlin-quality/ (7 depth files) — JVM research-lang phase 8, review B",
+        "file": "rules/kotlin-quality.md",
+        "line": 83,
+        "severity": "fix",
+        "kind": "notes-violation",
+        "finding": "The index carries five KT-ERR IDs where the notes bind it to two. The wave-4 authoring decision (jvm-topic-map.md \"Decision carried into authoring\" and \"Conflicts resolved in revision\" item 11) reads: \"Index budget resolved at two KT-ERR rows (KT-ERR-01, KT-ERR-03) in `rules/kotlin-quality.md`\", and jvm-java-runtime-safety.md restates it with the reason: \"`KT-ERR-02` is reviewer-facing, and `KT-ERR-04`/`KT-ERR-05` are detekt-config facts\". The shipped index carries three KT-ERR non-negotiable rows citing five IDs: row 10 (KT-ERR-01, KT-ERR-02), row 11 (KT-ERR-03), row 12 (KT-ERR-04, KT-ERR-05). Three of the five reach the always-loaded list against an explicit budget decision.",
+        "fix": "In rules/kotlin-quality.md, in row 10 replace the Rule cell with \"Never wrap code that may throw a JVM `Error` or a test assertion in `runCatching { }`, because it catches `Throwable`, not `Exception`.\" and the ID cell with \"KT-ERR-01\". Delete row 12 entirely (the `| 12 | An exception constructed from a caught one passes it as the cause... | KT-ERR-04, KT-ERR-05 |` line) and renumber the following rows 13-18 down to 12-17."
+      },
+      {
+        "set": "rules/kotlin-quality.md + rules/kotlin-quality/ (7 depth files) — JVM research-lang phase 8, review B",
+        "file": "rules/kotlin-quality/errors-and-resources.md",
+        "line": 18,
+        "severity": "fix",
+        "kind": "contradiction",
+        "finding": "KT-ERR routes `kotlin.Result` to KT-API, but the rule lives in KT-INTEROP-08. Three places in this file send the reader to `KT-API` / `api-and-abi.md` for `kotlin.Result` as a public return type: line 17-18 (\"`kotlin.Result<T>` as a public return type is `KT-API`'s (`api-and-abi.md`)\"), line 57 (\"The live question is the API-design one `KT-API` owns\") and line 158 (\"it lives in `KT-API`\"). api-and-abi.md contains no `Result` rule and does not claim the topic in its scope paragraph. The rule is KT-INTEROP-08 in java-interop.md, which is where authoring notes §2 and topic-map row M-V-07 put it (\"M-V-07 | Is `kotlin.Result<T>` used as a public return type... | KT-INTEROP\"). A reader following the pointer reaches a file that does not say what was claimed.",
+        "fix": "In rules/kotlin-quality/errors-and-resources.md: line 18, replace \"type is `KT-API`'s (`api-and-abi.md`).\" with \"type is `KT-INTEROP`'s (`java-interop.md`).\"; line 57, replace \"`KT-API` owns.\" with \"`KT-INTEROP` owns.\"; line 158, replace \"API-design one and it lives in `KT-API`.\" with \"API-design one and it lives in `KT-INTEROP`.\""
+      },
+      {
+        "set": "rules/kotlin-quality.md + rules/kotlin-quality/ (7 depth files) — JVM research-lang phase 8, review B",
+        "file": "rules/kotlin-quality.md",
+        "line": 68,
+        "severity": "fix",
+        "kind": "contradiction",
+        "finding": "The index says six JAVA-* IDs; the table cites seven, and not one line each. The preamble to Non-Negotiables says \"The six `JAVA-*` IDs are defined in the `java-quality` sibling set and duplicated here as one line each\". The table cites seven distinct JAVA-* IDs — JAVA-PLAT-01 (row 4), JAVA-PLAT-10 and JAVA-LINT-02 (row 16), JAVA-API-09, JAVA-API-10, JAVA-API-12 and JAVA-SEC-01 (row 17) — and they are not one line each: rows 16 and 17 each bundle several. Authoring notes §4 counts six shared *facts* (JSpecify is one fact carried by two IDs), not six IDs.",
+        "fix": "In rules/kotlin-quality.md line 68, replace \"The six `JAVA-*` IDs are defined in the `java-quality` sibling\" / \"set and duplicated here as one line each, because a Kotlin-only adopter never\" / \"loads that set.\" with \"The six shared facts below are defined in the `java-quality` sibling set and duplicated here as a bare line citing their IDs, because a Kotlin-only adopter never loads that set.\""
+      },
+      {
+        "set": "rules/kotlin-quality.md + rules/kotlin-quality/ (7 depth files) — JVM research-lang phase 8, review B",
+        "file": "rules/kotlin-quality/java-interop.md",
+        "line": 62,
+        "severity": "fix",
+        "kind": "unsupported-claim",
+        "finding": "KT-INTEROP-03 asserts \"Checker Framework, JetBrains, Android, Eclipse, Lombok, RxJava3 and Vert.x are all in that set\" and gives `-Xnullability-annotations=@org.checkerframework.checker.nullness.qual:strict` as the worked example. The only admissible source for this file (canonical-kotlin.md §13, the page-by-page read of kotlinlang's interop docs, which authoring notes §2 names as `java-interop.md`'s sole source) lists the flavours as \"JetBrains, JSpecify, Android, JSR-305, FindBugs, Eclipse, Lombok, RxJava3, Vert.x\" — Checker Framework is not among them and FindBugs has been dropped from the shipped list. SHOULD row, so fix rather than blocker.",
+        "fix": "In rules/kotlin-quality/java-interop.md line 62, replace \"Checker Framework, JetBrains, Android, Eclipse, Lombok, RxJava3 and Vert.x are all in that set.\" with \"JetBrains, Android, FindBugs, Eclipse, Lombok, RxJava3 and Vert.x are all in that set, and any flavour outside it — Checker Framework included — needs the same treatment.\""
+      },
+      {
+        "set": "rules/kotlin-quality.md + rules/kotlin-quality/ (7 depth files) — JVM research-lang phase 8, review B",
+        "file": "rules/kotlin-quality/coroutines.md",
+        "line": 14,
+        "severity": "nit",
+        "kind": "unsupported-claim",
+        "finding": "The scope paragraph says \"The published signature of a `suspend fun` is `KT-API-07`, in `KT-API`.\" The shipped KT-API-07 is about `@JvmOverloads` versus `@IntroducedAt` for a default-valued parameter and never mentions `suspend`. The signature rule is KT-API-04 (\"Never add a parameter to a published function... never widen *or* narrow a published return type\"); the Java-callability half is KT-INTEROP-07. jvm-concurrency.md's own cite-list glosses KT-API-07 the same loose way, so the drafter followed the consolidation, but the shipped cross-reference resolves to a rule that does not make the claim.",
+        "fix": "In rules/kotlin-quality/coroutines.md line 14, replace \"`suspend fun` is `KT-API-07`, in `KT-API`.\" with \"`suspend fun` is `KT-API-04`, in `KT-API`, and its Java-callable wrapper is `KT-INTEROP-07`.\""
+      },
+      {
+        "set": "rules/kotlin-quality.md + rules/kotlin-quality/ (7 depth files) — JVM research-lang phase 8, review B",
+        "file": "rules/kotlin-quality.md",
+        "line": 33,
+        "severity": "nit",
+        "kind": "contradiction",
+        "finding": "\"None of them fires on a settings file\" is false for rows 2 and 18. The double-load note says \"Rows 1, 4, 5, 6 and 15 below are the build-script rows and are the ones that bind there. Every other row is scoped in its own text to the source shape it governs, so none of them fires on a settings file.\" Row 2 (explicit API strict mode plus an ABI gate wired into `check`) and row 18 (KT-CORE-01/KT-CORE-02, which explicitly forbid editing the gate's own convention plugin) are both build-script rows and do bind on a `*.gradle.kts`. Authoring notes §1 requires exactly this list to be accurate, since its whole purpose is that a reader editing a settings file is not trained to skim.",
+        "fix": "In rules/kotlin-quality.md line 33, replace \"Rows 1, 4, 5, 6 and 15 below are the build-script rows and are\" with \"Rows 1, 2, 4, 5, 6, 15 and 18 below are the build-script rows and are\"."
+      },
+      {
+        "set": "rules/kotlin-quality.md + rules/kotlin-quality/ (7 depth files) — JVM research-lang phase 8, review B",
+        "file": "rules/kotlin-quality.md",
+        "line": 154,
+        "severity": "nit",
+        "kind": "deletion-candidate",
+        "finding": "Deletion test on the index: the `gradle-build` bullet ends \"`gradle-build` shares the `**/*.gradle.kts` glob with this set deliberately, because a build script is Kotlin source, so a build-script edit loads both indexes and a `.kt` source edit loads only this one.\" That is the same statement the file already makes at lines 32-35, sixteen lines below the top where a partial read is most likely to reach it. Removing it causes no mistake. It is the only line in the index that fails the deletion test — the rest (the gate block, the wrapper sentence, the \"narration is not evidence\" close, the Block-list-stays-short close) all match the house shape in rules/typescript-quality.md and are earning their tokens.",
+        "fix": "In rules/kotlin-quality.md, delete the sentence spanning lines 154-157 from \"`gradle-build` shares the `**/*.gradle.kts` glob\" through \"a `.kt` source edit loads only this one.\", leaving the bullet ending at \"distribution and publishing.\""
+      },
+      {
+        "set": "rules/kotlin-quality.md + rules/kotlin-quality/ (7 depth files) — JVM research-lang phase 8, review B",
+        "file": "rules/kotlin-quality/coroutines.md",
+        "line": 81,
+        "severity": "nit",
+        "kind": "style",
+        "finding": "The second gate command, `grep -rl --include='*.kt' 'suspend fun' . | xargs -r grep -nE -e 'runCatching\\s*\\{' -e 'catch\\s*\\([^)]*:\\s*(Exception|Throwable)\\)'`, is cited by KT-CORO-05 (MUST) as its fallback check. Run against a planted violation it printed `2:    return runCatching { fetch() }.getOrDefault(\"\")` — no filename, because grep omits the prefix when xargs hands it exactly one file. The finding is unlocatable on a small module, which is the case where a reviewer is most likely to run it.",
+        "fix": "In rules/kotlin-quality/coroutines.md line 81, replace `| xargs -r grep -nE \\` with `| xargs -r grep -HnE \\`."
+      },
+      {
+        "set": "rules/gradle-build.md + rules/gradle-build/*.md (GRADLE-CORE index and eight GRADLE-STRUCT / DEP / CACHE / TOOL / PLUG / DIST / PUB / CI depth files)",
+        "file": "rules/gradle-build/publishing.md",
+        "line": 90,
+        "severity": "blocker",
+        "kind": "verification-dishonest",
+        "finding": "GRADLE-PUB-04's verification cannot go red for the one element its own rationale singles out. Planted and run: a generated POM carrying name/description/licenses/developers/scm but NO project-level <url> printed nothing — the loop passed. `grep -qE \"</?url>\"` matches the `<url>` inside the `<scm>` block, which every compliant POM has, so the check is satisfied by the scm URL alone. The rationale says \"`url` is the element that goes missing: present in 8 of 32\", i.e. the row exists precisely for the case the check cannot detect. The cell's \"empty output is the pass\" statement is therefore false. Same defect in MVN-PUB-07's `grep -q \"<$e>\"`, which is out of this set.",
+        "fix": "Replace the verification cell with: `for e in name description url licenses developers scm; do [ \"$(xmllint --xpath \"boolean(/*/*[local-name()='$e'])\" build/publications/mavenJava/pom-default.xml 2>/dev/null)\" = true ] \\|\\| echo \"MISSING $e\"; done`. Any output is the finding, empty output is the pass. A grep on the element name cannot work here: `<url>` also appears inside `<scm>`, so a POM missing the project-level `url` — the element this row exists for — passes a grep. Run it against every publication that is deployed, not only the primary one."
+      },
+      {
+        "set": "rules/gradle-build.md + rules/gradle-build/*.md (GRADLE-CORE index and eight GRADLE-STRUCT / DEP / CACHE / TOOL / PLUG / DIST / PUB / CI depth files)",
+        "file": "rules/gradle-build/distribution.md",
+        "line": 102,
+        "severity": "blocker",
+        "kind": "contradiction",
+        "finding": "GRADLE-DIST-12 (MUST) states \"Shadow 9.3.0 and above require Gradle 9.0 and Java 17, current line 9.6.1\". GRADLE-PLUG-21 in plugin-authoring.md:151 states \"Shadow 9.5.0 and later need Gradle 9.2 and Java 17\". Both are copied verbatim from their consolidations (jvm-distribution.md DIST-12 floor column; jvm-gradle-plugin-dev.md PLUG-21 floor column) and the topic map's Cross-consolidation contradictions table never resolved them. As shipped, DIST-12's \"and above\" is falsified for 9.5.0+ by its own sibling, and it names 9.6.1 as the current line in the same breath — so an agent on Gradle 9.0 reading distribution.md adopts Shadow 9.6.1 and the build hard-fails.",
+        "fix": "In GRADLE-DIST-12's Rationale, replace \"Shadow 9.3.0 and above require Gradle 9.0 and Java 17, current line 9.6.1 (2026-07-22, verified 2026-09-12).\" with \"Shadow 9.3.0 requires Gradle 9.0 and Java 17, and 9.5.0 and later raise that to Gradle 9.2 (`GRADLE-PLUG-21` carries the same floor); current line 9.6.1 (2026-07-22, verified 2026-09-12).\""
+      },
+      {
+        "set": "rules/gradle-build.md + rules/gradle-build/*.md (GRADLE-CORE index and eight GRADLE-STRUCT / DEP / CACHE / TOOL / PLUG / DIST / PUB / CI depth files)",
+        "file": "rules/gradle-build/publishing.md",
+        "line": 117,
+        "severity": "fix",
+        "kind": "style",
+        "finding": "GRADLE-PUB-13's verification cell contains an unescaped `|` (`find . -maxdepth 3 -iname pom.xml | xargs -r dirname`), which ends the markdown cell. The row renders with six columns instead of five, so the Severity column shows `xargs -r dirname` and the real severity is lost. A 5-column table parse does not see this line as a rule definition at all, which is why GRADLE-PUB-13 reads as an undefined ID to any tool that scans rule rows. GRADLE-PUB-04:90 has the same defect via its `||`.",
+        "fix": "Escape the pipe: change `` `find . -maxdepth 3 -iname pom.xml | xargs -r dirname` `` to `` `find . -maxdepth 3 -iname pom.xml \\| xargs -r dirname` ``. Apply the same `\\|\\|` escaping to GRADLE-PUB-04's cell at line 90."
+      },
+      {
+        "set": "rules/gradle-build.md + rules/gradle-build/*.md (GRADLE-CORE index and eight GRADLE-STRUCT / DEP / CACHE / TOOL / PLUG / DIST / PUB / CI depth files)",
+        "file": "rules/gradle-build/dependencies.md",
+        "line": 65,
+        "severity": "fix",
+        "kind": "verification-dishonest",
+        "finding": "GRADLE-DEP-07 forbids four things and the rationale calls the grep \"the whole gate\", but the grep detects only three. Planted and run: a fixture declaring `implementation(\"com.acme:widget:[1.0,2.0)\")` — a version range, the rule's first named violation — produced no output, i.e. the MUST reads as a pass. The `+` suffix, `latest.*` and `-SNAPSHOT` fixtures all went red correctly and the compliant fixture went green. Separately, `-e '\\-SNAPSHOT'` makes GNU grep 3.8+ print `grep: warning: stray \\ before -` on every run, so a clean pass is never actually clean output.",
+        "fix": "Replace the command with: `grep -rnE --include='*.gradle.kts' --include='*.gradle' --include='*.versions.toml' -e '[0-9]\\.\\+' -e 'latest\\.release' -e 'latest\\.integration' -e '[-]SNAPSHOT' -e ':[[:space:]]*\\[[0-9]' -e ':[[:space:]]*\\([0-9]' .`"
+      },
+      {
+        "set": "rules/gradle-build.md + rules/gradle-build/*.md (GRADLE-CORE index and eight GRADLE-STRUCT / DEP / CACHE / TOOL / PLUG / DIST / PUB / CI depth files)",
+        "file": "rules/gradle-build/distribution.md",
+        "line": 65,
+        "severity": "fix",
+        "kind": "verification-dishonest",
+        "finding": "GRADLE-DIST-05's static half is an inverted check with no empty-output clause, which is exactly what GRADLE-CORE-03 (SHOULD, same rule set) forbids. `grep -n -e '.RSA' build.gradle.kts` printing nothing means there is no signature-exclusion list at all — the violation — not the pass. It also takes a bare root-file operand rather than a directory plus `--include`, against authoring note 9, so it never reaches the shading module in a multi-module build, which is where every shadowJar in the measured corpus lives.",
+        "fix": "Replace \"Statically, `grep -n -e '.RSA' build.gradle.kts` and confirm `.EC` sits in the same list.\" with \"Statically, `grep -rn --include='build.gradle.kts' --include='build.gradle' --include='pom.xml' -e 'META-INF/\\*\\.RSA' .` and confirm `.EC` sits in the same list. **Empty output here is the finding, not the pass**, because it means no signature exclusion exists anywhere.\""
+      },
+      {
+        "set": "rules/gradle-build.md + rules/gradle-build/*.md (GRADLE-CORE index and eight GRADLE-STRUCT / DEP / CACHE / TOOL / PLUG / DIST / PUB / CI depth files)",
+        "file": "rules/gradle-build/plugin-authoring.md",
+        "line": 82,
+        "severity": "fix",
+        "kind": "verification-dishonest",
+        "finding": "GRADLE-PLUG-24's grep half states only what a hit means (\"A hit inside a class implementing `ValueSource` is a violation on sight\") and never what empty output means. Empty output from `grep -rn -e 'MessageDigest' -e 'sha256' src` on a plugin that provisions a binary means no hash is computed anywhere, which is the MUST violated outright — the strongest possible finding read as a clean pass. GRADLE-CORE-03 names this defect class and this cell is an instance of it.",
+        "fix": "After \"...and the `check(...)` must sit in the service or a task action.\" insert: \"**Empty grep output is the finding, not the pass, on a plugin that provisions a binary: it means no hash is computed at all.**\""
+      },
+      {
+        "set": "rules/gradle-build.md + rules/gradle-build/*.md (GRADLE-CORE index and eight GRADLE-STRUCT / DEP / CACHE / TOOL / PLUG / DIST / PUB / CI depth files)",
+        "file": "rules/gradle-build/ci.md",
+        "line": 127,
+        "severity": "fix",
+        "kind": "verification-dishonest",
+        "finding": "GRADLE-CI-09's verification writes `uses-lines.txt` into the working tree (an untracked artifact a reviewer then has to clean up, and one that lands in the diff if the check runs before `git add -A`), and `-h` strips the filename so the printed findings carry a bare line number that cannot be traced to a workflow file. Run against a planted tag-pinned fixture it did go red and against a SHA-pinned one it went green, but in both runs it also printed the `./`-prefixed local action the cell has to except by hand.",
+        "fix": "Replace the two-command form with a single pipeline that needs no temp file and applies the local-action exemption mechanically: `grep -rn --include='*.yml' --include='*.yaml' -e 'uses:' .github/workflows/ \\| grep -vE -e '@[0-9a-f]{40}' -e 'uses:[[:space:]]*\\./'`. Every line printed is the finding, and empty output is the pass."
+      },
+      {
+        "set": "rules/gradle-build.md + rules/gradle-build/*.md (GRADLE-CORE index and eight GRADLE-STRUCT / DEP / CACHE / TOOL / PLUG / DIST / PUB / CI depth files)",
+        "file": "rules/gradle-build/plugin-authoring.md",
+        "line": 151,
+        "severity": "fix",
+        "kind": "contradiction",
+        "finding": "GRADLE-PLUG-21 (SHOULD) and GRADLE-DIST-12 (MUST, distribution.md:102) define the same finding — a `com.github.johnrengelman.shadow` hit — at two severities, and both verification cells say \"a `johnrengelman` hit is the violation\". A review of a plugin module inherits MUST or SHOULD purely from which depth file happened to load, which is the tiering breakage rule-distillation's Severity section exists to prevent. The topic map's contradiction 1 named PLUG-21 as the surviving text for the *shading-is-opt-in* claim only and never adjudicated the dead-id half.",
+        "fix": "In GRADLE-PLUG-21's Rule, replace \"Shading a plugin's own dependencies is opt-in through `com.gradleup.shadow`, never the dead `com.github.johnrengelman.shadow` id, and it does not imply relocation.\" with \"Shading a plugin's own dependencies is opt-in through `com.gradleup.shadow` (`GRADLE-DIST-12` owns the dead-id rule at MUST), and it does not imply relocation.\" In its Verification, replace \"A `johnrengelman` hit is the violation and empty output is the pass.\" with \"A `johnrengelman` hit is `GRADLE-DIST-12`'s finding, not this row's; empty output is the pass.\""
+      },
+      {
+        "set": "rules/gradle-build.md + rules/gradle-build/*.md (GRADLE-CORE index and eight GRADLE-STRUCT / DEP / CACHE / TOOL / PLUG / DIST / PUB / CI depth files)",
+        "file": "rules/gradle-build.md",
+        "line": 168,
+        "severity": "fix",
+        "kind": "unsupported-claim",
+        "finding": "The Siblings bullet states \"Bazel does not publish to Central itself\" as settled fact. The topic map's Wave 4 landed section lists it as still open: \"java_export / Maven Central publishing from Bazel — does rules_jvm_external's java_export/maven_publish produce a Central-Portal-acceptable bundle ... or is Bazel a non-publisher that always hands off to Gradle or Maven? (carried, unchanged)\". An open question stated flatly in an always-loaded index is the shape the program elsewhere flags as teaching a fiction.",
+        "fix": "Replace \"Bazel does not publish to Central itself, and that half is governed here.\" with \"Whether `rules_jvm_external`'s `java_export` can produce a Portal-acceptable bundle was unresolved as of 2026-09-12; the hand-off-to-Gradle path, which is dagger's own answer, is governed here.\""
+      },
+      {
+        "set": "rules/gradle-build.md + rules/gradle-build/*.md (GRADLE-CORE index and eight GRADLE-STRUCT / DEP / CACHE / TOOL / PLUG / DIST / PUB / CI depth files)",
+        "file": "rules/gradle-build/distribution.md",
+        "line": 21,
+        "severity": "nit",
+        "kind": "notes-violation",
+        "finding": "The topic map's Cross-consolidation contradictions row 18 requires that \"`distribution.md` carries one pointer line\" for BZL-JAVA-21's deploy-jar question, so a reader hitting a Bazel deploy jar is routed out of this taxonomy. No such line exists anywhere in the file, and no other line in the set mentions deploy jars. (Omitting the bare ID is defensible — BZL-JAVA is conditional on owner Q6 and a citation would dangle — but the routing line itself is still owed.)",
+        "fix": "Append to the owns/does-not-own paragraph: \"A Bazel `_deploy.jar` is an implicit output of `java_binary` and is governed by the `bazel-quality` set, never by a row here, because no rule in this file loads on a `BUILD.bazel`.\""
+      },
+      {
+        "set": "rules/gradle-build.md + rules/gradle-build/*.md (GRADLE-CORE index and eight GRADLE-STRUCT / DEP / CACHE / TOOL / PLUG / DIST / PUB / CI depth files)",
+        "file": "rules/maven-build/lifecycle-and-plugins.md",
+        "line": 137,
+        "severity": "fix",
+        "kind": "contradiction",
+        "finding": "Cross-set check on a JVM fact, not a build-system fact: gradle-build makes explicit source encoding merge-blocking (index non-negotiable 3, JAVA-PLAT-12 MUST in toolchains-and-compilation.md:85) on the ground that javac's source-reading default is a separate fallback point from JEP 400. jvm-platform-and-toolchains.md's JAVA-PLAT-12 states both halves — `options.encoding` for Gradle AND `<project.build.sourceEncoding>` for Maven — but the Maven half ships nowhere: `grep -rni 'encoding|utf-8' rules/maven-build*` returns zero hits across the index and all four depth files. A Maven-only adopter, who by the set's own design never loads `gradle-build` or `java-quality`, gets no encoding rule at all, so the two sets answer one JVM fact with MUST and with silence.",
+        "fix": "Add a row to the MVN-BUILD table: `| MVN-BUILD-20 | Set `<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>` in every published POM or its parent, regardless of the JDK floor. | `javac`'s source-reading default is a separate fallback point from the runtime default [JEP 400](https://openjdk.org/jeps/400) changed, so a JDK 25 toolchain still reads sources in the host's charset and a non-ASCII literal compiles differently on Windows than on Linux. Maven warns \"platform encoding ... is platform dependent\" and builds anyway. | `grep -rn --include='pom.xml' -e 'project.build.sourceEncoding' .` **Empty output is the finding, not the pass.** A value other than `UTF-8` is a second finding. `JAVA-PLAT-12` is the Gradle statement of the same decision, on a glob a Maven-only adopter never loads. | MUST |`"
+      },
+      {
+        "set": "rules/gradle-build.md + rules/gradle-build/*.md (GRADLE-CORE index and eight GRADLE-STRUCT / DEP / CACHE / TOOL / PLUG / DIST / PUB / CI depth files)",
+        "file": "rules/gradle-build/structure-and-conventions.md",
+        "line": 80,
+        "severity": "nit",
+        "kind": "verification-dishonest",
+        "finding": "GRADLE-STRUCT-04's cell states the hit/empty semantics but omits the vacuous case its two neighbours both state. Run against a fixture with `build-logic` but no `buildSrc`, `grep -rn -e 'org.gradle.accessors.dm' build-logic buildSrc 2>/dev/null` exits 2 on both the violating and the compliant tree (the missing-directory error is swallowed by the redirect but the exit code survives), so a CI gate keyed on exit code reports failure on a clean repo and a repo with neither directory prints nothing while exiting non-zero. Output-based reading is correct; the cell should say so, as STRUCT-03 and STRUCT-05 do.",
+        "fix": "Append to the Verification cell: \"Read the output, never the exit code: a missing `buildSrc` or `build-logic` makes grep exit 2 while printing nothing. A repo with neither directory passes vacuously.\""
+      },
+      {
+        "set": "rules/gradle-build.md + rules/gradle-build/*.md (GRADLE-CORE index and eight GRADLE-STRUCT / DEP / CACHE / TOOL / PLUG / DIST / PUB / CI depth files)",
+        "file": "rules/gradle-build/distribution.md",
+        "line": 29,
+        "severity": "nit",
+        "kind": "era-unlabelled",
+        "finding": "distribution.md is the only depth file in the set with no corpus-and-date statement, while carrying corpus counts throughout (\"0 of 32\", \"12 of 32 against 1 of 32\", \"6 of 32\", \"exactly one artifact in the 32-repository corpus\"). Every sibling states it once up front: structure-and-conventions.md \"Measured against Gradle 9.0.0 through 9.7.1 and a 32-repo survey ... verified 2026-09-12\", caching-and-correctness.md the same, toolchains-and-compilation.md a \"Measurement and Floors\" section, plugin-authoring.md \"Every version below was verified 2026-09-12\", ci.md a \"What Was Measured\" section. Authoring note 7 makes the date mandatory on version-specific content.",
+        "fix": "Insert a paragraph after the Contents line: \"Corpus counts below are over the 32-repository JVM exemplar set, and every tool version named in a row was verified 2026-09-12. Re-read the applied Shadow version before relying on any default this file describes.\""
+      },
+      {
+        "set": "rules/gradle-build.md + rules/gradle-build/*.md (GRADLE-CORE index and eight GRADLE-STRUCT / DEP / CACHE / TOOL / PLUG / DIST / PUB / CI depth files)",
+        "file": "rules/gradle-build.md",
+        "line": 145,
+        "severity": "nit",
+        "kind": "deletion-candidate",
+        "finding": "Deletion test, Severity section: \"The two deliberate exceptions are `GRADLE-PUB`, where published coordinates are immutable and a bad release is unrecoverable, and `GRADLE-CACHE`, where the defect never surfaces as a failure and is paid for as a stale artifact instead.\" This defends the author's MUST-density choice to a future rule author; it names no action and changes no diff. The preceding two sentences are the house-shape line (typescript-quality.md carries them verbatim) and stay.",
+        "fix": "Delete from \"The two\" on line 145 through \"stale artifact instead.\" on line 148, leaving the paragraph ending at \"...negotiate with all of it.\""
+      },
+      {
+        "set": "rules/gradle-build.md + rules/gradle-build/*.md (GRADLE-CORE index and eight GRADLE-STRUCT / DEP / CACHE / TOOL / PLUG / DIST / PUB / CI depth files)",
+        "file": "rules/gradle-build.md",
+        "line": 163,
+        "severity": "nit",
+        "kind": "duplication",
+        "finding": "Deletion test, Siblings: \"Two rows in `toolchains-and-compilation.md` keep their `JAVA-PLAT` IDs for the same reason, since the edit site is a build file and the decision is the language's.\" The same statement opens toolchains-and-compilation.md (lines 20-22: \"Two rows below keep `JAVA-PLAT` IDs: their edit site is a build file so they load from here, and a shipped ID is never renumbered\"), which is the file a reader reaches before ever needing the fact. Two copies of one fact in one package is the divergence risk validation.md's single-source-of-truth check names, and the index pays for it on every build-file edit.",
+        "fix": "Delete from \"Two\" on line 163 through \"language's.\" on line 166, ending the bullet at \"...editing a `.kt` source file loads only theirs.\""
+      },
+      {
+        "set": "rules/gradle-build.md + rules/gradle-build/*.md (GRADLE-CORE index and eight GRADLE-STRUCT / DEP / CACHE / TOOL / PLUG / DIST / PUB / CI depth files)",
+        "file": "rules/gradle-build.md",
+        "line": 156,
+        "severity": "nit",
+        "kind": "deletion-candidate",
+        "finding": "Deletion test, Siblings: \"Where the two ecosystems genuinely disagree it says so: `MVN-BUILD-12` carries the contrast with `GRADLE-DEP-16` on what a checksum proves, and Maven has no analogue of `verification-metadata.xml` at all.\" The bullet has already established that the two sets never load together. This sentence describes the contents of a rule the reader is not loading and cannot act on from a `.gradle.kts` edit, and `MVN-BUILD-12` states the contrast itself where it is needed. Removing it causes no mistake.",
+        "fix": "Delete from \"Where the two\" on line 156 through \"at all.\" on line 159, ending the bullet at \"...so the two rules never load together.\""
+      }
+    ]
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Review"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "review:kotlin-quality",
+      "phaseIndex": 1,
+      "phaseTitle": "Review",
+      "agentId": "a859f0ab561e85838",
+      "model": "claude-opus-5[1m]",
+      "state": "done",
+      "startedAt": 1789308918821,
+      "queuedAt": 1789308918802,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "rules/kotlin-quality.md + rules/kotlin-quality/ (7 depth fi…",
+      "promptPreview": "Model rationale: opus — content review of text that becomes an enforced rule; a wrong MUST or a verification that cannot go red propagates into every future diff.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- You are a reviewer in phase 8 (Validate) of the research-lang program for the JVM ecosystem, run from /home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake (a git worktree…",
+      "promptFramed": false,
+      "lastProgressAt": 1789309658888,
+      "tokens": 326917,
+      "toolCalls": 77,
+      "durationMs": 740066,
+      "resultPreview": "{\"set\":\"rules/kotlin-quality.md + rules/kotlin-quality/ (7 depth files) — JVM research-lang phase 8, review B\",\"files_read\":[\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.claude/skills/research-lang/references/validation.md\",\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.claude/skills/research-lang/references/rule-distillation.md\",\"/home/mherwig/dev/grimoire-lore/.agents/wor…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "review:gradle-build",
+      "phaseIndex": 1,
+      "phaseTitle": "Review",
+      "agentId": "a731d860e5b8fce9b",
+      "model": "claude-opus-5[1m]",
+      "state": "done",
+      "startedAt": 1789308918822,
+      "queuedAt": 1789308918803,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "rules/gradle-build.md + rules/gradle-build/*.md (GRADLE-COR…",
+      "promptPreview": "Model rationale: opus — content review of text that becomes an enforced rule; a wrong MUST or a verification that cannot go red propagates into every future diff.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- You are a reviewer in phase 8 (Validate) of the research-lang program for the JVM ecosystem, run from /home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake (a git worktree…",
+      "promptFramed": false,
+      "lastProgressAt": 1789309724343,
+      "tokens": 292497,
+      "toolCalls": 83,
+      "durationMs": 805520,
+      "resultPreview": "{\"set\":\"rules/gradle-build.md + rules/gradle-build/*.md (GRADLE-CORE index and eight GRADLE-STRUCT / DEP / CACHE / TOOL / PLUG / DIST / PUB / CI depth files)\",\"files_read\":[\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.claude/skills/research-lang/references/validation.md\",\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.claude/skills/research-lang/references/rule-distillation.…"
+    }
+  ],
+  "totalTokens": 619414,
+  "totalToolCalls": 160
+}

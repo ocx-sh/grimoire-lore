@@ -1,0 +1,25 @@
+android__nowinandroid	javaToolchainVer=	sourceCompatFiles=2	releaseFiles=0	jvmToolchainVer=	jvmTargetVals=jvmTarget = JvmTarget.JVM_17;	foojayFiles=0
+apache__kafka	javaToolchainVer=	sourceCompatFiles=1	releaseFiles=1	jvmToolchainVer=	jvmTargetVals=	foojayFiles=0
+apollographql__apollo-kotlin	javaToolchainVer=11,21,	sourceCompatFiles=3	releaseFiles=0	jvmToolchainVer=	jvmTargetVals=jvmTarget.set(JvmTarget.JVM_1_8);	foojayFiles=4
+bazelbuild__bazel	javaToolchainVer=	sourceCompatFiles=0	releaseFiles=0	jvmToolchainVer=	jvmTargetVals=	foojayFiles=0
+bazelbuild__rules_kotlin	javaToolchainVer=	sourceCompatFiles=1	releaseFiles=0	jvmToolchainVer=	jvmTargetVals=	foojayFiles=0
+cashapp__sqldelight	javaToolchainVer=17,8,	sourceCompatFiles=1	releaseFiles=0	jvmToolchainVer=	jvmTargetVals=jvmTarget = JvmTarget.JVM_17;	foojayFiles=3
+detekt__detekt	javaToolchainVer=	sourceCompatFiles=2	releaseFiles=0	jvmToolchainVer=17,	jvmTargetVals=	foojayFiles=3
+diffplug__spotless	javaToolchainVer=	sourceCompatFiles=0	releaseFiles=1	jvmToolchainVer=	jvmTargetVals=	foojayFiles=0
+google__dagger	javaToolchainVer=	sourceCompatFiles=9	releaseFiles=0	jvmToolchainVer=17,	jvmTargetVals=	foojayFiles=0
+google__guava	javaToolchainVer=	sourceCompatFiles=1	releaseFiles=0	jvmToolchainVer=	jvmTargetVals=	foojayFiles=0
+gradle__actions	javaToolchainVer=16,8,	sourceCompatFiles=0	releaseFiles=0	jvmToolchainVer=	jvmTargetVals=	foojayFiles=1
+gradle__gradle	javaToolchainVer=25,	sourceCompatFiles=1	releaseFiles=1	jvmToolchainVer=	jvmTargetVals=	foojayFiles=1
+GradleUp__shadow	javaToolchainVer=	sourceCompatFiles=0	releaseFiles=1	jvmToolchainVer=	jvmTargetVals=	foojayFiles=1
+grpc__grpc-java	javaToolchainVer=	sourceCompatFiles=27	releaseFiles=3	jvmToolchainVer=	jvmTargetVals=	foojayFiles=0
+JetBrains__Exposed	javaToolchainVer=17,21,	sourceCompatFiles=2	releaseFiles=0	jvmToolchainVer=17,	jvmTargetVals=jvmTarget.set(JvmTarget.JVM_11);jvmTarget.set(JvmTarget.JVM_17);jvmTarget.set(JvmTarget.JVM_1_8);	foojayFiles=1
+junit-team__junit-framework	javaToolchainVer=17,	sourceCompatFiles=2	releaseFiles=5	jvmToolchainVer=	jvmTargetVals=	foojayFiles=9
+Kotlin__kotlinx.coroutines	javaToolchainVer=	sourceCompatFiles=7	releaseFiles=2	jvmToolchainVer=17,8,	jvmTargetVals=jvmTarget = JvmTarget.JVM_1_8;jvmTarget = JvmTarget.JVM_9;jvmTarget.set(JvmTarget.JVM_17);jvmTarget.set(JvmTarget.JVM_1_8);	foojayFiles=0
+ktorio__ktor	javaToolchainVer=21,	sourceCompatFiles=1	releaseFiles=0	jvmToolchainVer=11,17,21,	jvmTargetVals=	foojayFiles=1
+micronaut-projects__micronaut-core	javaToolchainVer=	sourceCompatFiles=2	releaseFiles=0	jvmToolchainVer=	jvmTargetVals=	foojayFiles=0
+mockito__mockito	javaToolchainVer=21,	sourceCompatFiles=4	releaseFiles=0	jvmToolchainVer=	jvmTargetVals=jvmTarget = JvmTarget.JVM_11;	foojayFiles=1
+pinterest__ktlint	javaToolchainVer=	sourceCompatFiles=0	releaseFiles=1	jvmToolchainVer=21,	jvmTargetVals=	foojayFiles=2
+spring-projects__spring-boot	javaToolchainVer=	sourceCompatFiles=9	releaseFiles=0	jvmToolchainVer=	jvmTargetVals=	foojayFiles=0
+square__okhttp	javaToolchainVer=21,25,	sourceCompatFiles=8	releaseFiles=0	jvmToolchainVer=21,	jvmTargetVals=jvmTarget.set(JvmTarget.JVM_17);jvmTarget.set(JvmTarget.JVM_1_8);	foojayFiles=1
+testcontainers__testcontainers-java	javaToolchainVer=11,17,	sourceCompatFiles=2	releaseFiles=5	jvmToolchainVer=	jvmTargetVals=jvmTarget = "1.8";	foojayFiles=1
+uber__NullAway	javaToolchainVer=17,21,25,	sourceCompatFiles=9	releaseFiles=0	jvmToolchainVer=	jvmTargetVals=	foojayFiles=1

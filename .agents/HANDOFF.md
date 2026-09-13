@@ -1,3 +1,65 @@
+# JVM quality artifact program (AUTHORED, ON BRANCH `cmake`)
+
+Started 2026-09-05 22:57 CEST in the `cmake` worktree
+(`.agents/worktrees/cmake`, branch `cmake`) — not on `main`, not in the `java`
+worktree. Brief: Java/Kotlin, modern Gradle incl. plugin development, Maven,
+Ant as legacy, Bazel-for-Java as a complement to the concurrent Bazel program
+on `main`, SDK development and dependency management, fat/shadow jars, lint,
+test suite and coverage; self-directed topic discovery.
+
+## State at last write
+
+| Phase | Status | Where |
+|---|---|---|
+| 0 Frame | done, corrections appended after wave 1 | `.agents/research/jvm-frame.md` |
+| 1 Ground | done — 4 audits over a 32-repo exemplar corpus (fleet has zero JVM code) | `jvm-audit/*.md`; fetch and table scripts in `jvm-audit/scratch/` |
+| 2 Scout | done — 9 scouts, 423 raw candidates | `jvm-topic-map/*.md` |
+| 3 Map | launched 23:36, opus | `jvm-topic-map.md` when it lands |
+| 4–5 Wave 2 | done 2026-09-12 — 14 dives, 6 consolidations (gradle-core, gradle-plugin-dev, dependencies, distribution, quality-gates, language-api), 105 MUST, 81 surprises, 19 follow-ups | `jvm-<group>.md` + `jvm-<group>/`; receipts in `jvm-topic-map/scratch/wave2-receipt.json` |
+| 6 Harvest | done 2026-09-12 — "Wave 2 landed" appended to `jvm-topic-map.md`; 16 frame corrections appended to the frame; convergence verdict: not converged | briefs in `jvm-topic-map/scratch/wave3-briefs.json` |
+| 4–5 Wave 3 | done 2026-09-12 — 14 dives, 7 consolidations (concurrency, gradle-settings, publishing, bazel-java, maven-and-ant, platform-and-toolchains, java-runtime-safety), 151 IDs, 110 MUST, 82 surprises, 27 follow-ups | receipts in `jvm-topic-map/scratch/wave3-receipt.json` |
+| 6 Converge | done 2026-09-12 — verdict **needs-another-round**: 296 IDs / 215 MUST / 21 families across 13 consolidations, 22 cross-consolidation contradictions resolved, 26 binding authoring notes, 16 owner decisions with defaults | `jvm-topic-map.md` › "Wave 3 landed" and "Authoring notes (binding on the drafters)"; receipt `jvm-topic-map/scratch/converge-receipt.json` |
+| 4–5 Wave 4 | done 2026-09-12 — 6 dives, 5 revisions; KT-ERR ships as the 28th depth file; JAVA-SEC no longer depends on find-sec-bugs; residue is dated re-checks and corpus-unmeasurable items | `jvm-topic-map.md` › "Wave 4 landed"; receipt `jvm-topic-map/scratch/wave4-receipt.json` |
+| 7 Author | done 2026-09-13 — 35 opus drafters in two batches (a: java-quality 9+1, maven-build 4+1, two skills, Bazel-Java handoff; b: kotlin-quality 7+1, gradle-build 8+1); 24 IDs dropped at authoring with reasons in the receipts | `jvm-topic-map/scratch/author-{a,b}-receipt.json` |
+| 8 Validate | done 2026-09-13 — 5 opus reviewers ran verifications against planted fixtures (10 blockers, 24 fixes, nits skipped), 25 fixers applied them; checker clean on every set; two new checker lints (unquoted `--include=*` glob, split table row) with self-tests; `grim publish --dry-run` lists all seven JVM packages; `task artifacts` passes | `jvm-topic-map.md` › "Authoring landed"; `review-{a,b}-receipt.json` |
+| Marks | done — `assets/glyphs/{java,kotlin,gradle,maven}.svg` and `assets/lore-{java,kotlin,gradle,maven}.svg` via `scripts/make-mark.py` with white ink | |
+| Wiring | done — `publish.toml` (4 rules, 2 skills, 1 bundle at 0.1.0), `bundles/jvm-essentials.toml` (untagged members), `taskfile.yml` JVM checker step (no root: the fleet has no JVM), seven `docs/` companions with counts verified by command | |
+| Commit | done 2026-09-13 — two commits on `cmake` (checker lints, JVM set), rebased onto `main`; not pushed, no PR | |
+
+Exemplar clones live at `/home/mherwig/dev/.tmp-jvm-exemplars/<owner>__<repo>`
+(moved off the full tmpfs 2026-09-06; disposable); the frame table records
+every SHA, and `jvm-audit/scratch/fetch-exemplars.sh <dir>` recreates them
+(blob-less depth-1 clones, sparse checkout of build files).
+
+Owner halted before wave 2 on 2026-09-06, then said "continue" on
+2026-09-12 with no answers to Q1–Q8, so the map's defaults apply (Java-first
+SDK, JDK floor 17, Gradle floor 8.11, Kotlin DSL examples, own Maven rule,
+offer `java.md` to bazel-quality, 90 percent coverage floor, one docs-quality
+row). Wave 2 launched 2026-09-12 from
+`jvm-topic-map/scratch/jvm-wave2.mjs` (14 dives, 6 consolidations; the
+selection is baked into the script because `args` has a size cap). Wave 3 is
+staged in `jvm-topic-map.md` › "Staged for wave 3"; regenerate its script the
+same way from `scratch/map-receipt.json` (`wave3_staged`) with
+`existing_groups` set to the consolidations on disk so the reviser contract
+fires where a group already has a `jvm-<group>.md`.
+
+Since the halt, `bazel-quality` (rule, two skills, bundle) merged to `main`
+(4325c18). The Bazel-Java depth file is now an offer against a published set,
+not an in-flight one.
+
+## To resume cold
+
+1. Read `jvm-frame.md` end to end, corrections last.
+2. If `jvm-topic-map.md` exists: its "Selected for wave 2" briefs are the
+   commissions. Re-create the dive workflow from the research-lang skill's
+   `references/prompt-contracts.md` (dive + consolidator + reviser contracts)
+   — sonnet dives, opus consolidations, ≤ 14 dives per wave, pipeline per group.
+3. If it does not: re-run phase 3 from `references/wave-plan.md` over the 13
+   wave-1 artifacts.
+4. Budget: research phases 1–6 cost ~12.0M subagent tokens (wave 1 2.3M, map 0.5M, wave 2 3.2M, harvest 0.3M, wave 3 3.6M, converge 0.5M, wave 4 1.6M). Authoring and validation cost ~9.3M (draft a 3.1M, draft b 2.8M, review 1.45M, fix 1.35M, docs and lints ~0.5M). Total ~21M; no session limit hit.
+5. What is left is the owner's: commit on `cmake`, rebase onto `main` (this file conflicts: `main` gained the Bazel section), open the PR; merging publishes 0.1.0 of all seven. Q6 (`java.md` into `bazel-quality`) is still open; the file is `.agents/research/handoff/bazel-quality-java.md` plus one routing row in `bazel-quality-index-row.md`.
+6. Rule trigger evals in a fresh client session were not run: no consumer tree with Java or Kotlin exists in the fleet. First adopter should open a `.java`, a `.kt`, a `build.gradle.kts` and a `pom.xml` and confirm the right index is in context.
+
 # Handoff — language quality artifact programs
 
 # Bazel expertise artifact program

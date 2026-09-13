@@ -1,0 +1,4 @@
+android__nowinandroid	settings.gradle.kts	repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS
+detekt__detekt	settings.gradle.kts	repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS
+google__dagger	settings.gradle.kts	repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+pinterest__ktlint	settings.gradle.kts	repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS

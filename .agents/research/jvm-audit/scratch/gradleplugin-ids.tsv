@@ -1,0 +1,51 @@
+=== android__nowinandroid ===
+=== apache__kafka ===
+=== cashapp__sqldelight ===
+-- buildLogic/toolchain-convention/build.gradle --
+9:      id = "app.cash.sqldelight.toolchain.runtime"
+13:      id = "app.cash.sqldelight.toolchain.compiler"
+-- buildLogic/multiplatform-convention/build.gradle --
+9:      id = "app.cash.sqldelight.multiplatform"
+=== detekt__detekt ===
+=== diffplug__spotless ===
+=== google__dagger ===
+=== gradle__actions ===
+-- .github/workflow-samples/gradle-plugin/plugin/build.gradle.kts --
+31:        id = "org.example.greeting"
+=== gradle__gradle ===
+-- build-logic/performance-testing/build.gradle.kts --
+31:            id = "gradlebuild.performance-testing"
+-- build-logic/integration-testing/build.gradle.kts --
+10:            id = "gradlebuild.ide-provisioning"
+17:            id = "gradlebuild.android-home-warmup"
+-- build-logic/documentation/build.gradle.kts --
+34:            id = "gradlebuild.documentation"
+=== GradleUp__shadow ===
+=== JetBrains__Exposed ===
+-- exposed-gradle-plugin/build.gradle.kts --
+69:            id = "org.jetbrains.exposed.plugin"
+-- buildSrc/build.gradle.kts --
+21:            id = "testWithDBs"
+=== pinterest__ktlint ===
+-- build-logic/build.gradle.kts --
+62:            id = "ktlint-dokka"
+66:            id = "ktlint-kotlin-common"
+70:            id = "ktlint-publication"
+74:            id = "ktlint-publication-library"
+=== spring-projects__spring-boot ===
+-- buildSrc/build.gradle --
+91:			id = "org.springframework.boot.aggregator"
+95:			id = "org.springframework.boot.annotation-processor"
+99:			id = "org.springframework.boot.antora-contributor"
+103:			id = "org.springframework.boot.antora-dependencies"
+107:			id = "org.springframework.boot.architecture"
+111:			id = "org.springframework.boot.auto-configuration"
+115:			id = "org.springframework.boot.bom"
+119:			id = "org.springframework.boot.configuration-metadata"
+123:			id = "org.springframework.boot.configuration-properties"
+127:			id = "org.springframework.boot.conventions"
+-- gradle/plugins/cycle-detection-plugin/build.gradle --
+43:			id = "org.springframework.boot.cycle-detection"
+-- build-plugin/spring-boot-gradle-plugin/build.gradle --
+86:			id = "org.springframework.boot"
+92:			id = "org.springframework.boot.aot"

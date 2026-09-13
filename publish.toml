@@ -244,3 +244,43 @@ description = { readme = "docs/bazel-diagnose.md", logo = "assets/lore-bazel.svg
 [bundles.bazel-essentials]
 version = "0.1.0"
 description = { readme = "docs/bazel-essentials.md", logo = "assets/lore-bazel.svg" }
+# The JVM set: four rules split by what the file under edit is, not by
+# language family alone. `java-quality` and `kotlin-quality` load on source and
+# share a bounded handful of MUST rows by ID because the same JVM fact binds
+# both. `gradle-build` and `maven-build` load on build files, so a Java edit
+# never pays for the Gradle depth and a `pom.xml` edit never pays for the
+# Kotlin one; the one deliberate overlap is `*.gradle.kts`, which is Kotlin
+# source and a build file at once and so loads both `kotlin-quality` and
+# `gradle-build`. Ant lives inside `maven-build` as a legacy depth file rather than
+# a fifth rule: the fleet-external exemplar corpus carried Ant only beside a
+# Maven or Gradle build, never alone. The two skills are procedures that run
+# once per release or per dependency incident and would be dead weight loaded
+# on every edit. The Bazel-Java depth file is offered to `bazel-quality`, not
+# published here, so no two rules glob `BUILD.bazel`.
+[rules.java-quality]
+version = "0.1.0"
+description = { readme = "docs/java-quality.md", logo = "assets/lore-java.svg" }
+
+[rules.kotlin-quality]
+version = "0.1.0"
+description = { readme = "docs/kotlin-quality.md", logo = "assets/lore-kotlin.svg" }
+
+[rules.gradle-build]
+version = "0.1.0"
+description = { readme = "docs/gradle-build.md", logo = "assets/lore-gradle.svg" }
+
+[rules.maven-build]
+version = "0.1.0"
+description = { readme = "docs/maven-build.md", logo = "assets/lore-maven.svg" }
+
+[skills.jvm-release]
+version = "0.1.0"
+description = { readme = "docs/jvm-release.md", logo = "assets/lore-java.svg" }
+
+[skills.jvm-dependency-triage]
+version = "0.1.0"
+description = { readme = "docs/jvm-dependency-triage.md", logo = "assets/lore-java.svg" }
+
+[bundles.jvm-essentials]
+version = "0.1.0"
+description = { readme = "docs/jvm-essentials.md", logo = "assets/lore-java.svg" }

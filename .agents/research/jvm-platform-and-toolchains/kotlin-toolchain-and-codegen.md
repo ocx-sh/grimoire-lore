@@ -1,0 +1,346 @@
+---
+title: Kotlin build-side configuration — flags, targets, codegen, docs
+topic: kotlin-toolchain-and-codegen
+agent: jvm-platform-kt-comp-researcher
+model: sonnet
+date_researched: 2026-09-12
+sources_count: 17
+scope: |
+  Covers KT-COMP: Kotlin/JVM compiler `-X` flags and their stabilisation dates,
+  the jvmTarget/jvmToolchain/jvmTargetValidationMode attribute table, jvmDefault's
+  2.2.0 default flip, KGP/Gradle/AGP compatibility, Kotlin daemon JVM-argument
+  precedence and build-report sinks, KSP2-vs-kapt, and Dokka v1→v2. Also answers
+  the wave-2 KT-TEST handover: does `koverVerify` bind to `check` by default.
+  Does NOT cover explicit API mode, BCV or `abiValidation{}` (owned by
+  jvm-language-api.md, KT-API-01/03) or coroutine/test-framework choice (KT-TEST
+  proper, jvm-quality-gates.md).
+---
+
+## Table of contents
+
+1. [Findings](#findings)
+   1. [`-X` flags that stabilised or vanished](#1--x-flags-that-stabilised-or-vanished)
+   2. [`-Xjvm-default` deprecation and the `jvmDefault` default flip](#2--xjvm-default-deprecation-and-the-jvmdefault-default-flip)
+   3. [The JVM attribute table and `jvmToolchain` interaction](#3-the-jvm-attribute-table-and-jvmtoolchain-interaction)
+   4. [KGP/Gradle/AGP compatibility envelope](#4-kgpgradleagp-compatibility-envelope)
+   5. [Kotlin daemon JVM-argument precedence and build reports](#5-kotlin-daemon-jvm-argument-precedence-and-build-reports)
+   6. [KSP2 as default, kapt's remaining footprint](#6-ksp2-as-default-kapts-remaining-footprint)
+   7. [Dokka v1→v2](#7-dokka-v1v2)
+   8. [Kover's `check` wiring — the wave-2 handover, settled](#8-kovers-check-wiring--the-wave-2-handover-settled)
+2. [Normative guidance candidates](#normative-guidance-candidates)
+3. [Exemplar evidence](#exemplar-evidence)
+4. [AI-agent angle](#ai-agent-angle)
+5. [Contested / evolving](#contested--evolving)
+6. [Sources](#sources)
+
+## Summary
+
+- `-Xwhen-guards`, `-Xnon-local-break-continue` and `-Xmulti-dollar-interpolation` are gone as flags — the features went Stable and flag-free in Kotlin 2.2.0 (2025-06-23); a rule or a script still passing them is a silent no-op ([whatsnew22](https://kotlinlang.org/docs/whatsnew22.html)).
+- `-Xcontext-parameters` is likewise gone as a flag — context parameters (excluding context arguments and callable references) went Stable in Kotlin 2.4.0 (2026-07-14) ([whatsnew24](https://kotlinlang.org/docs/whatsnew24.html)).
+- `-Xjvm-default` is deprecated in favour of the stable `-jvm-default` option / Gradle `compilerOptions.jvmDefault` property, and that property's **default flipped from `DISABLE` to `ENABLE` in Kotlin 2.2.0** — existing interfaces silently start emitting real default methods plus compatibility bridges unless the build already opts in ([gradle-compiler-options](https://kotlinlang.org/docs/gradle-compiler-options.html), [whatsnew22](https://kotlinlang.org/docs/whatsnew22.html)).
+- `jvmTarget` still defaults to `"1.8"` even under a modern toolchain; `jvmToolchain(N)` only back-fills `jvmTarget` when the build has not set it explicitly — it never overrides an explicit `jvmTarget` ([gradle-compiler-options](https://kotlinlang.org/docs/gradle-compiler-options.html)).
+- `jvmTargetValidationMode` defaults to `ERROR` (not `WARNING`) on current Gradle/KGP; a build that expects a soft warning when `compileJava`/`compileKotlin` disagree will instead fail the build ([gradle-compiler-options](https://kotlinlang.org/docs/gradle-compiler-options.html)).
+- The KGP/Gradle/AGP compatibility envelope is a hard version table, not a rule of thumb: KGP 2.4.0–2.4.10 supports Gradle 7.6.3–9.5.0 and AGP 8.5.2–9.1.0; KGP 2.4.20 extends to Gradle 9.7.0 / AGP 9.3.1 ([gradle-configure-project](https://kotlinlang.org/docs/gradle-configure-project.html)).
+- The Kotlin daemon's JVM arguments resolve through **four levels**, later overriding earlier: Gradle-inherited baseline → `kotlin.daemon.jvm.options`/`kotlin.daemon.jvmargs` in `gradle.properties` → the `kotlin { kotlinDaemonJvmArgs = … }` extension in the build script → a specific task's `kotlinDaemonJvmArguments` ([gradle-compilation-and-caches](https://kotlinlang.org/docs/gradle-compilation-and-caches.html)).
+- `kotlin.build.report.output` accepts a comma-separated combination of `file`, `single_file`, `json`, `build_scan`, `http` — CI diagnosing a slow incremental build wants `file,json` at minimum, not the plugin's default (none) ([gradle-compilation-and-caches](https://kotlinlang.org/docs/gradle-compilation-and-caches.html)).
+- **KSP2 has been the default since KSP 2.0.0**, and KSP1 support is withdrawn from KSP 2.3.0 onward (K2-only) — a project pinned below Kotlin 2.3.0 is the only place KSP1 can still legally run ([WebSearch: google/ksp releases](https://github.com/google/ksp/releases), [ksp2.md](https://github.com/google/ksp/blob/main/docs/ksp2.md)).
+- kapt and KSP **can coexist per-module** during a staged migration — this is documented, not a hack — but a KSP processor cannot resolve types generated by a still-kapt processor in the same compilation unit ([ksp-kapt-migration](https://kotlinlang.org/docs/ksp-kapt-migration.html)).
+- In the exemplar corpus, kapt survives as a **deliberately-preserved legacy-path test fixture**, not as production build logic: `google__dagger`'s real library modules (`dagger-compiler`, `dagger-android-processor`) depend on `libs.ksp.api`, while `kapt` only appears in `javatests/artifacts/**` regression fixtures that exist to prove the old Android/Hilt kapt path still works (repo@4fbc045d2b:javatests/artifacts/dagger/kotlin-app/build.gradle:20,28).
+- Dokka's Gradle Plugin v2 (DGP v2) is the default since Dokka 2.1.0 and restructures configuration around a single top-level `dokka {}` extension, changes the multi-module mechanism from `dokkaHtmlMultiModule` to a `dependencies { dokka(project(...)) }` block, and moves per-subproject output one directory deeper by default ([dokka-migration](https://kotlinlang.org/docs/dokka-migration.html)).
+- Dokka's current floor in the corpus is **2.2.0** — ktor, okhttp and detekt all pin `dokka = "2.2.0"` in their version catalogs, with K2 analysis stable at that version ([exemplar evidence below]).
+- **Kover's `check` task DOES depend on `koverVerify` by default**, and has since Kover 0.7.0 — this is the opposite default from JaCoCo. Settled here, closing the wave-2 KT-TEST blocker: a bug reporter's own Gradle task tree on Kover 0.7.0+ shows `:shared:check` → `:shared:koverVerify` → `:shared:koverGenerateArtifact` → the test tasks, and a Kover maintainer's fix for "I don't want this" is `koverReport { defaults { verify { onCheck = false } } }` — confirming `onCheck` defaults to `true` ([google/ksp#523](https://github.com/Kotlin/kotlinx-kover/issues/523)).
+- `extraWarnings` (Gradle DSL) / `-Wextra` (CLI) remains **Experimental**, introduced in 2.1.0 and not promoted to Stable through 2.4.0 — cite it as a recommendation with an opt-in caveat, not a MUST ([whatsnew21](https://kotlinlang.org/docs/whatsnew21.html), [gradle-compiler-options](https://kotlinlang.org/docs/gradle-compiler-options.html)).
+- `freeCompilerArgs` itself is slated for future deprecation per the Gradle compiler-options page's own text — new code should prefer the typed `compilerOptions {}` properties and reserve `freeCompilerArgs` for flags with no typed equivalent yet.
+
+## Findings
+
+### 1. `-X` flags that stabilised or vanished
+
+Kotlin 2.1.0 (2024-11-27) introduced three preview language features behind explicit `-X` flags: `-Xwhen-guards` (guard conditions in `when` with a subject), `-Xnon-local-break-continue`, and `-Xmulti-dollar-interpolation` ([whatsnew21](https://kotlinlang.org/docs/whatsnew21.html)). Kotlin 2.2.0 (2025-06-23) promoted all three to **Stable**, which in Kotlin's flag lifecycle means the flag is retired, not renamed — the feature is on unconditionally and the flag is a no-op if still passed ([whatsnew22](https://kotlinlang.org/docs/whatsnew22.html)). The current `compiler-reference.html` no longer lists `-Xwhen-guards`, `-Xnon-local-break-continue` or `-Xmulti-dollar-interpolation` at all, confirming retirement rather than a spelling change ([compiler-reference](https://kotlinlang.org/docs/compiler-reference.html)).
+
+Context parameters followed the same arc one cycle later: `-Xcontext-parameters` (Preview in 2.2.0) went **Stable in Kotlin 2.4.0** (2026-07-14) for the parameter-declaration case, with context *arguments* and callable references remaining Experimental ([whatsnew24](https://kotlinlang.org/docs/whatsnew24.html)). `-Xcontext-parameters` is likewise absent from the current compiler reference.
+
+```kotlin
+// WRONG — Kotlin ≥ 2.2.0: these flags do nothing, feature is already on
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.addAll(listOf(
+            "-Xwhen-guards",
+            "-Xnon-local-break-continue",
+            "-Xmulti-dollar-interpolation",
+        ))
+    }
+}
+
+// CORRECT — Kotlin ≥ 2.2.0: nothing to configure, the features are unconditional
+kotlin {
+    compilerOptions {
+        // guard conditions, non-local break/continue, multi-dollar interpolation
+        // are all Stable and require no flag
+    }
+}
+```
+
+New Experimental flags a rule must not treat as durable without a version check: `-Xreturn-value-checker={check,full}` and `-Xexplicit-backing-fields` (both Kotlin 2.3.0, [whatsnew23](https://kotlinlang.org/docs/whatsnew23.html)).
+
+### 2. `-Xjvm-default` deprecation and the `jvmDefault` default flip
+
+`-Xjvm-default` is deprecated; the replacement is the stable `-jvm-default` CLI option and the Gradle `compilerOptions.jvmDefault` property, typed `JvmDefaultMode` (`ENABLE`, `NO_COMPATIBILITY`, `DISABLE`) ([gradle-compiler-options](https://kotlinlang.org/docs/gradle-compiler-options.html)). The migration mapping from the old flag values:
+
+| Old `-Xjvm-default=` value | New `jvmDefault` value |
+|---|---|
+| `all-compatibility` | `JvmDefaultMode.ENABLE` |
+| `all` | `JvmDefaultMode.NO_COMPATIBILITY` |
+| `disable` | `JvmDefaultMode.DISABLE` |
+
+The load-bearing fact is not the rename — it is that **`jvmDefault`'s default value became `ENABLE` in Kotlin 2.2.0**, where the pre-2.2.0 default was effectively `DISABLE` (`-Xjvm-default` unset meant no default methods) ([whatsnew22](https://kotlinlang.org/docs/whatsnew22.html), current [gradle-compiler-options](https://kotlinlang.org/docs/gradle-compiler-options.html) table). Any interface in a Kotlin 2.2.0+ build that did not previously set the flag now silently emits real JVM `default` methods plus compatibility bridges — a behaviour change for binary consumers of a published library, not a cosmetic rename.
+
+```kotlin
+// Kotlin < 2.2.0: interface methods compile to DefaultImpls + bridges only
+// Kotlin ≥ 2.2.0, unconfigured: same interface now ALSO gets a real `default`
+// method on the JVM interface — new default behaviour, not a new API
+interface Greeter {
+    fun greet(name: String): String = "Hello, $name"
+}
+```
+
+```kotlin
+// Pin the pre-2.2.0 behaviour explicitly if binary compatibility with old
+// consumers matters:
+kotlin {
+    compilerOptions {
+        jvmDefault = JvmDefaultMode.DISABLE
+    }
+}
+```
+
+### 3. The JVM attribute table and `jvmToolchain` interaction
+
+Current `compilerOptions` JVM-specific attributes ([gradle-compiler-options](https://kotlinlang.org/docs/gradle-compiler-options.html)):
+
+| Attribute | Values | Default |
+|---|---|---|
+| `jvmTarget` | `"1.8"`…`"25"`, `"26"` | **`"1.8"`** |
+| `jvmTargetValidationMode` | `WARNING`, `ERROR`, `IGNORE` | **`ERROR`** |
+| `javaParameters` | `true`/`false` | `false` |
+| `noJdk` | `true`/`false` | `false` |
+| `jvmDefault` | `ENABLE`, `NO_COMPATIBILITY`, `DISABLE` | **`ENABLE`** (since 2.2.0) |
+| `allWarningsAsErrors` | `true`/`false` | `false` |
+| `extraWarnings` | `true`/`false` | `false` (Experimental) |
+
+`jvmToolchain(N)` sets the *build-time* JDK used to run the Kotlin and Java compile tasks; it back-fills `compilerOptions.jvmTarget` **only when the build has not set `jvmTarget` explicitly** — an explicit `jvmTarget` always wins over whatever the toolchain would otherwise infer. This means a build with `jvmToolchain(21)` and no explicit `jvmTarget` still targets `"1.8"` bytecode unless `jvmTarget` is set to match. Gradle 8.0.2+ additionally requires a toolchain resolver plugin in `settings.gradle.kts`:
+
+```kotlin
+// settings.gradle.kts — Gradle 8.0.2+
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+}
+```
+
+```kotlin
+// WRONG — toolchain alone does not raise the bytecode target
+kotlin {
+    jvmToolchain(21)
+    // jvmTarget still resolves to "1.8" — nothing here sets it
+}
+
+// CORRECT — target must be set explicitly if it should track the toolchain
+kotlin {
+    jvmToolchain(21)
+    compilerOptions {
+        jvmTarget = JvmTarget.fromTarget("21")
+    }
+}
+```
+
+`jvmTargetValidationMode = ERROR` (the default) fails the build outright when the Kotlin and Java compile tasks disagree on target bytecode version — a rule assuming this is advisory (`WARNING`) describes pre-Gradle-8.0 behaviour, not current KGP.
+
+### 4. KGP/Gradle/AGP compatibility envelope
+
+Versioned table as documented ([gradle-configure-project](https://kotlinlang.org/docs/gradle-configure-project.html)):
+
+| KGP version | Gradle min–max | AGP min–max |
+|---|---|---|
+| 2.4.20 | 7.6.3–9.7.0 | 8.5.2–9.3.1 |
+| 2.4.0–2.4.10 | 7.6.3–9.5.0 | 8.5.2–9.1.0 |
+| 2.3.20–2.3.21 | 7.6.3–9.3.0 | 8.2.2–9.0.0 |
+| 2.3.10 | 7.6.3–9.0.0 | 8.2.2–9.0.0 |
+| 2.3.0 | 7.6.3–9.0.0 | 8.2.2–8.13.0 |
+| 2.2.20–2.2.21 | 7.6.3–8.14 | 7.3.1–8.11.1 |
+| 2.1.0–2.1.10 | 7.6.3–8.10* | 7.3.1–8.7.2 |
+| 2.0.0–2.0.21 | 6.8.3–8.8* | 7.1.3–8.5 |
+
+\* fully supported through the stated ceiling; one minor range beyond that (e.g. Gradle 8.7–8.10 for KGP 2.1.x) works with deprecation warnings for `withJava()` in Kotlin Multiplatform JVM targets only — not a JVM-only-project concern.
+
+A rule citing "Kotlin 2.4.0 needs Gradle 9+" is wrong in both directions: the floor is still 7.6.3, and the *ceiling* is the versioned fact that actually protects a build from silent breakage on a Gradle bump.
+
+### 5. Kotlin daemon JVM-argument precedence and build reports
+
+Four levels, each overriding the last ([gradle-compilation-and-caches](https://kotlinlang.org/docs/gradle-compilation-and-caches.html)):
+
+1. Gradle daemon's own inherited JVM arguments (baseline).
+2. `gradle.properties`: the `kotlin.daemon.jvm.options` system property (set via `org.gradle.jvmargs=-Dkotlin.daemon.jvm.options=...`) or the plain `kotlin.daemon.jvmargs` property.
+3. Build-script level: `kotlin { kotlinDaemonJvmArgs = listOf(...) }`.
+4. Per-task: `tasks.withType<CompileUsingKotlinDaemon>().configureEach { kotlinDaemonJvmArguments.set(listOf(...)) }`.
+
+`ktorio__ktor`'s own `gradle.properties` documents the gotcha in-repo: `-Dkotlin.daemon.jvm.options` inside `org.gradle.jvmargs` is what governs the **buildSrc** Kotlin daemon, because that daemon starts before `kotlin.daemon.jvmargs` (level 2's plain property) is read — "it ignores the value from `kotlin.daemon.jvmargs`" (repo@f92fad0435:gradle.properties:19-21).
+
+```properties
+# gradle.properties — the buildSrc daemon reads the -D system property inside
+# org.gradle.jvmargs, NOT the plain kotlin.daemon.jvmargs line below it
+org.gradle.jvmargs=-Xmx6g -Dkotlin.daemon.jvm.options="-Xmx512m,-XX:MaxMetaspaceSize=256m"
+kotlin.daemon.jvmargs=-Xms512m -Xmx2g
+```
+
+`kotlin.build.report.output` accepts any comma-separated combination of `file` (human-readable, default path `build/reports/kotlin-build/<project>-<timestamp>.txt`), `single_file`, `json`, `build_scan` (Gradle build-scan custom values), and `http` (requires `kotlin.build.report.http.url`). None of these are on by default — diagnosing a slow incremental build in CI requires opting in explicitly.
+
+### 6. KSP2 as default, kapt's remaining footprint
+
+KSP2 has been the default processing engine since **KSP 2.0.0**; it can be reverted to KSP1 via the Gradle property `ksp.useKSP2=false`, but **KSP1 support ends at KSP 2.3.0** — from that release KSP is K2-only, because KSP1 is a K1 compiler plugin and K1 itself stops shipping ([google/ksp releases](https://github.com/google/ksp/releases); [ksp2.md](https://github.com/google/ksp/blob/main/docs/ksp2.md)). A project pinned to KSP ≥ 2.3.0 or on AGP 9.0+ has no KSP1 escape hatch left.
+
+kapt and KSP are documented to coexist per-module during a staged migration — "KSP and kapt can run alongside each other, so you can migrate your project in stages, one library or module at a time" ([ksp-kapt-migration](https://kotlinlang.org/docs/ksp-kapt-migration.html)) — but a KSP processor cannot resolve types a co-resident kapt processor generates in the same module, which is why the migration guide's own worked example moves one processor's *entire* dependency (`kapt(...)` → `ksp(...)`) rather than splitting one processor's inputs.
+
+Migration mechanics (Kotlin DSL):
+
+```kotlin
+// WRONG (pre-KSP, still the pattern an LLM trained on 2021-2023 code emits)
+plugins {
+    kotlin("jvm")
+    kotlin("kapt")
+}
+dependencies {
+    implementation("com.google.dagger:dagger:2.48")
+    kapt("com.google.dagger:dagger-compiler:2.48")
+}
+
+// CORRECT — current default path
+plugins {
+    kotlin("jvm")
+    id("com.google.devtools.ksp") version "2.3.10" // pin to the exact release in use
+}
+dependencies {
+    implementation("com.google.dagger:dagger:2.48")
+    ksp("com.google.dagger:dagger-compiler:2.48")
+}
+```
+
+Every mainstream Dagger/Hilt processor now has a KSP path (Hilt 2.48+ supports KSP; `androidx.hilt:hilt-compiler` 1.1.x KSP-ready). The exemplar corpus's own `google/dagger` shows this transition directly: its real library modules (`dagger-compiler`, `dagger-android-processor`, `dagger-testing`) depend on `libs.ksp.api`/`libs.ksp`, and `kapt` appears **only** inside `javatests/artifacts/**` — fixture projects that deliberately exercise the legacy Android/Hilt kapt path (`com.android.legacy-kapt`) as a regression test, not as the library's production build (repo@4fbc045d2b:dagger-compiler/build.gradle.kts:33; javatests/artifacts/dagger/kotlin-app/build.gradle:20,28; javatests/artifacts/hilt-android/simple/feature/build.gradle:44,62).
+
+No commonly-used processor in the current corpus forces kapt as the *only* option — the one recorded gap upstream is `auto-value`/`Auto Factory`, listed on KSP's own supported-libraries page as "not yet supported" as of the current docs snapshot; a project depending on it is the one legitimate case for a kapt module in new code.
+
+### 7. Dokka v1→v2
+
+Dokka Gradle Plugin v2 (DGP v2) has been the default since **Dokka 2.1.0**; the current stable line is **2.2.0**, which the exemplar corpus's version catalogs converge on (`ktorio__ktor`, `square__okhttp`, `detekt__detekt` all pin `dokka = "2.2.0"`). Migration is a real restructuring, not a version bump ([dokka-migration](https://kotlinlang.org/docs/dokka-migration.html)):
+
+| Concern | DGP v1 | DGP v2 |
+|---|---|---|
+| Configuration entry point | per-task `tasks.withType<DokkaTask>` / `tasks.dokkaHtml {}` | single top-level `dokka {}` extension |
+| Multi-module aggregation | `tasks.dokkaHtmlMultiModule {}` on the root, `DokkaCollectorTask` | `dependencies { dokka(project(":sub")) }` in the root project; `DokkaCollectorTask` removed |
+| Output directory (per-subproject) | `build/dokka/html/<subproject-name>/` | one level deeper: `build/dokka/html/<root-name>/<subproject-name>/` unless `dokka { modulePath.set(...) }` restores v1 layout |
+| Visibility DSL | `org.jetbrains.dokka.DokkaConfiguration.Visibility` | `org.jetbrains.dokka.gradle.engine.parameters.VisibilityModifier` |
+| Output formats | HTML, Javadoc, GFM, Jekyll | HTML and Javadoc only — GFM/Jekyll removed |
+| Generation task | `dokkaHtml`, `dokkaHtmlMultiModule` | `dokkaGenerate` (or `dokkaGeneratePublicationHtml` / `...Javadoc`) |
+
+A staged migration uses `org.jetbrains.dokka.experimental.gradle.pluginMode=V2EnabledWithHelpers` in `gradle.properties` first (keeps v1-shaped DSL calls working with deprecation warnings), then finalizes to `V2Enabled` once the build script is fully converted. K2 analysis is stable in Dokka from 2.2.0 onward, matching the corpus floor above.
+
+### 8. Kover's `check` wiring — the wave-2 handover, settled
+
+**Kover's `check` task DOES depend on `koverVerify` by default, since Kover 0.7.0 — the opposite default from JaCoCo, which never wires `jacocoTestCoverageVerification` into `check` on its own** (JAVA-TEST-08 in [jvm-quality-gates.md](../jvm-quality-gates.md)).
+
+The evidence, definitive and primary:
+
+1. A bug report against Kover 0.7.0 prints the actual Gradle task dependency graph:
+   ```
+   :shared:check
+   +--- :shared:koverVerify
+   |    \--- :shared:koverGenerateArtifact
+   |         +--- :shared:compileJava
+   |         +--- :shared:compileKotlin
+   |         +--- :shared:integrationTest   <-- undesired but present
+   |         \--- :shared:test
+   ```
+   against the pre-0.7.0 tree, which had no `koverVerify` node under `check` at all ([google/ksp#523 issue body](https://github.com/Kotlin/kotlinx-kover/issues/523)).
+2. A Kover maintainer (`shanshin`, repo collaborator) replies with the exact opt-out, which only makes sense if the default is "on":
+   ```kotlin
+   koverReport {
+       defaults {
+           verify {
+               onCheck = false // disables the check → koverVerify dependency
+           }
+       }
+   }
+   ```
+   ([issue #523, maintainer comment](https://github.com/Kotlin/kotlinx-kover/issues/523))
+3. Kover's own migration guide for 0.6.x → 0.7.0 documents `onCheck` as the property inside `koverReport { defaults { verify {} } }` controlling exactly this wiring ([kover migration-to-0.7.0](https://kotlin.github.io/kotlinx-kover/gradle-plugin/migrations/migration-to-0.7.0.html)).
+
+This closes the KT-TEST handover cleanly: Kover 0.9.8's DSL reference does not restate it (Kover's docs genuinely never state defaults explicitly, confirming the original wave-2 finding that plausibility was not enough), but the plugin's own issue tracker and migration guide together are conclusive, and `onCheck` has kept the same name and role from 0.7.0 through the current 0.9.8 line with no changelog entry reverting it. **JAVA-TEST-08's Gradle-vs-Kover asymmetry is real: a Kotlin project applying Kover and doing nothing else already has `check` wired to fail on any `verify { rule {} }` block it defines — the risk is the opposite of JaCoCo's (an unnoticed floor firing, not an unnoticed floor never firing) unless a project explicitly disables `onCheck`** as `kotlinx.coroutines`' own convention plugin does via a different mechanism (`disable()` gated on a project property, not `onCheck`) — see exemplar evidence below.
+
+## Normative guidance candidates
+
+1. **Never emit `-Xwhen-guards`, `-Xnon-local-break-continue`, `-Xmulti-dollar-interpolation` or `-Xcontext-parameters` on Kotlin ≥ 2.2.0 / ≥ 2.4.0 respectively.** Rationale: the features are Stable and unconditional; the flags are silent no-ops. Verify: `grep -rn '\-Xwhen-guards\|\-Xnon-local-break-continue\|\-Xmulti-dollar-interpolation\|\-Xcontext-parameters' **/*.gradle.kts` — any hit paired with a Kotlin version ≥ the stabilisation release is dead weight to remove, not merely harmless.
+2. **Never write `-Xjvm-default=...` on Kotlin ≥ 2.2.0.** Rationale: replaced by the stable, typed `jvmDefault` DSL property; the string form invites the old value-name mismatch. Verify: `grep -rn 'Xjvm-default' **/*.gradle.kts` — every hit should become `compilerOptions.jvmDefault = JvmDefaultMode.<X>`.
+3. **A Kotlin build on 2.2.0+ that needs `DISABLE`/pre-2.2.0 `jvmDefault` semantics for binary-compatibility reasons must set `jvmDefault = JvmDefaultMode.DISABLE` explicitly** — the new default (`ENABLE`) is a behaviour change on upgrade, not a no-op. Rationale: silent new default methods on a published interface break assumptions downstream consumers may hold about `DefaultImpls`-only bridging. Verify: for any library that publishes Kotlin interfaces, check `compilerOptions.jvmDefault` is set explicitly rather than left at the tooling default; a diff of the compiled `.class` for a public interface across a Kotlin-version bump (`javap -p`) shows a new JVM `default` method if this was missed.
+4. **Set `compilerOptions.jvmTarget` explicitly whenever `jvmToolchain(N)` is set — never rely on the toolchain to raise it.** Rationale: `jvmToolchain` only back-fills `jvmTarget` when unset, and `jvmTarget` itself defaults to `"1.8"`; a build can compile with JDK 21 and still emit Java 8 bytecode. Verify: `grep -A3 'jvmToolchain' **/*.gradle.kts` and confirm a sibling `jvmTarget =` (or `compilerOptions { jvmTarget }`) sets the same or a compatible value; absence is the defect, matching frame correction 10 (guava, grpc-java shipping Java 8 bytecode from modern JDKs).
+5. **Do not assume `jvmTargetValidationMode` is advisory — it defaults to `ERROR`.** Rationale: a rule or reviewer expecting a soft warning on a Java/Kotlin target mismatch will be surprised by a hard build failure (current default) or a silent pass (`IGNORE`, if someone weakened it). Verify: `grep -rn 'jvmTargetValidationMode' **/*.gradle.kts`; absence means the default (`ERROR`) applies — that is the expected, not the risky, state.
+6. **Pin the KGP version against the versioned Gradle/AGP compatibility table before bumping either Gradle or KGP.** Rationale: KGP declares hard min/max Gradle and AGP ranges per release line; going outside them is unsupported, not merely untested. Verify: read `gradle/libs.versions.toml` for the `kotlin` and (if present) `agp` version entries, cross-reference against the table in Findings §4, and treat a Gradle bump that crosses a KGP ceiling as a required KGP bump in the same change.
+7. **A new Kotlin module needing an annotation processor must default to KSP; a kapt module is only acceptable when the specific processor has no KSP implementation, and that fact must be named in a comment at the `kapt(...)` dependency line.** Rationale: KSP2 has been default since KSP 2.0.0 and is materially faster; kapt survives in the corpus only as a deliberate legacy-path test fixture (dagger's own `javatests/artifacts`), never as new production build logic. Verify: `grep -rln 'id("org.jetbrains.kotlin.kapt")\|kotlin("kapt")' **/*.gradle.kts`; every hit must have an adjacent comment naming the specific processor and its missing-KSP status, or it is a defect.
+8. **Do not mix `kapt(...)` and `ksp(...)` for the *same* processor's *inputs* in one module; migrate a processor's whole dependency at once.** Rationale: KSP cannot resolve types a co-resident kapt-generated processor emits; per-processor migration, not per-symbol, is the only supported staging unit. Verify: for a module declaring both `kotlin("kapt")` and `id("com.google.devtools.ksp")`, list the `kapt(...)` and `ksp(...)` dependency coordinates and confirm no single library group/artifact appears under both configurations.
+9. **A Gradle build applying `com.google.devtools.ksp` on Kotlin ≥ 2.3.0 or AGP ≥ 9.0 must not set `ksp.useKSP2=false`.** Rationale: KSP1 is withdrawn (K2-only) from KSP 2.3.0; the flag becomes a hard failure trigger, not a fallback. Verify: `grep -rn 'ksp.useKSP2' **/gradle.properties` combined with the pinned KSP/Kotlin versions — flag the combination if the KSP plugin version is ≥ 2.3.0 and the property is `false`.
+10. **Treat `extraWarnings`/`-Wextra` as a recommendation with an explicit opt-in note, never a MUST.** Rationale: it has been Experimental since introduction in Kotlin 2.1.0 and was not promoted through 2.4.0; a MUST-level rule would bind agents to unstable compiler surface. Verify: `grep -rn 'extraWarnings\s*=\s*true\|\-Wextra' **/*.gradle.kts` is evidence of adoption, not evidence of a violation if absent.
+11. **A published library's Dokka setup should pin `org.jetbrains.dokka` ≥ `2.2.0` and use the DGP v2 `dokka {}` top-level extension, not the v1 per-task `tasks.dokkaHtml {}` shape.** Rationale: DGP v2 is default since 2.1.0, the corpus floor is 2.2.0, and v1 task-based configuration is the pattern most LLM training data still emits. Verify: `grep -rn 'tasks\.dokkaHtml\s*{\|tasks\.withType<DokkaTask>\|dokkaHtmlMultiModule' **/*.gradle.kts` — any hit on a Dokka version ≥ 2.1.0 build is stale v1-shaped configuration.
+12. **A Kotlin project applying the Kover plugin and defining any `verify { rule {} }` block already has `check` wired to fail on it — do not additionally wire `check.dependsOn(koverVerify)` (redundant) or assume a failing rule silently reports-only (it does not).** Rationale: settles the wave-2 KT-TEST blocker — Kover's default is the opposite of JaCoCo's. Verify: `grep -rn 'onCheck\s*=\s*false\|\.disable()' **/*.gradle.kts` near a `kover`/`koverReport` block — its absence means the project's coverage rule (if any) is load-bearing on every `./gradlew check`, and its presence must be read for the enclosing condition (a property gate, as in `kotlinx.coroutines`) before calling coverage "enforced" or "not enforced."
+13. **Do not cite `kotlin.build.report.output` as "on by default" — it emits nothing until a sink is named.** Rationale: none of `file`/`json`/`build_scan`/`http`/`single_file` is a default; CI wanting build-time diagnostics must opt in explicitly. Verify: `grep -rn 'kotlin.build.report.output' **/gradle.properties` — absence means no build report is produced, not "a report exists somewhere."
+
+## Exemplar evidence
+
+| Candidate | Satisfies | Violates / gap |
+|---|---|---|
+| 1 (stale `-X` flags) | 0/32 pass `-Xwhen-guards`/`-Xnon-local-break-continue`/`-Xmulti-dollar-interpolation`/`-Xcontext-parameters` explicitly — no violation found, but also no positive confirmation any exemplar re-checked this after upgrading past 2.2.0/2.4.0 | — |
+| 2/3 (`jvmDefault`) | `GradleUp__shadow@541b3be475:build.gradle.kts:43` and `detekt__detekt@45672efb8b:build-logic/src/main/kotlin/module.gradle.kts:70` both set `jvmDefault = JvmDefaultMode.NO_COMPATIBILITY` explicitly — deliberate, not defaulted | `apollographql__apollo-kotlin@c145295b72:libraries/apollo-gradle-plugin/testProjects/language-version/build.gradle.kts:17` and `micronaut-projects__micronaut-core@d5842045bb:inject-kotlin/build.gradle.kts:77` still pass the string flag `-Xjvm-default=all` rather than the typed DSL — stale-flag style even though functionally still accepted via `freeCompilerArgs` |
+| 4 (`jvmToolchain`+`jvmTarget`) | detekt's `module.gradle.kts:59-64` sets `jvmTarget = JvmTarget.fromTarget(jvmTargetVersion)` from a catalog version alongside its toolchain | frame correction 10 stands: `google__guava@5fb424c43a:pom.xml:215-216` and `grpc__grpc-java@fc4314419d` still ship Java 8 bytecode from modern JDKs (Maven-side, but the same toolchain/target conflation) |
+| 5 (`jvmTargetValidationMode`) | — | `Kotlin__kotlinx.coroutines@f63a04bacb:integration-testing/build.gradle.kts:264` deliberately weakens it to `JvmTargetValidationMode.WARNING` — the one corpus hit is a *downgrade* from the ERROR default, worth flagging as a named exception, not evidence the default is soft |
+| 7/8 (kapt only for legacy/no-KSP path) | `google__dagger@4fbc045d2b:dagger-compiler/build.gradle.kts:33` (`implementation(libs.ksp.api)`) — real library module is KSP-only | `google__dagger@4fbc045d2b:javatests/artifacts/dagger/kotlin-app/build.gradle:20,28` and `javatests/artifacts/hilt-android/simple/feature/build.gradle:44,62` keep `kapt` alive as a named legacy-path regression fixture, not production logic — matches candidate 7's carve-out exactly |
+| 9 (`ksp.useKSP2`) | `micronaut-projects__micronaut-core@d5842045bb:test-suite-kotlin/gradle.properties:3` sets `ksp.useKSP2 = true` explicitly (forward-leaning, not a violation) and `core-bom/build.gradle.kts:28` tracks `acceptedVersionRegressions.add("ksp2")` — evidence a real migration produced a temporary compatibility carve-out | — |
+| 10 (`extraWarnings`) | `detekt__detekt@45672efb8b:build-logic/src/main/kotlin/module.gradle.kts:65` sets `extraWarnings = true` — the one corpus adopter, confirming it is opt-in practice, not baseline | — |
+| 11 (Dokka ≥ 2.2.0, DGP v2 shape) | `ktorio__ktor@f92fad0435`, `square__okhttp@dfcfab3824`, `detekt__detekt@45672efb8b` all pin `dokka = "2.2.0"` in their catalogs; `ktorio__ktor`'s `build-logic/src/main/kotlin/ktorbuild.dokka.gradle.kts:14` uses the top-level `dokka {}` extension (v2 shape) | `square__okhttp@dfcfab3824:build-logic/src/main/kotlin/okhttp.dokka-multimodule-conventions.gradle.kts:6-19` still uses `dependencies { add("dokka", project(...)) }` per-module aggregation wiring predating the fully-DSL v2 style shown in the migration guide — a transitional shape worth reading, not copying verbatim |
+| 12 (Kover `check` wiring) | `Kotlin__kotlinx.coroutines@f63a04bacb:buildSrc/src/main/kotlin/kover-conventions.gradle.kts:26-33` — explicit, commented gate (`disable()` unless `-Pkover.enabled=true`) that only makes sense because `check` is wired to `koverVerify` by default; the same file's `minBound(expectedCoverage[projectName] ?: 85)` (lines ~50-58) is the rule that would otherwise fire on every `check` | none in corpus wire `check.dependsOn(koverVerify)` manually — confirms it is never necessary |
+| 13 (`kotlin.build.report.output`) | none of the 32 exemplars' `gradle.properties` set `kotlin.build.report.output` | universal gap — no exemplar demonstrates CI build-report diagnostics wired up |
+
+## AI-agent angle
+
+- **Emitting `-Xjvm-default=all`/`-Xjvm-default=all-compatibility` as a string flag.** This is exactly the shape most 2023-era training data shows; the mechanical check is `grep -rn 'Xjvm-default' **/*.gradle.kts` — every hit on a build declaring Kotlin ≥ 2.2.0 should become the typed `jvmDefault` property, and the agent should additionally check whether the *migrated* mode differs from the new implicit `ENABLE` default (i.e., don't just translate the flag name, translate the intent).
+- **Writing kapt scaffolding for a new Dagger/Hilt/Moshi/Room module by default.** kapt is the shape an LLM was trained on for years; the mechanical check is `grep -rn 'id("org.jetbrains.kotlin.kapt")\|kotlin("kapt")' **/*.gradle.kts` on any newly-added `build.gradle.kts` — if the processor named in the same file's dependency block appears on KSP's supported-libraries page, the kapt plugin application is the defect, not a stylistic choice.
+- **Passing `-Xwhen-guards`/`-Xnon-local-break-continue`/`-Xmulti-dollar-interpolation`/`-Xcontext-parameters` "to be safe" on a Kotlin 2.2.0+/2.4.0+ project**, because these flag names appear frequently in blog posts and Stack Overflow answers written during the Preview window. Mechanical check: `grep` for the flag names against the declared Kotlin version in `libs.versions.toml`; any match where the version is at/above the stabilisation release is a no-op to delete.
+- **Assuming Dokka v1's per-task `tasks.dokkaHtml {}` / `tasks.dokkaHtmlMultiModule {}` shape still applies**, because it is by far the more common shape in existing tutorials and Stack Overflow answers even in 2026. Mechanical check: on any Dokka version ≥ 2.1.0, `grep -rn 'tasks\.dokkaHtml\s*{\|dokkaHtmlMultiModule' **/*.gradle.kts` flags v1-shaped configuration that DGP v2 either ignores or errors on.
+- **Assuming coverage tools behave like JaCoCo by default (report-only, `check`-independent) and applying that assumption to Kover.** This is the exact mistake wave 2 flagged as a systematic failure mode (jvm-quality-gates.md failure mode 12: asserting a default from plausibility). Mechanical check: never state Kover's `check` binding without citing [issue #523](https://github.com/Kotlin/kotlinx-kover/issues/523) or the migration guide's `onCheck` section; if reviewing a Kover-using build, look for `onCheck = false` or a `disable()`/property gate before calling any `verify { rule {} }` "enforced."
+- **Reaching for `-Xcontext-receivers` (the older, now-removed context-receivers experiment) when asked for "context parameters."** These are two different, sequential Kotlin features (context receivers, deprecated and removed; context parameters, Stable in 2.4.0) with easily confused names; an agent producing `-Xcontext-receivers` on a 2.4.0+ codebase is reaching for dead syntax from an earlier, abandoned design. Mechanical check: `grep -rn 'Xcontext-receivers'` on any Kotlin ≥ 2.2.0 build is always a defect — the syntax was withdrawn, not merely renamed to `-Xcontext-parameters`.
+
+## Contested / evolving
+
+- **`freeCompilerArgs` is explicitly slated for future deprecation** per its own current doc entry ("We are going to deprecate the attribute `freeCompilerArgs` in future releases," [gradle-compiler-options](https://kotlinlang.org/docs/gradle-compiler-options.html)), but as of 2.4.20 it remains the only escape hatch for any `-X` flag without a typed property yet — trending toward typed-only compiler configuration, not there yet.
+- **`extraWarnings` has sat at Experimental for four full minor releases (2.1.0 → 2.4.0)** with no stabilisation signal in any `whatsnew2x` page fetched here — either JetBrains is deliberately letting real-world usage accumulate before locking the check set, or the feature is lower priority than its visibility suggests. Treat as still-moving until a `whatsnew25`/`whatsnew26` marks it Stable.
+- **KSP1's exact withdrawal boundary is stated two ways in different sources** — the map's brief frames it as "incompatible past Kotlin 2.3.0 or AGP 9.0," while the KSP release notes frame it as "KSP 2.3.0 is K2-only." These converge in practice (Kotlin 2.3.0 ships with K2-only tooling expectations) but are not the identical claim; a rule should cite the KSP-version framing (mechanically checkable from the applied plugin version) rather than the Kotlin-version framing (requires cross-referencing which KSP release a given Kotlin version pairs with).
+- **Dokka's per-module output-directory change (one level deeper by default in DGP v2) is a documented breaking change with an opt-out (`modulePath`)** that several real migrations reach for immediately rather than adopting the new layout — `square__okhttp`'s dokka convention file (see Exemplar evidence) shows a build still mid-transition. Expect the v1-shaped `dependencies { add("dokka", project(...)) }` idiom to persist in real repos for another release or two even after nominal DGP v2 adoption.
+- **The exact wording of Kover's `check` default is not in Kover's own current DSL reference at all** (confirmed by direct fetch of the 0.9.8 docs) — this file's answer rests on the plugin's issue tracker and a migration guide rather than a canonical "Kover 0.9.8 states X" sentence. If a future Kover release changes this default without a corresponding doc update, this file's guidance will be silently stale; re-verify against a fresh `--dependencies`/task-tree run before trusting this row past a major Kover version bump.
+
+## Sources
+
+| URL | What it is | Date/era | Why worth reading |
+|---|---|---|---|
+| [kotlinlang.org/docs/whatsnew21.html](https://kotlinlang.org/docs/whatsnew21.html) | Official Kotlin 2.1.0 release notes | 2024-11-27 | Introduces `-Xwhen-guards`/`-Xnon-local-break-continue`/`-Xmulti-dollar-interpolation`/`-Wextra` as new Experimental flags — the baseline a rule must not treat as current |
+| [kotlinlang.org/docs/whatsnew22.html](https://kotlinlang.org/docs/whatsnew22.html) | Official Kotlin 2.2.0 release notes | 2025-06-23 | Stabilises the three flags above, deprecates `-Xjvm-default`, documents the `jvmDefault` default becoming `ENABLE` |
+| [kotlinlang.org/docs/whatsnew23.html](https://kotlinlang.org/docs/whatsnew23.html) | Official Kotlin 2.3.0 release notes | 2025-12-16 | New Experimental flags (`-Xreturn-value-checker`, `-Xexplicit-backing-fields`); confirms `-language-version=1.8/1.9` fully dropped |
+| [kotlinlang.org/docs/whatsnew24.html](https://kotlinlang.org/docs/whatsnew24.html) | Official Kotlin 2.4.0 release notes | 2026-07-14 | Context parameters Stable; K1 compiler removed; Maven JVM-target auto-alignment added |
+| [kotlinlang.org/docs/compiler-reference.html](https://kotlinlang.org/docs/compiler-reference.html) | Official CLI compiler flag reference | fetched 2026-09-12 | Ground truth for which `-X` flags currently exist — confirms retirement of the flags named in the brief |
+| [kotlinlang.org/docs/gradle-compiler-options.html](https://kotlinlang.org/docs/gradle-compiler-options.html) | Official Gradle `compilerOptions` DSL reference | fetched 2026-09-12 | The JVM attribute table (`jvmTarget`, `jvmTargetValidationMode`, `jvmDefault`, `extraWarnings`) with exact defaults |
+| [kotlinlang.org/docs/gradle-configure-project.html](https://kotlinlang.org/docs/gradle-configure-project.html) | Official Gradle project-configuration guide | fetched 2026-09-12 | KGP/Gradle/AGP compatibility table; `jvmToolchain` setup and foojay-resolver requirement |
+| [kotlinlang.org/docs/gradle-compilation-and-caches.html](https://kotlinlang.org/docs/gradle-compilation-and-caches.html) | Official Gradle compilation/caching guide | fetched 2026-09-12 | Kotlin daemon JVM-argument precedence levels; `kotlin.build.report.output` sink options |
+| [kotlinlang.org/docs/ksp-overview.html](https://kotlinlang.org/docs/ksp-overview.html) | Official KSP overview | fetched 2026-09-12 | Supported-libraries table (Room, Moshi, Dagger, Hilt-in-progress, Auto Factory not-yet-supported) |
+| [kotlinlang.org/docs/ksp-kapt-migration.html](https://kotlinlang.org/docs/ksp-kapt-migration.html) | Official kapt→KSP migration guide | fetched 2026-09-12 | Exact plugin-id/dependency migration steps; confirms kapt/KSP coexistence during staged migration |
+| [github.com/google/ksp releases](https://github.com/google/ksp/releases) + [ksp2.md](https://github.com/google/ksp/blob/main/docs/ksp2.md) | KSP's own repository | fetched 2026-09-12 | KSP2-default-since-2.0.0 and KSP1-withdrawn-at-2.3.0 facts, from the tool's own source rather than a summary |
+| [github.com/google/ksp/blob/main/README.md](https://github.com/google/ksp/blob/main/README.md) | KSP repository README | fetched 2026-09-12 | Confirms the "up to 2x faster than kapt" claim's origin and links the canonical doc set |
+| [kotlinlang.org/docs/dokka-introduction.html](https://kotlinlang.org/docs/dokka-introduction.html) | Official Dokka overview | fetched 2026-09-12 | Output-format list (HTML/Javadoc/GFM/Jekyll pre-v2) |
+| [kotlinlang.org/docs/dokka-migration.html](https://kotlinlang.org/docs/dokka-migration.html) | Official Dokka v1→v2 migration guide | fetched 2026-09-12 | Full DSL-shape diff (multi-module aggregation, output directories, visibility DSL, task names) with code examples |
+| [kotlin.github.io/kotlinx-kover/gradle-plugin/](https://kotlin.github.io/kotlinx-kover/gradle-plugin/) | Kover 0.9.8 Gradle plugin docs | fetched 2026-09-12 | Confirms current version is 0.9.8 and that the docs still do not state the `check`/`koverVerify` default explicitly |
+| [kotlin.github.io/kotlinx-kover/gradle-plugin/migrations/migration-to-0.7.0.html](https://kotlin.github.io/kotlinx-kover/gradle-plugin/migrations/migration-to-0.7.0.html) | Kover's own 0.6.x→0.7.0 migration guide | fetched 2026-09-12 | Documents the `onCheck` property inside `defaults { verify {} }` — the DSL surface that controls the wiring |
+| [github.com/Kotlin/kotlinx-kover/issues/523](https://github.com/Kotlin/kotlinx-kover/issues/523) | Kover issue tracker, closed bug report + maintainer reply | filed against 0.7.0, fetched 2026-09-12 | The single most load-bearing source in this file: an actual Gradle task-dependency tree proving `check` → `koverVerify` on 0.7.0+, plus a maintainer's `onCheck = false` fix confirming the default is "on" |

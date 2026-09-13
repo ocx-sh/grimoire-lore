@@ -1,0 +1,747 @@
+{
+ "wave": 2,
+ "groups": [
+  {
+   "group": "gradle-core",
+   "dives": [
+    {
+     "slug": "config-cache-contract",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-gradle-core/config-cache-contract.md",
+     "sources_count": 15,
+     "top_rules": [
+      "Never reference Project or call Task.getProject() inside a task action \u2014 grep for getProject()/.project. inside doLast/doFirst bodies.",
+      "Never enumerate System.getenv()/getProperties() without a filter \u2014 use providers.environmentVariablesPrefixedBy() or a named getenv('KEY') lookup.",
+      "Never read a file directly at configuration time \u2014 use providers.fileContents(...).asText.",
+      "Never shell out (ProcessBuilder/Runtime.exec/ExecOperations.exec) at configuration time \u2014 use providers.exec()/ValueSource.",
+      "Never register a BuildListener/TaskExecutionListener from a plugin \u2014 use a Build Service via BuildEventsListenerRegistry; still-open gradle/gradle#18520 proves this is live friction.",
+      "CI must run with --configuration-cache and triage the report, not blanket-suppress with warn mode \u2014 Gradle 9 made warn mode discard incompatible-task cache entries anyway.",
+      "When migrating, audit third-party plugins first, not your own tasks \u2014 Square's 2022 postmortem's only two blockers were Anvil and Wire, not application code.",
+      "Treat Isolated Projects as diagnostics-only, not a CI gate \u2014 incubating only since 9.7.0 (2026-08-06), with cross-build and build-to-project constraints explicitly not fully enforced yet."
+     ],
+     "surprises": [
+      "gradle/gradle#24040: Gradle 9 changed maven-publish behavior so explicit repository credentials now silently DISABLE the configuration cache for that task instead of failing the build \u2014 a build can look fully successful while quietly never being cached.",
+      "The prior audit (exemplar-build-shape.md) itself asserts 'Gradle 9's default is already on regardless of the property,' which the primary sources (9.0.0 release notes, the road-to-configuration-cache blog) directly contradict \u2014 it's preferred-with-automatic-fallback, default still targeted at Gradle 11, not on by default in 9.x.",
+      "org.gradle.unsafe.isolated-projects isn't just an old alias floating in blogs \u2014 the 9.7.0 release notes formally deprecate it in that release, with 0/32 exemplars using it versus 5/32 on the live org.gradle.isolated-projects key.",
+      "Isolated Projects' own 9.7.0 docs admit two of four constraint categories (cross-build access, build-to-project access) are 'not fully enforced yet' \u2014 the feature can't yet catch everything it claims to forbid.",
+      "gradle/gradle#18520 (build-listener ban has no full replacement API for build-start/build-finish hooks, only task-completion) is still open years after the documented fix pattern existed \u2014 the 'documented replacement' isn't actually complete for every BuildListener use case.",
+      "The reviewer's compliance check has no dedicated task \u2014 it's just the real build/test command plus --configuration-cache, and 'clean' is the ABSENCE of a problems-summary line and HTML report, not a positive success signal from any task."
+     ],
+     "ok": true
+    },
+    {
+     "slug": "build-logic-and-catalog-seam",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-gradle-core/build-logic-and-catalog-seam.md",
+     "sources_count": 14,
+     "top_rules": [
+      "SHOULD (not MUST) prefer included build-logic over buildSrc \u2014 9/32 flagships (spring-boot, dagger, kotlinx.coroutines...) still use buildSrc; never call it a defect.",
+      "Any Settings plugin in build-logic MUST live in a separate minimal included build (build-logic-settings), never folded into the ordinary convention-plugin module, once that module exists.",
+      "Never write dot-notation catalog accessors (libs.guava) inside a precompiled script plugin \u2014 they are not generated there and never compile, in any Gradle version through 9.x.",
+      "Inside build-logic, read catalog coordinates via extensions.getByType<VersionCatalogsExtension>().named(\"libs\").findLibrary/findVersion/findPlugin \u2014 the officially sanctioned workaround.",
+      "Never use the internal org.gradle.accessors.dm.LibrariesForLibs reflection hack \u2014 unsupported, breaks across Gradle versions and in buildSrc/test.",
+      "A plugin consumed via alias(libs.plugins.x) cannot be used inside a precompiled script plugin's plugins{} block at all \u2014 declare it as a marker-artifact dependency and apply(plugin=\"id\") instead.",
+      "buildSrc/settings.gradle.kts must explicitly re-import the version catalog via dependencyResolutionManagement{versionCatalogs{...}} before any catalog access works there.",
+      "The OCX Gradle plugin's own dev repo does not need build-logic-settings on day one (single module); it becomes a MUST only once that repo grows a second ordinary build-logic module while still needing an early Settings plugin."
+     ],
+     "surprises": [
+      "gradle/gradle#15383 is still fully open after nearly 6 years with a maintainer stating the gap may be architecturally unfixable (precompiled plugins are compiled before the consuming catalog is known), not merely unprioritized.",
+      "The build-logic-settings split is not universal even among included-build adopters: junit-framework includes two ordinary modules together with no settings-only module, and jjohannes's reference repo mixes Settings and ordinary plugins in one module.",
+      "There is no workaround at all \u2014 supported or unsupported \u2014 for using alias(libs.plugins.x) inside a precompiled script plugin's plugins{} block, because that block is evaluated against a dummy project before any catalog exists.",
+      "dagger centralizes the string-keyed catalog workaround into a dedicated buildSrc helper file (VersionCatalogs.kt) rather than repeating it per convention plugin \u2014 a reusable pattern worth citing as the concrete fix.",
+      "Zero corpus repos at the measured SHAs use the internal LibrariesForLibs reflection hack \u2014 the supported VersionCatalogsExtension API is universal in the checked-out convention-plugin code."
+     ],
+     "ok": true
+    },
+    {
+     "slug": "task-inputs-and-cache-hits",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-gradle-core/task-inputs-and-cache-hits.md",
+     "sources_count": 14,
+     "top_rules": [
+      "Every custom task/transform property MUST carry exactly one input/output/@Internal/@Console annotation \u2014 verify via validatePlugins reporting missing_annotation",
+      "Never annotate a File/Directory-typed property @Input; use @InputFile/@InputDirectory \u2014 validatePlugins catches it as incorrect_use_of_input_annotation",
+      "@PathSensitive(NONE) for single files, @PathSensitive(RELATIVE) for directories; ABSOLUTE breaks cross-machine cache relocatability \u2014 grep PathSensitivity.ABSOLUTE",
+      "A JVM compile classpath input MUST be @CompileClasspath, never @InputFiles/@Classpath \u2014 it enables ABI-level compile avoidance by ignoring everything but ABI-affecting class changes",
+      "Every cacheable task's file inputs need a normalization strategy or caching is 'highly ineffective' per Gradle's own docs (missing_normalization_annotation)",
+      "Task ordering must be wired via Provider/output chains, never inferred from a bare File reference plus incidental execution order (implicit_dependency)",
+      "CI must run './gradlew validatePlugins' as an explicit step \u2014 java-gradle-plugin registers the task on any module, plugin or not, so its existence proves nothing ran or failed",
+      "On Gradle \u22659.0.0 an explicit reproducibleFileOrder=false/preserveFileTimestamps=true/useFileSystemPermissions() block is an active reproducibility opt-out requiring a justifying comment \u2014 read the wrapper version before judging, never assume it's a harmless legacy no-op"
+     ],
+     "surprises": [
+      "Kafka's block (build.gradle:362-364) is not merely 'restates defaults' as the wave-1 audit's headline framed it \u2014 direct fetch of the Gradle 9.0.0 upgrade guide shows it's a byte-for-byte copy of Gradle's own documented 3-property 'revert to pre-9 archive behaviour' snippet (including useFileSystemPermissions()), applied on a repo pinned to wrapper 9.7.1: a total, deliberate-looking opt-out of reproducibility, most plausibly an unexamined pre-9 carry-over never revisited during the Gradle 8\u21929 upgrade.",
+      "Two of the three real (non-false-positive) reproducible-archive hits in the corpus (micronaut-core, spotless) are the OPPOSITE problem from kafka: they correctly set the pre-9 values for reproducibility, which is now simply dead code restating the Gradle 9 default \u2014 harmless, but a rule can't just say 'check these properties are set correctly', it has to branch on wrapper version.",
+      "validatePlugins and the java-gradle-plugin jar-time check are two independently-implemented validations that overlap in content but differ in severity: the jar-time check only ever warns (confirmed live on the current docs page), while validatePlugins fails the build by default (confirmed via its own javadoc) \u2014 an agent that sees a warning and calls it fine can miss a check that would hard-fail.",
+      "It could not be confirmed from any primary Gradle doc that validatePlugins is wired into check/build by default for a java-gradle-plugin module \u2014 community sources hedge with 'typically wired', so the safe normative rule is an explicit CI step, not reliance on implicit lifecycle wiring.",
+      "The gradle/gradle docs source path for the 31 validation-problem IDs lives under a directory literally named 'unused/' (platforms/documentation/docs/src/docs/userguide/unused/validation_problems.adoc) yet the page is live, current, and matches docs.gradle.org/current/userguide/validation_problems.html exactly \u2014 the directory name is a docs-build artifact, not a deprecation signal, worth flagging so nobody discounts the source."
+     ],
+     "ok": true
+    }
+   ],
+   "consolidation": {
+    "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-gradle-core.md",
+    "rule_ids": [
+     "GRADLE-CACHE-01 \u2014 Never touch a Project from a task action; inject FileSystemOperations/ExecOperations and bind Project-derived values to Property<T>.",
+     "GRADLE-CACHE-02 \u2014 Never read a file, spawn a process, or resolve a Configuration at configuration time; use providers.fileContents/providers.exec/ValueSource.",
+     "GRADLE-CACHE-03 \u2014 Never enumerate System.getenv()/getProperties(); name the key or use providers.environmentVariablesPrefixedBy.",
+     "GRADLE-CACHE-04 \u2014 Never register a BuildListener or TaskExecutionListener; use a Build Service via BuildEventsListenerRegistry.",
+     "GRADLE-CACHE-05 \u2014 Never hold live-JVM state (ClassLoader/Thread/Socket/locks) or Gradle/Settings/SourceSet/Configuration in task fields or inputs.",
+     "GRADLE-CACHE-06 \u2014 Enable the cache via org.gradle.configuration-cache=true in gradle.properties, not a CI-only flag, and leave problems mode at fail.",
+     "GRADLE-CACHE-07 \u2014 Gate a published Gradle plugin on a TestKit test asserting a --configuration-cache build with zero problems.",
+     "GRADLE-CACHE-08 \u2014 Never read a green build as a cached build; verify the second run prints 'Reusing configuration cache.'",
+     "GRADLE-CACHE-09 \u2014 Write org.gradle.isolated-projects, never org.gradle.unsafe.isolated-projects.",
+     "GRADLE-CACHE-10 \u2014 Run Isolated Projects in diagnostics mode only; never make it a required CI gate.",
+     "GRADLE-CACHE-11 \u2014 Give every task/transform property exactly one input/output/@Internal/@Console annotation.",
+     "GRADLE-CACHE-12 \u2014 Never annotate a File/RegularFileProperty/DirectoryProperty with @Input.",
+     "GRADLE-CACHE-13 \u2014 Declare normalization on every file input: NONE for a file, RELATIVE for a directory, never ABSOLUTE.",
+     "GRADLE-CACHE-14 \u2014 Annotate a JVM compile classpath @CompileClasspath, not @InputFiles or @Classpath.",
+     "GRADLE-CACHE-15 \u2014 Wire task-to-task dependencies through Provider/task-output chains, never a bare File plus dependsOn.",
+     "GRADLE-CACHE-16 \u2014 Run ./gradlew validatePlugins as an explicit CI step with enableStricterValidation = true for any published plugin.",
+     "GRADLE-CACHE-17 \u2014 On Gradle >=9.0.0 add no archive reproducibility properties, and treat any explicit setting as an opt-out needing a comment.",
+     "GRADLE-STRUCT-01 \u2014 Put new shared build logic in an included build-logic build; never call an existing buildSrc deprecated or a defect.",
+     "GRADLE-STRUCT-02 \u2014 Split Settings plugins into a separate minimal build-logic-settings included build when build-logic also holds ordinary convention plugins.",
+     "GRADLE-STRUCT-03 \u2014 Never use dot-notation catalog accessors in a precompiled script plugin; bind VersionCatalogsExtension.named(...) and use findLibrary/findVersion/findPlugin.",
+     "GRADLE-STRUCT-04 \u2014 Never import org.gradle.accessors.dm.LibrariesForLibs.",
+     "GRADLE-STRUCT-05 \u2014 Never write alias(libs.plugins.x) in a precompiled script plugin's plugins{} block; declare the marker artifact and apply by id.",
+     "GRADLE-STRUCT-06 \u2014 Re-declare the version catalog in buildSrc/settings.gradle.kts before any buildSrc catalog access.",
+     "GRADLE-STRUCT-07 \u2014 Express cross-cutting configuration as a convention plugin, not root-level allprojects{}/subprojects{}.",
+     "GRADLE-STRUCT-08 \u2014 Set rootProject.name explicitly in the root settings file.",
+     "GRADLE-STRUCT-09 \u2014 Add a module through whatever mechanism generates the module list; never append a literal include() beside a generator, never count include( lines."
+    ],
+    "conflicts_resolved": [
+     "Kafka's archive block: pub audit called it 'Gradle's own defaults, a no-op'; the task-inputs dive re-fetched upgrading_major_version_9.html and the AbstractArchiveTask javadoc \u2014 those were the PRE-9.0 defaults and kafka's wrapper pins 9.7.1. Resolved for the dive (release notes normative over audit inference): apache__kafka@940c100fab:build.gradle:362-364 is an active, total reproducibility opt-out. Makes GRADLE-CACHE-17 version-gated rather than the usual 'add the block' advice.",
+     "Configuration cache 'on by default in Gradle 9': exemplar-build-shape.md's Contradictions section asserts it; the cc dive fetched the 9.0.0 release notes and road-to-configuration-cache and found preferred-with-automatic-fallback with the default targeted at Gradle 11. Resolved for the dive; the audit sentence is an overstatement, matching topic-map conflict 18.",
+     "build-logic-settings severity: the build-logic dive proposed MUST; its own Contested section then records junit-team__junit-framework@35c56a8e02:settings.gradle.kts:2-4 and jjohannes's reference repo shipping the merged form, with no stated size threshold anywhere. Resolved to SHOULD (GRADLE-STRUCT-02) \u2014 Gradle's wording is comparative ('A better solution'), the cost is caching throughput not correctness, and a MUST would flag JUnit and a Gradle Developer Advocate's teaching repo.",
+     "Must CI pass --configuration-cache? The cc dive's candidate #6 reads as yes; pub measured the flag in 3/32 workflows vs the property in 10/32. Resolved: gradle.properties is the canonical switch and the check reads it first (GRADLE-CACHE-06); a CLI flag is for overriding one job, and requiring it would flag nearly every adopter.",
+     "validatePlugins warns or fails? java_gradle_plugin.html documents a jar-time warning; the ValidatePlugins javadoc says the task fails by default. Resolved: two distinct gates at different times \u2014 the jar-time check warns, the task fails, and a plugin author who only runs `build` never hits the second. Hence GRADLE-CACHE-16 requires the explicit invocation.",
+     "Isolated Projects adoption (5/32) read as maturity: resolved against the 9.7.0 docs' own 'not fully enforced yet' on two of four constraint categories \u2014 adoption of the property is not adoption of a gate (GRADLE-CACHE-10), while the dead org.gradle.unsafe.* key stays a mechanical MUST (GRADLE-CACHE-09)."
+    ],
+    "needs_another_round": [
+     "maven-publish x configuration cache \u2014 is maven-publish fully cache-compatible on Gradle 9.7.x, partially (only the explicit-credentials path falls back per #24040), or still broadly incompatible? The cc dive fetched the issue and a March-2025 Gradle blog claim and could not resolve it; this blocks a precise GRADLE-CACHE-08 and touches GRADLE-PUB.",
+     "GRADLE-STRUCT rows never dived \u2014 M-B-05 (two subprojects sharing a leaf name causing wrong conflict resolution with no build failure, gradle/gradle#847) and M-B-07 (a subproject gradle.properties overriding root settings the configuration cache assumes fixed): both adjudicated P0/P1, neither covered by a wave-2 dive, both silent-failure shapes.",
+     "Remote build cache push-gating \u2014 10 buildCache{} blocks across 6 repos but no checked-out settings file shows remote(HttpBuildCache){ isPush = ... }; 'who may push to the shared cache' is the one build-cache correctness question the corpus has not answered.",
+     "Gradle 10 archive defaults \u2014 GRADLE-CACHE-17 is framed 9-vs-8; nothing in the 9.0.0/9.7.0 notes says whether Gradle 10 changes archive reproducibility again. Re-check when Gradle 10's release notes exist."
+    ],
+    "must_count": 18
+   }
+  },
+  {
+   "group": "gradle-plugin-dev",
+   "dives": [
+    {
+     "slug": "plugin-contract-and-validation",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-gradle-plugin-dev/plugin-contract-and-validation.md",
+     "sources_count": 14,
+     "top_rules": [
+      "Never import a Gradle type from an internal-segment package or an *Internal/*Impl type \u2014 Gradle can break these in any release including minors.",
+      "Never assume another plugin is applied; use pluginManager.apply(id) for hard deps or pluginManager.withPlugin(id) {} for optional integration.",
+      "Ban afterEvaluate except fail-fast validation of your own plugin's state; replace with lazy Property/Provider wiring, convention() defaults, and pluginManager.withPlugin().",
+      "Annotate every task property and run validatePlugins explicitly in CI \u2014 the built-in jar-time check only warns, never fails.",
+      "Choose the reverse-DNS plugin id deliberately before first Portal publish; it can never be reassigned.",
+      "Declare hard version floors as numbers: Kotlin-DSL plugin on Gradle 9.x needs consumer Gradle >=8.11, Groovy-DSL >=7.0, minimum KGP 2.0.0.",
+      "Read ocx --format json env via a ValueSource with injected ExecOperations (config-cache-exempt), never via raw System.getenv()/ProcessBuilder at configuration time.",
+      "Hold the parsed env result in a BuildService for the rest of the build; the dependency direction is ValueSource -> value -> BuildService, never BuildService driving a ValueSource (documented unsupported)."
+     ],
+     "surprises": [
+      "validatePlugins presence is a red herring for \"does this repo publish a plugin\" \u2014 10/32 corpus repos run it purely for internal build-logic convention modules via java-gradle-plugin, with zero Portal signal (nowinandroid, sqldelight).",
+      "Gradle explicitly documents that a BuildServiceProvider cannot drive a ValueSource's parameters at configuration time \u2014 this fixes the ValueSource-vs-BuildService seat question as a one-way dependency, not a stylistic choice.",
+      "The three afterEvaluate replacements aren't three interchangeable options \u2014 they map to three distinct problems (deferred reads, optional defaults, cross-plugin reaction), and the docs name exactly one narrow carve-out (fail-fast validation of your own plugin's state, last-registered-only).",
+      "Settings plugins carry a hidden structural cost: folding one into a shared build-logic composite build forces pluginManagement{} inclusion, which reduces build-cache capability \u2014 Gradle's own fix is a separate minimal build-logic-settings build, confirmed only in gradle/gradle itself in the corpus checked.",
+      "ExecOperations.exec accepts an explicit environment(map) that replaces rather than extends the ambient environment, giving Gradle a native primitive for OCX's site/translucent/explicit/pinned classification even though Gradle has no built-in classification scheme of its own.",
+      "Two Gradle-10-scheduled removals are plugin-author-specific and easy to miss: Project.getProperties() and Project.container(...), both still legal in 9.x but silently breaking on the next major upgrade."
+     ],
+     "ok": true
+    },
+    {
+     "slug": "testkit-matrix-and-portal",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-gradle-plugin-dev/testkit-matrix-and-portal.md",
+     "sources_count": 14,
+     "top_rules": [
+      "A plugin's version-support claim MUST be tested with GradleRunner.withGradleVersion(...) across 3 legs: declared floor, current stable, and release-candidate \u2014 2-leg 'current only' matrices are inadequate.",
+      "A configuration-cache functional-test leg MUST run separately from the version matrix \u2014 CC and version compatibility are orthogonal failure modes.",
+      "A plugin declaring compileOnly on another plugin's API MUST NOT use GradleRunner.withPluginClasspath() in functional tests; publish to a local Maven repo and consume it via the test's settings.gradle(.kts) instead \u2014 the failure mode is a misleading ClassNotFoundException, not a compile error.",
+      "TestKit functional tests MUST NOT assert on in-process state \u2014 TestKit runs the build in a separate process via the Tooling API with its own daemons and classloaders.",
+      "CI MUST run './gradlew publishPlugins --validate-only' on every change and read GRADLE_PUBLISH_KEY/SECRET from env vars, never committed properties, in the gated release job that runs bare publishPlugins.",
+      "validatePlugins { enableStricterValidation = true } MUST be set on any module that applies com.gradle.plugin-publish \u2014 the default only checks the plugin's own task types, not exported types.",
+      "validatePlugins task presence MUST NOT be used as a signal that a module publishes to the Portal (java-gradle-plugin registers it for any convention-plugin module too, 10/32 exemplar files); route on com.gradle.plugin-publish presence instead.",
+      "A published gradlePlugin{} block MUST set website, vcsUrl, per-plugin id/implementationClass/displayName/description/tags, and (plugin-publish 2.1.0+, March 2026) a compatibility { features { configurationCache = true } } declaration \u2014 currently a warning if absent, with a stated but undated plan to become a hard rejection.",
+      "Applying com.gradleup.shadow to a plugin is the sanctioned auto-wired shading path (since plugin-publish 1.0.0) \u2014 but treat relocation as a separate, narrower decision required only for dependencies at genuine risk of colliding in a shared, non-isolated classloader, not as an automatic consequence of shading.",
+      "org.gradle.testkit.dir / withTestKitDir(...) MUST be pinned to a project-relative, clean-swept location on any long-lived CI runner, since TestKit's default working directories are not deleted."
+     ],
+     "surprises": [
+      "com.gradle.plugin-publish 2.1.0 (dated to the March 2026 Gradle newsletter) auto-applies a whole separate plugin (gradle/gradle-plugin-compatibility-plugin) that makes a Configuration-Cache compatibility declaration deprecated-if-absent, with a stated intent to eventually hard-reject undeclared plugins \u2014 no cutover date announced yet.",
+      "Shadow's own build does not shade or relocate itself despite being the shading tool, because Gradle isolates each plugins{ id(...) } plugin into its own classloader by default \u2014 the 'shade a plugin, therefore relocate everything' generalization is wrong; the mandatory-relocation case (error-prone in javac) is specifically about a shared, non-isolated classloader.",
+      "validatePlugins running in a build tells you almost nothing about Portal publishing on its own \u2014 10/32 exemplar files hit the task purely because java-gradle-plugin registers it for internal convention-plugin modules, with 7 of those repos showing zero other Portal signal.",
+      "detekt runs a genuinely separate compilation (not just a different GradleRunner call) pinned to its floor Gradle version via a dedicated resolvable configuration and PluginUnderTestMetadata task, which is a stronger floor-proof than a single withGradleVersion() call.",
+      "Shadow's functional-test target needs four explicit --add-opens JVM args to test configuration-cache behavior via GradleRunner.withDebug(), an operational wrinkle tied to a 2022 Gradle issue whose continued necessity on the current JDK 17 floor is unverified.",
+      "Two incompatible gradlePlugin{ plugins{} } id-declaration idioms (create(\"id\"){} map-key vs explicit id=\"...\") remain in live, current use with no winner \u2014 Shadow and detekt use different but equally current syntax."
+     ],
+     "ok": true
+    }
+   ],
+   "consolidation": {
+    "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-gradle-plugin-dev.md",
+    "rule_ids": [
+     "GRADLE-PLUG-01 \u2014 Run `./gradlew validatePlugins` as its own CI step; never rely on the `jar`-time warning. (MUST)",
+     "GRADLE-PLUG-02 \u2014 Set `validatePlugins { enableStricterValidation = true }` in every module applying `com.gradle.plugin-publish`. (MUST)",
+     "GRADLE-PLUG-03 \u2014 Never import a Gradle type from a package with an `internal` segment or a type suffixed `Internal`/`Impl`. (MUST)",
+     "GRADLE-PLUG-04 \u2014 Never assume another plugin is applied; use `pluginManager.apply(id)` or `pluginManager.withPlugin(id) {}`. (MUST)",
+     "GRADLE-PLUG-05 \u2014 Never call `afterEvaluate {}` in plugin code except to fail-fast-validate your own extension's state. (MUST)",
+     "GRADLE-PLUG-06 \u2014 Do not use `Project.getProperties()` or `Project.container(...)`; use `findProperty()`/`ProviderFactory.gradleProperty()` and `ObjectFactory.domainObjectContainer()`. (CONSIDER)",
+     "GRADLE-PLUG-07 \u2014 Never call `System.getenv()`, `ProcessBuilder`, `Runtime.exec` or `ExecOperations.exec` directly at configuration time; route through `providers.exec()` or a `ValueSource`. (MUST)",
+     "GRADLE-PLUG-08 \u2014 Read the external CLI in a `ValueSource` with injected `ExecOperations`; hold the parsed result in a `BuildService`, never the reverse. (MUST)",
+     "GRADLE-PLUG-09 \u2014 Build a spawned tool's environment explicitly from declared task inputs and pass it to `ExecOperations.exec { environment(map) }`; never inherit the daemon's ambient env. (MUST)",
+     "GRADLE-PLUG-10 \u2014 Run a dedicated `--configuration-cache` functional-test leg separate from the version matrix, and declare `compatibility { features { configurationCache = true } }` only once it passes. (MUST)",
+     "GRADLE-PLUG-11 \u2014 Declare and TestKit-test a consumer-Gradle floor consistent with the DSL: Kotlin-DSL on Gradle 9.x \u21d2 \u2265 8.11, Groovy-DSL \u21d2 \u2265 7.0, KGP \u2265 2.0.0. (MUST)",
+     "GRADLE-PLUG-12 \u2014 Give the TestKit matrix at least two legs: the declared floor and current stable Gradle. (MUST)",
+     "GRADLE-PLUG-13 \u2014 Add a `release-candidate` leg on a scheduled job, not on the pull-request job. (SHOULD)",
+     "GRADLE-PLUG-14 \u2014 If the plugin declares `compileOnly` on another plugin's API, do not use `GradleRunner.withPluginClasspath()`; publish to a local Maven repo and consume it from the test's settings file. (MUST)",
+     "GRADLE-PLUG-15 \u2014 Assert only on `BuildResult`, task outcomes and files in a functional test; never on in-process state. (SHOULD)",
+     "GRADLE-PLUG-16 \u2014 Pin `org.gradle.testkit.dir` to a project-relative, `clean`-swept path on any CI that reuses runners. (CONSIDER)",
+     "GRADLE-PLUG-17 \u2014 Set the full Portal `gradlePlugin{}` metadata set: `website`, `vcsUrl`, and per plugin `id`, `implementationClass`, `displayName`, `description`, `tags`, `compatibility { features { \u2026 } }`. (MUST)",
+     "GRADLE-PLUG-18 \u2014 Run `publishPlugins --validate-only` on every PR; run bare `publishPlugins` only on a tag/release-gated job reading `GRADLE_PUBLISH_KEY`/`GRADLE_PUBLISH_SECRET` from the environment. (MUST)",
+     "GRADLE-PLUG-19 \u2014 Choose the reverse-DNS plugin id before the first publish from a namespace you control; it is permanent. (MUST)",
+     "GRADLE-PLUG-20 \u2014 Do not infer that a module publishes a plugin from `validatePlugins`; route on `com.gradle.plugin-publish`. (SHOULD)",
+     "GRADLE-PLUG-21 \u2014 Treat `com.gradleup.shadow` (never `com.github.johnrengelman.shadow`) as opt-in shading that does not imply relocation; `relocate(...)` only for a named shared-classloader collision. (SHOULD)"
+    ],
+    "conflicts_resolved": [
+     "A \u2014 Topic map conflict 1 claims `com.gradle.plugin-publish` auto-applies `com.gradleup.shadow`; the primary doc and `GradleUp__shadow@541b3be475:build.gradle.kts` (applies plugin-publish, neither shades nor relocates itself) show it only auto-publishes the shadow jar IF Shadow is applied. Resolved toward the dive: shading a plugin is opt-in and SHOULD, not the sanctioned default \u2014 the map's phrasing is corrected.",
+     "B \u2014 testkit dive demands three MUST TestKit legs (floor/current/release-candidate); detekt, the sharpest plugin-as-product exemplar, runs two, and the RC leg exists only in gradle/actions (an Action, not a plugin). Resolved by splitting severity: floor + current MUST (GRADLE-PLUG-12), release-candidate SHOULD and scheduled-only (GRADLE-PLUG-13) \u2014 an RC break is an upstream regression and a red PR trains people to ignore the matrix.",
+     "C \u2014 config-inventory Axis 4 left the seat for the `ocx --format json env` read open between ValueSource, BuildService and Provider. Resolved one way only on a documented impossibility ('a BuildServiceProvider cannot drive a ValueSource at configuration time'): ValueSource reads, BuildService holds the parsed value; recomputing per task is rejected for multiplying spawns and reopening the ambient-env hole.",
+     "D \u2014 testkit dive calls `enableStricterValidation` a MUST; gates audit measures 1/32 adoption (detekt only). Resolved toward the dive with scope narrowed to modules applying `com.gradle.plugin-publish`: the mechanism decides it \u2014 stricter mode is the only check covering the plugin's EXPORTED types, whose failures land in consumers' builds. Flagged as a new commitment and as owner question Q3.",
+     "E \u2014 `validatePlugins` presence reads as a 'this repo ships a plugin' signal; pub audit measured 10/32 files across 7 repos, 7 of them with zero Portal signal (nowinandroid, sqldelight). Resolved: route on `com.gradle.plugin-publish` (GRADLE-PLUG-20) \u2014 this is what keeps the Portal rows off the OCX SDK's own build-logic modules.",
+     "F \u2014 M-F-07 / map conflict 5 leaves the `gradlePlugin { plugins { } }` id idiom split. Shape audit: map-key form dominant where the plugin IS the product (shadow, detekt), explicit `id = \"\u2026\"` dominant in spring-boot. Resolved: neither is wrong \u2014 write the map-key form in new code; an idiom-only rewrite is churn, demoted from a rule to failure mode 11."
+    ],
+    "needs_another_round": [
+     "Settings-plugin tool provisioning \u2014 what is the right Gradle seat for `@ocx_tool`-style pinned-binary download with sha256 enforcement and a version-floor gate (custom JavaToolchainResolver, BuildService-backed download-and-verify, or ArtifactTransform), and how does each behave under the configuration cache and on a cold CI runner? config-inventory Axis 4 leaves the cell explicitly Open and 0/32 exemplars are a Settings plugin that shells to a CLI.",
+     "Isolated Projects compatibility for a Settings plugin \u2014 M-F-04's second half is unanswered: IP reached incubating only in Gradle 9.7.0, it is not yet a declarable Compatibility-Plugin feature, and a Settings plugin registering one shared BuildService across every project is exactly the IP-hostile shape. Can such a plugin be IP-compatible on Gradle 9.7 at all, and what diagnostic proves it?",
+     "Plugin API-surface nullability (M-F-11) \u2014 untouched by both dives. Does a plugin whose public API is consumed from a Kotlin DSL build script need JSpecify annotations, given Kotlin treats JSpecify as `strict` (errors) and JSR-305 as `warn` \u2014 i.e. does keeping JSR-305 on a plugin API break consumer build scripts under Kotlin 2.2/K2, or only warn?"
+    ],
+    "must_count": 15
+   }
+  },
+  {
+   "group": "dependencies",
+   "dives": [
+    {
+     "slug": "declaration-and-catalogs",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-dependencies/declaration-and-catalogs.md",
+     "sources_count": 14,
+     "top_rules": [
+      "A dependency whose type appears in a public superclass/interface, public method signature, public field, or public annotation MUST be `api`; everything else MUST be `implementation` \u2014 verify with `./gradlew :module:projectHealth`, not `compileJava`, since the failure surfaces at the consumer's build.",
+      "A published library MUST NOT use `enforcedPlatform()` \u2014 it overrides even a consumer's own explicit version, and Gradle's own docs single out this exact caution for reusable components; spring-boot@93b23c40c2 (13 hits) is the corpus's negative exemplar.",
+      "`enforcedPlatform()` is acceptable only in a leaf application module with zero library/plugin consumers of its own \u2014 never in anything `api`-published.",
+      "A library's own declarations MUST NOT use `strictly`/`!!` \u2014 it acts like a forced version for every consumer and is lossy when published (POM keeps only the strongest declaration; `reject` vanishes entirely).",
+      "A version catalog entry pins the DECLARED request only, never the RESOLVED version \u2014 Gradle's own docs state conflict resolution can still pick something else with no build failure and no diff in the catalog.",
+      "Never conclude 'no catalog' from a `**/gradle/libs.versions.toml` filename glob alone \u2014 grep `versionCatalogs\\s*{` in settings files instead; apollo-kotlin@c145295b72 names its catalog `gradle/libraries.toml`, and gradle/gradle itself wires three named catalogs programmatically.",
+      "'Versions are pinned' requires a catalog PLUS either a checked-in lockfile or a platform/BOM constraint participating in resolution \u2014 a catalog alone is not pinning (0/32 exemplars lock at all).",
+      "`fixDependencies --upgrade` is the only safe unattended auto-fix mode because it never removes or downgrades a declaration, only adds/upgrades (e.g. implementation\u2192api) \u2014 unrestricted `fixDependencies` can break a consumer relying on a leaked transitive type."
+     ],
+     "surprises": [
+      "gradle/gradle \u2014 the tool that invented version catalogs \u2014 does not use the conventional `gradle/libs.versions.toml` path for its own build at all; it wires three named catalogs (libs/testLibs/buildLibs) programmatically, a blind spot for any filename-only glob rule.",
+      "spring-boot, a library, is the corpus's ONLY enforcedPlatform() user (13 hits) \u2014 the exact anti-pattern Gradle's own docs warn a reusable component against, shipped by one of the most widely-depended-on Java libraries in existence.",
+      "0/32 exemplars use dependency locking at all, so 'version catalog' and 'pinned versions' are conflated everywhere in practice even though Gradle's own docs explicitly distinguish declared vs resolved.",
+      "No wave-1 audit or this dive could confirm any of the 32 exemplars actually apply DAGP (`com.autonomousapps.dependency-analysis`) to themselves \u2014 the tool this brief centers on is undermeasured in the very corpus used to justify it.",
+      "DAGP's own README is AsciiDoc, not Markdown, and its FAQ wiki page does not define the four advice categories (unused/wrong-configuration/transitive/annotation-processor) at all \u2014 those live only on the wiki's Home page, a routing trap for anyone fetching just the README or just the FAQ as the brief's phrasing implies."
+     ],
+     "ok": true
+    },
+    {
+     "slug": "locking-verification-supply-chain",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-dependencies/locking-verification-supply-chain.md",
+     "sources_count": 14,
+     "top_rules": [
+      "OCX SDK/plugin builds MUST enable dependencyLocking with a committed gradle.lockfile per project \u2014 0/32 exemplars do this, so it's a new commitment not a codified convention",
+      "Never combine dependency locking with -SNAPSHOT/changing versions in the same configuration \u2014 Gradle's own docs call this a misunderstanding that produces unpredictable results",
+      "CI must never run --write-locks in the same job as the main build/release, since a failed build silently drops lock-state changes",
+      "An SDK/plugin build MUST bootstrap gradle/verification-metadata.xml (sha256,pgp) AND require a second reviewer on every diff to that file \u2014 the bootstrap trusts whatever's currently resolvable, the reviewed diff is the actual control",
+      "verification-metadata.xml must rely only on sha256/sha512 entries; md5/sha1 alone is not verification per Gradle's own docs",
+      "PGP verification MUST maintain an explicit <trusted-keys> allowlist by full 40-char fingerprint \u2014 a valid signature only proves signing, never signer legitimacy",
+      "Internal group coordinates MUST use exclusiveContent{filter{includeGroup()}}, not bare content{}, given the Jackson org./com. prefix-swap attack passed Central's own domain-exact namespace verification",
+      "An agent proposing any dependency version bump MUST run a live resolution (./gradlew <module>:dependencies --write-locks/--refresh-dependencies) and refuse to emit any version it did not observe actually resolve \u2014 Sonatype measured ~28% (up to 1-in-4 for older models) of unvalidated LLM version recommendations as nonexistent"
+     ],
+     "surprises": [
+      "The one gradle.lockfile hit in the entire 32-repo corpus is gradle/gradle's own documentation snippet demonstrating the feature to readers, not a real lock on any build \u2014 locking has zero genuine exemplar support anywhere in the corpus.",
+      "Maven Central's namespace verification is what let the Jackson prefix-swap attack (org.fasterxml.jackson.core vs real com.fasterxml.jackson.core) through legitimately: DNS verification is domain-exact, so the attacker registering fasterxml.org passed verification for the org. namespace on its own merits \u2014 verification worked correctly and was still the wrong control.",
+      "Only gradle/gradle itself (1/32) has verification-metadata.xml among 32 flagship JVM exemplars including major libraries like okhttp, guava, and jackson-databind.",
+      "Sonatype's actual per-model hallucination rates span 7%-25%+ depending on generation (older models ~1-in-4, 2026 frontier models ~7-8%) \u2014 the brief's flat '28%' is the upper/older-model end, not a single stable figure, and is dropping fast.",
+      "Gradle's own docs state the bootstrap command's trust limitation in almost the exact words a security review would use ('trusts whatever is currently in your repositories'), making 'run the bootstrap command' insufficient as a rule on its own \u2014 it needs a mandatory reviewed-diff step attached.",
+      "A failed Gradle build silently discards any --write-locks changes, so a naive CI script chaining --write-locks with the main build can mask lockfile drift as if nothing happened."
+     ],
+     "ok": true
+    },
+    {
+     "slug": "maven-mediation-and-enforcer",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-dependencies/maven-mediation-and-enforcer.md",
+     "sources_count": 17,
+     "top_rules": [
+      "Bind maven-enforcer-plugin with an explicit <execution><goal>enforce</goal>; the plugin runs zero rules until bound (default lifecycle phase is `validate`).",
+      "Bind dependencyConvergence at ERROR on multi-module reactors with shared transitive libraries \u2014 mediation has no floor check of its own.",
+      "Bind banDuplicatePomDependencyVersions at ERROR everywhere; it costs nothing to configure and 0/32 corpus exemplars use it.",
+      "Bind banDynamicVersions at ERROR (default all-false allow-flags) on anything released; grep for ranges/SNAPSHOT/LATEST/RELEASE as the fast local proxy.",
+      "Bind requireUpperBoundDeps at ERROR as the cheap universal floor check \u2014 grpc-java's 8 example poms already prove real-world adoption.",
+      "Bind requirePluginVersions (banLatest/banRelease/banSnapshots/banTimestamps all true) to mechanize what assertj and guava already do by hand in pluginManagement.",
+      "Never explain a resolved Maven version by mediation alone \u2014 check `mvn help:effective-pom` for a dependencyManagement entry first, since it wins before mediation is even consulted.",
+      "A Gradle-built, Maven-consumed POM (the OCX SDK) needs no Maven-specific mechanism beyond a fully-resolved, non-dynamic, complete POM \u2014 the one real risk is a version-catalog placeholder or SNAPSHOT leaking into a released coordinate."
+     ],
+     "surprises": [
+      "Maven 4.0.0 is confirmed still RC as of 2026-09-12: Central's index tops out at maven-core 4.0.0-rc-6, with 3.9.16 the latest stable \u2014 bom packaging and consumer-POM flattening are migration-preview only, not adoptable yet.",
+      "grpc-java binds requireUpperBoundDeps in 8 examples/*/pom.xml files (enforcer 3.5.0) \u2014 a real, un-briefed adoption data point for that rule beyond assertj/guava.",
+      "The ASF parent POM (v39) enforces only Maven/Java version floors and a signed reproducible-release profile \u2014 zero dependency-drift protection, which falsifies the assumption that a strict widely-inherited parent already covers convergence/duplicate checks.",
+      "Maven's own docs flag that dependencyManagement can silently downgrade an unrelated dependency sharing coordinates \u2014 a documented footgun distinct from the mediation-vs-management confusion the brief anticipated.",
+      "Version range gotcha confirmed verbatim from primary docs: `[1.0,2.0)` includes `2.0-rc1` because '2.0-rc1' sorts below '2.0' \u2014 contrary to most users' expectation.",
+      "assertj and guava both pin every plugin version manually in pluginManagement but neither binds requirePluginVersions itself (0/32) \u2014 manual discipline with zero enforcer backstop is the norm, not the exception."
+     ],
+     "ok": true
+    }
+   ],
+   "consolidation": {
+    "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-dependencies.md",
+    "rule_ids": [
+     "GRADLE-DEP-01 \u2014 Declare a dependency `api` when one of its types appears in a public superclass/interface, method signature, field or annotation; `implementation` otherwise. [MUST]",
+     "GRADLE-DEP-02 \u2014 Never leave a dependency on `compileOnly` when it is reached at runtime via reflection, generated bytecode or ServiceLoader. [MUST]",
+     "GRADLE-DEP-03 \u2014 Declare annotation processors on the `annotationProcessor` configuration, never on the compile classpath. [MUST]",
+     "GRADLE-DEP-04 \u2014 Wire DAGP with at least one issue category at `severity(\"fail\")`, and run `fixDependencies` with `--upgrade` on any published module. [SHOULD]",
+     "GRADLE-DEP-05 \u2014 Never use `enforcedPlatform()` in a module published or consumed as a library; permitted in a leaf application, a test configuration, or a never-published internal platform. [MUST]",
+     "GRADLE-DEP-06 \u2014 Never use `strictly(...)` or `!!` in a published library's own api/implementation declarations; fine in distribution/test/build-logic catalogs and CLIs. [MUST]",
+     "GRADLE-DEP-07 \u2014 Never declare a version range, `+`, `latest.release`/`latest.integration`, or `-SNAPSHOT` in a build that produces a release artifact. [MUST]",
+     "GRADLE-DEP-08 \u2014 Never conclude \"no version catalog\" from a `gradle/libs.versions.toml` glob; detect a catalog by content grep. [MUST]",
+     "GRADLE-DEP-09 \u2014 Never state that versions are pinned on the strength of a version catalog; require a committed lockfile. [MUST]",
+     "GRADLE-DEP-10 \u2014 Declare repositories once in `dependencyResolutionManagement` and set `FAIL_ON_PROJECT_REPOS`. [SHOULD]",
+     "GRADLE-DEP-11 \u2014 Resolve every internally-owned group through `exclusiveContent`, not a bare `content { includeGroup }`. [MUST when a non-public repo is declared]",
+     "GRADLE-DEP-12 \u2014 Enable `dependencyLocking { lockAllConfigurations() }` and commit the lockfiles. [MUST for OCX SDK and OCX Gradle plugin / SHOULD for adopters]",
+     "GRADLE-DEP-13 \u2014 Never lock a configuration that resolves a changing or `-SNAPSHOT` version. [MUST given -12]",
+     "GRADLE-DEP-14 \u2014 Run `--write-locks` only in a dedicated gated job, and never infer success from the lockfile's existence. [SHOULD]",
+     "GRADLE-DEP-15 \u2014 Bootstrap `verification-metadata.xml` with `sha256,pgp`, commit it, and require human review of every regeneration diff. [MUST for OCX SDK and OCX Gradle plugin / CONSIDER for adopters]",
+     "GRADLE-DEP-16 \u2014 Count only sha256/sha512 as verification and key every `<trusted-key>` by full 40-char fingerprint; never fix a missing-checksum failure by disabling verification. [MUST given -15]",
+     "GRADLE-DEP-17 \u2014 Validate the committed `gradle-wrapper.jar` checksum in CI unless `setup-gradle@v4`+ already does it. [MUST for any repo committing a wrapper]",
+     "GRADLE-DEP-18 \u2014 Never emit a dependency version string that has not been observed to resolve against the real repository in this session. [MUST]",
+     "MVN-DEP-01 \u2014 Before explaining a Maven version pick by mediation, confirm no `dependencyManagement` entry matches (own POM, then parent chain). [MUST]",
+     "MVN-DEP-02 \u2014 Force a version by a direct declaration or `dependencyManagement`, never by editing a deeper transitive; Maven mediates by nearest-depth, not highest version. [MUST]",
+     "MVN-DEP-03 \u2014 Bind `maven-enforcer-plugin` with an explicit `<execution><goal>enforce</goal>`; plugin presence is not enforcement. [MUST]",
+     "MVN-DEP-04 \u2014 Bind `banDynamicVersions` with default all-false allow flags on any released POM. [MUST]",
+     "MVN-DEP-05 \u2014 Bind `banDuplicatePomDependencyVersions` (zero configuration) on every POM. [MUST]",
+     "MVN-DEP-06 \u2014 Bind `requireUpperBoundDeps` on every reactor as the universal floor; add `dependencyConvergence` only where paths genuinely share a library. [SHOULD]",
+     "MVN-DEP-07 \u2014 Bind `requirePluginVersions` rather than relying on manual pluginManagement discipline. [SHOULD]",
+     "MVN-DEP-08 \u2014 Never set `<systemPath>` without `<scope>system</scope>`, and prefer neither. [MUST]",
+     "MVN-DEP-09 \u2014 Check for `combine.children`/`combine.self` before assuming a child POM's list appends to or replaces the parent's. [CONSIDER]",
+     "MVN-DEP-10 \u2014 Ensure every `<version>` in a published POM is a concrete resolved string. [MUST for the OCX SDK]",
+     "MVN-DEP-11 \u2014 Do not adopt Maven 4 `bom` packaging or consumer-POM flattening as a shipped mechanism; migration preview only. [MUST]"
+    ],
+    "conflicts_resolved": [
+     "enforcedPlatform + spring-boot: the topic map (M-C-07), the build-shape audit (smell 4) and BOTH Gradle dives call spring-boot a violation on a raw count of 13 hits. Re-read all 13 today: 5 are smoke-test configurations, 5 are test/intTest/systemTest, 2 are internal tooling modules, and the single `api(enforcedPlatform(...))` is at platform/spring-boot-internal-dependencies/build.gradle:254 whose next line reads `// Internal module so enforced platform dependencies are OK` (line 258). Resolved: zero enforcedPlatform violations exist in the corpus; spring-boot is a POSITIVE exemplar, and GRADLE-DEP-05's verification cell must say \"read the owning module\", not \"grep and flag\" \u2014 a raw-count rule flags the repo that gets it right.",
+     "strictly/!! severity: declaration-and-catalogs proposed MUST but flagged its own grep as untested against the corpus and said it 'should be SHOULD until measured'. Measured today: 3 `strictly(` call sites (gradle/gradle build-platform:17, junit-framework junit4-compatibility:17, detekt-cli:26 \u2014 all build-logic/compat/CLI) and 98 `!!` catalog pins, all in gradle/gradle's distribution/test/provided catalogs. Resolved upward to MUST-with-scope: banned in a published library's own declarations, explicitly permitted in an application, distribution/test catalog, build-logic platform or CLI.",
+     "Does platform alignment substitute for locking? declaration-and-catalogs candidate 5 accepts 'a lockfile OR an enforced platform' as satisfying 'pinned'; locking-verification candidate 1 makes locking a MUST outright. Resolved against declaration-and-catalogs: a platform constrains which versions are allowed for the coordinates it names and records nothing about what was resolved for the ones it does not, so it cannot detect drift. GRADLE-DEP-09's check is a committed lockfile, full stop.",
+     "Locking severity: locking-verification's own Contested section narrows its candidate-1 MUST to 'MUST for the OCX SDK and Gradle plugin, SHOULD elsewhere'. Adopted, because 0/32 exemplars lock \u2014 making it a blanket MUST would flag every repo in the corpus including gradle/gradle.",
+     "DAGP as a gate: declaration-and-catalogs recommended `issues { all { onAny { severity(\"fail\") } } }` while flagging corpus adoption as entirely unmeasured (its Contested #1). Measured today: 2/32 \u2014 gradle/gradle fails only on duplicate-class warnings (gradlebuild.root-build.gradle.kts:25), detekt applies build-health 3.19.1 (settings.gradle.kts:54). Resolved: the rule requires at least one failing category rather than `onAny`, since the corpus's strictest adopter deliberately narrowed; the exact set for the SDK is deferred to the owner (Q-DEP-3).",
+     "The '28%' hallucination figure: the topic map's dive brief states 28%; locking-verification found Sonatype's real range is 7%\u201325%+ by model generation with 28% at the upper end, and recommends citing the range. Resolved by removing the number entirely from GRADLE-DEP-18 \u2014 the rule cites the mechanism (resolve before emitting), because a frontier-model agent reading a stale 25% discounts the rule, and the check is unconditional regardless of rate.",
+     "dependencyConvergence vs requireUpperBoundDeps as the Maven default: maven-mediation-and-enforcer explicitly left both open (its Contested #1). Resolved: `requireUpperBoundDeps` is the universal floor (cheaper, fewer false positives in a large reactor, real adoption base in grpc-java's 8 example POMs) and `dependencyConvergence` is added only where two or more paths genuinely reach the same library (assertj's shape, 1/32).",
+     "Maven 4 GA: the topic map's conflict 19 and frame correction 1 both hedged at rc-6 and asked wave 2 to settle it with a Central query. Settled by maven-mediation-and-enforcer's query on 2026-09-12: maven-core stable is 3.9.16, the 4.0 line tops out at 4.0.0-rc-6, no plain 4.0.0 exists. MVN-DEP-11 therefore bans bom packaging and consumer-POM flattening as shipped mechanism and carries the re-check command."
+    ],
+    "needs_another_round": [
+     "mavenLocal() and repository hygiene beyond content filtering \u2014 does the JVM rule set ban mavenLocal() outright, and at what severity, given 42 build files across the corpus declare it? No dive covered it, Gradle's Best Practices page naming it was not fetched for this family, so no rule was written \u2014 yet it is the second-most-likely thing an agent adds to 'fix' a resolution failure after a version bump, and it silently makes a build machine-dependent.",
+     "Maven-side checksum and verification policy \u2014 what is the Maven equivalent of verification-metadata.xml, and does the aether checksum-algorithm list harden or weaken a build? The corpus's only checksum configuration (assertj@485502bad2:.mvn/maven.config) sets `-Daether.checksums.algorithms=SHA-512,SHA-256,SHA-1,MD5 -Daether.connector.smartChecksums=false`, enumerating two algorithms Gradle's docs call insufficient alongside two secure ones; no source read here settles which it is. MVN-DEP currently has no supply-chain-integrity row at all while GRADLE-DEP has three.",
+     "Dependency-update automation as a rule surface \u2014 does the rule set say anything about Dependabot vs Renovate configuration, given 13/32 each with zero overlap and an agent is the thing reviewing their PRs? The publishing audit measured the split; no dive turned it into guidance, and GRADLE-DEP-18 (resolve before emitting) has an unexamined interaction with a bot that proposes bumps automatically."
+    ],
+    "must_count": 23
+   }
+  },
+  {
+   "group": "distribution",
+   "dives": [
+    {
+     "slug": "shading-failure-taxonomy",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-distribution/shading-failure-taxonomy.md",
+     "sources_count": 18,
+     "top_rules": [
+      "Never shade a consumable library \u2014 shading is only for CLIs, javac/annotation-processor plugins, and Gradle plugins (zero counterexamples in 32 exemplars)",
+      "Every shaded jar merging 2+ dependencies' META-INF/services/* MUST call mergeServiceFiles() (Gradle) or configure ServicesResourceTransformer (Maven) \u2014 the default duplicate strategy silently drops providers",
+      "Bundling log4j-core requires Log4j2PluginsCacheFileTransformer \u2014 it's a binary cache file, not merged by mergeServiceFiles() or plain concatenation",
+      "Spring's spring.factories has NO built-in Shadow transformer as of 2026-09-12 (GradleUp/shadow#1489, open since 2025-06-26) \u2014 AppendingTransformer corrupts its keyed-Properties merge; only spring/*.imports (line-list) is safely handled by mergeServiceFiles()",
+      "Every shaded jar MUST exclude META-INF/*.SF, *.DSA, *.RSA, and *.EC \u2014 re-signing the output does not fix the signed-jar SecurityException because the original signature is now over content that no longer matches",
+      "Multi-release-jar module-info.class leakage is excluded by default only on Shadow >= 9.0.0 (2025-08-07, shadow#1177/#729) \u2014 builds below that floor must exclude META-INF/versions/*/module-info.class manually",
+      "Split packages across two shaded libraries have NO fix via any transformer \u2014 JEP 261's split-package prohibition means the only real fix is relocating one side's package before shading; verify by diffing package sets across the two dependency jars",
+      "minimize() is unsafe unless every reflection/ServiceLoader-using dependency is explicitly excluded via minimize{exclude(dependency(...))} AND CI runs the shaded jar's own functional tests \u2014 its one documented blind spot (Class.forName(String)) is exactly how ServiceLoader works internally"
+     ],
+     "surprises": [
+      "google/error-prone does NOT relocate packages when shading, contradicting the wave-1 topic map's conflict-1 claim \u2014 its core/pom.xml maven-shade-plugin execution only restricts artifactSet includes, with createDependencyReducedPom=false and no <relocations> block at all; the one <relocation> grep-hit in the repo is an unrelated distributionManagement artifact-move notice in type_annotations/pom.xml",
+      "Maven Shade's dependency-reduced POM defaults to true and is required only when the shaded jar publishes under normal (non-classified) coordinates; error-prone explicitly sets it to false because it ships a classified with-dependencies jar alongside an unshaded primary artifact \u2014 a real, code-backed answer to the brief's decision (c)",
+      "jmh-gradle-plugin's own current upstream fix for the signed-jar SecurityException omits .EC (ECDSA signature files) from its exclude list \u2014 the most commonly copy-pasted reference fix has this gap",
+      "grpc-java's and dagger's preserveFileTimestamps grep hits are confirmed (via the pub audit) to be a hand-written Transformer method parameter name, not the Gradle archive property \u2014 a durable grep trap worth naming explicitly in the depth file",
+      "Shadow has no built-in transformer for Spring's spring.factories as of today (GradleUp/shadow#1489 still open) even though the shape of the fix is well understood by the maintainers and multiple third parties have hand-rolled SpringFileTransformer implementations",
+      "No exemplar in the 32-repo corpus was found actually using minimize() at all \u2014 the caution around it is sourced entirely from Shadow's own docs and issue history, not corroborated (or contradicted) by real exemplar usage"
+     ],
+     "ok": true
+    },
+    {
+     "slug": "distribution-shape-decision",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-distribution/distribution-shape-decision.md",
+     "sources_count": 14,
+     "top_rules": [
+      "A jar declared as a dependency and consumed via its API MUST NOT be shaded \u2014 zero counterexamples in 32 exemplars",
+      "Classify the artifact first: (a) program, (b) plugin/agent host-loaded, or (c) API dependency \u2014 the shape is a lookup on that answer, not a preference",
+      "Default a general JVM application to the `application` Gradle plugin baseline unless a more specific shape's precondition holds",
+      "Spring Boot apps MUST use nested `bootJar`, never shading \u2014 none of the merge-failure taxonomy can occur since nothing merges",
+      "Layered-jar `layerOrder` MUST stay `dependencies, spring-boot-loader, snapshot-dependencies, application` \u2014 reordering defeats Docker cache reuse on every commit",
+      "`jlink` MUST NOT run against a module graph containing an automatic module \u2014 it hard-fails; fix is exclude-to-classpath or find a modularized replacement",
+      "`jpackage` builds are per-OS only, and a macOS build MUST run notarization as a separate step after `jpackage` \u2014 signing alone isn't enough",
+      "Never `COPY` a single fat/shaded jar into a Dockerfile \u2014 use Jib or separate dependency/application COPY layers, or shading's lack of internal layering collapses Docker's cache too"
+     ],
+     "surprises": [
+      "The YouTrack SUPPORT-A-2700 article body is a client-rendered SPA that couldn't be scraped via WebFetch or curl \u2014 had to corroborate its content via an independent tacosteemers.com walkthrough and cite YouTrack as topic-only confirmation",
+      "jpackage has macOS signing flags but genuinely no notarization step of its own per the official spec \u2014 notarization is always a separate xcrun notarytool invocation, worth its own MUST",
+      "Jib's own layer split (other deps \u2192 snapshot deps \u2192 project deps \u2192 resources \u2192 classes \u2192 extra dirs) is finer-grained than Spring Boot's 4-layer order but follows the identical stable-to-volatile principle",
+      "Application-plugin usage (7/32) and Spring Boot's 383 bootJar hits both skew hard to sample/smoke-test modules, not shipped executables \u2014 citing either raw count without the per-module caveat would mislead",
+      "JEP 493 (jlink without JMODs) is a JDK-vendor opt-in build flag, not a universal JDK 24+ guarantee \u2014 no cross-linking, and an image built this way can't itself include jdk.jlink",
+      "0/32 exemplars use jlink or jpackage at all, so those two sections are precondition-derived from primary docs rather than corpus-corroborated \u2014 flagged explicitly in the file rather than presented as measured practice"
+     ],
+     "ok": true
+    }
+   ],
+   "consolidation": {
+    "conflicts_resolved": [
+     "\"Zero counterexamples in 32 repos: no consumable library shades\" (topic-map conflict 1, pub audit finding 4, BOTH dives) vs. measured reality \u2014 RESOLVED AGAINST the claim. Re-read apache__kafka@940c100fab:build.gradle:2089-2100 (project(':clients') shadowJar, archiveClassifier = null) and :401-420 (publishes components.shadow as the mavenJava publication): kafka-clients, the corpus's most-declared library artifact, IS a shaded jar under primary coordinates. The audit's Axis-2 'who consumes' table mis-filed it as 'build-tooling submodule, not kafka-clients'. DIST-02 keeps MUST status but ships with a three-condition carve-out (every bundled package relocated under the library's own namespace; non-vendored deps left as real POM deps; reason recorded) instead of an absolute.",
+     "error-prone relocation: exemplar-publishing-ci-bazel.md Axis 2 (`<relocation>` = 1, 'yes (<relocation>)') and topic-map row M-G-04 say error-prone relocates 'because it loads into javac'; shading-failure-taxonomy.md finding 8 says it does not. RESOLVED FOR THE TAXONOMY, re-verified at the pinned SHA: google__error-prone@c1f99ad5d3:core/pom.xml:403-413 has artifactSet/shadedClassifierName/createDependencyReducedPom and NO <relocations> block; the repo's only <relocation> is type_annotations/pom.xml:31-34, a <distributionManagement> artifact-move notice. The audit count is a grep false positive. Ships as AI-agent failure mode 9 and a grep trap in DIST-11.",
+     "Does Gradle sidestep Maven's dependency-reduced-POM trade-off? shading-failure-taxonomy.md finding 10 says yes ('Gradle's publication model lets a shaded and unshaded artifact each carry independently correct dependency metadata without this trade-off'). RESOLVED AGAINST IT: apache__kafka@940c100fab:build.gradle:410-420 hand-rolls a 20-line pom.withXml loop against GradleUp/shadow#324 to re-add the non-bundled deps. DIST-13 therefore binds both build systems symmetrically, and the residual 'what does components.shadow actually emit on Shadow 9.6.1' is flagged for another round.",
+     "Spring Boot + Shadow co-application: distribution-shape-decision.md candidate 4 states it as a MUST; shading-failure-taxonomy.md candidate 11 softens it to 'question why both are needed'. RESOLVED FOR THE MUST (DIST-16) \u2014 the more specific formulation, and the check is a two-grep set intersection with an unambiguous defect signature.",
+     "minimize() severity: the taxonomy debates whether it is recommendable at all. RESOLVED as a conditional MUST (DIST-10) rather than a ban, on re-measured evidence that 0/32 exemplars use it \u2014 the corpus's restraint means a ban would flag nothing and the conditional catches the one case an agent introduces."
+    ],
+    "must_count": 15,
+    "needs_another_round": [
+     "Shaded-library publication metadata under Gradle \u2014 On Shadow >= 9.0.0, does publishing `components.shadow` produce a POM whose <dependencies> correctly equal the non-bundled runtime set without hand-patching, and from which version? (kafka still hand-patches via pom.withXml against shadow#324; the GRADLE-PUB half of the question \u2014 what a Maven consumer sees through Gradle Module Metadata \u2014 is topic-map row M-H-02.)",
+     "minimize() in 2026 \u2014 Has jdependency-backed minimization gained any ServiceLoader / META-INF/services awareness since Shadow 9.0.0, and does minimize() interact correctly with mergeServiceFiles() on a current version? Every claim in this family traces to one sentence of Shadow's docs; 0/32 exemplars exercise it, so nothing is corroborated.",
+     "Reproducible shaded archives (straddles GRADLE-DIST and GRADLE-CACHE) \u2014 Gradle 9 makes archive tasks reproducible by default (map row M-D-11), but is a shadowJar output byte-identical across two clean builds on Shadow 9.6.1 / Gradle 9.7, and does mergeServiceFiles() preserve entry order? Neither dive checked whether shadowJar inherits the default."
+    ],
+    "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-distribution.md",
+    "rule_ids": [
+     "GRADLE-DIST-01 \u2014 Classify the module as (a) program, (b) host-loaded plugin/agent, or (c) API dependency, and state it, before adding any packaging plugin. [MUST]",
+     "GRADLE-DIST-02 \u2014 Do not publish a merged jar under a case-(c) library's primary coordinates; if vendoring is unavoidable, relocate every bundled package under the library's own namespace, keep non-vendored deps as real POM deps, and record why. [MUST]",
+     "GRADLE-DIST-03 \u2014 For a published Gradle plugin, do not add a shading plugin by hand; com.gradle.plugin-publish already applies com.gradleup.shadow \u2014 audit what it relocated. [MUST]",
+     "GRADLE-DIST-04 \u2014 A library SDK ships exactly the library jar, sources jar, javadoc/Dokka jar and a complete POM/GMM \u2014 no application, bootJar, jlink, jpackage or container output. [MUST]",
+     "GRADLE-DIST-05 \u2014 Exclude META-INF/*.SF, *.DSA, *.RSA and *.EC from every shaded jar. [MUST]",
+     "GRADLE-DIST-06 \u2014 Exclude META-INF/versions/*/module-info.class from every shaded jar, explicitly even on Shadow >= 9.0.0. [MUST]",
+     "GRADLE-DIST-07 \u2014 Call mergeServiceFiles() (Gradle) or ServicesResourceTransformer (Maven) on any shaded jar bundling more than one dependency shipping META-INF/services/*. [MUST]",
+     "GRADLE-DIST-08 \u2014 Apply Log4j2PluginsCacheFileTransformer when more than one bundled jar ships META-INF/Log4j2Plugins.dat. [MUST]",
+     "GRADLE-DIST-09 \u2014 Do not merge META-INF/spring.factories (or spring-autoconfigure-metadata.properties, spring.handlers, spring.schemas) with AppendingTransformer; META-INF/spring/*.imports is correct under mergeServiceFiles(). [MUST]",
+     "GRADLE-DIST-10 \u2014 Enable minimize() only with an exclude(dependency(...)) for every reflectively/SPI-loaded dependency AND a CI functional test against the built shaded jar. [MUST]",
+     "GRADLE-DIST-11 \u2014 Relocate only against a named collision with the consumer's classpath, and name that collision in a comment beside each relocate( call. [SHOULD]",
+     "GRADLE-DIST-12 \u2014 Use the com.gradleup.shadow plugin id; com.github.johnrengelman.shadow is the dead pre-2023 coordinate. [MUST]",
+     "GRADLE-DIST-13 \u2014 A shaded artifact published under non-classified coordinates must publish a POM declaring exactly the dependencies it did not bundle (Maven: leave createDependencyReducedPom true; Gradle: publish components.shadow and verify the generated POM). [MUST]",
+     "GRADLE-DIST-14 \u2014 Diff two dependencies' package sets before shading them together; treat any overlap as a blocker requiring relocation, not a merge-configuration problem. [MUST]",
+     "GRADLE-DIST-15 \u2014 Start a case-(a) JVM application from the application plugin unless a more specific shape's precondition holds; name the failed precondition before reaching for shading. [SHOULD]",
+     "GRADLE-DIST-16 \u2014 Never co-apply com.gradleup.shadow and org.springframework.boot on the same module; bootJar's nested BOOT-INF layout is the executable artifact. [MUST]",
+     "GRADLE-DIST-17 \u2014 Keep a layered bootJar's layerOrder as dependencies, spring-boot-loader, snapshot-dependencies, application (or a superset preserving that relative order). [SHOULD]",
+     "GRADLE-DIST-18 \u2014 Do not wire jlink into a build whose module graph contains an automatic module; put it on the classpath or replace it with a modularised release. [MUST]",
+     "GRADLE-DIST-19 \u2014 Build jpackage output once per target OS and run notarization as a separate CI step after a macOS jpackage run. [CONSIDER]",
+     "GRADLE-DIST-20 \u2014 Never COPY a single fat jar as a container image's only application layer; use Jib, or COPY BOOT-INF/lib and application classes as separate stable-to-volatile layers. [SHOULD]"
+    ]
+   }
+  },
+  {
+   "group": "quality-gates",
+   "dives": [
+    {
+     "slug": "java-lint-gate",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-quality-gates/java-lint-gate.md",
+     "sources_count": 17,
+     "top_rules": [
+      "Wire Error Prone + NullAway at the compiler-plugin layer on every Java module (net.ltgt.errorprone/net.ltgt.nullaway in Gradle; maven-compiler-plugin annotationProcessorPaths in Maven) \u2014 the only gate that runs on every compile.",
+      "Use OnlyNullMarked=true (NullAway 0.12.3+), not AnnotatedPackages, for new modules \u2014 package-prefix lists rot as code moves.",
+      "Never set both AnnotatedPackages and OnlyNullMarked, and never neither \u2014 NullAway fails the build immediately either way.",
+      "Before jspecifyMode=true, verify JDK 22+, or 17.0.19+/21.0.8+ on OpenJDK (not Oracle) with -XDaddTypeAnnotationsToSymbol=true \u2014 otherwise IllegalStateException at compile time.",
+      "Promote DefaultLocale, StringCaseLocaleUsage (severity bump only \u2014 it's already ENABLED_WARNINGS), EqualsMissingNullable, FieldMissingNullable, VoidMissingNullable, CatchingUnchecked, UnusedException, ConstantPatternCompile, UnnecessaryDefaultInEnumSwitch to ERROR on every new module.",
+      "Never rethrow a caught exception without passing it as cause \u2014 enforce via -Xep:UnusedException:ERROR.",
+      "Pick one Checkstyle base (google_checks.xml recommended) and commit a pruned copy \u2014 the two shipped rulesets diverge on more than half their modules, so shipping either unmodified misrepresents real practice.",
+      "Do not add PMD to a new JVM project's gate \u2014 0/32 flagship exemplars enforce it; Error Prone + NullAway + find-sec-bugs cover its unique value better.",
+      "SpotBugs earns a place only bundled with find-sec-bugs (spotbugsPlugins com.h3xstream.findsecbugs:findsecbugs-plugin:1.14.0), and only on modules parsing untrusted input.",
+      "Never recommend bare 'use JSpecify' \u2014 state the coexistence with jsr305/Checker Framework (13/32 vs 9/32 vs 2/32 native) and whether jspecifyMode is being flipped."
+     ],
+     "surprises": [
+      "StringCaseLocaleUsage, which the brief listed among the 'disabled checks worth promoting,' is actually already in ENABLED_WARNINGS, not DISABLED_CHECKS \u2014 verified by direct line count against BuiltInCheckerSuppliers.java. 'Promoting' it means a severity bump, not activation from off.",
+      "NullAway's -XDaddTypeAnnotationsToSymbol=true workaround for JDK 17.0.19+/21.0.8+ explicitly does NOT work on Oracle JDK builds \u2014 only OpenJDK-family distributions (Temurin, Zulu) \u2014 a toolchain-vendor trap, not just a version trap.",
+      "PMD is not merely under-adopted but actively performative in the flagship corpus: apache/maven declares maven-pmd-plugin with zero bound <executions>, and gradle/gradle ships the Gradle PMD plugin to users without ever running it on its own build.",
+      "jackson-databind's Error Prone usage is an opt-in Maven <profile>, not the default build \u2014 the most-cited 'lenient pole' exemplar isn't even running Error Prone by default, only when a developer explicitly activates the profile.",
+      "SpotBugs' own SECURITY category (1 of 10) is deliberately thin by SpotBugs' own design intent, not an oversight later patched by find-sec-bugs \u2014 the two were always meant to be paired.",
+      "Four incompatible Java nullness annotation systems (jsr305, Checker Framework, JSpecify declared, NullAway JSpecify-native) coexist simultaneously in the measured corpus with no dominant winner yet \u2014 Guava 33.4.1+ shipping @NullMarked means any NullAway user inherits stricter checking at Guava call sites regardless of their own project's mode."
+     ],
+     "ok": true
+    },
+    {
+     "slug": "test-suite-and-coverage",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-quality-gates/test-suite-and-coverage.md",
+     "sources_count": 16,
+     "top_rules": [
+      "Coverage-tool presence (jacocoTestReport/koverXmlReport) is never evidence of an enforced floor; only violationRules/jacocoTestCoverageVerification/koverVerify/minBound with an unconditional binding counts",
+      "Gradle's jacocoTestCoverageVerification is not a dependency of check by default (Gradle's own docs) \u2014 a build can have a floor configured and never run it",
+      "Even where a floor exists, read the surrounding conditional: junit-framework disables it under predictive test selection, kotlinx.coroutines disables it unless -Pkover.enabled=true is passed on a bare check",
+      "Hard numeric coverage floor is MUST for the OCX SDK only (ocx-sdk-python precedent); CONSIDER for any other adopter \u2014 3/32 exemplars enforce anything and all three gate it",
+      "JaCoCo for Java, Kover for Kotlin \u2014 JaCoCo misreads inline-function bodies and Kotlin's synthetic access$ accessors as uncovered",
+      "junit-platform-runner is removed in JUnit 6.0.0 with no replacement (unlike junit-platform-jfr, which folds into junit-platform-launcher) \u2014 block any JUnit-6 bump on a grep hit for it",
+      "junit.jupiter.execution.parallel.enabled=true alone is a no-op; it must be paired with execution.parallel.mode.default=concurrent or nodes stay SAME_THREAD (micronaut-core's own config is a live example)",
+      "Maven Surefire's unified single-provider architecture is documented as '3.6.0' but Maven Central's newest published artifact is 3.6.0-M1 (2026-06-02) \u2014 never pin bare 3.6.0",
+      "org.gradle.test-retry is not a MUST/SHOULD: 1/32 official, 1/32 hand-rolled, 30/32 nothing, including the corpus's strictest gates",
+      "No TZ-pin MUST: 0/32 exemplars pin a timezone, and guava deliberately runs the opposite discipline (non-English locale) to catch bugs"
+     ],
+     "surprises": [
+      "kotlinx.coroutines' Kover minBound(85) \u2014 one of the map's three 'enforced' exemplars \u2014 does NOT run on a bare `./gradlew check`; it's gated behind `-Pkover.enabled=true` in a separate CI step, so the true unconditional-enforcement count is closer to 1/32 (assertj) than 3/32",
+      "Maven Central has no GA maven-surefire-plugin:3.6.0 as of 2026-09-12 \u2014 the plugin's own docs site header reads 'Version: 3.6.0, Last Published: 2026-08-31' as if it shipped, but the newest artifact on Central is 3.6.0-M1 (2026-06-02); an initial WebFetch pass on the docs page itself hallucinated 'Release Type: GA', caught only by querying Central directly",
+      "junit-platform-runner's removal has NO replacement, but a web-search snippet (not the primary wiki page) claimed its content 'is now included directly in junit-platform-launcher' \u2014 conflating it with the separate junit-platform-jfr removal, which does fold into junit-platform-launcher; only fetching the primary wiki page caught this",
+      "Gradle's own docs state jacocoTestCoverageVerification is explicitly NOT a dependency of check \u2014 meaning a project can have a fully-configured violationRules block with a real threshold and it will never fail a CI build unless someone adds `check.dependsOn(...)`, a wiring gap distinct from 'coverage tool applied vs not'",
+      "micronaut-core sets `execution.parallel.enabled = true` and nothing else in its junit-platform.properties \u2014 a live, real-world instance of the exact half-configuration trap (enabled with no mode.default) that makes parallel execution silently still sequential",
+      "@ResourceLock/@Isolated is not a stable, finished feature: junit-team/junit-framework merged four PRs in 2025-2026 changing its semantics (child-node propagation, programmatic ResourceLocksProvider, Vintage-engine parallel methods) \u2014 a rule citing a specific capability here needs a version/PR citation the way StructuredTaskScope rows do"
+     ],
+     "ok": true
+    }
+   ],
+   "consolidation": {
+    "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-quality-gates.md",
+    "rule_ids": [
+     "JAVA-LINT-01 \u2014 Wire Error Prone and NullAway on every shipped Java module; a Checkstyle/SpotBugs block without them is a style gate, not a lint gate (SHOULD; MUST for the OCX SDK and OCX Gradle plugin)",
+     "JAVA-LINT-02 \u2014 Promote DefaultLocale, StringCaseLocaleUsage, EqualsMissingNullable, FieldMissingNullable, VoidMissingNullable, CatchingUnchecked, UnusedException, ConstantPatternCompile, UnnecessaryDefaultInEnumSwitch to ERROR on every new module (MUST)",
+     "JAVA-LINT-03 \u2014 Give every disable(...) / :OFF entry a one-line reason on the same or preceding line (SHOULD)",
+     "JAVA-LINT-04 \u2014 Set exactly one of NullAway's OnlyNullMarked or AnnotatedPackages, preferring OnlyNullMarked on 0.12.3+ (MUST)",
+     "JAVA-LINT-05 \u2014 Confirm JDK 22+, or OpenJDK-family 17.0.19+/21.0.8+ with -XDaddTypeAnnotationsToSymbol=true, before setting jspecifyMode = true (MUST)",
+     "JAVA-LINT-06 \u2014 Annotate new public API with JSpecify, always state the jsr305/Checker coexistence, and never leave an import javax.annotation.Nullable in a jspecifyMode module (MUST for the import check, SHOULD for the note)",
+     "JAVA-LINT-07 \u2014 Declare -Werror in exactly one convention plugin with an enumerated post-Java-8 -Xlint key list, never -Xlint:all alongside it (SHOULD)",
+     "JAVA-LINT-08 \u2014 Commit the Checkstyle ruleset as a repo file; never resolve it from the Checkstyle jar or an unmodified upstream name (MUST)",
+     "JAVA-LINT-09 \u2014 Do not add PMD to a new JVM project's gate, and do not read a <pluginManagement> declaration as evidence PMD runs (SHOULD)",
+     "JAVA-LINT-10 \u2014 Give SpotBugs a place only with find-sec-bugs wired and only on untrusted-input modules (SHOULD)",
+     "JAVA-LINT-11 \u2014 Wire the formatter into check; allow isEnforceCheck = false only where the same file names the CI job that runs it (SHOULD)",
+     "JAVA-TEST-01 \u2014 State the JUnit floor as 5 with 6 (2025-09-30, Java 17 / Kotlin 2.2) as the dated target; never assume 6 (MUST)",
+     "JAVA-TEST-02 \u2014 Grep for junit-platform-runner before any JUnit-6 bump and treat a hit as a hard blocker, not a warning (MUST)",
+     "JAVA-TEST-03 \u2014 Fully qualify every junit-platform.properties key as junit.jupiter.* or junit.platform.*; a bare suffix silently no-ops (MUST)",
+     "JAVA-TEST-04 \u2014 Pair junit.jupiter.execution.parallel.enabled=true with parallel.mode.default=concurrent (or @Execution(CONCURRENT)); alone it is a no-op (MUST)",
+     "JAVA-TEST-05 \u2014 Annotate any test mutating shared global state under parallel execution with @ResourceLock or @Isolated, and carry the PR/version any capability claim was verified against (MUST)",
+     "JAVA-TEST-06 \u2014 Explicitly attach every jvm-test-suite suite other than test to check; declaring a suite does not run it (MUST)",
+     "JAVA-TEST-07 \u2014 Set maxParallelForks explicitly and scaled to the box, dropping to 1 only for a named expensive suite (SHOULD)",
+     "JAVA-TEST-08 \u2014 Treat a coverage floor as real only when violationRules/jacocoTestCoverageVerification is wired into check or a Maven check goal is bound; never report a floor from a plugin id or a report task (MUST)",
+     "JAVA-TEST-09 \u2014 Read the enclosing conditional (enabled =, disable(), a -P property gate) before calling any coverage floor enforced (MUST)",
+     "JAVA-TEST-10 \u2014 Enforce an unconditional, CI-enforced, Linux-only coverage floor for the OCX SDK; leave it CONSIDER for every other adopter (MUST for the SDK, CONSIDER for adopters)",
+     "JAVA-TEST-11 \u2014 Do not adopt test retry, a timezone pin, or mutation testing above CONSIDER, and name test retry as an infrastructure-flake workaround only (CONSIDER)",
+     "JAVA-TEST-12 \u2014 Never pin a bare maven-surefire-plugin 3.6.0; cite 3.6.0-M1 with its date and query the registry, not the vendor doc banner (MUST)"
+    ],
+    "conflicts_resolved": [
+     "Coverage enforcement count \u2014 the map's conflict 11 and the gates audit say 3/32 enforce a numeric floor; test-suite-and-coverage.md shows two of those three gate their own gate. Resolved for the sub-artifact (it read the surrounding conditionals; the audit greppped for the construct): 3/32 DECLARE a floor, exactly 1/32 (assertj) enforces it unconditionally. Split into JAVA-TEST-08 (construct present) and JAVA-TEST-09 (read the enclosing conditional), because a presence-only check misreports junit-framework and kotlinx.coroutines.",
+     "StringCaseLocaleUsage's set membership \u2014 map row M-R-01 frames all nine promotable checks as DISABLED_CHECKS members; java-lint-gate.md's direct count against BuiltInCheckerSuppliers.java finds it in ENABLED_WARNINGS (line 1177, inside the 918-1236 range). Resolved for the source read over the map's summary: the switch is a severity bump (-Xep:StringCaseLocaleUsage:ERROR), not an activation. A rule saying 'enable' it would ask an agent to do nothing.",
+     "Error Prone + NullAway as 'the gate of record' vs 19/32 running neither \u2014 the map's conflict 9 declares the gate of record without a severity; the gates audit measures Error Prone 13/32 and NullAway 4/32. Resolved by splitting severity per consumer kind: SHOULD for an adopter (a MUST would flag 19 flagships), MUST for the OCX SDK and OCX Gradle plugin, which are green-field.",
+     "SpotBugs pairing with find-sec-bugs \u2014 java-lint-gate.md flagged its own open question ('corpus does not confirm how many of those 3 also wire find-sec-bugs'). Re-measured 2026-09-12 across all 32 clones: find-sec-bugs is 0/32, so all three SpotBugs gates (kafka, assertj, spotless) violate the rule. Resolved in favour of the rule with the violation stated rather than softening it, and the residual 'is plain SpotBugs earning anything' question escalated to another round.",
+     "junit-platform.properties key spelling \u2014 both wave-1 audits and the sub-artifact's brief print keys in the suffix form (execution.parallel.enabled). Verified verbatim by git show against micronaut-core@d5842045bb and mockito@5a676bcd9e: the real files carry the junit.jupiter. prefix. Resolved for the files: the audits' tables are shorthand, and a grep written from them matches nothing. Recorded as a correction inside JAVA-TEST-03.",
+     "Checkstyle stock-ruleset severity \u2014 java-lint-gate.md's candidate 9 makes a byte-identical google_checks.xml copy a finding, which would flag okhttp, the corpus's one stock user. Reading okhttp's convention plugin (2026-09-12) sharpens it: it never copies the file at all, it resolves it from the Checkstyle jar via resources.text.fromArchiveEntry, so the gate moves on every toolVersion bump with no diff. Resolved as MUST on 'committed file' and SHOULD on 'pruned, not stock' \u2014 two claims, two severities.",
+     "Kover's default check wiring \u2014 test-suite-and-coverage.md infers from one convention-plugin comment that koverVerify auto-binds to check, the opposite of JaCoCo, while noting Kover's own docs never say so. Resolved by declining to write a rule on it: JAVA-TEST-08 requires the explicit wire regardless of tool, which is correct under either default, and the question is escalated to a KT-TEST round.",
+     "Surefire 3.6.0 GA status \u2014 the map's conflict 20 resolves 'both scouts are right about different things'; test-suite-and-coverage.md queried Central directly and found 3.6.0-M1 (2026-06-02) newest, 3.5.6 the newest GA line. Resolved for the registry query over the vendor doc banner, and generalised into JAVA-TEST-12 as a method rule, not just a version fact.",
+     "Whether the coverage gate is the OCX Gradle plugin's gate at all \u2014 map conflict 12 sets MUST-for-SDK / CONSIDER-for-adopter but is silent on the plugin. Resolved: a percentage measures the wrong thing for an artifact whose failure mode is 'breaks on Gradle 9.7'; the plugin's gate is the TestKit cross-version matrix (owned by GRADLE-PLUG), and JAVA-TEST-10 is scoped to exclude it explicitly so nobody specifies a coverage number there."
+    ],
+    "needs_another_round": [
+     "KT-TEST \u2014 Does Kover's koverVerify bind to `check` by default? Kover 0.9.8's own docs never state it; the only evidence is a comment in kotlinx.coroutines' kover-conventions.gradle.kts implying it does, which is the opposite default from JaCoCo. No KT-TEST coverage rule can be written either way until a pass fetches Kover's DSL reference or reads the plugin source.",
+     "JAVA-LINT \u2014 With find-sec-bugs at 0/32, does plain SpotBugs earn anything on a project already running Error Prone + NullAway? All three corpus SpotBugs gates run it without the plugin, so either they see something the rule cannot, or three flagships run a redundant slow pass. Settling it needs a diff of SpotBugs' CORRECTNESS/MT_CORRECTNESS patterns against Error Prone's ENABLED_ERRORS \u2014 attempted by nobody in waves 1 or 2.",
+     "JAVA-TEST \u2014 Which JUnit release ships which @ResourceLock capability (target = CHILDREN, ResourceLocksProvider, Vintage-engine parallel method execution)? Four merged PRs are named but never mapped to versions, so JAVA-TEST-05 has to say 'carry the PR you verified against' instead of 'available from 6.x'."
+    ],
+    "must_count": 15
+   }
+  },
+  {
+   "group": "language-api",
+   "dives": [
+    {
+     "slug": "java-api-evolution-and-nullness",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-language-api/java-api-evolution-and-nullness.md",
+     "sources_count": 17,
+     "top_rules": [
+      "Never widen a public parameter type or change a return type in place \u2014 add an overload or bump major version (JLS \u00a713.4.14/.15); verify with japicmp against the last-published Central coordinate",
+      "@Deprecated(forRemoval, since) and the Javadoc @deprecated tag must both be present or both absent (JEP 277); verify with -Xlint:dep-ann plus a manual check for the reverse mismatch",
+      "forRemoval=true only with a stated target removal version in the Javadoc, never as a default deprecation posture",
+      "State the sealed-hierarchy compatibility policy explicitly (adding a permitted subtype = MINOR or MAJOR) \u2014 a downstream default/else branch silently absorbs new subtypes with no compiler signal",
+      "OCX SDK ships module-info.java (not Automatic-Module-Name) with an exact, minimal exports list \u2014 corpus shows libraries pick one strategy, rarely both (12/32 vs 10/32, different repos)",
+      "Declare @NullMarked once at module-info.java scope rather than per-package \u2014 it does not cascade across packages, only within a module",
+      "Gate the OCX SDK on japicmp, bound to verify/check ahead of publish, comparing against the last Central-published coordinate, with accepted breaks recorded in a reviewed reasoned allowlist (Central is immutable per M-H-10)",
+      "Use Type @Nullable [] and <T extends @Nullable Object>, never @Nullable Type[] or a bare <T> under @NullMarked \u2014 TYPE_USE placement is backwards from pre-annotation intuition"
+     ],
+     "surprises": [
+      "gradle/gradle's 'bespoke' binary-compatibility mechanism is not from-scratch \u2014 JapicmpTaskWithKotlin.java literally extends me.champeau.gradle.japicmp.JapicmpTask; it's japicmp plus a reviewed JSON allowlist (accepted-public-api-changes.json), not an independent tool, contrary to how the wave-1 audit phrased it",
+      "Adding a new overload is binary-*compatible* by JLS (old binaries keep resolving to the old signature) even though it can silently redirect which overload *new* source compilations pick \u2014 a source-compat, not binary-compat, hazard that cuts the opposite way from intuition",
+      "Changing a static final constant's value never breaks linkage \u2014 un-recompiled callers just silently keep the stale inlined value forever, with no error signal at all",
+      "guava proves module-info.java and Java-8 bytecode are not mutually exclusive: the base build still uses the deprecated <source>1.8</source>/<target>1.8</target> pair while module-info.java lives in a separate MR-JAR layer compiled with <release>9</release> \u2014 a pattern worth naming explicitly",
+      "The 2024 DOP v1.1 essay silently replaced its own fourth principle: 'validate at the boundary' (2022) became 'separate operations from data' \u2014 citing the 2022 four principles today cites withdrawn guidance",
+      "revapi is architecturally the better-designed tool (pluggable analyzers, first-class intentional-change marking) yet has zero adoption anywhere in the 32-repo corpus, so recommending it would be a bet against all observed practice rather than a codification of it"
+     ],
+     "ok": true
+    },
+    {
+     "slug": "kotlin-api-and-abi",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-language-api/kotlin-api-and-abi.md",
+     "sources_count": 14,
+     "top_rules": [
+      "Enable explicitApi() strict mode on every published Kotlin module \u2014 a missing visibility/type becomes a compiler error, not a lint warning",
+      "Never expose a data class in a published public API \u2014 one property addition changes both the constructor and copy() descriptors",
+      "Adopt the standalone binary-compatibility-validator plugin, not abiValidation{}, for a greenfield library today \u2014 abiValidation requires @OptIn(ExperimentalAbiValidation::class) and has 0/32 corpus adoption vs 5/32 for the standalone plugin",
+      "Never rely on @JvmOverloads alone for binary compatibility on a new default parameter \u2014 it only generates Java-visible overloads; Kotlin callers still hit NoSuchMethodError",
+      "Treat every @PublishedApi internal declaration under the same binary-compat review as public \u2014 its body is inlined into every caller of the public inline function",
+      "Never take a bare Boolean parameter in a public constructor or top-level function \u2014 split into named functions or an enum class",
+      "Propagate @RequiresOptIn markers through every public signature that uses the marked type \u2014 opt-in does not propagate automatically",
+      "Never reuse @RequiresOptIn to deprecate an already-shipped stable declaration \u2014 use @Deprecated(message, replaceWith, level) walking WARNING to ERROR to HIDDEN to removal instead",
+      "KDoc every public member except non-documenting overrides, but verify it via Dokka's report, not the compiler \u2014 unlike the visibility/type rules this one has no compile-time gate",
+      "An adopter already on the standalone BCV plugin should NOT migrate to abiValidation{} yet \u2014 it remains Experimental with zero corpus adoption and no compatibility guarantee"
+     ],
+     "surprises": [
+      "Narrowing a return type breaks binary compatibility exactly like widening does \u2014 it looks source-safe (even type-safe) and still throws NoSuchMethodError because the JVM call site is bound to the exact erased descriptor",
+      "Adding a value to an annotation's @Target set can silently redirect Java-reflection lookups from a field to the compiler-preferred property target, with zero Kotlin-side symptom and no compile error",
+      "@JvmOverloads is Java-callers-only and does nothing for Kotlin callers \u2014 the only mechanism that fixes both (@IntroducedAt under ExperimentalVersionOverloading) is itself still Experimental, so there is no fully-solved, stable answer to 'add a default parameter without breaking Kotlin callers' today",
+      "Two of Kotlin's three official library rules (visibility, explicit types) are fully subsumed by explicitApi() as compiler errors, but the third (KDoc every public member) has no compiler-level gate at all \u2014 only a Dokka report",
+      "ktlint and detekt both carry substantial .api BCV dump files (17 and 8) with no locatable plugin application in the sparse-checked-out corpus slice \u2014 their BCV wiring lives in an unmaterialized build-logic file, so they can't be cited as confirmed standalone-BCV adopters, only as artifact evidence",
+      "ktor's explicitApi = null is a per-module opt-in switch, not a repo-wide policy disagreement with kotlinlang's guidance \u2014 a naive grep for the setting misreads it as ktor rejecting explicit API mode"
+     ],
+     "ok": true
+    }
+   ],
+   "consolidation": {
+    "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-language-api.md",
+    "rule_ids": [
+     "JAVA-API-01 \u2014 Never change a published method's parameter or return type in place; add an overload and leave the original signature untouched (MUST)",
+     "JAVA-API-02 \u2014 Bind japicmp to check/verify upstream of every publish task; accepted breaks live in a reviewed allowlist with a reason per entry (MUST)",
+     "JAVA-API-03 \u2014 A published interface never gains an abstract method without a default body; seal it if the implementation set must stay closed (MUST)",
+     "JAVA-API-04 \u2014 Never change the value of a published public static final constant (SHOULD)",
+     "JAVA-API-05 \u2014 Every @Deprecated carries since and a matching Javadoc @deprecated tag; forRemoval=true only with a removal version already named (MUST)",
+     "JAVA-API-06 \u2014 Optional is a return type only; a public method returns an empty collection, never null (SHOULD)",
+     "JAVA-API-07 \u2014 A switch over a sealed type this codebase owns carries no default and no catch-all type pattern (MUST)",
+     "JAVA-API-08 \u2014 Classify 'adding a permitted subtype' once in a written compatibility policy, not per PR (SHOULD)",
+     "JAVA-API-09 \u2014 Annotate the published surface with JSpecify and declare @NullMarked once in module-info.java (MUST for new surface / SHOULD for existing)",
+     "JAVA-API-10 \u2014 Never mix nullness flavours in one file; migrate a package, do not layer (MUST)",
+     "JAVA-API-11 \u2014 Write Type @Nullable [] and <T extends @Nullable Object>; JSpecify annotations are TYPE_USE (MUST)",
+     "JAVA-API-12 \u2014 Ship module-info.java whose exports lists exactly the public packages; Automatic-Module-Name is not a substitute (MUST for SDK/library)",
+     "JAVA-API-13 \u2014 Compile with --release / options.release, never the source/target pair (MUST)",
+     "JAVA-API-14 \u2014 Reproduce the 16-member sysexit table as an enum plus an exception hierarchy; never parse stderr (MUST for SDK/plugin)",
+     "JAVA-API-15 \u2014 Hold zero runtime dependencies: java.net.http plus a hand-rolled reader over --format json (MUST for SDK)",
+     "KT-API-01 \u2014 Enable explicit API strict mode on every published module; warning mode does not count (MUST greenfield / SHOULD existing)",
+     "KT-API-02 \u2014 KDoc every public member except non-documenting overrides, gated by Dokka failOnWarning (SHOULD)",
+     "KT-API-03 \u2014 Run exactly one ABI gate with its .api dump committed and its check task wired into check (MUST)",
+     "KT-API-04 \u2014 Never add a parameter to a published function, and never widen or narrow a published return type (MUST)",
+     "KT-API-05 \u2014 Never expose a data class in a published public API (MUST)",
+     "KT-API-06 \u2014 Review every @PublishedApi internal declaration as if it were public (MUST)",
+     "KT-API-07 \u2014 Do not rely on @JvmOverloads for binary compatibility; @IntroducedAt is the only full fix and it is Experimental (SHOULD)",
+     "KT-API-08 \u2014 Propagate @RequiresOptIn markers through every public signature that mentions the marked type (MUST)",
+     "KT-API-09 \u2014 Retire a shipped declaration with @Deprecated walking WARNING \u2192 ERROR \u2192 HIDDEN \u2192 removal, never with a fresh @RequiresOptIn (MUST)",
+     "KT-API-10 \u2014 No bare Boolean parameter in a public constructor or top-level function, except a fluent single-setter (SHOULD)",
+     "KT-API-11 \u2014 Do not add an AnnotationTarget to a published @Target set without checking Java-reflection consumers (CONSIDER)"
+    ],
+    "conflicts_resolved": [
+     "abiValidation{} is 2/32, not 0/32 \u2014 re-measured this session: pinterest__ktlint@4c933394a3:build-logic/src/main/kotlin/KotlinCommonPlugin.kt:38-39 and detekt__detekt@45672efb8b:build-logic/src/main/kotlin/public-api.gradle.kts:13-14 both call abiValidation() under @OptIn(ExperimentalAbiValidation::class), resolving gates \u00a71's 'BCV wiring not locatable' flag. Standalone BCV stays the default (no Experimental opt-in) but the 'no working counter-example' rationale is withdrawn and KT-API-03 becomes 'run exactly one', not a prohibition.",
+     "explicit-API-mode adopter set: shape says 5/25 (incl. ktlint, excl. kotlinx.coroutines), gates says 5/32 (incl. kotlinx.coroutines, excl. ktlint). Each grep missed a form \u2014 shape missed the -Xexplicit-api=strict compiler flag, gates missed a call living in a build-logic .kt convention-plugin class. Union is 6/32; the consequence is KT-API-01's check must grep three spellings across *.gradle.kts, *.gradle AND build-logic/**/*.kt.",
+     "gradle/gradle's binary-compat mechanism: gates calls it a bespoke Groovy checker 'not japicmp/revapi'; the java dive read the class and found JapicmpTaskWithKotlin extends me.champeau.gradle.japicmp.JapicmpTask. Resolved for the dive (source read beats filename inference) \u2014 japicmp is the corpus's convergence point, and the bespoke JSON allowlist is a pattern to layer on it, not a competitor.",
+     "M-K-02's 'carry forRemoval and since' vs JEP 277's 'forRemoval only with a definite plan': resolved on the normative source \u2014 since is unconditional, omitting forRemoval is the correct spelling of an ordinary deprecation, forRemoval=true needs a removal version already in the Javadoc. Merged into one rule (JAVA-API-05) so the halves cannot drift.",
+     "The java dive's table marks 'add an abstract method to an interface' as having 'no runtime effect for callers'. Resolved against JLS \u00a713.5.3: linkage survives but invoking the method on a pre-existing implementation throws AbstractMethodError \u2014 hence JAVA-API-03 is a MUST for a default body, not a footnote.",
+     "Kotlin dive candidate 3 says 'never take a bare Boolean' while its own \u00a78 carves out a fluent single-setter. Resolved toward the carve-out with the severity following it: KT-API-10 is SHOULD, because a MUST shipped with a documented exception teaches agents that every MUST is negotiable.",
+     "japicmp vs revapi: revapi has the better design and 0/32 adoption. Resolved on measured practice over design \u2014 japicmp, with its cost stated and the decision flagged for re-taking rather than settled.",
+     "JSpecify direction vs installed base (map conflict 8) applied: severity split \u2014 MUST for new published surface and the OCX SDK, SHOULD with a coexistence note for an existing one; the unconditional half is JAVA-API-10 'never mix flavours in one file', which contradicts none of the corpus."
+    ],
+    "needs_another_round": [
+     "Source-level public-API measurement (JAVA-API, KT-API) \u2014 every wave-1 audit measured config files only. Which of JAVA-API-04..11 and KT-API-04..11 do the strict exemplars actually satisfy in Java/Kotlin source (public data class, Optional in parameter position, @Deprecated without since, misplaced @Nullable array annotations, default on a sealed switch), as opposed to in build configuration? Six rows are currently 'not independently measured' in both dives.",
+     "japicmp configuration depth (JAVA-API) \u2014 are the six 'declared' japicmp repos (apache/maven, assertj, gradle/gradle, grpc-java, micronaut-core, testcontainers-java) actually build-blocking, and what does an accepted-breaks file look like outside gradle/gradle's Groovy scaffolding? JAVA-API-02 has exactly one template and it is wrapped in machinery no adopter will copy.",
+     "revapi revisit (JAVA-API) \u2014 has revapi acquired any adopter or a maintained Gradle plugin since 0.15.1? The japicmp decision rests entirely on 0/32 adoption, not on design, so it should be re-taken rather than inherited if that changes."
+    ],
+    "must_count": 19
+   }
+  }
+ ],
+ "surprises": [
+  "gradle-core/config-cache-contract: gradle/gradle#24040: Gradle 9 changed maven-publish behavior so explicit repository credentials now silently DISABLE the configuration cache for that task instead of failing the build \u2014 a build can look fully successful while quietly never being cached.",
+  "gradle-core/config-cache-contract: The prior audit (exemplar-build-shape.md) itself asserts 'Gradle 9's default is already on regardless of the property,' which the primary sources (9.0.0 release notes, the road-to-configuration-cache blog) directly contradict \u2014 it's preferred-with-automatic-fallback, default still targeted at Gradle 11, not on by default in 9.x.",
+  "gradle-core/config-cache-contract: org.gradle.unsafe.isolated-projects isn't just an old alias floating in blogs \u2014 the 9.7.0 release notes formally deprecate it in that release, with 0/32 exemplars using it versus 5/32 on the live org.gradle.isolated-projects key.",
+  "gradle-core/config-cache-contract: Isolated Projects' own 9.7.0 docs admit two of four constraint categories (cross-build access, build-to-project access) are 'not fully enforced yet' \u2014 the feature can't yet catch everything it claims to forbid.",
+  "gradle-core/config-cache-contract: gradle/gradle#18520 (build-listener ban has no full replacement API for build-start/build-finish hooks, only task-completion) is still open years after the documented fix pattern existed \u2014 the 'documented replacement' isn't actually complete for every BuildListener use case.",
+  "gradle-core/config-cache-contract: The reviewer's compliance check has no dedicated task \u2014 it's just the real build/test command plus --configuration-cache, and 'clean' is the ABSENCE of a problems-summary line and HTML report, not a positive success signal from any task.",
+  "gradle-core/build-logic-and-catalog-seam: gradle/gradle#15383 is still fully open after nearly 6 years with a maintainer stating the gap may be architecturally unfixable (precompiled plugins are compiled before the consuming catalog is known), not merely unprioritized.",
+  "gradle-core/build-logic-and-catalog-seam: The build-logic-settings split is not universal even among included-build adopters: junit-framework includes two ordinary modules together with no settings-only module, and jjohannes's reference repo mixes Settings and ordinary plugins in one module.",
+  "gradle-core/build-logic-and-catalog-seam: There is no workaround at all \u2014 supported or unsupported \u2014 for using alias(libs.plugins.x) inside a precompiled script plugin's plugins{} block, because that block is evaluated against a dummy project before any catalog exists.",
+  "gradle-core/build-logic-and-catalog-seam: dagger centralizes the string-keyed catalog workaround into a dedicated buildSrc helper file (VersionCatalogs.kt) rather than repeating it per convention plugin \u2014 a reusable pattern worth citing as the concrete fix.",
+  "gradle-core/build-logic-and-catalog-seam: Zero corpus repos at the measured SHAs use the internal LibrariesForLibs reflection hack \u2014 the supported VersionCatalogsExtension API is universal in the checked-out convention-plugin code.",
+  "gradle-core/task-inputs-and-cache-hits: Kafka's block (build.gradle:362-364) is not merely 'restates defaults' as the wave-1 audit's headline framed it \u2014 direct fetch of the Gradle 9.0.0 upgrade guide shows it's a byte-for-byte copy of Gradle's own documented 3-property 'revert to pre-9 archive behaviour' snippet (including useFileSystemPermissions()), applied on a repo pinned to wrapper 9.7.1: a total, deliberate-looking opt-out of reproducibility, most plausibly an unexamined pre-9 carry-over never revisited during the Gradle 8\u21929 upgrade.",
+  "gradle-core/task-inputs-and-cache-hits: Two of the three real (non-false-positive) reproducible-archive hits in the corpus (micronaut-core, spotless) are the OPPOSITE problem from kafka: they correctly set the pre-9 values for reproducibility, which is now simply dead code restating the Gradle 9 default \u2014 harmless, but a rule can't just say 'check these properties are set correctly', it has to branch on wrapper version.",
+  "gradle-core/task-inputs-and-cache-hits: validatePlugins and the java-gradle-plugin jar-time check are two independently-implemented validations that overlap in content but differ in severity: the jar-time check only ever warns (confirmed live on the current docs page), while validatePlugins fails the build by default (confirmed via its own javadoc) \u2014 an agent that sees a warning and calls it fine can miss a check that would hard-fail.",
+  "gradle-core/task-inputs-and-cache-hits: It could not be confirmed from any primary Gradle doc that validatePlugins is wired into check/build by default for a java-gradle-plugin module \u2014 community sources hedge with 'typically wired', so the safe normative rule is an explicit CI step, not reliance on implicit lifecycle wiring.",
+  "gradle-core/task-inputs-and-cache-hits: The gradle/gradle docs source path for the 31 validation-problem IDs lives under a directory literally named 'unused/' (platforms/documentation/docs/src/docs/userguide/unused/validation_problems.adoc) yet the page is live, current, and matches docs.gradle.org/current/userguide/validation_problems.html exactly \u2014 the directory name is a docs-build artifact, not a deprecation signal, worth flagging so nobody discounts the source.",
+  "gradle-plugin-dev/plugin-contract-and-validation: validatePlugins presence is a red herring for \"does this repo publish a plugin\" \u2014 10/32 corpus repos run it purely for internal build-logic convention modules via java-gradle-plugin, with zero Portal signal (nowinandroid, sqldelight).",
+  "gradle-plugin-dev/plugin-contract-and-validation: Gradle explicitly documents that a BuildServiceProvider cannot drive a ValueSource's parameters at configuration time \u2014 this fixes the ValueSource-vs-BuildService seat question as a one-way dependency, not a stylistic choice.",
+  "gradle-plugin-dev/plugin-contract-and-validation: The three afterEvaluate replacements aren't three interchangeable options \u2014 they map to three distinct problems (deferred reads, optional defaults, cross-plugin reaction), and the docs name exactly one narrow carve-out (fail-fast validation of your own plugin's state, last-registered-only).",
+  "gradle-plugin-dev/plugin-contract-and-validation: Settings plugins carry a hidden structural cost: folding one into a shared build-logic composite build forces pluginManagement{} inclusion, which reduces build-cache capability \u2014 Gradle's own fix is a separate minimal build-logic-settings build, confirmed only in gradle/gradle itself in the corpus checked.",
+  "gradle-plugin-dev/plugin-contract-and-validation: ExecOperations.exec accepts an explicit environment(map) that replaces rather than extends the ambient environment, giving Gradle a native primitive for OCX's site/translucent/explicit/pinned classification even though Gradle has no built-in classification scheme of its own.",
+  "gradle-plugin-dev/plugin-contract-and-validation: Two Gradle-10-scheduled removals are plugin-author-specific and easy to miss: Project.getProperties() and Project.container(...), both still legal in 9.x but silently breaking on the next major upgrade.",
+  "gradle-plugin-dev/testkit-matrix-and-portal: com.gradle.plugin-publish 2.1.0 (dated to the March 2026 Gradle newsletter) auto-applies a whole separate plugin (gradle/gradle-plugin-compatibility-plugin) that makes a Configuration-Cache compatibility declaration deprecated-if-absent, with a stated intent to eventually hard-reject undeclared plugins \u2014 no cutover date announced yet.",
+  "gradle-plugin-dev/testkit-matrix-and-portal: Shadow's own build does not shade or relocate itself despite being the shading tool, because Gradle isolates each plugins{ id(...) } plugin into its own classloader by default \u2014 the 'shade a plugin, therefore relocate everything' generalization is wrong; the mandatory-relocation case (error-prone in javac) is specifically about a shared, non-isolated classloader.",
+  "gradle-plugin-dev/testkit-matrix-and-portal: validatePlugins running in a build tells you almost nothing about Portal publishing on its own \u2014 10/32 exemplar files hit the task purely because java-gradle-plugin registers it for internal convention-plugin modules, with 7 of those repos showing zero other Portal signal.",
+  "gradle-plugin-dev/testkit-matrix-and-portal: detekt runs a genuinely separate compilation (not just a different GradleRunner call) pinned to its floor Gradle version via a dedicated resolvable configuration and PluginUnderTestMetadata task, which is a stronger floor-proof than a single withGradleVersion() call.",
+  "gradle-plugin-dev/testkit-matrix-and-portal: Shadow's functional-test target needs four explicit --add-opens JVM args to test configuration-cache behavior via GradleRunner.withDebug(), an operational wrinkle tied to a 2022 Gradle issue whose continued necessity on the current JDK 17 floor is unverified.",
+  "gradle-plugin-dev/testkit-matrix-and-portal: Two incompatible gradlePlugin{ plugins{} } id-declaration idioms (create(\"id\"){} map-key vs explicit id=\"...\") remain in live, current use with no winner \u2014 Shadow and detekt use different but equally current syntax.",
+  "dependencies/declaration-and-catalogs: gradle/gradle \u2014 the tool that invented version catalogs \u2014 does not use the conventional `gradle/libs.versions.toml` path for its own build at all; it wires three named catalogs (libs/testLibs/buildLibs) programmatically, a blind spot for any filename-only glob rule.",
+  "dependencies/declaration-and-catalogs: spring-boot, a library, is the corpus's ONLY enforcedPlatform() user (13 hits) \u2014 the exact anti-pattern Gradle's own docs warn a reusable component against, shipped by one of the most widely-depended-on Java libraries in existence.",
+  "dependencies/declaration-and-catalogs: 0/32 exemplars use dependency locking at all, so 'version catalog' and 'pinned versions' are conflated everywhere in practice even though Gradle's own docs explicitly distinguish declared vs resolved.",
+  "dependencies/declaration-and-catalogs: No wave-1 audit or this dive could confirm any of the 32 exemplars actually apply DAGP (`com.autonomousapps.dependency-analysis`) to themselves \u2014 the tool this brief centers on is undermeasured in the very corpus used to justify it.",
+  "dependencies/declaration-and-catalogs: DAGP's own README is AsciiDoc, not Markdown, and its FAQ wiki page does not define the four advice categories (unused/wrong-configuration/transitive/annotation-processor) at all \u2014 those live only on the wiki's Home page, a routing trap for anyone fetching just the README or just the FAQ as the brief's phrasing implies.",
+  "dependencies/locking-verification-supply-chain: The one gradle.lockfile hit in the entire 32-repo corpus is gradle/gradle's own documentation snippet demonstrating the feature to readers, not a real lock on any build \u2014 locking has zero genuine exemplar support anywhere in the corpus.",
+  "dependencies/locking-verification-supply-chain: Maven Central's namespace verification is what let the Jackson prefix-swap attack (org.fasterxml.jackson.core vs real com.fasterxml.jackson.core) through legitimately: DNS verification is domain-exact, so the attacker registering fasterxml.org passed verification for the org. namespace on its own merits \u2014 verification worked correctly and was still the wrong control.",
+  "dependencies/locking-verification-supply-chain: Only gradle/gradle itself (1/32) has verification-metadata.xml among 32 flagship JVM exemplars including major libraries like okhttp, guava, and jackson-databind.",
+  "dependencies/locking-verification-supply-chain: Sonatype's actual per-model hallucination rates span 7%-25%+ depending on generation (older models ~1-in-4, 2026 frontier models ~7-8%) \u2014 the brief's flat '28%' is the upper/older-model end, not a single stable figure, and is dropping fast.",
+  "dependencies/locking-verification-supply-chain: Gradle's own docs state the bootstrap command's trust limitation in almost the exact words a security review would use ('trusts whatever is currently in your repositories'), making 'run the bootstrap command' insufficient as a rule on its own \u2014 it needs a mandatory reviewed-diff step attached.",
+  "dependencies/locking-verification-supply-chain: A failed Gradle build silently discards any --write-locks changes, so a naive CI script chaining --write-locks with the main build can mask lockfile drift as if nothing happened.",
+  "dependencies/maven-mediation-and-enforcer: Maven 4.0.0 is confirmed still RC as of 2026-09-12: Central's index tops out at maven-core 4.0.0-rc-6, with 3.9.16 the latest stable \u2014 bom packaging and consumer-POM flattening are migration-preview only, not adoptable yet.",
+  "dependencies/maven-mediation-and-enforcer: grpc-java binds requireUpperBoundDeps in 8 examples/*/pom.xml files (enforcer 3.5.0) \u2014 a real, un-briefed adoption data point for that rule beyond assertj/guava.",
+  "dependencies/maven-mediation-and-enforcer: The ASF parent POM (v39) enforces only Maven/Java version floors and a signed reproducible-release profile \u2014 zero dependency-drift protection, which falsifies the assumption that a strict widely-inherited parent already covers convergence/duplicate checks.",
+  "dependencies/maven-mediation-and-enforcer: Maven's own docs flag that dependencyManagement can silently downgrade an unrelated dependency sharing coordinates \u2014 a documented footgun distinct from the mediation-vs-management confusion the brief anticipated.",
+  "dependencies/maven-mediation-and-enforcer: Version range gotcha confirmed verbatim from primary docs: `[1.0,2.0)` includes `2.0-rc1` because '2.0-rc1' sorts below '2.0' \u2014 contrary to most users' expectation.",
+  "dependencies/maven-mediation-and-enforcer: assertj and guava both pin every plugin version manually in pluginManagement but neither binds requirePluginVersions itself (0/32) \u2014 manual discipline with zero enforcer backstop is the norm, not the exception.",
+  "distribution/shading-failure-taxonomy: google/error-prone does NOT relocate packages when shading, contradicting the wave-1 topic map's conflict-1 claim \u2014 its core/pom.xml maven-shade-plugin execution only restricts artifactSet includes, with createDependencyReducedPom=false and no <relocations> block at all; the one <relocation> grep-hit in the repo is an unrelated distributionManagement artifact-move notice in type_annotations/pom.xml",
+  "distribution/shading-failure-taxonomy: Maven Shade's dependency-reduced POM defaults to true and is required only when the shaded jar publishes under normal (non-classified) coordinates; error-prone explicitly sets it to false because it ships a classified with-dependencies jar alongside an unshaded primary artifact \u2014 a real, code-backed answer to the brief's decision (c)",
+  "distribution/shading-failure-taxonomy: jmh-gradle-plugin's own current upstream fix for the signed-jar SecurityException omits .EC (ECDSA signature files) from its exclude list \u2014 the most commonly copy-pasted reference fix has this gap",
+  "distribution/shading-failure-taxonomy: grpc-java's and dagger's preserveFileTimestamps grep hits are confirmed (via the pub audit) to be a hand-written Transformer method parameter name, not the Gradle archive property \u2014 a durable grep trap worth naming explicitly in the depth file",
+  "distribution/shading-failure-taxonomy: Shadow has no built-in transformer for Spring's spring.factories as of today (GradleUp/shadow#1489 still open) even though the shape of the fix is well understood by the maintainers and multiple third parties have hand-rolled SpringFileTransformer implementations",
+  "distribution/shading-failure-taxonomy: No exemplar in the 32-repo corpus was found actually using minimize() at all \u2014 the caution around it is sourced entirely from Shadow's own docs and issue history, not corroborated (or contradicted) by real exemplar usage",
+  "distribution/distribution-shape-decision: The YouTrack SUPPORT-A-2700 article body is a client-rendered SPA that couldn't be scraped via WebFetch or curl \u2014 had to corroborate its content via an independent tacosteemers.com walkthrough and cite YouTrack as topic-only confirmation",
+  "distribution/distribution-shape-decision: jpackage has macOS signing flags but genuinely no notarization step of its own per the official spec \u2014 notarization is always a separate xcrun notarytool invocation, worth its own MUST",
+  "distribution/distribution-shape-decision: Jib's own layer split (other deps \u2192 snapshot deps \u2192 project deps \u2192 resources \u2192 classes \u2192 extra dirs) is finer-grained than Spring Boot's 4-layer order but follows the identical stable-to-volatile principle",
+  "distribution/distribution-shape-decision: Application-plugin usage (7/32) and Spring Boot's 383 bootJar hits both skew hard to sample/smoke-test modules, not shipped executables \u2014 citing either raw count without the per-module caveat would mislead",
+  "distribution/distribution-shape-decision: JEP 493 (jlink without JMODs) is a JDK-vendor opt-in build flag, not a universal JDK 24+ guarantee \u2014 no cross-linking, and an image built this way can't itself include jdk.jlink",
+  "distribution/distribution-shape-decision: 0/32 exemplars use jlink or jpackage at all, so those two sections are precondition-derived from primary docs rather than corpus-corroborated \u2014 flagged explicitly in the file rather than presented as measured practice",
+  "quality-gates/java-lint-gate: StringCaseLocaleUsage, which the brief listed among the 'disabled checks worth promoting,' is actually already in ENABLED_WARNINGS, not DISABLED_CHECKS \u2014 verified by direct line count against BuiltInCheckerSuppliers.java. 'Promoting' it means a severity bump, not activation from off.",
+  "quality-gates/java-lint-gate: NullAway's -XDaddTypeAnnotationsToSymbol=true workaround for JDK 17.0.19+/21.0.8+ explicitly does NOT work on Oracle JDK builds \u2014 only OpenJDK-family distributions (Temurin, Zulu) \u2014 a toolchain-vendor trap, not just a version trap.",
+  "quality-gates/java-lint-gate: PMD is not merely under-adopted but actively performative in the flagship corpus: apache/maven declares maven-pmd-plugin with zero bound <executions>, and gradle/gradle ships the Gradle PMD plugin to users without ever running it on its own build.",
+  "quality-gates/java-lint-gate: jackson-databind's Error Prone usage is an opt-in Maven <profile>, not the default build \u2014 the most-cited 'lenient pole' exemplar isn't even running Error Prone by default, only when a developer explicitly activates the profile.",
+  "quality-gates/java-lint-gate: SpotBugs' own SECURITY category (1 of 10) is deliberately thin by SpotBugs' own design intent, not an oversight later patched by find-sec-bugs \u2014 the two were always meant to be paired.",
+  "quality-gates/java-lint-gate: Four incompatible Java nullness annotation systems (jsr305, Checker Framework, JSpecify declared, NullAway JSpecify-native) coexist simultaneously in the measured corpus with no dominant winner yet \u2014 Guava 33.4.1+ shipping @NullMarked means any NullAway user inherits stricter checking at Guava call sites regardless of their own project's mode.",
+  "quality-gates/test-suite-and-coverage: kotlinx.coroutines' Kover minBound(85) \u2014 one of the map's three 'enforced' exemplars \u2014 does NOT run on a bare `./gradlew check`; it's gated behind `-Pkover.enabled=true` in a separate CI step, so the true unconditional-enforcement count is closer to 1/32 (assertj) than 3/32",
+  "quality-gates/test-suite-and-coverage: Maven Central has no GA maven-surefire-plugin:3.6.0 as of 2026-09-12 \u2014 the plugin's own docs site header reads 'Version: 3.6.0, Last Published: 2026-08-31' as if it shipped, but the newest artifact on Central is 3.6.0-M1 (2026-06-02); an initial WebFetch pass on the docs page itself hallucinated 'Release Type: GA', caught only by querying Central directly",
+  "quality-gates/test-suite-and-coverage: junit-platform-runner's removal has NO replacement, but a web-search snippet (not the primary wiki page) claimed its content 'is now included directly in junit-platform-launcher' \u2014 conflating it with the separate junit-platform-jfr removal, which does fold into junit-platform-launcher; only fetching the primary wiki page caught this",
+  "quality-gates/test-suite-and-coverage: Gradle's own docs state jacocoTestCoverageVerification is explicitly NOT a dependency of check \u2014 meaning a project can have a fully-configured violationRules block with a real threshold and it will never fail a CI build unless someone adds `check.dependsOn(...)`, a wiring gap distinct from 'coverage tool applied vs not'",
+  "quality-gates/test-suite-and-coverage: micronaut-core sets `execution.parallel.enabled = true` and nothing else in its junit-platform.properties \u2014 a live, real-world instance of the exact half-configuration trap (enabled with no mode.default) that makes parallel execution silently still sequential",
+  "quality-gates/test-suite-and-coverage: @ResourceLock/@Isolated is not a stable, finished feature: junit-team/junit-framework merged four PRs in 2025-2026 changing its semantics (child-node propagation, programmatic ResourceLocksProvider, Vintage-engine parallel methods) \u2014 a rule citing a specific capability here needs a version/PR citation the way StructuredTaskScope rows do",
+  "language-api/java-api-evolution-and-nullness: gradle/gradle's 'bespoke' binary-compatibility mechanism is not from-scratch \u2014 JapicmpTaskWithKotlin.java literally extends me.champeau.gradle.japicmp.JapicmpTask; it's japicmp plus a reviewed JSON allowlist (accepted-public-api-changes.json), not an independent tool, contrary to how the wave-1 audit phrased it",
+  "language-api/java-api-evolution-and-nullness: Adding a new overload is binary-*compatible* by JLS (old binaries keep resolving to the old signature) even though it can silently redirect which overload *new* source compilations pick \u2014 a source-compat, not binary-compat, hazard that cuts the opposite way from intuition",
+  "language-api/java-api-evolution-and-nullness: Changing a static final constant's value never breaks linkage \u2014 un-recompiled callers just silently keep the stale inlined value forever, with no error signal at all",
+  "language-api/java-api-evolution-and-nullness: guava proves module-info.java and Java-8 bytecode are not mutually exclusive: the base build still uses the deprecated <source>1.8</source>/<target>1.8</target> pair while module-info.java lives in a separate MR-JAR layer compiled with <release>9</release> \u2014 a pattern worth naming explicitly",
+  "language-api/java-api-evolution-and-nullness: The 2024 DOP v1.1 essay silently replaced its own fourth principle: 'validate at the boundary' (2022) became 'separate operations from data' \u2014 citing the 2022 four principles today cites withdrawn guidance",
+  "language-api/java-api-evolution-and-nullness: revapi is architecturally the better-designed tool (pluggable analyzers, first-class intentional-change marking) yet has zero adoption anywhere in the 32-repo corpus, so recommending it would be a bet against all observed practice rather than a codification of it",
+  "language-api/kotlin-api-and-abi: Narrowing a return type breaks binary compatibility exactly like widening does \u2014 it looks source-safe (even type-safe) and still throws NoSuchMethodError because the JVM call site is bound to the exact erased descriptor",
+  "language-api/kotlin-api-and-abi: Adding a value to an annotation's @Target set can silently redirect Java-reflection lookups from a field to the compiler-preferred property target, with zero Kotlin-side symptom and no compile error",
+  "language-api/kotlin-api-and-abi: @JvmOverloads is Java-callers-only and does nothing for Kotlin callers \u2014 the only mechanism that fixes both (@IntroducedAt under ExperimentalVersionOverloading) is itself still Experimental, so there is no fully-solved, stable answer to 'add a default parameter without breaking Kotlin callers' today",
+  "language-api/kotlin-api-and-abi: Two of Kotlin's three official library rules (visibility, explicit types) are fully subsumed by explicitApi() as compiler errors, but the third (KDoc every public member) has no compiler-level gate at all \u2014 only a Dokka report",
+  "language-api/kotlin-api-and-abi: ktlint and detekt both carry substantial .api BCV dump files (17 and 8) with no locatable plugin application in the sparse-checked-out corpus slice \u2014 their BCV wiring lives in an unmaterialized build-logic file, so they can't be cited as confirmed standalone-BCV adopters, only as artifact evidence",
+  "language-api/kotlin-api-and-abi: ktor's explicitApi = null is a per-module opt-in switch, not a repo-wide policy disagreement with kotlinlang's guidance \u2014 a naive grep for the setting misreads it as ktor rejecting explicit API mode"
+ ],
+ "needs_another_round": [
+  "gradle-core: maven-publish x configuration cache \u2014 is maven-publish fully cache-compatible on Gradle 9.7.x, partially (only the explicit-credentials path falls back per #24040), or still broadly incompatible? The cc dive fetched the issue and a March-2025 Gradle blog claim and could not resolve it; this blocks a precise GRADLE-CACHE-08 and touches GRADLE-PUB.",
+  "gradle-core: GRADLE-STRUCT rows never dived \u2014 M-B-05 (two subprojects sharing a leaf name causing wrong conflict resolution with no build failure, gradle/gradle#847) and M-B-07 (a subproject gradle.properties overriding root settings the configuration cache assumes fixed): both adjudicated P0/P1, neither covered by a wave-2 dive, both silent-failure shapes.",
+  "gradle-core: Remote build cache push-gating \u2014 10 buildCache{} blocks across 6 repos but no checked-out settings file shows remote(HttpBuildCache){ isPush = ... }; 'who may push to the shared cache' is the one build-cache correctness question the corpus has not answered.",
+  "gradle-core: Gradle 10 archive defaults \u2014 GRADLE-CACHE-17 is framed 9-vs-8; nothing in the 9.0.0/9.7.0 notes says whether Gradle 10 changes archive reproducibility again. Re-check when Gradle 10's release notes exist.",
+  "gradle-plugin-dev: Settings-plugin tool provisioning \u2014 what is the right Gradle seat for `@ocx_tool`-style pinned-binary download with sha256 enforcement and a version-floor gate (custom JavaToolchainResolver, BuildService-backed download-and-verify, or ArtifactTransform), and how does each behave under the configuration cache and on a cold CI runner? config-inventory Axis 4 leaves the cell explicitly Open and 0/32 exemplars are a Settings plugin that shells to a CLI.",
+  "gradle-plugin-dev: Isolated Projects compatibility for a Settings plugin \u2014 M-F-04's second half is unanswered: IP reached incubating only in Gradle 9.7.0, it is not yet a declarable Compatibility-Plugin feature, and a Settings plugin registering one shared BuildService across every project is exactly the IP-hostile shape. Can such a plugin be IP-compatible on Gradle 9.7 at all, and what diagnostic proves it?",
+  "gradle-plugin-dev: Plugin API-surface nullability (M-F-11) \u2014 untouched by both dives. Does a plugin whose public API is consumed from a Kotlin DSL build script need JSpecify annotations, given Kotlin treats JSpecify as `strict` (errors) and JSR-305 as `warn` \u2014 i.e. does keeping JSR-305 on a plugin API break consumer build scripts under Kotlin 2.2/K2, or only warn?",
+  "dependencies: mavenLocal() and repository hygiene beyond content filtering \u2014 does the JVM rule set ban mavenLocal() outright, and at what severity, given 42 build files across the corpus declare it? No dive covered it, Gradle's Best Practices page naming it was not fetched for this family, so no rule was written \u2014 yet it is the second-most-likely thing an agent adds to 'fix' a resolution failure after a version bump, and it silently makes a build machine-dependent.",
+  "dependencies: Maven-side checksum and verification policy \u2014 what is the Maven equivalent of verification-metadata.xml, and does the aether checksum-algorithm list harden or weaken a build? The corpus's only checksum configuration (assertj@485502bad2:.mvn/maven.config) sets `-Daether.checksums.algorithms=SHA-512,SHA-256,SHA-1,MD5 -Daether.connector.smartChecksums=false`, enumerating two algorithms Gradle's docs call insufficient alongside two secure ones; no source read here settles which it is. MVN-DEP currently has no supply-chain-integrity row at all while GRADLE-DEP has three.",
+  "dependencies: Dependency-update automation as a rule surface \u2014 does the rule set say anything about Dependabot vs Renovate configuration, given 13/32 each with zero overlap and an agent is the thing reviewing their PRs? The publishing audit measured the split; no dive turned it into guidance, and GRADLE-DEP-18 (resolve before emitting) has an unexamined interaction with a bot that proposes bumps automatically.",
+  "distribution: Shaded-library publication metadata under Gradle \u2014 On Shadow >= 9.0.0, does publishing `components.shadow` produce a POM whose <dependencies> correctly equal the non-bundled runtime set without hand-patching, and from which version? (kafka still hand-patches via pom.withXml against shadow#324; the GRADLE-PUB half of the question \u2014 what a Maven consumer sees through Gradle Module Metadata \u2014 is topic-map row M-H-02.)",
+  "distribution: minimize() in 2026 \u2014 Has jdependency-backed minimization gained any ServiceLoader / META-INF/services awareness since Shadow 9.0.0, and does minimize() interact correctly with mergeServiceFiles() on a current version? Every claim in this family traces to one sentence of Shadow's docs; 0/32 exemplars exercise it, so nothing is corroborated.",
+  "distribution: Reproducible shaded archives (straddles GRADLE-DIST and GRADLE-CACHE) \u2014 Gradle 9 makes archive tasks reproducible by default (map row M-D-11), but is a shadowJar output byte-identical across two clean builds on Shadow 9.6.1 / Gradle 9.7, and does mergeServiceFiles() preserve entry order? Neither dive checked whether shadowJar inherits the default.",
+  "quality-gates: KT-TEST \u2014 Does Kover's koverVerify bind to `check` by default? Kover 0.9.8's own docs never state it; the only evidence is a comment in kotlinx.coroutines' kover-conventions.gradle.kts implying it does, which is the opposite default from JaCoCo. No KT-TEST coverage rule can be written either way until a pass fetches Kover's DSL reference or reads the plugin source.",
+  "quality-gates: JAVA-LINT \u2014 With find-sec-bugs at 0/32, does plain SpotBugs earn anything on a project already running Error Prone + NullAway? All three corpus SpotBugs gates run it without the plugin, so either they see something the rule cannot, or three flagships run a redundant slow pass. Settling it needs a diff of SpotBugs' CORRECTNESS/MT_CORRECTNESS patterns against Error Prone's ENABLED_ERRORS \u2014 attempted by nobody in waves 1 or 2.",
+  "quality-gates: JAVA-TEST \u2014 Which JUnit release ships which @ResourceLock capability (target = CHILDREN, ResourceLocksProvider, Vintage-engine parallel method execution)? Four merged PRs are named but never mapped to versions, so JAVA-TEST-05 has to say 'carry the PR you verified against' instead of 'available from 6.x'.",
+  "language-api: Source-level public-API measurement (JAVA-API, KT-API) \u2014 every wave-1 audit measured config files only. Which of JAVA-API-04..11 and KT-API-04..11 do the strict exemplars actually satisfy in Java/Kotlin source (public data class, Optional in parameter position, @Deprecated without since, misplaced @Nullable array annotations, default on a sealed switch), as opposed to in build configuration? Six rows are currently 'not independently measured' in both dives.",
+  "language-api: japicmp configuration depth (JAVA-API) \u2014 are the six 'declared' japicmp repos (apache/maven, assertj, gradle/gradle, grpc-java, micronaut-core, testcontainers-java) actually build-blocking, and what does an accepted-breaks file look like outside gradle/gradle's Groovy scaffolding? JAVA-API-02 has exactly one template and it is wrapped in machinery no adopter will copy.",
+  "language-api: revapi revisit (JAVA-API) \u2014 has revapi acquired any adopter or a maintained Gradle plugin since 0.15.1? The japicmp decision rests entirely on 0/32 adoption, not on design, so it should be re-taken rather than inherited if that changes."
+ ],
+ "must_count": 105
+}
