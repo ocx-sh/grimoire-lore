@@ -1,0 +1,796 @@
+{
+ "wave": 3,
+ "groups": [
+  {
+   "group": "concurrency",
+   "dives": [
+    {
+     "slug": "java-virtual-threads-and-structured-concurrency",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-concurrency/java-virtual-threads-and-structured-concurrency.md",
+     "sources_count": 17,
+     "top_rules": [
+      "Never pool virtual threads or wrap them in a fixed-size ExecutorService to throttle concurrency (JEP 444); use a Semaphore instead.",
+      "State synchronized-vs-ReentrantLock conditionally on JDK floor: migrate hot/blocking synchronized to ReentrantLock below JDK 24; default to synchronized on JDK 24+ per JEP 491's own JCIP-quoting guidance.",
+      "StructuredTaskScope/Joiner MUST NOT ship in published code while preview \u2014 enforced by JEP 12's class-file mechanism (preview bytecode only runs on the exact JDK feature release, with --enable-preview again at runtime), not just API instability.",
+      "Re-check the shipped-code guard against the JEP's own Status/Scope field (currently targeting JDK 28 finalisation), not on a fixed calendar.",
+      "jdk.tracePinnedThreads was removed in JDK 24 and silently does nothing \u2014 the only surviving pinning detector is the jdk.VirtualThreadPinned JFR event (default-enabled, 20ms threshold).",
+      "Bound fan-out at the real downstream resource's capacity (connection pool size, native library concurrency limit, API rate limit) with a Semaphore or bounded Joiner \u2014 never at 'thread count', since virtual threads removed the accidental platform-thread throttle.",
+      "Audit ThreadLocal-based per-thread caching before scaling onto virtual threads, but don't default to 'swap in a lock-free pool' \u2014 jackson-core tried that as a default (2.17.0) and reverted it (2.17.1) after production regressions.",
+      "Every rule row or code sample naming a concrete StructuredTaskScope/Joiner member must carry its JDK number \u2014 fork()'s return type, constructors-vs-factories, allSuccessfulOrThrow()'s return type, and onTimeout()/timeout() have each changed across JDK 21-27.",
+      "Prefer ScopedValue over ThreadLocal for one-way context into forked tasks; never pass a literal null to orElse \u2014 it now throws NullPointerException at runtime since JDK 25's finalisation.",
+      "'--enable-preview' is not a corpus norm (1/32, test-runtime only) \u2014 any rule recommending it must say so explicitly."
+     ],
+     "surprises": [
+      "jackson-core changed its default BufferRecyclerPool from threadLocalPool() to a lock-free pool in 2.17.0, then reverted the default back in 2.17.1 after production regressions, and deprecated the lock-free pool entirely in 2.18.0 \u2014 the 'obvious' virtual-thread fix for ThreadLocal caching was tried by the flagship library itself and rolled back.",
+      "HikariCP maintainers left two independent PRs (2023, 2024) to replace internal synchronized with ReentrantLock for virtual-thread friendliness unmerged, and an open issue shows a real production report of JEP 491's documented 'still pins' class-initializer case on JDK 24.",
+      "Preview status is not just an API-stability warning: JEP 12's class-file mechanism means preview bytecode only loads on the exact JDK feature release that compiled it, with --enable-preview required again at runtime \u2014 a published SDK built against a preview API cannot be consumed cross-JDK at all, which is a much harder constraint than 'the API might change'.",
+      "fork() returning Subtask instead of Future is not a recent change \u2014 it's been true since the very first preview in JDK 21 (JEP 453), years before the brief's other version-sensitive changes.",
+      "micronaut-core's sole --enable-preview usage in the whole 32-repo corpus is scoped to the Test task's JVM args only, not the JavaCompile task for its main sourceset \u2014 the one corpus precedent for preview flags isn't even a production compile-time usage.",
+      "StructuredTaskScope became a sealed interface (not an abstract class) as early as JEP 525 (JDK 26), a detail rarely mentioned in older tutorials still describing it as a class with subclasses ShutdownOnFailure/ShutdownOnSuccess."
+     ],
+     "ok": true
+    },
+    {
+     "slug": "kotlin-coroutines-correctness",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-concurrency/kotlin-coroutines-correctness.md",
+     "sources_count": 14,
+     "top_rules": [
+      "Never install CoroutineExceptionHandler on anything but a root coroutine (direct child of CoroutineScope/supervisorScope/SupervisorJob) \u2014 on a nested coroutine it is silently never called.",
+      "CoroutineExceptionHandler has no effect on async \u2014 its exception only surfaces at .await(), so wrap await() in try/catch instead.",
+      "Rethrow CancellationException from every catch/runCatching before other handling \u2014 verify with detekt's SuspendFunSwallowedCancellation, which ships but is active:false by default and must be turned on explicitly.",
+      "GlobalScope is not an absolute ban: GlobalScope.launch(explicitParentContext, ...) carrying a real caller-owned Job is the one sanctioned exception; a bare GlobalScope.launch{}/.async{} is always the violation \u2014 detekt's GlobalCoroutineUsage flags both forms indiscriminately, so a human pass is still needed.",
+      "Dispatchers.IO defaults to max(64, cores) threads; limitedParallelism(n) views are elastic and share IO's own pool rather than allocating n new threads, so multiple views do not sum on top of the base ceiling.",
+      "@Volatile never fixes a shared-counter race (counter++ is read-modify-write, not atomic) \u2014 use AtomicInteger, coarse-grained thread confinement, or Mutex.withLock instead.",
+      "A long-running loop needs a suspension point or an isActive/ensureActive()/yield() check to be cancellable \u2014 confirmed there is genuinely no lint for this specific check, unlike GlobalScope/swallowed-cancellation which do have inactive-by-default detekt rules.",
+      "runTest's single-threaded virtual scheduler cannot reproduce a real thread-level data race; any concurrency-safety claim (atomics/confinement/mutex fixes) needs a separate real-dispatcher stress test alongside the runTest suite, not instead of it."
+     ],
+     "surprises": [
+      "detekt already ships lint coverage for two of the brief's five MUST rows \u2014 GlobalCoroutineUsage (GlobalScope) and SuspendFunSwallowedCancellation \u2014 but both are active:false by default, so 'detekt is configured' does not mean these checks run; the brief's 'no lint exists' premise only holds for the missing-cooperative-cancellation-check row.",
+      "The exemplar corpus supplies a concrete, real-world instance of the GlobalScope exception the brief asks to decide: ktor's CIOEngine calls GlobalScope.launch(parentContext, ...), passing the caller's real Job so the coroutine is not actually detached \u2014 this is the shape a 'named exception' rule should codify.",
+      "Medium blocks every fetch method available (WebFetch, curl+UA, web.archive.org, freedium.cfd) with 403/DNS failures for both Elizarov design-rationale articles; had to fall back to search-engine-indexed verbatim excerpts, flagged explicitly in Sources as partial-confidence.",
+      "detekt also ships SuspendFunInFinallySection (inactive by default) and SleepInsteadOfDelay (active by default) that directly cover two more of this dive's normative candidates (NonCancellable-in-finally, and Thread.sleep on any dispatcher) \u2014 neither was anticipated by the brief.",
+      "detekt's coroutines rule classes now live under package dev.detekt.rules.coroutines rather than the historical io.gitlab.arturbosch.detekt.rules.coroutines, a rename that will break an agent's training-era assumptions about the group/package coordinates for custom detekt config."
+     ],
+     "ok": true
+    },
+    {
+     "slug": "process-and-cli-boundary",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-concurrency/process-and-cli-boundary.md",
+     "sources_count": 15,
+     "top_rules": [
+      "Every spawn point takes a constructor-injected ProcessLauncher interface \u2014 Java has no mockable process API, so this interface is the only test seam",
+      "Never fully drain stdout before touching stderr (or vice versa) without redirectErrorStream(true) \u2014 the JDK javadoc names this a deadlock risk on a full pipe buffer",
+      "Kill ladder is destroy() -> waitFor(grace) -> destroyForcibly() -> waitFor(), run unconditionally from a finally; on Windows destroy() is already forcible so the grace window is a no-op there",
+      "If the wrapped CLI can fork children, walk process.descendants() and destroy each handle \u2014 Process.destroy() never reaches descendants (no killpg equivalent on the JVM)",
+      "Use Process.onExit()'s CompletableFuture for the async path, not virtual threads \u2014 onExit costs nothing on the JDK floor (available since JDK 9) while virtual threads force a jump to JDK 21 for a fan-out regime this one-command-at-a-time SDK doesn't have",
+      "StructuredTaskScope must never appear in shipped SDK source \u2014 still preview through JDK 27, and a library can't force --enable-preview on consumers",
+      "ProcessBuilder.environment() starts as a live copy of System.getenv() \u2014 always .clear() before populating, or the ambient environment silently leaks into the child",
+      "Sysexit 75 is retried strictly before any exception is constructed, and retryability is a fixed no-argument property on the exception type itself, never threaded from a RetryPolicy, so it can't be skipped or forgotten at a call site",
+      "The 16-member exit-code enum is hand-maintained and diffed by a literal-set unit test against both ocx-sdk-python and rules_ocx/AGENTS.md \u2014 never generated from either",
+      "Read System.getenv() in exactly one classified OCX_ENV_CLASSES builder, never scattered across call sites, and never read the two explicit-class variables from the environment under any code path"
+     ],
+     "surprises": [
+      "The JVM has no killpg/process-group primitive at all \u2014 Process.destroy()/destroyForcibly() only ever reach the immediate child, so a kill ladder for a CLI that forks its own children needs an explicit Process.descendants() walk that ocx-sdk-python's POSIX process-group approach doesn't need to replicate",
+      "On Windows, Process.destroy() is already forcible (TerminateProcess) \u2014 there is no graceful-shutdown phase at all on that platform, so the entire grace-window rationale of the kill ladder is POSIX-only",
+      "java.net.http ships zero JSON support of any kind (BodyHandlers only return String/InputStream/Path) \u2014 the zero-runtime-dependency commitment's hand-rolled JSON reader isn't a corner being cut, it's the only option the JDK leaves open for parsing either HTTP bodies or captured CLI stdout",
+      "The 32-repo exemplar corpus has no exemplar at all for this row (M-Y-02 is 'partial' coverage sourced only from ocx-sdk-python) \u2014 the OCX SDK itself will be the fleet's first measured instance of this pattern, so every normative rule here is evidenced against prior art and JDK docs rather than a corpus library already doing it",
+      "Choosing virtual threads for this one boundary alone would force the SDK's JDK floor from the map's default 17 up to 21 \u2014 a four-major-version jump paid for a concurrency regime (high fan-out blocking-style I/O) this 'one command at a time' SDK never actually exercises"
+     ],
+     "ok": true
+    }
+   ],
+   "consolidation": {
+    "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-concurrency.md",
+    "rule_ids": [
+     "JAVA-CONC-01 \u2014 Never construct a fixed-size pool of virtual threads; bound concurrency with a Semaphore sized to the downstream resource.",
+     "JAVA-CONC-02 \u2014 Bound fan-out at the real downstream resource's capacity, never at the number of tasks.",
+     "JAVA-CONC-03 \u2014 State the synchronized-vs-ReentrantLock guidance conditionally on the module's JDK floor, split at JDK 24; never as one unconditional sentence.",
+     "JAVA-CONC-04 \u2014 Do not use -Djdk.tracePinnedThreads anywhere; use the jdk.VirtualThreadPinned JFR event as the only pinning detector on JDK 24+.",
+     "JAVA-CONC-05 \u2014 Keep StructuredTaskScope and every other preview API off the main-sourceset compile path of any published module.",
+     "JAVA-CONC-06 \u2014 Carry the verified JDK number on every code sample, comment or snippet naming a StructuredTaskScope/Joiner member, and re-read the member against that JDK's javadoc before emitting it.",
+     "JAVA-CONC-07 \u2014 Carry one-way context with ScopedValue rather than ThreadLocal, and never pass a literal null to ScopedValue.orElse.",
+     "JAVA-CONC-08 \u2014 Audit static ThreadLocal caches before scaling onto virtual threads, and state the chosen replacement strategy instead of blanket-swapping in a lock-free pool.",
+     "JAVA-CONC-09 \u2014 Take a ProcessLauncher by constructor injection at every CLI spawn point; never call new ProcessBuilder(...).start() outside the one real implementation.",
+     "JAVA-CONC-10 \u2014 Drain stdout and stderr concurrently; never read one to completion before touching the other.",
+     "JAVA-CONC-11 \u2014 Run the kill ladder destroy \u2192 waitFor(grace) \u2192 destroyForcibly \u2192 waitFor from a finally on every spawn path, walking descendants() when the CLI can fork.",
+     "JAVA-CONC-12 \u2014 Clear ProcessBuilder.environment() before writing to it, and read System.getenv() in exactly one classified env-table builder.",
+     "JAVA-CONC-13 \u2014 Use Process.onExit()'s CompletableFuture for the async path with an explicit bounded Executor on any blocking stage; do not adopt virtual threads here.",
+     "JAVA-CONC-14 \u2014 Retry sysexit 75 inside the spawn call before any exception is constructed, and expose retryability as a fixed no-argument property on the exception type.",
+     "KT-CORO-01 \u2014 Explicitly activate detekt's four inactive-by-default coroutine rules in the committed config; never treat 'detekt is applied' as evidence they run.",
+     "KT-CORO-02 \u2014 Fix every bare GlobalScope.launch/async; accept only the context-carrying adapter-boundary form that passes a Job the caller owns.",
+     "KT-CORO-03 \u2014 Never call runBlocking from inside a suspend fun.",
+     "KT-CORO-04 \u2014 Install a CoroutineExceptionHandler only on a root coroutine, never on async and never on a nested launch.",
+     "KT-CORO-05 \u2014 Rethrow CancellationException from every catch clause wide enough to observe it, runCatching included.",
+     "KT-CORO-06 \u2014 Keep unbounded or long-blocking work off bare Dispatchers.IO; give each blocking call site a limitedParallelism(n) view sized to the real resource.",
+     "KT-CORO-07 \u2014 Fix a shared-mutable-state race with atomics, coarse-grained confinement or Mutex.withLock, never with @Volatile.",
+     "KT-CORO-08 \u2014 Wrap any suspending call in a finally that must complete despite cancellation in withContext(NonCancellable).",
+     "KT-CORO-09 \u2014 Put a suspension point or an isActive/ensureActive() check in every long-running loop inside a coroutine body.",
+     "KT-CORO-10 \u2014 Inject the dispatcher in library and SDK code rather than hardcoding Dispatchers.IO/Default/Unconfined.",
+     "KT-CORO-11 \u2014 Add a real-dispatcher stress test alongside runTest for any test whose claim is thread safety.",
+     "KT-CORO-12 \u2014 Launch a coroutine that must outlive the test body on backgroundScope.",
+     "KT-CORO-13 \u2014 Choose StandardTestDispatcher for ordering-sensitive tests and UnconfinedTestDispatcher only when ordering is irrelevant."
+    ],
+    "conflicts_resolved": [
+     "Virtual threads vs Process.onExit() for the SDK's async path \u2014 map conflict 13 said 'virtual threads, no reactive stack'; the process dive says onExit()'s CompletableFuture. Resolved for the process dive: conflict 13 rejected a reactive runtime, it did not mandate Thread.ofVirtual(); onExit() is JDK 9 and free on the floor of 17, while virtual threads would force 17 \u2192 21 for a fan-out this one-command-at-a-time SDK never performs. JAVA-CONC-01/02 still govern wherever the fleet does fan out.",
+     "The --enable-preview grep scope \u2014 the process dive's check ('grep StructuredTaskScope|--enable-preview over build files must be empty') is over-broad and would flag micronaut-core's test-runtime jvmArg, the corpus's only precedent, as a violation. Resolved in favour of the VT dive's sourceset-scoped check: read which task the flag feeds; a compilerArgs entry on a published main sourceset is the violation, a Test{jvmArgs} entry is not. Same failure shape as the wave-2 correction to GRADLE-DEP-05.",
+     "'No lint exists for GlobalScope or swallowed CancellationException' (the KT-CORO brief's working assumption) vs detekt shipping both \u2014 resolved: both ship, and both are active:false by default, so 'detekt is configured' is not 'these checks run'. Re-measured across all 32 clones 2026-09-12: 1/32 activates any (detekt itself, GlobalCoroutineUsage only), 0/32 activate SuspendFunSwallowedCancellation or SuspendFunInFinallySection. Promoted to KT-CORO-01, the gate row.",
+     "GlobalScope: absolute ban vs named exception \u2014 detekt's GlobalCoroutineUsage flags both forms identically, and map row M-U-01's @OptIn(DelicateCoroutinesApi) grep is present on both too, so neither is a sufficient check. Resolved: the bare no-argument form is the MUST-fix; GlobalScope.launch(explicitParentContext, \u2026) at an adapter boundary is structurally parented (ktor CIOEngine.kt:73) and is accepted. A finding is a question, never an automatic rewrite.",
+     "synchronized vs ReentrantLock \u2014 the widely-trained unconditional 'migrate to ReentrantLock to avoid pinning' formulation is provably wrong above JDK 24, where JEP 491 itself quotes JCIP \u00a713.4 for defaulting to synchronized and says migrated code need not be reverted. Resolved as a floor-conditional rule with the split named at 24.",
+     "'limitedParallelism(n) views do not sum' read as 'do not create views' \u2014 resolved: creating views is cheap and correct (a LimitedDispatcher queues its own tasks onto IO's shared pool), the anti-pattern is unbounded blocking work on bare Dispatchers.IO. KT-CORO-06 targets the base dispatcher, not the view count.",
+     "Can runTest's virtual time hide a real race (the corpus's open Kotlin-testing question)? Resolved: yes, structurally \u2014 every TestDispatcher runs its queue one task at a time on a single scheduler thread, so a genuine data race or lock-ordering bug cannot fail there. A thread-safety claim needs a separate real-dispatcher massiveRun-shaped stress test; runTest stays default for suspension-order and cancellation logic.",
+     "The basis for the 'no StructuredTaskScope in shipped code' rule \u2014 API instability (map conflict 15) vs JEP 12's class-file mechanism (VT dive \u00a76). Resolved to the more specific formulation: minor_version all-16-bits-set pins a preview class file to the exact feature release that compiled it, so a JDK-26-built jar will not run on JDK 27 even with --enable-preview re-passed. That makes the rule a technical constraint, not a maturity opinion."
+    ],
+    "needs_another_round": [
+     "JAVA-CONC unresearched rows (M-N-05..M-N-11) \u2014 which of CPU-vs-I/O regime split, ExecutorService shutdown/close semantics, CompletableFuture terminal operations, double-checked locking, SimpleDateFormat statics, @GuardedBy documentation and the ReentrantReadWriteLock 65,536-reader ceiling earn a rule row, given Error Prone and SpotBugs already catch four of them mechanically \u2014 i.e. which are rules and which are JAVA-LINT configuration?",
+     "Kotlin Flow (M-U-07, M-U-10) \u2014 does Flow need its own depth section covering catch-operator placement and the StateFlow conflation contract, or do two rows in coroutines.md cover it? Both were explicitly out of the coroutines dive's scope.",
+     "JDK 27 GA re-verification \u2014 JDK 27 went GA 2026-09-15, three days after this file; did JEP 533's shape (R_X type parameter, timeout(), awaitAll() removed) ship unchanged, and is structured concurrency still targeted at JDK 28 for finalisation? JAVA-CONC-05/06 must be re-read against the GA javadoc.",
+     "detekt activation defaults \u2014 do GlobalCoroutineUsage, SuspendFunSwallowedCancellation, SuspendFunInFinallySection and CoroutineLaunchedInTestWithoutRunTest stay active:false in the first stable release cut from the dev.detekt.* main branch? KT-CORO-01's whole premise depends on it."
+    ],
+    "must_count": 23
+   }
+  },
+  {
+   "group": "gradle-settings",
+   "dives": [
+    {
+     "slug": "settings-time-surface-and-tool-provisioning",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-gradle-settings/settings-time-surface-and-tool-provisioning.md",
+     "sources_count": 17,
+     "top_rules": [
+      "Never implement JavaToolchainResolver to provision a non-JDK CLI -- its request/response types are JDK-only with no checksum field",
+      "Provision a pinned binary via a BuildService registered from Plugin<Settings>.apply() with gradle.sharedServices.registerIfAbsent(...); download+sha256 happen inside the service's execution-time code, never in apply() or a ValueSource",
+      "Never enforce a sha256 check inside a ValueSource -- it can compute a hash but has no authority to fail a task; enforcement belongs in the BuildService",
+      "Cache the provisioned binary under GRADLE_USER_HOME keyed on its sha256, never under build/, so a cold-runner download amortizes across invocations",
+      "A Settings plugin's shared BuildService registration is IP-safe only if registered exactly once with parameters fixed at registerIfAbsent time and never mutated or enumerated afterward",
+      "Run Isolated Projects diagnostics (-Dorg.gradle.isolated-projects.diagnostics=true) periodically but never wire org.gradle.isolated-projects=true into a required CI gate",
+      "Ban two subprojects sharing a leaf path segment anywhere in the settings tree (gradle/gradle#847, open since 2016, no build failure to hang it on -- treat as MUST-fail-CI via a script)",
+      "Never place gradle.properties in a subproject directory -- org.gradle.* keys are read once from root/GRADLE_USER_HOME and silently never consulted per-subproject",
+      "Gate remote build-cache push on possession of a write credential, never on CI-ness or branch name alone -- a fork PR's run is also 'CI' but lacks injected secrets",
+      "Do not treat a JSR-305-to-JSpecify annotation swap on a plugin's public API as routine -- JSpecify defaults to strict/errors in Kotlin 2.1+ while JSR-305 only warns, so the swap can newly break consumers"
+     ],
+     "surprises": [
+      "Gradle's own docs say registering a shared BuildService via gradle.sharedServices.registerIfAbsent(...) is explicitly 'safe with Isolated Projects' -- the opposite of the brief's framing that this shape is IP-hostile by construction; the safety is bounded because two of IP's four constraint categories (cross-build, build-to-project access) are still 'not fully enforced yet' as of 9.7.0",
+      "JavaToolchainResolver itself extends BuildService<BuildServiceParameters.None>, and JavaToolchainDownload carries only a bare HTTPS URI to a zip/tar -- there is no checksum field anywhere in the toolchain-resolver contract, so even for genuine JDK provisioning Gradle's sanctioned seat never enforces a hash",
+      "gradle/gradle#847 (duplicate subproject leaf names) is still open and reproducing on Gradle 8.12.1 as of a 2025-06-30 comment, with zero fix across the 8.x or 9.x lines despite 137 reactions since 2016",
+      "No corpus settings file gates remote build-cache push on credential possession except testcontainers-java; detekt's seemingly-careful isCiBuild-only gate is not actually fork-PR-safe, since fork PRs also run under CI",
+      "Kafka's build-scan gate (publishing.onlyIf { it.authenticated }) is a different Develocity feature (build scan, not cache) that just happens to be the map-cited exemplar shape -- its own buildCache{} block sidesteps the push question by disabling remote push outright rather than gating it",
+      "JSpecify defaulting to strict/errors in Kotlin (since 2.1) while JSR-305 stays warn-only makes the JSpecify migration the compatibility-risk direction, exactly backwards from an agent's likely instinct that adopting the newer spec-blessed annotation set is the safe upgrade"
+     ],
+     "ok": true
+    }
+   ],
+   "consolidation": {
+    "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-gradle-settings.md",
+    "rule_ids": [
+     "GRADLE-PLUG-22 \u2014 Never implement JavaToolchainResolver or add a toolchainManagement javaRepositories entry to provision a non-JDK tool (MUST).",
+     "GRADLE-PLUG-23 \u2014 Provision a pinned external binary from a BuildService registered once by gradle.sharedServices.registerIfAbsent in Plugin<Settings>.apply(), downloading in the service's execution-time method (MUST).",
+     "GRADLE-PLUG-24 \u2014 Enforce the sha256 by throwing from execution-time code before the binary reaches any classpath or PATH; never compute a hash for enforcement in a ValueSource (MUST).",
+     "GRADLE-PLUG-25 \u2014 Cache the provisioned binary under GRADLE_USER_HOME or a tool home, never under build/, and key the skip on the expected sha256 rather than file presence (MUST).",
+     "GRADLE-PLUG-26 \u2014 Set a shared BuildService's parameters inline at registerIfAbsent and never mutate them afterwards; read the service back only through findByName (MUST).",
+     "GRADLE-PLUG-27 \u2014 Run Isolated Projects diagnostics against the plugin's functional-test build once per release, and never wire org.gradle.isolated-projects=true into a required CI job (SHOULD).",
+     "GRADLE-PLUG-28 \u2014 Do not treat replacing JSR-305 with JSpecify annotations on a plugin's exported types as routine; it needs a major version and a migration note (MUST).",
+     "GRADLE-STRUCT-10 \u2014 Never create two projects sharing a path leaf segment in a build that also assigns a uniform explicit group (MUST).",
+     "GRADLE-STRUCT-11 \u2014 Never put an org.gradle.* key in a gradle.properties that is not the root of a build (MUST).",
+     "GRADLE-STRUCT-12 \u2014 Gate remote build-cache push on a write credential read through providers.environmentVariable(...).isPresent, never on CI-ness or a raw System.getenv (MUST)."
+    ],
+    "conflicts_resolved": [
+     "A \u2014 Dive: 'no corpus repo violates the duplicate-leaf-name ban.' Re-measured: three do (sqldelight settings.gradle:62,67 and testcontainers settings.gradle:30-31 are live instances, each with a uniform explicit group; nowinandroid settings.gradle.kts:69-79 has the most duplicates but assigns no group and is correct). Resolved toward measurement, and GRADLE-STRUCT-10 gains the uniform-group conjunct because Gradle's default group is the dotted parent path (Project.java:393-394).",
+     "B \u2014 Dive: subproject gradle.properties 'not observed in the corpus', verified by `find . -mindepth 2 -name gradle.properties` as a MUST-fail. Re-measured: 17/32 repos have one and zero are violations \u2014 every non-root file carrying an org.gradle.* key is a build root (build-logic, buildSrc, includeBuild, sample, docs snippet), nowinandroid's even citing gradle/gradle#2534 as the reason. Resolved: the dive's verification is discarded; GRADLE-STRUCT-11 is scoped to org.gradle.* keys outside a build root, and the general best-practice half is deliberately not shipped.",
+     "C \u2014 Dive lists diffplug/spotless under 'no gate at all'. Read in full, spotless@dc2a4cb9a3:settings.gradle:32-46 is the corpus's cleanest credential gate (push = true only inside `if (user != null && pass != null)`). Resolved toward the source: spotless moves from violator to exemplar and becomes the portable HttpBuildCache template.",
+     "D \u2014 Dive: 'no checked-out settings.gradle* gates push on more than CI-ness' \u2014 a grep-scope artifact. Extending to **/*.settings.gradle.kts adds ktor (ktorsettings.develocity.settings.gradle.kts:75, isPush = isCIRun, a second violator inside a reusable Settings plugin) and junit-framework (junitbuild.settings-conventions.settings.gradle.kts:50, pushEnabled defaultValue = false, a third satisfier). Resolved: the verification glob changes; tally becomes 3 satisfy / 2 violate.",
+     "E \u2014 Dive and GRADLE-STRUCT-02 both say gradle/gradle is the only (1/32) build-logic-settings split. Re-measured 3/32: ktor's build-settings-logic (pluginManagement-included, only *.settings.gradle.kts \u2014 the better copy-target for the OCX plugin) and junit-framework's gradle/base (a partial split, one Settings plugin leaked into gradle/plugins). Corrects jvm-gradle-core.md verdict 7's claim that junit ships the merged form; GRADLE-STRUCT-02 stays SHOULD since the cost argument is unchanged."
+    ],
+    "needs_another_round": [
+     "Settings-plugin functional testing \u2014 how does GradleRunner apply a Plugin<Settings> to a test project, and does the compileOnly/withPluginClasspath incompatibility (GRADLE-PLUG-14) behave the same at settings scope? Every GRADLE-PLUG-22..28 rule is currently verified by reading source because nothing established this.",
+     "Cold-runner cost of execution-time provisioning \u2014 what does GRADLE-PLUG-23's first-task-pays download cost on a GitHub-hosted runner versus a setup-ocx-style CI step, and does that change whether the Gradle plugin should provision at all when a CI action already did?",
+     "Latent-collision detection for GRADLE-STRUCT-10 \u2014 is there a Gradle-side way (resolution-result walk, build scan dependency view, dependencies report diff) to detect a project that actually lost conflict resolution, so the rule can report a real defect rather than a latent one?"
+    ],
+    "must_count": 9
+   }
+  },
+  {
+   "group": "publishing",
+   "dives": [
+    {
+     "slug": "central-portal-and-provenance",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-publishing/central-portal-and-provenance.md",
+     "sources_count": 19,
+     "top_rules": [
+      "MUST: state immutability first \u2014 a PUBLISHED component can never be removed/updated/re-signed, only a new version recovers",
+      "MUST: fail the release job when git tag != declared build-file version, before any build step (0/32 exemplars enforce this any other way; mirror ocx-sdk-python's release.yml check verbatim)",
+      "MUST: verify namespace (DNS TXT or io.github.* GitHub ownership) as a precondition, not discovered as an upload failure",
+      "MUST: every artifact ships sources jar + javadoc jar + .md5 + .sha1 + .asc; POM needs name/description/url/licenses/developers/scm or Central rejects the whole upload",
+      "MUST: set autoPublish=true + waitUntil=published (or vanniktech automaticRelease/nmcp publishingType=AUTOMATIC) if a CI green check is meant to mean 'this is live on Central' \u2014 waitUntil=validated still needs a human click",
+      "MUST: never write mavenLocal() into a committed repositories{} block \u2014 Gradle's own docs call it reproducibility-breaking, 'restricted to prototyping'; publishToMavenLocal as a producer-side verification task is fine and unaffected",
+      "SHOULD not MUST: never write literal credentials{} values \u2014 on Gradle 9.0+ (fixed by gradle/gradle#33830, merged 2025-06-13) this silently disables the config cache for that task rather than failing as it did on 8.x; verify via the literal 'Reusing configuration cache.' line on a second run",
+      "CONSIDER not MUST: actions/attest-build-provenance for SLSA L2 is a rule this program introduces deliberately \u2014 0/32 exemplars including bazelbuild/bazel and gradle/gradle use any provenance/scanning tooling, so state this explicitly rather than presenting it as observed practice"
+     ],
+     "surprises": [
+      "The two Gradle doc pages the brief named for mavenLocal() (declaring_repositories.html, best_practices_dependencies.html) say NOTHING about it \u2014 the actual warning ('restricted to prototyping rather than production builds') lives on a third, unnamed page: declaring_repositories_basics.html",
+      "The maven-publish/config-cache question resolves cleanly: gradle/gradle#33830 (merged 2025-06-13, milestone 9.0.0 RC1) changed the failure mode from a hard build failure (Gradle 8.x) to silent config-cache disablement (Gradle 9.0+) for exactly one shape \u2014 literal inline credentials{} \u2014 not a broad plugin incompatibility",
+      "0/32 exemplars use any git-tag-driven version plugin at all, which makes the ocx-sdk-python-style tag-vs-version CI check strictly necessary rather than a nice-to-have, since nothing else in observed practice enforces that consistency",
+      "Central's own placeholder-jar fallback for sources/javadoc (a jar containing just a README) is documented and sanctioned, not an anti-pattern to flag",
+      "3/32 exemplars still reference oss.sonatype.org URLs nearly a year after OSSRH's 2025-06-30 shutdown \u2014 live evidence of the exact AI-hallucination trap the corpus itself preserves",
+      "Sonatype's own Sigstore announcement states 'we have no intention of replacing PGP signatures' at launch, while also leaving the door open to eventually requiring both \u2014 there is no scheduled PGP deprecation to warn about"
+     ],
+     "ok": true
+    },
+    {
+     "slug": "consumability-across-build-systems",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-publishing/consumability-across-build-systems.md",
+     "sources_count": 15,
+     "top_rules": [
+      "Every published POM must declare name/description/url/licenses/developers/scm inside an explicit pom{} block \u2014 none is Gradle-property-derived and Central rejects an upload missing any.",
+      "Never propose maven.consumer.pom.flatten or <packaging>bom</packaging> as shipping mechanism \u2014 Maven 4.0.0 is still rc-6 on Central as of 2026-09-12; query the registry to re-check.",
+      "Any Gradle-only variant (feature variant, KMP target, Shadow's shadowRuntimeElements) is invisible to Maven and Bazel/Coursier by design \u2014 republish as a classified artifact if non-Gradle consumers need it.",
+      "To exclude a dependency from a shaded jar while keeping it correctly in the published POM, use Shadow's built-in `shadow` configuration \u2014 it has done this automatically since Shadow 1.1.0 (2014), no pom.withXml needed.",
+      "Ship a maven-consumability verification module (a small pom.xml + one smoke test resolving the published coordinates) rather than a second production build system \u2014 this is the corpus's actual dagger/okhttp/grpc-java/Exposed/junit-framework pattern.",
+      "A repo carrying both build.gradle* and pom.xml is a false-positive dual-build signal 10/10 times in this corpus \u2014 read the directory name (maven-tests/, examples/maven/, tooling-support-tests/) before concluding anything.",
+      "Scope GMM suppression to the one shaded module (kafka's tasks.withType(GenerateModuleMetadata){enabled=false} inside project(':clients')), never build-wide, since GMM costs Maven/Bazel nothing and gives Gradle consumers free variant-aware resolution.",
+      "Never disable Shadow's addShadowVariantIntoJavaComponent without a stated configuration-timing reason \u2014 it only controls a Gradle-only GMM variant that Maven/Bazel consumers never saw anyway."
+     ],
+     "surprises": [
+      "DIST-13's premise was wrong: Shadow's shadow-configuration-to-POM mapping isn't new in 9.0.0 \u2014 it dates to Shadow 1.1.0 (2014); what's actually new in 9.0.0 is the shadowRuntimeElements GMM variant.",
+      "kafka's hand-rolled pom.withXml isn't working around a Shadow POM defect at all \u2014 it deliberately avoids Shadow's built-in `shadow` configuration because that configuration ALSO writes the same deps into the manifest Class-Path header (GradleUp/shadow#324), which kafka doesn't want.",
+      "kafka disables GenerateModuleMetadata entirely for its shaded :clients module \u2014 a real, previously unrecorded exemplar answering the OCX SDK's 'suppress GMM or not' decision.",
+      "GradleUp/shadow#324 (cited by kafka's own comment as the reason for its POM patch) is actually about the JAR manifest Class-Path header, not about POM dependency correctness \u2014 a stale/misleading-looking citation that still turns out to be internally consistent once read in full.",
+      "junit-framework's own test suite (MavenPomFileTests.java) asserts the literal `<!-- do_not_remove: published-with-gradle-metadata -->` marker text as a golden-line snapshot \u2014 direct corpus proof of the Gradle-docs claim, not just a docs paraphrase.",
+      "Maven 4's 'build POM vs consumer POM' isn't a new capability at all \u2014 it's Maven 4 first-classing what flatten-maven-plugin already did in Maven 3, now opt-in via maven.consumer.pom.flatten (still RC, unshipped)."
+     ],
+     "ok": true
+    }
+   ],
+   "consolidation": {
+    "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-publishing.md",
+    "rule_ids": [
+     "GRADLE-PUB-01 \u2014 Verify the Central namespace (DNS TXT, or GitHub ownership for io.github.*) as a checked precondition of the release job, not a failure to retry.",
+     "GRADLE-PUB-02 \u2014 Fail the release job on a git-tag vs declared-version mismatch, in a step that runs before any build, sign or publish step.",
+     "GRADLE-PUB-03 \u2014 State Central's immutability (no removal, no update, version bump only) as the first line of the release runbook, above step 1.",
+     "GRADLE-PUB-04 \u2014 Write name, description, url, licenses, developers and a full scm block explicitly inside pom { }; url is the one that goes missing.",
+     "GRADLE-PUB-05 \u2014 Ship a matching -sources.jar and -javadoc.jar for every published artifact, using Central's documented placeholder-with-README fallback where real ones cannot be produced.",
+     "GRADLE-PUB-06 \u2014 Sign every publication and confirm .asc, .md5 and .sha1 exist per deployed file.",
+     "GRADLE-PUB-07 \u2014 Supply the PGP key to CI in memory (useInMemoryPgpKeys / ORG_GRADLE_PROJECT_signingInMemoryKey), never useGpgCmd.",
+     "GRADLE-PUB-08 \u2014 Never write literal credentials { username/password } in a publishing repository; read them through providers.gradleProperty / providers.environmentVariable.",
+     "GRADLE-PUB-09 \u2014 Republish any Gradle-only variant that non-Gradle consumers need as a classified artifact or separate publication; never leave it GMM-only.",
+     "GRADLE-PUB-10 \u2014 Scope any GMM suppression (GenerateModuleMetadata, addShadowVariantIntoJavaComponent) to the single module that needs it, with the reason adjacent.",
+     "GRADLE-PUB-11 \u2014 Put a dependency excluded from a shaded jar into Shadow's built-in shadow configuration instead of hand-rolling pom.withXml.",
+     "GRADLE-PUB-12 \u2014 Treat a java-platform BOM's api/runtime constraint split as Gradle-only and comment any dependency constrained on one side only.",
+     "GRADLE-PUB-13 \u2014 Ship a maven-consumability module (standalone pom.xml plus one resolving smoke test) as a release step, never as a second build system.",
+     "GRADLE-PUB-14 \u2014 Set autoPublish = true and waitUntil = \"published\" in any release job whose exit code is meant to mean live on Central.",
+     "GRADLE-PUB-15 \u2014 Never declare mavenLocal() in a committed repositories { } block; publishToMavenLocal as a producer-side task stays fine.",
+     "GRADLE-PUB-16 \u2014 Author a new release against the Central Portal directly, never oss.sonatype.org, io.codearte.nexus-staging, or the OSSRH Staging API shim.",
+     "GRADLE-PUB-17 \u2014 Sign with Sigstore alongside, never instead of, PGP.",
+     "GRADLE-PUB-18 \u2014 Add actions/attest-build-provenance to reach SLSA Build L2, and say in the text that this is ahead of the ecosystem rather than matching it.",
+     "MVN-PUB-01 \u2014 Pin central-publishing-maven-plugin to >= 0.7.0 before relying on a SNAPSHOT channel, comparing versions numerically.",
+     "MVN-PUB-02 \u2014 Do not propose maven.consumer.pom.flatten or <packaging>bom</packaging> as shipping mechanism while 4.0.0-rc-6 is Central's ceiling.",
+     "MVN-PUB-03 \u2014 Replace nexus-staging-maven-plugin and any oss.sonatype.org distributionManagement with central-publishing-maven-plugin."
+    ],
+    "conflicts_resolved": [
+     "maven-publish x configuration cache severity: central-portal-and-provenance rates the literal-credentials ban SHOULD because Gradle 9 degrades gracefully; raised to MUST (GRADLE-PUB-08) \u2014 its own rationale admits no case where the literal is better, Gradle 8.x still hard-fails, and a literal credential in a committed build file is a secret in VCS. Also closes GRADLE-CACHE-08's open question as 'partially incompatible, exactly one config shape'.",
+     "GRADLE-DIST-13's rationale ('Gradle does not make this free; kafka needed a hand-rolled pom.withXml') is wrong: Shadow's shadow-configuration -> RUNTIME-scope POM mapping dates to 1.1.0 (2014-08-26) and kafka's reason is the coupled manifest Class-Path write (shadow#324), not a POM defect. Primary docs + changelog + the issue title outrank an inference from reading kafka's build file. DIST-13's rule survives; the mechanism becomes GRADLE-PUB-11 and DIST-13's rationale needs correcting at authoring time.",
+     "OIDC 'trusted publishing' at the Central Portal: config-inventory.md Axis 3 asserts it exists post-OSSRH-sunset; central-portal-and-provenance fetched the Portal guide, requirements, Publisher API and registration pages on 2026-09-12 and found no OIDC path. Primary-source negative beats an unsourced analogy to PyPI \u2014 the OCX SDK uses a Portal token in CI secrets and the claim goes to Open questions, not into a rule.",
+     "mavenLocal() MUST NOT (GRADLE-PUB-15) collided with the consumability probe that resolves through it (GRADLE-PUB-13). Resolved by carve-out written into PUB-15's verification cell rather than by weakening either: PUB-15 governs a Gradle consuming build's repositories { }; the probe is a Maven module whose purpose is resolving a deliberately-unpublished artifact, and mvn reads ~/.m2 by default rather than through a declared Gradle repository.",
+     "Publishing-plugin choice: the corpus majority hand-rolls raw maven-publish (18/32, 7 with no higher-level plugin) against the recommendation of nmcp/vanniktech. Resolved by naming the departure rather than following the count \u2014 the majority pattern predates the configuration cache and Isolated Projects, and nmcp documents compatibility with both by construction; codifying the majority would codify debt.",
+     "Sigstore vs provenance severity, both at 0/32 corpus adoption: split on whether a consumer can act on the artifact. Central validates Sigstore bundles (since 2025-01-28) so a bundle is verifiable \u2014 SHOULD. Nothing Portal-side consumes a GitHub provenance attestation \u2014 CONSIDER."
+    ],
+    "needs_another_round": [
+     "Central Portal authentication and the Gradle-side SNAPSHOT path \u2014 does the Portal support OIDC/tokenless publishing (config-inventory asserts yes, primary sources are silent), and what is the snapshot equivalent of central-publishing-maven-plugin >= 0.7.0 for nmcp and vanniktech? Neither dive covered a Gradle snapshot channel at all.",
+     "The 42-file mavenLocal() census \u2014 which repos, and in which is the declaration inside a committed consuming repositories { } (the finding) versus a gitignored local override or a consumability probe (the carve-out)? GRADLE-PUB-15 currently has a count but no named violator.",
+     "Release-gate ordering for the jvm-release skill \u2014 at which point does the binary-compatibility gate run relative to sign/checksum/upload, and can a failed VALIDATED deployment be dropped without burning the version number? Immutability makes the ordering load-bearing and no dive established it.",
+     "Shadow's manifest Class-Path coupling \u2014 did GradleUp/shadow#324's 2025-01-24 closure change the shadow configuration's Class-Path write, or was it closed 'working as intended, use a different configuration name'? GRADLE-PUB-11's exception clause depends on the answer and the comment thread was never read.",
+     "version-catalog plugin publishing (map row M-H-08) \u2014 1/32 (ktor), deferred by the map to this group and answered by neither dive; does the OCX Gradle plugin ship a catalog for consumers, which is what would earn it a rule rather than a MAY-level mention?"
+    ],
+    "must_count": 14
+   }
+  },
+  {
+   "group": "bazel-java",
+   "dives": [
+    {
+     "slug": "bazel-java-toolchains-and-compilation",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-bazel-java/bazel-java-toolchains-and-compilation.md",
+     "sources_count": 16,
+     "top_rules": [
+      "Pin all four version flags explicitly (--java_language_version/--java_runtime_version, --tool_java_language_version/--tool_java_runtime_version); never rely on Bazel's 11/local_jdk/11/remotejdk_11 defaults.",
+      "Prefer remotejdk_* over local_jdk for --java_runtime_version \u2014 local_jdk makes output depend on the build machine's installed JVM.",
+      "Express a below-toolchain bytecode target with --javacopt=\"-source N -target N\", never by lowering --java_language_version, which also re-selects the java_toolchain via source_version matching.",
+      "Never set forcibly_disable_header_compilation=True without a recorded reason, and never call header compilation \"ijar-based\" \u2014 the default toolchain's header compiler is turbine (TurbineDirect), which parses source directly, not a compiled-jar stripper.",
+      "Confirm the strict-deps flag's real name on your own pinned binary before using it \u2014 command-line-reference says --experimental_strict_java_deps, user-manual says --strict_java_deps; only the experimental-prefixed spelling has exemplar evidence (rules_jvm_external).",
+      "Do not read an absent strict-deps flag as \"unenforced\" \u2014 default/strict/error are behaviorally identical and that is the behavior when the flag is unset; only off/warn weaken it.",
+      "Wire Error Prone severity via --javacopt=\"-Xep:Check:SEVERITY\" or java_package_configuration+package_group \u2014 never as a maven/bazel_dep artifact, since error-prone ships no Bazel config of its own.",
+      "When multiple JVM registrations match the same OS/CPU, Bazel silently picks the first one registered, not the most specific \u2014 order register_toolchains() calls deliberately and comment the intended winner."
+     ],
+     "surprises": [
+      "Bazel's own docs disagree on the strict-deps flag's name: command-line-reference calls it --experimental_strict_java_deps, user-manual calls it --strict_java_deps with no prefix \u2014 could not be resolved against a real bazel binary (none installed in the sandbox).",
+      "Strict Java deps is not something you turn on: per user-manual, default/strict/error are the same behavior and that IS the behavior when the flag is unset \u2014 an absent strict-deps line does not mean unenforced.",
+      "Header compilation on the default toolchain is turbine (TurbineDirect), not ijar \u2014 bazel-and-java's own prose only names ijar in that section, which misdescribes the mechanism (ijar strips a compiled jar; turbine parses source directly, no javac back-end invoked).",
+      "google/error-prone ships literally no MODULE.bazel/WORKSPACE/BUILD file at all; it's wired into Bazel purely via JavaBuilder + --javacopt/java_package_configuration, never as a dependency.",
+      "bazel-and-java's own page states the 'default javac options' are -source 8 -target 8, directly contradicting its own (and user-manual's) stated --java_language_version default of 11 two paragraphs apart \u2014 an internal doc inconsistency, not a live default.",
+      "contrib_rules_jvm's lint wrappers ARE bzlmod-native (own MODULE.bazel uses a `linter` module extension), but zero of the 32 program exemplars adopt them or apple_rules_lint at all."
+     ],
+     "ok": true
+    },
+    {
+     "slug": "bazel-java-external-deps-and-kotlin",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-bazel-java/bazel-java-external-deps-and-kotlin.md",
+     "sources_count": 16,
+     "top_rules": [
+      "Set fail_if_repin_required = True on every maven.install \u2014 its default False leaves both lock-file self-checks (input-artifacts hash and resolved-artifacts hash) as warnings the build survives, unlike crate_universe's unconditional hard-fail.",
+      "Never hand-merge or line-merge maven_install.json \u2014 it has no safe human-editable region at all (unlike MODULE.bazel.lock's registryFileHashes); on conflict, resolve MODULE.bazel and regenerate wholesale via REPIN=1 bazel run @maven//:pin.",
+      "Never point Bazel's own bazel-lockfile-merge jq driver at maven_install.json \u2014 it parses MODULE.bazel.lock's schema, not this one; the two lockfiles must never be conflated in review or tooling.",
+      "Resolve every Kotlin coordinate through rules_jvm_external's maven.install, never a hand-rolled java_import \u2014 its generated jvm_import auto-detects kotlin_module entries and skips ijar, which otherwise strips inline-function bodies; the fix (PR #69, 2019) predates every currently-supported release.",
+      "In a repo that also builds the same Kotlin sources with Gradle, set kt_kotlinc_options(x_lambdas = \"indy\") explicitly \u2014 rules_kotlin's own default (\"class\") diverges from both Kotlin 2.x's compiler default and Gradle's default (both \"indy\"), producing different bytecode for identical source.",
+      "Set version_conflict_policy = \"pinned\" for deterministic resolution; reuse jvm-dependencies.md GRADLE-DEP-09 \u2014 this only decides which version wins a conflict, it never vets legitimacy, exactly like a lockfile.",
+      "Set strict_visibility = True on maven.install once a repo has more than a handful of contributors touching the artifacts list, so pruning it fails loudly instead of breaking an undeclared consumer later.",
+      "The dual-build Gradle+Bazel source-of-truth question (M-X-07) gets a reading heuristic only \u2014 require a canonical-build sentence in CONTRIBUTING/README, never invent a parity generator nothing in the corpus supports."
+     ],
+     "surprises": [
+      "No merge between bazel-contrib/rules_jvm_external and bazel-contrib/rules_jvm has happened (both remain live, separate, non-archived repos) \u2014 but rules_kotlin itself underwent a GitHub org transfer from bazelbuild/ to bazel-contrib/, which is likely what the recent-shifts scout half-detected.",
+      "rules_jvm_external's freshness gate is NOT unconditional like crate_universe's: fail_if_repin_required defaults to False (confirmed in coursier.bzl source), so a stale or even hand-corrupted maven_install.json is merely a printed warning and the build still succeeds unless that flag is explicitly set \u2014 the opposite failure-mode shape from BZL-RUST-01.",
+      "The lock file self-checks on two independent hash fields, not one: __INPUT_ARTIFACTS_HASH (declared-vs-lock drift) and __RESOLVED_ARTIFACTS_HASH (lock-body self-tamper/bad-merge check) \u2014 both gated by the same fail_if_repin_required flag.",
+      "The ijar/Kotlin-inline-function bug is ancient (filed and fixed in 2019, PR #69) \u2014 there is no live rules_jvm_external version lacking the fix, so no version-floor caveat is actually needed for a repo starting today.",
+      "dagger already does almost everything right: fail_if_repin_required=True and lock_file are both set (MODULE.bazel:185-186), yet it still never sets version_conflict_policy or x_lambdas \u2014 showing the gate/pin discipline and the conflict-policy/codegen discipline are adopted completely independently in practice.",
+      "No exemplar in the corpus (0/6 Bazel-carrying repos, including dagger's dual Gradle+Bazel Kotlin build) sets x_lambdas at all \u2014 the silent-default bytecode divergence is not hypothetical, it's the observed universal state."
+     ],
+     "ok": true
+    }
+   ],
+   "consolidation": {
+    "conflicts_resolved": [
+     "ijar vs turbine, between the two dives \u2014 the toolchains dive says the default toolchain's header compiler is turbine and 'ijar-based' is a misdescription; the deps/Kotlin dive says ijar strips Kotlin inline-function bodies. Resolved by scope split: turbine parses SOURCE for java_library/kt_jvm_library, ijar strips a PREBUILT jar for java_import. Neither rule cures the other's failure \u2014 forcibly_disable_header_compilation does not fix the Kotlin trap, and routing Kotlin through maven.install does not change the header compiler. Both survive as separate rules (BZL-JAVA-07, BZL-JAVA-18) plus one merged failure mode.",
+     "Strict-deps severity and spelling \u2014 the toolchains dive made 'confirm the flag name on your own pinned binary' a MUST whose verification cannot run without a bazel binary (this program has none, and an adopting agent often will not either). Resolved by splitting: BZL-JAVA-05 demoted to SHOULD with the exemplar-evidenced spelling (--experimental_strict_java_deps, rules_jvm_external@449754dcbb:.bazelrc:9) as the writable default, and the MUST moved to BZL-JAVA-04, the misreading that licenses a real edit (absent flag already means error, so 'not enforced here' ends in =off).",
+     "strict_visibility severity \u2014 the deps dive rated it CONSIDER on 'absent is a finding to raise, not an automatic block'. Promoted to SHOULD (BZL-JAVA-13) on re-measurement: three of the four exemplars carrying a real external Maven graph set it (bazel@948b8c70e2:MODULE.bazel:269, grpc-java@fc4314419d:MODULE.bazel:78,100, rules_jvm_external@449754dcbb:MODULE.bazel:86), and it is the only mechanism that fails an undeclared transitive use at the point of the edit.",
+     "fail_if_repin_required \u2014 who actually violates. The deps dive's exemplar table named only dagger (satisfies) and grpc-java (violates by absence), implying the careful repos set it. Re-measured here: bazel-contrib__rules_jvm_external@449754dcbb:MODULE.bazel:81-86 \u2014 the ruleset that SHIPS the flag sets lock_file and strict_visibility on its own primary maven.install and not the gate (it does set it on a test fixture at :506-507). MUST stands; the violation row is now named.",
+     "M-X-08 / _deploy.jar \u2014 the toolchains dive deferred it wholly to jvm-distribution.md DIST-02..DIST-11 and emitted no BZL-JAVA rule. Resolved: the shading taxonomy is correctly inherited, but there is Bazel-only residue that file cannot carry \u2014 per bazel.build/reference/be/java, name_deploy.jar is an implicit output 'only built if explicitly requested', so a green bazel build //... never builds the shipped artifact. Ships as BZL-JAVA-21, MUST for CLI/application consumers.",
+     "x_lambdas and dagger \u2014 the deps dive filed dagger's unset x_lambdas under 'silent-default territory\u2026 not a counterexample'. Sharpened to a confirmed violation: dagger-compiler/main/java/dagger/internal/codegen/kotlin/BUILD:22-28 globs *.kt through compat_kt_jvm_library (tools/bazel_compat.bzl:20-26 \u2192 rules_kotlin's kt_jvm_library) while dagger-compiler/build.gradle.kts:6-10 applies kotlinJvm over source dirs wired to the same main/java tree (buildSrc/src/main/kotlin/dagger/gradle/build/DaggerConventionPlugin.kt:158-168). Same .kt files, two build systems, zero x_lambdas/kt_kotlinc_options anywhere in the repo.",
+     "Line-number drift in the toolchains dive's dagger citations \u2014 it cites Error Prone at .bazelrc:11-13, the four version flags at :17-28 and --add-exports at :26. Re-read at the pinned SHA: :17-18, :22-25, :28 (-source/-target) and :34. The pub audit (Axis 4) had it right. All dive citations corrected in the file and the correction recorded inline, because a grep written from the dive's numbers misses. The dive's other three .bazelrc citations (bazel :70-73, rules_java :4-7, rules_jvm_external :3-10 and :9) were re-read and are correct."
+    ],
+    "must_count": 12,
+    "needs_another_round": [
+     "Bazel-Java testing and coverage \u2014 what is the minimum wiring that makes `bazel test //...` actually run a JUnit 5 suite and emit a coverage report a JAVA-TEST floor can read? rules_java ships no first-party JUnit 5 rule, contrib_rules_jvm's java_junit5_test is the only path, and coverage_report_generator is customised by 0/6 exemplars. The sibling testing.md owns sizing and `manual` tags, not JUnit-platform wiring \u2014 a real hole between two files, not a duplicate.",
+     "java_export and publishing to Maven Central from Bazel \u2014 does rules_jvm_external's java_export/maven_publish produce a Central-Portal-acceptable bundle (sources jar, javadoc jar, per-file GPG signature, complete POM), or is Bazel a non-publisher that always hands off to Gradle or Maven? Load-bearing for the OCX SDK: the jvm-release skill assumes a Gradle or Maven publisher, and dagger \u2014 the corpus's canonical-Bazel repo \u2014 keeps Gradle precisely for publishing packaging.",
+     "Worker-state reproducibility for KotlinCompile \u2014 BZL-JAVA-20 is a CONSIDER because no primary source states a correctness defect and no exemplar overrides the default. One experiment (build twice with and without --strategy=KotlinCompile=local, diff the jars) would either promote it to a SHOULD with evidence or retire it to prose. Below the line for this program; promote only if an adopter reports a Kotlin flake."
+    ],
+    "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-bazel-java.md",
+    "rule_ids": [
+     "BZL-JAVA-01 \u2014 Pin all four JDK version flags in the root .bazelrc, and never write --java_version/--tool_java_version, which do not exist and silently no-op. (MUST)",
+     "BZL-JAVA-02 \u2014 Give both runtime flags a remotejdk_* value; treat local_jdk, explicit or defaulted, as a finding unless a comment says why local compilation is deliberate. (MUST)",
+     "BZL-JAVA-03 \u2014 Express a below-toolchain bytecode target as --javacopt=\"-source N -target N\" on an unchanged modern --java_language_version, never by lowering the language flag, which also re-selects the toolchain. (MUST)",
+     "BZL-JAVA-04 \u2014 Never conclude strict deps is unenforced from an absent flag, and never add =off or =warn to make a build pass: default, strict and error are the same behaviour. (MUST)",
+     "BZL-JAVA-05 \u2014 Write the flag as --experimental_strict_java_deps, the only exemplar-evidenced spelling, and confirm it with `bazel help build --long` whenever a binary is available. (SHOULD)",
+     "BZL-JAVA-06 \u2014 Wire Error Prone severity through --javacopt=\"-Xep:...\" or java_package_configuration + package_group, never a bazel_dep or maven coordinate on error_prone_core. (MUST)",
+     "BZL-JAVA-07 \u2014 Never set forcibly_disable_header_compilation = True without a recorded reason, and never call Bazel's header compilation ijar-based: the default header compiler is turbine. (SHOULD)",
+     "BZL-JAVA-08 \u2014 When two JVM repository definitions match the same OS/CPU pair, register the intended default first and comment it; resolution is registration order, never specificity. (SHOULD)",
+     "BZL-JAVA-09 \u2014 Give a first-party processor reading com.sun.tools.javac.* its own --jvmopt=\"--add-exports=...=ALL-UNNAMED\"; never touch JavaBuilder's --patch_module. (MUST where such a processor exists)",
+     "BZL-JAVA-10 \u2014 Set lock_file on every maven.install and commit it; each install tag needs its own name and its own lock file. (MUST)",
+     "BZL-JAVA-11 \u2014 Set fail_if_repin_required = True on every lock_file-bearing maven.install; the default False leaves both self-checks advisory. (MUST)",
+     "BZL-JAVA-12 \u2014 Never hand-edit or line-merge maven_install.json; on conflict resolve the artifacts list in MODULE.bazel and regenerate with REPIN=1 bazel run @maven//:pin. (MUST)",
+     "BZL-JAVA-13 \u2014 Set strict_visibility = True on maven.install so an undeclared transitive use fails at the point of the edit. (SHOULD)",
+     "BZL-JAVA-14 \u2014 Set version_conflict_policy = \"pinned\" wherever the build claims deterministic resolution, documented once per maven.install. (SHOULD)",
+     "BZL-JAVA-15 \u2014 Scope every exclusion to the narrowest correct mechanism: maven.artifact(exclusions) for one closure, excluded_artifacts only for a graph-wide ban. (SHOULD)",
+     "BZL-JAVA-16 \u2014 Mark codegen-only coordinates neverlink and test-only ones testonly via maven.amend_artifact; never hand-edit the generated java_import. (SHOULD)",
+     "BZL-JAVA-17 \u2014 Prefer the literal @maven//:group_artifact label over the artifact() macro in any BUILD file buildozer or a bump job will touch. (CONSIDER)",
+     "BZL-JAVA-18 \u2014 Never let a Maven-resolved Kotlin jar reach a hand-rolled java_import; route it through maven.install, whose import skips ijar on kotlin_module entries. (MUST)",
+     "BZL-JAVA-19 \u2014 Set kt_kotlinc_options(x_lambdas = \"indy\") wherever the same Kotlin sources are also compiled by Gradle. (MUST with a Gradle leg; SHOULD otherwise)",
+     "BZL-JAVA-20 \u2014 Know that KotlinCompile, KotlinKsp2 and JdepsMerge run under persistent multiplexed workers by default, and reach for --strategy=<mnemonic>=local as the first diagnostic on a Kotlin flake. (CONSIDER)",
+     "BZL-JAVA-21 \u2014 Name every //<pkg>:<name>_deploy.jar you ship explicitly in the build and CI lane; a green bazel build //... never builds it. (MUST for CLI/application consumers)",
+     "BZL-JAVA-22 \u2014 In a repo building the same code under both Gradle and Bazel, require one prose line naming the canonical build; do not require or build a parity generator. (SHOULD)",
+     "BZL-JAVA-23 \u2014 Treat contrib_rules_jvm's checkstyle/PMD/SpotBugs wrappers as a decision to record, not a default, and record the apple_rules_lint dependency when adopted. (CONSIDER)"
+    ]
+   }
+  },
+  {
+   "group": "maven-and-ant",
+   "dives": [
+    {
+     "slug": "maven4-lifecycle-and-plugins",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-maven-and-ant/maven4-lifecycle-and-plugins.md",
+     "sources_count": 26,
+     "top_rules": [
+      "Never invoke `mvn integration-test` or `mvn clean install` as the CI gate \u2014 use `mvn verify`; hyphenated phases skip teardown/reporting and can hang containers.",
+      "State every Maven-4 claim with the re-check command (`curl .../maven-core/maven-metadata.xml`) inline \u2014 4.0.0 has never shipped, only rc-6.",
+      "Set `<release>` on maven-compiler-plugin; unset `source`/`target` silently default to Java 8 regardless of the running JDK.",
+      "Query Central's maven-metadata.xml for Surefire, never the plugin doc-site's version banner \u2014 banner says 3.6.0, GA line is 3.5.6.",
+      "Flag any `.mvn/maven.config` using `aether.checksums.algorithms`/`aether.connector.smartChecksums` (resolver-1.x names) on a project whose wrapper pins Maven 4 \u2014 resolver 2.0 renamed both properties and the old names silently no-op.",
+      "Never present Maven checksum config as a security control \u2014 Maven Resolver's own docs state checksums are integrity-only and do not defend against MITM/supply-chain tampering; GPG signing is the trust layer.",
+      "Set `includeantruntime=\"false\"` explicitly on every live `<javac>` before any other Ant migration work \u2014 same-system, zero-risk, Ant's own manual recommends it.",
+      "Never recommend `ant.importBuild()` as an end-state or default bridge \u2014 it disables the Gradle configuration cache for the whole build unconditionally, and 0/32 corpus repos use it for real."
+     ],
+     "surprises": [
+      "assertj's `.mvn/maven.config` checksum flags are Maven-Resolver-1.x property names (correct for its pinned Maven 3.9.16/resolver 1.9.27) but resolver 2.0 (Maven 4) renamed both \u2014 the config silently becomes a no-op the day the wrapper moves to Maven 4, with no error at all.",
+      "Maven Resolver's own docs explicitly reject the 'MD5/SHA-1 are insecure' framing for Maven: checksums provide integrity only, never security/trust/MITM protection \u2014 the Gradle-verification-metadata mental model doesn't transfer.",
+      "`smartChecksums` only ever validates SHA-1 via an HTTP ETag header shortcut \u2014 leaving it on with a SHA-512-first algorithm list configures a stronger digest that never actually gets exercised; disabling it (as assertj does) is the operative half of the config, not the algorithm list.",
+      "Maven has no equivalent of Gradle's verification-metadata.xml at all \u2014 no file, plugin, or built-in feature plays that role; the closest levers (resolver checksum properties, GPG signing) are orthogonal, not substitutes.",
+      "apache/maven's own PR fixing the JDK17+ --add-opens/JaCoCo argLine clobber (apache/maven#11605) is still open and unmerged as of 2026-09-12 \u2014 the brief's cited bug has a proposed fix, not a shipped one.",
+      "The one wrapper-checksum exemplar in the whole corpus (assertj) sets neither wrapperSha256Sum nor distributionSha256Sum \u2014 0/1, not partial adoption."
+     ],
+     "ok": true
+    }
+   ],
+   "consolidation": {
+    "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-maven-and-ant.md",
+    "rule_ids": [
+     "MVN-BUILD-01 \u2014 Set the bytecode target with `<maven.compiler.release>` in exactly one place; never leave it unset and never express it as `<source>`/`<target>` (MUST)",
+     "MVN-BUILD-02 \u2014 Declare every annotation processor in `<annotationProcessorPaths>` with an explicit version; never let one ride the compile classpath (MUST)",
+     "MVN-BUILD-03 \u2014 Make `verify` the last Maven goal of every CI gate; a `-DskipTests install` reactor bootstrap before a `verify` gate is permitted (MUST)",
+     "MVN-BUILD-04 \u2014 In any module binding jacoco `prepare-agent`, compose `argLine` additively with `@{argLine}`, never as a bare flag list (MUST)",
+     "MVN-BUILD-05 \u2014 Pin `maven-surefire-plugin` to a version queried from Central, never from the plugin's doc-site banner, and confirm the JUnit Platform provider actually ran (MUST)",
+     "MVN-BUILD-06 \u2014 Before any Maven-4 move, find and de-duplicate every plugin declared in both `<build>` and a `<profile><build>` (MUST, migration)",
+     "MVN-BUILD-07 \u2014 Exercise Maven 4 as a separate non-blocking CI job that regenerates the wrapper at a pinned RC; never bump the committed `distributionUrl` to an RC (SHOULD)",
+     "MVN-BUILD-08 \u2014 State \"(Maven 3)\"/\"(Maven 4)\"/\"(both)\" on every Maven mechanic written down, and re-verify GA via Central before any unconditional Maven-4 claim (MUST)",
+     "MVN-BUILD-09 \u2014 Run the four-item Maven-4 readiness checklist: Java 17 to run Maven, Plexus DI removed, removed directory properties, `pre-*`/`post-*` phase-scope change (MUST, migration)",
+     "MVN-BUILD-10 \u2014 Set `<project.build.outputTimestamp>` to an explicit ISO-8601 UTC instant in every POM that publishes (MUST)",
+     "MVN-BUILD-11 \u2014 Read every `aether.*` property in `.mvn/maven.config` against the Maven version the wrapper pins; a resolver-1.x name under a Maven-4 distribution is a silent no-op (MUST)",
+     "MVN-BUILD-12 \u2014 Never describe Maven checksum configuration as a supply-chain or security control; name `maven-gpg-plugin` and Central signing for trust (MUST)",
+     "MVN-BUILD-13 \u2014 Do not remove `smartChecksums=false` when tidying build flags (CONSIDER)",
+     "MVN-BUILD-14 \u2014 Set both `wrapperSha256Sum` and `distributionSha256Sum` in every committed `.mvn/wrapper/maven-wrapper.properties` (MUST)",
+     "MVN-BUILD-15 \u2014 Check for build extensions in CI as well as in the tree; a workflow-written `.mvn/extensions.xml` changes resolution invisibly to a file census (SHOULD)",
+     "MVN-ANT-01 \u2014 Set `includeantruntime=\"false\"` explicitly on every live `<javac>`, before any other change to the file (MUST)",
+     "MVN-ANT-02 \u2014 Never introduce `ant.importBuild()`; bridge via an external `Exec` process or `ant.<task>(\u2026)` inside a task action (MUST)",
+     "MVN-ANT-03 \u2014 Never \"change\" an Ant property by re-declaring it; properties are write-once and the second write is silently ignored (MUST)",
+     "MVN-ANT-04 \u2014 Do not read a `depends` chain as proof a target ran; `depends` orders execution, it does not force it (SHOULD)",
+     "MVN-ANT-05 \u2014 Port leaf targets first and verify each ported output against the Ant artifact \u2014 entry list, manifest attributes, signed digest \u2014 before deleting the Ant target (SHOULD)",
+     "MVN-ANT-06 \u2014 Pin `digestalg`/`sigalg` on `<signjar>` and set `preservelastmodified=\"true\"` (CONSIDER)"
+    ],
+    "conflicts_resolved": [
+     "jackson-databind's `argLine`: the dive recorded `FasterXML__jackson-databind@a906e1782b:pom.xml:44` as SATISFYING the JaCoCo-composition rule. Re-measured this consolidation \u2014 it VIOLATES it. `:44-46` is two bare `--add-opens` flags with no `@{argLine}` placeholder while `:212-215` binds jacoco-maven-plugin; the POM carries its own smoking gun at `:51-54` (`<jacocoStrict>false</jacocoStrict>`, comment \"For some reason, release fails due to missing jacoco... so disable for now\") and a consequently non-failing `requireFilesExist` on `target/jacoco.exec` at `:226-243`. The corpus's counterexample, not its exemplar.",
+     "`mvn verify` vs `install`: the dive stated a flat prohibition (candidate #2, carried from map row M-J-10 unmeasured). Measured the 5 Maven-primary repos' CI this consolidation: `google__guava@5fb424c43a:.github/workflows/ci.yml:53,56` runs a deliberate `-DskipTests install` reactor bootstrap and then gates on `verify` \u2014 correct. Resolved: the rule binds the GATE, not every invocation. The real violation is `google__error-prone@c1f99ad5d3:.github/workflows/ci.yml:88,91` (`mvn install -DskipTests` then `mvn test`), which never reaches `verify` at all.",
+     "Surefire version: map row M-J-08 says \"3.6.0-M1\", the dive's candidate #7 quotes the doc banner \"3.6.0 / Last Published 2026-08-31\", frame correction 38 says Central GA tops at 3.5.6. Resolved in favour of Central: MVN-BUILD-05 pins from `maven-metadata.xml` and describes the single-provider consolidation as a 3.6.0-line change not yet GA \u2014 a rule quoting the banner instructs an agent to pin a milestone as stable.",
+     "Family routing for the supply-chain rows: the dive routed them to MVN-DEP (it was commissioned to close jvm-dependencies.md's open \"Maven-side checksum and verification policy\" question). But the map routes MVN-DEP to `dependencies.md`, triggered by \"adding a dependency\"; an agent editing `.mvn/maven.config` or `maven-wrapper.properties` is editing build configuration. Resolved: they land in MVN-BUILD (family follows file kind); MVN-DEP-01\u202611 stand unchanged and are cited, not duplicated.",
+     "Internal tension in the dive: candidate #12 says Maven checksums are never a security control, candidate #14 makes the wrapper checksum a supply-chain MUST. Resolved by scope, both survive \u2014 Resolver checksums verify an artifact fetched inside a chain GPG can also cover (integrity only), whereas the wrapper checksum pins a distribution downloaded and executed before any trust chain exists and where no signature is ever checked, so integrity is the only available control there.",
+     "`.mvn/extensions.xml` is 0/32 per the shape audit \u00a71 \u2014 but `apache__maven@ea4a417bd2:.github/workflows/maven.yml:77,93-95` copies one in before the Maven-3 leg and swaps it to `~/.m2/extensions.xml` for the Maven-4 leg. Resolved: the census counted committed files; an extension can replace the local repository wholesale, so MVN-BUILD-15 requires reading CI configs, not only `git ls-tree`.",
+     "Ant severity: map decision 3 folds Ant into a depth file because recognise-and-migrate fails rule-distillation's \"it changes a diff\" test; the dive proposes MUST-grade rules. Resolved: MVN-ANT rows ship as conditional-entry rules that fire only when a `build.xml` is in the diff. MVN-ANT-02 earns a MUST at 0/32 adoption because its blast radius is whole-build configuration-cache loss on the *Gradle* side, not on Ant."
+    ],
+    "needs_another_round": [
+     "Maven compilation under modern JDKs \u2014 does a modern JDK disable implicit annotation processing by default, and must a Maven build set `<maven.compiler.proc>full</maven.compiler.proc>` for processors to run at all? `apache__maven@ea4a417bd2:pom.xml:135` sets it; no dive covered the javac mechanism, and a wrong rule makes an agent believe processors ran when they did not. Highest-value gap in the family.",
+     "Maven toolchains \u2014 what is the Maven-side equivalent of the toolchain-vs-`--release` split JAVA-PLAT owns for Gradle: `~/.m2/toolchains.xml`, `maven-toolchains-plugin`, or the `setup-java` matrix? `google__guava@5fb424c43a:.github/workflows/ci.yml:53,56` passes `-Dtoolchain.skip` and `-Dsurefire.toolchain.version`, implying a live toolchain configuration no audit read.",
+     "`maven-antrun-plugin` \u2014 Ant inside Maven: what does a rule say about `<target>`/`<tasks>` blocks embedded in a POM, the one Ant surface that appears in live Maven builds rather than legacy files? The map's Ant brief named the plugin; the dive never fetched it, and MVN-ANT as written only fires on a `build.xml`.",
+     "Maven build extensions as a resolution mechanism \u2014 does MVN-BUILD-15 become a MUST, and what does a rule say about an extension that replaces the local repository for CI only (apache/maven's Mimir)? Measured 0/32 committed, which is exactly why the CI-injected case was missed."
+    ],
+    "must_count": 15
+   }
+  },
+  {
+   "group": "platform-and-toolchains",
+   "dives": [
+    {
+     "slug": "jdk-floors-modules-and-removed-apis",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-platform-and-toolchains/jdk-floors-modules-and-removed-apis.md",
+     "sources_count": 22,
+     "top_rules": [
+      "JAVA-PLAT-01: toolchain and --release/.release are two separate declared values \u2014 never let sourceCompatibility/targetCompatibility or <source>/<target> stand in for --release",
+      "JAVA-PLAT-02: SDK/library ships module-info.java with exports = exactly the public packages; Automatic-Module-Name only when floor <9 or module can't host sources, and it gives zero encapsulation",
+      "JAVA-PLAT-04: no global reflective-access relax flag since JDK 17 \u2014 every --add-opens/--add-exports is per-module, declared and commented at the call site",
+      "JAVA-PLAT-05: run jdeps --jdk-internals -R and jdeprscan --for-removal against every published artifact before any JDK-major bump; any hit blocks, doesn't just warn",
+      "JAVA-PLAT-06: before raising the CI matrix past JDK 21, grep every List/Deque/Set/Map/Collection implementor for a self-declared getFirst/getLast/addFirst/addLast/removeFirst/removeLast/reversed (SequencedCollection collision)",
+      "JAVA-PLAT-08: bind japicmp/BCV to check/verify directly (tasks.check.dependsOn / <phase>verify</phase>) \u2014 never leave it as a manual-only task or a CI-workflow-only side gate",
+      "JAVA-PLAT-10: before jspecifyMode = true, confirm JDK 22+ (any vendor) or 21.0.8+/17.0.19+ on an OpenJDK-family distro with -XDaddTypeAnnotationsToSymbol=true \u2014 never Oracle JDK 17/21 with the flag",
+      "JAVA-PLAT-11: OCX SDK floor is 17 (confirmed, matches Spring Boot 4 / JUnit 6), toolchain 25, CI matrix 17/21/25 \u2014 module-info.java needs no MR-JAR layer at this floor since it's already \u22659"
+     ],
+     "surprises": [
+      "Of the six declared japicmp adopters, only three (maven, gradle/gradle, testcontainers-java) bind the checker into the default build lifecycle \u2014 grpc-java's own build-file comment says 'Run with: ./gradlew japicmp --continue' (manual only), assertj only breaks the build inside a dedicated GitHub Actions workflow, and micronaut-core's check-binding lives in an external plugin repo not present in the sparse checkout",
+      "micronaut-core's accepted-breaks file is a much lighter template than gradle/gradle's: a flat {type, member, reason} JSON array (1370 lines) consumed via the japicmp-gradle-plugin's own richReport{addViolationTransformer(...)} extension point, not a custom ViolationRule class hierarchy \u2014 but the transformer class itself still has to be hand-written, it isn't shipped by the plugin",
+      "Because the OCX SDK's floor is already 17 (\u22659), it needs none of guava's multi-release-JAR complexity for module-info.java \u2014 that indirection is strictly a floor-below-9 problem",
+      "gradle/gradle's own Kotlin-DSL build is the SequencedCollection worked example, not a satisfier of any rule: gradle/gradle#27699 is still open with no code fix, only 'avoid the colliding name' as workaround",
+      "NullAway's jspecifyMode JDK-vendor split is sharper than a version check: JDK 22+ works on any vendor including Oracle, but below 22 the flag is OpenJDK-family only (Temurin/Zulu) and literally does nothing on Oracle JDK 17/21 \u2014 and NullAway \u22650.12.11 throws IllegalStateException rather than degrading silently",
+      "JEP 493 (jlink without JMODs) is confirmed a JDK-vendor build-time opt-in (--enable-linkable-runtime), not a JDK-24+ guarantee \u2014 jlink --help's own enabled/disabled line is the only way to know"
+     ],
+     "ok": true
+    },
+    {
+     "slug": "encoding-locale-timezone-determinism",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-platform-and-toolchains/encoding-locale-timezone-determinism.md",
+     "sources_count": 16,
+     "top_rules": [
+      "Never call a charset-less overload (new String(byte[]), getBytes(), FileReader, PrintStream(OutputStream)) without an explicit Charset, even on JDK 18+ \u2014 JEP 400 changed the default value, not the API surface; verify with Error Prone DefaultCharset + SpotBugs DM_DEFAULT_ENCODING",
+      "Set org.gradle.jvmargs=-Dfile.encoding=UTF-8 whenever CI/dev touches a non-UTF-8-default host, regardless of JDK floor \u2014 the daemon launches before toolchain selection and Gradle never sets file.encoding itself (gradle/gradle#2270, open)",
+      "Treat any file.encoding value other than UTF-8 or COMPAT on JDK 18+ as a defect \u2014 JEP 400's own spec note declares other values unspecified",
+      "Pin options.encoding/project.build.sourceEncoding explicitly regardless of JDK floor \u2014 a separate fallback point from JEP 400; only 15/32 exemplars set it, a different set from the 13/32 setting -Dfile.encoding",
+      "shadowJar inherits Gradle 9's reproducibleFileOrder/preserveFileTimestamps automatically \u2014 verified via source (ShadowJar never overrides createCopyActionExecuter, so AbstractArchiveTask's own logic drives file-tree order upstream of Shadow's custom CopyAction); do not add a redundant reproducibility block to shadowJar",
+      "mergeServiceFiles() preserves entry order deterministically but as classpath-resolution order (a LinkedHashSet in ServiceFileTransformer.kt), not sorted \u2014 byte-identical shadowJar output needs locked dependency versions, not just archive flags",
+      "Properties.store() always writes an unconditional timestamp comment line independent of archive-level fixes \u2014 strip via java.properties.date (Maven) or a comment-free/sorted Properties subclass (Shadow's own ReproducibleProperties is the reference shape)",
+      "Keep test-timezone pinning at CONSIDER only (0/32 corpus support) \u2014 jvm-quality-gates.md verdict 10 already names this as exactly what an agent invents unprompted; do not promote it to MUST/SHOULD without an owner decision"
+     ],
+     "surprises": [
+      "Shadow's ShadowJar never overrides Gradle's createCopyActionExecuter(), so Gradle 9's reproducibleFileOrder guarantee reaches shadowJar output for free, upstream of Shadow's entirely custom CopyAction/ZipOutputStream implementation \u2014 the two mechanisms (Gradle-level order, Shadow-level timestamp) are separate and answer the wave-2 handover question directly",
+      "Shadow already ships its own fix for the exact Properties.store() timestamp-comment bug this dive was asked to flag at the JDK level (internal/ReproducibleProperties.kt: overrides store() to throw, sorts entries, exposes writeWithoutComments()) \u2014 proof the bug is real and a template for the fix, found in a repo nobody expected to cite for this",
+      "mergeServiceFiles() merges into a Kotlin mutableSetOf() (LinkedHashSet), so merged META-INF/services line order is classpath-resolution order, not alphabetically sorted \u2014 Shadow's own docs don't state this either way, it required reading ServiceFileTransformer.kt directly",
+      "JEP 400's own text states 'no intent to deprecate or remove' charset-less overloads \u2014 the fix is entirely in Charset.defaultCharset()'s value, meaning new String(byte[])/getBytes() are just as charset-less and just as lint-worthy on JDK 25 as on JDK 8, despite usually being 'correct' now",
+      "kafka's build.gradle:362-364 copies Gradle's own pre-9 legacy-revert snippet verbatim while running wrapper 9.7.1 \u2014 an active, uncommented total opt-out of reproducibility that also silently negates whatever shadowJar in that same repo would otherwise inherit for free",
+      "Maven's Reproducible-Builds-by-default only starts at 4.0.0-beta-5, and Central's newest 4.x artifact is still 4.0.0-rc-6 as of 2026-09-12 \u2014 so 'Maven 4 does this automatically' is a claim about an unreleased line, not the corpus's actual Maven baseline"
+     ],
+     "ok": true
+    },
+    {
+     "slug": "kotlin-toolchain-and-codegen",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-platform-and-toolchains/kotlin-toolchain-and-codegen.md",
+     "sources_count": 17,
+     "top_rules": [
+      "Never emit -Xwhen-guards/-Xnon-local-break-continue/-Xmulti-dollar-interpolation/-Xcontext-parameters on Kotlin >=2.2.0/>=2.4.0 \u2014 they're silent no-ops, verify by grepping freeCompilerArgs against the pinned Kotlin version.",
+      "Never write -Xjvm-default=... on Kotlin >=2.2.0 \u2014 use the typed jvmDefault DSL property instead.",
+      "A Kotlin build upgrading to 2.2.0+ must set jvmDefault=DISABLE explicitly if it needs pre-2.2.0 binary-compat semantics \u2014 the default silently flipped to ENABLE.",
+      "Always set compilerOptions.jvmTarget explicitly alongside jvmToolchain(N) \u2014 the toolchain only back-fills jvmTarget when unset, and jvmTarget still defaults to \"1.8\".",
+      "jvmTargetValidationMode defaults to ERROR (hard fail), not WARNING \u2014 don't assume a soft warning on Kotlin/Java target mismatch.",
+      "Pin KGP version against the versioned Gradle/AGP compatibility table before bumping either \u2014 e.g. KGP 2.4.0-2.4.10 caps at Gradle 9.5.0/AGP 9.1.0.",
+      "New Kotlin modules needing an annotation processor must default to KSP; kapt is acceptable only when the specific processor has no KSP implementation, named in a comment.",
+      "Kover's check task DOES depend on koverVerify by default since Kover 0.7.0 (opposite of JaCoCo) \u2014 confirmed via github.com/Kotlin/kotlinx-kover/issues/523's task-dependency tree and maintainer's onCheck=false fix; this settles the wave-2 KT-TEST blocker.",
+      "Dokka floor should be pinned at >=2.2.0 using the DGP v2 top-level dokka{} extension, not the v1 per-task tasks.dokkaHtml{} shape.",
+      "Treat extraWarnings/-Wextra as a recommendation only \u2014 it has stayed Experimental through 2.1.0-2.4.0 with no stabilization signal."
+     ],
+     "surprises": [
+      "Kover's own DSL reference (0.9.8) genuinely never states the check/koverVerify default anywhere \u2014 the definitive answer came from a closed GitHub issue's literal Gradle task-dependency tree plus a maintainer's onCheck=false reply, not from any doc sentence.",
+      "kapt in the exemplar corpus (google/dagger) is not legacy cruft being phased out \u2014 it's a deliberately preserved regression-test fixture (javatests/artifacts/**) proving the old Android/Hilt kapt path still works, while the real library modules are already KSP-only.",
+      "ktorio/ktor's own gradle.properties contains an in-repo comment explaining a genuine Kotlin-daemon-precedence gotcha: -Dkotlin.daemon.jvm.options nested inside org.gradle.jvmargs governs the buildSrc daemon specifically because that daemon starts before the plain kotlin.daemon.jvmargs property is read.",
+      "jvmDefault's default is now ENABLE (not just renamed from -Xjvm-default) per the live gradle-compiler-options.html table \u2014 confirmed independently by two exemplars (shadow, detekt) explicitly overriding it back to NO_COMPATIBILITY, implying real projects are already compensating for the flip.",
+      "WebFetch's small-model summarization of kotlinlang.org pages was unreliable for flag-name precision (e.g. mangled '-Xwhen-guards' into '-Xguard-conditions' in one summary) \u2014 cross-checking whatsnew21 vs whatsnew22 vs the live compiler-reference.html was necessary to get exact flag identity right.",
+      "extraWarnings/-Wextra has now sat at Experimental for four consecutive minor releases (2.1.0 through 2.4.0) with zero stabilization signal in any fetched whatsnew page \u2014 longer than typical for a Kotlin experimental feature, worth flagging as possibly stalled rather than just 'still cooking'."
+     ],
+     "ok": true
+    }
+   ],
+   "consolidation": {
+    "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-platform-and-toolchains.md",
+    "rule_ids": [
+     "JAVA-PLAT-01 \u2014 State toolchain JDK and bytecode floor as two explicit values; express the floor as options.release / maven.compiler.release, never sourceCompatibility/<source>/<target> alone (MUST)",
+     "JAVA-PLAT-02 \u2014 Declare the OCX SDK at floor 17, toolchain 25, CI matrix 17/21/25 (MUST, SDK)",
+     "JAVA-PLAT-03 \u2014 Confirm the toolchain is JDK 22+ any vendor, or 21.0.8+/17.0.19+ OpenJDK-family with -XDaddTypeAnnotationsToSymbol=true, before setting NullAway jspecifyMode; never Oracle 17/21 (MUST)",
+     "JAVA-PLAT-04 \u2014 Ship a real module-info.java with a minimal exports list; use Automatic-Module-Name only below floor 9 and never call it encapsulation (MUST for SDK/library, CONSIDER for app/CLI)",
+     "JAVA-PLAT-05 \u2014 When the floor is below 9, compile module-info.java in a dedicated release-9+ execution and exclude it from the base compile (MUST when floor < 9)",
+     "JAVA-PLAT-06 \u2014 Declare every --add-opens/--add-exports per module at the point of use with a comment naming the library; never a global relax flag (MUST)",
+     "JAVA-PLAT-07 \u2014 Run jdeps --jdk-internals -R and jdeprscan --for-removal before raising a JDK major and treat any hit as blocking (MUST)",
+     "JAVA-PLAT-08 \u2014 Before crossing JDK 21, grep every List/Deque/Set/Map/Collection implementor for self-declared getFirst/getLast/addFirst/addLast/removeFirst/removeLast/reversed and re-check var-typed inference (SHOULD)",
+     "JAVA-PLAT-09 \u2014 Carry the exact JDK number on every removal/disablement claim (Security Manager 24, finalization 18, Unsafe warn 24/throw 26+, x86-32 removed 25, Applet removed 26, JNI warn 24) (MUST)",
+     "JAVA-PLAT-10 \u2014 Never call a charset-less overload; pass an explicit StandardCharsets constant even on a JDK 18+ floor (MUST)",
+     "JAVA-PLAT-11 \u2014 Sort, or use LinkedHashMap/TreeMap, at the boundary where any golden file, generated source or serialized fixture is produced from a HashMap/HashSet/ServiceLoader (SHOULD)",
+     "JAVA-PLAT-12 \u2014 Pin options.encoding = \"UTF-8\" or <project.build.sourceEncoding>UTF-8 explicitly, regardless of JDK floor (MUST)",
+     "JAVA-PLAT-13 \u2014 Set org.gradle.jvmargs=-Dfile.encoding=UTF-8 in the root gradle.properties whenever a non-UTF-8-default host is in the matrix (MUST conditional, SHOULD otherwise)",
+     "JAVA-PLAT-14 \u2014 Treat any -Dfile.encoding value other than UTF-8 or COMPAT on a JDK 18+ floor as a defect (MUST)",
+     "JAVA-PLAT-15 \u2014 Strip Properties.store()'s unconditional date comment from any .properties written into a published artifact, via java.properties.date or a sorted comment-free subclass (SHOULD)",
+     "JAVA-PLAT-16 \u2014 Declare <project.build.outputTimestamp> explicitly as ISO-8601 UTC on any Maven module claiming reproducibility (SHOULD)",
+     "JAVA-PLAT-17 \u2014 CONSIDER pinning the test-suite timezone on date/time-sensitive modules; do not raise above CONSIDER without an owner decision (CONSIDER)",
+     "JAVA-PLAT-18 \u2014 CONSIDER one CI job under a non-English, non-Latin locale for case/format/collation code, the call-site lint being the actual MUST (CONSIDER)",
+     "KT-COMP-01 \u2014 Never emit -Xwhen-guards, -Xnon-local-break-continue, -Xmulti-dollar-interpolation (retired 2.2.0) or -Xcontext-parameters (retired 2.4.0); -Xcontext-receivers is always a defect (MUST)",
+     "KT-COMP-02 \u2014 Never write -Xjvm-default= as a string flag; use the typed compilerOptions.jvmDefault property (MUST)",
+     "KT-COMP-03 \u2014 State compilerOptions.jvmDefault explicitly on any library or SDK publishing Kotlin interfaces on 2.2.0+, because the default flipped to ENABLE (MUST for library/SDK)",
+     "KT-COMP-04 \u2014 Set compilerOptions.jvmTarget explicitly alongside jvmToolchain(N), and make it equal the Java side's options.release in a mixed module (MUST)",
+     "KT-COMP-05 \u2014 Do not weaken jvmTargetValidationMode from its ERROR default without a comment naming why (MUST)",
+     "KT-COMP-06 \u2014 Check the KGP/Gradle/AGP compatibility table before bumping either, and bump KGP in the same change when a Gradle bump crosses its ceiling (MUST)",
+     "KT-COMP-07 \u2014 Never emit K1-era advice; -language-version 1.8/1.9 was dropped in Kotlin 2.3.0 and K1 itself removed in 2.4.0, and a claim must name which (MUST)",
+     "KT-COMP-08 \u2014 Use KSP in any new Kotlin module needing an annotation processor; kapt only with a comment naming the processor that lacks a KSP implementation (MUST)",
+     "KT-COMP-09 \u2014 Do not split one processor's inputs across kapt(...) and ksp(...) in the same module (MUST)",
+     "KT-COMP-10 \u2014 Do not set ksp.useKSP2=false on KSP >= 2.3.0 or AGP >= 9.0 (MUST)",
+     "KT-COMP-11 \u2014 Pin Dokka >= 2.2.0 and configure it through the DGP v2 top-level dokka {} extension, not v1 per-task shapes (SHOULD)",
+     "KT-COMP-12 \u2014 Treat extraWarnings / -Wextra as opt-in and say so; never a MUST while it stays Experimental (CONSIDER)",
+     "KT-COMP-13 \u2014 Put Kotlin daemon JVM args at the level the target daemon reads; buildSrc reads -Dkotlin.daemon.jvm.options inside org.gradle.jvmargs (SHOULD)"
+    ],
+    "conflicts_resolved": [
+     "Timezone pinning severity: map row M-Q-06 ranks it P0/P1 while the encoding dive keeps it CONSIDER. Resolved CONSIDER \u2014 priority ranks research value, severity ranks what fails a build, and 0/32 corpus support cannot carry a MUST (jvm-quality-gates.md verdict 10 names this exact rule as the one agents invent).",
+     "JAVA-PLAT-01's verification: the jdk-floors dive wrote it as a grep-and-flag on sourceCompatibility/<source>/<target>. That flags guava, whose 1.8 base layer is CORRECT as the base of a two-execution MR-JAR. Resolved: the check reads the owning compile task/<execution> for a governing release value \u2014 the same correction wave-2 #33 applied to GRADLE-DEP-05.",
+     "Adversarial-locale CI job: the encoding dive rated it SHOULD (2/32). Demoted to CONSIDER with a reason the dive did not give \u2014 the MUST that actually catches locale defects is the call-site lint (-Xep:StringCaseLocaleUsage:ERROR, DefaultLocale) owned by JAVA-LINT; the CI job is the residual.",
+     "jvmTarget vs options.release: the jdk-floors dive owns the Java floor knob and the Kotlin dive owns jvmTarget, and neither states the joint rule for a mixed Java+Kotlin module. Resolved into one rule (KT-COMP-04): the two are one decision written twice, with jvmTargetValidationMode (default ERROR) as the enforcement, plus the explicit caveat that a Kotlin-only module never triggers the validator.",
+     "Kotlin floor, two conflated facts: frame correction 2 says Kotlin 2.4.0 ends K1 outright; the Kotlin dive cites whatsnew23 that -language-version 1.8/1.9 was dropped in 2.3.0. Both true and different \u2014 language-version values died at 2.3.0, the K1 compiler at 2.4.0. KT-COMP-07 requires a claim to name which.",
+     "Archive-reproducibility scope: the encoding dive proposed DET-05/DET-06 as rules that mostly point at GRADLE-CACHE-17. Resolved: they are not rules in this family. JAVA-PLAT keeps only what Gradle's archive defaults cannot reach (Properties.store(), Maven outputTimestamp, mergeServiceFiles()'s classpath ordering); kafka's live opt-out is restated as evidence, not re-ruled.",
+     "japicmp rule ownership: the jdk-floors dive proposed JAVA-PLAT-08/09 (bind to check/verify; flat accepted-breaks file). Those belong to JAVA-API/JAVA-LINT, already consolidated in wave 2. Resolved: the six-repo re-measurement and the copyable templates are handed back as evidence rather than duplicated as JAVA-PLAT rules.",
+     "NullAway jspecifyMode rule ownership vs JAVA-LINT-05 in jvm-quality-gates.md: resolved by splitting on who breaks it \u2014 JAVA-LINT-05 owns the lint wiring, JAVA-PLAT-03 owns the toolchain-and-vendor precondition, because the agent editing the toolchain block is the one who trips it.",
+     "Kover check wiring: the Kotlin dive settled that check DOES depend on koverVerify by default since 0.7.0 (opposite of JaCoCo), proven by a task tree and a maintainer's onCheck=false fix, while Kover's own current docs still never state it. Resolved as a correction handed to JAVA-TEST-08, not as a KT-COMP rule, to avoid a duplicated rule across families.",
+     "Dokka's home: the Kotlin dive rates it a KT-COMP rule while M-Y-06 says docs-quality's generator table has no shape for Dokka. Resolved by splitting \u2014 the version-and-DSL rule is KT-COMP (it edits *.gradle.kts); only the unsolved tested-examples/generator-row gap goes to the sibling set as a file edit."
+    ],
+    "needs_another_round": [
+     "Mixed-module bytecode floor (KT-COMP/JAVA-PLAT boundary) \u2014 in a multi-project library, what mechanically enforces one bytecode floor across a Kotlin-only module and a Java-only module whose compile tasks never meet, given jvmTargetValidationMode only fires when both exist in the same module?",
+     "Dokka in docs-quality (M-Y-06) \u2014 does Dokka get a new row in the sibling set's wiring-by-generator.md and tested-examples-by-language.md, or does the JVM set carry its own subprocess-harness rule for tested doc examples? Sibling-file edit either way, not a new artifact.",
+     "Properties.store() on the Gradle side \u2014 is there any supported Gradle-side mechanism equivalent to Maven's java.properties.date, or must every plugin writing .properties output re-implement Shadow's ReproducibleProperties?",
+     "JEP 472 JNI deny-by-default \u2014 has a target JDK release been announced since 2026-09-12? JDK 24 ships warn and the JEP promises only 'a future release', so no rule may name a number today.",
+     "CI-runner timezone audit (JAVA-PLAT-17's decider) \u2014 do the CI runners the corpus actually uses default to UTC? That measurement is what separates '0/32 because nobody needs it' from '0/32 because nobody looked', and it is the only thing that can move the rule off CONSIDER in either direction."
+    ],
+    "must_count": 22
+   }
+  },
+  {
+   "group": "java-runtime-safety",
+   "dives": [
+    {
+     "slug": "untrusted-input-and-deserialization",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-java-runtime-safety/untrusted-input-and-deserialization.md",
+     "sources_count": 17,
+     "top_rules": [
+      "JAVA-SEC-01: never call ObjectInputStream.readObject()/readUnshared() on a boundary-crossing stream without an attached ObjectInputFilter allow-list; automate via Error Prone BanSerializableRead (ERROR)",
+      "JAVA-SEC-02: any Jackson polymorphic typing must resolve to jackson-databind \u22652.18.8/\u22652.21.4/\u22653.1.4 with an explicit PolymorphicTypeValidator \u2014 'a validator exists' is not the check, 'the validator is patched against CVE-2026-54512/54513' is",
+      "JAVA-SEC-03: harden every XML factory type independently (DocumentBuilderFactory, SAXParserFactory, XMLInputFactory, TransformerFactory, SchemaFactory, Validator, JAXB, XPath) \u2014 hardening one is not evidence for another, and none of this is in core SpotBugs",
+      "JAVA-SEC-04: never pass attacker-influenced strings to Context.lookup() or ~40 related JNDI/JDO/JMX/SQL-rowset APIs; automate via Error Prone BanJNDI (ERROR) \u2014 no dedicated CERT rule number exists, cite CERT VU#930724 instead",
+      "JAVA-SEC-05: every archive-extraction loop must resolve+normalize each entry path and verify containment against the destination root before writing \u2014 the JDK ships no safe extraction API for zip/tar/jar/war/apk/7z",
+      "JAVA-SEC-07: build subprocess commands with array/varargs ProcessBuilder only, never concatenation or 'sh -c' \u2014 binds the OCX SDK's own process-launch code; 5/5 measured corpus call sites already do this correctly",
+      "JAVA-SEC-09: SpotBugs earns a place in this gate only paired with find-sec-bugs, scoped to untrusted-input modules \u2014 measured find-sec-bugs 0/32, and all 3 corpus SpotBugs users (kafka, assertj, spotless) run without it",
+      "JAVA-SEC-10: never cite Oracle's Secure Coding Guidelines section 9 (ACCESS-1..20) as live guidance for JDK-24+ targets \u2014 JEP 486 disabled the Security Manager and Oracle's own page now carries that disclaimer on every guideline in the section"
+     ],
+     "surprises": [
+      "Oracle's own seccodeguide.html has already been edited for JDK 24: all 20 Access Control guidelines (9-1..9-20) carry a verbatim 'security manager permanently disabled since Java 24' note \u2014 the source resolves its own currency problem, it doesn't need to be excluded wholesale.",
+      "CVE-2026-54512 and CVE-2026-54513 are two distinct bypass mechanisms in one advisory (generic-parameter substring check vs allowIfSubTypeIsArray() component check), not one bug \u2014 patching one code path does not close the other; only a version bump fixes both.",
+      "There is no CERT rule numbered specifically for JNDI lookups; the closest (IDS54-J) only covers the LDAP-query half. The operative primary sources are Error Prone's BanJNDI and CERT/CC's VU#930724, not a SEI IDS-category rule.",
+      "Core SpotBugs has zero detectors for XXE, command injection, or path traversal, and only an indirect one (DMI_RANDOM_USED_ONLY_ONCE, which catches per-call Random instantiation, not security misuse) for the Random shape \u2014 the coverage gap is total, not partial, for 3 of the 6 core shapes.",
+      "The exemplar corpus's own gradle/gradle build-logic contains an unguarded ObjectInputStream.readObject() call (SimpleClassMetaDataRepository.java) with no ObjectInputFilter \u2014 low risk (reads a locally self-written cache) but the exact unguarded shape this family flags, inside a flagship repo.",
+      "The OCX SDK's subprocess-JSON boundary splits in two: inside the untrusted-input boundary for Jackson polymorphic-deserialization shapes (the CLI relays live-service data), but outside it for JNDI/ZipSlip/path/command shapes (the SDK is the producer, not consumer, of those operations) \u2014 it is not one blanket verdict."
+     ],
+     "ok": true
+    },
+    {
+     "slug": "errors-resources-and-lifecycle",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-java-runtime-safety/errors-resources-and-lifecycle.md",
+     "sources_count": 19,
+     "top_rules": [
+      "Never let a caught InterruptedException (directly or via a broader catch) fall through without re-interrupting or propagating \u2014 promote disabled InterruptedExceptionSwallowed, since the on-by-default InterruptedInCatchBlock catches a different mistake",
+      "Never catch Throwable/Error except at a documented top-level boundary \u2014 Error Prone TryFailThrowable (on by default) for tests, SonarJava S1181 for production",
+      "Promote -Xep:CatchingUnchecked:ERROR -Xep:UnusedException:ERROR explicitly \u2014 both are DISABLED_CHECKS and are the two most characteristic agent-written swallow/sever shapes",
+      "Any Closeable/AutoCloseable including Files.walk/list/lines/find streams must be acquired in try-with-resources \u2014 verify via StreamResourceLeak+MustBeClosedChecker (Error Prone, on by default) or S2095 (SonarJava), never PMD CloseResource (deprecated by S2095, 0/32 enforced)",
+      "Never wrap a caught exception as new X(e.getMessage()) \u2014 always pass the original as cause; verify with UnusedException plus a direct grep for the .getMessage()-in-constructor shape",
+      "Don't rely on SonarJava S4507 alone for printStackTrace/System.exit \u2014 it reports as a Security Hotspot invisible to a default Issues-only gate; use Error Prone's on-by-default CatchAndPrintStackTrace instead",
+      "On a project already running Error Prone+NullAway, still run SpotBugs CORRECTNESS+MT_CORRECTNESS \u2014 UL_UNRELEASED_LOCK and the annotation-free NP_* null-dataflow family have no Error Prone equivalent at all",
+      "Before treating any SpotBugs/PMD declaration as a real gate, confirm it's bound to the build's failure path (Gradle ignoreFailures=false plus check/test.dependsOn, or Maven <build><plugins> with an invoked goal) \u2014 a Maven <reporting>-only block with no `mvn site` CI job never fails a build, as assertj's own SpotBugs declaration demonstrates"
+     ],
+     "surprises": [
+      "Of the six named checks, four are already ENABLED_ERRORS/ENABLED_WARNINGS by default (TryFailThrowable, MustBeClosedChecker, InterruptedInCatchBlock, StreamResourceLeak) \u2014 only CatchingUnchecked and UnusedException are truly DISABLED_CHECKS; the brief's framing overstated the off-by-default problem.",
+      "assertj/assertj's SpotBugs declaration lives only under Maven's <reporting> block and no CI workflow ever runs `mvn site` or `spotbugs:check` \u2014 it never gates a build, contradicting wave-1's '3/32 SpotBugs-as-gate' count and mirroring the PMD performative-declaration pattern the brief already flagged elsewhere.",
+      "apache/kafka's and apache/maven's 'uses Error Prone' hits in the wave-1 audit are false positives: both only exclude the transitive error_prone_annotations dependency, neither applies the net.ltgt.errorprone plugin at all.",
+      "SonarJava S4507 (successor to deprecated S1148 for printStackTrace) reports as a Security Hotspot, not a standard Issue \u2014 a default Issues-only SonarQube quality gate shows zero findings for it even when printStackTrace is everywhere, per a confirmed SonarSource community thread.",
+      "SpotBugs UL_UNRELEASED_LOCK \u2014 named explicitly in the brief \u2014 has no Error Prone equivalent anywhere in ENABLED_ERRORS/WARNINGS/DISABLED_CHECKS, and it fires on real production code (kafka's BufferPool.allocate()), making it concrete proof the SpotBugs residual set is non-empty.",
+      "Error Prone already ships EmptyCatch, CatchAndPrintStackTrace and CatchFail as on-by-default ENABLED_WARNINGS \u2014 three checks not named in the brief that directly cover 'swallowed exception' and 'printStackTrace over logger' shapes better than the tools the brief pointed at."
+     ],
+     "ok": true
+    }
+   ],
+   "consolidation": {
+    "conflicts_resolved": [
+     "errors dive \u00a713 vs landed JAVA-LINT-10 on whether bare SpotBugs earns a gate slot \u2014 resolved by splitting per family: find-sec-bugs is required for JAVA-SEC (core SpotBugs has zero XXE/command-injection/path-traversal/JNDI detectors), while core SpotBugs CORRECTNESS+MT_CORRECTNESS independently earns a slot for UL_UNRELEASED_LOCK and the annotation-free NP_* family; JAVA-LINT-10's text is amended to add the second clause. Evidence: spotless runs Error Prone with disableAllWarnings=true + 5 checks and SpotBugs at Confidence.LOW.",
+     "errors dive \u00a713 vs jvm-audit/exemplar-quality-gates.md headline counts \u2014 resolved in the dive's favour (read-the-file beats grep-the-repo): Error Prone 13/32 corrected to 11/32 (kafka's build.gradle:2522 and maven's pom.xml:370,550 hits are error_prone_annotations *exclusions*, no plugin applied), SpotBugs-as-gate 3/32 corrected to 2/32 (assertj's block is <reporting>-only, no CI job runs mvn site or spotbugs:check).",
+     "SEC dive \u00a710 (\"bare SpotBugs contributes nothing\") vs ERR dive \u00a713 (\"skip find-sec-bugs, SpotBugs earns its slot\") \u2014 apparent conflict only; dissolves once scoped by family, stated explicitly because the two sentences read as contradictory when quoted out of scope.",
+     "ERR dive decision (a) \u2014 five JAVA-ERR rows in the always-loaded index \u2014 vs the 114-229-line index budget across nine families. Cut to three (ERR-01 re-interrupt, ERR-03 try-with-resources, ERR-04 chain the cause) plus JAVA-SEC-01's single reserved line; ERR-02 and ERR-05 drop to the depth file as reviewer-facing rather than every-edit.",
+     "JAVA-ERR-06's verification (-Xlint:removal) vs landed JAVA-LINT-07, whose enumerated -Xlint key list omits `removal`. Resolved: add `removal` to that list, deliberately excluding `deprecation` as noisy. Raised as an owner decision because it edits a landed rule.",
+     "Map row M-N-06 assigns ExecutorService shutdown to JAVA-CONC while the ERR dive covered it \u2014 resolved by splitting at the AutoCloseable seam: the JDK-19 close()-has-no-timeout trap stays here as JAVA-ERR-05, pool sizing and virtual-thread regime stay with JAVA-CONC; each rule's verification names the other.",
+     "Map row M-O-04's three-peer resource-leak framing (S2095, PMD CloseResource, Error Prone) vs SonarSource's own record that S2095 deprecated pmd:CloseResource in Sonar 5.3, with PMD enforced 0/32 \u2014 resolved to two peers; naming PMD would route an agent to a superseded, unused tool.",
+     "SEC dive decision (c) \u2014 the OCX SDK's subprocess is two boundaries, not one: inside the deserialization boundary (the ocx CLI is a thin client over a live service, so JAVA-SEC-02 binds its JSON handling) and outside the command/path boundary (the SDK is the producer, so JAVA-SEC-06 binds its ProcessBuilder call). Adopted as Verdict 3.",
+     "SEC dive decision (b) \u2014 whether Oracle's Secure Coding Guidelines section 9 may be cited at all, given JEP 486. Resolved: citable only through Oracle's own historical-scope note; sections 0/1/2/3/5/8 stay current, and JAVA-SEC-09 makes proposing SecurityManager/doPrivileged/AccessController/.policy for JDK 24+ a MUST-not."
+    ],
+    "must_count": 15,
+    "needs_another_round": [
+     "find-sec-bugs maintenance and signal-to-noise \u2014 is find-sec-bugs still maintained against SpotBugs 4.9+ and JDK 25 bytecode, and what is its false-positive rate on the XXE_* and PATH_TRAVERSAL_* families? JAVA-SEC-08 recommends a tool with 0/32 corpus adoption; if it is unmaintained, six of nine JAVA-SEC rules lose their only automatable gate and collapse to grep, which changes their severity, not just their verification column.",
+     "Kotlin's half of this family (KT-ERR, or KT-CORO absorbing it) \u2014 neither dive covered Kotlin and JAVA-ERR's depth file does not load on **/*.kt. runCatching swallows CancellationException (a worse JAVA-ERR-01), use {} is the try-with-resources analogue, and with no checked exceptions JAVA-ERR-09's contest is void while @Throws placement replaces it. Does kotlin-quality need a KT-ERR depth file, or does KT-CORO absorb cancellation and KT-INTEROP absorb @Throws?",
+     "Trust boundary for a subprocess with no live upstream \u2014 Verdict 3 is derived for an ocx CLI that is a thin client over a live service. Does the OCX Gradle plugin's `ocx --format json inspect --closure` read, which may run entirely against a local OCX_HOME cache, sit on the same side of the line as the SDK's, or does the dive's own \"re-derive, don't copy\" instruction put it outside?"
+    ],
+    "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake/.agents/research/jvm-java-runtime-safety.md",
+    "rule_ids": [
+     "JAVA-SEC-01 \u2014 Never call ObjectInputStream.readObject()/readUnshared() on bytes that crossed a trust boundary without an ObjectInputFilter allow-list attached. (MUST)",
+     "JAVA-SEC-02 \u2014 Where any polymorphic typing exists, jackson-databind must RESOLVE to >=2.18.8 / >=2.21.4 / >=3.1.4 and configure an explicit allow-list PolymorphicTypeValidator; never enableDefaultTyping(). (MUST)",
+     "JAVA-SEC-03 \u2014 Harden every XML parser factory independently; hardening one is not evidence for another. (MUST)",
+     "JAVA-SEC-04 \u2014 Never pass an attacker-influenced string as the name argument to Context.lookup() or any related JNDI/JDO/JMX/rowset lookup API. (MUST)",
+     "JAVA-SEC-05 \u2014 Resolve a caller-supplied path segment against its base and verify containment before opening any stream \u2014 archive entries and ordinary filenames alike. (MUST)",
+     "JAVA-SEC-06 \u2014 Build every subprocess command with the array/varargs ProcessBuilder form; never concatenate, never Runtime.exec(String), never sh -c. (MUST)",
+     "JAVA-SEC-07 \u2014 Never use Random, Math.random(), ThreadLocalRandom or SplittableRandom for a token, key, nonce, session id or reset code. (MUST)",
+     "JAVA-SEC-08 \u2014 Add find-sec-bugs wherever SpotBugs gates a module that parses, deserialises, extracts or executes untrusted input, and scope it to those modules. (SHOULD)",
+     "JAVA-SEC-09 \u2014 Never emit guidance or code relying on the Security Manager for a JDK-24+ target; cite Oracle's section 9 only through its own historical-scope note. (MUST)",
+     "JAVA-ERR-01 \u2014 A caught InterruptedException, including one caught via a wider catch, must re-interrupt or propagate. (MUST)",
+     "JAVA-ERR-02 \u2014 Do not catch Throwable or Error except at one documented top-level boundary; in test code it makes the test structurally unable to fail. (MUST)",
+     "JAVA-ERR-03 \u2014 Acquire every Closeable/AutoCloseable inside try-with-resources, including Files.walk/list/lines/find/newDirectoryStream and wrapping streams. (MUST)",
+     "JAVA-ERR-04 \u2014 Never construct a new exception from a caught one without passing it as the cause; new X(e.getMessage()) is always wrong. (MUST)",
+     "JAVA-ERR-05 \u2014 Shut down every ExecutorService on every exit path; JDK 19+ close() blocks indefinitely with no timeout. (MUST)",
+     "JAVA-ERR-06 \u2014 Do not override finalize(); use try-with-resources or java.lang.ref.Cleaner. (MUST)",
+     "JAVA-ERR-07 \u2014 Library, SDK and Gradle-plugin code never calls System.exit() and never printStackTrace() in place of the logger. (MUST)",
+     "JAVA-ERR-08 \u2014 Every Serializable class declares an explicit private static final long serialVersionUID. (SHOULD)",
+     "JAVA-ERR-09 \u2014 Prefer a standard unchecked wrapper over a sneaky-throw helper; reserve sneaky-throw for a functional interface or an override that cannot declare the checked exception. (CONSIDER)"
+    ]
+   }
+  }
+ ],
+ "surprises": [
+  "concurrency/java-virtual-threads-and-structured-concurrency: jackson-core changed its default BufferRecyclerPool from threadLocalPool() to a lock-free pool in 2.17.0, then reverted the default back in 2.17.1 after production regressions, and deprecated the lock-free pool entirely in 2.18.0 \u2014 the 'obvious' virtual-thread fix for ThreadLocal caching was tried by the flagship library itself and rolled back.",
+  "concurrency/java-virtual-threads-and-structured-concurrency: HikariCP maintainers left two independent PRs (2023, 2024) to replace internal synchronized with ReentrantLock for virtual-thread friendliness unmerged, and an open issue shows a real production report of JEP 491's documented 'still pins' class-initializer case on JDK 24.",
+  "concurrency/java-virtual-threads-and-structured-concurrency: Preview status is not just an API-stability warning: JEP 12's class-file mechanism means preview bytecode only loads on the exact JDK feature release that compiled it, with --enable-preview required again at runtime \u2014 a published SDK built against a preview API cannot be consumed cross-JDK at all, which is a much harder constraint than 'the API might change'.",
+  "concurrency/java-virtual-threads-and-structured-concurrency: fork() returning Subtask instead of Future is not a recent change \u2014 it's been true since the very first preview in JDK 21 (JEP 453), years before the brief's other version-sensitive changes.",
+  "concurrency/java-virtual-threads-and-structured-concurrency: micronaut-core's sole --enable-preview usage in the whole 32-repo corpus is scoped to the Test task's JVM args only, not the JavaCompile task for its main sourceset \u2014 the one corpus precedent for preview flags isn't even a production compile-time usage.",
+  "concurrency/java-virtual-threads-and-structured-concurrency: StructuredTaskScope became a sealed interface (not an abstract class) as early as JEP 525 (JDK 26), a detail rarely mentioned in older tutorials still describing it as a class with subclasses ShutdownOnFailure/ShutdownOnSuccess.",
+  "concurrency/kotlin-coroutines-correctness: detekt already ships lint coverage for two of the brief's five MUST rows \u2014 GlobalCoroutineUsage (GlobalScope) and SuspendFunSwallowedCancellation \u2014 but both are active:false by default, so 'detekt is configured' does not mean these checks run; the brief's 'no lint exists' premise only holds for the missing-cooperative-cancellation-check row.",
+  "concurrency/kotlin-coroutines-correctness: The exemplar corpus supplies a concrete, real-world instance of the GlobalScope exception the brief asks to decide: ktor's CIOEngine calls GlobalScope.launch(parentContext, ...), passing the caller's real Job so the coroutine is not actually detached \u2014 this is the shape a 'named exception' rule should codify.",
+  "concurrency/kotlin-coroutines-correctness: Medium blocks every fetch method available (WebFetch, curl+UA, web.archive.org, freedium.cfd) with 403/DNS failures for both Elizarov design-rationale articles; had to fall back to search-engine-indexed verbatim excerpts, flagged explicitly in Sources as partial-confidence.",
+  "concurrency/kotlin-coroutines-correctness: detekt also ships SuspendFunInFinallySection (inactive by default) and SleepInsteadOfDelay (active by default) that directly cover two more of this dive's normative candidates (NonCancellable-in-finally, and Thread.sleep on any dispatcher) \u2014 neither was anticipated by the brief.",
+  "concurrency/kotlin-coroutines-correctness: detekt's coroutines rule classes now live under package dev.detekt.rules.coroutines rather than the historical io.gitlab.arturbosch.detekt.rules.coroutines, a rename that will break an agent's training-era assumptions about the group/package coordinates for custom detekt config.",
+  "concurrency/process-and-cli-boundary: The JVM has no killpg/process-group primitive at all \u2014 Process.destroy()/destroyForcibly() only ever reach the immediate child, so a kill ladder for a CLI that forks its own children needs an explicit Process.descendants() walk that ocx-sdk-python's POSIX process-group approach doesn't need to replicate",
+  "concurrency/process-and-cli-boundary: On Windows, Process.destroy() is already forcible (TerminateProcess) \u2014 there is no graceful-shutdown phase at all on that platform, so the entire grace-window rationale of the kill ladder is POSIX-only",
+  "concurrency/process-and-cli-boundary: java.net.http ships zero JSON support of any kind (BodyHandlers only return String/InputStream/Path) \u2014 the zero-runtime-dependency commitment's hand-rolled JSON reader isn't a corner being cut, it's the only option the JDK leaves open for parsing either HTTP bodies or captured CLI stdout",
+  "concurrency/process-and-cli-boundary: The 32-repo exemplar corpus has no exemplar at all for this row (M-Y-02 is 'partial' coverage sourced only from ocx-sdk-python) \u2014 the OCX SDK itself will be the fleet's first measured instance of this pattern, so every normative rule here is evidenced against prior art and JDK docs rather than a corpus library already doing it",
+  "concurrency/process-and-cli-boundary: Choosing virtual threads for this one boundary alone would force the SDK's JDK floor from the map's default 17 up to 21 \u2014 a four-major-version jump paid for a concurrency regime (high fan-out blocking-style I/O) this 'one command at a time' SDK never actually exercises",
+  "gradle-settings/settings-time-surface-and-tool-provisioning: Gradle's own docs say registering a shared BuildService via gradle.sharedServices.registerIfAbsent(...) is explicitly 'safe with Isolated Projects' -- the opposite of the brief's framing that this shape is IP-hostile by construction; the safety is bounded because two of IP's four constraint categories (cross-build, build-to-project access) are still 'not fully enforced yet' as of 9.7.0",
+  "gradle-settings/settings-time-surface-and-tool-provisioning: JavaToolchainResolver itself extends BuildService<BuildServiceParameters.None>, and JavaToolchainDownload carries only a bare HTTPS URI to a zip/tar -- there is no checksum field anywhere in the toolchain-resolver contract, so even for genuine JDK provisioning Gradle's sanctioned seat never enforces a hash",
+  "gradle-settings/settings-time-surface-and-tool-provisioning: gradle/gradle#847 (duplicate subproject leaf names) is still open and reproducing on Gradle 8.12.1 as of a 2025-06-30 comment, with zero fix across the 8.x or 9.x lines despite 137 reactions since 2016",
+  "gradle-settings/settings-time-surface-and-tool-provisioning: No corpus settings file gates remote build-cache push on credential possession except testcontainers-java; detekt's seemingly-careful isCiBuild-only gate is not actually fork-PR-safe, since fork PRs also run under CI",
+  "gradle-settings/settings-time-surface-and-tool-provisioning: Kafka's build-scan gate (publishing.onlyIf { it.authenticated }) is a different Develocity feature (build scan, not cache) that just happens to be the map-cited exemplar shape -- its own buildCache{} block sidesteps the push question by disabling remote push outright rather than gating it",
+  "gradle-settings/settings-time-surface-and-tool-provisioning: JSpecify defaulting to strict/errors in Kotlin (since 2.1) while JSR-305 stays warn-only makes the JSpecify migration the compatibility-risk direction, exactly backwards from an agent's likely instinct that adopting the newer spec-blessed annotation set is the safe upgrade",
+  "publishing/central-portal-and-provenance: The two Gradle doc pages the brief named for mavenLocal() (declaring_repositories.html, best_practices_dependencies.html) say NOTHING about it \u2014 the actual warning ('restricted to prototyping rather than production builds') lives on a third, unnamed page: declaring_repositories_basics.html",
+  "publishing/central-portal-and-provenance: The maven-publish/config-cache question resolves cleanly: gradle/gradle#33830 (merged 2025-06-13, milestone 9.0.0 RC1) changed the failure mode from a hard build failure (Gradle 8.x) to silent config-cache disablement (Gradle 9.0+) for exactly one shape \u2014 literal inline credentials{} \u2014 not a broad plugin incompatibility",
+  "publishing/central-portal-and-provenance: 0/32 exemplars use any git-tag-driven version plugin at all, which makes the ocx-sdk-python-style tag-vs-version CI check strictly necessary rather than a nice-to-have, since nothing else in observed practice enforces that consistency",
+  "publishing/central-portal-and-provenance: Central's own placeholder-jar fallback for sources/javadoc (a jar containing just a README) is documented and sanctioned, not an anti-pattern to flag",
+  "publishing/central-portal-and-provenance: 3/32 exemplars still reference oss.sonatype.org URLs nearly a year after OSSRH's 2025-06-30 shutdown \u2014 live evidence of the exact AI-hallucination trap the corpus itself preserves",
+  "publishing/central-portal-and-provenance: Sonatype's own Sigstore announcement states 'we have no intention of replacing PGP signatures' at launch, while also leaving the door open to eventually requiring both \u2014 there is no scheduled PGP deprecation to warn about",
+  "publishing/consumability-across-build-systems: DIST-13's premise was wrong: Shadow's shadow-configuration-to-POM mapping isn't new in 9.0.0 \u2014 it dates to Shadow 1.1.0 (2014); what's actually new in 9.0.0 is the shadowRuntimeElements GMM variant.",
+  "publishing/consumability-across-build-systems: kafka's hand-rolled pom.withXml isn't working around a Shadow POM defect at all \u2014 it deliberately avoids Shadow's built-in `shadow` configuration because that configuration ALSO writes the same deps into the manifest Class-Path header (GradleUp/shadow#324), which kafka doesn't want.",
+  "publishing/consumability-across-build-systems: kafka disables GenerateModuleMetadata entirely for its shaded :clients module \u2014 a real, previously unrecorded exemplar answering the OCX SDK's 'suppress GMM or not' decision.",
+  "publishing/consumability-across-build-systems: GradleUp/shadow#324 (cited by kafka's own comment as the reason for its POM patch) is actually about the JAR manifest Class-Path header, not about POM dependency correctness \u2014 a stale/misleading-looking citation that still turns out to be internally consistent once read in full.",
+  "publishing/consumability-across-build-systems: junit-framework's own test suite (MavenPomFileTests.java) asserts the literal `<!-- do_not_remove: published-with-gradle-metadata -->` marker text as a golden-line snapshot \u2014 direct corpus proof of the Gradle-docs claim, not just a docs paraphrase.",
+  "publishing/consumability-across-build-systems: Maven 4's 'build POM vs consumer POM' isn't a new capability at all \u2014 it's Maven 4 first-classing what flatten-maven-plugin already did in Maven 3, now opt-in via maven.consumer.pom.flatten (still RC, unshipped).",
+  "bazel-java/bazel-java-toolchains-and-compilation: Bazel's own docs disagree on the strict-deps flag's name: command-line-reference calls it --experimental_strict_java_deps, user-manual calls it --strict_java_deps with no prefix \u2014 could not be resolved against a real bazel binary (none installed in the sandbox).",
+  "bazel-java/bazel-java-toolchains-and-compilation: Strict Java deps is not something you turn on: per user-manual, default/strict/error are the same behavior and that IS the behavior when the flag is unset \u2014 an absent strict-deps line does not mean unenforced.",
+  "bazel-java/bazel-java-toolchains-and-compilation: Header compilation on the default toolchain is turbine (TurbineDirect), not ijar \u2014 bazel-and-java's own prose only names ijar in that section, which misdescribes the mechanism (ijar strips a compiled jar; turbine parses source directly, no javac back-end invoked).",
+  "bazel-java/bazel-java-toolchains-and-compilation: google/error-prone ships literally no MODULE.bazel/WORKSPACE/BUILD file at all; it's wired into Bazel purely via JavaBuilder + --javacopt/java_package_configuration, never as a dependency.",
+  "bazel-java/bazel-java-toolchains-and-compilation: bazel-and-java's own page states the 'default javac options' are -source 8 -target 8, directly contradicting its own (and user-manual's) stated --java_language_version default of 11 two paragraphs apart \u2014 an internal doc inconsistency, not a live default.",
+  "bazel-java/bazel-java-toolchains-and-compilation: contrib_rules_jvm's lint wrappers ARE bzlmod-native (own MODULE.bazel uses a `linter` module extension), but zero of the 32 program exemplars adopt them or apple_rules_lint at all.",
+  "bazel-java/bazel-java-external-deps-and-kotlin: No merge between bazel-contrib/rules_jvm_external and bazel-contrib/rules_jvm has happened (both remain live, separate, non-archived repos) \u2014 but rules_kotlin itself underwent a GitHub org transfer from bazelbuild/ to bazel-contrib/, which is likely what the recent-shifts scout half-detected.",
+  "bazel-java/bazel-java-external-deps-and-kotlin: rules_jvm_external's freshness gate is NOT unconditional like crate_universe's: fail_if_repin_required defaults to False (confirmed in coursier.bzl source), so a stale or even hand-corrupted maven_install.json is merely a printed warning and the build still succeeds unless that flag is explicitly set \u2014 the opposite failure-mode shape from BZL-RUST-01.",
+  "bazel-java/bazel-java-external-deps-and-kotlin: The lock file self-checks on two independent hash fields, not one: __INPUT_ARTIFACTS_HASH (declared-vs-lock drift) and __RESOLVED_ARTIFACTS_HASH (lock-body self-tamper/bad-merge check) \u2014 both gated by the same fail_if_repin_required flag.",
+  "bazel-java/bazel-java-external-deps-and-kotlin: The ijar/Kotlin-inline-function bug is ancient (filed and fixed in 2019, PR #69) \u2014 there is no live rules_jvm_external version lacking the fix, so no version-floor caveat is actually needed for a repo starting today.",
+  "bazel-java/bazel-java-external-deps-and-kotlin: dagger already does almost everything right: fail_if_repin_required=True and lock_file are both set (MODULE.bazel:185-186), yet it still never sets version_conflict_policy or x_lambdas \u2014 showing the gate/pin discipline and the conflict-policy/codegen discipline are adopted completely independently in practice.",
+  "bazel-java/bazel-java-external-deps-and-kotlin: No exemplar in the corpus (0/6 Bazel-carrying repos, including dagger's dual Gradle+Bazel Kotlin build) sets x_lambdas at all \u2014 the silent-default bytecode divergence is not hypothetical, it's the observed universal state.",
+  "maven-and-ant/maven4-lifecycle-and-plugins: assertj's `.mvn/maven.config` checksum flags are Maven-Resolver-1.x property names (correct for its pinned Maven 3.9.16/resolver 1.9.27) but resolver 2.0 (Maven 4) renamed both \u2014 the config silently becomes a no-op the day the wrapper moves to Maven 4, with no error at all.",
+  "maven-and-ant/maven4-lifecycle-and-plugins: Maven Resolver's own docs explicitly reject the 'MD5/SHA-1 are insecure' framing for Maven: checksums provide integrity only, never security/trust/MITM protection \u2014 the Gradle-verification-metadata mental model doesn't transfer.",
+  "maven-and-ant/maven4-lifecycle-and-plugins: `smartChecksums` only ever validates SHA-1 via an HTTP ETag header shortcut \u2014 leaving it on with a SHA-512-first algorithm list configures a stronger digest that never actually gets exercised; disabling it (as assertj does) is the operative half of the config, not the algorithm list.",
+  "maven-and-ant/maven4-lifecycle-and-plugins: Maven has no equivalent of Gradle's verification-metadata.xml at all \u2014 no file, plugin, or built-in feature plays that role; the closest levers (resolver checksum properties, GPG signing) are orthogonal, not substitutes.",
+  "maven-and-ant/maven4-lifecycle-and-plugins: apache/maven's own PR fixing the JDK17+ --add-opens/JaCoCo argLine clobber (apache/maven#11605) is still open and unmerged as of 2026-09-12 \u2014 the brief's cited bug has a proposed fix, not a shipped one.",
+  "maven-and-ant/maven4-lifecycle-and-plugins: The one wrapper-checksum exemplar in the whole corpus (assertj) sets neither wrapperSha256Sum nor distributionSha256Sum \u2014 0/1, not partial adoption.",
+  "platform-and-toolchains/jdk-floors-modules-and-removed-apis: Of the six declared japicmp adopters, only three (maven, gradle/gradle, testcontainers-java) bind the checker into the default build lifecycle \u2014 grpc-java's own build-file comment says 'Run with: ./gradlew japicmp --continue' (manual only), assertj only breaks the build inside a dedicated GitHub Actions workflow, and micronaut-core's check-binding lives in an external plugin repo not present in the sparse checkout",
+  "platform-and-toolchains/jdk-floors-modules-and-removed-apis: micronaut-core's accepted-breaks file is a much lighter template than gradle/gradle's: a flat {type, member, reason} JSON array (1370 lines) consumed via the japicmp-gradle-plugin's own richReport{addViolationTransformer(...)} extension point, not a custom ViolationRule class hierarchy \u2014 but the transformer class itself still has to be hand-written, it isn't shipped by the plugin",
+  "platform-and-toolchains/jdk-floors-modules-and-removed-apis: Because the OCX SDK's floor is already 17 (\u22659), it needs none of guava's multi-release-JAR complexity for module-info.java \u2014 that indirection is strictly a floor-below-9 problem",
+  "platform-and-toolchains/jdk-floors-modules-and-removed-apis: gradle/gradle's own Kotlin-DSL build is the SequencedCollection worked example, not a satisfier of any rule: gradle/gradle#27699 is still open with no code fix, only 'avoid the colliding name' as workaround",
+  "platform-and-toolchains/jdk-floors-modules-and-removed-apis: NullAway's jspecifyMode JDK-vendor split is sharper than a version check: JDK 22+ works on any vendor including Oracle, but below 22 the flag is OpenJDK-family only (Temurin/Zulu) and literally does nothing on Oracle JDK 17/21 \u2014 and NullAway \u22650.12.11 throws IllegalStateException rather than degrading silently",
+  "platform-and-toolchains/jdk-floors-modules-and-removed-apis: JEP 493 (jlink without JMODs) is confirmed a JDK-vendor build-time opt-in (--enable-linkable-runtime), not a JDK-24+ guarantee \u2014 jlink --help's own enabled/disabled line is the only way to know",
+  "platform-and-toolchains/encoding-locale-timezone-determinism: Shadow's ShadowJar never overrides Gradle's createCopyActionExecuter(), so Gradle 9's reproducibleFileOrder guarantee reaches shadowJar output for free, upstream of Shadow's entirely custom CopyAction/ZipOutputStream implementation \u2014 the two mechanisms (Gradle-level order, Shadow-level timestamp) are separate and answer the wave-2 handover question directly",
+  "platform-and-toolchains/encoding-locale-timezone-determinism: Shadow already ships its own fix for the exact Properties.store() timestamp-comment bug this dive was asked to flag at the JDK level (internal/ReproducibleProperties.kt: overrides store() to throw, sorts entries, exposes writeWithoutComments()) \u2014 proof the bug is real and a template for the fix, found in a repo nobody expected to cite for this",
+  "platform-and-toolchains/encoding-locale-timezone-determinism: mergeServiceFiles() merges into a Kotlin mutableSetOf() (LinkedHashSet), so merged META-INF/services line order is classpath-resolution order, not alphabetically sorted \u2014 Shadow's own docs don't state this either way, it required reading ServiceFileTransformer.kt directly",
+  "platform-and-toolchains/encoding-locale-timezone-determinism: JEP 400's own text states 'no intent to deprecate or remove' charset-less overloads \u2014 the fix is entirely in Charset.defaultCharset()'s value, meaning new String(byte[])/getBytes() are just as charset-less and just as lint-worthy on JDK 25 as on JDK 8, despite usually being 'correct' now",
+  "platform-and-toolchains/encoding-locale-timezone-determinism: kafka's build.gradle:362-364 copies Gradle's own pre-9 legacy-revert snippet verbatim while running wrapper 9.7.1 \u2014 an active, uncommented total opt-out of reproducibility that also silently negates whatever shadowJar in that same repo would otherwise inherit for free",
+  "platform-and-toolchains/encoding-locale-timezone-determinism: Maven's Reproducible-Builds-by-default only starts at 4.0.0-beta-5, and Central's newest 4.x artifact is still 4.0.0-rc-6 as of 2026-09-12 \u2014 so 'Maven 4 does this automatically' is a claim about an unreleased line, not the corpus's actual Maven baseline",
+  "platform-and-toolchains/kotlin-toolchain-and-codegen: Kover's own DSL reference (0.9.8) genuinely never states the check/koverVerify default anywhere \u2014 the definitive answer came from a closed GitHub issue's literal Gradle task-dependency tree plus a maintainer's onCheck=false reply, not from any doc sentence.",
+  "platform-and-toolchains/kotlin-toolchain-and-codegen: kapt in the exemplar corpus (google/dagger) is not legacy cruft being phased out \u2014 it's a deliberately preserved regression-test fixture (javatests/artifacts/**) proving the old Android/Hilt kapt path still works, while the real library modules are already KSP-only.",
+  "platform-and-toolchains/kotlin-toolchain-and-codegen: ktorio/ktor's own gradle.properties contains an in-repo comment explaining a genuine Kotlin-daemon-precedence gotcha: -Dkotlin.daemon.jvm.options nested inside org.gradle.jvmargs governs the buildSrc daemon specifically because that daemon starts before the plain kotlin.daemon.jvmargs property is read.",
+  "platform-and-toolchains/kotlin-toolchain-and-codegen: jvmDefault's default is now ENABLE (not just renamed from -Xjvm-default) per the live gradle-compiler-options.html table \u2014 confirmed independently by two exemplars (shadow, detekt) explicitly overriding it back to NO_COMPATIBILITY, implying real projects are already compensating for the flip.",
+  "platform-and-toolchains/kotlin-toolchain-and-codegen: WebFetch's small-model summarization of kotlinlang.org pages was unreliable for flag-name precision (e.g. mangled '-Xwhen-guards' into '-Xguard-conditions' in one summary) \u2014 cross-checking whatsnew21 vs whatsnew22 vs the live compiler-reference.html was necessary to get exact flag identity right.",
+  "platform-and-toolchains/kotlin-toolchain-and-codegen: extraWarnings/-Wextra has now sat at Experimental for four consecutive minor releases (2.1.0 through 2.4.0) with zero stabilization signal in any fetched whatsnew page \u2014 longer than typical for a Kotlin experimental feature, worth flagging as possibly stalled rather than just 'still cooking'.",
+  "java-runtime-safety/untrusted-input-and-deserialization: Oracle's own seccodeguide.html has already been edited for JDK 24: all 20 Access Control guidelines (9-1..9-20) carry a verbatim 'security manager permanently disabled since Java 24' note \u2014 the source resolves its own currency problem, it doesn't need to be excluded wholesale.",
+  "java-runtime-safety/untrusted-input-and-deserialization: CVE-2026-54512 and CVE-2026-54513 are two distinct bypass mechanisms in one advisory (generic-parameter substring check vs allowIfSubTypeIsArray() component check), not one bug \u2014 patching one code path does not close the other; only a version bump fixes both.",
+  "java-runtime-safety/untrusted-input-and-deserialization: There is no CERT rule numbered specifically for JNDI lookups; the closest (IDS54-J) only covers the LDAP-query half. The operative primary sources are Error Prone's BanJNDI and CERT/CC's VU#930724, not a SEI IDS-category rule.",
+  "java-runtime-safety/untrusted-input-and-deserialization: Core SpotBugs has zero detectors for XXE, command injection, or path traversal, and only an indirect one (DMI_RANDOM_USED_ONLY_ONCE, which catches per-call Random instantiation, not security misuse) for the Random shape \u2014 the coverage gap is total, not partial, for 3 of the 6 core shapes.",
+  "java-runtime-safety/untrusted-input-and-deserialization: The exemplar corpus's own gradle/gradle build-logic contains an unguarded ObjectInputStream.readObject() call (SimpleClassMetaDataRepository.java) with no ObjectInputFilter \u2014 low risk (reads a locally self-written cache) but the exact unguarded shape this family flags, inside a flagship repo.",
+  "java-runtime-safety/untrusted-input-and-deserialization: The OCX SDK's subprocess-JSON boundary splits in two: inside the untrusted-input boundary for Jackson polymorphic-deserialization shapes (the CLI relays live-service data), but outside it for JNDI/ZipSlip/path/command shapes (the SDK is the producer, not consumer, of those operations) \u2014 it is not one blanket verdict.",
+  "java-runtime-safety/errors-resources-and-lifecycle: Of the six named checks, four are already ENABLED_ERRORS/ENABLED_WARNINGS by default (TryFailThrowable, MustBeClosedChecker, InterruptedInCatchBlock, StreamResourceLeak) \u2014 only CatchingUnchecked and UnusedException are truly DISABLED_CHECKS; the brief's framing overstated the off-by-default problem.",
+  "java-runtime-safety/errors-resources-and-lifecycle: assertj/assertj's SpotBugs declaration lives only under Maven's <reporting> block and no CI workflow ever runs `mvn site` or `spotbugs:check` \u2014 it never gates a build, contradicting wave-1's '3/32 SpotBugs-as-gate' count and mirroring the PMD performative-declaration pattern the brief already flagged elsewhere.",
+  "java-runtime-safety/errors-resources-and-lifecycle: apache/kafka's and apache/maven's 'uses Error Prone' hits in the wave-1 audit are false positives: both only exclude the transitive error_prone_annotations dependency, neither applies the net.ltgt.errorprone plugin at all.",
+  "java-runtime-safety/errors-resources-and-lifecycle: SonarJava S4507 (successor to deprecated S1148 for printStackTrace) reports as a Security Hotspot, not a standard Issue \u2014 a default Issues-only SonarQube quality gate shows zero findings for it even when printStackTrace is everywhere, per a confirmed SonarSource community thread.",
+  "java-runtime-safety/errors-resources-and-lifecycle: SpotBugs UL_UNRELEASED_LOCK \u2014 named explicitly in the brief \u2014 has no Error Prone equivalent anywhere in ENABLED_ERRORS/WARNINGS/DISABLED_CHECKS, and it fires on real production code (kafka's BufferPool.allocate()), making it concrete proof the SpotBugs residual set is non-empty.",
+  "java-runtime-safety/errors-resources-and-lifecycle: Error Prone already ships EmptyCatch, CatchAndPrintStackTrace and CatchFail as on-by-default ENABLED_WARNINGS \u2014 three checks not named in the brief that directly cover 'swallowed exception' and 'printStackTrace over logger' shapes better than the tools the brief pointed at."
+ ],
+ "needs_another_round": [
+  "concurrency: JAVA-CONC unresearched rows (M-N-05..M-N-11) \u2014 which of CPU-vs-I/O regime split, ExecutorService shutdown/close semantics, CompletableFuture terminal operations, double-checked locking, SimpleDateFormat statics, @GuardedBy documentation and the ReentrantReadWriteLock 65,536-reader ceiling earn a rule row, given Error Prone and SpotBugs already catch four of them mechanically \u2014 i.e. which are rules and which are JAVA-LINT configuration?",
+  "concurrency: Kotlin Flow (M-U-07, M-U-10) \u2014 does Flow need its own depth section covering catch-operator placement and the StateFlow conflation contract, or do two rows in coroutines.md cover it? Both were explicitly out of the coroutines dive's scope.",
+  "concurrency: JDK 27 GA re-verification \u2014 JDK 27 went GA 2026-09-15, three days after this file; did JEP 533's shape (R_X type parameter, timeout(), awaitAll() removed) ship unchanged, and is structured concurrency still targeted at JDK 28 for finalisation? JAVA-CONC-05/06 must be re-read against the GA javadoc.",
+  "concurrency: detekt activation defaults \u2014 do GlobalCoroutineUsage, SuspendFunSwallowedCancellation, SuspendFunInFinallySection and CoroutineLaunchedInTestWithoutRunTest stay active:false in the first stable release cut from the dev.detekt.* main branch? KT-CORO-01's whole premise depends on it.",
+  "gradle-settings: Settings-plugin functional testing \u2014 how does GradleRunner apply a Plugin<Settings> to a test project, and does the compileOnly/withPluginClasspath incompatibility (GRADLE-PLUG-14) behave the same at settings scope? Every GRADLE-PLUG-22..28 rule is currently verified by reading source because nothing established this.",
+  "gradle-settings: Cold-runner cost of execution-time provisioning \u2014 what does GRADLE-PLUG-23's first-task-pays download cost on a GitHub-hosted runner versus a setup-ocx-style CI step, and does that change whether the Gradle plugin should provision at all when a CI action already did?",
+  "gradle-settings: Latent-collision detection for GRADLE-STRUCT-10 \u2014 is there a Gradle-side way (resolution-result walk, build scan dependency view, dependencies report diff) to detect a project that actually lost conflict resolution, so the rule can report a real defect rather than a latent one?",
+  "publishing: Central Portal authentication and the Gradle-side SNAPSHOT path \u2014 does the Portal support OIDC/tokenless publishing (config-inventory asserts yes, primary sources are silent), and what is the snapshot equivalent of central-publishing-maven-plugin >= 0.7.0 for nmcp and vanniktech? Neither dive covered a Gradle snapshot channel at all.",
+  "publishing: The 42-file mavenLocal() census \u2014 which repos, and in which is the declaration inside a committed consuming repositories { } (the finding) versus a gitignored local override or a consumability probe (the carve-out)? GRADLE-PUB-15 currently has a count but no named violator.",
+  "publishing: Release-gate ordering for the jvm-release skill \u2014 at which point does the binary-compatibility gate run relative to sign/checksum/upload, and can a failed VALIDATED deployment be dropped without burning the version number? Immutability makes the ordering load-bearing and no dive established it.",
+  "publishing: Shadow's manifest Class-Path coupling \u2014 did GradleUp/shadow#324's 2025-01-24 closure change the shadow configuration's Class-Path write, or was it closed 'working as intended, use a different configuration name'? GRADLE-PUB-11's exception clause depends on the answer and the comment thread was never read.",
+  "publishing: version-catalog plugin publishing (map row M-H-08) \u2014 1/32 (ktor), deferred by the map to this group and answered by neither dive; does the OCX Gradle plugin ship a catalog for consumers, which is what would earn it a rule rather than a MAY-level mention?",
+  "bazel-java: Bazel-Java testing and coverage \u2014 what is the minimum wiring that makes `bazel test //...` actually run a JUnit 5 suite and emit a coverage report a JAVA-TEST floor can read? rules_java ships no first-party JUnit 5 rule, contrib_rules_jvm's java_junit5_test is the only path, and coverage_report_generator is customised by 0/6 exemplars. The sibling testing.md owns sizing and `manual` tags, not JUnit-platform wiring \u2014 a real hole between two files, not a duplicate.",
+  "bazel-java: java_export and publishing to Maven Central from Bazel \u2014 does rules_jvm_external's java_export/maven_publish produce a Central-Portal-acceptable bundle (sources jar, javadoc jar, per-file GPG signature, complete POM), or is Bazel a non-publisher that always hands off to Gradle or Maven? Load-bearing for the OCX SDK: the jvm-release skill assumes a Gradle or Maven publisher, and dagger \u2014 the corpus's canonical-Bazel repo \u2014 keeps Gradle precisely for publishing packaging.",
+  "bazel-java: Worker-state reproducibility for KotlinCompile \u2014 BZL-JAVA-20 is a CONSIDER because no primary source states a correctness defect and no exemplar overrides the default. One experiment (build twice with and without --strategy=KotlinCompile=local, diff the jars) would either promote it to a SHOULD with evidence or retire it to prose. Below the line for this program; promote only if an adopter reports a Kotlin flake.",
+  "maven-and-ant: Maven compilation under modern JDKs \u2014 does a modern JDK disable implicit annotation processing by default, and must a Maven build set `<maven.compiler.proc>full</maven.compiler.proc>` for processors to run at all? `apache__maven@ea4a417bd2:pom.xml:135` sets it; no dive covered the javac mechanism, and a wrong rule makes an agent believe processors ran when they did not. Highest-value gap in the family.",
+  "maven-and-ant: Maven toolchains \u2014 what is the Maven-side equivalent of the toolchain-vs-`--release` split JAVA-PLAT owns for Gradle: `~/.m2/toolchains.xml`, `maven-toolchains-plugin`, or the `setup-java` matrix? `google__guava@5fb424c43a:.github/workflows/ci.yml:53,56` passes `-Dtoolchain.skip` and `-Dsurefire.toolchain.version`, implying a live toolchain configuration no audit read.",
+  "maven-and-ant: `maven-antrun-plugin` \u2014 Ant inside Maven: what does a rule say about `<target>`/`<tasks>` blocks embedded in a POM, the one Ant surface that appears in live Maven builds rather than legacy files? The map's Ant brief named the plugin; the dive never fetched it, and MVN-ANT as written only fires on a `build.xml`.",
+  "maven-and-ant: Maven build extensions as a resolution mechanism \u2014 does MVN-BUILD-15 become a MUST, and what does a rule say about an extension that replaces the local repository for CI only (apache/maven's Mimir)? Measured 0/32 committed, which is exactly why the CI-injected case was missed.",
+  "platform-and-toolchains: Mixed-module bytecode floor (KT-COMP/JAVA-PLAT boundary) \u2014 in a multi-project library, what mechanically enforces one bytecode floor across a Kotlin-only module and a Java-only module whose compile tasks never meet, given jvmTargetValidationMode only fires when both exist in the same module?",
+  "platform-and-toolchains: Dokka in docs-quality (M-Y-06) \u2014 does Dokka get a new row in the sibling set's wiring-by-generator.md and tested-examples-by-language.md, or does the JVM set carry its own subprocess-harness rule for tested doc examples? Sibling-file edit either way, not a new artifact.",
+  "platform-and-toolchains: Properties.store() on the Gradle side \u2014 is there any supported Gradle-side mechanism equivalent to Maven's java.properties.date, or must every plugin writing .properties output re-implement Shadow's ReproducibleProperties?",
+  "platform-and-toolchains: JEP 472 JNI deny-by-default \u2014 has a target JDK release been announced since 2026-09-12? JDK 24 ships warn and the JEP promises only 'a future release', so no rule may name a number today.",
+  "platform-and-toolchains: CI-runner timezone audit (JAVA-PLAT-17's decider) \u2014 do the CI runners the corpus actually uses default to UTC? That measurement is what separates '0/32 because nobody needs it' from '0/32 because nobody looked', and it is the only thing that can move the rule off CONSIDER in either direction.",
+  "java-runtime-safety: find-sec-bugs maintenance and signal-to-noise \u2014 is find-sec-bugs still maintained against SpotBugs 4.9+ and JDK 25 bytecode, and what is its false-positive rate on the XXE_* and PATH_TRAVERSAL_* families? JAVA-SEC-08 recommends a tool with 0/32 corpus adoption; if it is unmaintained, six of nine JAVA-SEC rules lose their only automatable gate and collapse to grep, which changes their severity, not just their verification column.",
+  "java-runtime-safety: Kotlin's half of this family (KT-ERR, or KT-CORO absorbing it) \u2014 neither dive covered Kotlin and JAVA-ERR's depth file does not load on **/*.kt. runCatching swallows CancellationException (a worse JAVA-ERR-01), use {} is the try-with-resources analogue, and with no checked exceptions JAVA-ERR-09's contest is void while @Throws placement replaces it. Does kotlin-quality need a KT-ERR depth file, or does KT-CORO absorb cancellation and KT-INTEROP absorb @Throws?",
+  "java-runtime-safety: Trust boundary for a subprocess with no live upstream \u2014 Verdict 3 is derived for an ocx CLI that is a thin client over a live service. Does the OCX Gradle plugin's `ocx --format json inspect --closure` read, which may run entirely against a local OCX_HOME cache, sit on the same side of the line as the SDK's, or does the dive's own \"re-derive, don't copy\" instruction put it outside?"
+ ],
+ "must_count": 110
+}

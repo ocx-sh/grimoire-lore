@@ -1,0 +1,4 @@
+apache__maven	wrapper=-	maven.config=yes:-D sessionRootDirectory=${session.rootDirectory} -D apache.snapshots 	jvm.config=no	extensions.xml=no
+assertj__assertj	wrapper=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.16/apache-maven-3.9.16-bin.zip	maven.config=yes:-Daether.checksums.algorithms=SHA-512,SHA-256,SHA-1,MD5 -Daether.connector.smartChecksums=false 	jvm.config=no	extensions.xml=no
+FasterXML__jackson-databind	wrapper=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.11/apache-maven-3.9.11-bin.zip	maven.config=no	jvm.config=no	extensions.xml=no
+google__guava	wrapper=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.12/apache-maven-3.9.12-bin.zip	maven.config=no	jvm.config=no	extensions.xml=no

@@ -387,7 +387,7 @@ A change broke something the selection tool did not schedule.
    that were in effect (BZL-CI-25). `target-determinator`'s
    `-filter-incompatible-targets` defaults true and silently drops targets, and
    `-before-query-error-behavior` defaults to `ignore-and-build-all`.
-4. **Confirm the backstop exists.** `grep -rn --include=*.yml 'schedule:\|cron' .github/workflows`
+4. **Confirm the backstop exists.** `grep -rn --include='*.yml' 'schedule:\|cron' .github/workflows`
    for an unrestricted `bazel test //...`. EMPTY on a repo that already uses
    target selection is itself the finding (BZL-CI-27) — both miss classes are
    silent by construction, so a periodic full run is the only check that does not

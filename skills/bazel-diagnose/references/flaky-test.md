@@ -89,7 +89,7 @@ order-dependent and parallelism-dependent failures:
 
 | Invariant | Check | Rule |
 |---|---|---|
-| Output, temp files and state go only under `$TEST_TMPDIR` or `$TEST_UNDECLARED_OUTPUTS_DIR` | `grep -rnE '/tmp/|\$HOME|/var/tmp' <test sources>` — any absolute path outside those two variables is the finding; EMPTY clears only the files searched | BZL-TEST-12 |
+| Output, temp files and state go only under `$TEST_TMPDIR` or `$TEST_UNDECLARED_OUTPUTS_DIR` | `grep -rn -e '/tmp/' -e '\$HOME' -e '/var/tmp' <test sources>` — any absolute path outside those two variables is the finding; EMPTY clears only the files searched | BZL-TEST-12 |
 | The runfiles tree is never mutated during a run, and no assertion depends on filesystem atimes | Read each test for in-place writes to a runfiles path | BZL-TEST-13 |
 | A test reaching the network is tagged `requires-network`; one whose only network use was a repository-rule fetch is **not** | `grep -rn 'requires-network' --include='BUILD*' .` against what the test actually opens | BZL-TEST-09 |
 | A "no network" claim is proved from a **cold repository cache**, not from a green run | Re-run after `bazel clean --expunge` with the cache emptied | BZL-TEST-21 |

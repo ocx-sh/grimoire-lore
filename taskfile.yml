@@ -118,6 +118,15 @@ tasks:
       # a typo, the same reasoning the CSS step above already applies.
       - "{{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py rules/docs-quality.md skills/docs-plan skills/docs-instrument"
       #
+      # The JVM set is checked WITHOUT a root, for the same reason as CSS and
+      # docs: the fleet holds no Java or Kotlin, so every source glob would read
+      # as dead against `..` and every build-file glob against `../ocx`. The
+      # set was grounded on an exemplar corpus of upstream JVM repositories
+      # instead (see `.agents/research/jvm-frame.md`), and an extension glob
+      # for a language cannot be a typo. A rule .md path covers its support
+      # directory, so the four indexes are enough.
+      - "{{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py rules/java-quality.md rules/kotlin-quality.md rules/gradle-build.md rules/maven-build.md skills/jvm-release skills/jvm-dependency-triage"
+      #
       # Every checks/*.py script carries its own fixtures and its own
       # --self-test mode. Run all eight here, so a broken check is caught next
       # to the artifact validation above, not only the first time a real page

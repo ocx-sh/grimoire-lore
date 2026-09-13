@@ -1,0 +1,21 @@
+android__nowinandroid	settings.gradle.kts	include_lines=35	typesafe_accessors=1	rootProjectName=rootProject.name = "nowinandroid"
+apache__kafka	settings.gradle	include_lines=1	typesafe_accessors=0	rootProjectName=
+apollographql__apollo-kotlin	settings.gradle.kts	include_lines=1	typesafe_accessors=0	rootProjectName=rootProject.name = "apollo-kotlin"
+cashapp__sqldelight	settings.gradle	include_lines=38	typesafe_accessors=1	rootProjectName=
+detekt__detekt	settings.gradle.kts	include_lines=37	typesafe_accessors=1	rootProjectName=rootProject.name = "detekt"
+diffplug__spotless	settings.gradle	include_lines=5	typesafe_accessors=1	rootProjectName=
+google__dagger	settings.gradle.kts	include_lines=1	typesafe_accessors=0	rootProjectName=rootProject.name = "dagger-parent"
+gradle__gradle	settings.gradle.kts	include_lines=0	typesafe_accessors=0	rootProjectName=rootProject.name = "gradle"
+GradleUp__shadow	settings.gradle.kts	include_lines=0	typesafe_accessors=0	rootProjectName=rootProject.name = "shadow"
+grpc__grpc-java	settings.gradle	include_lines=42	typesafe_accessors=0	rootProjectName=rootProject.name = "grpc"
+JetBrains__Exposed	settings.gradle.kts	include_lines=25	typesafe_accessors=1	rootProjectName=rootProject.name = "exposed"
+junit-team__junit-framework	settings.gradle.kts	include_lines=1	typesafe_accessors=1	rootProjectName=rootProject.name = "junit-framework"
+Kotlin__kotlinx.coroutines	settings.gradle.kts	include_lines=3	typesafe_accessors=0	rootProjectName=rootProject.name = "kotlinx.coroutines"
+ktorio__ktor	settings.gradle.kts	include_lines=0	typesafe_accessors=1	rootProjectName=rootProject.name = "ktor"
+micronaut-projects__micronaut-core	settings.gradle	include_lines=75	typesafe_accessors=1	rootProjectName=
+mockito__mockito	settings.gradle.kts	include_lines=6	typesafe_accessors=0	rootProjectName=rootProject.name = "mockito"
+pinterest__ktlint	settings.gradle.kts	include_lines=1	typesafe_accessors=1	rootProjectName=rootProject.name = "ktlint-root"
+spring-projects__spring-boot	settings.gradle	include_lines=448	typesafe_accessors=0	rootProjectName=rootProject.name="spring-boot-build"
+square__okhttp	settings.gradle.kts	include_lines=34	typesafe_accessors=1	rootProjectName=rootProject.name = "okhttp-parent"
+testcontainers__testcontainers-java	settings.gradle	include_lines=6	typesafe_accessors=0	rootProjectName=
+uber__NullAway	settings.gradle	include_lines=30	typesafe_accessors=0	rootProjectName=

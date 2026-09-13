@@ -1,0 +1,34 @@
+summary = "The OCX JVM set — Java and Kotlin source standards, the Gradle and Maven build-file rules, and the release and dependency-triage procedures for an SDK that ships to strangers"
+keywords = "java,kotlin,jvm,gradle,maven,ant,quality,review,standards,error-prone,nullaway,detekt,ktlint,spotbugs,junit,jacoco,kover,coroutines,virtual-threads,dependencies,version-catalog,dependency-locking,verification-metadata,shadow,fat-jar,jlink,publishing,maven-central,gradle-plugin,toolchains,release"
+description = "Everything an agent needs to write, build and ship JVM code the way the OCX family does: the java-quality rule (Error Prone and NullAway as the gate of record, with depth on types, errors, concurrency, resources, security, testing, API design, platform and runtime safety), the kotlin-quality rule (detekt and ktlint with the coroutine rules switched on, depth on nullability, coroutines, errors and resources, API and interop), the gradle-build rule (Kotlin DSL, version catalogs, dependency locking and verification, configuration cache, toolchains, plugin development, distribution and publishing) and the maven-build rule (enforcer, dependency management, release, and the Ant legacy file), plus the jvm-release skill that walks a Maven Central release end to end and the jvm-dependency-triage skill that turns a vulnerability report or a conflicting transitive into a decided, verified change."
+license = "Apache-2.0"
+repository = "https://github.com/ocx-sh/grimoire-lore"
+
+# Members are same-directory relative: this catalog publishes flat under
+# ghcr.io/ocx-sh/lore/<name>, so `./java-quality` resolves against wherever
+# the bundle itself was pulled from — a mirror keeps working.
+#
+# MEMBERS CARRY NO TAG. Not a digest, not an exact version, not a floating
+# major, not `latest` — `latest` is a tag like any other and naming it is still
+# a pin. A bundle is a *set*, not a snapshot: its job is to say "these belong
+# together", and the consumer's own `grimoire.lock` is what freezes them.
+#
+# Do not pass --pin when releasing this bundle.
+#
+# Four rules, not one, because the globs genuinely differ: a `.java` or
+# `pom.xml` edit never loads the Kotlin or Gradle depth, and a `.kt` edit never
+# loads the Maven one. The one deliberate overlap is `*.gradle.kts`, which both
+# `kotlin-quality` (`**/*.kts`) and `gradle-build` claim: a Kotlin DSL build
+# script is Kotlin source and a build file at once, and each index says so in
+# its Siblings section. The Bazel-Java depth file is not a member — it belongs
+# to the `bazel-quality` set, which already owns `BUILD.bazel`.
+
+[rules]
+java-quality = "./java-quality"
+kotlin-quality = "./kotlin-quality"
+gradle-build = "./gradle-build"
+maven-build = "./maven-build"
+
+[skills]
+jvm-release = "./jvm-release"
+jvm-dependency-triage = "./jvm-dependency-triage"

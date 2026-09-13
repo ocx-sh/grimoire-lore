@@ -1,0 +1,11 @@
+apache__kafka	buildscript_block_files=1	classpath_lines=0
+apollographql__apollo-kotlin	buildscript_block_files=4	classpath_lines=0
+bazelbuild__bazel	buildscript_block_files=13	classpath_lines=0
+cashapp__sqldelight	buildscript_block_files=1	classpath_lines=0
+google__dagger	buildscript_block_files=10	classpath_lines=0
+google__guava	buildscript_block_files=1	classpath_lines=0
+grpc__grpc-java	buildscript_block_files=27	classpath_lines=0
+Kotlin__kotlinx.coroutines	buildscript_block_files=2	classpath_lines=0
+mockito__mockito	buildscript_block_files=1	classpath_lines=0
+testcontainers__testcontainers-java	buildscript_block_files=4	classpath_lines=0
+uber__NullAway	buildscript_block_files=1	classpath_lines=0

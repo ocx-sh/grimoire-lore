@@ -1,0 +1,5 @@
+apache__ant	count=21	rootlines=3051	totallines=5179
+bazelbuild__bazel	count=1	rootlines=-	totallines=45
+gradle__gradle	count=20	rootlines=-	totallines=383
+junit-team__junit-framework	count=1	rootlines=-	totallines=72
+spring-projects__spring-boot	count=2	rootlines=-	totallines=173

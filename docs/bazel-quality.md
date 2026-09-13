@@ -1,7 +1,7 @@
 # bazel-quality
 
 Standards for writing and reviewing Bazel: the gate, nineteen
-merge-blocking non-negotiables, and twelve depth files routed to by task.
+merge-blocking non-negotiables, and thirteen depth files routed to by task.
 
 ```sh
 grim add ghcr.io/ocx-sh/lore/bazel-quality
@@ -49,11 +49,11 @@ the rules:
 ## What is in it
 
 The index carries the gate, nineteen non-negotiables, and three
-cross-cutting rules it owns outright. 328 further rules live in twelve
+cross-cutting rules it owns outright. 353 further rules live in thirteen
 depth files — eight by concern (Starlark and BUILD shape, Bzlmod and
 repository rules, hermeticity, caching and remote execution, testing, CI and
-target selection, architecture, flags and versions) and four by language
-(Rust, Python, TypeScript, C++), because the rulesets genuinely diverge per
+target selection, architecture, flags and versions) and five by language
+(Rust, Python, TypeScript, C++, and Java with Kotlin), because the rulesets genuinely diverge per
 ruleset and a flat file would restate every exception in every paragraph.
 
 Every rule carries an ID, a rationale, a runnable verification that says

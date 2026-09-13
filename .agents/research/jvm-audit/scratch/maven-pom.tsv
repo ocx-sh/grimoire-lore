@@ -1,0 +1,15 @@
+apache__ant	poms=27	root=0	modules=-	parent=-
+apache__kafka	poms=3	root=0	modules=-	parent=-
+apache__maven	poms=2031	root=1	modules=5	parent=  <parent>    <groupId>org.apache.maven</groupId>    <artifactId>maven-parent</artifactId>    <version>49</version>
+assertj__assertj	poms=15	root=1	modules=5	parent=
+bazelbuild__bazel	poms=1	root=0	modules=-	parent=-
+FasterXML__jackson-databind	poms=1	root=1	modules=0	parent=  <parent>    <groupId>tools.jackson</groupId>    <artifactId>jackson-base</artifactId>    <version>3.3.0-SNAPSHOT</version>
+google__dagger	poms=2	root=0	modules=-	parent=-
+google__error-prone	poms=10	root=1	modules=9	parent=
+google__guava	poms=14	root=1	modules=5	parent=
+gradle__gradle	poms=46	root=0	modules=-	parent=-
+grpc__grpc-java	poms=8	root=0	modules=-	parent=-
+JetBrains__Exposed	poms=3	root=0	modules=-	parent=-
+junit-team__junit-framework	poms=3	root=0	modules=-	parent=-
+spring-projects__spring-boot	poms=170	root=0	modules=-	parent=-
+square__okhttp	poms=1	root=0	modules=-	parent=-
