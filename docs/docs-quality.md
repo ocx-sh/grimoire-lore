@@ -11,9 +11,10 @@ you can run, or says it is a reading heuristic and states what to look for.
 grim add ghcr.io/ocx-sh/lore/docs-quality
 ```
 
-Loads on `README.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, `docs/**`, `doc/**`,
-`website/**`, `site/**`, and the config file for MkDocs Material, mdBook,
-VitePress and Docusaurus. The index is always present. A depth file loads
+Loads on every Markdown, MDX, reStructuredText and AsciiDoc file in any
+directory, and on the config file for MkDocs Material, mdBook, VitePress,
+Docusaurus and Antora. Agent config files are out of scope by the rule's own
+first paragraph. To grade a page on demand, use the `docs-review` skill. The index is always present. A depth file loads
 only when the work calls for it.
 
 ## The fleet has no gate today

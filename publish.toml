@@ -193,7 +193,7 @@ description = { readme = "docs/typescript-packaging.md", logo = "assets/lore-typ
 version = "0.1.0"
 description = { readme = "docs/typescript-essentials.md", logo = "assets/lore-typescript.svg" }
 
-# The documentation design set: one rule plus two skills, not three rules or
+# The documentation design set: one rule plus three skills, not four rules or
 # one skill, because the split follows how often each piece runs. `docs-quality`
 # loads on every docs edit and blocks on counted limits, which is a rule's job.
 # `docs-plan` and `docs-instrument` each run once per project, discover or wire
@@ -201,9 +201,10 @@ description = { readme = "docs/typescript-essentials.md", logo = "assets/lore-ty
 # per-edit check, which is a skill's job. Two skills rather than one because
 # their evidence does not overlap: `docs-plan` reads the repository, its
 # issues and its logs, and `docs-instrument` reads the docs-quality rule set
-# and the repository's own CI runner.
+# and the repository's own CI runner. `docs-review` is the on-demand trigger:
+# a rule only loads on an edit, so grading an untouched page needs a name.
 [rules.docs-quality]
-version = "0.1.0"
+version = "0.2.0"
 description = { readme = "docs/docs-quality.md", logo = "assets/lore-docs.svg" }
 
 [skills.docs-plan]
@@ -214,8 +215,12 @@ description = { readme = "docs/docs-plan.md", logo = "assets/lore-docs.svg" }
 version = "0.1.0"
 description = { readme = "docs/docs-instrument.md", logo = "assets/lore-docs.svg" }
 
-[bundles.docs-essentials]
+[skills.docs-review]
 version = "0.1.0"
+description = { readme = "docs/docs-review.md", logo = "assets/lore-docs.svg" }
+
+[bundles.docs-essentials]
+version = "0.1.1"
 description = { readme = "docs/docs-essentials.md", logo = "assets/lore-docs.svg" }
 
 # The Bazel set: one rule plus two skills. `bazel-quality` is the index rule;

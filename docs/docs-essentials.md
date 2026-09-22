@@ -1,7 +1,7 @@
 # docs-essentials
 
 The documentation design set in one install: the `docs-quality` rule, and the
-`docs-plan` and `docs-instrument` skills.
+`docs-plan`, `docs-instrument` and `docs-review` skills.
 
 ```sh
 grim add ghcr.io/ocx-sh/lore/docs-essentials
@@ -12,8 +12,9 @@ grim add ghcr.io/ocx-sh/lore/docs-essentials
 | `docs-quality` | rule | Eighteen non-negotiables and 43 MUST rows across seven depth files: page types and the declaration, plain English limits, tested examples, navigation and search, observability, and what a site owes an agent reader |
 | `docs-plan` | skill | Discovery: a tiered task list from real evidence, a typed page inventory, a coverage map, a delete list, an IA plan |
 | `docs-instrument` | skill | The gate: retrofits the declaration, wires the checks into CI, and picks a link checker and example harness per generator |
+| `docs-review` | skill | The explicit trigger: grades named pages or a branch diff by hand, in any directory and any markup format |
 
-## Why one rule and two skills
+## Why one rule and three skills
 
 `docs-quality` is a merge gate. It loads on every docs edit and blocks on
 counted limits. Discovery and instrumentation differ in kind. Each runs once,
@@ -26,6 +27,9 @@ The two skills split further because their evidence sources do not overlap.
 `docs-plan` reads the repository, its issues and its logs. `docs-instrument`
 reads the docs-quality rule set and the repository's own CI runner. Neither
 step benefits from the other's context loaded at the same time.
+
+`docs-review` exists because a rule only loads on an edit. Grading a page
+nobody is touching, or a whole tree, needs a trigger someone can name.
 
 ## The premise
 
