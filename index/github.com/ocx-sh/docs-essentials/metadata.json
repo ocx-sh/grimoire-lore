@@ -1,6 +1,6 @@
 {
-  "created": "2026-09-05T18:35:49+02:00",
-  "description": "Everything a repository needs to plan, write and gate its documentation the way the OCX family does: the docs-quality rule with its 18 non-negotiables and seven depth files (page types, plain English, tested examples, navigation, observability, machine readers, the checks), the docs-plan skill that turns a project's own evidence into a tiered use-case list and typed page inventory, and the docs-instrument skill that retrofits the type declaration and wires every check into CI without turning every open pull request red.",
+  "created": "2026-09-22T23:35:53+02:00",
+  "description": "Everything a repository needs to plan, write and gate its documentation the way the OCX family does: the docs-quality rule with its 18 non-negotiables and seven depth files (page types, plain English, tested examples, navigation, observability, machine readers, the checks), the docs-plan skill that turns a project's own evidence into a tiered use-case list and typed page inventory, the docs-instrument skill that retrofits the type declaration and wires every check into CI without turning every open pull request red, and the docs-review skill that runs the gate by hand over any page in any format.",
   "keywords": [
     "documentation",
     "docs",

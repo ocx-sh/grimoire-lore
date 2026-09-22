@@ -1,0 +1,37 @@
+{
+  "created": "2026-09-22T23:35:53+02:00",
+  "description": "Grade documentation pages against the docs-quality rule set on demand, in any directory and any markup format (Markdown, MDX, reStructuredText, MyST, AsciiDoc). Use when someone asks to review, check, grade, lint or audit a doc page, a README, a changelog, a docs directory or the docs changed on a branch, asks whether a page meets docs-quality, or wants the docs gate run by hand. Not for deciding which pages to write, which is docs-plan, and not for wiring the checks into CI, which is docs-instrument.",
+  "keywords": [
+    "docs",
+    "documentation",
+    "review",
+    "docs-review",
+    "check",
+    "lint",
+    "audit",
+    "grade",
+    "readme",
+    "changelog",
+    "markdown",
+    "mdx",
+    "restructuredtext",
+    "rst",
+    "myst",
+    "asciidoc",
+    "adoc",
+    "sphinx",
+    "antora",
+    "doc_type",
+    "docs-quality"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "docs-review",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/docs-review",
+  "schema": 1,
+  "summary": "Runs the docs-quality gate by hand over named pages or a branch diff, in any directory and any markup format"
+}
