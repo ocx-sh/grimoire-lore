@@ -1,0 +1,39 @@
+{
+  "created": "2026-09-26T22:14:05+02:00",
+  "description": "CMake Build",
+  "keywords": [
+    "cmake",
+    "cmakelists",
+    "cmake-presets",
+    "ctest",
+    "cmake_minimum_required",
+    "policies",
+    "find_package",
+    "fetchcontent",
+    "cpm",
+    "hunter",
+    "toolchain",
+    "dependency-provider",
+    "cps",
+    "install",
+    "export",
+    "gnuinstalldirs",
+    "pkg-config",
+    "cross-compiling",
+    "gersemi",
+    "rules_foreign_cc",
+    "cpp",
+    "c++"
+  ],
+  "kind": "rule",
+  "license": "Apache-2.0",
+  "name": "cmake-build",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/cmake-build",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "The CMake build index: the configure gate, the non-negotiables, and where the depth lives for listfiles, modules, Config and pkg-config templates, presets and the Bazel seam"
+}

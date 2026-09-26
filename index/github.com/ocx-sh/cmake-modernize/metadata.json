@@ -1,0 +1,39 @@
+{
+  "created": "2026-09-26T22:14:05+02:00",
+  "description": "Ordered, once-per-repository procedure that takes a legacy directory-scoped CMake tree to target-based, installable and find_package-consumable CMake, with one exit check per step, a gated install-move-consume round trip and an as-subproject smoke as the two end proofs. Use when someone asks to modernize, clean up or migrate an old CMake tree as a whole, meaning replace include_directories, add_definitions or global CMAKE_CXX_FLAGS with target_* commands across the tree, make a legacy library installable, exportable and consumable through a Config package or CPS, or bring a legacy tree under the configure gate. Not for a one-line edit such as a single target_link_libraries keyword or one cmake_parse_arguments call, which the cmake-build rules cover without a procedure. Not for a tree that does not configure or finds the wrong dependency copy, which is cmake-dependency-triage, not for Conan or vcpkg manifests, which is cpp-packaging, and not for the standards themselves, which are the cmake-build rules.",
+  "keywords": [
+    "cmake",
+    "modernize",
+    "modern-cmake",
+    "legacy",
+    "migration",
+    "targets",
+    "target_link_libraries",
+    "include_directories",
+    "add_definitions",
+    "CMAKE_CXX_FLAGS",
+    "cmake_minimum_required",
+    "PROJECT_IS_TOP_LEVEL",
+    "install",
+    "export",
+    "find_package",
+    "config-package",
+    "round-trip",
+    "cps",
+    "pkg-config",
+    "cmake_parse_arguments",
+    "PARSE_ARGV",
+    "configure-gate",
+    "gersemi"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "cmake-modernize",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/cmake-modernize",
+  "schema": 1,
+  "summary": "Takes a legacy CMake tree to target-based and consumable in ten ordered steps, each closed by a command, never in one rewrite"
+}
