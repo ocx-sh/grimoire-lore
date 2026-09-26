@@ -1,0 +1,36 @@
+{
+  "created": "2026-09-26T16:18:20+02:00",
+  "description": "Go Modules",
+  "keywords": [
+    "go",
+    "golang",
+    "go.mod",
+    "go.sum",
+    "go.work",
+    "toolchain",
+    "godebug",
+    "replace",
+    "retract",
+    "depguard",
+    "govulncheck",
+    "golangci-lint",
+    "staticcheck",
+    "goreleaser",
+    "ko",
+    "cosign",
+    "setup-go",
+    "dependabot",
+    "release"
+  ],
+  "kind": "rule",
+  "license": "Apache-2.0",
+  "name": "go-modules",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/go-modules",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "The Go module and build-config index, with the gate, the non-negotiables, the GO-MOD rules, and where the lint-gate and release depth lives"
+}

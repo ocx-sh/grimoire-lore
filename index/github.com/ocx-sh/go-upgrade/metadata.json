@@ -1,0 +1,37 @@
+{
+  "created": "2026-09-26T16:18:20+02:00",
+  "description": "Ordered procedure for moving a Go module to a new Go release or triaging a Go dependency, covering the release-note and GODEBUG diff, the go and toolchain line bump by code kind, go fix after the bump, stdversion, the golangci-lint pin and config bump with its dated re-probes, the GOEXPERIMENT pin audit, govulncheck reachability triage in text mode, and superseded-module replacement. Use when bumping the go or toolchain directive, adopting a new Go minor or point release, bumping golangci-lint or staticcheck, answering a govulncheck finding or a Dependabot gomod PR, replacing a deprecated or archived module, or asking why a green build changed behaviour after a Go bump. Not for cutting a release, and not for diagnosing a hung or slow process.",
+  "keywords": [
+    "go",
+    "golang",
+    "upgrade",
+    "toolchain",
+    "go-mod",
+    "go-directive",
+    "godebug",
+    "go-fix",
+    "modernize",
+    "stdversion",
+    "go-vet",
+    "golangci-lint",
+    "staticcheck",
+    "gosec",
+    "goexperiment",
+    "govulncheck",
+    "vulnerability",
+    "dependency",
+    "depguard",
+    "dependabot",
+    "deprecated"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "go-upgrade",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/go-upgrade",
+  "schema": 1,
+  "summary": "Order-sensitive Go toolchain upgrade and dependency triage procedure, with the dated re-probes that keep pinned linter facts honest"
+}
