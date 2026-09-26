@@ -1,0 +1,36 @@
+{
+  "created": "2026-09-26T22:14:05+02:00",
+  "description": "C++ Packaging",
+  "keywords": [
+    "cpp",
+    "c++",
+    "cmake",
+    "conan",
+    "conan2",
+    "conanfile",
+    "conan.lock",
+    "conandata",
+    "vcpkg",
+    "vcpkg.json",
+    "portfile",
+    "triplet",
+    "lockfile",
+    "baseline",
+    "tool-requires",
+    "binary-cache",
+    "fetchcontent",
+    "cpm",
+    "package-manager"
+  ],
+  "kind": "rule",
+  "license": "Apache-2.0",
+  "name": "cpp-packaging",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/cpp-packaging",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "The C++ package-manager index: the gate, the non-negotiables, the manager and lock-of-record decisions, and where the Conan 2 and vcpkg depth lives for conanfiles, conan.lock, vcpkg manifests and portfiles"
+}
