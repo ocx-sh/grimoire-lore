@@ -1,0 +1,101 @@
+aquasecurity__trivy:pkg/downloader/backup.go:21: if err := os.Rename(dst, backup); errors.Is(err, os.ErrNotExist) {
+aquasecurity__trivy:pkg/downloader/backup.go:30: if err := os.Rename(backup, dst); err != nil {
+caddyserver__caddy:cmd/packagesfuncs.go:175: err = os.Rename(thisExecPath, backupExecPath)
+caddyserver__caddy:cmd/packagesfuncs.go:181: err2 := os.Rename(backupExecPath, thisExecPath)
+cli__cli:.github/skills/cli-exercise/tool/internal/cliutil/io.go:132: if err = os.Rename(name, filename); err != nil {
+cli__cli:.github/skills/cli-exercise/tool/internal/evidence/session_media.go:327: if err := os.Rename(source, normalized); err != nil {
+cli__cli:pkg/cmd/codespace/ssh.go:448: err = os.Rename(publicKey, publicKeyNew)
+cli__cli:pkg/cmd/codespace/ssh.go:454: err = os.Rename(privateKey, privateKeyNew)
+cli__cli:pkg/cmd/skills/update/update.go:483: if err := os.Rename(filepath.Join(dest, entry.Name()), filepath.Join(backup, entry.Name())); err != nil {
+cli__cli:pkg/cmd/skills/update/update.go:499: if err := os.Rename(from, to); err != nil {
+cli__cli:pkg/cmd/skills/update/update.go:517: _ = os.Rename(filepath.Join(backup, name), filepath.Join(dest, name))
+cockroachdb__pebble:vfs/vfs.go:307: return errors.WithStack(os.Rename(oldname, newname))
+containerd__containerd:plugins/snapshots/blockfile/blockfile.go:342: if err = os.Rename(path, renamed); err != nil {
+containerd__containerd:plugins/snapshots/blockfile/blockfile.go:355: if err1 := os.Rename(renamed, path); err1 != nil {
+containerd__containerd:plugins/snapshots/erofs/erofs.go:769: if err = os.Rename(td, path); err != nil {
+containerd__containerd:plugins/snapshots/lcow/lcow.go:223: if err = os.Rename(path, renamed); err != nil && !os.IsNotExist(err) {
+containerd__containerd:plugins/snapshots/lcow/lcow.go:232: if err1 := os.Rename(renamed, path); err1 != nil {
+containerd__containerd:plugins/snapshots/lcow/lcow.go:472: if err := os.Rename(scratchTempPath, scratchFinalPath); err != nil {
+containerd__containerd:plugins/snapshots/overlay/overlay.go:525: if err = os.Rename(td, path); err != nil {
+containerd__containerd:plugins/snapshots/native/native.go:177: if err = os.Rename(path, renamed); err != nil {
+containerd__containerd:plugins/snapshots/native/native.go:190: if err1 := os.Rename(renamed, path); err1 != nil {
+containerd__containerd:plugins/snapshots/native/native.go:267: if err = os.Rename(td, path); err != nil {
+containerd__containerd:plugins/snapshots/windows/common.go:158: if err = os.Rename(path, renamed); err != nil && !os.IsNotExist(err) {
+containerd__containerd:plugins/snapshots/windows/common.go:176: if renameErr := os.Rename(path, renamed); renameErr != nil && !os.IsNotExist(renameErr) {
+containerd__containerd:plugins/snapshots/windows/common.go:186: if err1 := os.Rename(renamed, path); err1 != nil {
+containerd__containerd:plugins/content/local/writer.go:156: if err := os.Rename(ingest, target); err != nil {
+containerd__containerd:plugins/content/local/store.go:722: err = os.Rename(tmp, path)
+containerd__containerd:internal/cri/store/container/status.go:304: if err := os.Rename(s.path, temp); err != nil && !os.IsNotExist(err) {
+containerd__containerd:core/runtime/v2/bundle.go:177: if err := os.Rename(path, atomicPath); err != nil {
+containerd__containerd:pkg/atomicfile/file.go:114: if err = os.Rename(a.f.Name(), a.name); err != nil {
+containerd__containerd:cmd/containerd/command/service_windows.go:347: os.Rename(path, path+".old")
+containerd__containerd:cmd/ctr/commands/images/build_erofs_cache.go:207: if err := os.Rename(dmverity.MetadataPath(tmpPath), dmverity.MetadataPath(dest)); err != nil {
+containerd__containerd:cmd/ctr/commands/images/build_erofs_cache.go:211: if err := os.Rename(tmpPath, dest); err != nil {
+containerd__containerd:cmd/go-buildtag/main.go:90: if err := os.Rename(p+".tmp", p); err != nil {
+dominikh__go-tools:internal/robustio/robustio_flaky.go:67: err = os.Rename(oldpath, newpath)
+dominikh__go-tools:internal/robustio/robustio_other.go:14: return os.Rename(oldpath, newpath)
+dominikh__go-tools:internal/xtools-internal/packagestest/modules.go:165: if err := os.Rename(modCache(exported), modCache(exported)+".orig"); err != nil {
+dominikh__go-tools:internal/xtools-internal/testfiles/testfiles.go:58: if err := os.Rename(oldpath, newpath); err != nil {
+etcd-io__etcd:tools/etcd-dump-metrics/install_darwin.go:57: return bp2, os.Rename(bp1, bp2)
+etcd-io__etcd:server/etcdserver/api/snap/db.go:66: err = os.Rename(f.Name(), fn)
+etcd-io__etcd:server/storage/wal/wal.go:285: if err = os.Rename(w.dir, brokenDirName); err != nil {
+etcd-io__etcd:server/storage/wal/wal.go:305: if err := os.Rename(tmpdirpath, w.dir); err != nil {
+etcd-io__etcd:server/storage/wal/wal.go:328: if err := os.Rename(tmpdirpath, w.dir); err != nil {
+etcd-io__etcd:server/storage/wal/wal.go:843: if err = os.Rename(newTail.Name(), fpath); err != nil {
+etcd-io__etcd:server/storage/backend/backend.go:588: err = os.Rename(tdbp, dbp)
+etcd-io__etcd:server/storage/backend.go:68: if err := os.Rename(snapPath, cfg.BackendPath()); err != nil {
+etcd-io__etcd:client/v3/snapshot/v3_snapshot.go:118: if err = os.Rename(partpath, dbPath); err != nil {
+golang__tools:internal/robustio/robustio_flaky.go:65: err = os.Rename(oldpath, newpath)
+golang__tools:internal/robustio/robustio_other.go:14: return os.Rename(oldpath, newpath)
+golang__tools:internal/packagestest/modules.go:165: if err := os.Rename(modCache(exported), modCache(exported)+".orig"); err != nil {
+golang__tools:internal/testfiles/testfiles.go:58: if err := os.Rename(oldpath, newpath); err != nil {
+golang__tools:refactor/rename/mvpkg.go:364: return os.Rename(from, to)
+google__go-containerregistry:pkg/v1/layout/write.go:272: return os.Rename(w.Name(), renamePath)
+google__go-containerregistry:pkg/registry/blobs_disk.go:79: return os.Rename(f.Name(), m.blobHashPath(h))
+google__go-github:tools/schemafields/openapi.go:483: return os.Rename(f.Name(), dest)
+goreleaser__goreleaser:internal/builders/node/download.go:157: if err := os.Rename(archive, bin); err != nil {
+goreleaser__goreleaser:internal/builders/node/download.go:221: if err := os.Rename(tmpName, dst); err != nil {
+hashicorp__terraform:internal/replacefile/replacefile_unix.go:27: return os.Rename(source, destination)
+hashicorp__terraform:internal/command/providers_mirror.go:245: err = os.Rename(stagingPath, targetPath)
+oras-project__oras-go:content/oci/storage.go:97: if err := os.Rename(ingest, target); err != nil {
+oras-project__oras-go:registry/remote/internal/configfile/configfile.go:407: if err := os.Rename(ingest, cfg.path); err != nil {
+prometheus__prometheus:tsdb/head_wal.go:2032: if err := os.Rename(tmpPath, path); err != nil {
+prometheus__prometheus:tsdb/fileutil/fileutil.go:94: if err := os.Rename(from, to); err != nil {
+prometheus__prometheus:documentation/examples/custom-sd/adapter/adapter.go:133: err = os.Rename(tmpfile.Name(), a.output)
+regclient__regclient:internal/conffile/conffile.go:185: return os.Rename(tmpFullname, f.fullname)
+regclient__regclient:scheme/ocidir/ocidir.go:316: err = os.Rename(path.Join(r.Path, tmpName), indexFile)
+regclient__regclient:scheme/ocidir/manifest.go:299: err = os.Rename(path.Join(dir, tmpName), file)
+regclient__regclient:scheme/ocidir/blob.go:162: err = os.Rename(path.Join(dir, tmpName), file)
+restic__restic:helpers/prepare-release/main.go:223: err := os.Rename(src, dest)
+restic__restic:internal/backend/local/local.go:180: if err = os.Rename(f.Name(), finalname); err != nil {
+restic__restic:internal/backend/cache/file.go:111: err = os.Rename(f.Name(), finalname)
+restic__restic:internal/selfupdate/download.go:104: if err := os.Rename(newFile.Name(), target); err != nil {
+restic__restic:internal/selfupdate/download_windows.go:25: if err := os.Rename(target, backup); err != nil {
+sigstore__cosign:test/helpers.go:406: err := os.Rename(f, newName)
+syncthing__syncthing:script/prune_mocks.go:77: return os.Rename(tmp.Name(), path)
+syncthing__syncthing:lib/syncthing/utils.go:282: _ = os.Rename(oldDBDir, oldDBDir+"-migrated")
+syncthing__syncthing:lib/upgrade/upgrade_supported.go:210: err = os.Rename(binary, old)
+syncthing__syncthing:lib/upgrade/upgrade_supported.go:214: if err := os.Rename(fname, binary); err != nil {
+syncthing__syncthing:lib/upgrade/upgrade_supported.go:215: os.Rename(old, binary)
+syncthing__syncthing:lib/fs/basicfs.go:209: return os.Rename(oldpath, newpath)
+syncthing__syncthing:test/util.go:195: return os.Rename(path, newPath)
+syncthing__syncthing:cmd/syncthing/crash_reporting.go:72: _ = os.Rename(file, strings.Replace(file, ".log", ".reported.log", 1))
+syncthing__syncthing:cmd/syncthing/monitor.go:392: err := os.Rename(from, to)
+syncthing__syncthing:cmd/syncthing/monitor.go:399: err := os.Rename(r.name, numberedFile(r.name, 0))
+syncthing__syncthing:cmd/syncthing/heapprof.go:53: err = os.Rename(name+".tmp", name)
+syncthing__syncthing:cmd/infra/ursrv/serve/serve.go:246: if err := os.Rename(cli.DumpFile+".tmp", cli.DumpFile); err != nil {
+syncthing__syncthing:cmd/stdiscosrv/database.go:315: if err := os.Rename(dbf+".tmp", dbf); err != nil {
+syncthing__syncthing:build.go:892: err := os.Rename("lang-en-new.json", "lang-en.json")
+tailscale__tailscale:atomicfile/atomicfile_windows.go:18: return os.Rename(srcFile, destFile)
+tailscale__tailscale:atomicfile/atomicfile_notwindows.go:13: return os.Rename(srcFile, destFile)
+tailscale__tailscale:misc/git_hook/githook/install.go:141: if err := os.Rename(tmp, target); err != nil {
+tailscale__tailscale:tstest/natlab/vmtest/images.go:235: if err := os.Rename(tmpFile, cachedPath); err != nil {
+tailscale__tailscale:tstest/natlab/vmtest/version.go:194: return os.Rename(tmp, dst)
+tailscale__tailscale:cmd/tailscaled/tailscaled.go:364: if err := os.Rename(oldPath, p); err != nil {
+tailscale__tailscale:cmd/tailscaled/install_darwin.go:176: if err := os.Rename(tmpBin, dst); err != nil {
+tailscale__tailscale:cmd/tsidp/tsidp.go:1530: if err := os.Rename(oldPath, deprecatedPath); err != nil {
+tailscale__tailscale:net/dns/direct.go:697: return os.Rename(fs.path(oldName), fs.path(newName))
+tailscale__tailscale:clientupdate/distsign/distsign.go:246: if err := os.Rename(dstPathUnverified, dstPath); err != nil {
+tailscale__tailscale:clientupdate/clientupdate.go:1106: if err := os.Rename(tailscale+".new", tailscale); err != nil {
+tailscale__tailscale:clientupdate/clientupdate.go:1110: if err := os.Rename(tailscaled+".new", tailscaled); err != nil {
+tailscale__tailscale:feature/taildrop/fileops_fs.go:111: err = os.Rename(oldPath, dst)

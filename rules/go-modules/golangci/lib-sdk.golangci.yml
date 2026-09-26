@@ -1,0 +1,158 @@
+# lib-sdk.golangci.yml: the golangci-lint v2 file for an SDK or a library
+# module. It is the whole baseline plus gochecknoglobals, gochecknoinits,
+# ireturn, exhaustive, staticcheck checks [all], revive exported and
+# sloglint no-global, with NO exclusion preset. Copy this whole file to the
+# module root as .golangci.yml. A CLI never takes this file (GO-GATE-22).
+# Implements GO-GATE-23 on top of GO-GATE-09, GO-GATE-10, GO-GATE-11,
+# GO-GATE-12, GO-GATE-13, GO-GATE-14, GO-GATE-15, GO-GATE-16 and GO-GATE-20
+# (go-modules rule, gates.md).
+# Measured 2026-09-26, golangci-lint v2.14.0 built with Go 1.27.1.
+# Re-run `golangci-lint config verify` and the superset check on every bump.
+version: "2"
+
+linters:
+  default: none
+  enable:
+    # golangci-lint v2 "standard", kept explicit
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    # exemplar consensus; bodyclose is GO-GATE-19, modernize is replaced by go fix (GO-GATE-03)
+    - unconvert
+    - misspell
+    - whitespace
+    - unparam
+    - nolintlint
+    - depguard
+    - gosec
+    # measured signal linters that back a family's MUST
+    - errorlint       # GO-ERR
+    - nilerr          # GO-ERR
+    - nilnil          # GO-ERR
+    - noctx           # GO-CONC / GO-IO
+    - contextcheck    # GO-CONC
+    - containedctx    # GO-CONC
+    - fatcontext      # GO-CONC
+    - usestdlibvars   # GO-NET
+    - canonicalheader # GO-NET
+    - wastedassign
+    - predeclared
+    - copyloopvar
+    - revive          # curated rules only, plus exported below (GO-GATE-15)
+    - thelper         # GO-TEST
+    - usetesting      # GO-TEST
+    - testifylint
+    - sloglint        # no-global below (GO-OBS-03, GO-GATE-23)
+    # library/SDK additions (GO-GATE-23)
+    - gochecknoglobals # GO-API-06
+    - gochecknoinits   # GO-API-06
+    - ireturn          # GO-API-07
+    - exhaustive       # GO-API-08
+  settings:
+    govet:
+      enable-all: true          # adds nilness, the SA5011 replacement (GO-GATE-11)
+      disable: [shadow, fieldalignment]
+    staticcheck:
+      checks: [all]    # GO-API-04: turns on ST1000, ST1003, ST1016, ST1020-22
+    errorlint:
+      errorf: true
+      errorf-multi: true
+      asserts: true
+      comparison: true
+    errcheck:
+      exclude-functions:
+        - (io.ReadCloser).Close   # GO-GATE-20: declared io.ReadCloser only; write-path closes stay checked
+    nilnil:
+      checked-types: [chan, func, iface, ptr, uintptr, unsafeptr]   # GO-ERR-12: map dropped, a nil map is a valid empty read
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+      allow-unused: false
+    revive:
+      rules:                    # a rules list REPLACES revive's defaults (GO-GATE-15); baseline three plus exported
+        - name: context-as-argument
+        - name: deep-exit
+        - name: time-equal      # GO-LANG-07
+        - name: exported        # GO-API-04
+    thelper:
+      test: { begin: true, first: false, name: false }
+      benchmark: { begin: true, first: false, name: false }
+      tb: { begin: true, first: false, name: false }
+      fuzz: { begin: true, first: false, name: false }
+    usetesting:
+      context-background: true
+      context-todo: true
+    sloglint:
+      no-global: "all"   # GO-OBS-03: this file only, never the baseline or CLI file
+    exhaustive:
+      default-signifies-exhaustive: false   # GO-API-08: a default: arm is never coverage
+    depguard:
+      rules:
+        superseded: # GO-MOD-08, verbatim, 13 entries (GO-OBS-06 automaxprocs, GO-LANG-22 x/exp/constraints)
+          files: ["$all"]
+          deny:
+            - pkg: io/ioutil
+              desc: "use io and os (go1.16)"
+            - pkg: github.com/pkg/errors
+              desc: "use errors and fmt.Errorf %w (go1.13/1.20)"
+            - pkg: golang.org/x/xerrors
+              desc: "use errors (go1.13)"
+            - pkg: golang.org/x/exp/slices
+              desc: "use slices (go1.21)"
+            - pkg: golang.org/x/exp/maps
+              desc: "use maps (go1.21)"
+            - pkg: golang.org/x/exp/constraints
+              desc: "use stdlib cmp.Ordered (Go 1.21)"
+            - pkg: github.com/golang/mock
+              desc: "archived 2024-01-08; use go.uber.org/mock"
+            - pkg: gopkg.in/yaml.v2
+              desc: "go-yaml archived 2025-04-01; use go.yaml.in/yaml/v3"
+            - pkg: gopkg.in/yaml.v3
+              desc: "go-yaml archived 2025-04-01; use go.yaml.in/yaml/v3"
+            - pkg: github.com/ghodss/yaml
+              desc: "unmaintained; use sigs.k8s.io/yaml"
+            - pkg: github.com/satori/go.uuid
+              desc: "abandoned; use github.com/google/uuid or stdlib uuid (go1.27)"
+            - pkg: github.com/hashicorp/go-multierror
+              desc: "use stdlib errors.Join (go1.20)"
+            - pkg: go.uber.org/automaxprocs
+              desc: "the runtime is container-aware at go>=1.25 (GO-OBS-06); use runtime.GOMAXPROCS(0)"
+        logging: # GO-OBS-01, verbatim; MUST for the SDK through GO-MOD-10
+          files: ["$all"]
+          deny:
+            - pkg: go.uber.org/zap
+              desc: "new fleet code logs through log/slog"
+            - pkg: github.com/rs/zerolog
+              desc: "new fleet code logs through log/slog"
+            - pkg: github.com/sirupsen/logrus
+              desc: "new fleet code logs through log/slog"
+        no-testify: # GO-TEST-02
+          files: ["$test"]
+          deny:
+            - pkg: github.com/stretchr/testify
+              desc: "stdlib testing + go-cmp (GO-TEST); drop this rule only in an incumbent-testify repo"
+    gosec:
+      excludes:
+        - G104 # duplicates errcheck
+        - G115 # ignores prior bounds checks (securego/gosec#1187); re-review this list on every golangci-lint bump
+        - G304 # file inclusion via variable; untrusted names go through os.Root (GO-IO-02, GO-SEC-01)
+      config:
+        G301: "0755"
+        G302: "0644"
+        G306: "0644"
+  exclusions:
+    generated: lax
+    presets: []   # NO preset (GO-GATE-23): comments would silence ST1000/ST1020-22 and revive exported
+    rules:
+      - path: _test\.go
+        linters: [gosec]
+
+formatters:
+  enable: [gofmt]
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  uniq-by-line: false

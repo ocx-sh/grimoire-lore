@@ -1,0 +1,200 @@
+aquasecurity__trivy:pkg/iac/adapters/terraform/aws/provider/adapt.go:12: //#nosec G101 -- False positive
+aquasecurity__trivy:pkg/iac/adapters/terraform/aws/ec2/autoscaling.go:68: //#nosec G101 -- False positive
+aquasecurity__trivy:pkg/iac/scanners/terraformplan/tfjson/parser/parser.go:4: "crypto/md5" //#nosec
+aquasecurity__trivy:pkg/iac/scanners/terraformplan/tfjson/parser/parser.go:232: hash := md5.Sum([]byte(moduleAddress)) // #nosec
+aquasecurity__trivy:pkg/iac/scanners/terraform/parser/resolvers/cache.go:5: "crypto/md5" // #nosec
+aquasecurity__trivy:pkg/iac/scanners/terraform/parser/resolvers/cache.go:73: hash := md5.Sum([]byte(source + ":" + version)) // #nosec
+aquasecurity__trivy:pkg/iac/terraform/presets.go:41: //nolint:gosec
+aquasecurity__trivy:pkg/dependency/parser/java/jar/parse.go:423: fullPath := path.Join(rootPath, zf.Name) // nolint:gosec
+caddyserver__caddy:listeners.go:464: //nolint:gosec
+caddyserver__caddy:modules/caddypki/adminapi.go:166: _, err = w.Write(interCert) //nolint:gosec // false positive... no XSS in a PEM for cryin' out loud
+caddyserver__caddy:modules/caddypki/adminapi.go:168: _, _ = w.Write(rootCert) //nolint:gosec // false positive... no XSS in a PEM for cryin' out loud
+caddyserver__caddy:modules/caddypki/crypto.go:80: PrivateKey string `json:"private_key,omitempty"` //nolint:gosec // false positive: yes it's exported, since it needs to encode/decode as JSON; and is often just
+caddyserver__caddy:modules/caddypki/acmeserver/acmeserver.go:345: //nolint:gosec
+caddyserver__caddy:modules/caddytls/capools.go:681: res, err := httpClient.Do(req) //nolint:gosec // SSRF false positive... uri comes from config
+caddyserver__caddy:modules/caddytls/certmanagers.go:158: resp, err := http.DefaultClient.Do(req) //nolint:gosec // SSRF false positive... request URI comes from config
+caddyserver__caddy:modules/caddytls/acmeissuer.go:385: resp, err := http.DefaultClient.Do(req) //nolint:gosec // no SSRF since URL is from trusted config
+caddyserver__caddy:modules/caddytls/zerosslissuer.go:43: APIKey string `json:"api_key,omitempty"` //nolint:gosec // false positive... yes this is exported, for JSON interop
+caddyserver__caddy:modules/caddytls/ech.go:1151: num := uint8(weakrand.N(uint8Range)) //nolint:gosec
+caddyserver__caddy:modules/caddyhttp/fileserver/staticfiles.go:670: //nolint:gosec
+caddyserver__caddy:modules/caddyhttp/fileserver/staticfiles.go:859: http.Redirect(w, r, toPath, http.StatusPermanentRedirect) //nolint:gosec // toPath is a same-origin path and leading // is stripped above
+caddyserver__caddy:modules/caddyhttp/fileserver/browse.go:172: //nolint:gosec // not sure how this could be XSS unless you lose control of the file system (like aren't sanitizing) and client ignores Content-Type of text/pla
+caddyserver__caddy:modules/caddyhttp/fileserver/browse.go:284: http.SetCookie(w, &http.Cookie{ //nolint:gosec // Secure depends on whether the request itself used TLS
+caddyserver__caddy:modules/caddyhttp/fileserver/browse.go:301: http.SetCookie(w, &http.Cookie{ //nolint:gosec // Secure depends on whether the request itself used TLS
+caddyserver__caddy:modules/caddyhttp/staticresp.go:249: fmt.Fprint(w, body) //nolint:gosec // no XSS unless you sabotage your own config
+caddyserver__caddy:modules/caddyhttp/celmatcher.go:415: // nolint:gosec // false positive, impossible to be out of bounds; see: https://github.com/securego/gosec/issues/1525
+caddyserver__caddy:modules/caddyhttp/celmatcher.go:420: // nolint:gosec // false positive, impossible to be out of bounds; see: https://github.com/securego/gosec/issues/1525
+caddyserver__caddy:modules/caddyhttp/errors.go:102: //nolint:gosec
+caddyserver__caddy:modules/caddyhttp/reverseproxy/healthchecks.go:509: resp, err := h.HealthChecks.Active.httpClient.Do(req) //nolint:gosec // no SSRF
+caddyserver__caddy:modules/caddyhttp/reverseproxy/upstreams.go:109: //nolint:gosec
+caddyserver__caddy:modules/caddyhttp/reverseproxy/upstreams.go:344: //nolint:gosec
+caddyserver__caddy:modules/caddyhttp/reverseproxy/fastcgi/writer.go:115: b[0] = byte(size) //nolint:gosec // false positive; b is made 8 bytes long, then this function is always called with b being at least 4 or 1 byte long
+caddyserver__caddy:modules/caddyhttp/reverseproxy/streaming.go:565: k[i] = key[(pos+i)&3] // nolint:gosec // false positive, impossible to be out of bounds; see: https://github.com/securego/gosec/issues/1525
+caddyserver__caddy:modules/caddyhttp/reverseproxy/httptransport.go:270: //nolint:gosec
+caddyserver__caddy:modules/caddyhttp/reverseproxy/selectionpolicies.go:252: j := weakrand.IntN(available) //nolint:gosec
+caddyserver__caddy:modules/caddyhttp/reverseproxy/selectionpolicies.go:301: if count == 1 || weakrand.IntN(count) == 0 { //nolint:gosec
+caddyserver__caddy:modules/caddyhttp/reverseproxy/selectionpolicies.go:644: Secret string `json:"secret,omitempty"` //nolint:gosec // yes it's exported because it needs to encode to JSON
+caddyserver__caddy:modules/caddyhttp/reverseproxy/selectionpolicies.go:817: if weakrand.IntN(count) == 0 { //nolint:gosec
+caddyserver__caddy:modules/caddyhttp/reverseproxy/selectionpolicies.go:856: return best[weakrand.IntN(len(best))] //nolint:gosec
+caddyserver__caddy:modules/caddyhttp/caddyauth/basicauth.go:246: //nolint:gosec
+caddyserver__caddy:modules/caddyhttp/caddyauth/basicauth.go:290: Password string `json:"password"` //nolint:gosec // false positive, this is a hashed password
+caddyserver__caddy:caddytest/caddytest.go:190: res, err := client.Do(req) //nolint:gosec // no SSRF because URL is hard-coded to localhost, and port comes from config
+caddyserver__caddy:caddytest/caddytest.go:283: os.Remove(f.Name()) //nolint:gosec // false positive, filename comes from std lib, no path traversal
+caddyserver__caddy:caddytest/caddytest.go:360: TLSClientConfig:       &tls.Config{InsecureSkipVerify: true}, //nolint:gosec
+caddyserver__caddy:caddytest/caddytest.go:510: resp, err := tc.Client.Do(req) //nolint:gosec // no SSRFs demonstrated
+caddyserver__caddy:caddyconfig/httploader.go:139: resp, err := client.Do(request) //nolint:gosec // no SSRF; comes from trusted config
+caddyserver__caddy:caddyconfig/httploader.go:185: //nolint:gosec
+caddyserver__caddy:caddyconfig/httploader.go:192: //nolint:gosec
+caddyserver__caddy:cmd/commandfuncs.go:77: cmd := exec.Command(os.Args[0], "run", "--pingback", ln.Addr().String()) //nolint:gosec // no command injection that I can determine...
+caddyserver__caddy:cmd/commandfuncs.go:716: if err := os.WriteFile(configFile, output, 0o600); err != nil { //nolint:gosec // path traversal is not really a thing here, this is either "Caddyfile" or admin
+caddyserver__caddy:cmd/commandfuncs.go:839: resp, err := client.Do(req) //nolint:gosec // the only SSRF here would be self-sabotage I think
+charmbracelet__bubbletea:examples/send-msg/main.go:110: pause := time.Duration(rand.Int63n(899)+100) * time.Millisecond // nolint:gosec
+charmbracelet__bubbletea:examples/send-msg/main.go:132: return food[rand.Intn(len(food))] // nolint:gosec
+charmbracelet__bubbletea:examples/progress-download/main.go:43: resp, err := http.Get(url) // nolint:gosec
+charmbracelet__bubbletea:examples/realtime/main.go:27: time.Sleep(time.Millisecond * time.Duration(rand.Int63n(900)+100)) // nolint:gosec
+charmbracelet__bubbletea:examples/tui-daemon-combo/main.go:131: pause := time.Duration(rand.Int63n(899)+100) * time.Millisecond // nolint:gosec
+charmbracelet__bubbletea:examples/tui-daemon-combo/main.go:138: return string(emojis[rand.Intn(len(emojis))]) // nolint:gosec
+charmbracelet__bubbletea:examples/package-manager/packages.go:49: pkgs[k] += fmt.Sprintf("-%d.%d.%d", rand.Intn(10), rand.Intn(10), rand.Intn(10)) //nolint:gosec
+charmbracelet__bubbletea:examples/package-manager/main.go:120: d := time.Millisecond * time.Duration(rand.Intn(500)) //nolint:gosec
+charmbracelet__bubbletea:examples/exec/main.go:16: c := exec.Command(editor) //nolint:gosec
+cli__cli:pkg/cmd/skills/search/search.go:580: //nolint:gosec // arguments are from user-selected search results, not arbitrary input
+containerd__containerd:contrib/apparmor/template.go:181: out, err := exec.Command("apparmor_parser", args...).CombinedOutput() //nolint:gosec // G702: arguments are passed directly to a fixed executable.
+containerd__containerd:integration/failpoint/cmd/runc-fp/main.go:89: cmd := exec.CommandContext(ctx, "runc", os.Args[1:]...) //nolint:gosec // G702: this test proxy forwards arguments directly to a fixed executable.
+containerd__containerd:internal/fsview/overlay_linux.go:34: return string(dest[:sz]), true //nolint:gosec // G602: sz is bounded by dest size
+containerd__containerd:core/mount/manager/plan.go:94: log.G(ctx).Warnf("unknown transform %q for mount %v", transformType, mounts[i]) //nolint:gosec // G602: i is bounded by range mounts
+containerd__containerd:core/mount/manager/plan.go:100: mustApply := shouldTransform(transformType, mounts[i].Type) //nolint:gosec // G602: i is bounded by range mounts
+containerd__containerd:cmd/ctr/commands/content/content.go:612: cmd := exec.Command("sh", "-c", editor+` "$@"`, "editor", tmp.Name()) //nolint:gosec // G702: the editor is intentionally a shell command.
+golangci__golangci-lint:pkg/result/issue.go:4: "crypto/md5" //nolint:gosec // for md5 hash
+golangci__golangci-lint:pkg/result/issue.go:89: hash := md5.New() //nolint:gosec // we don't need a strong hash here
+golangci__golangci-lint:pkg/goformat/runner.go:100: //nolint:gosec // See explanation below.
+golangci__golangci-lint:pkg/commands/internal/builder.go:92: //nolint:gosec // the variable is sanitized.
+golangci__golangci-lint:pkg/commands/internal/builder.go:132: //nolint:gosec // the variables are user related.
+golangci__golangci-lint:pkg/commands/internal/builder.go:188: //nolint:gosec // the variable is sanitized.
+golangci__golangci-lint:pkg/commands/internal/migrate/cloner/cloner.go:188: //nolint:gosec,mnd // The permission is right.
+golangci__golangci-lint:test/testshared/runner.go:266: //nolint:gosec // we don't use user input here
+google__go-containerregistry:pkg/v1/random/image.go:81: rng := rand.New(o.source) //nolint:gosec
+google__go-containerregistry:pkg/v1/random/options.go:33: seed := rand.Int63() //nolint:gosec
+google__go-containerregistry:pkg/v1/mutate/mutate.go:457: resolved := path.Clean(path.Join(path.Dir(name), clean)) //nolint:gosec // G305: path is only used for validation, not file I/O
+google__go-github:tools/gen-release-notes/main.go:124: cmd := exec.Command(cmdArgs[0], cmdArgs[1:]...) //nolint:gosec
+google__go-github:example/contents/main.go:65: f, err := os.Create(outputPath) //#nosec G703 -- path is validated above
+goreleaser__goreleaser:internal/pipe/krew/krew.go:147: if err := os.WriteFile(yamlPath, []byte("# This file was generated by GoReleaser. DO NOT EDIT.\n"+content), 0o644); err != nil { //nolint:gosec
+goreleaser__goreleaser:internal/pipe/aur/aur.go:185: if err := os.WriteFile(path, []byte(pkgContent), 0o644); err != nil { //nolint:gosec
+goreleaser__goreleaser:internal/pipe/cask/cask.go:319: if err := os.WriteFile(path, []byte(content), 0o644); err != nil { //nolint:gosec
+goreleaser__goreleaser:internal/pipe/mcp/mcp.go:30: gitHubTokenFilePath   = ".mcpregistry_github_token"   // #nosec:G101
+goreleaser__goreleaser:internal/pipe/mcp/mcp.go:31: registryTokenFilePath = ".mcpregistry_registry_token" // #nosec:G101
+goreleaser__goreleaser:internal/pipe/brew/brew.go:297: if err := os.WriteFile(path, []byte(content), 0o644); err != nil { //nolint:gosec
+goreleaser__goreleaser:internal/pipe/nix/nix.go:188: if err := os.WriteFile(path, []byte(content), 0o644); err != nil { //nolint:gosec
+goreleaser__goreleaser:internal/pipe/before/before.go:26: /* #nosec */
+goreleaser__goreleaser:internal/pipe/winget/template.go:33: }, "\n")), 0o644); err != nil { //nolint:gosec
+goreleaser__goreleaser:internal/pipe/dist/dist.go:60: // #nosec
+goreleaser__goreleaser:internal/pipe/aursources/aursources.go:163: if err := os.WriteFile(path, []byte(pkgContent), 0o644); err != nil { //nolint:gosec
+goreleaser__goreleaser:internal/pipe/sign/sign.go:256: // #nosec
+goreleaser__goreleaser:internal/pipe/flatpak/flatpak.go:219: if err := os.WriteFile(manifestFile, manifestBytes, 0o644); err != nil { //nolint:gosec
+goreleaser__goreleaser:internal/pipe/docker/api_docker.go:92: out, _ := exec.Command("docker", "build", "--help").CombinedOutput() //nolint:gosec
+goreleaser__goreleaser:internal/pipe/docker/api.go:48: /* #nosec */
+goreleaser__goreleaser:internal/pipe/docker/api.go:81: /* #nosec */
+goreleaser__goreleaser:internal/pipe/effectiveconfig/config.go:26: return os.WriteFile(path, bts, 0o644) //nolint:gosec
+goreleaser__goreleaser:internal/pipe/env/env.go:176: f, err := os.Open(path) // #nosec
+goreleaser__goreleaser:internal/pipe/changelog/changelog.go:112: return os.WriteFile(path, []byte(ctx.ReleaseNotes), 0o644) //nolint:gosec
+goreleaser__goreleaser:internal/pipe/snapcraft/snapcraft.go:258: // #nosec
+goreleaser__goreleaser:internal/pipe/snapcraft/snapcraft.go:421: if err = os.WriteFile(file, out, 0o644); err != nil { //nolint:gosec
+goreleaser__goreleaser:internal/pipe/snapcraft/snapcraft.go:427: /* #nosec */
+goreleaser__goreleaser:internal/pipe/snapcraft/snapcraft.go:483: /* #nosec */
+goreleaser__goreleaser:internal/pipe/sbom/sbom.go:202: // #nosec
+goreleaser__goreleaser:internal/git/git.go:30: /* #nosec */
+goreleaser__goreleaser:internal/builders/node/download.go:111: cmd := exec.CommandContext(ctx, tool, "--version") //nolint:gosec
+goreleaser__goreleaser:internal/builders/base/build.go:112: /* #nosec */
+goreleaser__goreleaser:internal/client/github.go:100: //nolint:gosec
+goreleaser__goreleaser:internal/client/gitlab.go:91: //nolint:gosec
+goreleaser__goreleaser:internal/client/gitea.go:73: //nolint:gosec
+goreleaser__goreleaser:internal/shell/shell.go:27: /* #nosec */
+goreleaser__goreleaser:internal/artifact/artifact.go:4: //nolint:gosec
+goreleaser__goreleaser:internal/artifact/artifact.go:364: //nolint:gosec
+goreleaser__goreleaser:internal/exec/exec.go:98: //nolint:gosec
+goreleaser__goreleaser:pkg/archive/gzip/gzip.go:38: file, err := os.Open(f.Source) // #nosec
+goreleaser__goreleaser:pkg/archive/xz/xz.go:39: file, err := os.Open(f.Source) // #nosec
+goreleaser__goreleaser:pkg/archive/tar/tar.go:62: info, err := os.Lstat(f.Source) // #nosec
+goreleaser__goreleaser:pkg/archive/tar/tar.go:68: link, err = os.Readlink(f.Source) // #nosec
+goreleaser__goreleaser:pkg/archive/tar/tar.go:98: file, err := os.Open(f.Source) // #nosec
+goreleaser__goreleaser:pkg/archive/zip/zip.go:65: info, err := os.Lstat(f.Source) // #nosec
+goreleaser__goreleaser:pkg/archive/zip/zip.go:92: link, err := os.Readlink(f.Source) // #nosec
+goreleaser__goreleaser:pkg/archive/zip/zip.go:99: file, err := os.Open(f.Source) // #nosec
+goreleaser__goreleaser:pkg/config/load.go:34: f, err := os.Open(file) // #nosec
+ko-build__ko:pkg/internal/git/git.go:58: /* #nosec */
+ko-build__ko:pkg/build/gobuild.go:391: /* #nosec G304 G703 -- KOCACHE is intentionally user-controlled. */
+ko-build__ko:pkg/build/gobuild.go:397: /* #nosec G304 G703 -- KOCACHE is intentionally user-controlled. */
+ko-build__ko:pkg/build/gobuild.go:407: /* #nosec G304 G703 -- tmpDir is derived from the user-controlled KOCACHE. */
+ko-build__ko:pkg/build/gobuild.go:424: /* #nosec G204 G702 -- ko intentionally invokes the user-configured go toolchain with user-supplied build args. */
+ko-build__ko:pkg/build/gobuild.go:556: return os.WriteFile(sbomPath, sbom, 0644) //nolint:gosec
+ko-build__ko:pkg/commands/options/build.go:130: /* #nosec G304 G703 -- KO_CONFIG_PATH is intentionally user-controlled. */
+ko-build__ko:pkg/commands/options/build.go:139: /* #nosec G304 G703 -- path is derived from the user-controlled KO_CONFIG_PATH. */
+ko-build__ko:pkg/commands/create.go:89: kubectlCmd := exec.CommandContext(ctx, "kubectl", append([]string{"create", "-f", "-"}, args...)...) //nolint:gosec
+ko-build__ko:pkg/commands/apply.go:89: kubectlCmd := exec.CommandContext(ctx, "kubectl", append([]string{"apply", "-f", "-"}, args...)...) //nolint:gosec
+ko-build__ko:pkg/commands/delete.go:39: //nolint:gosec // We actively want to pass arguments through, so this is fine.
+ko-build__ko:pkg/commands/run.go:124: /* #nosec G706 -- argv is the kubectl invocation we just built; logging it is the intent. */
+ko-build__ko:pkg/commands/run.go:126: /* #nosec G204 G702 -- ko run intentionally invokes kubectl with user-supplied arguments. */
+oras-project__oras:cmd/oras/internal/option/remote.go:103: Secret          string //nolint:gosec // G117: not a hardcoded secret, this is a CLI option field
+regclient__regclient:internal/conffile/conffile.go:175: //#nosec G703 tempfile location is user controlled
+regclient__regclient:internal/conffile/conffile.go:180: //#nosec G703 tempfile location is user controlled
+regclient__regclient:internal/conffile/conffile.go:184: //#nosec G703 tempfile location is user controlled
+regclient__regclient:internal/reghttp/http.go:170: //#nosec G304 command is run by a user accessing their own files
+regclient__regclient:internal/reghttp/http.go:449: //#nosec G704 inputs are user controlled and sanitized
+regclient__regclient:internal/reghttp/http.go:784: //#nosec G402 the default TLS 1.2 minimum version is allowed to support older registries
+regclient__regclient:internal/reghttp/http.go:966: //#nosec G304 file from a known directory and extension read by the user running the command on their own host
+regclient__regclient:internal/retryable/retryable.go:116: //#nosec G402 the default TLS 1.2 minimum version is allowed to support older registries
+regclient__regclient:internal/retryable/retryable.go:160: //#nosec G304 command is run by a user accessing their own files
+regclient__regclient:internal/ascii/ascii.go:30: //#nosec G115 false positive
+regclient__regclient:internal/ascii/lines.go:36: //#nosec G115 false positive
+regclient__regclient:internal/ascii/lines.go:38: //#nosec G115 false positive
+regclient__regclient:internal/ascii/progress.go:33: //#nosec G115 false positive
+regclient__regclient:internal/ascii/progress.go:35: //#nosec G115 false positive
+regclient__regclient:internal/auth/auth.go:73: //#nosec G117 exported struct intentionally holds secrets
+regclient__regclient:internal/auth/auth.go:524: AccessToken  string    `json:"access_token"` //#nosec G117 exported struct intentionally holds secrets
+regclient__regclient:internal/auth/auth.go:527: RefreshToken string    `json:"refresh_token"` //#nosec G117 exported struct intentionally holds secrets
+regclient__regclient:internal/auth/auth.go:699: //#nosec G704 inputs follow specification
+regclient__regclient:internal/auth/auth.go:724: //#nosec G704 inputs follow specification
+regclient__regclient:internal/auth/auth.go:756: //#nosec G704 inputs are user controlled or follow specification
+regclient__regclient:internal/auth/auth.go:764: //#nosec G704 inputs are user controlled or follow specification
+regclient__regclient:internal/auth/auth.go:854: Pass string `json:"password"` //#nosec G117 exported struct intentionally holds secrets
+regclient__regclient:internal/auth/auth.go:859: RefreshToken string `json:"refresh_token"` //#nosec G117 exported struct intentionally holds secrets
+regclient__regclient:internal/auth/auth.go:894: Pass: cred.Password, //#nosec G117 field name follows spec
+regclient__regclient:internal/auth/auth.go:908: //#nosec G704 inputs are user controlled or follow specification requirements
+regclient__regclient:internal/reqresp/reqresp.go:165: //#nosec G404 regresp is only used for testing
+regclient__regclient:internal/reqresp/reqresp.go:178: //#nosec G404 regresp is only used for testing
+regclient__regclient:internal/copyfs/copy.go:49: //#nosec G122 copy is only used for internal (test) code.
+regclient__regclient:internal/copyfs/copy.go:56: //#nosec G122 G304 copy is only used for internal (test) code.
+regclient__regclient:internal/copyfs/copy.go:62: //#nosec G304 copy is only used for internal (test) code.
+regclient__regclient:mod/mod.go:202: //#nosec G703 tempfile location is user controlled
+regclient__regclient:mod/layer.go:735: //#nosec G304 filename is from previous CreateTemp
+regclient__regclient:mod/layer.go:736: //#nosec G703 tempfile location is user controlled
+regclient__regclient:pkg/archive/tar.go:101: //#nosec G122 G304 filename is limited to provided path directory
+regclient__regclient:pkg/archive/tar.go:163: //#nosec G304 filename is limited to provided path directory
+regclient__regclient:pkg/template/template.go:39: //#nosec G304 file inclusion is from user provided values and user executed command
+regclient__regclient:cmd/regctl/image.go:724: //#nosec G304 command is run by a user accessing their own files
+regclient__regclient:cmd/regctl/artifact.go:533: //#nosec G301 defer to user umask setting, simplifies container scenarios, registry content is often public
+regclient__regclient:cmd/regctl/artifact.go:553: //#nosec G304 command is run by a user accessing their own files
+regclient__regclient:cmd/regctl/artifact.go:903: //#nosec G304 command is run by a user accessing their own files
+regclient__regclient:cmd/regctl/artifact.go:904: //#nosec G703 command is run by a user accessing their own files
+regclient__regclient:cmd/regctl/registry.go:349: //#nosec G115 false positive
+regclient__regclient:cmd/regbot/config.go:95: //#nosec G304 command is run by a user accessing their own files
+regclient__regclient:cmd/regbot/sandbox/image.go:263: //#nosec G304 command is run by a user accessing their own files
+regclient__regclient:cmd/regbot/sandbox/image.go:289: //#nosec G304 command is run by a user accessing their own files
+regclient__regclient:cmd/regsync/config.go:180: //#nosec G304 command is run by a user accessing their own files
+regclient__regclient:config/credhelper.go:38: //#nosec G204 only untrusted arg is a hostname which the executed command should not trust
+regclient__regclient:config/credhelper.go:54: Secret    string `json:"Secret"` //#nosec G117 exported struct intentionally holds secrets
+regclient__regclient:config/docker.go:66: Password string `json:"password,omitempty"` //#nosec G117 exported struct intentionally holds secrets
+regclient__regclient:config/docker.go:120: //#nosec G304 scoping file operations to a directory is not yet a feature of regclient.
+regclient__regclient:config/host.go:121: ClientKey     string            `json:"clientKey,omitempty" yaml:"clientKey"`         //#nosec G117 private pem cert for client (mTLS)
+regclient__regclient:config/host.go:124: Pass          string            `json:"pass,omitempty" yaml:"pass"`                   //#nosec G117 password, not used with credHelper
+regclient__regclient:config/host.go:145: User, Password, Token string //#nosec G117 exported struct intentionally holds secrets
+regclient__regclient:scheme/ocidir/ocidir.go:187: //#nosec G301 defer to user umask settings
+regclient__regclient:scheme/ocidir/ocidir.go:200: //#nosec G304 users should validate references they attempt to open
+regclient__regclient:scheme/ocidir/ocidir.go:225: //#nosec G304 users should validate references they attempt to open
+regclient__regclient:scheme/ocidir/ocidir.go:270: //#nosec G301 defer to user umask settings
+regclient__regclient:scheme/ocidir/ocidir.go:315: //#nosec G703 inputs are user controlled
+regclient__regclient:scheme/ocidir/ocidir.go:331: //#nosec G304 users should validate references they attempt to open
+regclient__regclient:scheme/ocidir/manifest.go:144: //#nosec G304 users should validate references they attempt to open
+regclient__regclient:scheme/ocidir/manifest.go:202: //#nosec G304 users should validate references they attempt to open
+regclient__regclient:scheme/ocidir/manifest.go:274: //#nosec G301 defer to user umask settings
+regclient__regclient:scheme/ocidir/manifest.go:298: //#nosec G703 inputs are user controlled
+regclient__regclient:scheme/ocidir/blob.go:53: //#nosec G304 users should validate references they attempt to open

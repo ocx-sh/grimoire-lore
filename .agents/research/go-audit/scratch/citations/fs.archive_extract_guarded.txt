@@ -1,0 +1,9 @@
+containerd__containerd:internal/cri/server/container_checkpoint_linux.go:359: tr := tar.NewReader(content.NewReader(ra))  //-->  if strings.Contains(header.Name, "..") {
+google__go-containerregistry:internal/cmd/edit.go:443: tr := tar.NewReader(mutate.Extract(img))  //-->  return filepath.Clean("/" + name)
+regclient__regclient:types/blob/tar.go:94: tr.tr = tar.NewReader(dr)  //-->  filename = filepath.Clean(filename)
+regclient__regclient:image.go:1753: trd.tr = tar.NewReader(dr)  //-->  name := filepath.ToSlash(filepath.Clean(header.Name))
+regclient__regclient:pkg/archive/tar.go:141: rt := tar.NewReader(rd)  //-->  fn := filepath.Join(path, filepath.Clean("/"+hdr.Name))
+tailscale__tailscale:derp/xdp/headers/update.go:65: g, err := gzip.NewReader(f)  //-->  if strings.Contains(h.Name, "..") {
+tailscale__tailscale:derp/xdp/headers/update.go:70: t := tar.NewReader(g)  //-->  if strings.Contains(h.Name, "..") {
+tailscale__tailscale:packages/deb/deb.go:127: gz, err := gzip.NewReader(r)  //-->  if filepath.Clean(hdr.Name) != "control" {
+tailscale__tailscale:packages/deb/deb.go:133: tr := tar.NewReader(gz)  //-->  if filepath.Clean(hdr.Name) != "control" {

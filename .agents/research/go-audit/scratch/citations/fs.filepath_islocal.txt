@@ -1,0 +1,8 @@
+aquasecurity__trivy:pkg/vex/repo/manager.go:109: if !filepath.IsLocal(repo.Name) {
+aquasecurity__trivy:pkg/oci/artifact.go:150: if !filepath.IsLocal(fileName) {
+aquasecurity__trivy:pkg/x/os/root.go:42: if !filepath.IsLocal(name) {
+caddyserver__caddy:modules/caddyhttp/caddyhttp.go:258: if relPath != "" && !filepath.IsLocal(relPath) {
+golang__tools:go/packages/golist.go:775: if err != nil || !filepath.IsLocal(r) {
+hashicorp__terraform:internal/command/test.go:317: if !filepath.IsLocal(preparation.Args.TestDirectory) {
+tailscale__tailscale:feature/taildrop/fileops_fs.go:217: if !filepath.IsLocal(baseName) {
+tailscale__tailscale:feature/taildrop/taildrop.go:173: if !filepath.IsLocal(name) {

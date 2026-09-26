@@ -1,0 +1,604 @@
+{
+ "rules": [
+  {
+   "rule": "go-quality",
+   "depth": [
+    {
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-quality/language.md",
+     "lines": 200,
+     "rule_ids_shipped": [
+      "GO-LANG-01",
+      "GO-LANG-02",
+      "GO-LANG-03",
+      "GO-LANG-04",
+      "GO-LANG-05",
+      "GO-LANG-06",
+      "GO-LANG-07",
+      "GO-LANG-08",
+      "GO-LANG-09",
+      "GO-LANG-10",
+      "GO-LANG-11",
+      "GO-LANG-12",
+      "GO-LANG-13",
+      "GO-LANG-14",
+      "GO-LANG-15",
+      "GO-LANG-16",
+      "GO-LANG-17",
+      "GO-LANG-18",
+      "GO-LANG-19",
+      "GO-LANG-20",
+      "GO-LANG-21",
+      "GO-LANG-22",
+      "GO-LANG-23",
+      "GO-LANG-26"
+     ],
+     "rule_ids_dropped": [
+      "GO-LANG-24: fails selection test 1. No failure mode in the consolidation's ranked list, no fixture (the consolidation records it as 'design judgment, nothing observable'), so there is no evidence agents get it wrong unaided. The ID stays in the corpus and is not reused.",
+      "GO-LANG-25: fails selection test 1. Iterator naming appears in no ranked failure mode, and the check is only a go doc read against the stdlib convention. The ID stays in the corpus and is not reused."
+     ],
+     "checker_clean": true,
+     "hoist_to_index": [
+      "GO-LANG-04: a module whose go line is below 1.27 (the library and SDK floor) never imports encoding/json/v2 or jsontext. The oldstable build leg and bare go vet catch it, and golangci govet and nogo do not",
+      "GO-LANG-08: an iter.Seq producer never calls yield again after it may have returned false. Check it with gopls check piped to grep for 'yield may be called again', plus one early-break test",
+      "GO-LANG-09: map iteration order never reaches observable output. Range over slices.Sorted(maps.Keys(m)), fix a flaky golden by sorting and never by re-recording, and give golden maps 8 or more entries"
+     ],
+     "routing_row": "Writing new Go against the module's go line, choosing an idiom that changed between releases, designing a generic function or an iterator, touching JSON, maps, time.Time, runes or randomness, or moving a module to a new Go release",
+     "commands_run": 9
+    },
+    {
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-quality/errors.md",
+     "lines": 203,
+     "rule_ids_shipped": [
+      "GO-ERR-01",
+      "GO-ERR-02",
+      "GO-ERR-03",
+      "GO-ERR-04",
+      "GO-ERR-05",
+      "GO-ERR-06",
+      "GO-ERR-07",
+      "GO-ERR-08",
+      "GO-ERR-09",
+      "GO-ERR-10",
+      "GO-ERR-11",
+      "GO-ERR-12",
+      "GO-ERR-13",
+      "GO-ERR-14",
+      "GO-ERR-15",
+      "GO-ERR-16",
+      "GO-ERR-17",
+      "GO-ERR-18",
+      "GO-ERR-19",
+      "GO-ERR-20"
+     ],
+     "rule_ids_dropped": [],
+     "checker_clean": true,
+     "hoist_to_index": [
+      "GO-ERR-01: Wrap with %w, never format an error with %v/%s; at a hiding boundary use fmt.Errorf(\"%w: %s\", ErrOwn, err.Error())",
+      "GO-ERR-08: Never drop a writable file's or buffered writer's Close/Flush/Sync error; use a named (err error) result with defer func() { err = errors.Join(err, f.Close()) }(), for every *os.File",
+      "GO-ERR-09: Exempt read-only closes only via errcheck exclude-functions (io.ReadCloser).Close; never enable the std-error-handling preset or add (*os.File).Close"
+     ],
+     "routing_row": "Returning, wrapping, matching or exposing an error, panicking, exiting, or closing a writable resource",
+     "commands_run": 9
+    },
+    {
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-quality/concurrency.md",
+     "lines": 196,
+     "rule_ids_shipped": [
+      "GO-CONC-01",
+      "GO-CONC-02",
+      "GO-CONC-03",
+      "GO-CONC-04",
+      "GO-CONC-05",
+      "GO-CONC-06",
+      "GO-CONC-07",
+      "GO-CONC-08",
+      "GO-CONC-09",
+      "GO-CONC-10",
+      "GO-CONC-11",
+      "GO-CONC-12",
+      "GO-CONC-13",
+      "GO-CONC-14",
+      "GO-CONC-15",
+      "GO-CONC-16",
+      "GO-CONC-17",
+      "GO-CONC-18",
+      "GO-CONC-19"
+     ],
+     "rule_ids_dropped": [],
+     "checker_clean": true,
+     "hoist_to_index": [
+      "GO-CONC-02: Never store a context.Context in a struct field or accept one via a WithContext option; own cancel + a done signal instead (containedctx)",
+      "GO-CONC-11: Every package that starts a goroutine (go statement, .Go(, .TryGo(, iter.Pull) calls goleak.VerifyTestMain in TestMain (MUST for SDK and libraries)",
+      "GO-CONC-13: Bound every fan-out sized by input, the wire or CLI args with errgroup.SetLimit, a semaphore or a counting channel"
+     ],
+     "routing_row": "Starting a goroutine, fanning out work, passing or storing a context, cancelling, or sharing state across goroutines",
+     "commands_run": 9
+    },
+    {
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-quality/api-design.md",
+     "lines": 201,
+     "rule_ids_shipped": [
+      "GO-API-01",
+      "GO-API-02",
+      "GO-API-03",
+      "GO-API-04",
+      "GO-API-05",
+      "GO-API-06",
+      "GO-API-07",
+      "GO-API-08",
+      "GO-API-09",
+      "GO-API-10",
+      "GO-API-11",
+      "GO-API-12",
+      "GO-API-13",
+      "GO-API-14",
+      "GO-API-15",
+      "GO-API-16",
+      "GO-API-17",
+      "GO-API-18",
+      "GO-API-19",
+      "GO-API-20"
+     ],
+     "rule_ids_dropped": [
+      "GO-API ruleset line-63 sentence (CLI takes the overlay minus gochecknoglobals): dropped per wave-4 (e) 5 and N-6, GO-GATE-18/22 win. GO-API-04's CLI clause is now a reading check under cli.golangci.yml",
+      "M-D-12 (unkeyed foreign literals): go vet composites under GO-GATE-02 already catches it. Kept only as failure mode 11",
+      "M-D-06 (zero value useful): folded into GO-API-13",
+      "M-D-19 (io.Reader/fs.FS parameters): common knowledge. The untrusted-name half is GO-IO-02",
+      "M-D-17 retry placement: owned by GO-IO-13 and GO-ERR-20, and its grep was never watched red",
+      "[contract] candidate 5 (no build tag, vet on every GOOS): folded into GO-API-19"
+     ],
+     "checker_clean": true,
+     "hoist_to_index": [
+      "GO-API-18: the SDK gates every typed call on the wrapped binary's version, lazily, once per *Client, cached only on success, with a pre-release-tolerant core compare",
+      "GO-API-19: the SDK spawn point maps a signal-killed child to *ExitError{Code: 128+n}, never the raw -1 ExitCode(), and the classifier file has no //go:build tag",
+      "GO-API-20: the SDK timeout cause is a *TimeoutError (Is ErrOcxTimeout), never the bare sentinel, and context.Cause is checked before the exit is classified"
+     ],
+     "routing_row": "Adding or changing an exported identifier, laying out packages, choosing functional options or a config struct, writing a doc comment or deprecation, tagging a library release, or building the SDK that wraps a CLI binary \u2192 go-quality/api-design.md",
+     "commands_run": 5
+    },
+    {
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-quality/testing.md",
+     "lines": 197,
+     "rule_ids_shipped": [
+      "GO-TEST-01",
+      "GO-TEST-02",
+      "GO-TEST-03",
+      "GO-TEST-04",
+      "GO-TEST-05",
+      "GO-TEST-06",
+      "GO-TEST-07",
+      "GO-TEST-08",
+      "GO-TEST-09",
+      "GO-TEST-10",
+      "GO-TEST-11",
+      "GO-TEST-12",
+      "GO-TEST-13",
+      "GO-TEST-14",
+      "GO-TEST-15",
+      "GO-TEST-16",
+      "GO-TEST-17",
+      "GO-TEST-18",
+      "GO-TEST-19",
+      "GO-TEST-20"
+     ],
+     "rule_ids_dropped": [
+      "GO-TEST-13 (caution sentence only, row ships): json/v2 golden-regeneration caution dropped per wave-3 contradiction 16 / N-6, GO-LANG-11 owns golden bytes",
+      "GO-TEST (open questions 2, 3, 5): answered upstream (usetesting by gates C-6, json/v2 by GO-LANG-11, coverage scope by GO-API-12), not carried per N-6",
+      "GO-TEST-02 SDK commitment 'go-cmp is the only test dependency': reworded to 'go-cmp and goleak, test-only' per wave-2 (e) 5 and wave-3 (e) 17"
+     ],
+     "checker_clean": true,
+     "hoist_to_index": [
+      "GO-TEST-02: new tests use stdlib testing plus go-cmp, and testify is never added to a module that does not already import it (depguard no-testify)",
+      "GO-TEST-01: t.Fatal/FailNow/require.* only from the test goroutine, proven by a separate go vet ./... because go test skips testinggoroutine",
+      "GO-TEST-12: a package wrapping a CLI tests it through the TestMain helper process with os.Executable(), never the real binary on PATH (MUST for the SDK)"
+     ],
+     "routing_row": "Writing or reviewing a test, a fuzz target, a benchmark, a golden file, a helper process that fakes a CLI, or a coverage gate",
+     "commands_run": 13
+    },
+    {
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-quality/cli-contract.md",
+     "lines": 188,
+     "rule_ids_shipped": [
+      "GO-CLI-01",
+      "GO-CLI-02",
+      "GO-CLI-03",
+      "GO-CLI-04",
+      "GO-CLI-05",
+      "GO-CLI-06",
+      "GO-CLI-07",
+      "GO-CLI-08",
+      "GO-CLI-09",
+      "GO-CLI-10",
+      "GO-CLI-11",
+      "GO-CLI-12",
+      "GO-CLI-13",
+      "GO-CLI-14",
+      "GO-CLI-15",
+      "GO-CLI-16",
+      "GO-CLI-17",
+      "GO-CLI-18",
+      "GO-CLI-19",
+      "GO-CLI-20",
+      "GO-CLI-21"
+     ],
+     "rule_ids_dropped": [],
+     "checker_clean": true,
+     "hoist_to_index": [
+      "GO-CLI-06: a cobra root sets SilenceErrors/SilenceUsage and wraps every RunE once (markStarted, after the last AddCommand), so an untyped pre-RunE error, including an unknown root subcommand, exits 64",
+      "GO-CLI-21: every non-root command with subcommands is sealed by one sealGroups walk (after InitDefaultCompletionCmd) so a bare or mistyped group exits 64, never 0 with help",
+      "GO-CLI-02: main is exactly code := run(os.Args[1:], os.Stdout, os.Stderr); reraise(code); os.Exit(int(code)), and nothing else calls os.Exit, log.Fatal* or cobra.CheckErr"
+     ],
+     "routing_row": "Writing a main package, choosing an exit code, wiring cobra commands or groups, handling a signal or a broken pipe, or writing to stdout, stderr or a terminal",
+     "commands_run": 6
+    },
+    {
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-quality/io.md",
+     "lines": 203,
+     "rule_ids_shipped": [
+      "GO-IO-01",
+      "GO-IO-02",
+      "GO-IO-03",
+      "GO-IO-04",
+      "GO-IO-05",
+      "GO-IO-06",
+      "GO-IO-07",
+      "GO-IO-08",
+      "GO-IO-09",
+      "GO-IO-10",
+      "GO-IO-11",
+      "GO-IO-12",
+      "GO-IO-13",
+      "GO-IO-14",
+      "GO-IO-15",
+      "GO-IO-16",
+      "GO-IO-17",
+      "GO-IO-19",
+      "GO-IO-20",
+      "GO-IO-21"
+     ],
+     "rule_ids_dropped": [
+      "GO-IO-18: retired per N-6 and wave-3 contradiction 20, a duplicate of GO-NET-14 (MUST, watched). io.md carries a one-line retirement notice pointing to GO-NET-14 and GO-NET-15 in the GO-NET family (network.md), and the number is never reused"
+     ],
+     "checker_clean": true,
+     "hoist_to_index": [
+      "GO-IO-11: Write crash-surviving state only through the atomic-write helper (CreateTemp in the target's directory, Sync, checked Close, Rename, Unix dir fsync). Never os.WriteFile or os.Create on the final path",
+      "GO-IO-02: Open every file name the program did not choose (archive entry, tag, digest, ref) through os.Root, never through filepath.Join(dest, name)",
+      "GO-IO-07: Every exec.Cmd is started with exec.CommandContext (GO-IO-01) and sets a nonzero Cmd.WaitDelay"
+     ],
+     "routing_row": "Writing or replacing a file on disk, opening a path built from external input, extracting or decompressing an archive, or starting, cancelling and reaping a subprocess -> go-quality/io.md (staging or ingesting content-addressed blobs -> network.md)",
+     "commands_run": 11
+    },
+    {
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-quality/network.md",
+     "lines": 202,
+     "rule_ids_shipped": [
+      "GO-NET-01",
+      "GO-NET-02",
+      "GO-NET-03",
+      "GO-NET-04",
+      "GO-NET-05",
+      "GO-NET-06",
+      "GO-NET-07",
+      "GO-NET-08",
+      "GO-NET-09",
+      "GO-NET-10",
+      "GO-NET-11",
+      "GO-NET-12",
+      "GO-NET-13",
+      "GO-NET-14",
+      "GO-NET-15",
+      "GO-NET-16",
+      "GO-NET-17",
+      "GO-NET-18",
+      "GO-NET-19"
+     ],
+     "rule_ids_dropped": [
+      "GO-IO-18: retired per N-6 and wave-3 contradiction 20. GO-NET-14 supersedes it. The scope paragraph names it as retired and not reused, and io.md keeps the pointer line",
+      "failure mode 16 (not an ID, 'citing another SDK comment as measured fact'): dropped per N-6, which says the CDN 403 claim appears nowhere. GO-NET-18's rationale now rests on client identification only",
+      "snippets for GO-NET-03, GO-NET-11, GO-NET-14 and the go-containerregistry pull wiring (not IDs): cut so the body fits the checker's 200-line cap in direct mode. Only the watchdog snippet ships, and N-7's wiring stays in GO-NET-06's row text and failure mode 14"
+     ],
+     "checker_clean": true,
+     "hoist_to_index": [
+      "GO-NET-06: one client constructor per package. An API client sets Timeout > 0. A blob-streaming client sets Timeout 0 with ResponseHeaderTimeout plus an idle-read watchdog that cancels the request's own WithCancelCause context",
+      "GO-NET-07: bound every network body before reading it whole (io.LimitReader max+1 and reject on a client, http.MaxBytesReader in a handler). Never truncate silently",
+      "GO-NET-05: a credentialed client's CheckRedirect keeps the 10-hop cap, refuses https to http, and re-adds credentials only by destination origin, never copied from via"
+     ],
+     "routing_row": "Making an HTTP request, building a client, transport or server, bounding a timeout or a body, retrying, streaming or staging a downloaded blob, parsing a digest, or talking to an OCI registry \u2192 go-quality/network.md",
+     "commands_run": 2
+    },
+    {
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-quality/security.md",
+     "lines": 189,
+     "rule_ids_shipped": [
+      "GO-SEC-01",
+      "GO-SEC-02",
+      "GO-SEC-03",
+      "GO-SEC-04",
+      "GO-SEC-05",
+      "GO-SEC-06",
+      "GO-SEC-07",
+      "GO-SEC-08",
+      "GO-SEC-09",
+      "GO-SEC-10",
+      "GO-SEC-11"
+     ],
+     "rule_ids_dropped": [],
+     "checker_clean": true,
+     "hoist_to_index": [
+      "GO-SEC-01: never list golangci's common-false-positives exclusion preset (it hides G103/G204); exclude G304 by name and give every G103/G204 suppression a reason",
+      "GO-SEC-07: hold every credential in a redacting Secret type (String, GoString, LogValue, MarshalText all [REDACTED], value only via Reveal() at the send site), never a raw string or []byte field",
+      "GO-SEC-02: every token, key, nonce, salt or resource ID comes from crypto/rand (rand.Text or rand.Read), never math/rand or math/rand/v2"
+     ],
+     "routing_row": "Generating a token or ID, configuring TLS or a --insecure/--ca-file flag, holding or logging a credential, rendering an HTML template, touching unsafe/linkname/cgo, or decoding an untrusted body -> security.md (GO-SEC)",
+     "commands_run": 11
+    },
+    {
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-quality/observability.md",
+     "lines": 203,
+     "rule_ids_shipped": [
+      "GO-OBS-01",
+      "GO-OBS-02",
+      "GO-OBS-03",
+      "GO-OBS-04",
+      "GO-OBS-05",
+      "GO-OBS-06",
+      "GO-OBS-07",
+      "GO-OBS-08",
+      "GO-OBS-09",
+      "GO-OBS-10",
+      "GO-OBS-11",
+      "GO-OBS-12",
+      "GO-OBS-13",
+      "GO-OBS-14",
+      "GO-OBS-15",
+      "GO-OBS-16",
+      "GO-OBS-17",
+      "GO-OBS-18",
+      "GO-OBS-19",
+      "GO-OBS-20",
+      "GO-OBS-21",
+      "GO-OBS-22"
+     ],
+     "rule_ids_dropped": [],
+     "checker_clean": true,
+     "hoist_to_index": [
+      "GO-OBS-02: library and SDK code never calls slog.SetDefault or log.SetOutput/SetFlags/SetPrefix; it takes an injected *slog.Logger that defaults to slog.New(slog.DiscardHandler)",
+      "GO-OBS-05: never blank-import net/http/pprof; register the handlers explicitly on a dedicated mux, on an operator-only listener behind a flag that defaults to off (gosec G108)",
+      "GO-OBS-06: at a go line of 1.25 or later never import go.uber.org/automaxprocs or call runtime.GOMAXPROCS(n>0); size pools from runtime.GOMAXPROCS(0)"
+     ],
+     "routing_row": "Logging or accepting a logger, exposing pprof or a metrics endpoint, setting GOMAXPROCS, GOGC, GOMEMLIMIT or a GODEBUG value, diagnosing a hung, racy or leaking process, or making or judging a performance claim (sync.Pool, preallocation, default.pgo)",
+     "commands_run": 9
+    }
+   ],
+   "index": {
+    "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-quality.md",
+    "lines": 179,
+    "non_negotiables": 18,
+    "core_rule_ids": [
+     "GO-CORE-01",
+     "GO-CORE-02",
+     "GO-CORE-03",
+     "GO-CORE-04",
+     "GO-CORE-05"
+    ],
+    "checker_clean": true,
+    "globs": [
+     "**/*.go"
+    ]
+   }
+  },
+  {
+   "rule": "go-modules",
+   "depth": [
+    {
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-modules/gates.md",
+     "lines": 174,
+     "rule_ids_shipped": [
+      "GO-GATE-01",
+      "GO-GATE-02",
+      "GO-GATE-03",
+      "GO-GATE-04",
+      "GO-GATE-05",
+      "GO-GATE-06",
+      "GO-GATE-07",
+      "GO-GATE-08",
+      "GO-GATE-09",
+      "GO-GATE-10",
+      "GO-GATE-11",
+      "GO-GATE-12",
+      "GO-GATE-13",
+      "GO-GATE-14",
+      "GO-GATE-15",
+      "GO-GATE-16",
+      "GO-GATE-17",
+      "GO-GATE-18",
+      "GO-GATE-19",
+      "GO-GATE-20",
+      "GO-GATE-21",
+      "GO-GATE-22",
+      "GO-GATE-23"
+     ],
+     "rule_ids_dropped": [
+      "none: no GO-GATE row dropped. GO-GATE-13 ships as a citation row per N-6. RECEIPT NOTES: the shipped rules/go-modules/golangci/{baseline,cli,lib-sdk}.golangci.yml give 'golangci-lint config verify' exit 0/0/0 (golangci-lint v2.14.0, from fixtures/author-gates/cfg). With comments stripped, each file differs from its verified config-assembly copy by one thing only: the 13th superseded entry, golang.org/x/exp/constraints. GO-GATE-22 superset check: cli 0 missing, lib-sdk 0 missing, fragment 28 missing (red). L13 re-watched: the x/exp/constraints import exits 1 under all three files, and the cmp.Ordered twin exits 0 under all three. C-18 re-run under the shipped files matched (bad exit 1, good exit 0 under baseline and lib-sdk, clibad exit 1, cligood exit 1 on the recorded errcheck fixture debt). Step 10 (gopls v0.23.0): loop violation exits 1, checked twin and no-iterator module exit 0. The logging depguard desc 'new fleet code logs through log/slog' is kept verbatim per N-4 (GO-OBS-01 owns the text). If portability should win over N-4, the GO-OBS-01 owner has to change it."
+     ],
+     "checker_clean": true,
+     "hoist_to_index": [
+      "GO-GATE-01: Run the ordered gate block from every go.mod root, test-helper and tools modules included, gate on each step's exit code (never on stdout), and never drop a step because another one 'covers' it",
+      "GO-GATE-22: Copy exactly one of the three shipped golangci-lint files, whole, to each module's .golangci.yml: baseline by default, cli for a CLI, lib-sdk for the SDK and libraries. Never write a fragment, and never paste config YAML anywhere else",
+      "GO-GATE-09: Use only the golangci-lint v2 schema (default: none, explicit enable list). Never list the common-false-positives or std-error-handling exclusion preset in any file, and config verify must exit 0"
+     ],
+     "routing_row": "Writing or changing a CI gate step, a .golangci.yml or staticcheck.conf, the go vet, go fix, -race, generate or govulncheck step, or adding, removing or silencing a linter",
+     "commands_run": 5
+    },
+    {
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-modules/release.md",
+     "lines": 190,
+     "rule_ids_shipped": [
+      "GO-REL-01",
+      "GO-REL-02",
+      "GO-REL-03",
+      "GO-REL-04",
+      "GO-REL-05",
+      "GO-REL-06",
+      "GO-REL-07",
+      "GO-REL-08",
+      "GO-REL-09",
+      "GO-REL-10",
+      "GO-REL-11",
+      "GO-REL-12",
+      "GO-REL-14"
+     ],
+     "rule_ids_dropped": [
+      "GO-REL-13: retired per N-6 / wave-3 contradiction 12, GO-API-10 owns the gorelease gate (measured v0/v1 split); one-line retirement citation kept in the scope paragraph, number never reused"
+     ],
+     "checker_clean": true,
+     "hoist_to_index": [
+      "GO-REL-01: build release binaries with -trimpath and commit-derived -X values only, never a clock value ({{.Date}}, {{time}}, date), and stamp no build date",
+      "GO-REL-03: a release artifact shows a 40-hex vcs.revision and no +dirty on go version -m, is never built from inside a submodule or nested repo, and never uses -buildvcs=false",
+      "GO-REL-12: pin every uses: in every workflow to a 40-hex commit SHA with a # vX.Y.Z trailer (./ local actions exempt)"
+     ],
+     "routing_row": "Building a release binary, stamping a version or writing --version, writing a goreleaser or ko config, signing or attesting release assets, pinning workflow actions, or tagging a module version",
+     "commands_run": 13
+    }
+   ],
+   "index": {
+    "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-modules.md",
+    "lines": 178,
+    "non_negotiables": 17,
+    "core_rule_ids": [
+     "GO-MOD-01",
+     "GO-MOD-02",
+     "GO-MOD-03",
+     "GO-MOD-04",
+     "GO-MOD-05",
+     "GO-MOD-06",
+     "GO-MOD-07",
+     "GO-MOD-08",
+     "GO-MOD-09",
+     "GO-MOD-10",
+     "GO-MOD-11",
+     "GO-MOD-12",
+     "GO-MOD-13",
+     "GO-MOD-14",
+     "GO-MOD-15",
+     "GO-MOD-16",
+     "GO-MOD-17",
+     "GO-MOD-18"
+    ],
+    "checker_clean": true,
+    "globs": [
+     "**/go.mod",
+     "**/go.sum",
+     "**/go.work",
+     "**/go.work.sum",
+     "**/.golangci.*",
+     "**/*golangci*.yml",
+     "**/*golangci*.yaml",
+     "**/.goreleaser.*",
+     "**/goreleaser*.yml",
+     "**/goreleaser*.yaml",
+     "**/.config/goreleaser.*",
+     "**/.ko.yaml",
+     "**/staticcheck.conf"
+    ]
+   }
+  }
+ ],
+ "standalone": [
+  {
+   "paths": [
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/skills/go-release/SKILL.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/skills/go-release/references/release-config.md",
+    "/home/mherwig/.cache/research-lang/go-tools/fixtures/author-go-release/"
+   ],
+   "checker_clean": true,
+   "notes": [
+    "The checker (check-artifacts.py skills/go-release) is clean. SKILL.md is 463 lines. It has 11 steps, a pinned-defaults table, a 14-row '| # | Finding | Rule |' MUST table with the IDs last, and a ranked 'What agents get wrong here' list. references/release-config.md (151 lines) holds the pinned default .goreleaser.yaml and a SHA-pinned release workflow. The action SHAs were resolved with gh api on 2026-09-26, and checkout and setup-go match the consolidation's SHAs.",
+    "Every new or reworded command was watched red and green under fixtures/author-go-release. The v2 grep, the ldflags presence grep, the clock grep, the strip grep, the dockers grep and the stored-key grep went red on planted twins and green on the reference config. The gorelease v0/v1 split used the pinned x/exp pseudo-version: v1 exited 0 then 1, and the v0 '## incompatible changes' count went 0 then 1. The asset-name loop printed 1x6 vs 0x6. The five-label artifact loop (go version -m plus go tool nm) was silent on the 6 snapshot binaries, and each label fired on its planted binary. The double build over two clones with cmp on checksums.txt was green on the reference config and red without -trimpath and with a {{ .Now }} value. The --version check and the (devel) count both went red on their twins. The workflow greps (id-token, subject-checksums, the SHA pin rewritten with -e alternatives) were checked on good and bad twins. cosign 3.1.3 keyless verify-blob and gh attestation verify ran on goreleaser v2.17.1's real assets: green on the real file, red on a tampered copy, and red under a wrong identity. The published-name loop printed 1x6 on bazelisk v1.29.0 and 0x6 on goreleaser. sha256sum --check went green and red. go list -m -retracted went from [] to [reason] through a local proxy. The go list -m proxy check succeeded on go-cmp v0.7.0 and exited 1 on v0.99.0. govulncheck -mode=binary exited 0 on the good artifact and 3 on a known-vulnerable one. The Go snippet is gofmt-clean.",
+    "Contradiction with the consolidation, needs an orchestrator decision: GO-REL-11's text says 'actions/attest-build-provenance with subject-path: dist/<tool>-*'. On goreleaser 2.17.1 with formats: [binary], dist/<tool>-* matches only the .spdx.sbom.json files, because the binaries stay under dist/<id>_<os>_<arch>_<variant>/ (measured on a snapshot). The skill uses subject-checksums: dist/checksums.txt, which action.yml at v4.2.2 supports. The rules/go-modules/release.md drafter should reword GO-REL-11 the same way.",
+    "Contradiction with GO-REL-01's evidence: goreleaser 2.17.1 resolves {{ .Date }} to the commit time. A commit dated 2020-01-01 stamped 2020-01-01T00:00:00Z, and a double build with -X main.date={{ .Date }} came out byte-identical. {{ .Now }} does go red. GO-REL-01 still holds as a rule (stamp no date), and the skill keeps the clock grep as the check for .Date. Its rationale that {{.Date}} 'changes the bytes on every build' did not reproduce under goreleaser.",
+    "New measured trap, not in any consolidation: with the ldflags key omitted, goreleaser 2.17.1 injects '-s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=goreleaser' (read from the resolved dist/config.yaml). The skill gates on ldflags being present. Also new: the SBOMs from syft 1.51.0 carry a random documentNamespace and a creation time, so the double build skips sbom. gorelease exits 1 with 'has uncommitted changes' on a dirty tree. `goreleaser check` exits 1 when there is no git remote.",
+    "GO-REL-14 procedure gap, filled with a measured workaround: on the GO-REL-14 layout, a commit carrying both tools/mytool/vX.Y.Z and vX.Y.Z stamps the Go tag correctly. Given GORELEASER_CURRENT_TAG=tools/mytool/vX.Y.Z, goreleaser 2.17.1 logs 'invalid semantic version' but exits 0 and stamps the nested string as the version. The workflow therefore sets GORELEASER_CURRENT_TAG to github.ref_name. The consolidation is silent on how the nested tag fits the mirror's vX.Y.Z tag pattern.",
+    "Applied, not re-taken: GO-REL-13 is not cited, and the library API gate cites GO-API-10 with its v0 reading rule (N-6, wave-3 (e) 12). GO-MOD-13, 14 and 15 are carried as consolidation modules 'New commitments' assigns them. Q4 defaults, no-strip, double signing and the SDK-at-v0 decision are marked pinned. No rule text is restated outside the '| # | Finding | Rule |' table.",
+    "Dropped: nothing. The skill defines no rule rows, so there are no four-test drops. The fetch-depth check and the module-line-vs-tag-major check are written as reading heuristics, as the consolidations record them.",
+    "Side effect outside my fixture dir, flagged for the owner: `go clean -modcache` in a retract probe wiped the shared GOMODCACHE at /home/mherwig/.cache/research-lang/go-tools/gopath/pkg/mod, which other drafters' runs use. It is a re-downloadable cache. I re-warmed golang.org/x/exp@v0.0.0-20260908205506-85c1c2202aba and golang.org/x/mod@v0.41.0, and other modules re-download on the next use. The bin/ tools were unaffected. Offline file:// proxy fixtures are unaffected."
+   ]
+  },
+  {
+   "paths": [
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/skills/go-upgrade/SKILL.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/skills/go-upgrade/references/probes.md",
+    "/home/mherwig/.cache/research-lang/go-tools/fixtures/author-go-upgrade/"
+   ],
+   "checker_clean": true,
+   "notes": [
+    "SKILL.md is 397 lines and references/probes.md is 247 lines with a Contents line. check-artifacts.py reports clean on skills/go-upgrade. Frontmatter follows jvm-release: name, description, license, metadata.summary and metadata.keywords.",
+    "Structure: two runbooks. A covers moving to a new Go release in 9 steps: release notes plus the silent-change table, GODEBUG diff, go/toolchain bump by code kind, go fix, vet stdversion, golangci pin and config, GOEXPERIMENT audit, Bazel nogo, full gate. B covers dependency triage in 5 steps: govulncheck text mode, upgrade never replace, superseded modules, pinned-dependency re-reads, gate plus human review. Then a 22-row | # | Finding | Rule | MUST table with the ID last, and 13 ranked agent failure modes. No row starts with a rule ID.",
+    "All 13 N-12 dated re-checks are placed. SA4023 is P5. The gosec empty-excludes pass including G304 is P3. config verify plus superset is P6. The zap --fix probe is P1, rebuilt as a portable plant. roclose is P2. QF1009 is P4. nojsonv2 and nogreenteagc are in A7. The go fix roster and the gopls yield analyzer are in A4 and A5. colorprofile is B4. TOOLS_NOGO and nogo stdversion are A8, cited to BZL-GO-06/07 only. golang/go#74763 is A3, cited to GO-REL-14. toonew json/v2 is A5.",
+    "Every new or reworded command was watched red and green under /home/mherwig/.cache/research-lang/go-tools/fixtures/author-go-upgrade/. That covers: go get go@ and toolchain@, the GODEBUG before/after diff, the recursive toolchain grep, the floor test, tidy -diff, the declined-fix grep, the while-read workspace godebug loop (a rewrite of L9 without for-over-$(...)), the toonew grep (red on x/tools v0.50.0's copy, green on the Go 1.27.1 GOROOT copy), the GOEXPERIMENT grep, noswissmap exit 2, the binary -X: check, the iterator locator, all six golangci and staticcheck probes, and the verify loop. Commands that could not be watched red are written as reading heuristics: the fix-roster diff, the vet/golangci yield analyzer, colorprofile envNoColor, and #74763 state.",
+    "New measured fact, worth routing to the owners of GO-LANG-15 and GO-GATE-03: on Go 1.27.1 the 'ignoring alternative fix' stderr prints only on an uncached go fix run. A second plain go fix -diff printed nothing, and after go fix ./... the notice is gone. The skill therefore uses go fix -a -diff and reads the notice before applying.",
+    "Limitation not fixed, because it is a decision already taken (topic map wave-4 (e) 2): the gate step-10 locator grep 'func(yield func(' matches only the returned-closure producer form and misses a named producer such as func All(yield func(int) bool). The skill copies it as decided.",
+    "P5 was probed with standalone staticcheck 2026.2.1 only, and the text says golangci's bundled staticcheck was not probed. P6's fragment control listed 26 missing linters for my fragment. The consolidation's 28 came from a different fragment.",
+    "No rule IDs were dropped, because the skill defines none. Not carried because other skills or rule files own them: GO-MOD-13, 14 and 15 (go-release), GO-MOD-05 beyond godebug parity, and GO-MOD-18. Portability: no fleet paths, no ocx names and no repo@sha citations in the shipped text. Pinned defaults (Q1 lines, CLI patch cadence, golangci v2.14.0, gopls v0.23.0) are marked pinned and adopter-overridable.",
+    "No files were edited outside skills/go-upgrade/ and the fixture directory. Nothing was committed."
+   ]
+  },
+  {
+   "paths": [
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/skills/go-diagnose/SKILL.md",
+    "/home/mherwig/.cache/research-lang/go-tools/fixtures/author-go-diagnose/"
+   ],
+   "checker_clean": true,
+   "notes": [
+    "The skill is one file, SKILL.md, 480 lines, with no references/ directory because everything fit under the 500-line limit. It routes by symptom to sections A-I, starts at Step 0 (GO-OBS-22) and puts the GO-OBS-14 consent gate first. Its frontmatter uses the same keys as jvm-release. It restates MUST rows only in a | # | Finding | Rule | table and defines no rule ID.",
+    "The checker (check-artifacts.py skills/go-diagnose --forbid /home/ --forbid .agents/research) is clean, exit 0. The file has no em dashes, no prose semicolons, and no fleet, ocx, /home or .agents strings.",
+    "Every new or reworded command was run with a planted violation and a compliant twin under fixtures/author-go-diagnose (Go 1.27.1): the SIGQUIT dump tally, go test -timeout, the awaitGoroutines grep, ps --ppid zombie detection, execwait=2, GORACE -race -count=20, goleak, the goroutine and goroutineleak endpoints, the CPU profile (test and live), block and mutex profiles, the heap diff_base, gctrace, schedtrace, GOTRACEBACK=crash, benchstat, the go version -m greps and the /proc environ read. The flight recorder and the trace -d=parsed step were re-run from the dive's fixture.",
+    "LOAD-BEARING FINDING for the GO-TEST and GO-IO owners and the orchestrator: on go1.27.1, GODEBUG=execwait=2 never fires for a Cmd from exec.CommandContext, the shape GO-IO-01 requires. CommandContext's default Cancel closure refers back to the Cmd, so the finalizer never runs. A custom Cancel that refers to the Cmd was also silent. The same leak with a Cancel that does not refer to the Cmd panicked. Separately, execwait=2 only fires after a GC collects the Cmd before exit, so a short test exits green. As a result, GO-TEST-12's 'leak-freedom checked under GODEBUG=execwait=2' clause, and the SDK commitment built on it, check nothing on the mandated shape. The skill states this blind spot and routes to reading each Start for its Wait. I did not edit any rule text.",
+    "Refinements measured and written into the skill as procedure, with no rule text changed. (1) The go1.27.1 SIGQUIT dump includes runtime goroutines, a superset of GO-OBS-10's 'every user goroutine'. (2) benchstat over two different package paths prints separate tables with no vs-base column, so a comparison must run at the same import path. (3) A live heap diff needs ?gc=1: without it the growing function was 20% of the diff, with it 126%. (4) Live /debug/pprof/block and /debug/pprof/mutex record nothing (mutex shows sampling period=0) unless the binary set the rates. (5) go tool pprof reads a 1.27.1 profile with no binary argument.",
+    "Written as named procedures, not commands, because they were not watched: Delve attach, and core-dump symbolization (coredumpctl). The schedtrace runqueue interpretation is labelled a reading heuristic. The kernel 6.12/6.13 caveat cites sourceware 32713, following observability conflict C6.",
+    "No rule IDs were dropped, because a skill defines none. IDs cited: GO-OBS-05,06,07,08,09,10,11,12,13,14,15,16,19,20,21,22, GO-CONC-07,08,09,10,11,13,15,16, GO-IO-01,07,13,14, GO-TEST-01,09,11,12,19,20, GO-GATE-02,04, GO-MOD-09 and GO-CLI-08.",
+    "Not done, because it is outside my output file: publish.toml [skills.go-diagnose], docs/go-diagnose.md and the go-essentials bundle membership (N-14) need adding by whoever owns those files."
+   ]
+  },
+  {
+   "paths": [
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/bazel-quality/go.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/bazel-quality.md",
+    "/home/mherwig/.cache/research-lang/go-tools/fixtures/author-go/"
+   ],
+   "checker_clean": true,
+   "notes": [
+    "go.md: 195 lines, so it also meets N-13's 200-line cap. It follows java.md's shape: frontmatter title and summary, an Owns BZL-GO paragraph naming go-quality and go-modules as the owners of *.go and go.mod, the eight sibling families each cited with its owning file, a Contents line, a measurement disclosure (Bazel 9.2.0, rules_go 0.63.0, gazelle 0.54.0, Go 1.27.1, measured 2026-09-26, bazel WAS run, no 8.x leg, 2/35 exemplars, adopt decision left to bazel-adopt), four rule tables, Gaps, and 17 What Agents Get Wrong items.",
+    "All 15 IDs are kept verbatim (BZL-GO-01..15). None dropped. BZL-GO-12 and BZL-GO-13 stay as doc-derived reading heuristics, and each is labelled that way in its row.",
+    "Applied the (e) 10 citation fixes: BZL-GO-09 cites GO-REL-06 for the ReadBuildInfo fallback, not GO-REL-05 or GO-REL-14. BZL-GO-06 says 'the 5 analyzers rules_go's vet = True names', not 'go test runs'. BZL-GO-14's byte identity is scoped to linux_amd64 in the text.",
+    "Reshaped verifications, each run red and green under fixtures/author-go/: the BZL-GO-01 host grep with a quoted --include; the BZL-GO-05 registration script in a fenced block, run from the root with operand '.'; the BZL-GO-06 vet = True and passes/stdversion greps; the BZL-GO-08 race/pure grep; the BZL-GO-09 path grep split into three -e patterns with no alternation and --include='*bazelrc*' '.' (red on wsc-red1..3, silent on wsc-green1..2); the BZL-GO-09 -X grep; the BZL-GO-10 workflow GOOS grep; the BZL-GO-12 grep; the BZL-GO-04 go.mod leak grep; the BZL-GO-14 key grep, rewritten pipe-free as grep -rnoP with a (?!STABLE_) lookahead; the BZL-GO-15 presence grep for --strip=never (empty output is the finding). The BZL-GO-13 check_direct_dependencies grep is a presence read and was also run.",
+    "BZL-GO-03: the git diff --exit-code half had never been run in the consolidation. I watched it on Bazel 9.2.0 in author-go/tidy: with io_rsc_quote deleted and committed, the diff gate exited 1 after tidy, and on the tidied commit it exited 0. Side observation: tidy also appends the dev go_deps typeparams repo to use_repo.",
+    "The BZL-GO-06 gap audit is written as a named reading procedure, not a command. The consolidation records no exact command for it, only the measured residue.",
+    "Portability: removed the ocx/bazelisk package path, repo@sha citations, the fleet and OCX consumer commitments and the dogfood wording. Pinned defaults are marked: nogo optional, SA9010/SA4023 in nogo deps, --strip=never. External links: bazel-gazelle#1797 and rules_go#2396.",
+    "bazel-quality.md edits: one routing row after java.md. Keywords rules_go, go_deps, nogo and x_defs (gazelle was already present). go-modules is named in the manifest Siblings bullet with go.mod, and go-quality in the source bullet with *.go. Adding x_defs and *.go goes one step past the brief, and N-13 requires both. Nothing else changed.",
+    "N-13 items left for the orchestrator (outside my files): bump publish.toml [rules.bazel-quality] version 0.2.0 -> 0.3.0 (publish.toml is already modified in the worktree by someone else, not checked); update docs/bazel-quality.md. The index's 'Editing Cargo.toml ...' routing row still omits go.mod and go-modules, left untouched per the brief.",
+    "Checker: check-artifacts.py rules/bazel-quality.md -> clean (covers the support dir). check-artifacts.py rules/bazel-quality/go.md -> clean. No em dashes and no prose semicolons in go.md. The only ';' is inside the fenced bash registration script."
+   ]
+  }
+ ],
+ "dropped_ids": [
+  "GO-LANG-24: fails selection test 1. No failure mode in the consolidation's ranked list, no fixture (the consolidation records it as 'design judgment, nothing observable'), so there is no evidence agents get it wrong unaided. The ID stays in the corpus and is not reused.",
+  "GO-LANG-25: fails selection test 1. Iterator naming appears in no ranked failure mode, and the check is only a go doc read against the stdlib convention. The ID stays in the corpus and is not reused.",
+  "GO-API ruleset line-63 sentence (CLI takes the overlay minus gochecknoglobals): dropped per wave-4 (e) 5 and N-6, GO-GATE-18/22 win. GO-API-04's CLI clause is now a reading check under cli.golangci.yml",
+  "M-D-12 (unkeyed foreign literals): go vet composites under GO-GATE-02 already catches it. Kept only as failure mode 11",
+  "M-D-06 (zero value useful): folded into GO-API-13",
+  "M-D-19 (io.Reader/fs.FS parameters): common knowledge. The untrusted-name half is GO-IO-02",
+  "M-D-17 retry placement: owned by GO-IO-13 and GO-ERR-20, and its grep was never watched red",
+  "[contract] candidate 5 (no build tag, vet on every GOOS): folded into GO-API-19",
+  "GO-TEST-13 (caution sentence only, row ships): json/v2 golden-regeneration caution dropped per wave-3 contradiction 16 / N-6, GO-LANG-11 owns golden bytes",
+  "GO-TEST (open questions 2, 3, 5): answered upstream (usetesting by gates C-6, json/v2 by GO-LANG-11, coverage scope by GO-API-12), not carried per N-6",
+  "GO-TEST-02 SDK commitment 'go-cmp is the only test dependency': reworded to 'go-cmp and goleak, test-only' per wave-2 (e) 5 and wave-3 (e) 17",
+  "GO-IO-18: retired per N-6 and wave-3 contradiction 20, a duplicate of GO-NET-14 (MUST, watched). io.md carries a one-line retirement notice pointing to GO-NET-14 and GO-NET-15 in the GO-NET family (network.md), and the number is never reused",
+  "GO-IO-18: retired per N-6 and wave-3 contradiction 20. GO-NET-14 supersedes it. The scope paragraph names it as retired and not reused, and io.md keeps the pointer line",
+  "failure mode 16 (not an ID, 'citing another SDK comment as measured fact'): dropped per N-6, which says the CDN 403 claim appears nowhere. GO-NET-18's rationale now rests on client identification only",
+  "snippets for GO-NET-03, GO-NET-11, GO-NET-14 and the go-containerregistry pull wiring (not IDs): cut so the body fits the checker's 200-line cap in direct mode. Only the watchdog snippet ships, and N-7's wiring stays in GO-NET-06's row text and failure mode 14",
+  "none: no GO-GATE row dropped. GO-GATE-13 ships as a citation row per N-6. RECEIPT NOTES: the shipped rules/go-modules/golangci/{baseline,cli,lib-sdk}.golangci.yml give 'golangci-lint config verify' exit 0/0/0 (golangci-lint v2.14.0, from fixtures/author-gates/cfg). With comments stripped, each file differs from its verified config-assembly copy by one thing only: the 13th superseded entry, golang.org/x/exp/constraints. GO-GATE-22 superset check: cli 0 missing, lib-sdk 0 missing, fragment 28 missing (red). L13 re-watched: the x/exp/constraints import exits 1 under all three files, and the cmp.Ordered twin exits 0 under all three. C-18 re-run under the shipped files matched (bad exit 1, good exit 0 under baseline and lib-sdk, clibad exit 1, cligood exit 1 on the recorded errcheck fixture debt). Step 10 (gopls v0.23.0): loop violation exits 1, checked twin and no-iterator module exit 0. The logging depguard desc 'new fleet code logs through log/slog' is kept verbatim per N-4 (GO-OBS-01 owns the text). If portability should win over N-4, the GO-OBS-01 owner has to change it.",
+  "GO-REL-13: retired per N-6 / wave-3 contradiction 12, GO-API-10 owns the gorelease gate (measured v0/v1 split); one-line retirement citation kept in the scope paragraph, number never reused"
+ ],
+ "unclean": []
+}

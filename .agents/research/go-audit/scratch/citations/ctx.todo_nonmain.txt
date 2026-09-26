@@ -1,0 +1,200 @@
+aquasecurity__trivy:pkg/version/version.go:76: ctx := log.WithContextPrefix(context.TODO(), log.PrefixMisconfiguration)
+aquasecurity__trivy:pkg/iac/rego/embed.go:35: ctx := context.TODO()
+aquasecurity__trivy:pkg/fanal/artifact/local/fs.go:350: return a.cache.DeleteBlobs(context.TODO(), reference.BlobIDs)
+aquasecurity__trivy:pkg/fanal/artifact/vm/file.go:122: return a.cache.DeleteBlobs(context.TODO(), reference.BlobIDs)
+aquasecurity__trivy:pkg/fanal/artifact/vm/ebs.go:33: ebs, err := ebsfile.New(context.TODO(), config.MakeAWSOptions(region, endpoint)...)
+aquasecurity__trivy:pkg/fanal/artifact/vm/ami.go:23: ctx := context.TODO()
+aquasecurity__trivy:pkg/fanal/artifact/sbom/sbom.go:106: return a.cache.DeleteBlobs(context.TODO(), reference.BlobIDs)
+aquasecurity__trivy:pkg/fanal/image/registry/ecr/ecr.go:48: context.TODO(),
+aquasecurity__trivy:pkg/fanal/image/registry/ecr/ecr.go:55: context.TODO(),
+bazelbuild__bazel-gazelle:walk/config.go:47: cr.v2.Configure(context.TODO(), config.ConfigureArgs{
+bazelbuild__bazel-gazelle:language/go/resolve.go:142: return resolveGo(context.TODO(), c, ix, rc, imp, from)
+caddyserver__caddy:admin.go:422: ln, err := addr.Listen(context.TODO(), 0, net.ListenConfig{})
+caddyserver__caddy:sigtrap.go:59: exitProcess(context.TODO(), logger)
+caddyserver__caddy:sigtrap_posix.go:44: certmagic.CleanUpOwnLocks(context.TODO(), Log()) // try to clean up locks anyway, it's important
+cli__cli:pkg/cmdutil/flags.go:59: return gitc.TrackingBranchNames(context.TODO(), toComplete), cobra.ShellCompDirectiveNoFileComp
+cli__cli:pkg/cmd/auth/shared/gitcredentials/helper_config.go:23: ctx := context.TODO()
+cli__cli:pkg/cmd/auth/shared/gitcredentials/helper_config.go:93: ctx := context.TODO()
+cli__cli:pkg/cmd/auth/shared/gitcredentials/updater.go:19: ctx := context.TODO()
+cockroachdb__pebble:internal/base/lazy_value.go:195: return f.Fetcher.FetchHandle(context.TODO(),
+cockroachdb__pebble:level_checker.go:856: ctx := context.TODO()
+cockroachdb__pebble:flushable.go:324: context.TODO(),
+cockroachdb__pebble:flushable.go:370: context.TODO(),
+cockroachdb__pebble:tool/blob.go:69: reader, err := blob.NewFileReader(context.TODO(), readable, blob.FileReaderOptions{
+cockroachdb__pebble:tool/db.go:1113: properties, err := r.ReadPropertiesBlock(context.TODO(), nil /* buffer pool */)
+cockroachdb__pebble:blob_rewrite.go:172: ctx := context.TODO()
+cockroachdb__pebble:compaction_delete.go:120: context.TODO(), c.deleteOnly.Bounds, c.deleteOnly.Table.TableMetadata,
+cockroachdb__pebble:recovery.go:725: readable, err := d.objProvider.OpenForReading(context.TODO(), base.FileTypeTable, n,
+cockroachdb__pebble:recovery.go:733: blobReadable, err := d.objProvider.OpenForReading(context.TODO(), base.FileTypeBlob, base.DiskFileNum(blobFileID),
+cockroachdb__pebble:recovery.go:744: res, err := ingestLoad1(context.TODO(), d.opts, d.FormatMajorVersion(), readable, d.cacheHandle, &d.compressionCounters, base.PhysicalTableFileNum(fileNums[i]),
+cockroachdb__pebble:metamorphic/ops.go:2043: err = source.ScanInternal(context.TODO(), pebble.ScanInternalOptions{
+cockroachdb__pebble:metamorphic/ops.go:2107: err = source.ScanInternal(context.TODO(), pebble.ScanInternalOptions{
+cockroachdb__pebble:file_cache.go:334: err = h.withReader(context.TODO(), block.NoReadEnv, meta, func(r *sstable.Reader, env sstable.ReadEnv) error {
+cockroachdb__pebble:file_cache.go:999: v, err := h.findOrCreateTable(context.TODO(), file, initFileOpts{})
+cockroachdb__pebble:file_cache.go:1006: props, err := r.ReadPropertiesBlock(context.TODO(), nil /* buffer pool */)
+cockroachdb__pebble:sstable/suffix_rewriter.go:88: props, err := r.ReadPropertiesBlock(context.TODO(), nil /* buffer pool */)
+cockroachdb__pebble:sstable/suffix_rewriter.go:223: iter, err := r.NewRawRangeKeyIter(context.TODO(), NoFragmentTransforms, NoReadEnv)
+cockroachdb__pebble:sstable/rowblk_writer.go:1878: props, err := r.ReadPropertiesBlock(context.TODO(), nil /* buffer pool */)
+cockroachdb__pebble:sstable/colblk_writer.go:1278: props, err := r.ReadPropertiesBlock(context.TODO(), nil /* buffer pool */)
+cockroachdb__pebble:sstable/reader.go:236: return r.NewPointIter(context.TODO(), opts)
+cockroachdb__pebble:sstable/reader.go:683: ctx := context.TODO()
+cockroachdb__pebble:sstable/reader.go:892: ctx := context.TODO()
+cockroachdb__pebble:sstable/layout.go:120: ctx := context.TODO()
+cockroachdb__pebble:sstable/blob/blob.go:576: ctx := context.TODO()
+cockroachdb__pebble:compaction.go:1586: leftTable, rightTable, err := d.exciseTable(context.TODO(), exciseBounds, m, layer.Level(), tightExciseBounds)
+cockroachdb__pebble:compaction.go:1597: if err := d.ingestSplit(context.TODO(), ve, ingestSplitFiles, replacedTables); err != nil {
+cockroachdb__pebble:compaction.go:2627: _, err := d.objProvider.LinkOrCopyFromLocal(context.TODO(), d.opts.FS,
+cockroachdb__pebble:compaction.go:3103: ctx := context.TODO()
+containerd__containerd:internal/cri/nri/nri_api_linux.go:351: return cdispec.WithCDIDevices(devices...)(context.TODO(), nil, nil, s)
+containerd__containerd:client/client.go:255: runtime, _ := c.defaultRuntime(context.TODO())
+containerd__containerd:core/mount/mount_windows.go:60: log.G(context.TODO()).WithError(layerErr).Error("failed to deactivate layer during mount failure cleanup")
+containerd__containerd:core/mount/mount_windows.go:72: log.G(context.TODO()).WithError(layerErr).Error("failed to unprepare layer during mount failure cleanup")
+containerd__containerd:core/mount/mount_windows.go:96: log.G(context.TODO()).WithError(bindErr).Error("failed to remove binding during mount failure cleanup")
+containerd__containerd:pkg/archive/tar.go:681: n, err := copyBuffered(context.TODO(), cw.tw, file)
+etcd-io__etcd:tools/benchmark/cmd/txn_put.go:91: _, err := c.Txn(context.TODO()).Then(ops...).Commit()
+etcd-io__etcd:tools/benchmark/cmd/stm.go:166: lock = func() error { return m.Lock(context.TODO()) }
+etcd-io__etcd:tools/benchmark/cmd/stm.go:167: unlock = func() error { return m.Unlock(context.TODO()) }
+etcd-io__etcd:tools/benchmark/cmd/stm.go:178: resp, err := lc.Lock(context.TODO(), req)
+etcd-io__etcd:tools/benchmark/cmd/stm.go:186: _, err := lc.Unlock(context.TODO(), req)
+etcd-io__etcd:tools/benchmark/cmd/watch.go:193: ctx, cancel := context.WithCancel(context.TODO())
+etcd-io__etcd:tools/benchmark/cmd/watch.go:240: if err := limit.Wait(context.TODO()); err != nil {
+etcd-io__etcd:tools/benchmark/cmd/watch.go:243: if _, err := c.Do(context.TODO(), op); err != nil {
+etcd-io__etcd:tools/benchmark/cmd/watch_latency.go:98: if err := limiter.Wait(context.TODO()); err != nil {
+etcd-io__etcd:tools/benchmark/cmd/watch_latency.go:102: if _, err := putClient.Put(context.TODO(), key, value); err != nil {
+etcd-io__etcd:tools/benchmark/cmd/watch_latency.go:144: wchs[i*watchLWatchersPerStream+j] = streams[i].Watch(context.TODO(), key, opts...)
+etcd-io__etcd:tools/benchmark/cmd/txn_mixed.go:109: _, err := c.Txn(context.TODO()).Then(req.op).Commit()
+etcd-io__etcd:tools/benchmark/cmd/watch_get.go:60: resp, err := clients[0].Put(context.TODO(), "watchkey", v)
+etcd-io__etcd:tools/benchmark/cmd/watch_get.go:79: ctx, cancel := context.WithCancel(context.TODO())
+etcd-io__etcd:tools/benchmark/cmd/watch_get.go:106: wch := stream.Watch(context.TODO(), "watchkey", v3.WithRev(rev))
+etcd-io__etcd:tools/benchmark/cmd/lease.go:61: _, err := c.KeepAliveOnce(context.TODO(), resp.ID)
+etcd-io__etcd:server/etcdserver/txn/put.go:107: prevKV, err = txnWrite.Range(context.TODO(), p.Key, nil, mvcc.RangeOptions{})
+etcd-io__etcd:server/etcdserver/txn/txn.go:274: rr, err := rv.Range(context.TODO(), c.Key, mkGteRange(c.RangeEnd), mvcc.RangeOptions{})
+etcd-io__etcd:server/etcdserver/api/v3client/doc.go:40: //	resp, err := cli.Put(context.TODO(), "some-key", "it works!")
+etcd-io__etcd:server/etcdserver/api/v3rpc/watch.go:452: r, err := sws.watchable.Range(context.TODO(), evs[i].Kv.Key, nil, opt)
+etcd-io__etcd:server/etcdserver/api/membership/cluster.go:762: ctx, cancel := context.WithTimeout(context.TODO(), 30*time.Second)
+etcd-io__etcd:server/etcdserver/api/rafthttp/http.go:148: if err := h.r.Process(context.TODO(), &m); err != nil {
+etcd-io__etcd:server/etcdserver/api/rafthttp/http.go:307: if err := h.r.Process(context.TODO(), m); err != nil {
+etcd-io__etcd:server/etcdserver/apply/backend.go:51: return mvcctxn.Put(context.TODO(), a.options.Logger, a.options.Lessor, a.options.KV, p)
+etcd-io__etcd:server/etcdserver/apply/backend.go:55: return mvcctxn.DeleteRange(context.TODO(), a.options.Logger, a.options.KV, dr)
+etcd-io__etcd:server/etcdserver/apply/backend.go:59: return mvcctxn.Range(context.TODO(), a.options.Logger, a.options.KV, r, true)
+etcd-io__etcd:server/etcdserver/apply/backend.go:63: return mvcctxn.Txn(context.TODO(), a.options.Logger, rt, a.options.TxnModeWriteWithSharedBuffer, a.options.KV, a.options.Lessor, skipRangeExecution)
+etcd-io__etcd:server/etcdserver/apply/backend.go:69: ctx, trace := traceutil.EnsureTrace(context.TODO(), a.options.Logger, "compact",
+etcd-io__etcd:server/etcdmain/grpc_proxy.go:472: _, err := client.KV.Get(context.TODO(), "_", clientv3.WithKeysOnly())
+etcd-io__etcd:server/storage/mvcc/kvstore.go:244: s.compactBarrier(context.TODO(), ch)
+etcd-io__etcd:server/config/config.go:253: ctx, cancel := context.WithTimeout(context.TODO(), 30*time.Second)
+etcd-io__etcd:etcdctl/ctlv3/command/elect_command.go:74: ctx, cancel := context.WithCancel(context.TODO())
+etcd-io__etcd:etcdctl/ctlv3/command/elect_command.go:108: ctx, cancel := context.WithCancel(context.TODO())
+etcd-io__etcd:etcdctl/ctlv3/command/elect_command.go:136: return e.Resign(context.TODO())
+etcd-io__etcd:etcdctl/ctlv3/command/make_mirror_command.go:138: err := makeMirror(context.TODO(), c, dc)
+etcd-io__etcd:etcdctl/ctlv3/command/role_command.go:115: resp, err := mustClientFromCmd(cmd).Auth.RoleAdd(context.TODO(), args[0])
+etcd-io__etcd:etcdctl/ctlv3/command/role_command.go:129: resp, err := mustClientFromCmd(cmd).Auth.RoleDelete(context.TODO(), args[0])
+etcd-io__etcd:etcdctl/ctlv3/command/role_command.go:144: resp, err := mustClientFromCmd(cmd).Auth.RoleGet(context.TODO(), name)
+etcd-io__etcd:etcdctl/ctlv3/command/role_command.go:158: resp, err := mustClientFromCmd(cmd).Auth.RoleList(context.TODO())
+etcd-io__etcd:etcdctl/ctlv3/command/role_command.go:178: resp, err := mustClientFromCmd(cmd).Auth.RoleGrantPermission(context.TODO(), args[0], key, rangeEnd, perm)
+etcd-io__etcd:etcdctl/ctlv3/command/role_command.go:193: resp, err := mustClientFromCmd(cmd).Auth.RoleRevokePermission(context.TODO(), args[0], key, rangeEnd)
+etcd-io__etcd:etcdctl/ctlv3/command/lease_command.go:130: resp, rerr := mustClientFromCmd(cmd).TimeToLive(context.TODO(), leaseFromArgs(args[0]), opts...)
+etcd-io__etcd:etcdctl/ctlv3/command/lease_command.go:149: resp, rerr := mustClientFromCmd(cmd).Leases(context.TODO())
+etcd-io__etcd:etcdctl/ctlv3/command/lease_command.go:181: respc, kerr := mustClientFromCmd(cmd).KeepAliveOnce(context.TODO(), id)
+etcd-io__etcd:etcdctl/ctlv3/command/lease_command.go:189: respc, kerr := mustClientFromCmd(cmd).KeepAlive(context.TODO(), id)
+etcd-io__etcd:etcdctl/ctlv3/command/lock_command.go:80: ctx, cancel := context.WithCancel(context.TODO())
+etcd-io__etcd:etcdctl/ctlv3/command/lock_command.go:101: unlockErr := m.Unlock(context.TODO())
+etcd-io__etcd:etcdctl/ctlv3/command/lock_command.go:119: return m.Unlock(context.TODO())
+etcd-io__etcd:etcdctl/ctlv3/command/user_command.go:166: resp, err := mustClientFromCmd(cmd).Auth.UserAddWithOptions(context.TODO(), user, password, options)
+etcd-io__etcd:etcdctl/ctlv3/command/user_command.go:180: resp, err := mustClientFromCmd(cmd).Auth.UserDelete(context.TODO(), args[0])
+etcd-io__etcd:etcdctl/ctlv3/command/user_command.go:195: resp, err := client.Auth.UserGet(context.TODO(), name)
+etcd-io__etcd:etcdctl/ctlv3/command/user_command.go:204: roleResp, err := client.Auth.RoleGet(context.TODO(), role)
+etcd-io__etcd:etcdctl/ctlv3/command/user_command.go:221: resp, err := mustClientFromCmd(cmd).Auth.UserList(context.TODO())
+etcd-io__etcd:etcdctl/ctlv3/command/user_command.go:243: resp, err := mustClientFromCmd(cmd).Auth.UserChangePassword(context.TODO(), args[0], password)
+etcd-io__etcd:etcdctl/ctlv3/command/user_command.go:257: resp, err := mustClientFromCmd(cmd).Auth.UserGrantRole(context.TODO(), args[0], args[1])
+etcd-io__etcd:etcdctl/ctlv3/command/user_command.go:271: resp, err := mustClientFromCmd(cmd).Auth.UserRevokeRole(context.TODO(), args[0], args[1])
+etcd-io__etcd:client/v3/experimental/recipes/priority_queue.go:34: return &PriorityQueue{client, context.TODO(), key + "/"}
+etcd-io__etcd:client/v3/experimental/recipes/key.go:66: txnresp, err := kv.Txn(context.TODO()).If(cmp).Then(req).Commit()
+etcd-io__etcd:client/v3/experimental/recipes/key.go:79: resp, err := kv.Get(context.TODO(), prefix, v3.WithLastKey()...)
+etcd-io__etcd:client/v3/experimental/recipes/key.go:108: txn := kv.Txn(context.TODO())
+etcd-io__etcd:client/v3/experimental/recipes/key.go:127: _, err := rk.kv.Delete(context.TODO(), rk.key)
+etcd-io__etcd:client/v3/experimental/recipes/key.go:133: _, err := rk.kv.Put(context.TODO(), rk.key, val)
+etcd-io__etcd:client/v3/experimental/recipes/barrier.go:34: return &Barrier{client, context.TODO(), key}
+etcd-io__etcd:client/v3/experimental/recipes/rwmutex.go:34: return &RWMutex{s, context.TODO(), prefix + "/", nil}
+etcd-io__etcd:client/v3/experimental/recipes/queue.go:33: return &Queue{client, context.TODO(), keyPrefix}
+etcd-io__etcd:client/v3/experimental/recipes/double_barrier.go:39: ctx:   context.TODO(),
+etcd-io__etcd:client/v3/experimental/recipes/client.go:36: txnresp, err := kv.Txn(context.TODO()).If(cmp).Then(req).Commit()
+etcd-io__etcd:client/v3/namespace/doc.go:34: //	cli.Put(context.TODO(), "abc", "123")
+etcd-io__etcd:client/v3/namespace/doc.go:35: //	resp, _ := unprefixedKV.Get(context.TODO(), "my-prefix/abc")
+etcd-io__etcd:client/v3/namespace/doc.go:38: //	unprefixedKV.Put(context.TODO(), "my-prefix/abc", "456")
+etcd-io__etcd:client/v3/namespace/doc.go:39: //	resp, _ = cli.Get(context.TODO(), "abc")
+etcd-io__etcd:client/v3/concurrency/election.go:64: // If the context is 'context.TODO()/context.Background()', the Campaign
+etcd-io__etcd:client/v3/leasing/doc.go:30: //	resp, err := lkv.Get(context.TODO(), "abc")
+etcd-io__etcd:client/v3/leasing/doc.go:34: //	resp, err = lkv.Get(context.TODO(), "abc")
+etcd-io__etcd:client/v3/leasing/doc.go:43: //	lkv2.Put(context.TODO(), "abc", "456")
+etcd-io__etcd:client/v3/txn.go:28: //	Txn(context.TODO()).If(
+etcd-io__etcd:client/v3/client.go:376: baseCtx := context.TODO()
+etcd-io__etcd:client/pkg/transport/listener.go:107: ln, err = cfg.Listen(context.TODO(), "tcp", addr)
+etcd-io__etcd:tests/framework/integration/cluster_proxy.go:54: ctx, ctxCancel := context.WithCancel(context.WithValue(context.TODO(), "_name", "grpcProxyContext"))
+etcd-io__etcd:tests/framework/e2e/util.go:53: return SpawnWithExpectsContext(context.TODO(), args, envVars, xs...)
+etcd-io__etcd:tests/common/auth_util.go:70: if _, err := c.RoleAdd(context.TODO(), r.role); err != nil {
+etcd-io__etcd:tests/common/auth_util.go:75: if _, err := c.RoleGrantPermission(context.TODO(), r.role, r.key, r.keyEnd, r.permission); err != nil {
+etcd-io__etcd:tests/common/auth_util.go:86: if _, err := c.UserAdd(context.TODO(), u.user, u.pass, config.UserAddOptions{}); err != nil {
+etcd-io__etcd:tests/common/auth_util.go:91: if _, err := c.UserGrantRole(context.TODO(), u.user, u.role); err != nil {
+etcd-io__etcd:tests/common/auth_util.go:133: return c.AuthEnable(context.TODO())
+etcd-io__etcd:tests/common/auth_util.go:150: authrev, err := c.AuthStatus(context.TODO())
+etcd-io__etcd:tests/common/auth_util.go:156: return authrev.AuthRevision, c.AuthEnable(context.TODO())
+golang__tools:internal/imports/fix.go:1114: stdout, err := e.invokeGo(context.TODO(), "env", append([]string{"-json"}, requiredGoEnvVars...)...)
+golang__tools:internal/imports/mod.go:124: vendorEnabled, mainModVendor, err = gocommand.VendorEnabled(context.TODO(), inv, r.env.GocmdRunner)
+golang__tools:internal/imports/mod.go:239: stdout, err := r.env.invokeGo(context.TODO(), "list", "-m", "-e", "-json", "...")
+google__go-containerregistry:pkg/v1/remote/check.go:35: auth, err := authn.Resolve(context.TODO(), kc, ref.Context())
+google__go-containerregistry:pkg/v1/remote/check.go:41: tr, err := transport.NewWithContext(context.TODO(), ref.Context().Registry, auth, t, scopes)
+grpc__grpc-go:stats/opentelemetry/opentelemetry.go:490: ic.Add(context.TODO(), incr, ao)
+grpc__grpc-go:stats/opentelemetry/opentelemetry.go:498: ic.Add(context.TODO(), incr, ao)
+grpc__grpc-go:stats/opentelemetry/opentelemetry.go:506: fc.Add(context.TODO(), incr, ao)
+grpc__grpc-go:stats/opentelemetry/opentelemetry.go:514: ih.Record(context.TODO(), incr, ao)
+grpc__grpc-go:stats/opentelemetry/opentelemetry.go:522: fh.Record(context.TODO(), incr, ao)
+grpc__grpc-go:stats/opentelemetry/opentelemetry.go:530: ig.Record(context.TODO(), incr, ao)
+grpc__grpc-go:credentials/google/google.go:56: opts.PerRPCCreds, err = newADC(context.TODO())
+hashicorp__terraform:internal/backend/local/backend_local.go:172: rawVariables = b.interactiveCollectVariables(context.TODO(), op.Variables, rootMod.Variables, op.UIIn)
+hashicorp__terraform:internal/backend/remote-state/gcs/backend.go:142: ctx := context.TODO()
+hashicorp__terraform:internal/backend/remote-state/gcs/backend_state.go:32: ctx := context.TODO()
+hashicorp__terraform:internal/backend/remote-state/gcs/client.go:34: ctx := context.TODO()
+hashicorp__terraform:internal/backend/remote-state/gcs/client.go:65: ctx := context.TODO()
+hashicorp__terraform:internal/backend/remote-state/gcs/client.go:86: ctx := context.TODO()
+hashicorp__terraform:internal/backend/remote-state/gcs/client.go:97: ctx := context.TODO()
+hashicorp__terraform:internal/backend/remote-state/gcs/client.go:127: ctx := context.TODO()
+hashicorp__terraform:internal/backend/remote-state/gcs/client.go:158: ctx := context.TODO()
+hashicorp__terraform:internal/backend/remote-state/oci/backend_state.go:146: ctx := context.TODO()
+hashicorp__terraform:internal/backend/remote-state/oci/client.go:264: ctx := context.TODO()
+hashicorp__terraform:internal/backend/remote-state/oci/client.go:325: ctx := context.TODO()
+hashicorp__terraform:internal/backend/remote-state/s3/backend.go:799: ctx := context.TODO()
+hashicorp__terraform:internal/backend/remote-state/s3/backend_state.go:39: ctx := context.TODO()
+hashicorp__terraform:internal/backend/remote-state/s3/client.go:70: ctx := context.TODO()
+hashicorp__terraform:internal/backend/remote-state/s3/client.go:196: ctx := context.TODO()
+hashicorp__terraform:internal/backend/remote-state/s3/client.go:254: ctx := context.TODO()
+hashicorp__terraform:internal/backend/remote-state/s3/client.go:282: ctx := context.TODO()
+hashicorp__terraform:internal/backend/remote-state/s3/client.go:440: ctx := context.TODO()
+hashicorp__terraform:internal/backend/remote-state/azure/client.go:35: ctx, _ := context.WithTimeout(context.TODO(), veryLongTimeout)
+hashicorp__terraform:internal/communicator/ssh/communicator.go:253: ctx, cancelKeepAlive := context.WithCancel(context.TODO())
+hashicorp__terraform:internal/providercache/dir_modify.go:108: _, err := installFromLocalDir(context.TODO(), meta, newPath, nil)
+hashicorp__terraform:internal/terraform/eval_context_mock.go:187: return context.TODO()
+hashicorp__terraform:internal/terraform/eval_context_builtin.go:136: return context.TODO()
+ko-build__ko:pkg/commands/cache.go:302: br, err := i.cache.get(context.TODO(), i.ref.Context().Digest(h.String()), i.miss)
+ko-build__ko:pkg/commands/cache.go:316: br, err := i.cache.get(context.TODO(), i.ref.Context().Digest(h.String()), i.miss)
+ko-build__ko:pkg/commands/cache.go:461: rl, err := l.cache.puller.Layer(context.TODO(), l.ref)
+kubernetes-sigs__controller-runtime:tools/setup-envtest/workflows/workflows.go:40: ctx := logr.NewContext(context.TODO(), env.Log.WithName("use"))
+kubernetes-sigs__controller-runtime:tools/setup-envtest/workflows/workflows.go:67: ctx := logr.NewContext(context.TODO(), env.Log.WithName("list"))
+kubernetes-sigs__controller-runtime:tools/setup-envtest/workflows/workflows.go:78: ctx := logr.NewContext(context.TODO(), env.Log.WithName("cleanup"))
+kubernetes-sigs__controller-runtime:tools/setup-envtest/workflows/workflows.go:96: ctx := logr.NewContext(context.TODO(), env.Log.WithName("sideload"))
+kubernetes-sigs__controller-runtime:pkg/envtest/server.go:229: apiServerPath, etcdPath, kubectlPath, err := downloadBinaryAssets(context.TODO(),
+kubernetes-sigs__controller-runtime:pkg/envtest/server.go:405: return wait.PollUntilContextTimeout(context.TODO(), time.Millisecond*50, time.Second*5, true, func(ctx context.Context) (bool, error) {
+kubernetes-sigs__controller-runtime:pkg/envtest/crd.go:168: return wait.PollUntilContextTimeout(context.TODO(), options.PollInterval, options.MaxTime, true, p.poll)
+kubernetes-sigs__controller-runtime:pkg/envtest/crd.go:232: if err := cs.Delete(context.TODO(), crd); err != nil {
+kubernetes-sigs__controller-runtime:pkg/envtest/crd.go:254: err := cs.Get(context.TODO(), client.ObjectKey{Name: crd.GetName()}, existingCrd)
+kubernetes-sigs__controller-runtime:pkg/envtest/crd.go:257: if err := cs.Create(context.TODO(), crd); err != nil {
+kubernetes-sigs__controller-runtime:pkg/envtest/crd.go:265: if err := cs.Get(context.TODO(), client.ObjectKey{Name: crd.GetName()}, existingCrd); err != nil {
+kubernetes-sigs__controller-runtime:pkg/envtest/crd.go:269: return cs.Update(context.TODO(), crd)
+kubernetes-sigs__controller-runtime:pkg/envtest/webhook.go:227: return wait.PollUntilContextTimeout(context.TODO(), options.PollInterval, options.MaxTime, true, p.poll)
+prometheus__prometheus:tsdb/index/index.go:1824: ln, err := dec.LookupSymbol(context.TODO(), lno)
+prometheus__prometheus:tsdb/index/index.go:1828: lv, err := dec.LookupSymbol(context.TODO(), lvo)
+prometheus__prometheus:model/rulefmt/rulefmt.go:311: context.TODO(),
+restic__restic:internal/checker/testing.go:15: hints, errs := chkr.LoadIndex(context.TODO(), restic.NoopTerminalCounterFactory)
+restic__restic:internal/checker/testing.go:24: err := chkr.LoadSnapshots(context.TODO(), &data.SnapshotFilter{}, nil)
+restic__restic:internal/checker/testing.go:31: go chkr.Packs(context.TODO(), errChan)
+restic__restic:internal/checker/testing.go:39: go chkr.Structure(context.TODO(), restic.NoopCounter, errChan)
+restic__restic:internal/checker/testing.go:46: blobs, err := chkr.UnusedBlobs(context.TODO())

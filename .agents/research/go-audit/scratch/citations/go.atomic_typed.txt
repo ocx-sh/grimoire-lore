@@ -1,0 +1,200 @@
+aquasecurity__trivy:pkg/iac/scanners/terraform/parser/resolvers/remote.go:18: count atomic.Int32
+aquasecurity__trivy:pkg/x/os/os.go:17: initialized atomic.Bool
+caddyserver__caddy:listeners.go:628: closed              atomic.Int32
+caddyserver__caddy:listen_unix.go:168: cnt := new(atomic.Int32)
+caddyserver__caddy:listen_unix.go:185: cnt := new(atomic.Int32)
+caddyserver__caddy:listen_unix.go:221: count  *atomic.Int32
+caddyserver__caddy:listen_unix.go:247: count  *atomic.Int32
+caddyserver__caddy:usagepool.go:225: refs  atomic.Int32
+caddyserver__caddy:modules/caddyhttp/server.go:389: shutdownAt atomic.Pointer[time.Time]
+caddyserver__caddy:modules/caddyhttp/reverseproxy/hosts.go:71: unhealthy    atomic.Int32
+caddyserver__caddy:modules/caddyhttp/reverseproxy/hosts.go:72: activePasses atomic.Int64
+caddyserver__caddy:modules/caddyhttp/reverseproxy/hosts.go:73: activeFails  atomic.Int64
+caddyserver__caddy:modules/caddyhttp/reverseproxy/hosts.go:185: numRequests atomic.Int64
+caddyserver__caddy:modules/caddyhttp/reverseproxy/hosts.go:186: fails       atomic.Int64
+caddyserver__caddy:modules/caddyhttp/reverseproxy/reverseproxy.go:50: // inFlightRequests uses sync.Map with atomic.Int64 for lock-free updates on the hot path
+caddyserver__caddy:modules/caddyhttp/reverseproxy/reverseproxy.go:54: v, _ := inFlightRequests.LoadOrStore(address, new(atomic.Int64))
+caddyserver__caddy:modules/caddyhttp/reverseproxy/reverseproxy.go:55: v.(*atomic.Int64).Add(1)
+caddyserver__caddy:modules/caddyhttp/reverseproxy/reverseproxy.go:60: if v.(*atomic.Int64).Add(-1) <= 0 {
+caddyserver__caddy:modules/caddyhttp/reverseproxy/reverseproxy.go:69: copyMap[key.(string)] = value.(*atomic.Int64).Load()
+caddyserver__caddy:modules/caddyhttp/reverseproxy/selectionpolicies.go:86: index       atomic.Uint32
+caddyserver__caddy:modules/caddyhttp/reverseproxy/selectionpolicies.go:322: robin atomic.Uint32
+caddyserver__caddy:caddy.go:839: var exiting atomic.Bool
+caddyserver__caddy:listen.go:119: closed          atomic.Bool
+caddyserver__caddy:listen.go:241: closed            atomic.Bool
+cli__cli:.github/skills/cli-exercise/tool/internal/terminal/adapter.go:45: closing             atomic.Bool
+cli__cli:.github/skills/cli-exercise/tool/internal/terminal/adapter.go:46: processGroup        atomic.Int64
+cli__cli:internal/prompter/multi_select_with_search.go:55: // sleeps. atomic.Value is used because the hook is written by the test
+cli__cli:internal/prompter/multi_select_with_search.go:57: onSearchDone atomic.Value
+cli__cli:internal/skills/installer/installer.go:98: var done atomic.Int32
+cli__cli:internal/skills/discovery/discovery.go:677: var done atomic.Int32
+cockroachdb__pebble:read_state.go:27: refcnt    atomic.Int32
+cockroachdb__pebble:wal/failover_writer.go:123: headTail atomic.Uint64
+cockroachdb__pebble:wal/failover_writer.go:999: ongoingOperationStart atomic.Int64
+cockroachdb__pebble:wal/failover_writer.go:1000: error                 atomic.Pointer[error]
+cockroachdb__pebble:vfs/mem_fs.go:654: refs  atomic.Int32
+cockroachdb__pebble:vfs/errorfs/latency.go:66: agg atomic.Int64
+cockroachdb__pebble:vfs/errorfs/errorfs.go:257: on atomic.Bool
+cockroachdb__pebble:vfs/disk_health.go:133: statsMap map[DiskWriteCategory]*atomic.Uint64
+cockroachdb__pebble:vfs/disk_health.go:139: statsMap: make(map[DiskWriteCategory]*atomic.Uint64),
+cockroachdb__pebble:vfs/disk_health.go:145: func (d *DiskWriteStatsCollector) CreateStat(category DiskWriteCategory) *atomic.Uint64 {
+cockroachdb__pebble:vfs/disk_health.go:146: var bytesWritten *atomic.Uint64
+cockroachdb__pebble:vfs/disk_health.go:150: bytesWritten = new(atomic.Uint64)
+cockroachdb__pebble:vfs/disk_health.go:208: lastWritePacked atomic.Uint64
+cockroachdb__pebble:vfs/disk_health.go:214: aggBytesWritten *atomic.Uint64
+cockroachdb__pebble:vfs/disk_health.go:230: var bytesWritten *atomic.Uint64
+cockroachdb__pebble:vfs/disk_health.go:234: bytesWritten = new(atomic.Uint64)
+cockroachdb__pebble:vfs/syncing_file.go:30: offset atomic.Int64
+cockroachdb__pebble:vfs/syncing_file.go:36: syncOffset         atomic.Int64
+cockroachdb__pebble:vfs/disk_full.go:100: generation atomic.Uint32
+cockroachdb__pebble:replay/workload_capture.go:62: curManifest atomic.Uint64
+cockroachdb__pebble:replay/workload_capture.go:64: enabled atomic.Bool
+cockroachdb__pebble:replay/replay.go:283: err           atomic.Value
+cockroachdb__pebble:replay/replay.go:296: paceDurationNano atomic.Uint64
+cockroachdb__pebble:replay/replay.go:298: writeBytes       atomic.Uint64
+cockroachdb__pebble:internal/pacertoy/rocksdb/main.go:40: level   atomic.Int64
+cockroachdb__pebble:internal/pacertoy/rocksdb/main.go:62: level                 atomic.Int64
+cockroachdb__pebble:internal/pacertoy/rocksdb/main.go:93: fill       atomic.Int64
+cockroachdb__pebble:internal/pacertoy/rocksdb/main.go:94: drain      atomic.Int64
+cockroachdb__pebble:internal/pacertoy/rocksdb/main.go:102: sstables            []atomic.Int64
+cockroachdb__pebble:internal/pacertoy/rocksdb/main.go:122: db.sstables = make([]atomic.Int64, numLevels-1)
+cockroachdb__pebble:internal/pacertoy/pebble/main.go:48: level      atomic.Int64
+cockroachdb__pebble:internal/pacertoy/pebble/main.go:76: level           atomic.Int64
+cockroachdb__pebble:internal/pacertoy/pebble/main.go:117: fill       atomic.Int64
+cockroachdb__pebble:internal/pacertoy/pebble/main.go:118: drain      atomic.Int64
+cockroachdb__pebble:internal/pacertoy/pebble/main.go:126: sstables            []atomic.Int64
+cockroachdb__pebble:internal/pacertoy/pebble/main.go:143: db.sstables = make([]atomic.Int64, numLevels-1)
+cockroachdb__pebble:internal/treesteps/tree_steps_on.go:336: recordingInProgress atomic.Bool
+cockroachdb__pebble:internal/cache/refcnt_normal.go:20: val atomic.Int32
+cockroachdb__pebble:internal/cache/entry.go:75: referenced atomic.Bool
+cockroachdb__pebble:internal/cache/clockpro.go:81: hits   atomic.Int64
+cockroachdb__pebble:internal/cache/clockpro.go:82: misses atomic.Int64
+cockroachdb__pebble:internal/cache/cache.go:69: refs    atomic.Int64
+cockroachdb__pebble:internal/cache/cache.go:71: idAlloc atomic.Uint64
+cockroachdb__pebble:internal/cache/refcnt_tracing.go:23: val atomic.Int32
+cockroachdb__pebble:internal/arenaskl/arena.go:31: n   atomic.Uint64
+cockroachdb__pebble:internal/arenaskl/skl.go:82: height atomic.Uint32 // Current height. 1 <= height <= maxHeight. CAS.
+cockroachdb__pebble:internal/arenaskl/node.go:38: nextOffset atomic.Uint32
+cockroachdb__pebble:internal/arenaskl/node.go:39: prevOffset atomic.Uint32
+cockroachdb__pebble:internal/randvar/uniform.go:27: max atomic.Uint64
+cockroachdb__pebble:internal/problemspans/by_level.go:27: empty  atomic.Bool
+cockroachdb__pebble:internal/ackseq/ackseq.go:25: next atomic.Uint64
+cockroachdb__pebble:internal/base/internal.go:766: value atomic.Uint64
+cockroachdb__pebble:internal/base/directory_lock.go:111: refs atomic.Int32
+cockroachdb__pebble:internal/inflight/in_flight.go:247: atomic.Uint64
+cockroachdb__pebble:internal/manifest/table_metadata.go:85: AllowedSeeks atomic.Int64
+cockroachdb__pebble:internal/manifest/table_metadata.go:153: refs atomic.Int32
+cockroachdb__pebble:internal/manifest/table_metadata.go:157: statsValid atomic.Bool
+cockroachdb__pebble:internal/manifest/table_metadata.go:375: refs atomic.Int32
+cockroachdb__pebble:internal/manifest/table_metadata.go:377: propsValid atomic.Bool
+cockroachdb__pebble:internal/manifest/version.go:184: refs atomic.Int32
+cockroachdb__pebble:internal/manifest/btree.go:79: ref   atomic.Int32
+cockroachdb__pebble:internal/manifest/annotator.go:41: cachedValues [maxAnnotationsPerNode]atomic.Value
+cockroachdb__pebble:internal/manifest/blob_metadata.go:142: refs atomic.Int32
+cockroachdb__pebble:internal/manifest/blob_metadata.go:144: propsValid atomic.Bool
+cockroachdb__pebble:internal/manual/manual.go:67: InUseBytes atomic.Int64
+cockroachdb__pebble:internal/genericcache/shard.go:17: hits   atomic.Int64
+cockroachdb__pebble:internal/genericcache/shard.go:18: misses atomic.Int64
+cockroachdb__pebble:internal/genericcache/node.go:22: referenced atomic.Bool
+cockroachdb__pebble:internal/genericcache/node.go:81: refCount    atomic.Int32
+cockroachdb__pebble:internal/dsl/predicates.go:44: atomic.Int32
+cockroachdb__pebble:batch.go:242: applied atomic.Bool
+cockroachdb__pebble:batch.go:278: lifecycle atomic.Int32
+cockroachdb__pebble:objstorage/objstorageprovider/sharedcache/shared_cache.go:89: count atomic.Int64
+cockroachdb__pebble:objstorage/objstorageprovider/sharedcache/shared_cache.go:91: totalReads          atomic.Int64
+cockroachdb__pebble:objstorage/objstorageprovider/sharedcache/shared_cache.go:92: multiShardReads     atomic.Int64
+cockroachdb__pebble:objstorage/objstorageprovider/sharedcache/shared_cache.go:93: multiBlockReads     atomic.Int64
+cockroachdb__pebble:objstorage/objstorageprovider/sharedcache/shared_cache.go:94: readsWithFullHit    atomic.Int64
+cockroachdb__pebble:objstorage/objstorageprovider/sharedcache/shared_cache.go:95: readsWithPartialHit atomic.Int64
+cockroachdb__pebble:objstorage/objstorageprovider/sharedcache/shared_cache.go:96: readsWithNoHit      atomic.Int64
+cockroachdb__pebble:objstorage/objstorageprovider/sharedcache/shared_cache.go:98: evictions         atomic.Int64
+cockroachdb__pebble:objstorage/objstorageprovider/sharedcache/shared_cache.go:99: writeBackFailures atomic.Int64
+cockroachdb__pebble:objstorage/objstorageprovider/remote.go:38: initialized atomic.Bool
+cockroachdb__pebble:objstorage/objstorageprovider/provider.go:152: value atomic.Uint32
+cockroachdb__pebble:objstorage/objstorageprovider/objiotracing/obj_io_tracing_on.go:41: handleID atomic.Uint64
+cockroachdb__pebble:flushable.go:110: readerRefs atomic.Int32
+cockroachdb__pebble:bench/scan.go:40: bytes       atomic.Int64
+cockroachdb__pebble:bench/scan.go:41: scanned     atomic.Int64
+cockroachdb__pebble:bench/fsbench.go:252: var done atomic.Bool
+cockroachdb__pebble:bench/fsbench.go:308: var done atomic.Bool
+cockroachdb__pebble:bench/fsbench.go:365: var done atomic.Bool
+cockroachdb__pebble:bench/fsbench.go:417: done         atomic.Bool
+cockroachdb__pebble:bench/fsbench.go:481: done         atomic.Bool
+cockroachdb__pebble:bench/ycsb.go:195: readAmpCount atomic.Uint64
+cockroachdb__pebble:bench/ycsb.go:196: readAmpSum   atomic.Uint64
+cockroachdb__pebble:bench/ycsb.go:198: numOps       atomic.Uint64
+cockroachdb__pebble:bench/sync.go:39: var bytes atomic.Uint64
+cockroachdb__pebble:bench/queue.go:37: func newQueueTest(common *CommonConfig, cfg *QueueConfig) (Test, *atomic.Int64) {
+cockroachdb__pebble:bench/queue.go:38: ops := new(atomic.Int64)
+cockroachdb__pebble:blob_rewrite.go:90: cancel atomic.Bool
+cockroachdb__pebble:blob_rewrite.go:110: bytesWritten          atomic.Int64 // Total bytes written to the new blob file.
+cockroachdb__pebble:record/log_writer.go:28: written atomic.Int32
+cockroachdb__pebble:record/log_writer.go:74: headTail atomic.Uint64
+cockroachdb__pebble:record/log_writer.go:83: blocked atomic.Bool
+cockroachdb__pebble:record/log_writer.go:259: index           atomic.Int64
+cockroachdb__pebble:record/log_writer.go:264: blocked                   atomic.Bool
+cockroachdb__pebble:record/log_writer.go:482: syncedOffset atomic.Uint64
+cockroachdb__pebble:open.go:163: closed:              new(atomic.Value),
+cockroachdb__pebble:open.go:518: // tied to the lifetime of DB: the DB.closed atomic.Value.
+cockroachdb__pebble:open.go:521: v := obj.(*atomic.Value)
+cockroachdb__pebble:version_set.go:53: atomicInProgressBytes atomic.Int64
+cockroachdb__pebble:version_set.go:73: curCompactionConcurrency atomic.Int32
+cockroachdb__pebble:version_set.go:109: nextFileNum atomic.Uint64
+cockroachdb__pebble:db.go:261: memTableCount    atomic.Int64
+cockroachdb__pebble:db.go:262: memTableReserved atomic.Int64 // number of bytes reserved in the cache for memtables
+cockroachdb__pebble:db.go:266: memTableRecycle atomic.Pointer[memTable]
+cockroachdb__pebble:db.go:269: logSize atomic.Uint64
+cockroachdb__pebble:db.go:273: logBytesIn atomic.Uint64
+cockroachdb__pebble:db.go:276: diskAvailBytes       atomic.Uint64
+cockroachdb__pebble:db.go:313: closed *atomic.Value
+cockroachdb__pebble:db.go:353: vers atomic.Uint64
+cockroachdb__pebble:db.go:440: manualLen atomic.Int32
+cockroachdb__pebble:db.go:469: burstConcurrency atomic.Int32
+cockroachdb__pebble:db.go:562: valueRetrievalProfile atomic.Pointer[bytesprofile.Profile]
+cockroachdb__pebble:metamorphic/history.go:31: err    atomic.Value
+cockroachdb__pebble:metamorphic/options.go:341: var cumulativeTime atomic.Int64
+cockroachdb__pebble:file_cache.go:118: iterCount         atomic.Int32
+cockroachdb__pebble:file_cache.go:426: refs   atomic.Int64
+cockroachdb__pebble:file_cache.go:428: sstables  atomic.Int64
+cockroachdb__pebble:file_cache.go:429: blobFiles atomic.Int64
+cockroachdb__pebble:mem_table.go:85: writerRefs atomic.Int32
+cockroachdb__pebble:mem_table.go:416: count         atomic.Uint32
+cockroachdb__pebble:mem_table.go:417: frags         atomic.Pointer[keySpanFrags]
+cockroachdb__pebble:sstable/block/compression.go:293: atomic.Uint64
+cockroachdb__pebble:sstable/block/compression.go:298: atomic.Uint64
+cockroachdb__pebble:sstable/block/category_stats.go:97: var numRegisteredCategories atomic.Uint32
+cockroachdb__pebble:sstable/tablefilters/binaryfuse/simulation.go:20: var sizeSum, filterSizeSum atomic.Uint64
+cockroachdb__pebble:sstable/filter.go:30: hits atomic.Int64
+cockroachdb__pebble:sstable/filter.go:32: misses atomic.Int64
+cockroachdb__pebble:commit.go:38: headTail atomic.Uint64
+cockroachdb__pebble:commit.go:44: slots [record.SyncConcurrency]atomic.Pointer[Batch]
+cockroachdb__pebble:compaction.go:121: written  *atomic.Int64
+cockroachdb__pebble:compaction.go:242: cancel atomic.Bool
+cockroachdb__pebble:compaction.go:498: bytesWritten atomic.Int64
+cockroachdb__pebble:compaction.go:3078: bytesWritten *atomic.Int64,
+cockroachdb__pebble:compaction.go:3099: bytesWritten *atomic.Int64,
+containerd__containerd:internal/cri/server/service.go:154: initialized atomic.Bool
+containerd__containerd:internal/cri/server/images/image_pull.go:796: activeReqs atomic.Int32
+containerd__containerd:internal/cri/server/images/image_pull.go:799: totalBytesRead atomic.Uint64
+containerd__containerd:core/runtime/v2/shim.go:489: taskDeleteExit atomic.Pointer[runtime.Exit]
+containerd__containerd:core/metadata/db.go:99: dirty atomic.Uint32
+containerd__containerd:core/content/testsuite/testsuite.go:1165: var contentSeed atomic.Int64
+containerd__containerd:core/transfer/streaming/writer.go:79: remaining atomic.Int32
+containerd__containerd:core/transfer/streaming/reader.go:33: window    atomic.Int32
+containerd__containerd:core/metrics/cgroups/v1/oom.go:67: count     atomic.Int64
+containerd__containerd:core/images/usage/calculator.go:88: size      atomic.Int64
+containerd__containerd:core/unpack/unpacker.go:172: unpacks atomic.Int32
+containerd__containerd:cmd/containerd/server/server.go:165: var mustSucceed atomic.Int32
+containerd__containerd:cmd/containerd-shim-runc-v2/process/init.go:66: pausing      atomic.Bool
+containerd__containerd:cmd/containerd-shim-runc-v2/process/io.go:233: count atomic.Int64
+containerd__containerd:cmd/containerd-shim-runc-v2/process/io.go:239: atomic.Int64{},
+dominikh__go-tools:lintcmd/cache/prog.go:43: closing      atomic.Bool
+dominikh__go-tools:go/ir/task.go:25: transitive atomic.Bool    // true once it is known all predecessors are done.
+etcd-io__etcd:server/etcdserver/server.go:214: inflightSnapshots atomic.Int64
+etcd-io__etcd:server/etcdserver/server.go:215: appliedIndex      atomic.Uint64
+etcd-io__etcd:server/etcdserver/server.go:216: committedIndex    atomic.Uint64
+etcd-io__etcd:server/etcdserver/server.go:217: term              atomic.Uint64
+etcd-io__etcd:server/etcdserver/server.go:218: lead              atomic.Uint64
+etcd-io__etcd:client/v3/client.go:82: lg atomic.Pointer[zap.Logger]
+etcd-io__etcd:tests/robustness/identity/id.go:33: streamID  atomic.Int64
+etcd-io__etcd:tests/robustness/identity/id.go:34: requestID atomic.Int64

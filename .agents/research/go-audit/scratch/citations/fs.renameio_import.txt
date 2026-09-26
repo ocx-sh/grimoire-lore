@@ -1,0 +1,1 @@
+aquasecurity__trivy:pkg/dependency/parser/golang/sum/parse_testcase.go:194: {Name: "github.com/google/renameio", Version: "v0.1.0"},

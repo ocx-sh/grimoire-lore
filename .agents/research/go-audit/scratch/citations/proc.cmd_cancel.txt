@@ -1,0 +1,4 @@
+containerd__containerd:pkg/imageverifier/bindir/processes_unix.go:40: cmd.Cancel = func() error {
+dominikh__go-tools:lintcmd/cache/prog.go:85: cmd.Cancel = in.Close
+golang__tools:cmd/bisect/go120.go:14: cmd.Cancel = func() error {
+golangci__golangci-lint:internal/go/cache/prog.go:100: cmd.Cancel = in.Close

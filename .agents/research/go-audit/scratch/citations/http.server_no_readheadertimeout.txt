@@ -1,0 +1,41 @@
+etcd-io__etcd:server/etcdmain/grpc_proxy.go:575: srvhttp := &http.Server{
+etcd-io__etcd:server/embed/etcd.go:599: srv := &http.Server{
+etcd-io__etcd:tests/framework/integration/cluster.go:1015: Config: &http.Server{
+etcd-io__etcd:tests/framework/integration/cluster.go:1045: Config: &http.Server{
+golang__tools:gopls/internal/server/server.go:291: webServer := &http.Server{Addr: listener.Addr().String(), Handler: rootMux}
+hashicorp__terraform:internal/command/login.go:473: server := &http.Server{
+prometheus__prometheus:web/web.go:778: httpSrv := &http.Server{
+syncthing__syncthing:cmd/syncthing/main.go:1081: srv := &http.Server{
+syncthing__syncthing:cmd/infra/stupgrades/main.go:106: srv := &http.Server{
+syncthing__syncthing:cmd/stdiscosrv/apisrv.go:121: srv := &http.Server{
+tailscale__tailscale:tsconsensus/monitor.go:52: srv := &http.Server{Handler: mux}
+tailscale__tailscale:tsconsensus/tsconsensus.go:466: srv := &http.Server{Handler: c.makeCommandHandler(auth)}
+tailscale__tailscale:k8s-operator/api-proxy/proxy.go:126: ap.hs = &http.Server{
+tailscale__tailscale:wgengine/bench/bench.go:126: srv := &http.Server{
+tailscale__tailscale:client/tailscale/example/servetls/servetls.go:19: s := &http.Server{
+tailscale__tailscale:safeweb/http.go:274: s.h = cmp.Or(config.HTTPServer, &http.Server{})
+tailscale__tailscale:ipn/ipnlocal/peerapi.go:242: httpServer := &http.Server{
+tailscale__tailscale:ipn/ipnlocal/serve.go:667: hs := &http.Server{
+tailscale__tailscale:ipn/ipnserver/server.go:533: hs := &http.Server{
+tailscale__tailscale:tsnet/tsnet.go:1026: s.localAPIServer = &http.Server{Handler: lah}
+tailscale__tailscale:tstest/integration/testcontrol/testcontrol.go:494: BaseConfig: &http.Server{
+tailscale__tailscale:tstest/nettest/nettest.go:78: Config: &http.Server{Handler: handler},
+tailscale__tailscale:tstest/natlab/vnet/vnet.go:453: hs := &http.Server{Handler: n.s.control}
+tailscale__tailscale:tstest/natlab/vnet/vnet.go:471: hs := &http.Server{Handler: ds.handler}
+tailscale__tailscale:tstest/natlab/vnet/vnet.go:481: hs := &http.Server{Handler: n.s.derps[0].handler}
+tailscale__tailscale:tstest/natlab/vnet/vnet.go:502: hs := &http.Server{Handler: n.s.cloudInitHandler()}
+tailscale__tailscale:tstest/natlab/vnet/vnet.go:516: hs := &http.Server{Handler: n.s.fileServerHandler()}
+tailscale__tailscale:tstest/natlab/vnet/vnet.go:527: hs := &http.Server{Handler: n.s.fakeACME}
+tailscale__tailscale:tstest/natlab/vnet/vnet.go:601: hs := &http.Server{Handler: handler}
+tailscale__tailscale:tstest/natlab/vmtest/web.go:114: srv := &http.Server{Handler: mux}
+tailscale__tailscale:drive/driveimpl/local_impl.go:67: hs := &http.Server{Handler: http.HandlerFunc(s.serveHTTP)}
+tailscale__tailscale:cmd/pgproxy/pgproxy.go:80: srv := &http.Server{
+tailscale__tailscale:cmd/containerboot/main.go:1209: srv := &http.Server{Handler: mux}
+tailscale__tailscale:cmd/k8s-proxy/k8s-proxy.go:296: localSrv := &http.Server{Addr: addrPort, Handler: mux}
+tailscale__tailscale:cmd/tailscaled/tailscaled.go:916: srv := &http.Server{
+tailscale__tailscale:cmd/tailscaled/proxy.go:91: hs := &http.Server{Handler: httpProxyHandler(dialer.UserDial)}
+tailscale__tailscale:cmd/proxy-test-server/proxy-test-server.go:65: hs := &http.Server{
+tailscale__tailscale:cmd/derper/derper.go:335: httpsrv := &http.Server{
+tailscale__tailscale:cmd/derper/derper.go:410: port80srv := &http.Server{
+tailscale__tailscale:cmd/tailscale/cli/cert.go:61: s := &http.Server{
+tailscale__tailscale:cmd/tailscale/cli/web.go:160: server := &http.Server{

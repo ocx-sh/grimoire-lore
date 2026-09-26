@@ -127,6 +127,23 @@ tasks:
       # directory, so the four indexes are enough.
       - "{{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py rules/java-quality.md rules/kotlin-quality.md rules/gradle-build.md rules/maven-build.md skills/jvm-release skills/jvm-dependency-triage"
       #
+      # The Go set follows the JVM reasoning: the fleet holds no Go, so there
+      # is no consumer to resolve globs against in CI. It was grounded on an
+      # upstream exemplar corpus instead (see `.agents/research/go-frame.md`).
+      # Set GO_CONSUMER to a Go module checkout (the research used ko) to also
+      # check glob liveness; the allow-absent names are correct globs that a
+      # single-module repository without a workspace, a dotless goreleaser
+      # config or a `.yml` (not `.yaml`) golangci config does not carry. Each
+      # one matched at least one repository in the exemplar corpus except
+      # `.config/goreleaser.*`, which goreleaser itself reads by name.
+      - |
+        if [ -n "{{.GO_CONSUMER}}" ] && [ -f "{{.GO_CONSUMER}}/go.mod" ]; then
+          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --root {{.GO_CONSUMER}} --forbid '/home/mherwig' --forbid '.agents/research' --allow-absent '**/go.work' --allow-absent '**/go.work.sum' --allow-absent '**/*golangci*.yml' --allow-absent '**/goreleaser*.yml' --allow-absent '**/goreleaser*.yaml' --allow-absent '**/.config/goreleaser.*' --allow-absent '**/staticcheck.conf' rules/go-quality.md rules/go-modules.md skills/go-release skills/go-upgrade skills/go-diagnose
+        else
+          echo "note: GO_CONSUMER unset — glob liveness NOT checked for go; set it to a Go module checkout to include it"
+          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' rules/go-quality.md rules/go-modules.md skills/go-release skills/go-upgrade skills/go-diagnose
+        fi
+      #
       # Every checks/*.py script carries its own fixtures and its own
       # --self-test mode. Run all eight here, so a broken check is caught next
       # to the artifact validation above, not only the first time a real page
@@ -168,6 +185,8 @@ tasks:
       # The fleet root, not a single repo — see the comment above.
       TS_CONSUMER: '{{.TS_CONSUMER | default ".."}}'
       BAZEL_CONSUMER: '{{.BAZEL_CONSUMER | default "../rules_ocx"}}'
+      # No default: the fleet has no Go module to point at.
+      GO_CONSUMER: '{{.GO_CONSUMER | default ""}}'
 
   build:
     desc: Build every publishable artifact without pushing anything

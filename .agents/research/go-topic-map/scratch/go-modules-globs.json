@@ -1,0 +1,1 @@
+["**/go.mod", "**/go.sum", "**/go.work", "**/go.work.sum", "**/.golangci.*", "**/*golangci*.yml", "**/*golangci*.yaml", "**/.goreleaser.*", "**/goreleaser*.yml", "**/goreleaser*.yaml", "**/.config/goreleaser.*", "**/.ko.yaml", "**/staticcheck.conf"]

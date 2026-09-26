@@ -1,0 +1,16 @@
+golang__tools:gopls/internal/cache/cache.go:42: // GOMEMLIMIT, ours is not. GOMEMLIMIT helps in cases where you have a
+golang__tools:gopls/internal/cache/cache.go:47: // Setting GOMEMLIMIT to too low a number would make gopls perform poorly on
+golang__tools:gopls/internal/cache/cache.go:49: // badly behaved tenant. Short of calibrating GOMEMLIMIT based on the user's
+golang__tools:gopls/internal/cache/cache.go:51: // GOMEMLIMIT to solve its GC CPU problem.
+golang__tools:gopls/internal/settings/settings.go:730: // Unlike the GOMEMLIMIT environment variable, this setting is
+prometheus__prometheus:cmd/prometheus/main.go:434: a.Flag("auto-gomemlimit", "Automatically set GOMEMLIMIT to match Linux container or system memory limit").
+prometheus__prometheus:cmd/prometheus/main.go:436: a.Flag("auto-gomemlimit.ratio", "The ratio of reserved GOMEMLIMIT memory to the detected maximum container or system memory").
+prometheus__prometheus:cmd/prometheus/main.go:438: a.Flag("auto-gomemlimit.refresh-interval", "Interval at which to re-detect the container or system memory limit and update GOMEMLIMIT accordingly. Useful when t
+prometheus__prometheus:cmd/prometheus/main.go:840: logger.Warn("automemlimit", "msg", "Failed to set GOMEMLIMIT automatically", "err", err)
+prometheus__prometheus:web/web.go:883: GOMEMLIMIT:     debug.SetMemoryLimit(-1),
+prometheus__prometheus:web/api/v1/openapi_examples.go:818: "GOMEMLIMIT":          int64(3703818240),
+prometheus__prometheus:web/api/v1/api.go:193: GOMEMLIMIT          int64     `json:"GOMEMLIMIT"`
+prometheus__prometheus:web/api/v1/openapi_schemas.go:1160: props.Set("GOMEMLIMIT", integerSchema())
+prometheus__prometheus:web/api/v1/openapi_schemas.go:1169: Required:             []string{"startTime", "CWD", "hostname", "serverTime", "reloadConfigSuccess", "lastConfigTime", "corruptionCount", "goroutineCount", "GOMA
+prometheus__prometheus:web/api/testhelpers/api.go:124: GOMEMLIMIT          int64     `json:"GOMEMLIMIT"`
+tailscale__tailscale:tsweb/varz/runtimemetrics.go:99: // against GOMEMLIMIT or a container memory limit.

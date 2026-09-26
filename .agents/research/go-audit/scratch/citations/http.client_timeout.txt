@@ -1,0 +1,56 @@
+aquasecurity__trivy:pkg/downloader/download.go:98: Client: &http.Client{
+caddyserver__caddy:modules/caddytls/ondemand.go:178: onDemandAskClient = &http.Client{
+caddyserver__caddy:modules/caddyhttp/reverseproxy/healthchecks.go:177: a.httpClient = &http.Client{
+caddyserver__caddy:caddytest/caddytest.go:75: Client: &http.Client{
+caddyserver__caddy:caddytest/caddytest.go:174: client := &http.Client{
+caddyserver__caddy:caddytest/caddytest.go:228: client := &http.Client{
+caddyserver__caddy:caddytest/caddytest.go:308: client := &http.Client{
+caddyserver__caddy:caddyconfig/httploader.go:171: client := &http.Client{
+charmbracelet__bubbletea:examples/http/main.go:72: c := &http.Client{
+charmbracelet__bubbletea:tutorials/commands/main.go:20: c := &http.Client{Timeout: 10 * time.Second}
+cli__cli:pkg/cmd/send-telemetry/send_telemetry.go:77: httpClient := &http.Client{
+etcd-io__etcd:server/etcdserver/cluster_util.go:73: cc := &http.Client{
+etcd-io__etcd:server/etcdserver/cluster_util.go:244: cc := &http.Client{
+etcd-io__etcd:server/etcdserver/cluster_util.go:384: cc := &http.Client{
+golang__tools:internal/event/export/otel/otel.go:62: client:      &http.Client{Timeout: DefaultTimeout},
+golangci__golangci-lint:scripts/website/github/github.go:27: client := &http.Client{Timeout: 2 * time.Second}
+google__go-github:tools/schemafields/openapi.go:402: client := &http.Client{Timeout: 5 * time.Minute}
+google__go-github:example/newfilewithappauth/main.go:37: client, err := github.NewClient(github.WithHTTPClient(&http.Client{
+google__go-github:github/github.go:668: c.clientIgnoreRedirects = &http.Client{
+google__go-github:github/github.go:929: o.httpClient = &http.Client{
+grpc__grpc-go:xds/googledirectpath/utils.go:37: client := &http.Client{Timeout: timeout}
+grpc__grpc-go:credentials/google/idtoken.go:45: var defaultMetadataHTTPClient = &http.Client{
+grpc__grpc-go:credentials/sts/sts.go:197: return &http.Client{
+hashicorp__terraform:internal/backend/remote-state/oci/auth.go:316: httpClient = &http.Client{
+hashicorp__terraform:internal/backend/remote-state/cos/backend.go:385: &http.Client{
+hashicorp__terraform:internal/backend/remote-state/cos/backend.go:534: client := &http.Client{Timeout: 2 * time.Second}
+oras-project__oras-go:registry/remote/signature/lookaside.go:76: client: &http.Client{Timeout: lookasideTimeout},
+prometheus__prometheus:discovery/linode/linode.go:162: &http.Client{
+prometheus__prometheus:discovery/stackit/server.go:82: d.httpClient = &http.Client{
+prometheus__prometheus:discovery/ionos/server.go:75: cfg.HTTPClient = &http.Client{
+prometheus__prometheus:discovery/vultr/vultr.go:132: d.client = govultr.NewClient(&http.Client{
+prometheus__prometheus:discovery/outscale/outscale.go:156: httpClient := &http.Client{
+prometheus__prometheus:discovery/digitalocean/digitalocean.go:178: httpClient = &http.Client{
+prometheus__prometheus:discovery/hetzner/hcloud.go:76: hcloud.WithHTTPClient(&http.Client{
+prometheus__prometheus:discovery/hetzner/robot.go:65: d.client = &http.Client{
+prometheus__prometheus:cmd/promtool/metrics.go:40: httpClient := &http.Client{
+syncthing__syncthing:lib/rc/rc.go:166: client := &http.Client{
+syncthing__syncthing:lib/rc/rc.go:194: client := &http.Client{
+syncthing__syncthing:lib/upgrade/upgrade_supported.go:64: var upgradeClient = &http.Client{
+syncthing__syncthing:lib/discover/global.go:114: var announceClient httpClient = &contextClient{&http.Client{
+syncthing__syncthing:lib/discover/global.go:134: var queryClient httpClient = &contextClient{&http.Client{
+syncthing__syncthing:cmd/syncthing/main.go:384: client := &http.Client{
+syncthing__syncthing:cmd/infra/stcrashreceiver/sourcecodeloader.go:45: client: &http.Client{Timeout: httpTimeout},
+syncthing__syncthing:cmd/strelaysrv/main.go:76: httpClient    = &http.Client{
+tailscale__tailscale:sessionrecording/connect.go:412: return &http.Client{
+tailscale__tailscale:wif/wif.go:80: return &http.Client{
+tailscale__tailscale:misc/bumpdeps/bumpdeps.go:186: client:   &http.Client{Timeout: 2 * time.Minute},
+tailscale__tailscale:tstest/natlab/vmtest/tailmac.go:713: client := &http.Client{Timeout: 5 * time.Second}
+tailscale__tailscale:cmd/k8s-operator/e2e/setup.go:1041: pebbleClient := &http.Client{
+tailscale__tailscale:cmd/tailscale/cli/netcheck.go:128: hc := &http.Client{
+tailscale__tailscale:cmd/stunstamp/stunstamp.go:842: c: &http.Client{
+tailscale__tailscale:net/captivedetection/captivedetection.go:44: d.httpClient = &http.Client{
+tailscale__tailscale:net/dns/resolver/forwarder.go:550: c = &http.Client{
+tailscale__tailscale:net/portmapper/upnp.go:446: c.uPnPHTTPClient = &http.Client{
+tailscale__tailscale:feature/identityfederation/identityfederation.go:127: httpClient := &http.Client{Timeout: 10 * time.Second}
+tailscale__tailscale:feature/taildrop/localapi.go:335: client := &http.Client{

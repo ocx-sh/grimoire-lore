@@ -1,0 +1,7 @@
+caddyserver__caddy:cmd/main.go:277: for range time.Tick(1 * time.Second) {
+containerd__containerd:pkg/shim/shim.go:153: for range time.Tick(30 * time.Second) {
+kubernetes-sigs__controller-runtime:pkg/controller/priorityqueue/priorityqueue.go:537: t := time.Tick(10 * time.Second)
+kubernetes-sigs__controller-runtime:pkg/controller/priorityqueue/priorityqueue.go:604: t := time.Tick(500 * time.Millisecond) // borrowed from workqueue: https://github.com/kubernetes/kubernetes/blob/67a807bf142c7a2a5ecfdb2a5d24b4cdea4cc79c/stagin
+prometheus__prometheus:documentation/examples/custom-sd/adapter-usage/main.go:163: for c := time.Tick(time.Duration(d.refreshInterval) * time.Second); ; {
+prometheus__prometheus:cmd/prometheus/main.go:1428: case <-time.Tick(time.Duration(cfg.autoReloadInterval)):
+syncthing__syncthing:cmd/infra/ursrv/serve/serve.go:160: for range time.Tick(cli.DumpInterval) {

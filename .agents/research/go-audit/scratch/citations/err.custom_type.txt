@@ -1,0 +1,200 @@
+aquasecurity__trivy:pkg/types/error.go:11: func (e *ExitError) Error() string {
+aquasecurity__trivy:pkg/types/error.go:20: func (e *UserError) Error() string {
+aquasecurity__trivy:pkg/iac/scanners/cloudformation/parser/errors.go:18: func (e *InvalidContentError) Error() string {
+aquasecurity__trivy:pkg/dependency/parser/java/pom/parse.go:1081: func (e *rateLimitError) Error() string { return e.err.Error() }
+aquasecurity__trivy:pkg/x/io/max_bytes_reader.go:17: func (e *MaxBytesError) Error() string {
+bazel-contrib__rules_go:go/tools/bazel_testing/bazel_testing.go:251: func (e *StderrExitError) Error() string {
+bazel-contrib__rules_go:go/tools/builders/importcfg.go:229: func (e depsError) Error() string {
+bazel-contrib__rules_go:go/tools/builders/cgo2.go:486: func (e cgoError) Error() string {
+bazel-contrib__rules_go:go/tools/builders/stdliblist.go:44: func (err flatPackagesError) Error() string {
+bazel-contrib__rules_go:go/tools/gopackagesdriver/flatpackage.go:49: func (err FlatPackagesError) Error() string {
+bazel-contrib__rules_go:go/tools/releaser/releaser.go:117: func (e *usageError) Error() string {
+bazel-contrib__rules_go:go/tools/releaser/run.go:86: func (e *commandError) Error() string {
+bazel-contrib__rules_go:go/runfiles/runfiles.go:281: func (e Error) Error() string {
+bazelbuild__bazel-gazelle:cmd/move_labels/main.go:241: func (e errorList) Error() string {
+bazelbuild__bazel-gazelle:cmd/fetch_repo/errorscompat.go:44: func (e *joinError) Error() string {
+caddyserver__caddy:admin.go:1404: func (e APIError) Error() string {
+caddyserver__caddy:modules/caddytls/ech.go:1201: func (p PublishECHConfigListErrors) Error() string {
+caddyserver__caddy:modules/caddyhttp/replacer.go:420: func (e RequestBodyLimitError) Error() string {
+caddyserver__caddy:modules/caddyhttp/errors.go:65: func (e HandlerError) Error() string {
+caddyserver__caddy:caddytest/caddytest.go:109: func (e configLoadError) Error() string { return e.Response }
+caddyserver__caddy:cmd/cobra.go:172: func (e *exitError) Error() string {
+charmbracelet__bubbletea:examples/http/main.go:25: func (e errMsg) Error() string { return e.error.Error() }
+charmbracelet__bubbletea:tutorials/commands/main.go:36: func (e errMsg) Error() string { return e.err.Error() }
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/contract.go:29: func (fault *fault) Error() string { return fault.Message }
+cli__cli:internal/safepaths/absolute.go:72: func (e PathTraversalError) Error() string {
+cli__cli:internal/attachments/client.go:200: func (e *uploadError) Error() string {
+cli__cli:internal/codespaces/codespaces.go:54: func (e *TimeoutError) Error() string {
+cli__cli:internal/codespaces/api/api.go:951: func (e AcceptPermissionsRequiredError) Error() string {
+cli__cli:internal/keyring/keyring.go:17: func (e *TimeoutError) Error() string {
+cli__cli:internal/config/migration/multi_account.go:19: func (e CowardlyRefusalError) Error() string {
+cli__cli:internal/run/run.go:78: func (e CmdError) Error() string {
+cli__cli:internal/run/stub.go:114: func (e errWithExitCode) Error() string {
+cli__cli:internal/skills/discovery/discovery.go:36: func (e *TreeTooLargeError) Error() string {
+cli__cli:internal/skills/discovery/discovery.go:339: func (e *noReleasesError) Error() string { return e.reason }
+cli__cli:git/errors.go:16: func (e *NotInstalled) Error() string {
+cli__cli:git/errors.go:30: func (ge *GitError) Error() string {
+cli__cli:pkg/iostreams/content.go:44: func (e BinaryTerminalError) Error() string {
+cli__cli:pkg/cmdutil/errors.go:26: func (fe *FlagError) Error() string {
+cli__cli:pkg/cmdutil/errors.go:64: func (e NoResultsError) Error() string {
+cli__cli:pkg/cmd/secret/shared/base_repo.go:17: func (e AmbiguousBaseRepoError) Error() string {
+cli__cli:pkg/cmd/release/create/http.go:37: func (e errMissingRequiredWorkflowScope) Error() string {
+cli__cli:pkg/cmd/auth/shared/oauth_scopes.go:17: func (e MissingScopesError) Error() string {
+cli__cli:pkg/cmd/project/shared/queries/resolve.go:35: func (e *OptionNotFoundError) Error() string {
+cli__cli:pkg/cmd/project/shared/queries/resolve.go:50: func (e *OptionAmbiguousError) Error() string {
+cli__cli:pkg/cmd/project/shared/queries/resolve.go:63: func (e *WrongFieldTypeError) Error() string {
+cli__cli:pkg/cmd/project/shared/queries/resolve.go:74: func (e *ItemNotInProjectError) Error() string {
+cli__cli:pkg/cmd/project/shared/queries/resolve_fields.go:25: func (e *FieldIDNotFoundError) Error() string {
+cli__cli:pkg/cmd/project/shared/queries/resolve_fields.go:39: func (e *FieldNotFoundError) Error() string {
+cli__cli:pkg/cmd/project/shared/queries/resolve_fields.go:53: func (e *FieldAmbiguousError) Error() string {
+cli__cli:pkg/cmd/config/get/get.go:82: func (e nonExistentKeyError) Error() string {
+cli__cli:pkg/cmd/config/set/set.go:126: func (e InvalidValueError) Error() string {
+cli__cli:pkg/cmd/extension/manager.go:39: func (e *ErrExtensionExecutableNotFound) Error() string {
+cli__cli:pkg/cmd/root/root.go:60: func (ae *AuthError) Error() string {
+cli__cli:pkg/search/searcher.go:312: func (err httpError) Error() string {
+cockroachdb__pebble:internal/iterv2/op_check_iter.go:34: func (e *IllegalOpError) Error() string { return e.msg }
+cockroachdb__pebble:internal/base/error.go:50: func (e *CorruptBlockData) Error() string { return e.cause.Error() }
+cockroachdb__pebble:event.go:1486: func (e *corruptionDetailError) Error() string {
+cockroachdb__pebble:options.go:2633: func (e ErrMissingWALRecoveryDir) Error() string {
+cockroachdb__pebble:options.go:2647: func (e ErrSecondaryIdentifierMismatch) Error() string {
+containerd__containerd:internal/cri/util/sanitize.go:84: func (e *sanitizedError) Error() string {
+containerd__containerd:internal/truncindex/truncindex.go:50: func (e ErrAmbiguousPrefix) Error() string {
+containerd__containerd:internal/registrar/registrar.go:47: func (e *ReservedErr) Error() string {
+containerd__containerd:core/remotes/docker/errcode.go:47: func (ec ErrorCode) Error() string {
+containerd__containerd:core/remotes/docker/errcode.go:136: func (e Error) Error() string {
+containerd__containerd:core/remotes/docker/errcode.go:200: func (errs Errors) Error() string {
+containerd__containerd:core/remotes/errors/errors.go:42: func (e ErrUnexpectedStatus) Error() string {
+containerd__containerd:pkg/filters/parser.go:272: func (pe parseError) Error() string {
+dominikh__go-tools:lintcmd/config.go:17: func (err parseBuildConfigError) Error() string { return err.err.Error() }
+dominikh__go-tools:lintcmd/cache/cache.go:106: func (e *entryNotFoundError) Error() string {
+dominikh__go-tools:staticcheck/fakexml/typeinfo.go:361: func (e *TagPathError) Error() string {
+dominikh__go-tools:staticcheck/fakexml/marshal.go:111: func (err *CyclicTypeError) Error() string {
+dominikh__go-tools:staticcheck/fakexml/marshal.go:374: func (e *UnsupportedTypeError) Error() string {
+etcd-io__etcd:server/etcdserver/api/etcdhttp/types/errors.go:29: func (e HTTPError) Error() string {
+etcd-io__etcd:server/etcdserver/api/v2error/error.go:138: func (e Error) Error() string {
+etcd-io__etcd:server/etcdserver/errors/errors.go:53: func (e DiscoveryError) Error() string {
+etcd-io__etcd:client/v3/lease.go:101: func (e ErrKeepAliveHalted) Error() string {
+etcd-io__etcd:api/v3rpc/rpctypes/error.go:252: func (e EtcdError) Error() string {
+golang__tools:internal/gcimporter/iexport.go:1601: func (e internalError) Error() string { return "gcimporter: " + string(e) }
+golang__tools:internal/bisect/bisect.go:483: func (e *parseError) Error() string { return e.text }
+golang__tools:internal/jsonrpc2/wire.go:105: func (err *WireError) Error() string {
+golang__tools:internal/jsonrpc2/jsonrpc2.go:17: func (e constError) Error() string { return string(e) }
+golang__tools:internal/jsonrpc2_v2/wire.go:76: func (err *WireError) Error() string {
+golang__tools:gopls/internal/cache/load.go:327: func (m *moduleErrorMap) Error() string {
+golang__tools:gopls/internal/settings/settings.go:1608: func (e *SoftError) Error() string {
+golang__tools:gopls/internal/protocol/tsjson.go:24: func (e *UnmarshalError) Error() string {
+golang__tools:gopls/internal/protocol/generate/main.go:269: func (e *UnmarshalError) Error() string {
+golang__tools:gopls/internal/cmd/harness.go:71: func (e commandLineError) Error() string { return string(e) }
+golang__tools:cmd/splitdwarf/internal/macho/file.go:322: func (e *FormatError) Error() string {
+golang__tools:cmd/fiximports/main.go:474: func (e packageError) Error() string {
+golang__tools:go/internal/gccgoimporter/parser.go:84: func (e importError) Error() string {
+golang__tools:go/packages/packages.go:598: func (err Error) Error() string {
+golang__tools:go/analysis/validate.go:129: func (e *CycleInRequiresGraphError) Error() string {
+golang__vuln:internal/gosym/symtab.go:747: func (e UnknownFileError) Error() string { return "unknown file: " + string(e) }
+golang__vuln:internal/gosym/symtab.go:757: func (e *UnknownLineError) Error() string {
+golang__vuln:internal/gosym/symtab.go:769: func (e *DecodingError) Error() string {
+golang__vuln:internal/vulncheck/packages.go:245: func (e *packageError) Error() string {
+golang__vuln:internal/scan/errors.go:68: func (e *exitCodeError) Error() string { return e.message }
+golangci__golangci-lint:internal/errorutil/errors.go:17: func (e PanicError) Error() string {
+golangci__golangci-lint:internal/go/cache/cache.go:131: func (e *entryNotFoundError) Error() string {
+golangci__golangci-lint:pkg/goanalysis/pkgerrors/errors.go:17: func (e *IllTypedError) Error() string {
+golangci__golangci-lint:pkg/exitcodes/exitcodes.go:19: func (e ExitError) Error() string {
+google__go-cmp:cmp/cmpopts/equate.go:132: func (anyError) Error() string     { return "any error" }
+google__go-containerregistry:internal/verify/verify.go:47: func (v Error) Error() string {
+google__go-containerregistry:pkg/v1/remote/transport/error.go:48: func (e *Error) Error() string {
+google__go-containerregistry:pkg/v1/remote/transport/ping.go:192: func (m multierrs) Error() string {
+google__go-containerregistry:pkg/name/errors.go:27: func (e *ErrBadName) Error() string {
+google__go-containerregistry:pkg/registry/blobs.go:104: func (e RedirectError) Error() string { return fmt.Sprintf("redirecting (%d): %s", e.Code, e.Location) }
+google__go-github:github/github.go:1760: func (r *ErrorResponse) Error() string {
+google__go-github:github/github.go:1823: func (r *TwoFactorAuthError) Error() string { return (*ErrorResponse)(r).Error() }
+google__go-github:github/github.go:1833: func (r *RateLimitError) Error() string {
+google__go-github:github/github.go:1862: func (*AcceptedError) Error() string {
+google__go-github:github/github.go:1887: func (r *AbuseRateLimitError) Error() string {
+google__go-github:github/github.go:1932: func (r *RedirectionError) Error() string {
+google__go-github:github/github.go:2001: func (e *Error) Error() string {
+goreleaser__goreleaser:internal/pipe/gomod/gomod_proxy.go:154: func (e ErrProxy) Error() string {
+goreleaser__goreleaser:internal/pipe/cask/cask.go:41: func (e ErrNoArchivesFound) Error() string {
+goreleaser__goreleaser:internal/pipe/brew/brew.go:44: func (e ErrNoArchivesFound) Error() string {
+goreleaser__goreleaser:internal/pipe/nix/nix.go:45: func (e errNoArchivesFound) Error() string {
+goreleaser__goreleaser:internal/pipe/git/errors.go:13: func (e ErrDirty) Error() string {
+goreleaser__goreleaser:internal/pipe/git/errors.go:22: func (e ErrWrongRef) Error() string {
+goreleaser__goreleaser:internal/pipe/winget/winget.go:50: func (e errNoArchivesFound) Error() string {
+goreleaser__goreleaser:internal/pipe/artifactory/artifactory.go:44: func (r *errorResponse) Error() string {
+goreleaser__goreleaser:internal/pipe/pipe.go:41: func (e ErrSkip) Error() string {
+goreleaser__goreleaser:internal/pipe/scoop/scoop.go:35: func (e ErrIncorrectArchiveCount) Error() string {
+goreleaser__goreleaser:internal/pipe/env/env.go:31: func (e ErrMultipleTokens) Error() string {
+goreleaser__goreleaser:internal/gerrors/errors.go:93: func (e ErrDetailed) Error() string { return e.err.Error() }
+goreleaser__goreleaser:internal/tmpl/tmpl.go:410: func (e ExpectedSingleEnvErr) Error() string {
+goreleaser__goreleaser:internal/tmpl/errors.go:39: func (e Error) Error() string {
+goreleaser__goreleaser:internal/builders/golang/gomain/gomain.go:32: func (e ErrNoMain) Error() string {
+goreleaser__goreleaser:internal/client/client.go:196: func (e ErrNoMilestoneFound) Error() string {
+goreleaser__goreleaser:internal/retryx/retryx.go:27: func (e HTTPError) Error() string { return e.Err.Error() }
+goreleaser__goreleaser:pkg/config/load.go:24: func (e VersionError) Error() string {
+grpc__grpc-go:internal/status/status.go:211: func (e *Error) Error() string {
+grpc__grpc-go:internal/testutils/restartable_listener.go:28: func (*tempError) Error() string {
+grpc__grpc-go:internal/xds/xdsclient/xdsresource/errors.go:56: func (e *xdsClientError) Error() string {
+grpc__grpc-go:internal/xds/clients/internal/testutils/restartable_listener.go:32: func (*tempError) Error() string {
+grpc__grpc-go:internal/xds/clients/xdsclient/internal/xdsresource/errors.go:55: func (e *xdsClientError) Error() string {
+grpc__grpc-go:internal/transport/transport.go:799: func (e ConnectionError) Error() string {
+grpc__grpc-go:internal/transport/http2_client.go:772: func (e NewStreamError) Error() string {
+grpc__grpc-go:credentials/alts/internal/conn/aeadrekey.go:46: func (k KeySizeError) Error() string {
+grpc__grpc-go:credentials/alts/internal/common.go:47: func (e *peerNotRespondingError) Error() string {
+hashicorp__terraform:internal/getproviders/errors.go:31: func (err ErrHostNoProviders) Error() string {
+hashicorp__terraform:internal/getproviders/errors.go:49: func (err ErrHostUnreachable) Error() string {
+hashicorp__terraform:internal/getproviders/errors.go:73: func (err ErrUnauthorized) Error() string {
+hashicorp__terraform:internal/getproviders/errors.go:90: func (err ErrProviderNotFound) Error() string {
+hashicorp__terraform:internal/getproviders/errors.go:113: func (err ErrRegistryProviderNotKnown) Error() string {
+hashicorp__terraform:internal/getproviders/errors.go:139: func (err ErrPlatformNotSupported) Error() string {
+hashicorp__terraform:internal/getproviders/errors.go:170: func (err ErrProtocolNotSupported) Error() string {
+hashicorp__terraform:internal/getproviders/errors.go:196: func (err ErrQueryFailed) Error() string {
+hashicorp__terraform:internal/getproviders/errors.go:227: func (err ErrRequestCanceled) Error() string {
+hashicorp__terraform:internal/getproviders/errors.go:241: func (err ErrLockConflictsWithConstraints) Error() string {
+hashicorp__terraform:internal/backend/remote-state/s3/backend_state.go:287: func (err bucketRegionError) Error() string {
+hashicorp__terraform:internal/backend/remote-state/s3/client.go:772: func (err badChecksumError) Error() string {
+hashicorp__terraform:internal/backend/remote/backend_state.go:45: func (e errorUnlockFailed) Error() string {
+hashicorp__terraform:internal/backend/remote/retry.go:32: func (e NonRetryableError) Error() string {
+hashicorp__terraform:internal/plans/planfile/reader.go:36: func (e *ErrUnusableLocalPlan) Error() string {
+hashicorp__terraform:internal/getmodules/moduleaddrs/detect_abs_filepath.go:61: func (e *MaybeRelativePathErr) Error() string {
+hashicorp__terraform:internal/cloud/state.go:447: func (e errorUnlockFailed) Error() string {
+hashicorp__terraform:internal/cloud/retry.go:32: func (e NonRetryableError) Error() string {
+hashicorp__terraform:internal/states/statemgr/locker.go:217: func (e *LockError) Error() string {
+hashicorp__terraform:internal/states/statefile/read.go:35: func (e *ErrUnusableState) Error() string {
+hashicorp__terraform:internal/rpcapi/handles.go:282: func (err newHandleError) Error() string {
+hashicorp__terraform:internal/rpcapi/handles.go:298: func (err closeHandleError) Error() string {
+hashicorp__terraform:internal/stacks/stackruntime/internal/stackeval/change_exec.go:188: func (err ErrChangeExecUnregistered) Error() string {
+hashicorp__terraform:internal/communicator/remote/command.go:94: func (e *ExitError) Error() string {
+hashicorp__terraform:internal/command/meta_backend_errors.go:25: func (e *errWrongWorkspaceForPlan) Error() string {
+hashicorp__terraform:internal/command/meta_backend_errors.go:57: func (e *errBackendLocalRead) Error() string {
+hashicorp__terraform:internal/command/meta_backend_errors.go:73: func (e *errBackendMigrateLocalDelete) Error() string {
+hashicorp__terraform:internal/command/meta_backend_errors.go:89: func (e *errBackendNewUnknown) Error() string {
+hashicorp__terraform:internal/command/meta_backend_errors.go:107: func (e *errBackendSavedUnknown) Error() string {
+hashicorp__terraform:internal/command/meta_backend_errors.go:126: func (e *errBackendClearSaved) Error() string {
+hashicorp__terraform:internal/command/meta_backend_errors.go:314: func (e *errBackendNoExistingWorkspaces) Error() string {
+hashicorp__terraform:internal/command/show.go:40: func (e *errUnusableDataMisc) Error() string {
+hashicorp__terraform:internal/command/cliconfig/credentials.go:494: func (err ErrUnwritableHostCredentials) Error() string {
+hashicorp__terraform:internal/command/meta_providers.go:603: func (errs providerPluginErrors) Error() string {
+hashicorp__terraform:internal/tfdiags/diagnostics.go:316: func (dae DiagnosticsAsError) Error() string {
+hashicorp__terraform:internal/tfdiags/diagnostics.go:365: func (woe NonFatalError) Error() string {
+hashicorp__terraform:internal/experiments/errors.go:16: func (e UnavailableError) Error() string {
+hashicorp__terraform:internal/experiments/errors.go:27: func (e ConcludedError) Error() string {
+hashicorp__terraform:internal/pluginshared/errors.go:39: func (e ErrQueryFailed) Error() string {
+hashicorp__terraform:internal/pluginshared/errors.go:50: func (e ErrCloudPluginNotVerified) Error() string {
+hashicorp__terraform:internal/providers/testing/state_store_mock.go:78: func (e StateNotFoundErr) Error() string {
+hashicorp__terraform:internal/registry/errors.go:17: func (e *errModuleNotFound) Error() string {
+hashicorp__terraform:internal/registry/errors.go:42: func (e *ServiceUnreachableError) Error() string {
+hashicorp__terraform:internal/promising/errors.go:11: func (err ErrUnresolved) Error() string {
+hashicorp__terraform:internal/promising/errors.go:26: func (err ErrSelfDependent) Error() string {
+hashicorp__terraform:internal/providercache/installer.go:807: func (err InstallerError) Error() string {
+ko-build__ko:pkg/internal/git/errors.go:62: func (e ErrDirty) Error() string {
+kubernetes-sigs__controller-runtime:tools/setup-envtest/env/exit.go:54: func (c *exitCode) Error() string {
+kubernetes-sigs__controller-runtime:pkg/controller/controllerutil/controllerutil.go:44: func (e *AlreadyOwnedError) Error() string {
+kubernetes-sigs__controller-runtime:pkg/reconcile/reconcile.go:187: func (te *terminalError) Error() string {
+kubernetes-sigs__controller-runtime:pkg/cache/internal/informers.go:57: func (r ErrResourceNotCached) Error() string {
+kubernetes-sigs__controller-runtime:pkg/cache/informer_cache.go:45: func (*ErrCacheNotStarted) Error() string {
+kubernetes-sigs__controller-runtime:pkg/client/apiutil/errors.go:36: func (e *ErrResourceDiscoveryFailed) Error() string {
+kubernetes-sigs__controller-runtime:pkg/webhook/conversion/conversion.go:330: func (e PartialImplementationError) Error() string {
+oras-project__oras:cmd/oras/internal/errors/errors.go:46: func (e UnsupportedFormatTypeError) Error() string {
+oras-project__oras:cmd/oras/internal/errors/errors.go:64: func (o *Error) Error() string {
+oras-project__oras-go:copyerror.go:77: func (e *CopyError) Error() string {
+oras-project__oras-go:registry/remote/errcode/errors.go:57: func (e Error) Error() string {
+oras-project__oras-go:registry/remote/errcode/errors.go:81: func (errs Errors) Error() string {

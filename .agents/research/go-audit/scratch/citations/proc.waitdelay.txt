@@ -1,0 +1,8 @@
+cli__cli:.github/skills/cli-exercise/tool/internal/preflight/check.go:63: command.WaitDelay = 5 * time.Second
+cli__cli:.github/skills/cli-exercise/tool/internal/evidence/render.go:116: command.WaitDelay = 5 * time.Second
+cli__cli:.github/skills/cli-exercise/tool/internal/evidence/render.go:363: command.WaitDelay = 5 * time.Second
+dominikh__go-tools:internal/xtools-internal/gocommand/invoke.go:234: cmd.WaitDelay = 30 * time.Second
+golang__tools:internal/gocommand/invoke.go:258: cmd.WaitDelay = 30 * time.Second
+golang__tools:cmd/bisect/go120.go:23: cmd.WaitDelay = 2 * time.Second
+goreleaser__goreleaser:internal/shell/shell.go:29: cmd.WaitDelay = time.Second
+goreleaser__goreleaser:internal/exec/exec.go:100: cmd.WaitDelay = time.Second

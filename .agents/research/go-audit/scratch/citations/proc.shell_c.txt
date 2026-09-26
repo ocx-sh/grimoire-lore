@@ -1,0 +1,5 @@
+containerd__containerd:cmd/ctr/commands/content/content.go:612: cmd := exec.Command("sh", "-c", editor+` "$@"`, "editor", tmp.Name()) //nolint:gosec // G702: the editor is intentionally a shell command.
+dominikh__go-tools:staticcheck/sa1005/sa1005.go:40: exec.Command("/bin/sh", "-c", "ls | grep Awesome")`,
+etcd-io__etcd:tools/etcd-dump-metrics/install_darwin.go:51: if err = exec.Command("bash", "-c", fmt.Sprintf("unzip %s -d %s", zipPath, dir)).Run(); err != nil {
+golang__tools:refactor/rename/mvpkg.go:344: cmd = exec.Command("sh", "-c", m.cmd)
+grpc__grpc-go:interop/grpclb_fallback/client_linux.go:124: if err := exec.Command("bash", "-c", command).Run(); err != nil {

@@ -1,0 +1,2 @@
+golang__tools:gopls/internal/server/general.go:286: runtimedebug.SetMemoryLimit(options.MemoryLimit)
+prometheus__prometheus:web/web.go:883: GOMEMLIMIT:     debug.SetMemoryLimit(-1),

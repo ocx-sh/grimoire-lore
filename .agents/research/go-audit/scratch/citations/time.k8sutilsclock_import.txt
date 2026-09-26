@@ -1,0 +1,4 @@
+aquasecurity__trivy:pkg/clock/clock.go:7: "k8s.io/utils/clock"
+aquasecurity__trivy:pkg/policy/policy.go:14: "k8s.io/utils/clock"
+kubernetes-sigs__controller-runtime:pkg/controller/priorityqueue/metrics.go:24: "k8s.io/utils/clock"
+kubernetes-sigs__controller-runtime:pkg/controller/priorityqueue/priorityqueue.go:27: "k8s.io/utils/clock"

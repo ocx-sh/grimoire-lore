@@ -1,0 +1,200 @@
+aquasecurity__trivy:pkg/iac/scanners/ansible/parser/template.go:85: case <-time.After(timeout):
+caddyserver__caddy:caddyconfig/httploader.go:158: case <-time.After(time.Millisecond * 500):
+charmbracelet__bubbletea:tty.go:100: case <-time.After(500 * time.Millisecond): //nolint:mnd
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/actions.go:719: case <-time.After(10 * time.Millisecond):
+cli__cli:.github/skills/cli-exercise/tool/internal/terminal/adapter.go:245: case <-time.After(5 * time.Second):
+cli__cli:.github/skills/cli-exercise/tool/internal/execution/cli.go:183: case <-time.After(10 * time.Millisecond):
+cli__cli:.github/skills/cli-exercise/tool/internal/execution/cli.go:409: case <-time.After(10 * time.Millisecond):
+cli__cli:internal/keyring/keyring.go:31: case <-time.After(60 * time.Second):
+cli__cli:internal/keyring/keyring.go:56: case <-time.After(60 * time.Second):
+cli__cli:internal/keyring/keyring.go:71: case <-time.After(60 * time.Second):
+cli__cli:pkg/cmd/skills/install/install.go:358: case <-time.After(visibilityWaitTimeout):
+cli__cli:pkg/cmd/skills/install/install.go:451: case <-time.After(visibilityWaitTimeout):
+cli__cli:pkg/cmd/skills/preview/preview.go:247: case <-time.After(visibilityWaitTimeout):
+cockroachdb__pebble:replay/replay.go:477: case <-time.After(time.Second):
+containerd__containerd:plugins/gc/scheduler.go:234: return time.After(d), &next
+containerd__containerd:internal/cri/server/sandbox_portforward_linux.go:119: case <-time.After(timeout):
+containerd__containerd:internal/cri/server/sandbox_portforward_windows.go:95: case <-time.After(timeout):
+containerd__containerd:internal/eventq/eventq.go:96: discardTime = time.After(time.Until(discardQueue[0].discardAt).Abs())
+containerd__containerd:internal/eventq/eventq.go:128: discardTime = time.After(time.Until(discardQueue[0].discardAt).Abs() + 10*time.Millisecond)
+containerd__containerd:core/sandbox/proxy/controller.go:157: case <-time.After(retryInterval * time.Millisecond):
+containerd__containerd:core/content/helpers.go:167: case <-time.After(time.Millisecond * time.Duration(randutil.Intn(retry))):
+containerd__containerd:core/transfer/local/progress.go:315: timeout := time.After(10 * time.Second)
+containerd__containerd:core/remotes/docker/resolver.go:840: case <-time.After(50 * time.Millisecond):
+containerd__containerd:pkg/dialer/dialer.go:53: <-time.After(10 * time.Millisecond)
+containerd__containerd:pkg/dialer/dialer.go:64: case <-time.After(timeout):
+containerd__containerd:pkg/shim/util_unix.go:198: timeoutCh := time.After(timeout)
+containerd__containerd:pkg/shim/shim.go:459: case <-time.After(5 * time.Second):
+containerd__containerd:pkg/sys/reaper/reaper_unix.go:77: case <-time.After(1 * time.Second):
+containerd__containerd:cmd/containerd-shim-runc-v2/process/io.go:396: case <-time.After(binaryIOProcTermTimeout):
+dominikh__go-tools:internal/xtools-internal/gocommand/invoke.go:444: case <-time.After(5 * time.Second):
+etcd-io__etcd:cache/cache.go:249: case <-time.After(10 * time.Millisecond):
+etcd-io__etcd:cache/cache.go:278: timeoutCh := time.After(c.cfg.WaitTimeout)
+etcd-io__etcd:cache/cache.go:326: case <-time.After(backoff):
+etcd-io__etcd:server/etcdserver/raft.go:212: case <-time.After(internalTimeout):
+etcd-io__etcd:server/etcdserver/server.go:502: case <-time.After(itv):
+etcd-io__etcd:server/etcdserver/server.go:1260: case <-time.After(interval):
+etcd-io__etcd:server/etcdserver/server.go:1338: case <-time.After(d):
+etcd-io__etcd:server/etcdserver/server.go:1868: case <-time.After(releaseDelayAfterSnapshot):
+etcd-io__etcd:server/etcdserver/server.go:2212: case <-time.After(monitorVersionInterval):
+etcd-io__etcd:server/etcdserver/server.go:2234: case <-time.After(monitorVersionInterval):
+etcd-io__etcd:server/etcdserver/server.go:2282: case <-time.After(t):
+etcd-io__etcd:server/etcdserver/server.go:2340: case <-time.After(t):
+etcd-io__etcd:server/etcdserver/v3_server.go:463: case <-time.After(applyTimeout):
+etcd-io__etcd:server/etcdserver/v3_server.go:791: case <-time.After(dur):
+etcd-io__etcd:server/etcdserver/api/v3rpc/interceptor.go:328: case <-time.After(election):
+etcd-io__etcd:server/etcdserver/api/rafthttp/probing_status.go:65: case <-time.After(interval):
+etcd-io__etcd:server/proxy/grpcproxy/watch_broadcast.go:164: case <-time.After(time.Second):
+etcd-io__etcd:server/proxy/grpcproxy/watcher.go:126: case <-time.After(50 * time.Millisecond):
+etcd-io__etcd:server/proxy/grpcproxy/lease.go:329: ticker = time.After(time.Duration(rp.TTL) * time.Second)
+etcd-io__etcd:server/proxy/grpcproxy/lease.go:341: timer := time.After(500 * time.Millisecond)
+etcd-io__etcd:server/proxy/tcpproxy/userspace.go:199: case <-time.After(tp.MonitorInterval):
+etcd-io__etcd:server/auth/simple_token.go:89: if nowtime.After(tokenendtime) {
+etcd-io__etcd:server/embed/doc.go:38: case <-time.After(60 * time.Second):
+etcd-io__etcd:server/storage/backend.go:91: case <-time.After(10 * time.Second):
+etcd-io__etcd:server/storage/mvcc/watchable_store.go:272: tickc = time.After(10 * time.Millisecond)
+etcd-io__etcd:server/storage/mvcc/kvstore_compaction.go:100: case <-time.After(s.cfg.CompactionSleepInterval):
+etcd-io__etcd:server/lease/lessor.go:781: if lt.time.After(now) /* lt.time: next checkpoint time */ {
+etcd-io__etcd:server/lease/leasehttp/http.go:86: case <-time.After(applyTimeout):
+etcd-io__etcd:server/lease/leasehttp/http.go:117: case <-time.After(applyTimeout):
+etcd-io__etcd:client/v3/watch.go:482: case <-time.After(closeSendErrTimeout):
+etcd-io__etcd:client/v3/lease.go:496: case <-time.After(retryConnWait):
+etcd-io__etcd:client/v3/lease.go:617: case <-time.After(retryConnWait):
+etcd-io__etcd:client/v3/leasing/cache.go:245: case <-time.After(time.Second):
+etcd-io__etcd:client/v3/client.go:216: case <-time.After(c.cfg.AutoSyncInterval):
+etcd-io__etcd:client/pkg/testutil/recorder.go:120: timeoutC = time.After(r.waitTimeout)
+etcd-io__etcd:client/pkg/testutil/recorder.go:134: case <-time.After(10 * time.Millisecond):
+etcd-io__etcd:client/pkg/testutil/testutil.go:73: timeoutCh := time.After(timeout)
+etcd-io__etcd:client/pkg/fileutil/purge.go:103: case <-time.After(interval):
+etcd-io__etcd:tests/antithesis/test-template/robustness/traffic/main.go:237: case <-time.After(t):
+etcd-io__etcd:tests/framework/integration/cluster.go:367: case <-time.After(time.Second + time.Duration(ElectionTicks)*framecfg.TickDuration + time.Second + rafthttp.ConnWriteTimeout):
+etcd-io__etcd:tests/framework/integration/cluster.go:1196: case <-time.After(2 * time.Second):
+etcd-io__etcd:tests/framework/testutils/helpters.go:60: case <-time.After(timeout):
+etcd-io__etcd:tests/framework/e2e/util.go:125: case <-time.After(d):
+etcd-io__etcd:tests/robustness/client/watch.go:95: case <-time.After(100 * time.Millisecond):
+etcd-io__etcd:tests/robustness/traffic/kubernetes.go:288: case <-time.After(param.Period):
+etcd-io__etcd:pkg/proxy/server.go:307: case <-time.After(lat):
+etcd-io__etcd:pkg/proxy/server.go:333: case <-time.After(s.retryInterval):
+etcd-io__etcd:pkg/proxy/server.go:539: case <-time.After(lat):
+etcd-io__etcd:pkg/expect/expect.go:195: case <-time.After(time.Millisecond * 10):
+etcd-io__etcd:pkg/netutil/netutil.go:139: case <-time.After(retryInterval):
+golang__tools:internal/gocommand/invoke.go:468: case <-time.After(5 * time.Second):
+golang__tools:internal/modindex/directories.go:114: return mtime.Before(start) || mtime.After(end)
+golang__tools:gopls/internal/server/diagnostics.go:226: case <-time.After(delay):
+golang__tools:gopls/internal/filewatcher/fsnotify_watcher.go:398: case <-time.After(delay):
+golang__tools:gopls/internal/filewatcher/fsnotify_watcher.go:535: case <-time.After(delay):
+golang__tools:gopls/internal/util/browser/browser.go:62: case <-time.After(timeout):
+golang__tools:gopls/internal/debug/flight.go:156: case <-time.After(timeout):
+golang__tools:gopls/internal/test/integration/fake/editor.go:199: case <-time.After(delay):
+golang__tools:gopls/internal/filecache/filecache.go:654: case <-time.After(maxPeriod):
+golang__tools:cmd/stress/stress.go:104: case <-time.After(*flagTimeout):
+golang__tools:cmd/stress/stress.go:114: case <-time.After(10 * time.Second):
+goreleaser__goreleaser:internal/client/github.go:159: case <-time.After(sleep):
+grpc__grpc-go:internal/testutils/fakegrpclb/server.go:242: case <-time.After(10 * time.Second):
+grpc__grpc-go:internal/testutils/roundrobin/roundrobin.go:102: for ; ctx.Err() == nil; <-time.After(time.Millisecond) {
+grpc__grpc-go:internal/testutils/roundrobin/roundrobin.go:199: <-time.After(time.Millisecond)
+grpc__grpc-go:stats/opentelemetry/internal/testutils/testutils.go:53: for ; ctx.Err() == nil; <-time.After(time.Millisecond) {
+grpc__grpc-go:interop/soak_tests.go:115: earliestNextStart := time.After(config.MinTimeBetweenRPCs)
+hashicorp__terraform:internal/moduletest/graph/wait.go:96: case <-time.After(2 * time.Second):
+hashicorp__terraform:internal/moduletest/graph/wait.go:102: case <-time.After(2 * time.Second):
+hashicorp__terraform:internal/moduletest/graph/wait.go:155: case <-time.After(2 * time.Second):
+hashicorp__terraform:internal/resources/ephemeral/ephemeral_resources.go:188: case <-time.After(10 * time.Second):
+hashicorp__terraform:internal/backend/remote/testing.go:62: case <-time.After(time.Minute):
+hashicorp__terraform:internal/backend/remote/backend_common.go:86: case <-time.After(backoff(backoffMin, backoffMax, i)):
+hashicorp__terraform:internal/backend/remote/backend_common.go:292: case <-time.After(backoff(backoffMin, backoffMax, i)):
+hashicorp__terraform:internal/backend/remote/backend_common.go:507: case <-time.After(runPollInterval):
+hashicorp__terraform:internal/backend/remote/retry.go:61: case <-time.After(delay):
+hashicorp__terraform:internal/backend/remote/backend_plan.go:286: case <-time.After(planConfigurationVersionsPollInterval):
+hashicorp__terraform:internal/backend/remote/backend_plan.go:358: case <-time.After(lockTimeout):
+hashicorp__terraform:internal/backend/remote/cloud_integration.go:27: case <-time.After(backoff(backoffMinInterval, backoffMaxInterval, i)):
+hashicorp__terraform:internal/cloud/testing.go:75: case <-time.After(time.Minute):
+hashicorp__terraform:internal/cloud/backend_common.go:60: case <-time.After(backoff(backoffMin, backoffMax, i)):
+hashicorp__terraform:internal/cloud/backend_common.go:242: case <-time.After(backoff(backoffMin, backoffMax, i)):
+hashicorp__terraform:internal/cloud/backend_common.go:457: case <-time.After(runPollInterval):
+hashicorp__terraform:internal/cloud/backend_common.go:633: case <-time.After(planConfigurationVersionsPollInterval):
+hashicorp__terraform:internal/cloud/backend_query.go:344: case <-time.After(backoff(backoffMin, backoffMax, i)):
+hashicorp__terraform:internal/cloud/retry.go:61: case <-time.After(delay):
+hashicorp__terraform:internal/cloud/backend_plan.go:240: case <-time.After(lockTimeout):
+hashicorp__terraform:internal/cloud/cloud_integration.go:52: case <-time.After(backoff(backoffMinInterval, backoffMaxInterval, i)):
+hashicorp__terraform:internal/states/statemgr/locker.go:105: case <-time.After(delay):
+hashicorp__terraform:internal/helper/slowmessage/slowmessage.go:30: case <-time.After(threshold):
+hashicorp__terraform:internal/communicator/communicator.go:111: case <-time.After(delay):
+hashicorp__terraform:internal/command/views/hook_ui.go:177: case <-time.After(h.periodicUiTimer):
+hashicorp__terraform:internal/command/test_cleanup.go:132: case <-time.After(waitTime):
+hashicorp__terraform:internal/command/test.go:240: case <-time.After(waitTime):
+hashicorp__terraform:internal/command/meta.go:552: case <-time.After(5 * time.Second):
+hashicorp__terraform:internal/policy/client.go:231: case <-time.After(callbackServiceTimeout):
+hashicorp__terraform:internal/dag/walk.go:305: case <-time.After(time.Second * 5):
+junegunn__fzf:src/terminal.go:5852: case <-time.After(blockDuration):
+junegunn__fzf:src/server.go:253: case <-time.After(channelTimeout):
+junegunn__fzf:src/tui/light_windows.go:169: timeout = time.After(timeoutInterval * time.Millisecond)
+kubernetes-sigs__controller-runtime:pkg/internal/testing/process/process.go:164: timedOut := time.After(ps.StartTimeout)
+kubernetes-sigs__controller-runtime:pkg/internal/testing/process/process.go:266: timedOut := time.After(ps.StopTimeout)
+prometheus__prometheus:tsdb/head_append.go:130: antiDeadlockTimeout := time.After(500 * time.Millisecond)
+prometheus__prometheus:tsdb/agent/db.go:697: case <-time.After(db.opts.TruncateFrequency):
+prometheus__prometheus:tsdb/wlog/watcher.go:294: case <-time.After(5 * time.Second):
+prometheus__prometheus:tsdb/db.go:1291: case <-time.After(backoff):
+prometheus__prometheus:tsdb/db.go:1295: case <-time.After(db.opts.BlockReloadInterval):
+prometheus__prometheus:discovery/kubernetes/kubernetes.go:716: case <-time.After(interval):
+prometheus__prometheus:discovery/manager.go:431: case <-time.After(b.NextBackOff()):
+prometheus__prometheus:scrape/scrape.go:1427: case <-time.After(offset):
+prometheus__prometheus:scrape/scrape.go:1696: case <-time.After(interval / 10):
+prometheus__prometheus:storage/remote/azuread/azuread.go:562: if !deltaExpirytime.After(time.Now().UTC()) {
+prometheus__prometheus:storage/remote/metadata_watcher.go:105: case <-time.After(mw.deadline):
+prometheus__prometheus:storage/remote/queue_manager.go:1341: case <-time.After(s.qm.flushDeadline):
+prometheus__prometheus:storage/remote/queue_manager.go:1504: case <-time.After(time.Second):
+prometheus__prometheus:storage/remote/queue_manager.go:2097: case <-time.After(time.Duration(sleepDuration)):
+prometheus__prometheus:rules/group.go:214: case <-time.After(time.Until(evalTimestamp)):
+prometheus__prometheus:rules/group.go:249: case <-time.After(2 * g.interval):
+regclient__regclient:internal/reghttp/http.go:368: case <-time.After(sleepTime):
+regclient__regclient:internal/retryable/retryable.go:436: case <-time.After(sleepTime):
+regclient__regclient:cmd/regbot/sandbox/image.go:368: case <-time.After(freq):
+regclient__regclient:cmd/regsync/root.go:777: case <-time.After(s.RateLimit.Retry):
+restic__restic:internal/backend/rclone/backend.go:334: case <-time.After(waitForExit):
+restic__restic:internal/backend/s3/s3.go:592: case <-time.After(1 * time.Minute):
+restic__restic:internal/backend/sftp/sftp.go:621: case <-time.After(closeTimeout):
+restic__restic:internal/repository/lock.go:57: retryTimeout := time.After(retryLock)
+restic__restic:internal/repository/lock.go:72: retrySleepCh := time.After(retrySleep)
+stretchr__testify:mock/mock.go:157: //	Mock.On("MyMethod", arg1, arg2).WaitUntil(time.After(time.Second))
+syncthing__syncthing:lib/syncthing/syncthing.go:343: case <-time.After(10 * time.Second):
+syncthing__syncthing:lib/model/indexhandler.go:230: case <-time.After(250 * time.Millisecond):
+syncthing__syncthing:lib/dialer/public.go:174: case <-time.After(sleep):
+syncthing__syncthing:lib/connections/relay_listen.go:117: case <-time.After(10 * time.Second):
+syncthing__syncthing:lib/stun/stun.go:228: case <-time.After(sleepFor):
+syncthing__syncthing:lib/geoip/geoip.go:75: case <-time.After(p.refreshInterval):
+syncthing__syncthing:cmd/syncthing/monitor.go:561: case <-time.After(panicUploadNoticeWait):
+syncthing__syncthing:cmd/syncthing/main.go:1093: case <-time.After(m.startDelay):
+syncthing__syncthing:cmd/strelaysrv/main.go:232: case <-time.After(timeout):
+syncthing__syncthing:cmd/strelaysrv/session.go:137: timedout := time.After(messageTimeout)
+syncthing__syncthing:cmd/strelaysrv/listener.go:207: case <-time.After(time.Second):
+tailscale__tailscale:gokrazy/build/build.go:511: case <-time.After(5 * time.Second):
+tailscale__tailscale:logtail/example/logreprocess/logreprocess.go:34: <-time.After(*timeout)
+tailscale__tailscale:kube/services/services.go:50: case <-time.After(20 * time.Second):
+tailscale__tailscale:kube/services/services.go:97: case <-time.After(20 * time.Second):
+tailscale__tailscale:wgengine/router/osrouter/ifconfig_windows.go:293: case <-time.After(time.Second):
+tailscale__tailscale:prober/prober.go:321: case <-time.After(-1 * p.interval):
+tailscale__tailscale:util/eventbus/eventbustest/eventbustest.go:102: case <-time.After(100 * time.Second): // "indefinitely", to advance a synctest clock
+tailscale__tailscale:util/eventbus/eventbustest/eventbustest.go:126: case <-time.After(100 * time.Second): // "indefinitely", to advance a synctest clock
+tailscale__tailscale:util/eventbus/eventbustest/eventbustest.go:149: case <-time.After(100 * time.Second): // "indefinitely", to advance a synctest clock
+tailscale__tailscale:util/syspolicy/rsop/resultant_policy.go:407: timeoutCh = time.After(policyReloadMinDelay)
+tailscale__tailscale:util/syspolicy/rsop/resultant_policy.go:409: delayCh = time.After(policyReloadMaxDelay)
+tailscale__tailscale:tsnet/tsnet.go:1186: case <-time.After(5 * time.Second):
+tailscale__tailscale:tsnet/tsnet.go:2363: case <-time.After(time.Second):
+tailscale__tailscale:tstest/integration/integration.go:912: case <-time.After(30 * time.Second):
+tailscale__tailscale:tstest/natlab/vnet/vnet.go:2960: case <-time.After(time.Second):
+tailscale__tailscale:tstest/natlab/vmtest/vmtest.go:2339: case <-time.After(500 * time.Millisecond):
+tailscale__tailscale:tstest/natlab/vmtest/qemu.go:493: case <-time.After(100 * time.Millisecond):
+tailscale__tailscale:tstest/natlab/vmtest/qemu.go:539: case <-time.After(100 * time.Millisecond):
+tailscale__tailscale:tstest/natlab/vmtest/tailmac.go:276: case <-time.After(60 * time.Second):
+tailscale__tailscale:cmd/k8s-operator/e2e/setup.go:847: case <-time.After(time.Second):
+tailscale__tailscale:cmd/k8s-operator/e2e/setup.go:996: case <-time.After(10 * time.Second):
+tailscale__tailscale:cmd/fbstatus/fbstatus.go:171: case <-time.After(2 * time.Second):
+tailscale__tailscale:cmd/fbstatus/fbstatus.go:517: case <-time.After(5 * time.Second):
+tailscale__tailscale:cmd/tailscaled/tailscaled.go:608: case <-time.After(d):
+tailscale__tailscale:cmd/tailscale/cli/cert.go:187: case <-time.After(1 * time.Second):
+tailscale__tailscale:cmd/tta/tta.go:616: case <-time.After(2 * time.Second):
+tailscale__tailscale:cmd/stunstamp/stunstamp.go:1019: case <-time.After(time.Second * 10): // give goroutine some time to flush
+tailscale__tailscale:net/tstun/wrap.go:869: case <-time.After(1 * time.Second):
+tailscale__tailscale:net/netmon/netmon.go:627: case <-time.After(1000 * time.Millisecond):
+tailscale__tailscale:safesocket/safesocket.go:72: case <-time.After(250 * time.Millisecond):
+tailscale__tailscale:logpolicy/logpolicy.go:1000: case <-time.After(500 * time.Millisecond):

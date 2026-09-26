@@ -1,0 +1,2343 @@
+{
+ "results": [
+  {
+   "set": "go-quality index + language.md, errors.md, concurrency.md (review-quality-a)",
+   "files_read": [
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.claude/skills/research-lang/references/validation.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.claude/skills/research-lang/references/rule-distillation.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-topic-map.md (Authoring notes N-1..N-14; wave 2/3/4 (e) contradiction lists; M-K-05 row; wave-4 harvest notes)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-quality.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-quality/language.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-quality/errors.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-quality/concurrency.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-language.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-errors.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-concurrency.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-gates.md (targeted greps: toolchain header, errorlint 0/51, usetesting, fatcontext, exitAfterDefer, GO-GATE-09/15/18)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-modules/gates.md (Dates and Floors, gate block, GO-GATE-01)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/java-quality.md (head)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/java-quality/concurrency.md (head)",
+    "hoisted rows: io.md GO-IO-11, network.md GO-NET-06, api-design.md GO-API-18/20, testing.md GO-TEST-02, cli-contract.md GO-CLI-02/03/06/21"
+   ],
+   "findings": [
+    {
+     "file": "rules/go-quality/language.md",
+     "line": 156,
+     "severity": "blocker",
+     "kind": "verification-dishonest",
+     "finding": "GO-LANG-17's `godebug-parity` block (lines 158-165) runs `go list -f '{{.DefaultGODEBUG}}' .`, which prints an empty string for any non-main package. A library member, or a member whose `main` lives under `cmd/`, gives `ws=\"\"` and `off=\"\"` and passes silently even when go.work and the member disagree. Planted in review-quality-a/godebug/bad (member `godebug default=go1.21`, go.work with none, root package `m`): empty output, exit 0. It went red only when the member root was `package main` (godebug-main/bad). The cell's 'empty output is the pass' is false for the common library shape.",
+     "fix": "Replace lines 160-164 of the block with:\n```\ngo list -m -f '{{.Dir}}' | while read -r d; do\n  ws=$(go -C \"$d\" list -test -f '{{if eq .Name \"main\"}}{{.ImportPath}} {{.DefaultGODEBUG}}{{end}}' ./...)\n  off=$(GOWORK=off go -C \"$d\" list -test -f '{{if eq .Name \"main\"}}{{.ImportPath}} {{.DefaultGODEBUG}}{{end}}' ./...)\n  [ \"$ws\" = \"$off\" ] || echo \"godebug differs: $d\"\ndone\n```\nIn the GO-LANG-17 verification cell, append: \"It compares every main and test-main package under each member, so a library member is covered through its tests (watched 2026-09-26 on Go 1.27.1: red on a library member with a test and on a main member, empty on the twin).\""
+    },
+    {
+     "file": "rules/go-quality/language.md",
+     "line": 143,
+     "severity": "fix",
+     "kind": "notes-violation",
+     "finding": "GO-LANG-24 (generic-interface constraints) and GO-LANG-25 (iterator naming), both SHOULD reading heuristics in the go-language.md ruleset, are dropped with no trace. N-2 says to draw from the Ruleset, and N-6 does not list them as drops. The IDs appear nowhere under rules/.",
+     "fix": "Insert after the GO-LANG-21 row (line 143):\n| GO-LANG-24 | Constrain a generic interface's own type parameter with `any`. Put a stronger constraint (`comparable`, `cmp.Ordered`, a self-referential method constraint) on the concrete implementations, unless every implementation needs it. | An over-constrained interface forecloses implementations that do not need the extra power. The Go blog's generic-interfaces post says to leave stronger constraints to implementations. | For each generic interface, compare its constraint with what every in-module implementation uses. | SHOULD |\n| GO-LANG-25 | Name iterator-returning functions by the `iter` convention: `All` for the single natural full sequence, `Backward` for reverse order, `Keys` or `Values` for map-like projections, and a domain name (`Preorder`) when several sequences exist and none is the default. Put configuration on the arguments (`Scan(min, max)`), never on a family of name variants. | The stdlib (`slices.All`, `maps.Keys`, go 1.23) sets the reader's expectation, and an off-convention name hides which sequence is the default. | `go doc` review of each exported iterator-returning name against the convention. | SHOULD |\nOn line 135, replace \"except GO-LANG-14's and GO-LANG-26's, which are design judgments\" with \"except GO-LANG-14's, GO-LANG-24's, GO-LANG-25's and GO-LANG-26's, which are design judgments\"."
+    },
+    {
+     "file": "rules/go-quality/language.md",
+     "line": 69,
+     "severity": "fix",
+     "kind": "verification-dishonest",
+     "finding": "The section says golangci-lint's pass is empty output. golangci-lint v2.14.0 prints `0 issues.` on a pass (observed in every review run). The empty-output clause is false, and it contradicts errors.md and concurrency.md, which both say `0 issues.` is the pass.",
+     "fix": "Replace \"reports all four rows. Empty\\noutput is the pass.\" with \"reports all four rows. Exit 0 with `0 issues.` is the pass, and GO-LANG-05's grep passes on empty output.\""
+    },
+    {
+     "file": "rules/go-quality/language.md",
+     "line": 55,
+     "severity": "fix",
+     "kind": "notes-violation",
+     "finding": "N-8 requires the GO-LANG-04 row to cite x/tools v0.50.0 `toonew.go:28-29`. The row cites `internal/typesinternal/toonew.go` with no line range. The mechanism is correct: golangci govet reported `0 issues.` on the planted json/v2 import, bare `go vet` exited 1, and a go1.26.0 `go build` failed with the quoted `build constraints exclude all Go files`.",
+     "fix": "Replace \"(`internal/typesinternal/toonew.go`, read 2026-09-26)\" with \"(`internal/typesinternal/toonew.go:28-29`, read 2026-09-26)\"."
+    },
+    {
+     "file": "rules/go-quality/concurrency.md",
+     "line": 159,
+     "severity": "fix",
+     "kind": "contradiction",
+     "finding": "GO-CONC-17 calls the pinned timeout sentinel \"an exported sentinel such as `ErrTimeout`, renamed per project\". GO-ERR-20 (errors.md:186) and GO-API-20 pin the default name `ErrOcxTimeout`. So the pinned default has two names across the set.",
+     "fix": "Replace \"(its `Is` target is an exported sentinel such as `ErrTimeout`, renamed per project)\" with \"(its `Is` target is the exported sentinel, pinned default `ErrOcxTimeout`, which the adopter renames once)\"."
+    },
+    {
+     "file": "rules/go-quality.md",
+     "line": 84,
+     "severity": "fix",
+     "kind": "contradiction",
+     "finding": "Non-negotiable 8 says `t.Fatal`, `t.FailNow` and `require.*` \"run only on the test goroutine, including inside `wg.Go` and `errgroup.Go` closures\". Read literally, this permits them inside those closures, which is the opposite of GO-TEST-01, which confines them to the test goroutine.",
+     "fix": "Replace \"run only on the test goroutine, including inside `wg.Go` and `errgroup.Go` closures, which no tool checks.\" with \"run only on the test goroutine, never inside a `go` statement or a `wg.Go` or `errgroup.Go` closure, and no tool checks the closure case.\""
+    },
+    {
+     "file": "rules/go-quality/errors.md",
+     "line": 185,
+     "severity": "fix",
+     "kind": "contradiction",
+     "finding": "GO-ERR-19's rationale teaches `defer func() { _ = os.Remove(p) }() // best-effort temp cleanup` as the compliant form. This is an unconditional deferred temp removal, which GO-IO-12 forbids in any function that renames. The errcheck fact is true (re-measured: `defer os.Remove(p)` red, the `_ =` twin `0 issues.`), but no consolidation carries it, and an agent writing an atomic-write helper will copy it.",
+     "fix": "Replace \"its compliant form is `defer func() { _ = os.Remove(p) }() // best-effort temp cleanup` (golangci-lint v2.14.0, measured 2026-09-26)\" with \"its compliant form is `defer func() { _ = os.Remove(p) }() // best-effort temp cleanup` (golangci-lint v2.14.0, measured 2026-09-26), never in a function that renames the file (GO-IO-12)\"."
+    },
+    {
+     "file": "rules/go-quality/errors.md",
+     "line": 31,
+     "severity": "fix",
+     "kind": "era-unlabelled",
+     "finding": "Dates and Floors labels `errors.Join` and `errors.AsType` \"toolchain-gated\". N-9 and concurrency.md:32 label stdlib API floors \"go-line gated\" (stdversion), and language.md:35 says \"never compiler-enforced\". So one set uses two opposite gate labels for the same class of floor.",
+     "fix": "Replace lines 29-32 with:\n- **`%w`** is go1.13 and several `%w` in one call is go1.20, both toolchain-gated `fmt` behaviour.\n- **`errors.Join`** (go1.20) and **`errors.AsType`** (go1.26) are go-line gated but never compiler-enforced: a `go 1.25` module compiles `AsType` on 1.27, and only `go vet` `stdversion` sees the mismatch, not staticcheck."
+    },
+    {
+     "file": "rules/go-quality/errors.md",
+     "line": 55,
+     "severity": "fix",
+     "kind": "unsupported-claim",
+     "finding": "GO-ERR-02's rationale says the corpus has an `err == io.EOF` \"on a JSON decoder whose errors are wrapped\". go-errors.md records only \"`err == io.EOF` on a JSON decoder\" (trivy magefiles/vex.go:304). No consolidation supports the \"whose errors are wrapped\" clause.",
+     "fix": "Replace \"including one on a JSON decoder whose errors are wrapped.\" with \"including one on a JSON decoder.\""
+    },
+    {
+     "file": "rules/go-quality/errors.md",
+     "line": 39,
+     "severity": "fix",
+     "kind": "verification-dishonest",
+     "finding": "The line says \"every gate was watched red and green\". GO-ERR-05's SA4023 layer has no clean green: the consolidation says \"Watched green: none clean\". This overclaims watch status for a MUST row.",
+     "fix": "Replace \"and every gate was watched red and green.\" with \"and every gate was watched red and green except GO-ERR-05's SA4023 layer, whose only green is its `_test.go` blind spot.\""
+    },
+    {
+     "file": "rules/go-quality/concurrency.md",
+     "line": 60,
+     "severity": "nit",
+     "kind": "style",
+     "finding": "A doubled blank line sits between the GO-CONC-05 table and `## The Vet Step`.",
+     "fix": "Delete line 60 (the second empty line)."
+    },
+    {
+     "file": "rules/go-quality.md",
+     "line": 162,
+     "severity": "nit",
+     "kind": "deletion-candidate",
+     "finding": "Deletion test: \"Keep the Block list short enough that a blocked change is unusual. A rule set where everything blocks teaches the reader to negotiate with all of it.\" is authoring advice. A coding agent makes no different edit with or without it.",
+     "fix": "Delete lines 162-163."
+    },
+    {
+     "file": "rules/go-quality.md",
+     "line": 124,
+     "severity": "nit",
+     "kind": "deletion-candidate",
+     "finding": "Deletion test: \"One level deep: these files do not point at each other.\" describes the artifact's authoring constraint. No reader decision depends on it.",
+     "fix": "Replace \"under. One level deep: these files do not point at each other.\" with \"under.\""
+    },
+    {
+     "file": "rules/go-quality.md",
+     "line": 98,
+     "severity": "nit",
+     "kind": "deletion-candidate",
+     "finding": "Deletion test: \"Five cross-cutting rules that belong to no single depth file. Everything else is defined in a depth file and only cited here.\" repeats what the section heading and the routing table already say.",
+     "fix": "Replace lines 98-100 with \"The commands these rules name are in the block under the table, run from the repository root.\""
+    }
+   ],
+   "verifications_exercised": [
+    {
+     "id": "GO-ERR-09",
+     "went_red": true,
+     "went_green": true,
+     "note": "Anchored grep run verbatim. On `presets: [comments, std-error-handling]` it printed the hit with exit 0. On a compliant config whose comment names the preset it printed nothing with exit 1. The empty-output clause is true."
+    },
+    {
+     "id": "GO-ERR-14",
+     "went_red": true,
+     "went_green": true,
+     "note": "Six-pattern grep. It hit both `strings.Contains(err.Error(), ...)` and a compiled `re.MatchString(err.Error())` with exit 0. The `errors.Is` twin gave empty output and exit 1."
+    },
+    {
+     "id": "GO-LANG-05",
+     "went_red": true,
+     "went_green": true,
+     "note": "`-SA1019` grep matched both `.golangci.yml` and `staticcheck.conf` with exit 0. The `[\"all\"]` twin gave empty output and exit 1."
+    },
+    {
+     "id": "GO-LANG-16",
+     "went_red": true,
+     "went_green": true,
+     "note": "C9 grep caught `nojsonv2` in a Makefile, `nogreenteagc` in a YAML env map, and `jsonv2,nogreenteagc` in a Dockerfile ENV. The opt-in-only twin gave empty output and exit 1."
+    },
+    {
+     "id": "GO-CONC-03",
+     "went_red": true,
+     "went_green": true,
+     "note": "Grep fallback gave 3 hits on http.Get, http.NewRequest and net.Dial. The NewRequestWithContext/DialContext twin gave empty output and exit 1, as the cell claims."
+    },
+    {
+     "id": "GO-CONC-11 goleak-coverage",
+     "went_red": true,
+     "went_green": true,
+     "note": "Bash block run verbatim. It printed ./a (named-function `go worker()`) and ./b (`iter.Pull`), and skipped ./c, which has VerifyTestMain. The twin with TestMain everywhere gave empty output."
+    },
+    {
+     "id": "GO-CONC-06/07/08 vet",
+     "went_red": true,
+     "went_green": true,
+     "note": "`go vet ./...` reported copylocks, lostcancel and waitgroup with exit 1, and the twin exited 0. golangci govet at defaults also reported all three (exit 1 / `0 issues.`), which confirms the 'golangci govet at its defaults runs all three' claim."
+    },
+    {
+     "id": "GO-LANG-04",
+     "went_red": true,
+     "went_green": true,
+     "note": "`go vet` on a go 1.26.0 module importing encoding/json/v2 gave `json.Marshal requires go1.27 or later`, exit 1, and the v1 twin exited 0. golangci govet gave `0 issues.` (blind, as stated). The go1.26.0 toolchain `go build` failed with the quoted `build constraints exclude all Go files`."
+    },
+    {
+     "id": "GO-CORE-01 weaken-check + gate-files-touched",
+     "went_red": true,
+     "went_green": true,
+     "note": "Git fixture with origin/main as base. It printed the `//nolint:errcheck` line, the `t.Skip` line and `.golangci.yml`. The functional-only twin gave empty output for both."
+    },
+    {
+     "id": "GO-CORE-05 generated-touch",
+     "went_red": true,
+     "went_green": true,
+     "note": "A hand edit to a file whose `Code generated ... DO NOT EDIT.` marker sits on line 6 was printed. The twin that edits only non-generated code gave empty output (xargs exit 123, as grep found nothing)."
+    },
+    {
+     "id": "GO-GATE-01 step 10 / GO-LANG-08 gopls-yield",
+     "went_red": true,
+     "went_green": true,
+     "note": "Both the index `test -z` form (exit 1 / 0) and language.md's find|gopls|grep form (hit with exit 0 / empty with exit 1) were run with gopls v0.23.0 on the unchecked-yield loop and on the checked twin."
+    },
+    {
+     "id": "GO-LANG-14",
+     "went_red": true,
+     "went_green": false,
+     "note": "`NAME=contains; grep ... \"\\b$NAME(\"` printed the single call site and did not match the generic declaration `func contains[T comparable](`. No two-call twin was planted."
+    },
+    {
+     "id": "GO-LANG-17 godebug-parity",
+     "went_red": false,
+     "went_green": true,
+     "note": "It stayed silent on a library member whose godebug differs from go.work, because `DefaultGODEBUG` is empty for non-main packages. It went red only when the member root was package main. This is the blocker. A `list -test ... ./...` main-filtered form went red on both shapes and green on the twin."
+    },
+    {
+     "id": "snippets (go vet)",
+     "went_red": true,
+     "went_green": true,
+     "note": "`go vet` exited 0 on go 1.26.0 for BoxMap, the math/rand/v2 PCG snippet, the errors.md `save` named-return join, and the concurrency.md semaphore + wg.Go + errors.Join snippet. The GO-LANG-23 wrong snippet failed at go 1.26.0 (`generic method requires go1.27 or later`) and compiled at go 1.27.0."
+    },
+    {
+     "id": "GO-ERR-19 errcheck claim",
+     "went_red": true,
+     "went_green": true,
+     "note": "errcheck flagged `defer os.Remove(p)` with exit 1, and the `_ =` closure twin gave `0 issues.`. The claim is true but absent from the consolidations."
+    }
+   ],
+   "unresolved_ids": [],
+   "trigger_evals": [],
+   "verdict": "fix-then-ship"
+  },
+  {
+   "set": "go-quality depth files: api-design.md, testing.md, cli-contract.md (GO-API, GO-TEST, GO-CLI)",
+   "files_read": [
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.claude/skills/research-lang/references/validation.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.claude/skills/research-lang/references/rule-distillation.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-topic-map.md (Authoring notes N-1..N-14; Wave 2/3/4 (e) contradiction lists; wave-4 (b) and (d))",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-quality/api-design.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-quality/testing.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-quality/cli-contract.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-api.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-testing.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-cli.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/java-quality/concurrency.md (head)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-quality.md (head, routing rows)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-modules/golangci/lib-sdk.golangci.yml",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-modules/golangci/cli.golangci.yml (settings)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-topic-map/scratch/author-receipt.json (go-diagnose execwait note)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/rust-quality/cli-contract.md (CLI-04/08/12/16 rows)"
+   ],
+   "findings": [
+    {
+     "file": "rules/go-quality/testing.md",
+     "line": 179,
+     "severity": "blocker",
+     "kind": "contradiction",
+     "finding": "GO-TEST-18 tells the reader to call GO-CLI's `run(args, stdin, stdout, stderr) int`, but GO-CLI-02 (MUST) pins `run(os.Args[1:], os.Stdout, os.Stderr)` returning an `ExitCode` (three params, typed result), and cli-contract.md:52 tests `run(args, &out, &errb)`. Two rows answer the question of run's signature two ways, and no topic-map resolution covers it.",
+     "fix": "In the GO-TEST-18 Rule cell replace \"call `GO-CLI`'s `run(args, stdin, stdout, stderr) int` with `bytes.Buffer`s and assert exit code, stdout and stderr for every flag and error path.\" with \"call `GO-CLI-02`'s `run(args, stdout, stderr)` with `bytes.Buffer`s and assert the returned `ExitCode`, stdout and stderr for every flag and error path.\""
+    },
+    {
+     "file": "rules/go-quality/testing.md",
+     "line": 88,
+     "severity": "blocker",
+     "kind": "unsupported-claim",
+     "finding": "The GO-TEST-06 (MUST) cell says \"`usetesting` is silent below `go 1.24`\". The consolidation says only the 1.24-gated checks are disabled, and a planted go 1.23 module under lib-sdk.golangci.yml still got `os.MkdirTemp` and `os.Setenv` findings (2 issues). Only the context check went silent.",
+     "fix": "Replace \"`usetesting` is silent below `go 1.24`.\" with \"Below `go 1.24`, `usetesting` skips only its 1.24-gated checks (`context-background`, `context-todo`, `os-chdir`) and still reports `os.MkdirTemp` and `os.Setenv`.\""
+    },
+    {
+     "file": "rules/go-quality/cli-contract.md",
+     "line": 60,
+     "severity": "fix",
+     "kind": "verification-dishonest",
+     "finding": "The GO-CLI-20 deprecation grep matches the struct-literal `Deprecated: \"` and `Mark*Deprecated(`. It stays green (exit 1) on the assignment form `old.Deprecated = \"use new\"`, which is equally cobra's deprecation machinery. Planted in fixtures/review-quality-b/c20/assign.",
+     "fix": "Replace the grep in the GO-CLI-20 Verification cell with: `grep -rn --include='*.go' -e 'Deprecated: *\"' -e '\\.Deprecated *= *\"' -e 'MarkDeprecated(' -e 'MarkShorthandDeprecated(' -e 'MarkPersistentFlagDeprecated(' .` (watched: hits the assignment, stays empty on the doc-comment twin)."
+    },
+    {
+     "file": "rules/go-quality/api-design.md",
+     "line": 109,
+     "severity": "fix",
+     "kind": "verification-dishonest",
+     "finding": "The GO-API-11 misspelled-prefix grep (`-i -e '^\\s*//\\s*deprecated'`) goes red on any doc comment for an identifier whose name starts with Deprecated, such as `// DeprecatedCount counts ...`, so \"empty output is the pass\" fails on compliant code. Planted in fixtures/review-quality-b/api11/fp.",
+     "fix": "Replace line 109 with: `grep -rn -i --include='*.go' -e '^\\s*//\\s*deprecated\\b' . | grep -v -e '// Deprecated: '` (watched: still 3 hits on deprecated:, DEPRECATED: and Deprecated -, and empty on the twin and the DeprecatedCount probe)."
+    },
+    {
+     "file": "rules/go-quality/api-design.md",
+     "line": 35,
+     "severity": "fix",
+     "kind": "unsupported-claim",
+     "finding": "The Floors bullet says the `go` line gates `//go:fix inline`, and line 40-41 says a lower line loses GO-API-11's inliner. The consolidation gives only a go1.26 floor. Measured: under go1.27.1, `go fix -diff ./...` inlined an `Old()` call and exited 1 in a `go 1.22` module, the same as at `go 1.27`. The directive is toolchain-gated.",
+     "fix": "Replace lines 35-41 with: \"- **Floors.** `any` (go 1.18), doc-comment syntax (go 1.19), `slices.Clone`, `maps.Clone` and `context.WithTimeoutCause` (go 1.21), and `errors.AsType` (go 1.26) are gated by the `go` line. `//go:fix inline` (go 1.26) and a `-coverpkg` profile listing untested packages (go 1.22) are gated by the toolchain. / - **Pinned default:** libraries and the SDK declare `go 1.26.0`, so every floor here is met. The adopter may override it, and a lower line loses the `errors.AsType` test form.\""
+    },
+    {
+     "file": "rules/go-quality/testing.md",
+     "line": 114,
+     "severity": "fix",
+     "kind": "notes-violation",
+     "finding": "GO-TEST-12 reverses its execwait clause. The consolidation and wave-2 (e) 17 say GO-TEST-12 keeps \"leak-freedom checked under GODEBUG=execwait=2\". The draft says execwait=2 cannot prove it on 1.27.1, citing only the go-diagnose author receipt. The draft is correct: in fixtures/review-quality-b/execwait, CommandContext stayed silent and exec.Command panicked. observability.md, io.md and go-diagnose already follow it. The departure is simply not recorded in the binding notes.",
+     "fix": "No change to testing.md. Add to go-topic-map.md, under Wave 4 (e), item \"19. **GO-TEST-12's execwait clause (supersedes wave-2 (e) 17).** On go1.27.1, `GODEBUG=execwait=2` never fires for an `exec.CommandContext` `Cmd` (its `Cancel` closure refers back to the `Cmd`), and fires only after a GC collects the `Cmd`. GO-TEST-12 reads leak-freedom (every `Start` reaches `Wait`, GO-IO-01), and GO-OBS-07 calls execwait a diagnosis aid with blind spots.\""
+    },
+    {
+     "file": "rules/go-quality/cli-contract.md",
+     "line": 158,
+     "severity": "fix",
+     "kind": "portability",
+     "finding": "The four carried-over Rust stream rules cite no IDs. They reference \"the pinned JSON envelope\", which nothing in the Go set defines, and a Go-only adopter does not have rust-quality installed. The consolidation said to point at the Rust IDs. The paragraph also hedges (\"about 100 ms\").",
+     "fix": "Replace line 158 with: \"Four stream rules carry over unchanged from the Rust CLI contract (`rust-quality` CLI-04, CLI-08, CLI-12, CLI-16) and get no Go ID. Structured errors (CLI-04, MUST) print `{\\\"error\\\": {\\\"code\\\": slug, \\\"exit\\\": int, \\\"message\\\": text}}` on stdout, with slugs from GO-CLI-01's switch. Progress bars (CLI-08, MUST) draw to stderr and are suppressed when it is not a TTY, when `CI` is set, or under a machine-output flag. Help text (CLI-12) is ASCII, short, and free of internal references. A command doing network I/O prints a status line within 100 ms (CLI-16, CONSIDER).\""
+    },
+    {
+     "file": "rules/go-quality/testing.md",
+     "line": 117,
+     "severity": "fix",
+     "kind": "trigger",
+     "finding": "GO-TEST-15 (MUST) governs workflow YAML (`-fuzz` without `-fuzztime`), and its pinned default tells the reader to create a scheduled fuzz workflow. The `**/*.go` glob never loads this file on a workflow edit, and go-quality.md:138 routes \"a CI workflow that runs the gate\" to go-modules, which does not carry GO-TEST-15.",
+     "fix": "In rules/go-quality.md line 132, change the routing cell to: \"Writing or reviewing a test, a fuzz target, a benchmark, a golden file, a helper process that fakes a CLI, a coverage gate, or a CI workflow that runs `go test -fuzz`\"."
+    },
+    {
+     "file": "rules/go-quality/testing.md",
+     "line": 180,
+     "severity": "fix",
+     "kind": "style",
+     "finding": "The GO-TEST-19 verification cell has a grep with no statement of what empty output means (N-10).",
+     "fix": "After \"every hit is rewritten by hand or not at all.\" insert \"Empty output means no benchmark needs a hand rewrite.\""
+    },
+    {
+     "file": "rules/go-quality/api-design.md",
+     "line": 116,
+     "severity": "fix",
+     "kind": "notes-violation",
+     "finding": "Three pinned defaults lack N-5's \"the adopter may override\" clause: GO-API-10's v0 policy (line 116), GO-API-12's 100% (line 127) and GO-API-01's one-package layout (line 64). Line 42-45's blanket covers only the ocx names.",
+     "fix": "Append \" (default, the adopter may override)\" to the end of each sentence beginning \"**Pinned default:**\" in the GO-API-01, GO-API-10 and GO-API-12 rows."
+    },
+    {
+     "file": "rules/go-quality/testing.md",
+     "line": 86,
+     "severity": "nit",
+     "kind": "verification-dishonest",
+     "finding": "GO-TEST-04's rule is per test package, but its command is per file. A package that splits testify and go-cmp across two files gives empty output, and the cell calls that a pass.",
+     "fix": "Replace \"Empty output is the pass.\" in the GO-TEST-04 cell with \"Empty output is the pass for single-file mixing. A package that splits the two across files is a reading check.\""
+    },
+    {
+     "file": "rules/go-quality/testing.md",
+     "line": 114,
+     "severity": "nit",
+     "kind": "style",
+     "finding": "GO-TEST-12 uses the placeholder `./yourpkg` without the \"rename\" instruction N-10 asks for.",
+     "fix": "Replace \"`go test -c -o pkg.test ./yourpkg`\" with \"`go test -c -o pkg.test ./sdk` (rename `./sdk` to your package)\"."
+    },
+    {
+     "file": "rules/go-quality/cli-contract.md",
+     "line": 66,
+     "severity": "nit",
+     "kind": "verification-dishonest",
+     "finding": "setout-locator's exit status is inverted. A listed violation exits 123 through xargs and grep -L, and a clean tree exits 0. The empty-output wording is correct, but a script that gates on the exit code gets the result backwards.",
+     "fix": "Change the comment on line 64 to \"# setout-locator (GO-CLI-20): files that wire stderr but not stdout. Empty output is the pass. Judge by output, not exit status.\""
+    },
+    {
+     "file": "rules/go-quality/cli-contract.md",
+     "line": 16,
+     "severity": "nit",
+     "kind": "era-unlabelled",
+     "finding": "`os.UserConfigDir` needs go 1.13 has no N-9 gate label, while its sibling floors on the same line carry one.",
+     "fix": "Replace \"**`os.UserConfigDir`** needs go 1.13.\" with \"**`os.UserConfigDir`** needs go 1.13 (go-line gated).\""
+    }
+   ],
+   "verifications_exercised": [
+    {
+     "id": "GO-API-02",
+     "went_red": true,
+     "went_green": true,
+     "note": "Script line run under bash from api02/{violation,twin}. It printed `Do(x any) error`, `Data any` and `Raw map[string]interface{}` with exit 0, and printed nothing on the twin (exit 1), whose prose says \"any\". Empty output = pass holds."
+    },
+    {
+     "id": "GO-API-03",
+     "went_red": true,
+     "went_green": true,
+     "note": "`go doc -short . | grep -E '^type Option func\\(\\*options\\) error'` gave empty output, exit 1 on func(*Client), and matched on the twin. Presence check wording holds."
+    },
+    {
+     "id": "GO-API-09",
+     "went_red": true,
+     "went_green": true,
+     "note": "The nolint nilnil grep hit `//nolint:nilnil` (exit 0) and was empty on the twin (exit 1)."
+    },
+    {
+     "id": "GO-API-11",
+     "went_red": true,
+     "went_green": true,
+     "note": "The deprecated-prefix grep caught deprecated:, DEPRECATED: and \"Deprecated -\" and was empty on the twin. It false-reds on a `// DeprecatedCount ...` doc comment, and the proposed `\\b` fix was watched. `go fix -diff ./...` exited 1 with an Old->New inline hunk and 0 on the twin. It also inlined in a go 1.22 module, which refutes the go-line gating claim."
+    },
+    {
+     "id": "GO-TEST-01",
+     "went_red": true,
+     "went_green": true,
+     "note": "`go vet ./t01/violation/` reported `call to (*testing.T).Fatal from a non-test goroutine` with exit 1, while `go test` on the same file exited 0. The twin vetted clean."
+    },
+    {
+     "id": "GO-TEST-06",
+     "went_red": true,
+     "went_green": true,
+     "note": "`go fix -diff` (testingcontext) printed the t.Context() hunk with exit 1 and exited 0 on the twin. usetesting under lib-sdk.golangci.yml gave 2 issues and 0 on the twin. On a go 1.23 module usetesting still reported MkdirTemp and Setenv, so \"silent below 1.24\" is false."
+    },
+    {
+     "id": "GO-TEST-07",
+     "went_red": true,
+     "went_green": true,
+     "note": "`go fix -diff` (forvar) deleted a commented `tt := tt` with exit 1 and exited 0 on the twin."
+    },
+    {
+     "id": "GO-TEST-12",
+     "went_red": true,
+     "went_green": true,
+     "note": "The `TOOL=ocx; grep ... -e \"\\\"$TOOL\\\"\" -e 'LookPath(' .` grep hit `exec.Command(\"ocx\", ...)` under both bash and zsh, and was empty on the os.Executable twin. Separately, execwait=2 was silent on a leaked CommandContext and panicked on a leaked Command, which confirms the drafted text over the consolidation."
+    },
+    {
+     "id": "GO-TEST-15",
+     "went_red": true,
+     "went_green": true,
+     "note": "The unbounded-fuzz command printed the unbounded line (also a multi-line `-fuzz FuzzX \\` form) and was empty on the -fuzztime twin."
+    },
+    {
+     "id": "GO-TEST-16",
+     "went_red": true,
+     "went_green": true,
+     "note": "The gate script exited 1 on a 66.7% profile, a mode-only profile and a 0-byte profile, and 1 outside the module root (`is not in std`, \"no total: line\"). It exited 0 at 100%. Fails closed as stated."
+    },
+    {
+     "id": "GO-TEST-17",
+     "went_red": true,
+     "went_green": true,
+     "note": "Binary built with -cover. Unset GOCOVERDIR gave a warning, run exit 0, then the check exited 1 with \"GOCOVERDIR holds no counters\". With it set, covcounters were written and the check exited 0."
+    },
+    {
+     "id": "GO-CLI-01",
+     "went_red": true,
+     "went_green": true,
+     "note": "`grep -rn --include='*.go' -E 'os\\.Exit\\(-?[0-9]' .` hit os.Exit(3) and was empty on the three-statement main."
+    },
+    {
+     "id": "GO-CLI-05",
+     "went_red": true,
+     "went_green": true,
+     "note": "Bare `go vet` reported `errors.AsType requires go1.26 or later (module is go1.25)` with exit 1, and exited 0 at go 1.26. `go build` passed at 1.25, so only vet gates it."
+    },
+    {
+     "id": "GO-CLI-13",
+     "went_red": true,
+     "went_green": true,
+     "note": "Both greps hit LookupEnv, colorprofile.Detect and termenv.EnvNoColor(), and both were empty on the Getenv twin."
+    },
+    {
+     "id": "GO-CLI-20",
+     "went_red": true,
+     "went_green": true,
+     "note": "The deprecation grep hit MarkDeprecated and the struct-literal Deprecated, but missed the `old.Deprecated = \"...\"` assignment in isolation (exit 1). The fix was watched. setout-locator listed app.go on the violation and nothing on the twin, with exit statuses inverted (123 and 0)."
+    },
+    {
+     "id": "GO-CLI-21",
+     "went_red": true,
+     "went_green": true,
+     "note": "noop-group-locator listed the ExactArgs+AddCommand file and was empty on the twin."
+    },
+    {
+     "id": "snippets",
+     "went_red": false,
+     "went_green": true,
+     "note": "These compiled and passed `go vet` (exit 0): the api-design right snippet (errors.AsType on context.Cause), the testing.md TestMain/TestVersion snippet (`go test` passes 0/64/75), the cli-contract classify snippet, and the sealGroups snippet against cobra v1.10.1."
+    }
+   ],
+   "unresolved_ids": [],
+   "trigger_evals": [],
+   "verdict": "fix-then-ship"
+  },
+  {
+   "set": "go-quality depth files C: rules/go-quality/io.md, network.md, security.md, observability.md",
+   "files_read": [
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.claude/skills/research-lang/references/validation.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.claude/skills/research-lang/references/rule-distillation.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-topic-map.md (Authoring notes N-1..N-14; wave 2, 3, 4 (e) contradiction lists)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-quality/io.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-quality/network.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-quality/security.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-quality/observability.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-io.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-network.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-security.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-observability.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-quality.md (routing and non-negotiable rows citing the set)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-modules/gates.md (GO-GATE-07/09/14/16/19 rows)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-security/untrusted-input-and-crypto.md (G708 lines only)"
+   ],
+   "findings": [
+    {
+     "file": "rules/go-quality/io.md",
+     "line": 85,
+     "severity": "blocker",
+     "kind": "unsupported-claim",
+     "finding": "GO-IO-06 (MUST) tells the reader that a `_unix.go` file name is enough to hold `Setpgid`, `Pgid` and `syscall.Kill(-pid, sig)`. Go does not treat `unix` as a filename suffix, so `spawn_unix.go` with no `//go:build unix` line compiles on every OS. Planted in review-quality-c/iounix/bad/spawn_unix.go, `GOOS=windows go vet ./iounix/bad/` exited 1 with `unknown field Setpgid in struct literal of type syscall.SysProcAttr`. The `//go:build unix` twin exited 0. The vet catches the mistake, but the rule text tells the agent to make it. The consolidation carries the same error (go-io.md:179).",
+     "fix": "In the GO-IO-06 Rule cell, replace \"`Setpgid`, `Pgid` and `syscall.Kill(-pid, sig)` go in a `//go:build unix` file or a `_unix.go` or `_linux.go` file.\" with \"`Setpgid`, `Pgid` and `syscall.Kill(-pid, sig)` go in a file that carries `//go:build unix`, or in a `_linux.go` file. A `_unix.go` name alone constrains nothing, because `unix` is not a GOOS file-name suffix.\""
+    },
+    {
+     "file": "rules/go-quality/observability.md",
+     "line": 104,
+     "severity": "blocker",
+     "kind": "verification-dishonest",
+     "finding": "The GO-OBS-07 (MUST) grep has no `--include` and no Markdown exclude. In any repo that installs this rule at project scope, the grep matches the installed rule files (observability.md, testing.md and io.md all contain `execwait=`), so it can never print empty output on compliant code. Planted in review-quality-c/obs/execwait-clean: a `.claude/rules/go-quality/observability.md` copy plus a CI-only setting gave 4 hits from the rule file. Adding `--exclude='*.md'` gave empty output, exit 1, and the baked Dockerfile still went red. The grep also scans `.git`.",
+     "fix": "At line 96 and in the GO-OBS-07 Verification cell at line 104, replace `grep -rn --exclude-dir=.github --exclude='*_test.go' -e 'execwait=' .` with `grep -rn --exclude-dir=.git --exclude-dir=.github --exclude='*_test.go' --exclude='*.md' -e 'execwait=' .`. After \"Empty output is the pass.\" in the cell, add: \"Markdown is excluded because installed rule files and docs name the setting.\""
+    },
+    {
+     "file": "rules/go-quality/io.md",
+     "line": 107,
+     "severity": "fix",
+     "kind": "verification-dishonest",
+     "finding": "The GO-IO-09 grep's `-e 'exec\\.Command.*\"-p\"'` alternative matches compliant `exec.CommandContext(ctx, \"mkdir\", \"-p\", dir)`. In review-quality-c/io09/good (a `mkdir -p` call plus a `--password-stdin` twin) the grep printed the `mkdir` line with exit 0, so \"empty output = pass\" is false on common compliant code. The violation (`docker login -p pw`) went red as intended.",
+     "fix": "In the GO-IO-09 Verification cell, replace \"`: empty output = pass. It sees single-line calls only, so an argv slice built elsewhere is read by hand.\" with \"`: empty output = pass. A `-p` hit whose flag is not a password (`mkdir -p`, `ssh -p`) is read and cleared. It sees single-line calls only, so an argv slice built elsewhere is read by hand.\""
+    },
+    {
+     "file": "rules/go-quality/observability.md",
+     "line": 60,
+     "severity": "fix",
+     "kind": "verification-dishonest",
+     "finding": "GO-OBS-02 (MUST) forbids `log.SetFlags` and `log.SetPrefix`, but the global-logging grep matches only `slog.SetDefault(` and `log.SetOutput(`. In review-quality-c/obs/logbad, a library `init` that calls `log.SetFlags(0); log.SetPrefix(...)` printed nothing, so the check cannot go red for half of the banned calls.",
+     "fix": "Replace line 60 with `grep -rl -e 'slog\\.SetDefault(' -e 'log\\.SetOutput(' -e 'log\\.SetFlags(' -e 'log\\.SetPrefix(' --include='*.go' . | xargs -r grep -L -e '^package main$'`."
+    },
+    {
+     "file": "rules/go-quality/observability.md",
+     "line": 106,
+     "severity": "fix",
+     "kind": "verification-dishonest",
+     "finding": "The GO-OBS-09 cell says \"A CLI's `main` hit is read too\", but `xargs -r grep -L -e '^package main$'` drops every `package main` file, so a CLI hit is never printed. In review-quality-c/obs/gcmain, a CLI `main` that calls `debug.SetMemoryLimit(1 << 30)` produced empty output. That breaks the rule's \"CLIs never set them\" clause.",
+     "fix": "Replace \"Empty output is the pass for libraries. A CLI's `main` hit is read too.\" with \"Empty output is the pass for libraries. The grep drops `package main` files, so check a CLI by reading its `main` for `debug.SetMemoryLimit(`, `debug.SetGCPercent(` or a `GOGC` or `GOMEMLIMIT` env default.\""
+    },
+    {
+     "file": "rules/go-quality/io.md",
+     "line": 111,
+     "severity": "fix",
+     "kind": "contradiction",
+     "finding": "GO-IO-13 says the reasoned G204 suppression is valid only with the `common-false-positives` preset off and cites GO-GATE-14. GO-GATE-14 owns the gosec excludes and thresholds. The preset ban is GO-GATE-09's text as amended by GO-SEC-01 (wave-3 (e) 1 and 2), which is also how security.md:15 attributes it.",
+     "fix": "In the GO-IO-13 Rationale cell, replace \"with gosec's `common-false-positives` exclusion preset off (GO-GATE-14)\" with \"with golangci-lint's `common-false-positives` exclusion preset off (GO-SEC-01, GO-GATE-09)\"."
+    },
+    {
+     "file": "rules/go-quality/network.md",
+     "line": 166,
+     "severity": "fix",
+     "kind": "notes-violation",
+     "finding": "N-10 requires every checker cell to say what empty output means. The GO-NET-14 cell runs the GO-NET-14 grep but never says so.",
+     "fix": "At the end of the GO-NET-14 Verification cell, after \"is the finding.\", add \" Empty output is the pass.\""
+    },
+    {
+     "file": "rules/go-quality/security.md",
+     "line": 48,
+     "severity": "nit",
+     "kind": "era-unlabelled",
+     "finding": "\"G117 is recent\" gives no version. The consolidation dates G117 only as \"bundled in golangci-lint 2.14.0\".",
+     "fix": "Replace \"G117 is recent, so an older golangci-lint is silent on GO-SEC-04.\" with \"G117 ships in the gosec that golangci-lint v2.14.0 bundles (read 2026-09-26), and a golangci-lint whose gosec lacks it is silent on GO-SEC-04.\""
+    },
+    {
+     "file": "rules/go-quality/security.md",
+     "line": 77,
+     "severity": "nit",
+     "kind": "unsupported-claim",
+     "finding": "The GO-SEC-03 cell makes two claims that the consolidation does not record: G402 fires on `MinVersion: tls.VersionTLS10` (`TLS MinVersion too low`), and G402 is silent on a hand-set `CipherSuites` list. Both held in the review fixture (review-quality-c/sec/tlsmin and tlscs, golangci-lint v2.14.0) but have no run in go-security.md. The same applies to GO-SEC-10's G708 sentence (line 159). The consolidation says G708 \"did not fire\", while the review fixture tmpldirect gave `G708: Server-side template injection` on a direct `Execute(w, r.URL.Query().Get(\"q\"))` and nothing on the struct-wrapped twin. The claims are true, but the evidence trail is missing.",
+     "fix": "No rule-text change needed. In the GO-SEC-03 cell, after `(`TLS MinVersion too low`)`, add \" (watched 2026-09-26, golangci-lint v2.14.0)\"."
+    },
+    {
+     "file": "rules/go-quality/io.md",
+     "line": 14,
+     "severity": "nit",
+     "kind": "notes-violation",
+     "finding": "N-2 says a cross-family reference cites the rule ID only, and the index routes to the file. io.md names the sibling depth file `network.md` in plain text at line 14 and again at line 140.",
+     "fix": "Line 14: replace \"are `GO-NET` (network.md).\" with \"are `GO-NET`.\" Line 140: replace \"in the `GO-NET` family (network.md), and\" with \"in the `GO-NET` family, and\"."
+    },
+    {
+     "file": "rules/go-quality/io.md",
+     "line": 7,
+     "severity": "nit",
+     "kind": "notes-violation",
+     "finding": "N-9 says each depth file opens with one line naming the versions it binds to. network.md:8 and security.md:8 do this. io.md and observability.md start straight into the Owns paragraph and give the versions only under Dates and Floors.",
+     "fix": "After line 6 of io.md, insert a blank line and then \"Binds to Go 1.27.1 and golangci-lint v2.14.0 with its bundled gosec and `noctx`, measured 2026-09-26.\" After line 6 of observability.md, insert a blank line and then \"Binds to Go 1.27.1 and golangci-lint v2.14.0, measured 2026-09-26.\""
+    }
+   ],
+   "verifications_exercised": [
+    {
+     "id": "GO-IO-06",
+     "went_red": true,
+     "went_green": true,
+     "note": "Ran `GOOS=windows go vet` through run.sh. It exited 1 on a `_unix.go` file with no build tag (`unknown field Setpgid`) and 0 on the `//go:build unix` twin. The check works, but the rule text wrongly allows a bare `_unix.go` name (blocker)."
+    },
+    {
+     "id": "GO-IO-07",
+     "went_red": true,
+     "went_green": true,
+     "note": "The WaitDelay grep printed run.go on the violation (exit 123) and nothing on the twin. \"Empty output = pass\" holds."
+    },
+    {
+     "id": "GO-IO-05",
+     "went_red": true,
+     "went_green": true,
+     "note": "The `go list -f '{{if eq .Name \"main\"}}...{{.DefaultGODEBUG}}{{end}}'` command printed an empty godebug for bad and `tarinsecurepath=0,zipinsecurepath=0` for good. Its output is read, not counted, as the file says."
+    },
+    {
+     "id": "GO-IO-09",
+     "went_red": true,
+     "went_green": false,
+     "note": "Went red on `docker login -p pw`, but also printed a compliant `mkdir -p` line (exit 0), so \"empty output = pass\" fails on compliant code."
+    },
+    {
+     "id": "GO-NET-03",
+     "went_red": true,
+     "went_green": true,
+     "note": "The `&http.Transport{` grep hit the literal (exit 0) and was empty on the `DefaultTransport.Clone()` twin (exit 1)."
+    },
+    {
+     "id": "GO-NET-05",
+     "went_red": true,
+     "went_green": true,
+     "note": "Both locators listed the uncapped, credential-copying CheckRedirect. Both were empty on the capped, https-only twin."
+    },
+    {
+     "id": "GO-NET-10",
+     "went_red": true,
+     "went_green": true,
+     "note": "`io\\.Copy(io\\.Discard, ` hit the unbounded drain and missed the `io.CopyN` twin. This confirms the cell's watched claim, which the consolidation does not record."
+    },
+    {
+     "id": "GO-SEC-01",
+     "went_red": true,
+     "went_green": true,
+     "note": "The anchored grep hit `presets: [comments, common-false-positives]`. It did not hit a compliant config whose comment names the preset."
+    },
+    {
+     "id": "GO-SEC-02/03",
+     "went_red": true,
+     "went_green": true,
+     "note": "`golangci-lint run ./...` with `presets: [comments]` and excludes G104, G115 and G304 gave G404 on both math/rand and math/rand/v2 and G402 `TLS MinVersion too low` on TLS10. It was silent on a hand-set CipherSuites/CurvePreferences list, as the cell says, so the added grep is needed."
+    },
+    {
+     "id": "GO-SEC-05",
+     "went_red": true,
+     "went_green": true,
+     "note": "The decoder-bound pipeline listed d.go for `json.NewDecoder(resp.Body)` and was empty on the `io.LimitReader` twin."
+    },
+    {
+     "id": "GO-SEC-07",
+     "went_red": true,
+     "went_green": true,
+     "note": "The `raw-secret-field` grep (-rniwE) flagged `Password string`, `APIKey string` and `RefreshToken []byte`. It was empty on the `Password Secret` / `TokenURL string` twin."
+    },
+    {
+     "id": "GO-SEC-10",
+     "went_red": true,
+     "went_green": true,
+     "note": "G708 fired on a direct `t.Execute(w, r.URL.Query().Get(\"q\"))` and was silent on the struct-wrapped twin. This matches the drafted cell, not the consolidation's \"did not fire\"."
+    },
+    {
+     "id": "GO-OBS-06",
+     "went_red": true,
+     "went_green": true,
+     "note": "`runtime\\.GOMAXPROCS([^0)]` hit `runtime.GOMAXPROCS(4)` and was empty on `runtime.GOMAXPROCS(0)`."
+    },
+    {
+     "id": "GO-OBS-02",
+     "went_red": false,
+     "went_green": true,
+     "note": "A library calling `log.SetFlags` and `log.SetPrefix` (both banned by the rule) produced empty output. The grep covers only SetDefault and SetOutput."
+    },
+    {
+     "id": "GO-OBS-07",
+     "went_red": true,
+     "went_green": false,
+     "note": "Went red on a Dockerfile `ENV GODEBUG=execwait=2`. On a compliant repo with the rule installed under .claude/rules it printed 4 lines from the rule file itself, so it can never be green for an adopter."
+    },
+    {
+     "id": "GO-OBS-09",
+     "went_red": false,
+     "went_green": true,
+     "note": "A CLI `main` calling `debug.SetMemoryLimit` produced empty output, because `grep -L '^package main$'` drops main files, contrary to the cell's \"A CLI's main hit is read too\"."
+    },
+    {
+     "id": "snippets-vet",
+     "went_red": false,
+     "went_green": true,
+     "note": "Extracted the network.md watchdog, the io.md process-group spawn (unix), the security.md Secret type and the observability.md injected-logger snippet with imports. `go vet ./snip/...` exited 0 on linux, and a windows vet of the portable three exited 0."
+    }
+   ],
+   "unresolved_ids": [
+    "GO-IO-18"
+   ],
+   "trigger_evals": [],
+   "verdict": "fix-then-ship"
+  },
+  {
+   "set": "go-modules (rules/go-modules.md, rules/go-modules/gates.md, rules/go-modules/release.md, rules/go-modules/golangci/{baseline,cli,lib-sdk}.golangci.yml)",
+   "files_read": [
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.claude/skills/research-lang/references/validation.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.claude/skills/research-lang/references/rule-distillation.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-topic-map.md (Authoring notes N-1..N-14; Wave 2/3/4 (e) contradiction lists; Artifact set decision glob table)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-modules.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-modules/gates.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-modules/release.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-modules/golangci/baseline.golangci.yml",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-modules/golangci/cli.golangci.yml",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-modules/golangci/lib-sdk.golangci.yml",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-modules.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-gates.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-release.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-quality.md (gate block, non-negotiables, GO-CORE table, routing)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-language.md (GO-LANG-08, GO-LANG-22, L10, L13)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-topic-map/scratch/author-receipt.json (lines 517-520, provenance of the GO-REL-01/-11 departures)"
+   ],
+   "findings": [
+    {
+     "file": "rules/go-modules.md",
+     "line": 146,
+     "severity": "blocker",
+     "kind": "contradiction",
+     "finding": "Routing ping-pong. This row sends 'a Makefile, workflow, Dockerfile or .go-version that runs Go' to go-quality, but rules/go-quality.md:138 sends 'a .go-version file ... or a Makefile or CI workflow that runs the gate' back to go-modules. N-1 makes go-quality the router for these residual misses, and every workflow rule (GO-MOD-16/17/18, GO-GATE-04/07/08, GO-REL-06/11/12) lives in this set. So an agent that follows this row away from go-modules while editing a workflow loses exactly the rules that govern it.",
+     "fix": "Replace the row with: | Editing any `*.go` file, or the `ENV` lines of a `Dockerfile` that runs Go | `go-quality` (sibling set, below) |"
+    },
+    {
+     "file": "rules/go-modules.md",
+     "line": 91,
+     "severity": "blocker",
+     "kind": "contradiction",
+     "finding": "Non-negotiable 9 says 'neither the SDK nor a library carries a tool directive' under a header that says every line blocks a merge. Its owner row GO-MOD-11 (line 117, and go-modules.md consolidation) is MUST only for the SDK and SHOULD for a library. So the two rows give a library `tool` line two different severities.",
+     "fix": "| 9 | The SDK's runtime import graph is stdlib-only, and the SDK carries no `tool` directive (in a library it is SHOULD, GO-MOD-11). | GO-MOD-10, GO-MOD-11 |"
+    },
+    {
+     "file": "rules/go-modules.md",
+     "line": 83,
+     "severity": "blocker",
+     "kind": "contradiction",
+     "finding": "Non-negotiable 1 makes 'say whether empty output is the pass or the finding' merge-blocking and cites GO-CORE-03, but GO-CORE-03 is SHOULD in its owner table (rules/go-quality.md). The go-quality index's own hoist (its line 18) cites only GO-CORE-01/02.",
+     "fix": "| 1 | Never reach green by weakening the check (a dropped gate step, a linter or setting removed from the copied golangci file, a bare `//nolint`, `-mod=mod`, `-buildvcs=false`), and never trust a verification nobody watched go red. | GO-CORE-01, GO-CORE-02 |"
+    },
+    {
+     "file": "rules/go-modules/release.md",
+     "line": 152,
+     "severity": "blocker",
+     "kind": "unsupported-claim",
+     "finding": "The GO-REL-11 MUST prescribes `subject-checksums: dist/checksums.txt` and states that `subject-path: dist/<tool>-*` matches only the SBOMs '(measured 2026-09-26)'. The consolidation (go-release.md:94) prescribes `subject-path: dist/<tool>-*`, and no authoring note or (e) resolution ratifies the change. The departure comes from author-receipt.json:518, which says 'needs an orchestrator decision'. The claim looks true: the release-dist snapshot listing has only `mytool-*.spdx.sbom.json` at the dist root, and the binaries sit under `mytool_<os>_<arch>_v*/`. It is still unratified.",
+     "fix": "No text change in release.md. Ratify the departure. Append to go-topic-map.md \u203a Authoring notes: 'N-15. GO-REL-11 uses `subject-checksums: dist/checksums.txt`. On goreleaser 2.17.1 with `formats: [binary]`, `subject-path: dist/<tool>-*` matches only the `.spdx.sbom.json` files (author-go-release snapshot and go-release-consolidation/release-dist listing, 2026-09-26).' Then amend go-release.md GO-REL-11 in place to match. If the orchestrator declines, revert the row to the consolidation text."
+    },
+    {
+     "file": "rules/go-modules/release.md",
+     "line": 76,
+     "severity": "blocker",
+     "kind": "unsupported-claim",
+     "finding": "The GO-REL-01 rationale says '`{{.Date}}` resolves to the commit time under goreleaser 2.17.1 (measured 2026-09-26)'. The consolidation classes `{{.Date}}` as wall clock (go-release.md:156, the golangci-lint violation row), and no note ratifies the reversal. Its only source is author-receipt.json:519, flagged as a contradiction for the orchestrator. The rule text (ban every date stamp) still matches the consolidation, so only the rationale departs.",
+     "fix": "Ratify with an authoring note: 'N-16. goreleaser 2.17.1 resolves {{ .Date }} to the commit time (author-go-release v-date fixture, 2026-09-26). GO-REL-01 keeps its ban because a date stamp duplicates vcs.time.' Then amend go-release.md's GO-REL-01 rationale and its violations row. Otherwise replace the sentence with: 'A date stamp only duplicates `vcs.time`, so the rule bans `{{.Date}}` too.'"
+    },
+    {
+     "file": "rules/go-modules/gates.md",
+     "line": 113,
+     "severity": "fix",
+     "kind": "verification-dishonest",
+     "finding": "The GO-GATE-10 grep false-reds on a compliant repository. `grep -rc --include='*golangci*'` also counts the golangci workflow that the go-modules glob loads on purpose. Watched: the shipped baseline plus `.github/workflows/golangci-lint.yml` printed `.golangci.yml:3` and `.github/workflows/golangci-lint.yml:0`, so the stated 'any count below 3' reads as a finding. The consolidation's check was behavioural, not this grep.",
+     "fix": "Replace the Verification cell with: `grep -c -e '^[^#]*uniq-by-line: false' -e '^[^#]*max-issues-per-linter: 0' -e '^[^#]*max-same-issues: 0' .golangci.yml`, run from the module root, prints one count, and any count below 3 is the finding. (Watched: 3 on the shipped baseline, 0 on a planted default config.)"
+    },
+    {
+     "file": "rules/go-modules/release.md",
+     "line": 138,
+     "severity": "fix",
+     "kind": "verification-dishonest",
+     "finding": "The GO-REL-07 grep false-reds on any repo whose release workflow is named `goreleaser.yml`, because `--include='*goreleaser*.y*ml'` also matches `.github/workflows/goreleaser.yml`, which never starts with `version: 2`. Watched: a compliant `.goreleaser.yaml` plus that workflow listed the workflow.",
+     "fix": "`grep -rL --include='*goreleaser*.y*ml' --exclude-dir=.github -e '^version: *2$' .` lists configs that lack the line. Any output is the finding, and empty output is the pass. (Watched: empty on the compliant twin, lists `.goreleaser.yaml` on the violation.)"
+    },
+    {
+     "file": "rules/go-modules/release.md",
+     "line": 80,
+     "severity": "fix",
+     "kind": "verification-dishonest",
+     "finding": "The GO-REL-05 grep `-e '-s -w'` misses the common list form (`ldflags:` with `- -s` and `- -w` on separate lines) and the reversed `-w -s`. Watched: exit 1 on a config that strips, which the cell calls 'the rule is met'.",
+     "fix": "`grep -rn --include='*goreleaser*.y*ml' --exclude-dir=.github -e '-s -w' -e '-w -s' -e '^[[:space:]]*- -s[[:space:]]*$' -e '^[[:space:]]*- -w[[:space:]]*$' .` locates stripping, and empty output means the rule is met. (Watched: hits both list lines on the violation, empty on the twin.)"
+    },
+    {
+     "file": "rules/go-modules.md",
+     "line": 103,
+     "severity": "fix",
+     "kind": "verification-dishonest",
+     "finding": "'Run each verification from the module root' conflicts with the `.github` greps in GO-MOD-03, GO-MOD-16, GO-MOD-17 and GO-MOD-18. `.github` lives at the repository root. From a nested module root (the GO-REL-14 shape), grep exits 2, and GO-MOD-17 counts exit 2 as the finding, which is a false red.",
+     "fix": "The GO-MOD family is defined here and nowhere else. Run each verification from the module root, except the `.github` greps in GO-MOD-03 and GO-MOD-16 to 18, which run from the repository root."
+    },
+    {
+     "file": "rules/go-modules.md",
+     "line": 58,
+     "severity": "fix",
+     "kind": "contradiction",
+     "finding": "The index calls its block 'the manifest slice of GO-GATE-01's full ordered block', but it adds `golangci-lint config verify`, which is not a GO-GATE-01 step. It also orders steps as tidy, build, vet, lint, govulncheck, while GO-GATE-01 says to run them 'in order' as vet, lint, build, tidy, govulncheck.",
+     "fix": "Replace the first sentence with: These are the manifest-facing checks. `go mod tidy -diff`, `go build`, `go vet`, `golangci-lint run` and `govulncheck` are GO-GATE-01 steps 7, 5, 2, 3 and 8, and CI runs them in GO-GATE-01's order. `config verify` is GO-GATE-09's config-change check, not a gate step."
+    },
+    {
+     "file": "rules/go-modules/release.md",
+     "line": 30,
+     "severity": "fix",
+     "kind": "notes-violation",
+     "finding": "N-9 requires each depth file to open with one line naming the versions it binds to (gates.md does, at line 8). In release.md that line is at line 30, after the ownership paragraph and the Contents line.",
+     "fix": "Move 'Binds to Go 1.27.1, goreleaser 2.17.1, cosign 3.1.3, govulncheck v1.8.0 and syft (measured 2026-09-26).' to line 7, directly under the H1. Leave line 30 as: 'Every floor below is toolchain-gated: the Go that builds the binary decides it, not the `go` line.'"
+    },
+    {
+     "file": "rules/go-modules.md",
+     "line": 134,
+     "severity": "fix",
+     "kind": "era-unlabelled",
+     "finding": "GO-MOD-16's behaviour claims (a patch-bearing `go-version-file` line installs that exact patch, and `check-latest` cannot move an exact patch) are setup-go-version-specific. The consolidation's floor is setup-go v6, and the row names no version.",
+     "fix": "Append to the Rationale cell: (setup-go v6, read 2026-09-26)."
+    },
+    {
+     "file": "rules/go-modules.md",
+     "line": 136,
+     "severity": "nit",
+     "kind": "era-unlabelled",
+     "finding": "GO-MOD-18 names `GOAUTH` without its go 1.24 floor. Its Verification cell also does not say what empty output means (N-10).",
+     "fix": "Rule: '... and never sets `GOAUTH=off` (`GOAUTH` go 1.24).' Verification: '`grep -rn -e 'GOPRIVATE' -e 'GOAUTH' .github/workflows`, read against each private fetch: a private fetch with no `GOPRIVATE` hit, or any `GOAUTH=off` hit, is the finding.'"
+    },
+    {
+     "file": "rules/go-modules.md",
+     "line": 111,
+     "severity": "nit",
+     "kind": "era-unlabelled",
+     "finding": "N-9 requires each floor to say what gates it. GO-MOD-03's '(go 1.23)' and GO-MOD-11's '(go 1.24)' (line 117) do not say whether the toolchain or the `go` line gates them.",
+     "fix": "GO-MOD-03: '(go 1.23 toolchain)'. GO-MOD-11: '(go 1.24, go-line gated)'."
+    },
+    {
+     "file": "rules/go-modules/gates.md",
+     "line": 75,
+     "severity": "nit",
+     "kind": "style",
+     "finding": "The GO-GATE-04 Verification cell does not state what empty output means (N-10).",
+     "fix": "Append: 'Empty output is the pass.'"
+    },
+    {
+     "file": "rules/go-modules/gates.md",
+     "line": 63,
+     "severity": "nit",
+     "kind": "verification-dishonest",
+     "finding": "GO-GATE-01's root listing omits the `testdata` exclusion that the index's `roots` command (go-modules.md:66) uses. A `testdata/**/go.mod` then reads as 'a root no job runs in', which is a false finding. It also gives two definitions of a module root.",
+     "fix": "`find . -name go.mod -not -path '*/vendor/*' -not -path '*/testdata/*'` lists the roots, and a root no job runs in is the finding."
+    },
+    {
+     "file": "rules/go-modules/gates.md",
+     "line": 114,
+     "severity": "nit",
+     "kind": "era-unlabelled",
+     "finding": "GO-GATE-11 pins `nilness@v0.49.0`, which is the version watched in C-1. N-5's dated x/tools pin is v0.50.0, and the row does not say why it differs.",
+     "fix": "After the command add: '(watched at x/tools v0.49.0, 2026-09-26; re-probe on a bump)'."
+    },
+    {
+     "file": "rules/go-modules/release.md",
+     "line": 147,
+     "severity": "nit",
+     "kind": "verification-dishonest",
+     "finding": "pin-check false-reds on a quoted SHA ref (`uses: 'actions/setup-go@<40hex>' # v6.0.0`, watched printed), and it never checks the `# vX.Y.Z` trailer that GO-REL-12 requires.",
+     "fix": "`grep -rnE 'uses:[[:space:]]*[^.[:space:]][^[:space:]]*@' .github/workflows | grep -vE \"@[0-9a-f]{40}['\\\"]?([[:space:]]|$)\"`. Then add to the GO-REL-12 cell: 'The `# vX.Y.Z` trailer is read, not grepped.'"
+    },
+    {
+     "file": "rules/go-modules/golangci/baseline.golangci.yml",
+     "line": 112,
+     "severity": "nit",
+     "kind": "portability",
+     "finding": "The depguard `logging` desc 'new fleet code logs through log/slog' ships internal 'fleet' jargon in a message adopters will see. It appears at baseline lines 112/114/116, cli 117/119/121 and lib-sdk 126/128/130. The owner GO-OBS-01 row does not fix this wording.",
+     "fix": "In all three files replace each `desc: \"new fleet code logs through log/slog\"` with `desc: \"new code logs through log/slog\"`."
+    },
+    {
+     "file": "rules/go-modules.md",
+     "line": 34,
+     "severity": "nit",
+     "kind": "trigger",
+     "finding": "GO-MOD-17 tells the reader to edit `.github/dependabot.yml`. Neither the go-modules glob list (binding, N-1) nor go-quality's routing reaches that file, so an agent editing it never has GO-MOD-17 loaded, and the index does not name the gap.",
+     "fix": "Line 34: 'A `*.go` file, a Makefile, `.github/dependabot.yml` or another workflow never loads it, and the `go-quality` index routes those.' (orchestrator: add dependabot.yml to go-quality.md's routing row 138)."
+    },
+    {
+     "file": "rules/go-modules.md",
+     "line": 24,
+     "severity": "nit",
+     "kind": "deletion-candidate",
+     "finding": "Deletion test on the index. Lines 24-25 ('Traps, not tutorials...'), line 75 ('A task is done when...', which duplicates go-quality.md:66), and lines 173-174 ('A go.mod edit never pays for it...') prevent no mistake.",
+     "fix": "Delete lines 24-25, line 75 and the last sentence of the go-quality Siblings bullet (lines 173-174)."
+    }
+   ],
+   "verifications_exercised": [
+    {
+     "id": "GO-MOD-01 floor-check",
+     "went_red": true,
+     "went_green": true,
+     "note": "go 1.27.1 exit 1, go 1.26.0 exit 0 (fixtures floor-bad, mod-good)"
+    },
+    {
+     "id": "GO-MOD-02 toolchain grep",
+     "went_red": true,
+     "went_green": true,
+     "note": "mod-bad prints toolchain line exit 0, mod-good exit 1"
+    },
+    {
+     "id": "GO-MOD-07 non-local replace grep",
+     "went_red": true,
+     "went_green": true,
+     "note": "fork swap printed, local ../sib replace empty exit 1"
+    },
+    {
+     "id": "GO-MOD-10 sdk-deps",
+     "went_red": true,
+     "went_green": true,
+     "note": "runtime google/uuid printed exit 1; test-only go-cmp empty exit 0"
+    },
+    {
+     "id": "GO-MOD-11 tool grep",
+     "went_red": true,
+     "went_green": true,
+     "note": "tool line printed exit 0; none exit 1"
+    },
+    {
+     "id": "GO-MOD-08 / GO-GATE-13 depguard under shipped baseline",
+     "went_red": true,
+     "went_green": true,
+     "note": "x/exp/constraints -> 'not allowed from list superseded: use stdlib cmp.Ordered (Go 1.21)' exit 1; cmp.Ordered twin 0 issues exit 0 (satisfies (e) 1 L13 re-watch)"
+    },
+    {
+     "id": "golangci-lint config verify on the three shipped files",
+     "went_red": false,
+     "went_green": true,
+     "note": "all three exit 0 (green only, as expected for a shipped file)"
+    },
+    {
+     "id": "GO-GATE-22 superset check",
+     "went_red": true,
+     "went_green": true,
+     "note": "3-linter fragment lists 26 missing baseline linters; cli and lib-sdk list none"
+    },
+    {
+     "id": "GO-GATE-09 anchored preset grep",
+     "went_red": true,
+     "went_green": true,
+     "note": "common-false-positives preset line hit exit 0; shipped baseline empty exit 1"
+    },
+    {
+     "id": "GO-GATE-10 issues grep",
+     "went_red": true,
+     "went_green": false,
+     "note": "false red: a compliant repo's golangci workflow prints ':0', which the cell reads as a finding"
+    },
+    {
+     "id": "GO-GATE-16 banned-linter grep",
+     "went_red": true,
+     "went_green": true,
+     "note": "default: all, wsl_v5, noinlineerr, wrapcheck, exhaustruct hit; shipped baseline empty exit 1"
+    },
+    {
+     "id": "GO-GATE-20 exclude-functions grep",
+     "went_red": true,
+     "went_green": true,
+     "note": "(*os.File).Close printed; shipped baseline empty exit 1"
+    },
+    {
+     "id": "GO-GATE-23 lib-sdk doc checks and placement grep",
+     "went_red": true,
+     "went_green": true,
+     "note": "undocumented Frob -> revive exported + ST1000 exit 1; documented twin exit 0; no-global grep empty on baseline"
+    },
+    {
+     "id": "GO-GATE-01 step 10 (gopls yield)",
+     "went_red": true,
+     "went_green": true,
+     "note": "gopls v0.23.0: ignored-yield loop exit 1, checked twin exit 0, no-iterator module exit 0"
+    },
+    {
+     "id": "GO-GATE-08 / GO-GATE-07 / GO-GATE-04 workflow greps",
+     "went_red": true,
+     "went_green": true,
+     "note": "version: latest and @latest hit; SHA-pinned v2.14.0 workflow empty; windows grep exit 1 on a Linux-only workflow; CGO_ENABLED: 0 hit"
+    },
+    {
+     "id": "GO-REL-02/03/04 artifact-check loop",
+     "went_red": true,
+     "went_green": true,
+     "note": "stamped CGO_ENABLED=0 v1 build silent; unstamped cgo GOAMD64=v3 build printed NOT-STATIC, UNSTAMPED, RAISED-GOAMD64"
+    },
+    {
+     "id": "GO-REL-01 clock pre-check grep",
+     "went_red": true,
+     "went_green": true,
+     "note": "{{ .Now }} in ldflags hit; commit-only ldflags empty"
+    },
+    {
+     "id": "GO-REL-05 strip grep",
+     "went_red": false,
+     "went_green": true,
+     "note": "missed the list-form '- -s' / '- -w' ldflags (exit 1 on a stripping config)"
+    },
+    {
+     "id": "GO-REL-07 version: 2 grep",
+     "went_red": true,
+     "went_green": false,
+     "note": "false red: lists a compliant repo's .github/workflows/goreleaser.yml"
+    },
+    {
+     "id": "GO-REL-12 pin-check",
+     "went_red": true,
+     "went_green": true,
+     "note": "actions/checkout@v5 printed; SHA-pinned and ./ local actions empty; a quoted SHA ref false-reds (nit)"
+    },
+    {
+     "id": "GO-REL-06 fetch-depth and GO-REL-11 id-token presence greps",
+     "went_red": true,
+     "went_green": true,
+     "note": "empty on the bad workflow (finding), hit on the good one"
+    },
+    {
+     "id": "GO-REL-08 asset-names and GO-REL-09 SBOM count",
+     "went_red": true,
+     "went_green": true,
+     "note": "run read-only on existing author-release/sums-{good,bad}: 1x6 vs 0x6, and 6 vs 0"
+    },
+    {
+     "id": "Go snippets (release.md versionString, gates.md Fprintln pair)",
+     "went_red": false,
+     "went_green": true,
+     "note": "go vet exit 0 and gofmt -l empty on Go 1.27.1"
+    }
+   ],
+   "unresolved_ids": [
+    "GO-REL-13"
+   ],
+   "trigger_evals": [],
+   "verdict": "fix-then-ship"
+  },
+  {
+   "set": "go-release, go-upgrade, go-diagnose skills (phase 8 content review)",
+   "files_read": [
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.claude/skills/research-lang/references/validation.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.claude/skills/research-lang/references/rule-distillation.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-topic-map.md (Authoring notes N-1..N-14; wave 2/3/4 (e) contradiction lists)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/skills/go-release/SKILL.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/skills/go-release/references/release-config.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/skills/go-upgrade/SKILL.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/skills/go-upgrade/references/probes.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/skills/go-diagnose/SKILL.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-release.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-modules.md (targeted)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-language.md (targeted)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-observability.md (targeted)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-gates.md (targeted)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-modules/release.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-modules/gates.md (gate block, GO-GATE rows, superset check)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-modules.md (roots, floor-check, GO-MOD rows)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/go-quality/language.md (GO-LANG-15..17, silent-change table)",
+    "every rule row for all 95 IDs cited by the set, under /home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-topic-map/scratch/author-receipt.json (drafter measurements)"
+   ],
+   "findings": [
+    {
+     "file": "skills/go-release/references/release-config.md",
+     "line": 95,
+     "severity": "blocker",
+     "kind": "contradiction",
+     "finding": "The pinned release workflow breaks GO-MOD-16, a MUST it cites on line 124. GO-MOD-16 requires `GOTOOLCHAIN=local` on build jobs, and the job env sets only GORELEASER_CURRENT_TAG. An adopter who copies the template ships a release job that fails the rule the skill's MUST table (row 3) enforces.",
+     "fix": "After line 95 (`      GORELEASER_CURRENT_TAG: ${{ github.ref_name }}`), insert the line `      GOTOOLCHAIN: local`. In the table under the workflow, after the `go-version-file: go.mod` row, add the row `| `GOTOOLCHAIN: local` | the build uses the toolchain setup-go installed and never downloads another one | GO-MOD-16 |`."
+    },
+    {
+     "file": "skills/go-upgrade/SKILL.md",
+     "line": 92,
+     "severity": "blocker",
+     "kind": "contradiction",
+     "finding": "The A1 table says `stdversion` is the only check for a stdlib symbol newer than the `go` line. Step A5 (line 198), GO-LANG-04 and wave-4 (e) 13 / N-8 all name the `oldstable` leg's `go build ./...` as the durable check, and they say golangci's govet and nogo are blind. Two statements in one file give different answers to the same question.",
+     "fix": "Replace the cell `Step A5's `stdversion` is the only check` with `Step A5's `stdversion`, plus the `oldstable` leg's `go build ./...`, which is the durable check (GO-LANG-04)`."
+    },
+    {
+     "file": "skills/go-upgrade/SKILL.md",
+     "line": 321,
+     "severity": "blocker",
+     "kind": "contradiction",
+     "finding": "The text says `go.uber.org/automaxprocs goes only from a main module at go 1.25 or above`, and line 89 also says `from a main module`. That wording implies a library at go 1.26 keeps the import. GO-OBS-06 (MUST) forbids the import in every module at go 1.25 or later, GO-MOD-09 says never import it in a library, and go-diagnose MUST row 4 reports it as a finding.",
+     "fix": "Line 321: replace the bullet with `- `go.uber.org/automaxprocs` is removed from every module whose `go` line is 1.25 or above, and a library never imports it at any line (GO-MOD-09, GO-OBS-06).` Line 89: replace `Remove `go.uber.org/automaxprocs` from a main module (GO-MOD-09)` with `Remove `go.uber.org/automaxprocs` (GO-MOD-09, GO-OBS-06)`."
+    },
+    {
+     "file": "skills/go-release/SKILL.md",
+     "line": 98,
+     "severity": "fix",
+     "kind": "contradiction",
+     "finding": "Step 2 tags the commit locally before step 3 runs. Step 3 is titled `run the API gate before the tag`, and line 78 says the bump size comes from step 3's report. A library therefore picks and tags its version before the report that decides the version.",
+     "fix": "Replace lines 98-99 with `Then tag that commit **locally** and do not push it until step 9. A library or SDK runs step 3 first and tags only once its report agrees with the version. Steps 5 and 8 build from the local tag.`"
+    },
+    {
+     "file": "skills/go-release/references/release-config.md",
+     "line": 102,
+     "severity": "fix",
+     "kind": "contradiction",
+     "finding": "`go-version-file: go.mod` and a goreleaser run from the repository root are wrong for the GO-REL-14 nested CLI that step 5 supports. There the root `go.mod` is the parent module, usually with a bare `go 1.N.0` line and no `toolchain` line, which is exactly the shape GO-MOD-16 forbids pointing `go-version-file` at.",
+     "fix": "After the workflow table (after line 129), add the paragraph: `For a nested CLI (GO-REL-14), set `go-version-file: tools/mytool/go.mod` and add `workdir: tools/mytool` to the goreleaser-action `with:` block, and keep `.goreleaser.yaml` in `tools/mytool`. Rename the path.`"
+    },
+    {
+     "file": "skills/go-upgrade/SKILL.md",
+     "line": 207,
+     "severity": "fix",
+     "kind": "verification-dishonest",
+     "finding": "The toonew re-check reads empty output as a pass. If a future toolchain moves or renames `toonew.go`, grep writes `No such file or directory` to stderr, stdout stays empty and xargs exits 123, which is the same exit code as a real pass. Watched: with a planted GOROOT that lacks the file, stdout was empty with exit 123, the same result as the genuine pass on go1.27.1.",
+     "fix": "Replace comment line 206 with `# A hit means bare go vet is blind too, and only the oldstable build leg remains. A `No such file or directory` error means the file moved: find toonew.go under GOROOT's src/cmd/vendor and re-run. It is never a pass.`"
+    },
+    {
+     "file": "skills/go-upgrade/SKILL.md",
+     "line": 143,
+     "severity": "fix",
+     "kind": "verification-dishonest",
+     "finding": "MUST row 1 (line 347) calls a patch-level floor a finding, but the floor check goes green on a patch floor below 1.26.0. Watched: `go 1.25.3` exits 0.",
+     "fix": "After line 143, insert `# Patch-level floor (GO-MOD-01). Any output is the finding. Empty output passes.` followed by `go list -m -f '{{.GoVersion}}' | grep -v -E -e '^1\\.[0-9]+(\\.0)?$'` (watched: prints `1.25.3` and `1.26.2`, and is silent on `1.26.0`)."
+    },
+    {
+     "file": "skills/go-upgrade/SKILL.md",
+     "line": 64,
+     "severity": "fix",
+     "kind": "contradiction",
+     "finding": "The module-root finder leaves out the `testdata` exclusion that GO-MOD-06's `roots` block in rules/go-modules.md carries. As written, every gate step also runs inside a testdata module, and those are often deliberately broken, so the gate goes falsely red.",
+     "fix": "Replace `find . -name go.mod -not -path '*/vendor/*'` with `find . -name go.mod -not -path '*/vendor/*' -not -path '*/testdata/*'`."
+    },
+    {
+     "file": "skills/go-upgrade/references/probes.md",
+     "line": 231,
+     "severity": "fix",
+     "kind": "contradiction",
+     "finding": "P6 names the baseline `.golangci.yml`, on this line and on line 240. GO-GATE-22 and gates.md ship it as `baseline.golangci.yml`, and `.golangci.yml` is each module's copy of one of the three files. Run in a module whose copy is the lib-sdk file, the superset check compares the wrong pair.",
+     "fix": "Line 231: `for f in baseline.golangci.yml cli.golangci.yml lib-sdk.golangci.yml; do`. Line 240: `comm -23 <(en baseline.golangci.yml) <(en \"$overlay\") | sed \"s|^|$overlay missing |\"`. Line 225: after `on the three golangci-lint files`, insert ` (`baseline.golangci.yml`, `cli.golangci.yml`, `lib-sdk.golangci.yml`)`."
+    },
+    {
+     "file": "skills/go-upgrade/references/probes.md",
+     "line": 246,
+     "severity": "fix",
+     "kind": "contradiction",
+     "finding": "The measured line says a five-linter fragment lists 26 missing baseline linters. GO-GATE-22 says a five-linter fragment drops 28. The count depends on the fragment (a fresh one printed 25), so a re-prober who compares against 26 reports a spurious difference.",
+     "fix": "Replace `and the superset check lists 26 missing baseline linters for it` with `and the superset check prints one line for each baseline linter the fragment omits (the count depends on the fragment)`."
+    },
+    {
+     "file": "skills/go-upgrade/SKILL.md",
+     "line": 85,
+     "severity": "fix",
+     "kind": "duplication",
+     "finding": "The A1 silent-change table restates GO-LANG-15's silent-change table in rules/go-quality/language.md, which is depth text (N-4, N-11). The copy has already drifted: it drops the `slices.Insert` and core-type rows and rewords the stdversion row.",
+     "fix": "Replace the table on lines 85-92 with one sentence: `Check each against the silent-change table under GO-LANG-15 (go-quality `language.md`, Moving to a New Go Release). Every row there arrives with no compile error.`"
+    },
+    {
+     "file": "skills/go-release/SKILL.md",
+     "line": 167,
+     "severity": "fix",
+     "kind": "duplication",
+     "finding": "The `versionString` snippet is a second copy of GO-REL-06's snippet in rules/go-modules/release.md, with different code. N-4 and N-11 say rule text appears once, so the two copies will drift.",
+     "fix": "Replace the fenced go block on lines 167-188 with `Copy GO-REL-06's `versionString` snippet (go-modules `release.md`, Checked by Running the Binary).`"
+    },
+    {
+     "file": "skills/go-upgrade/SKILL.md",
+     "line": 266,
+     "severity": "fix",
+     "kind": "notes-violation",
+     "finding": "N-12 requires a re-check step for the nogo `stdversion` probe. A8 names the BZL-GO-06 gap audit and the BZL-GO-07 external vet, but not whether `stdversion` under nogo is still inert.",
+     "fix": "After `BZL-GO-07's external `vet` on every rules_go or Go bump.`, insert `Also re-probe whether nogo's `stdversion` still reports the SDK's Go version for every package (BZL-GO-06 Gaps). Keep `passes/stdversion` out until it does not.`"
+    },
+    {
+     "file": "skills/go-upgrade/SKILL.md",
+     "line": 368,
+     "severity": "fix",
+     "kind": "notes-violation",
+     "finding": "The MUST table leaves out MUST rows the procedure enforces: GO-GATE-12 (A6.4 nolint form), GO-LANG-10 (A4, a declined omitzero fix), GO-MOD-10 (B3, SDK stdlib-only) and BZL-GO-07 (A8, a green bazel build is not the vet pass).",
+     "fix": "Append the rows `| 23 | A new finding is silenced with a bare or unexplained `//nolint` | GO-GATE-12 |`, `| 24 | An `omitempty` to `omitzero` swap on contract output lands without a byte golden over nil and empty | GO-LANG-10 |`, `| 25 | The SDK's runtime import graph gains a non-stdlib module | GO-MOD-10 |` and `| 26 | A green `bazel build //...` is read as the vet pass | BZL-GO-07 |`."
+    },
+    {
+     "file": "skills/go-diagnose/SKILL.md",
+     "line": 453,
+     "severity": "fix",
+     "kind": "notes-violation",
+     "finding": "Step D2 (line 261) enforces GO-GATE-02 (MUST: go vet runs as its own step, and a green test run is not a vet pass), but the MUST table has no row for it.",
+     "fix": "Append the row `| 15 | A race diagnosis skips `go vet ./...` because `-race` or `go test` passed | GO-GATE-02 |`."
+    },
+    {
+     "file": "skills/go-release/SKILL.md",
+     "line": 434,
+     "severity": "fix",
+     "kind": "notes-violation",
+     "finding": "references/release-config.md (lines 131-133) enforces GO-GATE-04 (MUST): never move `CGO_ENABLED=0` to workflow level, where it reaches the race job. The MUST table has no row for it.",
+     "fix": "Append the row `| 15 | `CGO_ENABLED=0` is set at workflow level, where it reaches the `-race` job | GO-GATE-04 |`."
+    },
+    {
+     "file": "skills/go-release/SKILL.md",
+     "line": 342,
+     "severity": "fix",
+     "kind": "style",
+     "finding": "The `Tags fetched` check cell does not say what empty output means (N-10). The `--include='release*.yml'` filter prints nothing for a workflow named release.yaml or cd.yml.",
+     "fix": "Replace the Pass cell with `the block shows `fetch-depth: 0`. Empty output means no workflow named release*.yml exists: point the grep at the real release workflow. A reading heuristic`."
+    },
+    {
+     "file": "skills/go-diagnose/SKILL.md",
+     "line": 151,
+     "severity": "nit",
+     "kind": "style",
+     "finding": "The measured output quotes `timed out after 3s`, but the command on line 149 uses `-timeout=30s`. Re-run as written, it prints `after 30s`.",
+     "fix": "Replace `panic: test timed out after 3s` with `panic: test timed out after 30s`."
+    },
+    {
+     "file": "skills/go-diagnose/SKILL.md",
+     "line": 318,
+     "severity": "nit",
+     "kind": "era-unlabelled",
+     "finding": "`(Go 1.25)` here and `(Go 1.24)` on line 380 give the floor but not what gates it (N-9). The owning rules label them go-line gated.",
+     "fix": "Line 318: `(Go 1.25)` becomes `(go 1.25, go-line gated)`. Line 380: `(Go 1.24)` becomes `(go 1.24, go-line gated)`."
+    },
+    {
+     "file": "skills/go-release/SKILL.md",
+     "line": 164,
+     "severity": "nit",
+     "kind": "era-unlabelled",
+     "finding": "`since Go 1.24` does not say what gates it (N-9). release.md says every floor in this family is toolchain-gated.",
+     "fix": "Replace `stamp since Go 1.24` with `stamp since Go 1.24 (toolchain-gated)`."
+    },
+    {
+     "file": "skills/go-upgrade/SKILL.md",
+     "line": 275,
+     "severity": "nit",
+     "kind": "contradiction",
+     "finding": "The step-10 locator grep leaves out the `--exclude-dir=vendor` that GO-GATE-01's step 10 carries, so a vendored iterator producer triggers the gopls step.",
+     "fix": "Replace `grep -rln --include='*.go' -e 'func(yield func(' .` with `grep -rln --include='*.go' --exclude-dir=vendor -e 'func(yield func(' .`."
+    }
+   ],
+   "verifications_exercised": [
+    {
+     "id": "GO-REL-07 (go-release step 4 v2 grep)",
+     "went_red": true,
+     "went_green": true,
+     "note": "The bad config printed 0 (exit 1) and the good config printed 1. The cell says 0 is the finding, which is correct."
+    },
+    {
+     "id": "GO-REL-01 (go-release step 4 clock grep)",
+     "went_red": true,
+     "went_green": true,
+     "note": "Hit .Date, .Now and time on the bad config. The good config gave empty output with exit 1. The empty-output clause is correct."
+    },
+    {
+     "id": "GO-REL-05/GO-REL-10 (step 4 strip and dockers greps)",
+     "went_red": true,
+     "went_green": true,
+     "note": "Both hit the bad config and gave empty output on the good one."
+    },
+    {
+     "id": "GO-REL-12 (go-release step 9 pin-check)",
+     "went_red": true,
+     "went_green": true,
+     "note": "Printed @v7, a quoted @v7 and a SHA with a -evil suffix. The good workflow (SHA with trailer, bare SHA, ./local) gave empty output with exit 1."
+    },
+    {
+     "id": "GO-REL-11 (step 9 id-token and subject-checksums presence greps)",
+     "went_red": true,
+     "went_green": true,
+     "note": "An empty release.yml gave empty output (the finding) and the good workflow printed the line. The clause is correct."
+    },
+    {
+     "id": "GO-REL-02/03/04/05 (go-release step 7 artifact loop)",
+     "went_red": true,
+     "went_green": true,
+     "note": "Copied verbatim and run through run.sh bash. DIRTY, NOT-STATIC, RAISED-GOAMD64, STRIPPED and UNSTAMPED each fired once on their planted binaries. It was silent on the clean -trimpath CGO_ENABLED=0 binary."
+    },
+    {
+     "id": "GO-REL-06 (go-release step 5 --version and (devel) counts)",
+     "went_red": false,
+     "went_green": true,
+     "note": "At the local tag it printed 1 and 0. The step-5 snippet compiles and go vet is clean. The red twin was not re-planted."
+    },
+    {
+     "id": "GO-MOD-01 (go-upgrade A3 floor check)",
+     "went_red": true,
+     "went_green": true,
+     "note": "1.27.0 and 1.26.2 exit 1, and 1.26.0 exits 0. It misses a patch floor below 1.26.0 (1.25.3 exits 0), which is recorded as a finding."
+    },
+    {
+     "id": "GO-LANG-01/GO-GATE-03 (go-upgrade A4 declined-fix grep)",
+     "went_red": true,
+     "went_green": true,
+     "note": "An omitempty on a struct field printed `omitzero: ignoring alternative fix ... (behavior change)` under -a. The twin gave empty output with exit 1. Confirmed that a second plain run prints no notice."
+    },
+    {
+     "id": "GO-LANG-04 (go-upgrade A5 toonew re-check)",
+     "went_red": true,
+     "went_green": true,
+     "note": "Green on the go1.27.1 GOROOT (empty, xargs 123). Red on a planted copy that has the json/v2 line. The same empty-output pass also appears when the file is missing, recorded as verification-dishonest."
+    },
+    {
+     "id": "GO-LANG-16 (go-upgrade A7 GOEXPERIMENT grep)",
+     "went_red": true,
+     "went_green": true,
+     "note": "Caught a YAML env map and a comma list. Silent on the opt-in jsonv2. Also confirmed `GOEXPERIMENT=noswissmap go build` prints `go: unknown GOEXPERIMENT swissmap` with exit 2."
+    },
+    {
+     "id": "GO-GATE-22 (probes.md P6)",
+     "went_red": true,
+     "went_green": true,
+     "note": "The shipped files, with the baseline copied as .golangci.yml, gave empty output. A 5-linter fragment printed 25 missing lines. The count depends on the fragment, and the file-name mismatch is recorded."
+    },
+    {
+     "id": "GO-ERR-05 (probes.md P5 SA4023 blind spot)",
+     "went_red": false,
+     "went_green": true,
+     "note": "The plant compiles and vets clean. staticcheck -tests=true -checks SA4023 exits 0 with empty output, which reproduces the stated blind spot. The positive control was not re-run."
+    },
+    {
+     "id": "GO-OBS-22/GO-MOD-09 (go-diagnose step 0 and I1 greps)",
+     "went_red": true,
+     "went_green": true,
+     "note": "A go 1.24 module printed DefaultGODEBUG with containermaxprocs=0, and a go 1.27.0 module gave empty output with exit 1. A GOEXPERIMENT=nogreenteagc build showed `go1.27.1-X:nogreenteagc` and a `build GOEXPERIMENT=` line."
+    },
+    {
+     "id": "GO-OBS-10 (go-diagnose A2 timeout dump plus A4 tally)",
+     "went_red": true,
+     "went_green": false,
+     "note": "A lock-order inversion test timed out with exit 1. The tally showed 2 sync.Mutex.Lock sharing a `created by sync.(*WaitGroup).Go` line. The A5 awaitGoroutines grep gave empty output with exit 1 on this non-exec hang, which is correct."
+    }
+   ],
+   "unresolved_ids": [],
+   "trigger_evals": [
+    {
+     "skill": "go-release",
+     "should_trigger": [
+      "cut v1.4.0 of our Go CLI and put the binaries on the GitHub release",
+      "after go install our tool, --version prints (devel) instead of the tag, why",
+      "I tagged v2.3.0 with a broken API and people already pulled it, how do I undo that"
+     ],
+     "should_not_trigger": "bump go.mod to go 1.27 and fix whatever breaks",
+     "weakness": "Fires on all three and stays quiet on the neighbour, which is excluded explicitly. The description is an 937-char noun list. `(devel)` and `snapshot` never appear, so a stamping complaint worded only as '(devel)' relies on the '--version' phrase."
+    },
+    {
+     "skill": "go-upgrade",
+     "should_trigger": [
+      "move this repo to Go 1.28",
+      "govulncheck is flagging GO-2026-0412 in golang.org/x/net, what do we do",
+      "dependabot opened a gomod PR, is it safe to merge"
+     ],
+     "should_not_trigger": "tag and publish v0.9.0 of the SDK",
+     "weakness": "None material. The `Not for cutting a release` clause guards the neighbour, and all three utterances map to explicit Use-when phrases."
+    },
+    {
+     "skill": "go-diagnose",
+     "should_trigger": [
+      "go test hangs forever in CI and gets killed",
+      "the service's memory keeps climbing, find out why",
+      "is my refactor actually faster?"
+     ],
+     "should_not_trigger": "add goleak.VerifyTestMain to this package's tests",
+     "weakness": "Keyword overlap: `goleak`, `pprof` and bare `it is slow` also match authoring tasks and build or CI slowness. A request to add a goleak check or speed up `go build` could over-trigger. Narrow `it is slow` to `the program is slow at run time` and anchor goleak as `goleak failed`."
+    }
+   ],
+   "verdict": "fix-then-ship"
+  },
+  {
+   "set": "bazel-quality/go.md + bazel-quality.md Go routing edits (BZL-GO)",
+   "files_read": [
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.claude/skills/research-lang/references/validation.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.claude/skills/research-lang/references/rule-distillation.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-topic-map.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/bazel-quality/go.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/bazel-quality.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-bazel.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/docs/bazel-quality.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/publish.toml",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/bazel-quality/java.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/bazel-quality/architecture.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/bazel-quality/flags.md"
+   ],
+   "findings": [
+    {
+     "file": "rules/bazel-quality/go.md",
+     "line": 130,
+     "severity": "blocker",
+     "kind": "verification-dishonest",
+     "finding": "BZL-GO-09's `-X` grep cannot go red on any BUILD file that passes this set's own buildifier gate. buildifier 6.1.1 rewrites `gc_linkopts = [\"-X\", \"main.version=v1.2.3\"]` onto several lines, which puts `\"-X\",` on a line of its own. After that, `grep ... -e 'gc_linkopts.*-X' -e 'ldflags.*-X' .` exits 1 with empty output, and the row reads that as a pass. The cell's claim that it was watched red on a gc_linkopts plant holds only for a single-line plant that buildifier has not formatted. Fixture: review-bazel-go/linkopts-bfy.",
+     "fix": "In the BZL-GO-09 Verification cell, replace `grep -rn --include='BUILD*' --include='*.bzl' -e 'gc_linkopts.*-X' -e 'ldflags.*-X' .` with `grep -rn --include='BUILD*' --include='*.bzl' -e 'gc_linkopts.*-X' -e 'ldflags.*-X' -e '\"-X\"' -e '\"-X ' .`, and replace `and on a `gc_linkopts` plant.` with `and on a buildifier-formatted `gc_linkopts` plant, where `\"-X\"` sits on its own line.` (Tested: the new form goes red on the formatted plant and stays green on the x_defs twin.)"
+    },
+    {
+     "file": "rules/bazel-quality/go.md",
+     "line": 113,
+     "severity": "fix",
+     "kind": "verification-dishonest",
+     "finding": "BZL-GO-10's workflow grep misses the most common GitHub Actions form, an `env:` map (`GOOS: windows` / `GOARCH: arm64`) on a job whose step runs `bazel build`. On that plant the grep exits 1 with empty output, which is a false pass. It went red only on the inline `GOOS=... bazel build` form. Fixtures: g10-red-envmap, g10-red-inline, g10-green.",
+     "fix": "Replace `grep -rn -e 'GOOS=' -e 'GOARCH=' .github/workflows` with `grep -rn -e 'GOOS=' -e 'GOARCH=' -e 'GOOS:' -e 'GOARCH:' .github/workflows`, and replace `**a hit on a step that runs `bazel` is the finding.**` with `**a hit on, or an `env:` map above, a step that runs `bazel` is the finding.**`"
+    },
+    {
+     "file": "rules/bazel-quality/go.md",
+     "line": 96,
+     "severity": "fix",
+     "kind": "verification-dishonest",
+     "finding": "The BZL-GO-05 registration check stays silent when the registration line is commented out (`# go_sdk.nogo(nogo = \"//tools:my_nogo\")`), because the MODULE.bazel pattern is not anchored. An unregistered nogo therefore passes. Fixture: g05-commented. With the pattern anchored, that plant printed FINDING and the registered twin stayed empty.",
+     "fix": "Replace `! grep -qs -e 'go_sdk.nogo(' MODULE.bazel` with `! grep -qs -e '^go_sdk.nogo(' MODULE.bazel` in the fenced registration check."
+    },
+    {
+     "file": "rules/bazel-quality/go.md",
+     "line": 132,
+     "severity": "fix",
+     "kind": "verification-dishonest",
+     "finding": "BZL-GO-15's config grep looks for `--strip=never` anywhere in any rc file. In a mixed repository, a `build:asan ... --strip=never` line (the shape BZL-CC-18 requires) satisfies it while the `release` config still strips. Fixture g15-mixed: the grep as written printed the asan line, which the cell reads as a pass. The tightened form exited 1 there and matched g15-green.",
+     "fix": "Replace `grep -rn --include='*bazelrc*' -e '--strip=never' -e '--strip never' .` with `grep -rn --include='*bazelrc*' -e 'build:release.*--strip=never' -e 'build:release.*--strip never' .`"
+    },
+    {
+     "file": "rules/bazel-quality/go.md",
+     "line": 43,
+     "severity": "fix",
+     "kind": "unsupported-claim",
+     "finding": "The line credits reading a ruleset's version from the BCR's `metadata.json` to BZL-FLAG-28. BZL-FLAG-28 actually says to list the GitHub releases and sort them by semver. The `metadata.json` check belongs to BZL-ARCH-11, verification (1), and the consolidation cites both IDs. Failure mode 2 at line 161 repeats the miscitation.",
+     "fix": "Line 43: replace `metadata.json` (BZL-FLAG-28).` with `metadata.json` (BZL-ARCH-11, BZL-FLAG-28).`. Line 161: replace `(BZL-FLAG-28).` with `(BZL-ARCH-11, BZL-FLAG-28).`"
+    },
+    {
+     "file": "rules/bazel-quality/go.md",
+     "line": 79,
+     "severity": "fix",
+     "kind": "contradiction",
+     "finding": "The nogo snippet is introduced as 'the registered shape, measured red and green', but it has no `load()` for `nogo` and `TOOLS_NOGO`. Copied as written, it fails at load time, and it breaks index non-negotiable 1 (load every symbol explicitly). The drafter's own fixture (author-go/reg/BUILD.bazel) carries the load line.",
+     "fix": "After the line `# root BUILD.bazel` insert `load(\"@rules_go//go:def.bzl\", \"TOOLS_NOGO\", \"nogo\")` followed by one blank line."
+    },
+    {
+     "file": "rules/bazel-quality.md",
+     "line": 41,
+     "severity": "fix",
+     "kind": "contradiction",
+     "finding": "The index says every rule set here was measured on 8.7.0, 8.8.0 and 9.2.0 (2026-09-06), and that a rule naming no version held on both majors. go.md line 39 says no 8.x leg was run, and it was measured on 2026-09-26. Once go.md is added, the two files give different answers to 'which Bazel versions does this row hold on'.",
+     "fix": "Replace `defaults on \u2014 and every rule set here was measured on 8.7.0, 8.8.0 and 9.2.0\n(2026-09-06).` with `defaults on \u2014 and every rule set here was measured on 8.7.0, 8.8.0 and 9.2.0\n(2026-09-06), except `java.md` and `go.md`, whose own measurement disclosure governs.`"
+    },
+    {
+     "file": "docs/bazel-quality.md",
+     "line": 4,
+     "severity": "fix",
+     "kind": "notes-violation",
+     "finding": "N-13 requires docs/bazel-quality.md to be updated in the same change. The file is untouched and now wrong: it says thirteen depth files, a 165-line index, 353 depth rules and five languages, and its Siblings omit go-modules and go-quality.",
+     "fix": "Line 4: `thirteen depth files` -> `fourteen depth files`. Line 14: `165 lines` -> `168 lines`. Lines 51-55: `353 further rules live in thirteen` -> `368 further rules live in fourteen`, and `five by language\n(Rust, Python, TypeScript, C++, and Java with Kotlin)` -> `six by language\n(Rust, Python, TypeScript, C++, Java with Kotlin, and Go, if you adopt Bazel for Go)`. Siblings (lines 90-92): `rust-cargo`, `python-packaging` and `typescript-packaging` -> `rust-cargo`, `python-packaging`, `typescript-packaging` and `go-modules`, and `rust-quality`, `python-quality` and\n`typescript-quality` -> `rust-quality`, `python-quality`, `typescript-quality` and `go-quality`."
+    },
+    {
+     "file": "rules/bazel-quality/go.md",
+     "line": 36,
+     "severity": "nit",
+     "kind": "notes-violation",
+     "finding": "N-5 pins staticcheck 2026.2.1 (measured 2026-09-26), but the measurement disclosure says `staticcheck 2026.2`.",
+     "fix": "Replace `staticcheck 2026.2 (`honnef.co/go/tools` v0.8.1)` with `staticcheck 2026.2.1 (`honnef.co/go/tools` v0.8.1)`."
+    },
+    {
+     "file": "rules/bazel-quality/go.md",
+     "line": 131,
+     "severity": "nit",
+     "kind": "portability",
+     "finding": "BZL-GO-14's key grep uses `-P` (PCRE lookahead), which BSD/macOS grep does not have. There it exits 2 with an error instead of giving a verdict. The same file routes an adopter to macOS matrix legs.",
+     "fix": "After `**empty output is the pass.**` in the BZL-GO-14 Verification cell, insert `GNU grep only (`-P`); on macOS run it as `ggrep`.`"
+    }
+   ],
+   "verifications_exercised": [
+    {
+     "id": "BZL-GO-01",
+     "went_red": true,
+     "went_green": true,
+     "note": "go_sdk.host grep: exit 0 with a hit on g01-red, exit 1 and empty on g01-green. Empty-output clause is true."
+    },
+    {
+     "id": "BZL-GO-04",
+     "went_red": true,
+     "went_green": true,
+     "note": "go.mod honnef grep: hit on the tool+require plant, empty on the clean go.mod."
+    },
+    {
+     "id": "BZL-GO-05",
+     "went_red": true,
+     "went_green": true,
+     "note": "Registration check printed FINDING on the unregistered nogo and nothing on the registered twin. It also stayed silent on a commented-out go_sdk.nogo line, a false green (fixed by anchoring with ^)."
+    },
+    {
+     "id": "BZL-GO-06",
+     "went_red": true,
+     "went_green": true,
+     "note": "Both greps (vet = True, passes/stdversion) hit g06-red and were empty on g06-green."
+    },
+    {
+     "id": "BZL-GO-07",
+     "went_red": true,
+     "went_green": true,
+     "note": "Underlying claim checked with Go 1.27.1 via run.sh. On a go 1.26.0 module, go vet ./... exited 1 with 'bytes.CutLast requires go1.27 or later (file is go1.26)' and the waitgroup finding. The twin exited 0. A too-new testing/synctest call on a go 1.24.0 floor exited 0, which confirms the fixture note. The bazel-wrapped form was not run (no bazel binary)."
+    },
+    {
+     "id": "BZL-GO-08",
+     "went_red": true,
+     "went_green": true,
+     "note": "race/pure boolean grep hit race = True and was empty on race = \"on\"."
+    },
+    {
+     "id": "BZL-GO-09-path",
+     "went_red": true,
+     "went_green": true,
+     "note": "Path-form grep went red on 7 plants (%workspace%, ./status.sh, status.sh, quoted, space-separated, trailing flag, ci.bazelrc) and green on 4 (tools/status.sh, ./tools/status.sh, absolute, quoted tools/)."
+    },
+    {
+     "id": "BZL-GO-09-X",
+     "went_red": false,
+     "went_green": true,
+     "note": "The gc_linkopts -X grep exited 1 (a pass) on a buildifier-6.1.1-formatted gc_linkopts violation. Adding -e '\"-X\"' -e '\"-X ' made it red there and left it green on the x_defs twin."
+    },
+    {
+     "id": "BZL-GO-10",
+     "went_red": true,
+     "went_green": true,
+     "note": "Went red on the inline GOOS= form. Stayed green (a false pass) on the env: map form. Adding -e 'GOOS:' -e 'GOARCH:' catches both."
+    },
+    {
+     "id": "BZL-GO-12",
+     "went_red": true,
+     "went_green": true,
+     "note": "gazelle_default_attributes grep hit g12-red and was empty on the gazelle_override twin."
+    },
+    {
+     "id": "BZL-GO-14",
+     "went_red": true,
+     "went_green": true,
+     "note": "PCRE key grep reported {BUILD_TIMESTAMP} and {GIT_TAG} and was silent on the STABLE_-only twin."
+    },
+    {
+     "id": "BZL-GO-15",
+     "went_red": true,
+     "went_green": true,
+     "note": "Presence grep: empty (the finding) on the rc without --strip=never and a hit on the green rc. It also gave a false pass on a mixed rc where only build:asan carries --strip=never. Scoping the pattern to build:release fixes this."
+    }
+   ],
+   "unresolved_ids": [],
+   "trigger_evals": [],
+   "verdict": "fix-then-ship"
+  }
+ ],
+ "findings": [
+  {
+   "set": "go-quality index + language.md, errors.md, concurrency.md (review-quality-a)",
+   "file": "rules/go-quality/language.md",
+   "line": 156,
+   "severity": "blocker",
+   "kind": "verification-dishonest",
+   "finding": "GO-LANG-17's `godebug-parity` block (lines 158-165) runs `go list -f '{{.DefaultGODEBUG}}' .`, which prints an empty string for any non-main package. A library member, or a member whose `main` lives under `cmd/`, gives `ws=\"\"` and `off=\"\"` and passes silently even when go.work and the member disagree. Planted in review-quality-a/godebug/bad (member `godebug default=go1.21`, go.work with none, root package `m`): empty output, exit 0. It went red only when the member root was `package main` (godebug-main/bad). The cell's 'empty output is the pass' is false for the common library shape.",
+   "fix": "Replace lines 160-164 of the block with:\n```\ngo list -m -f '{{.Dir}}' | while read -r d; do\n  ws=$(go -C \"$d\" list -test -f '{{if eq .Name \"main\"}}{{.ImportPath}} {{.DefaultGODEBUG}}{{end}}' ./...)\n  off=$(GOWORK=off go -C \"$d\" list -test -f '{{if eq .Name \"main\"}}{{.ImportPath}} {{.DefaultGODEBUG}}{{end}}' ./...)\n  [ \"$ws\" = \"$off\" ] || echo \"godebug differs: $d\"\ndone\n```\nIn the GO-LANG-17 verification cell, append: \"It compares every main and test-main package under each member, so a library member is covered through its tests (watched 2026-09-26 on Go 1.27.1: red on a library member with a test and on a main member, empty on the twin).\""
+  },
+  {
+   "set": "go-quality index + language.md, errors.md, concurrency.md (review-quality-a)",
+   "file": "rules/go-quality/language.md",
+   "line": 143,
+   "severity": "fix",
+   "kind": "notes-violation",
+   "finding": "GO-LANG-24 (generic-interface constraints) and GO-LANG-25 (iterator naming), both SHOULD reading heuristics in the go-language.md ruleset, are dropped with no trace. N-2 says to draw from the Ruleset, and N-6 does not list them as drops. The IDs appear nowhere under rules/.",
+   "fix": "Insert after the GO-LANG-21 row (line 143):\n| GO-LANG-24 | Constrain a generic interface's own type parameter with `any`. Put a stronger constraint (`comparable`, `cmp.Ordered`, a self-referential method constraint) on the concrete implementations, unless every implementation needs it. | An over-constrained interface forecloses implementations that do not need the extra power. The Go blog's generic-interfaces post says to leave stronger constraints to implementations. | For each generic interface, compare its constraint with what every in-module implementation uses. | SHOULD |\n| GO-LANG-25 | Name iterator-returning functions by the `iter` convention: `All` for the single natural full sequence, `Backward` for reverse order, `Keys` or `Values` for map-like projections, and a domain name (`Preorder`) when several sequences exist and none is the default. Put configuration on the arguments (`Scan(min, max)`), never on a family of name variants. | The stdlib (`slices.All`, `maps.Keys`, go 1.23) sets the reader's expectation, and an off-convention name hides which sequence is the default. | `go doc` review of each exported iterator-returning name against the convention. | SHOULD |\nOn line 135, replace \"except GO-LANG-14's and GO-LANG-26's, which are design judgments\" with \"except GO-LANG-14's, GO-LANG-24's, GO-LANG-25's and GO-LANG-26's, which are design judgments\"."
+  },
+  {
+   "set": "go-quality index + language.md, errors.md, concurrency.md (review-quality-a)",
+   "file": "rules/go-quality/language.md",
+   "line": 69,
+   "severity": "fix",
+   "kind": "verification-dishonest",
+   "finding": "The section says golangci-lint's pass is empty output. golangci-lint v2.14.0 prints `0 issues.` on a pass (observed in every review run). The empty-output clause is false, and it contradicts errors.md and concurrency.md, which both say `0 issues.` is the pass.",
+   "fix": "Replace \"reports all four rows. Empty\\noutput is the pass.\" with \"reports all four rows. Exit 0 with `0 issues.` is the pass, and GO-LANG-05's grep passes on empty output.\""
+  },
+  {
+   "set": "go-quality index + language.md, errors.md, concurrency.md (review-quality-a)",
+   "file": "rules/go-quality/language.md",
+   "line": 55,
+   "severity": "fix",
+   "kind": "notes-violation",
+   "finding": "N-8 requires the GO-LANG-04 row to cite x/tools v0.50.0 `toonew.go:28-29`. The row cites `internal/typesinternal/toonew.go` with no line range. The mechanism is correct: golangci govet reported `0 issues.` on the planted json/v2 import, bare `go vet` exited 1, and a go1.26.0 `go build` failed with the quoted `build constraints exclude all Go files`.",
+   "fix": "Replace \"(`internal/typesinternal/toonew.go`, read 2026-09-26)\" with \"(`internal/typesinternal/toonew.go:28-29`, read 2026-09-26)\"."
+  },
+  {
+   "set": "go-quality index + language.md, errors.md, concurrency.md (review-quality-a)",
+   "file": "rules/go-quality/concurrency.md",
+   "line": 159,
+   "severity": "fix",
+   "kind": "contradiction",
+   "finding": "GO-CONC-17 calls the pinned timeout sentinel \"an exported sentinel such as `ErrTimeout`, renamed per project\". GO-ERR-20 (errors.md:186) and GO-API-20 pin the default name `ErrOcxTimeout`. So the pinned default has two names across the set.",
+   "fix": "Replace \"(its `Is` target is an exported sentinel such as `ErrTimeout`, renamed per project)\" with \"(its `Is` target is the exported sentinel, pinned default `ErrOcxTimeout`, which the adopter renames once)\"."
+  },
+  {
+   "set": "go-quality index + language.md, errors.md, concurrency.md (review-quality-a)",
+   "file": "rules/go-quality.md",
+   "line": 84,
+   "severity": "fix",
+   "kind": "contradiction",
+   "finding": "Non-negotiable 8 says `t.Fatal`, `t.FailNow` and `require.*` \"run only on the test goroutine, including inside `wg.Go` and `errgroup.Go` closures\". Read literally, this permits them inside those closures, which is the opposite of GO-TEST-01, which confines them to the test goroutine.",
+   "fix": "Replace \"run only on the test goroutine, including inside `wg.Go` and `errgroup.Go` closures, which no tool checks.\" with \"run only on the test goroutine, never inside a `go` statement or a `wg.Go` or `errgroup.Go` closure, and no tool checks the closure case.\""
+  },
+  {
+   "set": "go-quality index + language.md, errors.md, concurrency.md (review-quality-a)",
+   "file": "rules/go-quality/errors.md",
+   "line": 185,
+   "severity": "fix",
+   "kind": "contradiction",
+   "finding": "GO-ERR-19's rationale teaches `defer func() { _ = os.Remove(p) }() // best-effort temp cleanup` as the compliant form. This is an unconditional deferred temp removal, which GO-IO-12 forbids in any function that renames. The errcheck fact is true (re-measured: `defer os.Remove(p)` red, the `_ =` twin `0 issues.`), but no consolidation carries it, and an agent writing an atomic-write helper will copy it.",
+   "fix": "Replace \"its compliant form is `defer func() { _ = os.Remove(p) }() // best-effort temp cleanup` (golangci-lint v2.14.0, measured 2026-09-26)\" with \"its compliant form is `defer func() { _ = os.Remove(p) }() // best-effort temp cleanup` (golangci-lint v2.14.0, measured 2026-09-26), never in a function that renames the file (GO-IO-12)\"."
+  },
+  {
+   "set": "go-quality index + language.md, errors.md, concurrency.md (review-quality-a)",
+   "file": "rules/go-quality/errors.md",
+   "line": 31,
+   "severity": "fix",
+   "kind": "era-unlabelled",
+   "finding": "Dates and Floors labels `errors.Join` and `errors.AsType` \"toolchain-gated\". N-9 and concurrency.md:32 label stdlib API floors \"go-line gated\" (stdversion), and language.md:35 says \"never compiler-enforced\". So one set uses two opposite gate labels for the same class of floor.",
+   "fix": "Replace lines 29-32 with:\n- **`%w`** is go1.13 and several `%w` in one call is go1.20, both toolchain-gated `fmt` behaviour.\n- **`errors.Join`** (go1.20) and **`errors.AsType`** (go1.26) are go-line gated but never compiler-enforced: a `go 1.25` module compiles `AsType` on 1.27, and only `go vet` `stdversion` sees the mismatch, not staticcheck."
+  },
+  {
+   "set": "go-quality index + language.md, errors.md, concurrency.md (review-quality-a)",
+   "file": "rules/go-quality/errors.md",
+   "line": 55,
+   "severity": "fix",
+   "kind": "unsupported-claim",
+   "finding": "GO-ERR-02's rationale says the corpus has an `err == io.EOF` \"on a JSON decoder whose errors are wrapped\". go-errors.md records only \"`err == io.EOF` on a JSON decoder\" (trivy magefiles/vex.go:304). No consolidation supports the \"whose errors are wrapped\" clause.",
+   "fix": "Replace \"including one on a JSON decoder whose errors are wrapped.\" with \"including one on a JSON decoder.\""
+  },
+  {
+   "set": "go-quality index + language.md, errors.md, concurrency.md (review-quality-a)",
+   "file": "rules/go-quality/errors.md",
+   "line": 39,
+   "severity": "fix",
+   "kind": "verification-dishonest",
+   "finding": "The line says \"every gate was watched red and green\". GO-ERR-05's SA4023 layer has no clean green: the consolidation says \"Watched green: none clean\". This overclaims watch status for a MUST row.",
+   "fix": "Replace \"and every gate was watched red and green.\" with \"and every gate was watched red and green except GO-ERR-05's SA4023 layer, whose only green is its `_test.go` blind spot.\""
+  },
+  {
+   "set": "go-quality index + language.md, errors.md, concurrency.md (review-quality-a)",
+   "file": "rules/go-quality/concurrency.md",
+   "line": 60,
+   "severity": "nit",
+   "kind": "style",
+   "finding": "A doubled blank line sits between the GO-CONC-05 table and `## The Vet Step`.",
+   "fix": "Delete line 60 (the second empty line)."
+  },
+  {
+   "set": "go-quality index + language.md, errors.md, concurrency.md (review-quality-a)",
+   "file": "rules/go-quality.md",
+   "line": 162,
+   "severity": "nit",
+   "kind": "deletion-candidate",
+   "finding": "Deletion test: \"Keep the Block list short enough that a blocked change is unusual. A rule set where everything blocks teaches the reader to negotiate with all of it.\" is authoring advice. A coding agent makes no different edit with or without it.",
+   "fix": "Delete lines 162-163."
+  },
+  {
+   "set": "go-quality index + language.md, errors.md, concurrency.md (review-quality-a)",
+   "file": "rules/go-quality.md",
+   "line": 124,
+   "severity": "nit",
+   "kind": "deletion-candidate",
+   "finding": "Deletion test: \"One level deep: these files do not point at each other.\" describes the artifact's authoring constraint. No reader decision depends on it.",
+   "fix": "Replace \"under. One level deep: these files do not point at each other.\" with \"under.\""
+  },
+  {
+   "set": "go-quality index + language.md, errors.md, concurrency.md (review-quality-a)",
+   "file": "rules/go-quality.md",
+   "line": 98,
+   "severity": "nit",
+   "kind": "deletion-candidate",
+   "finding": "Deletion test: \"Five cross-cutting rules that belong to no single depth file. Everything else is defined in a depth file and only cited here.\" repeats what the section heading and the routing table already say.",
+   "fix": "Replace lines 98-100 with \"The commands these rules name are in the block under the table, run from the repository root.\""
+  },
+  {
+   "set": "go-quality depth files: api-design.md, testing.md, cli-contract.md (GO-API, GO-TEST, GO-CLI)",
+   "file": "rules/go-quality/testing.md",
+   "line": 179,
+   "severity": "blocker",
+   "kind": "contradiction",
+   "finding": "GO-TEST-18 tells the reader to call GO-CLI's `run(args, stdin, stdout, stderr) int`, but GO-CLI-02 (MUST) pins `run(os.Args[1:], os.Stdout, os.Stderr)` returning an `ExitCode` (three params, typed result), and cli-contract.md:52 tests `run(args, &out, &errb)`. Two rows answer the question of run's signature two ways, and no topic-map resolution covers it.",
+   "fix": "In the GO-TEST-18 Rule cell replace \"call `GO-CLI`'s `run(args, stdin, stdout, stderr) int` with `bytes.Buffer`s and assert exit code, stdout and stderr for every flag and error path.\" with \"call `GO-CLI-02`'s `run(args, stdout, stderr)` with `bytes.Buffer`s and assert the returned `ExitCode`, stdout and stderr for every flag and error path.\""
+  },
+  {
+   "set": "go-quality depth files: api-design.md, testing.md, cli-contract.md (GO-API, GO-TEST, GO-CLI)",
+   "file": "rules/go-quality/testing.md",
+   "line": 88,
+   "severity": "blocker",
+   "kind": "unsupported-claim",
+   "finding": "The GO-TEST-06 (MUST) cell says \"`usetesting` is silent below `go 1.24`\". The consolidation says only the 1.24-gated checks are disabled, and a planted go 1.23 module under lib-sdk.golangci.yml still got `os.MkdirTemp` and `os.Setenv` findings (2 issues). Only the context check went silent.",
+   "fix": "Replace \"`usetesting` is silent below `go 1.24`.\" with \"Below `go 1.24`, `usetesting` skips only its 1.24-gated checks (`context-background`, `context-todo`, `os-chdir`) and still reports `os.MkdirTemp` and `os.Setenv`.\""
+  },
+  {
+   "set": "go-quality depth files: api-design.md, testing.md, cli-contract.md (GO-API, GO-TEST, GO-CLI)",
+   "file": "rules/go-quality/cli-contract.md",
+   "line": 60,
+   "severity": "fix",
+   "kind": "verification-dishonest",
+   "finding": "The GO-CLI-20 deprecation grep matches the struct-literal `Deprecated: \"` and `Mark*Deprecated(`. It stays green (exit 1) on the assignment form `old.Deprecated = \"use new\"`, which is equally cobra's deprecation machinery. Planted in fixtures/review-quality-b/c20/assign.",
+   "fix": "Replace the grep in the GO-CLI-20 Verification cell with: `grep -rn --include='*.go' -e 'Deprecated: *\"' -e '\\.Deprecated *= *\"' -e 'MarkDeprecated(' -e 'MarkShorthandDeprecated(' -e 'MarkPersistentFlagDeprecated(' .` (watched: hits the assignment, stays empty on the doc-comment twin)."
+  },
+  {
+   "set": "go-quality depth files: api-design.md, testing.md, cli-contract.md (GO-API, GO-TEST, GO-CLI)",
+   "file": "rules/go-quality/api-design.md",
+   "line": 109,
+   "severity": "fix",
+   "kind": "verification-dishonest",
+   "finding": "The GO-API-11 misspelled-prefix grep (`-i -e '^\\s*//\\s*deprecated'`) goes red on any doc comment for an identifier whose name starts with Deprecated, such as `// DeprecatedCount counts ...`, so \"empty output is the pass\" fails on compliant code. Planted in fixtures/review-quality-b/api11/fp.",
+   "fix": "Replace line 109 with: `grep -rn -i --include='*.go' -e '^\\s*//\\s*deprecated\\b' . | grep -v -e '// Deprecated: '` (watched: still 3 hits on deprecated:, DEPRECATED: and Deprecated -, and empty on the twin and the DeprecatedCount probe)."
+  },
+  {
+   "set": "go-quality depth files: api-design.md, testing.md, cli-contract.md (GO-API, GO-TEST, GO-CLI)",
+   "file": "rules/go-quality/api-design.md",
+   "line": 35,
+   "severity": "fix",
+   "kind": "unsupported-claim",
+   "finding": "The Floors bullet says the `go` line gates `//go:fix inline`, and line 40-41 says a lower line loses GO-API-11's inliner. The consolidation gives only a go1.26 floor. Measured: under go1.27.1, `go fix -diff ./...` inlined an `Old()` call and exited 1 in a `go 1.22` module, the same as at `go 1.27`. The directive is toolchain-gated.",
+   "fix": "Replace lines 35-41 with: \"- **Floors.** `any` (go 1.18), doc-comment syntax (go 1.19), `slices.Clone`, `maps.Clone` and `context.WithTimeoutCause` (go 1.21), and `errors.AsType` (go 1.26) are gated by the `go` line. `//go:fix inline` (go 1.26) and a `-coverpkg` profile listing untested packages (go 1.22) are gated by the toolchain. / - **Pinned default:** libraries and the SDK declare `go 1.26.0`, so every floor here is met. The adopter may override it, and a lower line loses the `errors.AsType` test form.\""
+  },
+  {
+   "set": "go-quality depth files: api-design.md, testing.md, cli-contract.md (GO-API, GO-TEST, GO-CLI)",
+   "file": "rules/go-quality/testing.md",
+   "line": 114,
+   "severity": "fix",
+   "kind": "notes-violation",
+   "finding": "GO-TEST-12 reverses its execwait clause. The consolidation and wave-2 (e) 17 say GO-TEST-12 keeps \"leak-freedom checked under GODEBUG=execwait=2\". The draft says execwait=2 cannot prove it on 1.27.1, citing only the go-diagnose author receipt. The draft is correct: in fixtures/review-quality-b/execwait, CommandContext stayed silent and exec.Command panicked. observability.md, io.md and go-diagnose already follow it. The departure is simply not recorded in the binding notes.",
+   "fix": "No change to testing.md. Add to go-topic-map.md, under Wave 4 (e), item \"19. **GO-TEST-12's execwait clause (supersedes wave-2 (e) 17).** On go1.27.1, `GODEBUG=execwait=2` never fires for an `exec.CommandContext` `Cmd` (its `Cancel` closure refers back to the `Cmd`), and fires only after a GC collects the `Cmd`. GO-TEST-12 reads leak-freedom (every `Start` reaches `Wait`, GO-IO-01), and GO-OBS-07 calls execwait a diagnosis aid with blind spots.\""
+  },
+  {
+   "set": "go-quality depth files: api-design.md, testing.md, cli-contract.md (GO-API, GO-TEST, GO-CLI)",
+   "file": "rules/go-quality/cli-contract.md",
+   "line": 158,
+   "severity": "fix",
+   "kind": "portability",
+   "finding": "The four carried-over Rust stream rules cite no IDs. They reference \"the pinned JSON envelope\", which nothing in the Go set defines, and a Go-only adopter does not have rust-quality installed. The consolidation said to point at the Rust IDs. The paragraph also hedges (\"about 100 ms\").",
+   "fix": "Replace line 158 with: \"Four stream rules carry over unchanged from the Rust CLI contract (`rust-quality` CLI-04, CLI-08, CLI-12, CLI-16) and get no Go ID. Structured errors (CLI-04, MUST) print `{\\\"error\\\": {\\\"code\\\": slug, \\\"exit\\\": int, \\\"message\\\": text}}` on stdout, with slugs from GO-CLI-01's switch. Progress bars (CLI-08, MUST) draw to stderr and are suppressed when it is not a TTY, when `CI` is set, or under a machine-output flag. Help text (CLI-12) is ASCII, short, and free of internal references. A command doing network I/O prints a status line within 100 ms (CLI-16, CONSIDER).\""
+  },
+  {
+   "set": "go-quality depth files: api-design.md, testing.md, cli-contract.md (GO-API, GO-TEST, GO-CLI)",
+   "file": "rules/go-quality/testing.md",
+   "line": 117,
+   "severity": "fix",
+   "kind": "trigger",
+   "finding": "GO-TEST-15 (MUST) governs workflow YAML (`-fuzz` without `-fuzztime`), and its pinned default tells the reader to create a scheduled fuzz workflow. The `**/*.go` glob never loads this file on a workflow edit, and go-quality.md:138 routes \"a CI workflow that runs the gate\" to go-modules, which does not carry GO-TEST-15.",
+   "fix": "In rules/go-quality.md line 132, change the routing cell to: \"Writing or reviewing a test, a fuzz target, a benchmark, a golden file, a helper process that fakes a CLI, a coverage gate, or a CI workflow that runs `go test -fuzz`\"."
+  },
+  {
+   "set": "go-quality depth files: api-design.md, testing.md, cli-contract.md (GO-API, GO-TEST, GO-CLI)",
+   "file": "rules/go-quality/testing.md",
+   "line": 180,
+   "severity": "fix",
+   "kind": "style",
+   "finding": "The GO-TEST-19 verification cell has a grep with no statement of what empty output means (N-10).",
+   "fix": "After \"every hit is rewritten by hand or not at all.\" insert \"Empty output means no benchmark needs a hand rewrite.\""
+  },
+  {
+   "set": "go-quality depth files: api-design.md, testing.md, cli-contract.md (GO-API, GO-TEST, GO-CLI)",
+   "file": "rules/go-quality/api-design.md",
+   "line": 116,
+   "severity": "fix",
+   "kind": "notes-violation",
+   "finding": "Three pinned defaults lack N-5's \"the adopter may override\" clause: GO-API-10's v0 policy (line 116), GO-API-12's 100% (line 127) and GO-API-01's one-package layout (line 64). Line 42-45's blanket covers only the ocx names.",
+   "fix": "Append \" (default, the adopter may override)\" to the end of each sentence beginning \"**Pinned default:**\" in the GO-API-01, GO-API-10 and GO-API-12 rows."
+  },
+  {
+   "set": "go-quality depth files: api-design.md, testing.md, cli-contract.md (GO-API, GO-TEST, GO-CLI)",
+   "file": "rules/go-quality/testing.md",
+   "line": 86,
+   "severity": "nit",
+   "kind": "verification-dishonest",
+   "finding": "GO-TEST-04's rule is per test package, but its command is per file. A package that splits testify and go-cmp across two files gives empty output, and the cell calls that a pass.",
+   "fix": "Replace \"Empty output is the pass.\" in the GO-TEST-04 cell with \"Empty output is the pass for single-file mixing. A package that splits the two across files is a reading check.\""
+  },
+  {
+   "set": "go-quality depth files: api-design.md, testing.md, cli-contract.md (GO-API, GO-TEST, GO-CLI)",
+   "file": "rules/go-quality/testing.md",
+   "line": 114,
+   "severity": "nit",
+   "kind": "style",
+   "finding": "GO-TEST-12 uses the placeholder `./yourpkg` without the \"rename\" instruction N-10 asks for.",
+   "fix": "Replace \"`go test -c -o pkg.test ./yourpkg`\" with \"`go test -c -o pkg.test ./sdk` (rename `./sdk` to your package)\"."
+  },
+  {
+   "set": "go-quality depth files: api-design.md, testing.md, cli-contract.md (GO-API, GO-TEST, GO-CLI)",
+   "file": "rules/go-quality/cli-contract.md",
+   "line": 66,
+   "severity": "nit",
+   "kind": "verification-dishonest",
+   "finding": "setout-locator's exit status is inverted. A listed violation exits 123 through xargs and grep -L, and a clean tree exits 0. The empty-output wording is correct, but a script that gates on the exit code gets the result backwards.",
+   "fix": "Change the comment on line 64 to \"# setout-locator (GO-CLI-20): files that wire stderr but not stdout. Empty output is the pass. Judge by output, not exit status.\""
+  },
+  {
+   "set": "go-quality depth files: api-design.md, testing.md, cli-contract.md (GO-API, GO-TEST, GO-CLI)",
+   "file": "rules/go-quality/cli-contract.md",
+   "line": 16,
+   "severity": "nit",
+   "kind": "era-unlabelled",
+   "finding": "`os.UserConfigDir` needs go 1.13 has no N-9 gate label, while its sibling floors on the same line carry one.",
+   "fix": "Replace \"**`os.UserConfigDir`** needs go 1.13.\" with \"**`os.UserConfigDir`** needs go 1.13 (go-line gated).\""
+  },
+  {
+   "set": "go-quality depth files C: rules/go-quality/io.md, network.md, security.md, observability.md",
+   "file": "rules/go-quality/io.md",
+   "line": 85,
+   "severity": "blocker",
+   "kind": "unsupported-claim",
+   "finding": "GO-IO-06 (MUST) tells the reader that a `_unix.go` file name is enough to hold `Setpgid`, `Pgid` and `syscall.Kill(-pid, sig)`. Go does not treat `unix` as a filename suffix, so `spawn_unix.go` with no `//go:build unix` line compiles on every OS. Planted in review-quality-c/iounix/bad/spawn_unix.go, `GOOS=windows go vet ./iounix/bad/` exited 1 with `unknown field Setpgid in struct literal of type syscall.SysProcAttr`. The `//go:build unix` twin exited 0. The vet catches the mistake, but the rule text tells the agent to make it. The consolidation carries the same error (go-io.md:179).",
+   "fix": "In the GO-IO-06 Rule cell, replace \"`Setpgid`, `Pgid` and `syscall.Kill(-pid, sig)` go in a `//go:build unix` file or a `_unix.go` or `_linux.go` file.\" with \"`Setpgid`, `Pgid` and `syscall.Kill(-pid, sig)` go in a file that carries `//go:build unix`, or in a `_linux.go` file. A `_unix.go` name alone constrains nothing, because `unix` is not a GOOS file-name suffix.\""
+  },
+  {
+   "set": "go-quality depth files C: rules/go-quality/io.md, network.md, security.md, observability.md",
+   "file": "rules/go-quality/observability.md",
+   "line": 104,
+   "severity": "blocker",
+   "kind": "verification-dishonest",
+   "finding": "The GO-OBS-07 (MUST) grep has no `--include` and no Markdown exclude. In any repo that installs this rule at project scope, the grep matches the installed rule files (observability.md, testing.md and io.md all contain `execwait=`), so it can never print empty output on compliant code. Planted in review-quality-c/obs/execwait-clean: a `.claude/rules/go-quality/observability.md` copy plus a CI-only setting gave 4 hits from the rule file. Adding `--exclude='*.md'` gave empty output, exit 1, and the baked Dockerfile still went red. The grep also scans `.git`.",
+   "fix": "At line 96 and in the GO-OBS-07 Verification cell at line 104, replace `grep -rn --exclude-dir=.github --exclude='*_test.go' -e 'execwait=' .` with `grep -rn --exclude-dir=.git --exclude-dir=.github --exclude='*_test.go' --exclude='*.md' -e 'execwait=' .`. After \"Empty output is the pass.\" in the cell, add: \"Markdown is excluded because installed rule files and docs name the setting.\""
+  },
+  {
+   "set": "go-quality depth files C: rules/go-quality/io.md, network.md, security.md, observability.md",
+   "file": "rules/go-quality/io.md",
+   "line": 107,
+   "severity": "fix",
+   "kind": "verification-dishonest",
+   "finding": "The GO-IO-09 grep's `-e 'exec\\.Command.*\"-p\"'` alternative matches compliant `exec.CommandContext(ctx, \"mkdir\", \"-p\", dir)`. In review-quality-c/io09/good (a `mkdir -p` call plus a `--password-stdin` twin) the grep printed the `mkdir` line with exit 0, so \"empty output = pass\" is false on common compliant code. The violation (`docker login -p pw`) went red as intended.",
+   "fix": "In the GO-IO-09 Verification cell, replace \"`: empty output = pass. It sees single-line calls only, so an argv slice built elsewhere is read by hand.\" with \"`: empty output = pass. A `-p` hit whose flag is not a password (`mkdir -p`, `ssh -p`) is read and cleared. It sees single-line calls only, so an argv slice built elsewhere is read by hand.\""
+  },
+  {
+   "set": "go-quality depth files C: rules/go-quality/io.md, network.md, security.md, observability.md",
+   "file": "rules/go-quality/observability.md",
+   "line": 60,
+   "severity": "fix",
+   "kind": "verification-dishonest",
+   "finding": "GO-OBS-02 (MUST) forbids `log.SetFlags` and `log.SetPrefix`, but the global-logging grep matches only `slog.SetDefault(` and `log.SetOutput(`. In review-quality-c/obs/logbad, a library `init` that calls `log.SetFlags(0); log.SetPrefix(...)` printed nothing, so the check cannot go red for half of the banned calls.",
+   "fix": "Replace line 60 with `grep -rl -e 'slog\\.SetDefault(' -e 'log\\.SetOutput(' -e 'log\\.SetFlags(' -e 'log\\.SetPrefix(' --include='*.go' . | xargs -r grep -L -e '^package main$'`."
+  },
+  {
+   "set": "go-quality depth files C: rules/go-quality/io.md, network.md, security.md, observability.md",
+   "file": "rules/go-quality/observability.md",
+   "line": 106,
+   "severity": "fix",
+   "kind": "verification-dishonest",
+   "finding": "The GO-OBS-09 cell says \"A CLI's `main` hit is read too\", but `xargs -r grep -L -e '^package main$'` drops every `package main` file, so a CLI hit is never printed. In review-quality-c/obs/gcmain, a CLI `main` that calls `debug.SetMemoryLimit(1 << 30)` produced empty output. That breaks the rule's \"CLIs never set them\" clause.",
+   "fix": "Replace \"Empty output is the pass for libraries. A CLI's `main` hit is read too.\" with \"Empty output is the pass for libraries. The grep drops `package main` files, so check a CLI by reading its `main` for `debug.SetMemoryLimit(`, `debug.SetGCPercent(` or a `GOGC` or `GOMEMLIMIT` env default.\""
+  },
+  {
+   "set": "go-quality depth files C: rules/go-quality/io.md, network.md, security.md, observability.md",
+   "file": "rules/go-quality/io.md",
+   "line": 111,
+   "severity": "fix",
+   "kind": "contradiction",
+   "finding": "GO-IO-13 says the reasoned G204 suppression is valid only with the `common-false-positives` preset off and cites GO-GATE-14. GO-GATE-14 owns the gosec excludes and thresholds. The preset ban is GO-GATE-09's text as amended by GO-SEC-01 (wave-3 (e) 1 and 2), which is also how security.md:15 attributes it.",
+   "fix": "In the GO-IO-13 Rationale cell, replace \"with gosec's `common-false-positives` exclusion preset off (GO-GATE-14)\" with \"with golangci-lint's `common-false-positives` exclusion preset off (GO-SEC-01, GO-GATE-09)\"."
+  },
+  {
+   "set": "go-quality depth files C: rules/go-quality/io.md, network.md, security.md, observability.md",
+   "file": "rules/go-quality/network.md",
+   "line": 166,
+   "severity": "fix",
+   "kind": "notes-violation",
+   "finding": "N-10 requires every checker cell to say what empty output means. The GO-NET-14 cell runs the GO-NET-14 grep but never says so.",
+   "fix": "At the end of the GO-NET-14 Verification cell, after \"is the finding.\", add \" Empty output is the pass.\""
+  },
+  {
+   "set": "go-quality depth files C: rules/go-quality/io.md, network.md, security.md, observability.md",
+   "file": "rules/go-quality/security.md",
+   "line": 48,
+   "severity": "nit",
+   "kind": "era-unlabelled",
+   "finding": "\"G117 is recent\" gives no version. The consolidation dates G117 only as \"bundled in golangci-lint 2.14.0\".",
+   "fix": "Replace \"G117 is recent, so an older golangci-lint is silent on GO-SEC-04.\" with \"G117 ships in the gosec that golangci-lint v2.14.0 bundles (read 2026-09-26), and a golangci-lint whose gosec lacks it is silent on GO-SEC-04.\""
+  },
+  {
+   "set": "go-quality depth files C: rules/go-quality/io.md, network.md, security.md, observability.md",
+   "file": "rules/go-quality/security.md",
+   "line": 77,
+   "severity": "nit",
+   "kind": "unsupported-claim",
+   "finding": "The GO-SEC-03 cell makes two claims that the consolidation does not record: G402 fires on `MinVersion: tls.VersionTLS10` (`TLS MinVersion too low`), and G402 is silent on a hand-set `CipherSuites` list. Both held in the review fixture (review-quality-c/sec/tlsmin and tlscs, golangci-lint v2.14.0) but have no run in go-security.md. The same applies to GO-SEC-10's G708 sentence (line 159). The consolidation says G708 \"did not fire\", while the review fixture tmpldirect gave `G708: Server-side template injection` on a direct `Execute(w, r.URL.Query().Get(\"q\"))` and nothing on the struct-wrapped twin. The claims are true, but the evidence trail is missing.",
+   "fix": "No rule-text change needed. In the GO-SEC-03 cell, after `(`TLS MinVersion too low`)`, add \" (watched 2026-09-26, golangci-lint v2.14.0)\"."
+  },
+  {
+   "set": "go-quality depth files C: rules/go-quality/io.md, network.md, security.md, observability.md",
+   "file": "rules/go-quality/io.md",
+   "line": 14,
+   "severity": "nit",
+   "kind": "notes-violation",
+   "finding": "N-2 says a cross-family reference cites the rule ID only, and the index routes to the file. io.md names the sibling depth file `network.md` in plain text at line 14 and again at line 140.",
+   "fix": "Line 14: replace \"are `GO-NET` (network.md).\" with \"are `GO-NET`.\" Line 140: replace \"in the `GO-NET` family (network.md), and\" with \"in the `GO-NET` family, and\"."
+  },
+  {
+   "set": "go-quality depth files C: rules/go-quality/io.md, network.md, security.md, observability.md",
+   "file": "rules/go-quality/io.md",
+   "line": 7,
+   "severity": "nit",
+   "kind": "notes-violation",
+   "finding": "N-9 says each depth file opens with one line naming the versions it binds to. network.md:8 and security.md:8 do this. io.md and observability.md start straight into the Owns paragraph and give the versions only under Dates and Floors.",
+   "fix": "After line 6 of io.md, insert a blank line and then \"Binds to Go 1.27.1 and golangci-lint v2.14.0 with its bundled gosec and `noctx`, measured 2026-09-26.\" After line 6 of observability.md, insert a blank line and then \"Binds to Go 1.27.1 and golangci-lint v2.14.0, measured 2026-09-26.\""
+  },
+  {
+   "set": "go-modules (rules/go-modules.md, rules/go-modules/gates.md, rules/go-modules/release.md, rules/go-modules/golangci/{baseline,cli,lib-sdk}.golangci.yml)",
+   "file": "rules/go-modules.md",
+   "line": 146,
+   "severity": "blocker",
+   "kind": "contradiction",
+   "finding": "Routing ping-pong. This row sends 'a Makefile, workflow, Dockerfile or .go-version that runs Go' to go-quality, but rules/go-quality.md:138 sends 'a .go-version file ... or a Makefile or CI workflow that runs the gate' back to go-modules. N-1 makes go-quality the router for these residual misses, and every workflow rule (GO-MOD-16/17/18, GO-GATE-04/07/08, GO-REL-06/11/12) lives in this set. So an agent that follows this row away from go-modules while editing a workflow loses exactly the rules that govern it.",
+   "fix": "Replace the row with: | Editing any `*.go` file, or the `ENV` lines of a `Dockerfile` that runs Go | `go-quality` (sibling set, below) |"
+  },
+  {
+   "set": "go-modules (rules/go-modules.md, rules/go-modules/gates.md, rules/go-modules/release.md, rules/go-modules/golangci/{baseline,cli,lib-sdk}.golangci.yml)",
+   "file": "rules/go-modules.md",
+   "line": 91,
+   "severity": "blocker",
+   "kind": "contradiction",
+   "finding": "Non-negotiable 9 says 'neither the SDK nor a library carries a tool directive' under a header that says every line blocks a merge. Its owner row GO-MOD-11 (line 117, and go-modules.md consolidation) is MUST only for the SDK and SHOULD for a library. So the two rows give a library `tool` line two different severities.",
+   "fix": "| 9 | The SDK's runtime import graph is stdlib-only, and the SDK carries no `tool` directive (in a library it is SHOULD, GO-MOD-11). | GO-MOD-10, GO-MOD-11 |"
+  },
+  {
+   "set": "go-modules (rules/go-modules.md, rules/go-modules/gates.md, rules/go-modules/release.md, rules/go-modules/golangci/{baseline,cli,lib-sdk}.golangci.yml)",
+   "file": "rules/go-modules.md",
+   "line": 83,
+   "severity": "blocker",
+   "kind": "contradiction",
+   "finding": "Non-negotiable 1 makes 'say whether empty output is the pass or the finding' merge-blocking and cites GO-CORE-03, but GO-CORE-03 is SHOULD in its owner table (rules/go-quality.md). The go-quality index's own hoist (its line 18) cites only GO-CORE-01/02.",
+   "fix": "| 1 | Never reach green by weakening the check (a dropped gate step, a linter or setting removed from the copied golangci file, a bare `//nolint`, `-mod=mod`, `-buildvcs=false`), and never trust a verification nobody watched go red. | GO-CORE-01, GO-CORE-02 |"
+  },
+  {
+   "set": "go-modules (rules/go-modules.md, rules/go-modules/gates.md, rules/go-modules/release.md, rules/go-modules/golangci/{baseline,cli,lib-sdk}.golangci.yml)",
+   "file": "rules/go-modules/release.md",
+   "line": 152,
+   "severity": "blocker",
+   "kind": "unsupported-claim",
+   "finding": "The GO-REL-11 MUST prescribes `subject-checksums: dist/checksums.txt` and states that `subject-path: dist/<tool>-*` matches only the SBOMs '(measured 2026-09-26)'. The consolidation (go-release.md:94) prescribes `subject-path: dist/<tool>-*`, and no authoring note or (e) resolution ratifies the change. The departure comes from author-receipt.json:518, which says 'needs an orchestrator decision'. The claim looks true: the release-dist snapshot listing has only `mytool-*.spdx.sbom.json` at the dist root, and the binaries sit under `mytool_<os>_<arch>_v*/`. It is still unratified.",
+   "fix": "No text change in release.md. Ratify the departure. Append to go-topic-map.md \u203a Authoring notes: 'N-15. GO-REL-11 uses `subject-checksums: dist/checksums.txt`. On goreleaser 2.17.1 with `formats: [binary]`, `subject-path: dist/<tool>-*` matches only the `.spdx.sbom.json` files (author-go-release snapshot and go-release-consolidation/release-dist listing, 2026-09-26).' Then amend go-release.md GO-REL-11 in place to match. If the orchestrator declines, revert the row to the consolidation text."
+  },
+  {
+   "set": "go-modules (rules/go-modules.md, rules/go-modules/gates.md, rules/go-modules/release.md, rules/go-modules/golangci/{baseline,cli,lib-sdk}.golangci.yml)",
+   "file": "rules/go-modules/release.md",
+   "line": 76,
+   "severity": "blocker",
+   "kind": "unsupported-claim",
+   "finding": "The GO-REL-01 rationale says '`{{.Date}}` resolves to the commit time under goreleaser 2.17.1 (measured 2026-09-26)'. The consolidation classes `{{.Date}}` as wall clock (go-release.md:156, the golangci-lint violation row), and no note ratifies the reversal. Its only source is author-receipt.json:519, flagged as a contradiction for the orchestrator. The rule text (ban every date stamp) still matches the consolidation, so only the rationale departs.",
+   "fix": "Ratify with an authoring note: 'N-16. goreleaser 2.17.1 resolves {{ .Date }} to the commit time (author-go-release v-date fixture, 2026-09-26). GO-REL-01 keeps its ban because a date stamp duplicates vcs.time.' Then amend go-release.md's GO-REL-01 rationale and its violations row. Otherwise replace the sentence with: 'A date stamp only duplicates `vcs.time`, so the rule bans `{{.Date}}` too.'"
+  },
+  {
+   "set": "go-modules (rules/go-modules.md, rules/go-modules/gates.md, rules/go-modules/release.md, rules/go-modules/golangci/{baseline,cli,lib-sdk}.golangci.yml)",
+   "file": "rules/go-modules/gates.md",
+   "line": 113,
+   "severity": "fix",
+   "kind": "verification-dishonest",
+   "finding": "The GO-GATE-10 grep false-reds on a compliant repository. `grep -rc --include='*golangci*'` also counts the golangci workflow that the go-modules glob loads on purpose. Watched: the shipped baseline plus `.github/workflows/golangci-lint.yml` printed `.golangci.yml:3` and `.github/workflows/golangci-lint.yml:0`, so the stated 'any count below 3' reads as a finding. The consolidation's check was behavioural, not this grep.",
+   "fix": "Replace the Verification cell with: `grep -c -e '^[^#]*uniq-by-line: false' -e '^[^#]*max-issues-per-linter: 0' -e '^[^#]*max-same-issues: 0' .golangci.yml`, run from the module root, prints one count, and any count below 3 is the finding. (Watched: 3 on the shipped baseline, 0 on a planted default config.)"
+  },
+  {
+   "set": "go-modules (rules/go-modules.md, rules/go-modules/gates.md, rules/go-modules/release.md, rules/go-modules/golangci/{baseline,cli,lib-sdk}.golangci.yml)",
+   "file": "rules/go-modules/release.md",
+   "line": 138,
+   "severity": "fix",
+   "kind": "verification-dishonest",
+   "finding": "The GO-REL-07 grep false-reds on any repo whose release workflow is named `goreleaser.yml`, because `--include='*goreleaser*.y*ml'` also matches `.github/workflows/goreleaser.yml`, which never starts with `version: 2`. Watched: a compliant `.goreleaser.yaml` plus that workflow listed the workflow.",
+   "fix": "`grep -rL --include='*goreleaser*.y*ml' --exclude-dir=.github -e '^version: *2$' .` lists configs that lack the line. Any output is the finding, and empty output is the pass. (Watched: empty on the compliant twin, lists `.goreleaser.yaml` on the violation.)"
+  },
+  {
+   "set": "go-modules (rules/go-modules.md, rules/go-modules/gates.md, rules/go-modules/release.md, rules/go-modules/golangci/{baseline,cli,lib-sdk}.golangci.yml)",
+   "file": "rules/go-modules/release.md",
+   "line": 80,
+   "severity": "fix",
+   "kind": "verification-dishonest",
+   "finding": "The GO-REL-05 grep `-e '-s -w'` misses the common list form (`ldflags:` with `- -s` and `- -w` on separate lines) and the reversed `-w -s`. Watched: exit 1 on a config that strips, which the cell calls 'the rule is met'.",
+   "fix": "`grep -rn --include='*goreleaser*.y*ml' --exclude-dir=.github -e '-s -w' -e '-w -s' -e '^[[:space:]]*- -s[[:space:]]*$' -e '^[[:space:]]*- -w[[:space:]]*$' .` locates stripping, and empty output means the rule is met. (Watched: hits both list lines on the violation, empty on the twin.)"
+  },
+  {
+   "set": "go-modules (rules/go-modules.md, rules/go-modules/gates.md, rules/go-modules/release.md, rules/go-modules/golangci/{baseline,cli,lib-sdk}.golangci.yml)",
+   "file": "rules/go-modules.md",
+   "line": 103,
+   "severity": "fix",
+   "kind": "verification-dishonest",
+   "finding": "'Run each verification from the module root' conflicts with the `.github` greps in GO-MOD-03, GO-MOD-16, GO-MOD-17 and GO-MOD-18. `.github` lives at the repository root. From a nested module root (the GO-REL-14 shape), grep exits 2, and GO-MOD-17 counts exit 2 as the finding, which is a false red.",
+   "fix": "The GO-MOD family is defined here and nowhere else. Run each verification from the module root, except the `.github` greps in GO-MOD-03 and GO-MOD-16 to 18, which run from the repository root."
+  },
+  {
+   "set": "go-modules (rules/go-modules.md, rules/go-modules/gates.md, rules/go-modules/release.md, rules/go-modules/golangci/{baseline,cli,lib-sdk}.golangci.yml)",
+   "file": "rules/go-modules.md",
+   "line": 58,
+   "severity": "fix",
+   "kind": "contradiction",
+   "finding": "The index calls its block 'the manifest slice of GO-GATE-01's full ordered block', but it adds `golangci-lint config verify`, which is not a GO-GATE-01 step. It also orders steps as tidy, build, vet, lint, govulncheck, while GO-GATE-01 says to run them 'in order' as vet, lint, build, tidy, govulncheck.",
+   "fix": "Replace the first sentence with: These are the manifest-facing checks. `go mod tidy -diff`, `go build`, `go vet`, `golangci-lint run` and `govulncheck` are GO-GATE-01 steps 7, 5, 2, 3 and 8, and CI runs them in GO-GATE-01's order. `config verify` is GO-GATE-09's config-change check, not a gate step."
+  },
+  {
+   "set": "go-modules (rules/go-modules.md, rules/go-modules/gates.md, rules/go-modules/release.md, rules/go-modules/golangci/{baseline,cli,lib-sdk}.golangci.yml)",
+   "file": "rules/go-modules/release.md",
+   "line": 30,
+   "severity": "fix",
+   "kind": "notes-violation",
+   "finding": "N-9 requires each depth file to open with one line naming the versions it binds to (gates.md does, at line 8). In release.md that line is at line 30, after the ownership paragraph and the Contents line.",
+   "fix": "Move 'Binds to Go 1.27.1, goreleaser 2.17.1, cosign 3.1.3, govulncheck v1.8.0 and syft (measured 2026-09-26).' to line 7, directly under the H1. Leave line 30 as: 'Every floor below is toolchain-gated: the Go that builds the binary decides it, not the `go` line.'"
+  },
+  {
+   "set": "go-modules (rules/go-modules.md, rules/go-modules/gates.md, rules/go-modules/release.md, rules/go-modules/golangci/{baseline,cli,lib-sdk}.golangci.yml)",
+   "file": "rules/go-modules.md",
+   "line": 134,
+   "severity": "fix",
+   "kind": "era-unlabelled",
+   "finding": "GO-MOD-16's behaviour claims (a patch-bearing `go-version-file` line installs that exact patch, and `check-latest` cannot move an exact patch) are setup-go-version-specific. The consolidation's floor is setup-go v6, and the row names no version.",
+   "fix": "Append to the Rationale cell: (setup-go v6, read 2026-09-26)."
+  },
+  {
+   "set": "go-modules (rules/go-modules.md, rules/go-modules/gates.md, rules/go-modules/release.md, rules/go-modules/golangci/{baseline,cli,lib-sdk}.golangci.yml)",
+   "file": "rules/go-modules.md",
+   "line": 136,
+   "severity": "nit",
+   "kind": "era-unlabelled",
+   "finding": "GO-MOD-18 names `GOAUTH` without its go 1.24 floor. Its Verification cell also does not say what empty output means (N-10).",
+   "fix": "Rule: '... and never sets `GOAUTH=off` (`GOAUTH` go 1.24).' Verification: '`grep -rn -e 'GOPRIVATE' -e 'GOAUTH' .github/workflows`, read against each private fetch: a private fetch with no `GOPRIVATE` hit, or any `GOAUTH=off` hit, is the finding.'"
+  },
+  {
+   "set": "go-modules (rules/go-modules.md, rules/go-modules/gates.md, rules/go-modules/release.md, rules/go-modules/golangci/{baseline,cli,lib-sdk}.golangci.yml)",
+   "file": "rules/go-modules.md",
+   "line": 111,
+   "severity": "nit",
+   "kind": "era-unlabelled",
+   "finding": "N-9 requires each floor to say what gates it. GO-MOD-03's '(go 1.23)' and GO-MOD-11's '(go 1.24)' (line 117) do not say whether the toolchain or the `go` line gates them.",
+   "fix": "GO-MOD-03: '(go 1.23 toolchain)'. GO-MOD-11: '(go 1.24, go-line gated)'."
+  },
+  {
+   "set": "go-modules (rules/go-modules.md, rules/go-modules/gates.md, rules/go-modules/release.md, rules/go-modules/golangci/{baseline,cli,lib-sdk}.golangci.yml)",
+   "file": "rules/go-modules/gates.md",
+   "line": 75,
+   "severity": "nit",
+   "kind": "style",
+   "finding": "The GO-GATE-04 Verification cell does not state what empty output means (N-10).",
+   "fix": "Append: 'Empty output is the pass.'"
+  },
+  {
+   "set": "go-modules (rules/go-modules.md, rules/go-modules/gates.md, rules/go-modules/release.md, rules/go-modules/golangci/{baseline,cli,lib-sdk}.golangci.yml)",
+   "file": "rules/go-modules/gates.md",
+   "line": 63,
+   "severity": "nit",
+   "kind": "verification-dishonest",
+   "finding": "GO-GATE-01's root listing omits the `testdata` exclusion that the index's `roots` command (go-modules.md:66) uses. A `testdata/**/go.mod` then reads as 'a root no job runs in', which is a false finding. It also gives two definitions of a module root.",
+   "fix": "`find . -name go.mod -not -path '*/vendor/*' -not -path '*/testdata/*'` lists the roots, and a root no job runs in is the finding."
+  },
+  {
+   "set": "go-modules (rules/go-modules.md, rules/go-modules/gates.md, rules/go-modules/release.md, rules/go-modules/golangci/{baseline,cli,lib-sdk}.golangci.yml)",
+   "file": "rules/go-modules/gates.md",
+   "line": 114,
+   "severity": "nit",
+   "kind": "era-unlabelled",
+   "finding": "GO-GATE-11 pins `nilness@v0.49.0`, which is the version watched in C-1. N-5's dated x/tools pin is v0.50.0, and the row does not say why it differs.",
+   "fix": "After the command add: '(watched at x/tools v0.49.0, 2026-09-26; re-probe on a bump)'."
+  },
+  {
+   "set": "go-modules (rules/go-modules.md, rules/go-modules/gates.md, rules/go-modules/release.md, rules/go-modules/golangci/{baseline,cli,lib-sdk}.golangci.yml)",
+   "file": "rules/go-modules/release.md",
+   "line": 147,
+   "severity": "nit",
+   "kind": "verification-dishonest",
+   "finding": "pin-check false-reds on a quoted SHA ref (`uses: 'actions/setup-go@<40hex>' # v6.0.0`, watched printed), and it never checks the `# vX.Y.Z` trailer that GO-REL-12 requires.",
+   "fix": "`grep -rnE 'uses:[[:space:]]*[^.[:space:]][^[:space:]]*@' .github/workflows | grep -vE \"@[0-9a-f]{40}['\\\"]?([[:space:]]|$)\"`. Then add to the GO-REL-12 cell: 'The `# vX.Y.Z` trailer is read, not grepped.'"
+  },
+  {
+   "set": "go-modules (rules/go-modules.md, rules/go-modules/gates.md, rules/go-modules/release.md, rules/go-modules/golangci/{baseline,cli,lib-sdk}.golangci.yml)",
+   "file": "rules/go-modules/golangci/baseline.golangci.yml",
+   "line": 112,
+   "severity": "nit",
+   "kind": "portability",
+   "finding": "The depguard `logging` desc 'new fleet code logs through log/slog' ships internal 'fleet' jargon in a message adopters will see. It appears at baseline lines 112/114/116, cli 117/119/121 and lib-sdk 126/128/130. The owner GO-OBS-01 row does not fix this wording.",
+   "fix": "In all three files replace each `desc: \"new fleet code logs through log/slog\"` with `desc: \"new code logs through log/slog\"`."
+  },
+  {
+   "set": "go-modules (rules/go-modules.md, rules/go-modules/gates.md, rules/go-modules/release.md, rules/go-modules/golangci/{baseline,cli,lib-sdk}.golangci.yml)",
+   "file": "rules/go-modules.md",
+   "line": 34,
+   "severity": "nit",
+   "kind": "trigger",
+   "finding": "GO-MOD-17 tells the reader to edit `.github/dependabot.yml`. Neither the go-modules glob list (binding, N-1) nor go-quality's routing reaches that file, so an agent editing it never has GO-MOD-17 loaded, and the index does not name the gap.",
+   "fix": "Line 34: 'A `*.go` file, a Makefile, `.github/dependabot.yml` or another workflow never loads it, and the `go-quality` index routes those.' (orchestrator: add dependabot.yml to go-quality.md's routing row 138)."
+  },
+  {
+   "set": "go-modules (rules/go-modules.md, rules/go-modules/gates.md, rules/go-modules/release.md, rules/go-modules/golangci/{baseline,cli,lib-sdk}.golangci.yml)",
+   "file": "rules/go-modules.md",
+   "line": 24,
+   "severity": "nit",
+   "kind": "deletion-candidate",
+   "finding": "Deletion test on the index. Lines 24-25 ('Traps, not tutorials...'), line 75 ('A task is done when...', which duplicates go-quality.md:66), and lines 173-174 ('A go.mod edit never pays for it...') prevent no mistake.",
+   "fix": "Delete lines 24-25, line 75 and the last sentence of the go-quality Siblings bullet (lines 173-174)."
+  },
+  {
+   "set": "go-release, go-upgrade, go-diagnose skills (phase 8 content review)",
+   "file": "skills/go-release/references/release-config.md",
+   "line": 95,
+   "severity": "blocker",
+   "kind": "contradiction",
+   "finding": "The pinned release workflow breaks GO-MOD-16, a MUST it cites on line 124. GO-MOD-16 requires `GOTOOLCHAIN=local` on build jobs, and the job env sets only GORELEASER_CURRENT_TAG. An adopter who copies the template ships a release job that fails the rule the skill's MUST table (row 3) enforces.",
+   "fix": "After line 95 (`      GORELEASER_CURRENT_TAG: ${{ github.ref_name }}`), insert the line `      GOTOOLCHAIN: local`. In the table under the workflow, after the `go-version-file: go.mod` row, add the row `| `GOTOOLCHAIN: local` | the build uses the toolchain setup-go installed and never downloads another one | GO-MOD-16 |`."
+  },
+  {
+   "set": "go-release, go-upgrade, go-diagnose skills (phase 8 content review)",
+   "file": "skills/go-upgrade/SKILL.md",
+   "line": 92,
+   "severity": "blocker",
+   "kind": "contradiction",
+   "finding": "The A1 table says `stdversion` is the only check for a stdlib symbol newer than the `go` line. Step A5 (line 198), GO-LANG-04 and wave-4 (e) 13 / N-8 all name the `oldstable` leg's `go build ./...` as the durable check, and they say golangci's govet and nogo are blind. Two statements in one file give different answers to the same question.",
+   "fix": "Replace the cell `Step A5's `stdversion` is the only check` with `Step A5's `stdversion`, plus the `oldstable` leg's `go build ./...`, which is the durable check (GO-LANG-04)`."
+  },
+  {
+   "set": "go-release, go-upgrade, go-diagnose skills (phase 8 content review)",
+   "file": "skills/go-upgrade/SKILL.md",
+   "line": 321,
+   "severity": "blocker",
+   "kind": "contradiction",
+   "finding": "The text says `go.uber.org/automaxprocs goes only from a main module at go 1.25 or above`, and line 89 also says `from a main module`. That wording implies a library at go 1.26 keeps the import. GO-OBS-06 (MUST) forbids the import in every module at go 1.25 or later, GO-MOD-09 says never import it in a library, and go-diagnose MUST row 4 reports it as a finding.",
+   "fix": "Line 321: replace the bullet with `- `go.uber.org/automaxprocs` is removed from every module whose `go` line is 1.25 or above, and a library never imports it at any line (GO-MOD-09, GO-OBS-06).` Line 89: replace `Remove `go.uber.org/automaxprocs` from a main module (GO-MOD-09)` with `Remove `go.uber.org/automaxprocs` (GO-MOD-09, GO-OBS-06)`."
+  },
+  {
+   "set": "go-release, go-upgrade, go-diagnose skills (phase 8 content review)",
+   "file": "skills/go-release/SKILL.md",
+   "line": 98,
+   "severity": "fix",
+   "kind": "contradiction",
+   "finding": "Step 2 tags the commit locally before step 3 runs. Step 3 is titled `run the API gate before the tag`, and line 78 says the bump size comes from step 3's report. A library therefore picks and tags its version before the report that decides the version.",
+   "fix": "Replace lines 98-99 with `Then tag that commit **locally** and do not push it until step 9. A library or SDK runs step 3 first and tags only once its report agrees with the version. Steps 5 and 8 build from the local tag.`"
+  },
+  {
+   "set": "go-release, go-upgrade, go-diagnose skills (phase 8 content review)",
+   "file": "skills/go-release/references/release-config.md",
+   "line": 102,
+   "severity": "fix",
+   "kind": "contradiction",
+   "finding": "`go-version-file: go.mod` and a goreleaser run from the repository root are wrong for the GO-REL-14 nested CLI that step 5 supports. There the root `go.mod` is the parent module, usually with a bare `go 1.N.0` line and no `toolchain` line, which is exactly the shape GO-MOD-16 forbids pointing `go-version-file` at.",
+   "fix": "After the workflow table (after line 129), add the paragraph: `For a nested CLI (GO-REL-14), set `go-version-file: tools/mytool/go.mod` and add `workdir: tools/mytool` to the goreleaser-action `with:` block, and keep `.goreleaser.yaml` in `tools/mytool`. Rename the path.`"
+  },
+  {
+   "set": "go-release, go-upgrade, go-diagnose skills (phase 8 content review)",
+   "file": "skills/go-upgrade/SKILL.md",
+   "line": 207,
+   "severity": "fix",
+   "kind": "verification-dishonest",
+   "finding": "The toonew re-check reads empty output as a pass. If a future toolchain moves or renames `toonew.go`, grep writes `No such file or directory` to stderr, stdout stays empty and xargs exits 123, which is the same exit code as a real pass. Watched: with a planted GOROOT that lacks the file, stdout was empty with exit 123, the same result as the genuine pass on go1.27.1.",
+   "fix": "Replace comment line 206 with `# A hit means bare go vet is blind too, and only the oldstable build leg remains. A `No such file or directory` error means the file moved: find toonew.go under GOROOT's src/cmd/vendor and re-run. It is never a pass.`"
+  },
+  {
+   "set": "go-release, go-upgrade, go-diagnose skills (phase 8 content review)",
+   "file": "skills/go-upgrade/SKILL.md",
+   "line": 143,
+   "severity": "fix",
+   "kind": "verification-dishonest",
+   "finding": "MUST row 1 (line 347) calls a patch-level floor a finding, but the floor check goes green on a patch floor below 1.26.0. Watched: `go 1.25.3` exits 0.",
+   "fix": "After line 143, insert `# Patch-level floor (GO-MOD-01). Any output is the finding. Empty output passes.` followed by `go list -m -f '{{.GoVersion}}' | grep -v -E -e '^1\\.[0-9]+(\\.0)?$'` (watched: prints `1.25.3` and `1.26.2`, and is silent on `1.26.0`)."
+  },
+  {
+   "set": "go-release, go-upgrade, go-diagnose skills (phase 8 content review)",
+   "file": "skills/go-upgrade/SKILL.md",
+   "line": 64,
+   "severity": "fix",
+   "kind": "contradiction",
+   "finding": "The module-root finder leaves out the `testdata` exclusion that GO-MOD-06's `roots` block in rules/go-modules.md carries. As written, every gate step also runs inside a testdata module, and those are often deliberately broken, so the gate goes falsely red.",
+   "fix": "Replace `find . -name go.mod -not -path '*/vendor/*'` with `find . -name go.mod -not -path '*/vendor/*' -not -path '*/testdata/*'`."
+  },
+  {
+   "set": "go-release, go-upgrade, go-diagnose skills (phase 8 content review)",
+   "file": "skills/go-upgrade/references/probes.md",
+   "line": 231,
+   "severity": "fix",
+   "kind": "contradiction",
+   "finding": "P6 names the baseline `.golangci.yml`, on this line and on line 240. GO-GATE-22 and gates.md ship it as `baseline.golangci.yml`, and `.golangci.yml` is each module's copy of one of the three files. Run in a module whose copy is the lib-sdk file, the superset check compares the wrong pair.",
+   "fix": "Line 231: `for f in baseline.golangci.yml cli.golangci.yml lib-sdk.golangci.yml; do`. Line 240: `comm -23 <(en baseline.golangci.yml) <(en \"$overlay\") | sed \"s|^|$overlay missing |\"`. Line 225: after `on the three golangci-lint files`, insert ` (`baseline.golangci.yml`, `cli.golangci.yml`, `lib-sdk.golangci.yml`)`."
+  },
+  {
+   "set": "go-release, go-upgrade, go-diagnose skills (phase 8 content review)",
+   "file": "skills/go-upgrade/references/probes.md",
+   "line": 246,
+   "severity": "fix",
+   "kind": "contradiction",
+   "finding": "The measured line says a five-linter fragment lists 26 missing baseline linters. GO-GATE-22 says a five-linter fragment drops 28. The count depends on the fragment (a fresh one printed 25), so a re-prober who compares against 26 reports a spurious difference.",
+   "fix": "Replace `and the superset check lists 26 missing baseline linters for it` with `and the superset check prints one line for each baseline linter the fragment omits (the count depends on the fragment)`."
+  },
+  {
+   "set": "go-release, go-upgrade, go-diagnose skills (phase 8 content review)",
+   "file": "skills/go-upgrade/SKILL.md",
+   "line": 85,
+   "severity": "fix",
+   "kind": "duplication",
+   "finding": "The A1 silent-change table restates GO-LANG-15's silent-change table in rules/go-quality/language.md, which is depth text (N-4, N-11). The copy has already drifted: it drops the `slices.Insert` and core-type rows and rewords the stdversion row.",
+   "fix": "Replace the table on lines 85-92 with one sentence: `Check each against the silent-change table under GO-LANG-15 (go-quality `language.md`, Moving to a New Go Release). Every row there arrives with no compile error.`"
+  },
+  {
+   "set": "go-release, go-upgrade, go-diagnose skills (phase 8 content review)",
+   "file": "skills/go-release/SKILL.md",
+   "line": 167,
+   "severity": "fix",
+   "kind": "duplication",
+   "finding": "The `versionString` snippet is a second copy of GO-REL-06's snippet in rules/go-modules/release.md, with different code. N-4 and N-11 say rule text appears once, so the two copies will drift.",
+   "fix": "Replace the fenced go block on lines 167-188 with `Copy GO-REL-06's `versionString` snippet (go-modules `release.md`, Checked by Running the Binary).`"
+  },
+  {
+   "set": "go-release, go-upgrade, go-diagnose skills (phase 8 content review)",
+   "file": "skills/go-upgrade/SKILL.md",
+   "line": 266,
+   "severity": "fix",
+   "kind": "notes-violation",
+   "finding": "N-12 requires a re-check step for the nogo `stdversion` probe. A8 names the BZL-GO-06 gap audit and the BZL-GO-07 external vet, but not whether `stdversion` under nogo is still inert.",
+   "fix": "After `BZL-GO-07's external `vet` on every rules_go or Go bump.`, insert `Also re-probe whether nogo's `stdversion` still reports the SDK's Go version for every package (BZL-GO-06 Gaps). Keep `passes/stdversion` out until it does not.`"
+  },
+  {
+   "set": "go-release, go-upgrade, go-diagnose skills (phase 8 content review)",
+   "file": "skills/go-upgrade/SKILL.md",
+   "line": 368,
+   "severity": "fix",
+   "kind": "notes-violation",
+   "finding": "The MUST table leaves out MUST rows the procedure enforces: GO-GATE-12 (A6.4 nolint form), GO-LANG-10 (A4, a declined omitzero fix), GO-MOD-10 (B3, SDK stdlib-only) and BZL-GO-07 (A8, a green bazel build is not the vet pass).",
+   "fix": "Append the rows `| 23 | A new finding is silenced with a bare or unexplained `//nolint` | GO-GATE-12 |`, `| 24 | An `omitempty` to `omitzero` swap on contract output lands without a byte golden over nil and empty | GO-LANG-10 |`, `| 25 | The SDK's runtime import graph gains a non-stdlib module | GO-MOD-10 |` and `| 26 | A green `bazel build //...` is read as the vet pass | BZL-GO-07 |`."
+  },
+  {
+   "set": "go-release, go-upgrade, go-diagnose skills (phase 8 content review)",
+   "file": "skills/go-diagnose/SKILL.md",
+   "line": 453,
+   "severity": "fix",
+   "kind": "notes-violation",
+   "finding": "Step D2 (line 261) enforces GO-GATE-02 (MUST: go vet runs as its own step, and a green test run is not a vet pass), but the MUST table has no row for it.",
+   "fix": "Append the row `| 15 | A race diagnosis skips `go vet ./...` because `-race` or `go test` passed | GO-GATE-02 |`."
+  },
+  {
+   "set": "go-release, go-upgrade, go-diagnose skills (phase 8 content review)",
+   "file": "skills/go-release/SKILL.md",
+   "line": 434,
+   "severity": "fix",
+   "kind": "notes-violation",
+   "finding": "references/release-config.md (lines 131-133) enforces GO-GATE-04 (MUST): never move `CGO_ENABLED=0` to workflow level, where it reaches the race job. The MUST table has no row for it.",
+   "fix": "Append the row `| 15 | `CGO_ENABLED=0` is set at workflow level, where it reaches the `-race` job | GO-GATE-04 |`."
+  },
+  {
+   "set": "go-release, go-upgrade, go-diagnose skills (phase 8 content review)",
+   "file": "skills/go-release/SKILL.md",
+   "line": 342,
+   "severity": "fix",
+   "kind": "style",
+   "finding": "The `Tags fetched` check cell does not say what empty output means (N-10). The `--include='release*.yml'` filter prints nothing for a workflow named release.yaml or cd.yml.",
+   "fix": "Replace the Pass cell with `the block shows `fetch-depth: 0`. Empty output means no workflow named release*.yml exists: point the grep at the real release workflow. A reading heuristic`."
+  },
+  {
+   "set": "go-release, go-upgrade, go-diagnose skills (phase 8 content review)",
+   "file": "skills/go-diagnose/SKILL.md",
+   "line": 151,
+   "severity": "nit",
+   "kind": "style",
+   "finding": "The measured output quotes `timed out after 3s`, but the command on line 149 uses `-timeout=30s`. Re-run as written, it prints `after 30s`.",
+   "fix": "Replace `panic: test timed out after 3s` with `panic: test timed out after 30s`."
+  },
+  {
+   "set": "go-release, go-upgrade, go-diagnose skills (phase 8 content review)",
+   "file": "skills/go-diagnose/SKILL.md",
+   "line": 318,
+   "severity": "nit",
+   "kind": "era-unlabelled",
+   "finding": "`(Go 1.25)` here and `(Go 1.24)` on line 380 give the floor but not what gates it (N-9). The owning rules label them go-line gated.",
+   "fix": "Line 318: `(Go 1.25)` becomes `(go 1.25, go-line gated)`. Line 380: `(Go 1.24)` becomes `(go 1.24, go-line gated)`."
+  },
+  {
+   "set": "go-release, go-upgrade, go-diagnose skills (phase 8 content review)",
+   "file": "skills/go-release/SKILL.md",
+   "line": 164,
+   "severity": "nit",
+   "kind": "era-unlabelled",
+   "finding": "`since Go 1.24` does not say what gates it (N-9). release.md says every floor in this family is toolchain-gated.",
+   "fix": "Replace `stamp since Go 1.24` with `stamp since Go 1.24 (toolchain-gated)`."
+  },
+  {
+   "set": "go-release, go-upgrade, go-diagnose skills (phase 8 content review)",
+   "file": "skills/go-upgrade/SKILL.md",
+   "line": 275,
+   "severity": "nit",
+   "kind": "contradiction",
+   "finding": "The step-10 locator grep leaves out the `--exclude-dir=vendor` that GO-GATE-01's step 10 carries, so a vendored iterator producer triggers the gopls step.",
+   "fix": "Replace `grep -rln --include='*.go' -e 'func(yield func(' .` with `grep -rln --include='*.go' --exclude-dir=vendor -e 'func(yield func(' .`."
+  },
+  {
+   "set": "bazel-quality/go.md + bazel-quality.md Go routing edits (BZL-GO)",
+   "file": "rules/bazel-quality/go.md",
+   "line": 130,
+   "severity": "blocker",
+   "kind": "verification-dishonest",
+   "finding": "BZL-GO-09's `-X` grep cannot go red on any BUILD file that passes this set's own buildifier gate. buildifier 6.1.1 rewrites `gc_linkopts = [\"-X\", \"main.version=v1.2.3\"]` onto several lines, which puts `\"-X\",` on a line of its own. After that, `grep ... -e 'gc_linkopts.*-X' -e 'ldflags.*-X' .` exits 1 with empty output, and the row reads that as a pass. The cell's claim that it was watched red on a gc_linkopts plant holds only for a single-line plant that buildifier has not formatted. Fixture: review-bazel-go/linkopts-bfy.",
+   "fix": "In the BZL-GO-09 Verification cell, replace `grep -rn --include='BUILD*' --include='*.bzl' -e 'gc_linkopts.*-X' -e 'ldflags.*-X' .` with `grep -rn --include='BUILD*' --include='*.bzl' -e 'gc_linkopts.*-X' -e 'ldflags.*-X' -e '\"-X\"' -e '\"-X ' .`, and replace `and on a `gc_linkopts` plant.` with `and on a buildifier-formatted `gc_linkopts` plant, where `\"-X\"` sits on its own line.` (Tested: the new form goes red on the formatted plant and stays green on the x_defs twin.)"
+  },
+  {
+   "set": "bazel-quality/go.md + bazel-quality.md Go routing edits (BZL-GO)",
+   "file": "rules/bazel-quality/go.md",
+   "line": 113,
+   "severity": "fix",
+   "kind": "verification-dishonest",
+   "finding": "BZL-GO-10's workflow grep misses the most common GitHub Actions form, an `env:` map (`GOOS: windows` / `GOARCH: arm64`) on a job whose step runs `bazel build`. On that plant the grep exits 1 with empty output, which is a false pass. It went red only on the inline `GOOS=... bazel build` form. Fixtures: g10-red-envmap, g10-red-inline, g10-green.",
+   "fix": "Replace `grep -rn -e 'GOOS=' -e 'GOARCH=' .github/workflows` with `grep -rn -e 'GOOS=' -e 'GOARCH=' -e 'GOOS:' -e 'GOARCH:' .github/workflows`, and replace `**a hit on a step that runs `bazel` is the finding.**` with `**a hit on, or an `env:` map above, a step that runs `bazel` is the finding.**`"
+  },
+  {
+   "set": "bazel-quality/go.md + bazel-quality.md Go routing edits (BZL-GO)",
+   "file": "rules/bazel-quality/go.md",
+   "line": 96,
+   "severity": "fix",
+   "kind": "verification-dishonest",
+   "finding": "The BZL-GO-05 registration check stays silent when the registration line is commented out (`# go_sdk.nogo(nogo = \"//tools:my_nogo\")`), because the MODULE.bazel pattern is not anchored. An unregistered nogo therefore passes. Fixture: g05-commented. With the pattern anchored, that plant printed FINDING and the registered twin stayed empty.",
+   "fix": "Replace `! grep -qs -e 'go_sdk.nogo(' MODULE.bazel` with `! grep -qs -e '^go_sdk.nogo(' MODULE.bazel` in the fenced registration check."
+  },
+  {
+   "set": "bazel-quality/go.md + bazel-quality.md Go routing edits (BZL-GO)",
+   "file": "rules/bazel-quality/go.md",
+   "line": 132,
+   "severity": "fix",
+   "kind": "verification-dishonest",
+   "finding": "BZL-GO-15's config grep looks for `--strip=never` anywhere in any rc file. In a mixed repository, a `build:asan ... --strip=never` line (the shape BZL-CC-18 requires) satisfies it while the `release` config still strips. Fixture g15-mixed: the grep as written printed the asan line, which the cell reads as a pass. The tightened form exited 1 there and matched g15-green.",
+   "fix": "Replace `grep -rn --include='*bazelrc*' -e '--strip=never' -e '--strip never' .` with `grep -rn --include='*bazelrc*' -e 'build:release.*--strip=never' -e 'build:release.*--strip never' .`"
+  },
+  {
+   "set": "bazel-quality/go.md + bazel-quality.md Go routing edits (BZL-GO)",
+   "file": "rules/bazel-quality/go.md",
+   "line": 43,
+   "severity": "fix",
+   "kind": "unsupported-claim",
+   "finding": "The line credits reading a ruleset's version from the BCR's `metadata.json` to BZL-FLAG-28. BZL-FLAG-28 actually says to list the GitHub releases and sort them by semver. The `metadata.json` check belongs to BZL-ARCH-11, verification (1), and the consolidation cites both IDs. Failure mode 2 at line 161 repeats the miscitation.",
+   "fix": "Line 43: replace `metadata.json` (BZL-FLAG-28).` with `metadata.json` (BZL-ARCH-11, BZL-FLAG-28).`. Line 161: replace `(BZL-FLAG-28).` with `(BZL-ARCH-11, BZL-FLAG-28).`"
+  },
+  {
+   "set": "bazel-quality/go.md + bazel-quality.md Go routing edits (BZL-GO)",
+   "file": "rules/bazel-quality/go.md",
+   "line": 79,
+   "severity": "fix",
+   "kind": "contradiction",
+   "finding": "The nogo snippet is introduced as 'the registered shape, measured red and green', but it has no `load()` for `nogo` and `TOOLS_NOGO`. Copied as written, it fails at load time, and it breaks index non-negotiable 1 (load every symbol explicitly). The drafter's own fixture (author-go/reg/BUILD.bazel) carries the load line.",
+   "fix": "After the line `# root BUILD.bazel` insert `load(\"@rules_go//go:def.bzl\", \"TOOLS_NOGO\", \"nogo\")` followed by one blank line."
+  },
+  {
+   "set": "bazel-quality/go.md + bazel-quality.md Go routing edits (BZL-GO)",
+   "file": "rules/bazel-quality.md",
+   "line": 41,
+   "severity": "fix",
+   "kind": "contradiction",
+   "finding": "The index says every rule set here was measured on 8.7.0, 8.8.0 and 9.2.0 (2026-09-06), and that a rule naming no version held on both majors. go.md line 39 says no 8.x leg was run, and it was measured on 2026-09-26. Once go.md is added, the two files give different answers to 'which Bazel versions does this row hold on'.",
+   "fix": "Replace `defaults on \u2014 and every rule set here was measured on 8.7.0, 8.8.0 and 9.2.0\n(2026-09-06).` with `defaults on \u2014 and every rule set here was measured on 8.7.0, 8.8.0 and 9.2.0\n(2026-09-06), except `java.md` and `go.md`, whose own measurement disclosure governs.`"
+  },
+  {
+   "set": "bazel-quality/go.md + bazel-quality.md Go routing edits (BZL-GO)",
+   "file": "docs/bazel-quality.md",
+   "line": 4,
+   "severity": "fix",
+   "kind": "notes-violation",
+   "finding": "N-13 requires docs/bazel-quality.md to be updated in the same change. The file is untouched and now wrong: it says thirteen depth files, a 165-line index, 353 depth rules and five languages, and its Siblings omit go-modules and go-quality.",
+   "fix": "Line 4: `thirteen depth files` -> `fourteen depth files`. Line 14: `165 lines` -> `168 lines`. Lines 51-55: `353 further rules live in thirteen` -> `368 further rules live in fourteen`, and `five by language\n(Rust, Python, TypeScript, C++, and Java with Kotlin)` -> `six by language\n(Rust, Python, TypeScript, C++, Java with Kotlin, and Go, if you adopt Bazel for Go)`. Siblings (lines 90-92): `rust-cargo`, `python-packaging` and `typescript-packaging` -> `rust-cargo`, `python-packaging`, `typescript-packaging` and `go-modules`, and `rust-quality`, `python-quality` and\n`typescript-quality` -> `rust-quality`, `python-quality`, `typescript-quality` and `go-quality`."
+  },
+  {
+   "set": "bazel-quality/go.md + bazel-quality.md Go routing edits (BZL-GO)",
+   "file": "rules/bazel-quality/go.md",
+   "line": 36,
+   "severity": "nit",
+   "kind": "notes-violation",
+   "finding": "N-5 pins staticcheck 2026.2.1 (measured 2026-09-26), but the measurement disclosure says `staticcheck 2026.2`.",
+   "fix": "Replace `staticcheck 2026.2 (`honnef.co/go/tools` v0.8.1)` with `staticcheck 2026.2.1 (`honnef.co/go/tools` v0.8.1)`."
+  },
+  {
+   "set": "bazel-quality/go.md + bazel-quality.md Go routing edits (BZL-GO)",
+   "file": "rules/bazel-quality/go.md",
+   "line": 131,
+   "severity": "nit",
+   "kind": "portability",
+   "finding": "BZL-GO-14's key grep uses `-P` (PCRE lookahead), which BSD/macOS grep does not have. There it exits 2 with an error instead of giving a verdict. The same file routes an adopter to macOS matrix legs.",
+   "fix": "After `**empty output is the pass.**` in the BZL-GO-14 Verification cell, insert `GNU grep only (`-P`); on macOS run it as `ggrep`.`"
+  }
+ ]
+}

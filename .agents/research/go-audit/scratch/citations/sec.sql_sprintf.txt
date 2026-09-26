@@ -1,0 +1,67 @@
+cli__cli:pkg/cmd/issue/edit/edit.go:495: failedIssueChan <- fmt.Sprintf("failed to update %s: %s", issue.URL, err)
+cli__cli:pkg/cmd/issue/edit/edit.go:501: failedIssueChan <- fmt.Sprintf("failed to update %s: %s", issue.URL, err)
+cli__cli:pkg/cmd/issue/edit/edit.go:505: failedIssueChan <- fmt.Sprintf("failed to update %s:\n%s", issue.URL, err)
+cli__cli:pkg/cmd/release/delete/delete.go:85: fmt.Sprintf("Delete release %s in %s?", release.TagName, ghrepo.FullName(baseRepo)), true)
+cli__cli:pkg/cmd/release/delete-asset/delete_asset.go:78: fmt.Sprintf("Delete asset %s in release %s in %s?", opts.AssetName, release.TagName, ghrepo.FullName(baseRepo)),
+cli__cli:pkg/cmd/pr/shared/commentable.go:451: return p.Confirm(fmt.Sprintf("Delete the comment: %q?", body), true)
+cli__cli:pkg/cmd/pr/merge/merge.go:387: message := fmt.Sprintf("Pull request %s#%d was already merged. Delete the branch locally?", ghrepo.FullName(m.baseRepo), m.pr.Number)
+cli__cli:pkg/cmd/codespace/delete.go:217: return p.Confirm(fmt.Sprintf("Codespace %s has unsaved changes. OK to delete?", cs.Name))
+cli__cli:pkg/cmd/project/shared/queries/resolve.go:51: return fmt.Sprintf("option %q is ambiguous on field %q; multiple options share this name (use --single-select-option-id with one of: %s)", e.Name, e.FieldName, 
+cli__cli:pkg/cmd/extension/manager.go:392: return fmt.Sprintf("This extension does not support the %[1]s architecture. I tried to install it on a %[1]s machine, and it failed due to the lack of an availa
+cli__cli:pkg/cmd/gist/delete/delete.go:117: confirmed, err := opts.Prompter.Confirm(fmt.Sprintf("Delete %q gist?", gist.Filename()), false)
+cli__cli:pkg/cmd/skills/update/update.go:376: confirmed, confirmErr := opts.Prompter.Confirm(fmt.Sprintf("Update %d skill(s)?", len(updates)), true)
+cockroachdb__pebble:internal/tombspan/tombspan.go:417: return fmt.Sprintf("delete L%d.%s (completely contained within %s)",
+cockroachdb__pebble:metamorphic/ops.go:360: return fmt.Sprintf("%s.Delete(%q)", o.writerID, kf.FormatKey(o.key))
+cockroachdb__pebble:metamorphic/ops.go:397: return fmt.Sprintf("%s.SingleDelete(%q, %v /* maybeReplaceDelete */)",
+cockroachdb__pebble:metamorphic/ops.go:527: return fmt.Sprintf("%s.RangeKeyDelete(%q, %q)",
+containerd__containerd:plugins/snapshots/devmapper/dmsetup/dmsetup.go:180: _, err := dmsetup("message", poolName, "0", fmt.Sprintf("delete %d", deviceID))
+dominikh__go-tools:stylecheck/st1018/st1018.go:109: Message: fmt.Sprintf("delete %s character %U", kind, r.r),
+dominikh__go-tools:stylecheck/st1018/st1018.go:149: Message:   fmt.Sprintf("delete all %s characters", kind),
+dominikh__go-tools:go/ir/print.go:465: return fmt.Sprintf("select %sblocking [%s]", non, b.String())
+etcd-io__etcd:tests/robustness/model/describe.go:149: return fmt.Sprintf("guaranteedUpdate(%q, %s, mod_rev=%d)", txn.Conditions[0].Key, describeValueOrHash(txn.OperationsOnSuccess[0].Put.Value), txn.Conditions[0].E
+etcd-io__etcd:tests/robustness/model/describe.go:154: return fmt.Sprintf("guaranteedDelete(%q, mod_rev=%d)", txn.Conditions[0].Key, txn.Conditions[0].ExpectedRevision)
+etcd-io__etcd:tests/robustness/model/describe.go:208: return fmt.Sprintf("delete(%q)", op.Delete.Key)
+golang__tools:gopls/internal/golang/codeaction.go:393: str = fmt.Sprintf("Delete import: %s %q", fix.StmtInfo.Name, fix.StmtInfo.ImportPath)
+golang__tools:gopls/internal/analysis/unusedfunc/unusedfunc.go:138: Message:   fmt.Sprintf("Delete %s %q", noun, id.Name),
+golang__tools:go/ssa/print.go:377: return fmt.Sprintf("select %sblocking [%s]", non, b.String())
+google__go-github:github/pulls.go:355: u := fmt.Sprintf("repos/%v/%v/pulls/%v/update-branch", owner, repo, number)
+goreleaser__goreleaser:internal/pipe/linkedin/client.go:241: return fmt.Sprintf("https://www.linkedin.com/feed/update/%s", result.Activity), nil
+hashicorp__terraform:internal/moduletest/states/manifest.go:342: Detail:   fmt.Sprintf("Failed to delete state file for key %s: %s.", key, err),
+hashicorp__terraform:internal/configs/parser_config_dir.go:155: Detail: fmt.Sprintf(`The configuration's "state_store_provider" block defines a provider called %q but the "migrate_from_state_store" block uses a provider call
+hashicorp__terraform:internal/stacks/stackruntime/internal/stackeval/provider_expressions.go:107: errorDetail = fmt.Sprintf("\n\nThis stack has a configured provider of the correct type under the name %q. Update this block's \"providers\" argument to referen
+hashicorp__terraform:internal/stacks/stackruntime/internal/stackeval/stack.go:733: Detail:   fmt.Sprintf("The component instance %s could not be removed. The linked removed block was not executed because the `from` attribute of the removed blo
+hashicorp__terraform:internal/command/state_meta.go:158: fmt.Sprintf(`The current state contains no resource instance %s. If you've just added its resource to the configuration or have changed the count or for_each ar
+hashicorp__terraform:internal/command/jsonformat/plan.go:559: buf.WriteString(fmt.Sprintf("[bold]  # %s[reset] update (unknown reason %s)", dispAddr, changeCause))
+hashicorp__terraform:internal/command/jsonformat/plan.go:590: buf.WriteString(fmt.Sprintf("[bold]  # %s[reset] delete (unknown reason %s)", dispAddr, changeCause))
+hashicorp__terraform:internal/command/meta_backend_errors.go:42: msg = msg + fmt.Sprintf(` If you'd like to continue to use the plan file, you must run "terraform workspace select %s" to select the matching workspace.
+hashicorp__terraform:internal/command/providers_mirror.go:106: fmt.Sprintf("To update the locked dependency selections to match a changed configuration, run:\n  terraform init -upgrade\n got:%v", errs),
+hashicorp__terraform:internal/depsfile/locks_file.go:264: Detail:   fmt.Sprintf("Cannot lock a version for built-in provider %s. Built-in providers are bundled inside Terraform itself, so you can't select a version for
+hashicorp__terraform:internal/terraform/context_plan.go:906: fmt.Sprintf("If you apply this plan, Terraform will discard its tracking information for the following objects, but it will not delete them:\n%s\n\nAfter applyi
+oras-project__oras:test/e2e/suite/command/manifest.go:181: dstRepo := fmt.Sprintf(repoFmt, "delete", "no-confirm")
+oras-project__oras:test/e2e/suite/command/manifest.go:189: dstRepo := fmt.Sprintf(repoFmt, "delete", "descriptor-without-confirm")
+oras-project__oras:test/e2e/suite/command/manifest.go:219: dstRepo := fmt.Sprintf(repoFmt, "delete", "no-reference")
+oras-project__oras:test/e2e/suite/command/manifest.go:225: dstRepo := fmt.Sprintf(repoFmt, "delete", "no-reference")
+oras-project__oras:test/e2e/suite/command/manifest.go:491: dstRepo := fmt.Sprintf(repoFmt, "delete", "confirm-input")
+oras-project__oras:test/e2e/suite/command/manifest.go:499: dstRepo := fmt.Sprintf(repoFmt, "delete", "verbose-flag")
+oras-project__oras:test/e2e/suite/command/manifest.go:506: dstRepo := fmt.Sprintf(repoFmt, "delete", "confirm-flag")
+oras-project__oras:test/e2e/suite/command/manifest.go:513: dstRepo := fmt.Sprintf(repoFmt, "delete", "output-descriptor")
+oras-project__oras:test/e2e/suite/command/blob.go:185: dstRepo := fmt.Sprintf(repoFmt, "delete", "no-ref")
+oras-project__oras:test/e2e/suite/command/blob.go:192: dstRepo := fmt.Sprintf(repoFmt, "delete", "no-confirm")
+oras-project__oras:test/e2e/suite/command/blob.go:199: dstRepo := fmt.Sprintf(repoFmt, "delete", "wrong-ref-form")
+oras-project__oras:test/e2e/suite/command/blob.go:232: dstRepo := fmt.Sprintf(repoFmt, "delete", "prompt-confirmation")
+oras-project__oras:test/e2e/suite/command/blob.go:243: dstRepo := fmt.Sprintf(repoFmt, "delete", "flag-confirmation")
+oras-project__oras:test/e2e/suite/command/blob.go:257: dstRepo := fmt.Sprintf(repoFmt, "delete", "blob-delete-verbose")
+oras-project__oras:cmd/oras/root/manifest/delete.go:111: prompt := fmt.Sprintf("Are you sure you want to delete the manifest %q and all tags associated with it?", desc.Digest)
+oras-project__oras:cmd/oras/root/blob/delete.go:102: prompt := fmt.Sprintf("Are you sure you want to delete the blob %q?", desc.Digest)
+regclient__regclient:cmd/regctl/config.go:67: Long: fmt.Sprintf(`Retrieve or update a configuration option.
+regclient__regclient:cmd/regctl/registry.go:64: Long: fmt.Sprintf(`Retrieve or update registry configurations.
+restic__restic:internal/fs/vss_windows.go:1118: err = newVssTextError(fmt.Sprintf("Failed to delete snapshot: %s", e.Error()))
+syncthing__syncthing:lib/protocol/protocol.go:1129: return fmt.Sprintf("index-update for %v", msg.Folder), nil
+tailscale__tailscale:health/warnings.go:35: return fmt.Sprintf("An update from version %s to %s is available.", args[ArgCurrentVersion], args[ArgAvailableVersion])
+tailscale__tailscale:health/warnings.go:37: return fmt.Sprintf("An update from version %s to %s is available. Run `tailscale update` or `tailscale set --auto-update` to update now.", args[ArgCurrentVersio
+tailscale__tailscale:health/warnings.go:51: return fmt.Sprintf("A security update from version %s to %s is available.", args[ArgCurrentVersion], args[ArgAvailableVersion])
+tailscale__tailscale:health/warnings.go:53: return fmt.Sprintf("A security update from version %s to %s is available. Run `tailscale update` or `tailscale set --auto-update` to update now.", args[ArgCurre
+tailscale__tailscale:cmd/k8s-operator/svc-for-pg.go:222: instr := fmt.Sprintf("To proceed, you can either manually delete the existing Tailscale Service or choose a different hostname with the '%s' annotaion", Annotat
+tailscale__tailscale:cmd/k8s-nameserver/main.go:356: msg := fmt.Sprintf("ConfigMap update received: %s", event)
+tailscale__tailscale:cmd/tailscale/cli/serve_v2.go:1580: msg := fmt.Sprintf("Are you sure you want to delete %d handlers under port %s?", len(mounts), portStr)
+tailscale__tailscale:cmd/tailscale/cli/update.go:114: msg := fmt.Sprintf("This will update Tailscale from %v to %v. Continue?", version.Short(), ver)

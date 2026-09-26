@@ -1,0 +1,28 @@
+summary = "The OCX Go set: Go source standards, the go.mod and tool-config rule, and the release, upgrade and diagnosis procedures"
+keywords = "go,golang,quality,review,standards,modules,go.mod,golangci-lint,staticcheck,govulncheck,go-vet,go-fix,errors,context,goroutines,errgroup,testing,synctest,fuzzing,cobra,cli,exit-codes,os-exec,atomic-write,os-root,http,oci,registry,slog,pprof,pgo,generics,iterators,goreleaser,ko,cosign,reproducible-builds,release,upgrade,diagnose"
+description = "Everything an agent needs to write, gate, ship and debug Go the way the OCX family does: the go-quality rule (the gate block, the non-negotiables and ten depth files on language era, errors, concurrency and context, API and SDK design, testing, the CLI contract, files and processes, network and registry clients, security, and observability and performance), the go-modules rule (go and toolchain directive policy, dependency hygiene, the pinned golangci-lint v2 configs and the release engineering rules), plus the go-release skill that cuts a reproducible, signed release, the go-upgrade skill that moves a module to a new Go release or triages a dependency, and the go-diagnose skill for a hung, leaking, racy or slow process."
+license = "Apache-2.0"
+repository = "https://github.com/ocx-sh/grimoire-lore"
+
+# Members are same-directory relative: this catalog publishes flat under
+# ghcr.io/ocx-sh/lore/<name>, so `./go-quality` resolves against wherever the
+# bundle itself was pulled from — a mirror keeps working.
+#
+# MEMBERS CARRY NO TAG. Not a digest, not an exact version, not a floating
+# major, not `latest` — `latest` is a tag like any other and naming it is still
+# a pin. A bundle is a *set*, not a snapshot: its job is to say "these belong
+# together", and the consumer's own `grimoire.lock` is what freezes them.
+#
+# Do not pass --pin when releasing this bundle.
+#
+# The Bazel-Go depth file is not a member — it ships inside `bazel-quality`,
+# which already owns `BUILD.bazel`.
+
+[rules]
+go-quality = "./go-quality"
+go-modules = "./go-modules"
+
+[skills]
+go-release = "./go-release"
+go-upgrade = "./go-upgrade"
+go-diagnose = "./go-diagnose"

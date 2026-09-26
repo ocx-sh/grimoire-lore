@@ -1,0 +1,5 @@
+prometheus__prometheus:scrape/scrape.go:1411: last = sl.scrapeAndReport(last, time.Now().Round(0), errc)
+prometheus__prometheus:scrape/scrape.go:1436: alignedScrapeTime := time.Now().Round(0)
+prometheus__prometheus:scrape/scrape.go:1450: scrapeTime := time.Now().Round(0)
+tailscale__tailscale:net/netmon/netmon.go:705: // monotonic clock reading is to use t = t.Round(0)."
+tailscale__tailscale:net/netmon/netmon.go:706: return time.Now().Round(0)

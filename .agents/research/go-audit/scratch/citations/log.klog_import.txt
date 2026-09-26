@@ -1,0 +1,9 @@
+containerd__containerd:plugins/cri/runtime/plugin.go:31: "k8s.io/klog/v2"
+golang__tools:go/analysis/passes/ctrlflow/ctrlflow.go:256: typesinternal.IsFunctionNamed(fn, "k8s.io/klog", "Exit", "ExitDepth", "Exitf", "Exitln", "Fatal", "FatalDepth", "Fatalf", "Fatalln") ||
+kubernetes-sigs__controller-runtime:pkg/controller/controller.go:26: "k8s.io/klog/v2"
+kubernetes-sigs__controller-runtime:pkg/webhook/admission/webhook.go:32: "k8s.io/klog/v2"
+kubernetes-sigs__controller-runtime:pkg/webhook/authentication/webhook.go:27: "k8s.io/klog/v2"
+kubernetes-sigs__controller-runtime:pkg/builder/controller.go:28: "k8s.io/klog/v2"
+kubernetes-sigs__controller-runtime:pkg/builder/webhook.go:31: "k8s.io/klog/v2"
+prometheus__prometheus:util/testutil/testing.go:38: goleak.IgnoreTopFunction("k8s.io/klog/v2.(*loggingT).flushDaemon"),
+prometheus__prometheus:cmd/prometheus/main.go:59: "k8s.io/klog"

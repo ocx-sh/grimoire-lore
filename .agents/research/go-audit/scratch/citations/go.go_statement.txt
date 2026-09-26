@@ -1,0 +1,200 @@
+aquasecurity__trivy:pkg/rpc/server/listen.go:74: go func() {
+aquasecurity__trivy:pkg/parallel/pipeline.go:96: go func() {
+aquasecurity__trivy:pkg/parallel/walk.go:71: go func() {
+aquasecurity__trivy:pkg/iac/scanners/ansible/parser/template.go:68: go func() {
+aquasecurity__trivy:pkg/commands/signal.go:23: go func() {
+aquasecurity__trivy:pkg/notification/notice.go:62: go func() {
+aquasecurity__trivy:pkg/fanal/image/daemon/containerd.go:72: go func() {
+bazel-contrib__rules_go:go/tools/builders/nogo_main.go:412: go func(act *action) {
+bazel-contrib__rules_go:go/tools/gopackagesdriver/utils.go:54: go func() {
+bazel-contrib__rules_go:go/tools/bzltestutil/wrap.go:107: go process(m.outR)
+bazel-contrib__rules_go:go/tools/bzltestutil/wrap.go:108: go process(m.errR)
+bazelbuild__bazel-gazelle:cmd/autogazelle/server_unix.go:165: go func() {
+bazelbuild__bazel-gazelle:v2/walk/walk.go:315: go w.populateCache(mode)
+bazelbuild__bazel-gazelle:v2/walk/dirinfo.go:192: go func() {
+caddyserver__caddy:service_windows.go:39: go func() {
+caddyserver__caddy:admin.go:389: go func(oldAdminServer *http.Server) {
+caddyserver__caddy:admin.go:439: go func() {
+caddyserver__caddy:admin.go:521: go func(oldAdminServer *http.Server) {
+caddyserver__caddy:admin.go:610: go func() {
+caddyserver__caddy:sigtrap.go:38: go func() {
+caddyserver__caddy:sigtrap.go:51: go exitProcessFromSignal("SIGINT")
+caddyserver__caddy:modules/caddypki/pki.go:114: go p.maintenanceForCA(ca)
+caddyserver__caddy:modules/caddytls/tls.go:442: go func(ctx context.Context) {
+caddyserver__caddy:modules/caddytls/tls.go:965: go func(ctx context.Context) {
+caddyserver__caddy:modules/caddytls/sessiontickets.go:114: go s.stayUpdated()
+caddyserver__caddy:modules/caddytls/distributedstek/distributedstek.go:115: go s.rotate(doneChan, keysChan)
+caddyserver__caddy:modules/caddytls/standardstek/stek.go:78: go s.rotate(doneChan, keysChan)
+caddyserver__caddy:modules/caddyhttp/server.go:1074: go s.h3server.ServeListener(h3ln)
+caddyserver__caddy:modules/caddyhttp/reverseproxy/metrics.go:61: go func() {
+caddyserver__caddy:modules/caddyhttp/reverseproxy/healthchecks.go:299: go func(upstream *Upstream) {
+caddyserver__caddy:modules/caddyhttp/reverseproxy/healthchecks.go:611: go func(host *Host, failDuration time.Duration) {
+caddyserver__caddy:modules/caddyhttp/reverseproxy/hosts.go:167: go func() {
+caddyserver__caddy:modules/caddyhttp/reverseproxy/streaming.go:148: go func() {
+caddyserver__caddy:modules/caddyhttp/reverseproxy/streaming.go:227: go spc.copyToBackend(errc)
+caddyserver__caddy:modules/caddyhttp/reverseproxy/streaming.go:228: go spc.copyFromBackend(errc)
+caddyserver__caddy:modules/caddyhttp/reverseproxy/reverseproxy.go:421: go h.activeHealthChecker()
+caddyserver__caddy:modules/caddyhttp/app.go:631: go srv.server.Serve(ln)
+caddyserver__caddy:modules/caddyhttp/app.go:828: go stopServer(server)
+caddyserver__caddy:modules/caddyhttp/app.go:829: go stopH3Server(server)
+caddyserver__caddy:modules/caddyhttp/caddyauth/command.go:103: go func() {
+caddyserver__caddy:caddytest/caddytest.go:292: go func() {
+caddyserver__caddy:cmd/commandfuncs.go:118: go func() {
+caddyserver__caddy:cmd/commandfuncs.go:136: go func() {
+caddyserver__caddy:cmd/commandfuncs.go:155: go func() {
+caddyserver__caddy:cmd/commandfuncs.go:328: go watchConfigFile(configFile, adapterUsed)
+caddyserver__caddy:caddy.go:636: go func() {
+caddyserver__caddy:caddy.go:673: go func() { _ = runLoadedConfig(loadedConfig) }()
+caddyserver__caddy:caddy.go:811: go func() {
+caddyserver__caddy:sigtrap_posix.go:36: go func() {
+charmbracelet__bubbletea:tea.go:425: go func(ch chan struct{}) {
+charmbracelet__bubbletea:tea.go:662: go func() {
+charmbracelet__bubbletea:tea.go:698: go p.listenForResize(ch)
+charmbracelet__bubbletea:tea.go:711: go func() {
+charmbracelet__bubbletea:tea.go:729: go func() {
+charmbracelet__bubbletea:tea.go:790: go p.Send(ColorProfileMsg{*p.profile})
+charmbracelet__bubbletea:tea.go:814: go p.Send(cmd())
+charmbracelet__bubbletea:tea.go:850: go p.execBatchMsg(msg)
+charmbracelet__bubbletea:tea.go:854: go p.execSequenceMsg(msg)
+charmbracelet__bubbletea:tea.go:861: go p.checkResize()
+charmbracelet__bubbletea:tea.go:942: go func() {
+charmbracelet__bubbletea:tea.go:1098: go p.Send(ColorProfileMsg{*p.profile})
+charmbracelet__bubbletea:tea.go:1101: go p.Send(resizeMsg)
+charmbracelet__bubbletea:tea.go:1105: go p.Send(EnvMsg(p.environ))
+charmbracelet__bubbletea:tea.go:1132: go func() {
+charmbracelet__bubbletea:tea.go:1387: go p.checkResize()
+charmbracelet__bubbletea:tea.go:1434: go func() {
+charmbracelet__bubbletea:exec.go:106: go p.Send(fn(err))
+charmbracelet__bubbletea:exec.go:119: go p.Send(fn(err))
+charmbracelet__bubbletea:exec.go:127: go p.Send(fn(err))
+charmbracelet__bubbletea:examples/send-msg/main.go:108: go func() {
+charmbracelet__bubbletea:examples/progress-download/main.go:101: go pw.Start()
+charmbracelet__bubbletea:tty.go:21: go p.Send(ResumeMsg{})
+charmbracelet__bubbletea:tty.go:79: go p.readLoop()
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/actions.go:358: go func() { _, _ = runtime.Finish(context.Background(), "partial_action", true) }()
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/runtime.go:350: go runtime.consume(runContext)
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/runtime.go:367: go runtime.watch(ctx)
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/runtime.go:395: go func() {
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/runtime.go:454: go func() { _, _ = runtime.Finish(context.Background(), "capture_failure", true) }()
+cli__cli:.github/skills/cli-exercise/tool/internal/terminal/adapter.go:89: go adapter.read(output)
+cli__cli:.github/skills/cli-exercise/tool/internal/preflight/probe.go:125: go func() {
+cli__cli:.github/skills/cli-exercise/tool/internal/evidence/session_inspection.go:114: go func() {
+cli__cli:internal/ghcmd/cmd.go:139: go func() {
+cli__cli:internal/codespaces/rpc/invoker.go:107: go func() {
+cli__cli:internal/codespaces/rpc/invoker.go:117: go func() {
+cli__cli:internal/codespaces/rpc/invoker.go:145: go invoker.heartbeat(pfctx, 1*time.Minute)
+cli__cli:internal/codespaces/rpc/test/port_forwarder.go:55: go func() {
+cli__cli:internal/codespaces/rpc/test/port_forwarder.go:59: go func() {
+cli__cli:internal/codespaces/connection/tunnels_api_server_mock.go:352: go handleRequests(ctx, convertRequests(reqs))
+cli__cli:internal/codespaces/connection/tunnels_api_server_mock.go:378: go func() {
+cli__cli:internal/codespaces/connection/tunnels_api_server_mock.go:389: go func() {
+cli__cli:internal/codespaces/states.go:73: go func() {
+cli__cli:internal/codespaces/portforwarder/port_forwarder.go:71: go func() {
+cli__cli:internal/codespaces/portforwarder/port_forwarder.go:204: go func() {
+cli__cli:internal/codespaces/portforwarder/port_forwarder.go:213: go func() {
+cli__cli:internal/codespaces/portforwarder/port_forwarder.go:294: go func() {
+cli__cli:internal/keyring/keyring.go:24: go func() {
+cli__cli:internal/keyring/keyring.go:42: go func() {
+cli__cli:internal/keyring/keyring.go:64: go func() {
+cli__cli:pkg/iostreams/iostreams.go:392: go func() {
+cli__cli:pkg/cmd/status/status.go:319: go func() {
+cli__cli:pkg/cmd/secret/set/set.go:270: go func() {
+cli__cli:pkg/cmd/secret/set/set.go:293: go func() {
+cli__cli:pkg/cmd/issue/edit/edit.go:491: go func(issue *api.Issue) {
+cli__cli:pkg/cmd/release/download/download.go:275: go func() {
+cli__cli:pkg/cmd/release/shared/fetch.go:193: go func() {
+cli__cli:pkg/cmd/release/shared/fetch.go:199: go func() {
+cli__cli:pkg/cmd/variable/set/set.go:190: go func() {
+cli__cli:pkg/cmd/codespace/create.go:428: go func() {
+cli__cli:pkg/cmd/codespace/logs.go:102: go func() {
+cli__cli:pkg/cmd/codespace/logs.go:111: go func() {
+cli__cli:pkg/cmd/codespace/ssh.go:267: go func() {
+cli__cli:pkg/cmd/codespace/ssh.go:277: go func() {
+cli__cli:pkg/cmd/codespace/ssh.go:588: go func(cs *api.Codespace) {
+cli__cli:pkg/cmd/codespace/ssh.go:627: go func() {
+cli__cli:pkg/cmd/codespace/jupyter.go:83: go func() {
+cli__cli:pkg/cmd/codespace/ports.go:190: go func() {
+cli__cli:pkg/cmd/extension/browse/browse.go:190: go func() {
+cli__cli:pkg/cmd/extension/browse/browse.go:195: go func() {
+cli__cli:pkg/cmd/extension/browse/browse.go:453: go loadSelectedReadme()
+cli__cli:pkg/cmd/extension/browse/browse.go:527: go loadSelectedReadme()
+cli__cli:pkg/cmd/extension/browse/browse.go:581: go loadSelectedReadme()
+cli__cli:pkg/cmd/extension/browse/browse.go:585: go loadSelectedReadme()
+cli__cli:pkg/cmd/extension/browse/browse.go:607: go loadSelectedReadme()
+cli__cli:pkg/cmd/extension/browse/browse.go:615: go loadSelectedReadme()
+cli__cli:pkg/cmd/extension/browse/browse.go:619: go loadSelectedReadme()
+cli__cli:pkg/cmd/extension/browse/browse.go:627: go loadSelectedReadme()
+cli__cli:pkg/cmd/extension/browse/browse.go:630: go loadSelectedReadme()
+cli__cli:pkg/cmd/extension/browse/browse.go:633: go loadSelectedReadme()
+cli__cli:pkg/cmd/extension/manager.go:206: go func(e *Extension) {
+cli__cli:pkg/cmd/root/extension.go:35: go func() {
+cli__cli:pkg/cmd/skills/install/install.go:295: go func() {
+cli__cli:pkg/cmd/skills/preview/preview.go:153: go func() {
+cli__cli:pkg/cmd/skills/search/search.go:387: go func() {
+cli__cli:pkg/cmd/skills/search/search.go:391: go func() {
+cli__cli:pkg/cmd/skills/search/search.go:834: go func(idx int) {
+cli__cli:pkg/cmd/skills/search/search.go:897: go func(owner, repo, fullName string) {
+cli__cli:api/queries_issue.go:730: go func(m func() error) {
+cockroachdb__pebble:vfs/disk_health.go:257: go func() {
+cockroachdb__pebble:vfs/disk_health.go:679: go func() {
+cockroachdb__pebble:replay/workload_capture.go:386: go w.copyFiles()
+cockroachdb__pebble:internal/pacertoy/rocksdb/main.go:139: go db.drainMemtable()
+cockroachdb__pebble:internal/pacertoy/rocksdb/main.go:140: go db.drainCompaction()
+cockroachdb__pebble:internal/pacertoy/rocksdb/main.go:317: go func() {
+cockroachdb__pebble:internal/pacertoy/rocksdb/main.go:340: go simulateWrite(db)
+cockroachdb__pebble:internal/pacertoy/pebble/main.go:158: go db.drainMemtable()
+cockroachdb__pebble:internal/pacertoy/pebble/main.go:159: go db.drainCompaction()
+cockroachdb__pebble:internal/pacertoy/pebble/main.go:327: go func() {
+cockroachdb__pebble:internal/pacertoy/pebble/main.go:377: go simulateWrite(db, measureLatency)
+cockroachdb__pebble:internal/metricsutil/window.go:87: go func() {
+cockroachdb__pebble:internal/deletepacer/delete_pacer.go:107: go func() {
+cockroachdb__pebble:internal/genericcache/shard.go:55: go s.releaseLoop()
+cockroachdb__pebble:objstorage/objstorageprovider/sharedcache/shared_cache.go:854: go func() {
+cockroachdb__pebble:objstorage/objstorageprovider/objiotracing/obj_io_tracing_on.go:61: go t.workerLoop()
+cockroachdb__pebble:compaction_scheduler.go:306: go s.periodicGranter()
+cockroachdb__pebble:tool/db_io_bench.go:85: go func(workerIdx int, ios []benchIO) {
+cockroachdb__pebble:bench/write_bench.go:201: go writer.run(ctx, wg)
+cockroachdb__pebble:bench/bench.go:113: go func() {
+cockroachdb__pebble:bench/bench.go:119: go func() {
+cockroachdb__pebble:bench/bench.go:130: go func() {
+cockroachdb__pebble:bench/bench.go:201: go func() {
+cockroachdb__pebble:bench/bench.go:207: go func() {
+cockroachdb__pebble:bench/bench.go:273: go func() {
+cockroachdb__pebble:record/log_writer.go:595: go func() {
+cockroachdb__pebble:cmd/pebble/random.go:78: go func(limiter *rate.Limiter) {
+cockroachdb__pebble:compaction_delete.go:46: go d.compact(c, nil)
+cockroachdb__pebble:table_stats.go:54: go d.collectTableStats()
+cockroachdb__pebble:iterator.go:2539: go i.readState.db.maybeScheduleCompactionAsync()
+cockroachdb__pebble:ingest.go:2602: go d.validateSSTables()
+cockroachdb__pebble:ingest.go:2708: go d.validateSSTables()
+cockroachdb__pebble:download.go:312: go d.compact(c, doneCh)
+cockroachdb__pebble:sstable/suffix_rewriter.go:167: go func() {
+cockroachdb__pebble:sstable/write_queue.go:58: go w.runWorker()
+cockroachdb__pebble:sstable/tablefilters/internal/filtertestutils/bench.go:109: go func() {
+cockroachdb__pebble:sstable/tablefilters/internal/filtersim/fpr.go:33: go func() {
+cockroachdb__pebble:compaction.go:1389: go d.flush()
+cockroachdb__pebble:compaction.go:1437: go func() {
+cockroachdb__pebble:compaction.go:2117: go func() {
+containerd__containerd:contrib/fuzz/daemon.go:47: go func() {
+containerd__containerd:plugins/mount/manager.go:115: go func() {
+containerd__containerd:plugins/cri/cri.go:173: go func() {
+containerd__containerd:plugins/snapshots/windows/windows.go:294: go func() {
+containerd__containerd:plugins/server/internal/serve.go:32: go func() {
+containerd__containerd:plugins/metadata/plugin.go:173: go func() {
+containerd__containerd:plugins/restart/monitor.go:65: go m.run(tomlext.ToStdTime(ic.Config.(*Config).Interval))
+containerd__containerd:plugins/gc/scheduler.go:121: go m.run(ic.Context)
+containerd__containerd:plugins/gc/scheduler.go:202: go func() {
+containerd__containerd:plugins/gc/scheduler.go:227: go func() {
+containerd__containerd:internal/cri/server/service.go:327: go func(h *cniNetConfSyncer) {
+containerd__containerd:internal/cri/server/service.go:338: go func() {
+containerd__containerd:internal/cri/server/service.go:347: go func() {
+containerd__containerd:internal/cri/server/container_start.go:269: go func() {
+containerd__containerd:internal/cri/server/podsandbox/sandbox_stop.go:119: go func() {
+containerd__containerd:internal/cri/server/podsandbox/sandbox_run.go:332: go func() {
+containerd__containerd:internal/cri/server/podsandbox/recover.go:161: go func() {
+containerd__containerd:internal/cri/server/sandbox_portforward_linux.go:85: go func() {
+containerd__containerd:internal/cri/server/sandbox_portforward_linux.go:92: go func() {
+containerd__containerd:internal/cri/server/events/events.go:129: go func() {
+containerd__containerd:internal/cri/server/streaming.go:118: go func() {
+containerd__containerd:internal/cri/server/images/snapshots.go:60: go func() {
+containerd__containerd:internal/cri/server/images/image_pull.go:709: go func() {

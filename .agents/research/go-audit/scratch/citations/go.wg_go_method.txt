@@ -1,0 +1,200 @@
+aquasecurity__trivy:magefiles/terraformplan.go:83: g.Go(func() error {
+aquasecurity__trivy:pkg/rpc/client/client.go:64: wg.Go(func() {
+aquasecurity__trivy:pkg/parallel/pipeline.go:60: g.Go(func() error {
+aquasecurity__trivy:pkg/parallel/pipeline.go:80: g.Go(func() error {
+aquasecurity__trivy:pkg/parallel/walk.go:28: g.Go(func() error {
+aquasecurity__trivy:pkg/parallel/walk.go:62: g.Go(func() error {
+aquasecurity__trivy:pkg/fanal/analyzer/analyzer.go:519: eg.Go(func() error {
+bazel-contrib__rules_go:go/tools/releaser/upgradedep.go:225: eg.Go(func() error {
+bazel-contrib__rules_go:go/tools/releaser/upgradedep.go:238: eg.Go(func() error {
+bazelbuild__bazel-gazelle:language/go/update.go:37: eg.Go(func() error {
+cli__cli:internal/featuredetection/feature_detection.go:259: wg.Go(func() error {
+cli__cli:internal/featuredetection/feature_detection.go:262: wg.Go(func() error {
+cli__cli:internal/skills/installer/installer.go:102: wg.Go(func() {
+cli__cli:internal/skills/discovery/discovery.go:683: wg.Go(func() {
+cli__cli:pkg/cmd/attestation/api/client.go:200: g.Go(func() error {
+cli__cli:pkg/cmd/status/status.go:273: wg.Go(func() error {
+cli__cli:pkg/cmd/status/status.go:646: g.Go(func() error {
+cli__cli:pkg/cmd/status/status.go:652: g.Go(func() error {
+cli__cli:pkg/cmd/status/status.go:658: g.Go(func() error {
+cli__cli:pkg/cmd/issue/shared/lookup.go:110: g.Go(func() error {
+cli__cli:pkg/cmd/label/clone.go:124: wg.Go(func() error {
+cli__cli:pkg/cmd/release/shared/upload.go:122: g.Go(func() error {
+cli__cli:pkg/cmd/repo/edit/edit.go:315: g.Go(func() error {
+cli__cli:pkg/cmd/repo/edit/edit.go:323: g.Go(func() error {
+cli__cli:pkg/cmd/pr/shared/finder.go:268: g.Go(func() error {
+cli__cli:pkg/cmd/pr/shared/finder.go:273: g.Go(func() error {
+cli__cli:pkg/cmd/pr/shared/finder.go:278: g.Go(func() error {
+cli__cli:pkg/cmd/pr/shared/finder.go:283: g.Go(func() error {
+cli__cli:pkg/cmd/pr/shared/finder.go:288: g.Go(func() error {
+cli__cli:pkg/cmd/pr/shared/editable_http.go:19: wg.Go(func() error {
+cli__cli:pkg/cmd/pr/shared/editable_http.go:28: wg.Go(func() error {
+cli__cli:pkg/cmd/pr/shared/editable_http.go:40: wg.Go(func() error {
+cli__cli:pkg/cmd/pr/shared/editable_http.go:62: wg.Go(func() error {
+cli__cli:pkg/cmd/pr/edit/edit.go:505: wg.Go(func() error {
+cli__cli:pkg/cmd/pr/edit/edit.go:509: wg.Go(func() error {
+cli__cli:pkg/cmd/pr/edit/edit.go:583: wg.Go(func() error {
+cli__cli:pkg/cmd/pr/edit/edit.go:586: wg.Go(func() error {
+cli__cli:pkg/cmd/codespace/delete.go:185: g.Go(func() error {
+cli__cli:pkg/cmd/codespace/ports.go:344: group.Go(func() error {
+cli__cli:pkg/cmd/skills/search/search.go:308: wg.Go(func() {
+cli__cli:pkg/cmd/skills/search/search.go:318: wg.Go(func() {
+cli__cli:pkg/cmd/skills/search/search.go:328: wg.Go(func() {
+cli__cli:api/queries_repo.go:993: g.Go(func() error {
+cli__cli:api/queries_repo.go:1014: g.Go(func() error {
+cli__cli:api/queries_repo.go:1026: g.Go(func() error {
+cli__cli:api/queries_repo.go:1039: g.Go(func() error {
+cli__cli:api/queries_repo.go:1050: g.Go(func() error {
+cli__cli:api/queries_repo.go:1061: g.Go(func() error {
+cli__cli:api/queries_repo.go:1069: g.Go(func() error {
+cli__cli:api/queries_repo.go:1077: g.Go(func() error {
+cli__cli:api/queries_repo.go:1523: g.Go(func() error {
+cli__cli:api/queries_repo.go:1532: g.Go(func() error {
+cli__cli:api/queries_repo.go:1564: g.Go(func() error {
+cli__cli:api/queries_repo.go:1574: g.Go(func() error {
+cli__cli:api/queries_repo.go:1584: g.Go(func() error {
+cockroachdb__pebble:wal/failover_manager.go:1008: s.wg.Go(f)
+cockroachdb__pebble:replay/replay.go:397: r.errgroup.Go(func() error { return r.prepareWorkloadSteps(ctx) })
+cockroachdb__pebble:replay/replay.go:398: r.errgroup.Go(func() error { return r.applyWorkloadSteps(ctx) })
+cockroachdb__pebble:replay/replay.go:399: r.errgroup.Go(func() error { return r.refreshMetrics(ctx) })
+cockroachdb__pebble:bench/scan.go:87: wg.Go(func() {
+cockroachdb__pebble:bench/fsbench.go:561: wg.Go(func() { bench.execute(maxOps) })
+cockroachdb__pebble:bench/ycsb.go:323: wg.Go(func() { y.sampleReadAmp(db) })
+cockroachdb__pebble:bench/ycsb.go:327: wg.Go(func() { y.worker(db) })
+cockroachdb__pebble:bench/sync.go:57: wg.Go(func() {
+cockroachdb__pebble:bench/write_bench.go:157: wg.Go(func() { w.pause() })
+cockroachdb__pebble:bench/queue.go:67: wg.Go(func() {
+cockroachdb__pebble:metamorphic/meta.go:648: eg.Go(func() error {
+cockroachdb__pebble:sstable/colblk_writer.go:190: w.writeQueue.wg.Go(w.drainWriteQueue)
+cockroachdb__pebble:sstable/blob/blob.go:182: fw.writeQueue.wg.Go(fw.drainWriteQueue)
+containerd__containerd:internal/cri/server/sandbox_stats_list.go:42: wg.Go(func() {
+containerd__containerd:internal/cri/server/restart.go:73: eg.Go(func() error {
+containerd__containerd:internal/cri/server/restart.go:181: eg.Go(func() error {
+containerd__containerd:internal/cri/server/images/check.go:43: wg.Go(func() {
+containerd__containerd:internal/cri/server/sandbox_stats_stream.go:44: wg.Go(func() {
+containerd__containerd:internal/cri/server/list_pod_sandbox_metrics_linux.go:84: g.Go(func() error {
+containerd__containerd:internal/cri/io/exec_io.go:97: wg.Go(func() {
+containerd__containerd:internal/cri/io/container_io.go:176: wg.Go(func() {
+containerd__containerd:core/runtime/v2/shim_load.go:96: eg.Go(func() error {
+containerd__containerd:core/runtime/v2/shim_windows.go:74: dpc.wg.Go(func() {
+containerd__containerd:core/metadata/db.go:441: wg.Go(func() {
+containerd__containerd:core/metadata/db.go:503: wg.Go(func() {
+containerd__containerd:core/remotes/docker/fetcher.go:573: eg.Go(func() error {
+containerd__containerd:core/remotes/docker/fetcher.go:589: eg.Go(func() error {
+containerd__containerd:core/images/converter/default.go:177: eg.Go(func() error {
+containerd__containerd:core/images/converter/default.go:275: eg.Go(func() error {
+containerd__containerd:core/images/handlers.go:231: eg.Go(func() error {
+containerd__containerd:core/unpack/unpacker.go:312: u.eg.Go(func() error {
+containerd__containerd:core/unpack/unpacker.go:317: u.eg.Go(func() error {
+containerd__containerd:core/unpack/unpacker.go:794: eg.Go(func() error {
+containerd__containerd:pkg/shutdown/shutdown.go:85: grp.Go(func() error { return fn(ctx) })
+containerd__containerd:pkg/cio/io_unix.go:76: wg.Go(func() {
+containerd__containerd:pkg/cio/io_unix.go:86: wg.Go(func() {
+containerd__containerd:cmd/ctr/commands/images/push.go:192: eg.Go(func() error {
+containerd__containerd:cmd/ctr/commands/images/push.go:225: eg.Go(func() error {
+etcd-io__etcd:tools/benchmark/cmd/watch_latency.go:79: wg.Go(func() {
+etcd-io__etcd:tools/benchmark/cmd/lease.go:68: wg.Go(func() {
+etcd-io__etcd:tests/antithesis/test-template/robustness/traffic/main.go:109: g.Go(func() error {
+etcd-io__etcd:tests/antithesis/test-template/robustness/traffic/main.go:119: g.Go(func() error {
+etcd-io__etcd:tests/e2e/utils.go:96: g.Go(func() error {
+etcd-io__etcd:tests/framework/e2e/downgrade.go:175: g.Go(func() error {
+etcd-io__etcd:tests/robustness/client/watch.go:40: g.Go(func() error {
+etcd-io__etcd:tests/robustness/client/watch.go:49: g.Go(func() error {
+etcd-io__etcd:tests/robustness/traffic/kubernetes.go:97: g.Go(func() error {
+etcd-io__etcd:tests/robustness/traffic/kubernetes.go:112: g.Go(func() error {
+golang__tools:internal/imports/source_env.go:99: g.Go(func() error {
+golang__tools:internal/imports/fix.go:1787: wg.Go(func() {
+golang__tools:internal/modindex/symbols.go:50: g.Go(func() error {
+golang__tools:refactor/importgraph/graph.go:82: wg.Go(func() {
+golang__tools:gopls/internal/cache/parse_cache.go:348: g.Go(func() error {
+golang__tools:gopls/internal/cache/analysis.go:313: g.Go(func() error {
+golang__tools:gopls/internal/cache/analysis.go:837: wg.Go(func() {
+golang__tools:gopls/internal/cache/check.go:293: g.Go(func() error {
+golang__tools:gopls/internal/cache/check.go:381: g.Go(func() error {
+golang__tools:gopls/internal/cache/check.go:617: group.Go(func() error {
+golang__tools:gopls/internal/cache/check.go:1017: g.Go(func() error {
+golang__tools:gopls/internal/cache/mod_vuln.go:129: group.Go(func() error {
+golang__tools:gopls/internal/cache/mod_vuln.go:347: g.Go(func() error {
+golang__tools:gopls/internal/cache/mod_vuln.go:358: g.Go(func() error {
+golang__tools:gopls/internal/cache/symbols.go:38: g.Go(func() error {
+golang__tools:gopls/internal/server/command.go:530: wg.Go(func() {
+golang__tools:gopls/internal/server/command.go:1741: wg.Go(func() {
+golang__tools:gopls/internal/server/diagnostics.go:424: wg.Go(func() {
+golang__tools:gopls/internal/server/diagnostics.go:482: wg.Go(func() {
+golang__tools:gopls/internal/server/diagnostics.go:491: wg.Go(func() {
+golang__tools:gopls/internal/server/diagnostics.go:501: wg.Go(func() {
+golang__tools:gopls/internal/server/workspace.go:139: wg.Go(func() {
+golang__tools:gopls/internal/server/text_synchronization.go:278: wg.Go(func() {
+golang__tools:gopls/internal/filewatcher/fsnotify_watcher.go:43: w.wg.Go(w.run)
+golang__tools:gopls/internal/filewatcher/fsnotify_watcher.go:44: w.wg.Go(w.process)
+golang__tools:gopls/internal/mod/diagnostics.go:73: g.Go(func() error {
+golang__tools:gopls/internal/vulncheck/scan/command.go:68: g.Go(func() error {
+golang__tools:gopls/internal/vulncheck/scan/command.go:89: g.Go(func() error {
+golang__tools:gopls/internal/golang/implementation.go:247: group.Go(func() error {
+golang__tools:gopls/internal/golang/implementation.go:280: group.Go(func() error {
+golang__tools:gopls/internal/golang/implementation.go:302: group.Go(func() error {
+golang__tools:gopls/internal/golang/references.go:401: group.Go(func() error {
+golang__tools:gopls/internal/golang/references.go:446: group.Go(func() error {
+golang__tools:gopls/internal/golang/references.go:474: group.Go(func() error {
+golang__tools:gopls/internal/golang/references.go:525: group.Go(func() error {
+golang__tools:go/packages/packages.go:954: g.Go(func() error {
+golang__tools:go/packages/packages.go:1421: g.Go(func() error {
+golang__tools:go/packages/internal/linecount/linecount.go:129: g.Go(func() error {
+golang__tools:go/buildutil/allpackages.go:55: wg.Go(func() {
+golang__tools:go/buildutil/allpackages.go:108: wg.Go(func() {
+golang__tools:go/analysis/unitchecker/unitchecker.go:556: g.Go(func() error {
+golang__tools:go/analysis/passes/modernize/waitgroupgo.go:44: //     wg.Go(go func() { ... })
+golang__tools:go/analysis/passes/modernize/waitgroupgo.go:48: //     wg.Go(go func() { ... })
+golang__tools:go/analysis/passes/modernize/waitgroupgo.go:159: // wg.Go(func()
+golang__tools:go/analysis/passes/modernize/doc.go:697: wg.Go(func(){ ... })
+golang__tools:go/analysis/passes/loopclosure/loopclosure.go:222: //	g.Go(func() error { ... })
+golang__vuln:internal/client/client.go:186: g.Go(func() error {
+golang__vuln:internal/client/client.go:301: g.Go(func() error {
+golangci__golangci-lint:pkg/goanalysis/runner.go:273: wg.Go(func() {
+golangci__golangci-lint:pkg/goanalysis/runner_loadingpackage.go:50: wg.Go(func() {
+golangci__golangci-lint:pkg/goanalysis/runner_loadingpackage.go:98: actsWg.Go(func() error {
+golangci__golangci-lint:pkg/goanalysis/runners_cache.go:36: wg.Go(func() {
+golangci__golangci-lint:pkg/goanalysis/runners_cache.go:98: wg.Go(func() {
+golangci__golangci-lint:pkg/result/processors/filename_unadjuster.go:47: wg.Go(func() {
+google__go-containerregistry:pkg/v1/layout/write.go:347: g.Go(func() error {
+google__go-containerregistry:pkg/v1/remote/pusher.go:397: g.Go(func() error {
+google__go-containerregistry:pkg/v1/remote/pusher.go:401: g.Go(func() error {
+google__go-containerregistry:pkg/v1/remote/pusher.go:490: g.Go(func() error {
+google__go-containerregistry:pkg/v1/remote/pusher.go:520: g.Go(func() error {
+google__go-containerregistry:pkg/v1/remote/multi_write.go:40: g.Go(func() error {
+google__go-containerregistry:pkg/gcrane/copy.go:140: g.Go(func() error {
+google__go-containerregistry:pkg/gcrane/copy.go:150: g.Go(func() error {
+google__go-containerregistry:pkg/crane/copy.go:162: g.Go(func() error {
+google__go-github:tools/metadata/openapi.go:201: g.Go(func() error {
+goreleaser__goreleaser:internal/pipe/archive/archive.go:111: g.Go(func() error {
+goreleaser__goreleaser:internal/pipe/archive/archive.go:143: g.Go(func() error {
+goreleaser__goreleaser:internal/pipe/archive/archive.go:147: g.Go(func() error {
+goreleaser__goreleaser:internal/pipe/checksums/checksums.go:141: g.Go(func() error {
+goreleaser__goreleaser:internal/pipe/release/release.go:190: g.Go(func() error {
+goreleaser__goreleaser:internal/pipe/makeself/makeself.go:70: g.Go(func() error {
+goreleaser__goreleaser:internal/pipe/makeself/makeself.go:93: g.Go(func() error {
+goreleaser__goreleaser:internal/pipe/iru/iru.go:124: g.Go(func() error {
+goreleaser__goreleaser:internal/pipe/notary/macos.go:58: g.Go(func() error {
+goreleaser__goreleaser:internal/pipe/sign/sign_docker.go:58: g.Go(func() error {
+goreleaser__goreleaser:internal/pipe/sign/sign_binary.go:77: g.Go(func() error {
+goreleaser__goreleaser:internal/pipe/sign/sign.go:94: g.Go(func() error {
+goreleaser__goreleaser:internal/pipe/build/build.go:63: g.Go(func() error {
+goreleaser__goreleaser:internal/pipe/build/build.go:135: g.Go(func() error {
+goreleaser__goreleaser:internal/pipe/flatpak/flatpak.go:147: g.Go(func() error {
+goreleaser__goreleaser:internal/pipe/ko/ko.go:164: g.Go(func() error {
+goreleaser__goreleaser:internal/pipe/docker/docker.go:164: g.Go(func() error {
+goreleaser__goreleaser:internal/pipe/docker/manifest.go:98: g.Go(func() error {
+goreleaser__goreleaser:internal/pipe/docker/v2/docker.go:149: g.Go(func() error {
+goreleaser__goreleaser:internal/pipe/docker/v2/docker.go:158: g.Go(func() error {
+goreleaser__goreleaser:internal/pipe/docker/v2/docker.go:180: g.Go(func() error {
+goreleaser__goreleaser:internal/pipe/universalbinary/universalbinary.go:57: g.Go(func() error {
+goreleaser__goreleaser:internal/pipe/nfpm/nfpm.go:118: g.Go(func() error {
+goreleaser__goreleaser:internal/pipe/snapcraft/snapcraft.go:219: g.Go(func() error {
+goreleaser__goreleaser:internal/pipe/upx/upx.go:53: g.Go(func() error {
+goreleaser__goreleaser:internal/pipe/sbom/sbom.go:101: g.Go(func() error { return catalogTask(ctx, cfg) })
+goreleaser__goreleaser:internal/pipe/blob/upload.go:172: g.Go(func() error {
+goreleaser__goreleaser:internal/pipe/blob/upload.go:182: g.Go(func() error {
+goreleaser__goreleaser:internal/pipe/blob/blob.go:44: g.Go(func() error {
+goreleaser__goreleaser:internal/semerrgroup/sem.go:34: g.g.Go(func() error { return err })
+goreleaser__goreleaser:internal/semerrgroup/sem.go:75: s.g.Go(func() error {
+goreleaser__goreleaser:internal/http/http.go:267: g.Go(func() error {
