@@ -1,0 +1,40 @@
+{
+  "created": "2026-09-26T16:18:20+02:00",
+  "description": "Ordered runbook for cutting a Go release, for a CLI shipped as raw per-platform binaries and for a library or SDK shipped as a module tag, from the tag and major-version decision through the gorelease API gate, the goreleaser v2 config gates and snapshot, version stamping, the per-binary artifact checks, the double-build reproducibility proof, keyless signing and build provenance, to verifying what was published and retracting a bad version. Use when tagging or releasing a Go module, CLI or SDK, writing or reviewing a .goreleaser.yaml or a Go release workflow, deciding a version bump or a /vN major, checking that a Go binary is reproducible or prints the right --version, verifying Go release assets, checksums.txt, a cosign bundle or a build-provenance attestation, or fixing a Go version that already shipped. Not for bumping the go or toolchain line or triaging a dependency, and not for mirroring someone else's Go binaries.",
+  "keywords": [
+    "go",
+    "golang",
+    "release",
+    "goreleaser",
+    "gorelease",
+    "semver",
+    "module",
+    "tag",
+    "retract",
+    "major-version",
+    "reproducible-builds",
+    "trimpath",
+    "cgo",
+    "buildvcs",
+    "version-stamping",
+    "checksums",
+    "cosign",
+    "sigstore",
+    "attestation",
+    "slsa",
+    "sbom",
+    "syft",
+    "govulncheck",
+    "github-actions"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "go-release",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/go-release",
+  "schema": 1,
+  "summary": "Gate-ordered Go release procedure for CLIs and libraries, built around the permanence of a proxied tag, with its commands watched red and green on goreleaser 2.17.1 and Go 1.27.1"
+}
