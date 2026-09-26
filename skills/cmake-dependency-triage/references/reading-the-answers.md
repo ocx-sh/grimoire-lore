@@ -77,10 +77,10 @@ nothing for it on both lines. That is not "never looked up".
   falls through to the `BoostConfig.cmake` that Boost ships from 1.70.
 - A module's copy is its `<X>_LIBRARY*` and `<X>_INCLUDE_DIR` cache lines,
   printed by `--debug-find-pkg` as `The item was found at`. They can come from
-  two copies, and the module reports the version it parsed, usually the
-  header's: FindEXPAT in a cross build took `expat.h` 2.8.5 from the sysroot
-  and `libexpat.so` 2.7.3 from the host, and `found suitable version` and
-  4.4.2's `found.version` both said 2.8.5 (3.31.12, 4.3.4 and 4.4.2).
+  two copies (class C8), and the module reports the version it parsed, usually
+  the header's: FindEXPAT in a cross build took `expat.h` 2.8.5 from the
+  sysroot and `libexpat.so` 2.7.3 from the host, and `found suitable version`
+  and 4.4.2's `found.version` both said 2.8.5 (3.31.12, 4.3.4 and 4.4.2).
 
 ## FetchContent redirects
 
