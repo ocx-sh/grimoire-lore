@@ -490,3 +490,9 @@ artifacts. The ones that change a reading of the corpus:
 2. `-Werror=dev` still fails the configure on 4.4.2 exactly as `-Werror=author` does. The real trap is the reverse: `-Werror=author` on 3.31 or 4.3 is accepted and does nothing.
 3. A guarded `set(CMAKE_MSVC_RUNTIME_LIBRARY)` after `project()` is legal under CMK-TGT-16, but on a static-CRT vcpkg leg nothing defines the variable first, so CMK-VCPKG-06 narrows the placement to a preset or before the first `project()`.
 4. A consumed library's test tree is gated on a project-prefixed option that defaults to `PROJECT_IS_TOP_LEVEL`, never on `PROJECT_IS_TOP_LEVEL` directly (CMK-TEST-09).
+
+### Waves 4-8 corrections and convergence (2026-09-26)
+
+1. The host could measure more than the map recorded: CMake 4.0.7, 4.1.6 and 4.2.7 are provisionable, and Bazel 9.2.0 runs through rules_ocx's bazelisk. The CMK-BZL rows and the 4.0-4.2 claims are now measured (`cmake-bazel-seam/wave4-real-wrap.md`, `cmake-versions-and-gate/wave4-4x-matrix.md`).
+2. Planted fixtures under-test procedures. Running the skills on real trees found 41 failure-mode instances over waves 4-6 and 3 MUST rows (CMK-TGT-03's header half, CMK-TGT-21, CMK-DEP-33), plus CMK-DEP-34 from a held-out superbuild.
+3. The research-lang stop condition "no new failure mode" does not terminate on real trees. The program converged on "no new failure class and no new MUST row on held-out trees" instead (`cmake-skills/fm-classes-*.md`, `wave7-holdout-*`, `wave8-*`).

@@ -50,6 +50,18 @@ install and export MUSTs the round trip depends on land together, in one
 diff, because none of them alone produces a consumable package and the round
 trip only means something run after all of them.
 
+## Tested by running it, grouped by failure class
+
+The procedure was run end to end on seven real legacy trees of different
+shapes, from a single-directory C library to a multi-library project with
+generated headers and a vendored third_party tree, a header-only library and
+a library whose consumers already depended on a hand-written install. Each
+misled or stalled step was fixed, and every failure was filed under one of
+nine classes, such as a proof consumer weaker than a real one, a default that
+crosses into the parent project, or output that drifts while every presence
+check stays green. Each step names the classes it must check. The last
+held-out round, on two fresh trees, found no new class.
+
 ## What it refuses
 
 Raising an existing `cmake_minimum_required` minimum: it reports the finding

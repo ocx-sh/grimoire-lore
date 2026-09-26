@@ -261,7 +261,12 @@ endif()
 option(OPENJPEG_BUILD_TESTING "Build the tests" ${_opj_testing_default})
 get_property(_old_type CACHE BUILD_TESTING PROPERTY TYPE)
 if(PROJECT_IS_TOP_LEVEL AND _old_type STREQUAL "UNINITIALIZED")
-    set(OPENJPEG_BUILD_TESTING "${BUILD_TESTING}" CACHE BOOL "Build the tests" FORCE)
+    set(OPENJPEG_BUILD_TESTING
+        "${BUILD_TESTING}"
+        CACHE BOOL
+        "Build the tests"
+        FORCE
+    )
     unset(BUILD_TESTING CACHE)
 endif()
 ```

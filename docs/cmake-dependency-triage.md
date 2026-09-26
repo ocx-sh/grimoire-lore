@@ -36,14 +36,18 @@ a manager's own trace (`VCPKG_TRACE_FIND_PACKAGE`, `vcpkg depend-info`), or
 `cmake --graphviz`, which draws the target graph and renders only its legend
 on a `find_package`-only project.
 
-## Ten entry points, one first read each
+## Fifteen entry points, one first read each
 
 Wrong copy or a re-pointed hint with no effect, an installed copy ignored in
 favour of a fetched one, cmake-conan active with a `find_program` stuck
 NOTFOUND, a consumer failing right after `Configuring done`, CMake 4 refusing
 a floor below 3.5 or below 3.10, an online configure passing while an offline
 one fails, "which version did Conan pick", a vcpkg tree resolving to the
-wrong version, and a provider that registered but was never called. Each maps
+wrong version, a provider that registered but was never called, a binary
+that loads a different copy at run time than the one configured, the 4.4
+gate stopping inside a fetched dependency, cmake-conan handing over a copy
+Conan did not install, two versions of one library meeting in one link, and
+a CPM project building another version than its call names. Each maps
 to a first command and the rule that owns the fix, never a version number
 recalled from memory or a changelog. A provider intercepts only
 `find_package` and `FetchContent_MakeAvailable`: with cmake-conan under
@@ -51,6 +55,18 @@ recalled from memory or a changelog. A provider intercepts only
 after the first intercepted `find_package`, in that call's directory and
 below, so a subdirectory's first call leaves the top level NOTFOUND even
 after its own later call resolves.
+
+## Tested by running it, grouped by failure class
+
+The procedure was run literally, from the symptom only, on real packages:
+two installed copies of one library, vcpkg baselines and overrides, Conan
+graphs and the cmake-conan provider, a library bundling its own copy of a
+dependency, CPM locks and local packages, a cross build against a sysroot, a
+pkg-config copy beside a Config-package copy, an ExternalProject superbuild,
+a Debug-only package on a Release build, and a Hunter bootstrap. Every step
+that misled or stalled was fixed, and every failure was filed under one of
+eight classes, each with the check that catches it. The last held-out round,
+on two mechanisms no earlier round had built, found no new class.
 
 ## What it refuses to do
 

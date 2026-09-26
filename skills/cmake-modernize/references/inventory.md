@@ -200,11 +200,12 @@ grep -rniE --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_deps' 
 
 ## Standards and warnings-as-errors
 
-`I11`, standard setters (`CMK-TGT-05`). Empty output = nothing to check. A hit
-whose enclosing `if()` lacks `NOT DEFINED CMAKE_<LANG>_STANDARD` is the finding
-(cmark's bare `set(CMAKE_C_STANDARD 99)` ignored `-DCMAKE_C_STANDARD=11`, exit
-0). The guard also holds `CMAKE_<LANG>_STANDARD_REQUIRED ON` (`CMK-TGT-06`) and
-`CMAKE_<LANG>_EXTENSIONS OFF` (`CMK-TGT-07`).
+`I11`, standard setters (`CMK-TGT-05`). Empty output = nothing to check. A hit whose
+enclosing `if()` lacks `NOT DEFINED CMAKE_<LANG>_STANDARD` or `NOT CMAKE_<LANG>_STANDARD`
+(closed by `)` or `AND`) is the finding. A `CACHE` setter without `FORCE` passes only at
+policy version 3.21 or later (cmark's bare `set(CMAKE_C_STANDARD 99)` ignored
+`-DCMAKE_C_STANDARD=11`, exit 0). The guard also holds `CMAKE_<LANG>_STANDARD_REQUIRED ON`
+(`CMK-TGT-06`) and `CMAKE_<LANG>_EXTENSIONS OFF` (`CMK-TGT-07`).
 
 ```sh
 grep -rniE --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_deps' --exclude-dir='build*' \

@@ -9,9 +9,9 @@ grim add ghcr.io/ocx-sh/lore/cmake-essentials
 
 | Member | Kind | Covers |
 |---|---|---|
-| `cmake-build` | rule | Eighteen non-negotiables and 159 rules across ten depth files: version floors and policies, the CMake language, module authoring, targets and linkage, install and export with CPS, dependency acquisition, toolchains and providers, testing, presets and CI, and the Bazel seam |
+| `cmake-build` | rule | Eighteen non-negotiables and 164 rules across ten depth files: version floors and policies, the CMake language, module authoring, targets and linkage, install and export with CPS, dependency acquisition, toolchains and providers, testing, presets and CI, and the Bazel seam |
 | `cpp-packaging` | rule | Sixteen non-negotiables and 46 rules across two depth files: Conan 2 recipes, profiles and lockfiles, and vcpkg manifests, baselines, ports and binary caching |
-| `cmake-dependency-triage` | skill | Ten entry points for a dependency that resolved to the wrong copy, version or mechanism, keyed to the configure's own records rather than a trace or a green build |
+| `cmake-dependency-triage` | skill | Fifteen entry points for a dependency that resolved to the wrong copy, version or mechanism, keyed to the configure's own records rather than a trace or a green build |
 | `cmake-modernize` | skill | A ten-step, once-per-repository procedure from directory-scoped CMake to targets, install and export, closed by a command at every step |
 
 ## Why two rules and not one

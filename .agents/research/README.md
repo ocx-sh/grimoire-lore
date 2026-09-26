@@ -159,7 +159,7 @@ docs, ruleset READMEs and release notes were each found wrong at least once.
 
 ## CMake and C++ package management
 
-A three-wave program (2026-09-05 to 2026-09-26, paused for three weeks after
+An eight-wave program (2026-09-05 to 2026-09-26, paused for three weeks after
 wave 1) behind the `cmake-build` and `cpp-packaging` rules and the
 `cmake-dependency-triage` and `cmake-modernize` skills, indexed by
 [cmake-topic-map.md](cmake-topic-map.md) and framed by
@@ -187,3 +187,14 @@ the provider and toolchain-file interactions were each found different from
 the docs or from wave 1 at least once. The workflow scripts that ran every
 phase, and the generators that bake a wave's selection into them, are under
 `cmake-topic-map/scratch/`.
+
+Waves 4 to 8 tested the drafted set against reality rather than fixtures: a
+real Bazel 9 `rules_foreign_cc` wrap, CMake 4.0 to 4.2, both skills run
+literally on real legacy trees and real dependency scenarios, and every
+verification cell swept over real repositories (`wave<N>-*.md` ledgers under
+`cmake-audit/`, `cmake-skills/`, `cmake-bazel-seam/`,
+`cmake-versions-and-gate/` and `cmake-package-managers/`). Real trees never
+stop producing failure-mode instances, so the program converged on failure
+classes instead (`cmake-skills/fm-classes-modernize.md`,
+`fm-classes-triage.md`): held-out trees produced no new class and no new MUST
+row.

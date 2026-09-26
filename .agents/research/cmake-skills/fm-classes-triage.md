@@ -10,6 +10,7 @@ sources:
   - .agents/research/cmake-skills/wave5-modernize-real.md
   - .agents/research/cmake-skills/wave6-modernize-real.md
   - .agents/research/cmake-skills/wave7-holdout-triage.md (C8, added by the wave 7 applier)
+  - .agents/research/cmake-skills/wave8-holdout-triage.md (instances of C2, C3, C6 and C8, no new class)
 ---
 
 # cmake-dependency-triage: eight failure classes
@@ -70,7 +71,7 @@ without naming which input was sticky.
 row: "Did a cached or once-written input outlive the change?", read as the
 line that moved between the two greps. The step 1 grep now collects every
 sticky input measured so far (`_DIR`, the hints, `CMAKE_TOOLCHAIN_FILE`,
-`CPM_USE_LOCAL_PACKAGES`, `CPM_SOURCE_CACHE`).
+`CPM_USE_LOCAL_PACKAGES`, `CPM_SOURCE_CACHE`, and since wave 8 `HUNTER_CACHED_ROOT`).
 
 | Instance | Ledger | What happened |
 |---|---|---|
@@ -82,11 +83,13 @@ sticky input measured so far (`_DIR`, the hints, `CMAKE_TOOLCHAIN_FILE`,
 | B2-c misled | wave6-triage-real | `CPM_USE_LOCAL_PACKAGES:BOOL=ON` was not in the grep |
 | B2-d wrong | wave6-triage-real | `-U fmt_DIR` kept 12.1.0 |
 | B2-e misled | wave6-triage-real | `--fresh` fixed it and was credited to a stale `_DIR` |
+| B-j stalled | wave8-holdout-triage | a populated `HUNTER_ROOT` skipped the bootstrap configure that fails on an empty one (exit 0 against exit 1, 4.3.4 and 4.4.2) |
 
 ## C3 Substitution after resolution
 
 **Statement.** Every configure record names the intended copy, and the
-artifact still carries another: the loader picks a same-SONAME copy, another
+artifact still carries another: the loader picks a same-SONAME copy, the
+generator picks another installed configuration of the package, another
 package compiles in a bundled copy, or the source at the recorded pin differs
 (an override that skips the patch, an edited shared checkout). Only a read of
 the artifact or its source finds it.
@@ -109,6 +112,8 @@ copy" now requires these reads to find no other copy.
 | B3-c stalled | wave6-triage-real | empty step 1 grep for a fetched copy's source |
 | B3-d stalled | wave6-triage-real | 0 debug blocks, 0 events |
 | B3-e stalled | wave6-triage-real | the declare grep showed CI's pin, nothing read the checkout |
+| A-b, A-c, A-h misled | wave8-holdout-triage | `ldd` printed lz4's Debug `liblz4d.so.1` for a RelWithDebInfo leg, and the reads compared only directories |
+| A-j stalled | wave8-holdout-triage | a false stop at "right copy", no route for the imported configuration |
 
 ## C4 An absent or rejected candidate read as precedence
 
@@ -168,7 +173,9 @@ a pkg-config row since wave 7.
 **Statement.** The gate promotes a diagnostic inside code the project does not
 own. Remedies that lower its severity or scope fail, are forbidden, or are a
 silent no-op on one CMake line. Only a change to the dependency's input clears
-it: a scoped floor value, a re-pin, or a patch of every hit.
+it: a scoped floor value, a re-pin, or a patch of every hit. A dependency
+configured in a child process never sees a scoped value or a `-D`, so there only
+a re-pin or a patch reaches its input (wave 8).
 
 **Check in the skill.** Step 4's C6 row: "Does the remedy change the
 dependency's input, with the gate on, on every CI line?", with the floor-writes
@@ -181,6 +188,8 @@ grep and the `CMAKE_INSTALL_FULL_` grep in the merged T5, T6 and T12 section.
 | FM11 scoped `cmake_diagnostic` or `CMAKE_SKIP_INSTALL_RULES` for 4.4's stop | wave4-real-tree T1-e | both exit 1 on 4.4.2, only a full patch cleared it |
 | T1-e stalled | wave4-real-tree | no row for the 4.4 stop |
 | O2 misled (cross-skill) | wave6-modernize-real | a vendored in-repo floor on 3.31.12, CMK-DEP-30 had no knob, routed to the owner |
+| B-h wrong | wave8-holdout-triage | CMK-DEP-15's set/unset around `HunterGate(` and a `-D` both exit 1 on 4.4.2, the re-pinned gate module exit 0 |
+| B-i (caught) | wave8-holdout-triage | the C6 question rejected all three remedies, with no route to the one that works |
 
 ## C7 A proof that exercises one consumer kind
 
@@ -199,15 +208,16 @@ that calls one exported function, once per consumer kind (T4).
 | M11 wrong (cross-skill) | wave4-real-tree, Chipmunk2D | empty `main` passed, `sincos` undefined for a calling consumer |
 | Z11 wrong (cross-skill) | wave6-modernize-real, zlib | `CONFIG` round trip passed, FindZLIB answered plain consumers |
 
-## C8 One library, several lookups
+## C8 One dependency, several lookups
 
 Added by the wave 7 applier (2026-09-26) from the held-out test in
 `wave7-holdout-triage.md`, after checking it against C1 to C7 below.
 
-**Statement.** One library reaches the artifact through more than one lookup:
-`find_package` beside `pkg_check_modules`, a Find module's `find_path` beside
-its `find_library`, per-component calls, or a superbuild's outer configure
-beside its inner one. Each lookup has its own inputs, search order and record,
+**Statement.** One dependency reaches the build through more than one lookup or
+configure: `find_package` beside `pkg_check_modules`, a Find module's
+`find_path` beside its `find_library`, per-component calls, a superbuild's
+outer configure beside its inner one, or a manager's bootstrap configure
+(wave 8). Each lookup has its own inputs, search order and record,
 so each can land on another copy with exit 0, and the triage credits one
 lookup's record for the whole artifact.
 
@@ -242,6 +252,27 @@ condition now name C8.
 | A-c misled | wave7-holdout-triage | `Found libzstd, version 1.5.6` and the runtime-path cycle warning had no reading |
 | A-i stalled | wave7-holdout-triage | C3 routed a two-directory `RUNPATH` to T11 |
 | B-b, B-c, B-f | wave7-holdout-triage | two caches, and the triage read the one that did not build the artifact |
+| B-b misled | wave8-holdout-triage | the error's `CMakeLists.txt:1` was the Hunter bootstrap project's line, read in the project |
+| B-g misled | wave8-holdout-triage | the cache count over `build` printed one file, the failing cache sat under `HUNTER_ROOT` |
+
+## Wave 8 held-out test (applied 2026-09-26)
+
+Two new mechanisms, the generator's choice of an imported configuration (lz4
+1.10.0) and HunterGate's bootstrap configure on CMake 4 (cpp-pm/gate v0.9.2
+with Hunter v0.26.12), produced no new class. The applier checked each problem
+against the statements:
+
+- Scenario A is C3: `lz4_DIR`, the event and `The file was found at` all name
+  the intended package, and the generator swaps in its Debug build after
+  resolution. One lookup and one cache rule out C8, and `lz4_DIR` is the
+  lookup's own record, which rules out C1.
+- B-b and B-g are C8: a nested configure's record (its error location, its
+  cache) was read as the outer one's. Only the location of the inner tree is
+  new, so the statement widens from "one library" to "one dependency".
+- B-h is C6: the class question caught it (B-i). Its route listed a scoped
+  value as an input change, which it is not for a child process.
+- B-j is C2: a once-written input outside the tree, the same shape as the
+  `CPM_SOURCE_CACHE` row.
 
 ## Outside every class
 

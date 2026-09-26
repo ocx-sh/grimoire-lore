@@ -18,7 +18,7 @@ rows it leans on at the end. Everything below ran on CMake 3.31.12, 4.3.4 and
 4.4.2 against real trees (2026-09-26). The references name each tree and tool.
 
 Contents: [Stop condition](#stop-condition) · [The evidence rule](#the-evidence-rule) · [Before you start](#before-you-start) · [The read order](#the-read-order) · [Check the classes](#4-check-the-eight-classes-before-you-name-the-copy) · [Pick the entry point](#pick-the-entry-point) ·
-[T1 to T15](#t1-and-t13-wrong-copy-or-a-re-pointed-hint-had-no-effect) · [Pinned defaults](#pinned-defaults) · [MUST rows this procedure enforces](#must-rows-this-procedure-enforces) · [Failure classes](#failure-classes) · [References](#references)
+[T1 to T15](#t1-and-t13-wrong-copy-or-a-re-pointed-hint-had-no-effect) · [Pinned defaults](#pinned-defaults) · [MUST rows this procedure enforces](#must-rows-this-procedure-enforces) · [References](#references)
 
 ## Stop condition
 
@@ -76,7 +76,7 @@ Run the four steps in order, on the tree that showed the symptom. `build` and
 
 ```sh
 NAME=dep
-grep -rn --include='CMakeCache.txt' -e "^${NAME}_DIR" -e "^${NAME}_ROOT" -e '^CMAKE_PREFIX_PATH' -e '^VCPKG_INSTALLED_DIR' -e '^CMAKE_TOOLCHAIN_FILE' -e '^CMAKE_PROJECT_TOP_LEVEL_INCLUDES' -e '^CPM_PACKAGE_' -e '^CPM_USE_LOCAL_PACKAGES' -e '^CPM_SOURCE_CACHE' build
+grep -rn --include='CMakeCache.txt' -e "^${NAME}_DIR" -e "^${NAME}_ROOT" -e '^CMAKE_PREFIX_PATH' -e '^VCPKG_INSTALLED_DIR' -e '^CMAKE_TOOLCHAIN_FILE' -e '^CMAKE_PROJECT_TOP_LEVEL_INCLUDES' -e '^CPM_PACKAGE_' -e '^CPM_USE_LOCAL_PACKAGES' -e '^CPM_SOURCE_CACHE' -e '^HUNTER_CACHED_ROOT' build
 ```
 
 The patterns are a union, so read each line, and the first row below that
@@ -93,11 +93,12 @@ from. Lines from a second `CMakeCache.txt` are a nested configure's (C8).
 | `CPM_USE_LOCAL_PACKAGES:BOOL=ON` | CPM ran `find_package` before fetching. The option is read from the environment on the first configure and then cached, so unsetting the variable or `-U dep_DIR` keeps the local copy (4.4.2) | T15 |
 | `CPM_PACKAGE_dep_VERSION` other than the version the `CPMAddPackage` call names | Another declaration of the name came first, a `CPMUsePackageLock` file included | T15 |
 | `CPM_PACKAGE_dep_SOURCE_DIR` outside the build tree | A shared `CPM_SOURCE_CACHE` copy, which every tree reuses, `--fresh` included | T15 |
+| `HUNTER_CACHED_ROOT` | A Hunter root outside the tree decides what runs, and a step that runs only while it lacks something passes on a populated one. Compare it with CI's, and reproduce on a new, empty `HUNTER_ROOT` | C2 |
 | `dep_DIR` not under the current `dep_ROOT`, `CMAKE_PREFIX_PATH` entry or `VCPKG_INSTALLED_DIR` | A stale cache entry, or a rooted copy. Step 2 tells them apart | T1, T9 |
 | `dep_DIR:PATH=<build>/CMakeFiles/pkgRedirects` | A FetchContent or CPM redirect answered, and step 2 prints its candidates with no `The file was found at` line. An installed copy was never consulted | T2 |
 | No `dep_DIR` line, with `CMAKE_PROJECT_TOP_LEVEL_INCLUDES` naming a provider | Expected under cmake-conan with `CMakeConfigDeps`: the provider sets `dep_DIR` as a normal variable (measured 3.31.12 and 4.4.2) | T3 |
 | No `dep_DIR` line and no provider | A Find module answered, or the call never ran. A module's copy is its `<NAME>_LIBRARY*` and `<NAME>_INCLUDE_DIR` cache lines, grepped with `NAME` as the call spells it | [references](references/reading-the-answers.md#module-mode-find_package) |
-| `dep_DIR` under the expected prefix, and no row above matches | The configured copy is right for this lookup. A binary that reports another version at run time is a second lookup (C8), the loader (T11), or, with no `ldd` line for the library, a bundled copy compiled in (T14). Otherwise a wrong version is the manager's | C8, T11, T14, T8, T9 |
+| `dep_DIR` under the expected prefix, and no row above matches | The configured copy is right for this lookup. A binary that reports another version at run time is a second lookup (C8), the loader (T11), or, with no `ldd` line for the library, a bundled copy compiled in (T14). One that loads another file of the same package is the imported configuration (C3). Otherwise a wrong version is the manager's | C8, T11, T14, C3, T8, T9 |
 
 ### 2. Reconfigure fresh, with the search printed
 
@@ -125,8 +126,9 @@ and `warnings` block apply exactly as in CI.
   runs before step 1, and never without `--fresh`.
 - A gated configure that stops at a floor error first is T5 or T6.
 
-Then re-run the step 1 grep beside the saved output (C2). A moved `dep_DIR`
-is a stale cache, and step 4's C4 question reads one that stayed (T1, CMK-DEP-21).
+Then re-run the step 1 grep beside the saved output (C2), comparing values,
+not line numbers, which `--fresh` shifts. A moved `dep_DIR` is a stale cache,
+and step 4's C4 question reads one that stayed (T1, CMK-DEP-21).
 
 ### 3. On CMake 4.1 and newer, read the configure log
 
@@ -160,10 +162,10 @@ the first that fails ([measured cases](references/failure-modes.md)).
 |---|---|---|---|
 | C1 Proxy record | Is each path and version you cite a record of what this tree consumed? | The evidence rule's list | The consumption record: the generators folder (T8), vcpkg's `status` (T9), the `CPM_PACKAGE_` lines (T15), `CMakeSystem.cmake` (T1), the `The file was found at` path (step 2) |
 | C2 Sticky state | Did a cached or once-written input outlive the change? | Step 1's saved output beside the re-grep after step 2 | Name the line that moved. A reset that clears the symptom with no moved line names no mechanism. `-U` never reloads a toolchain or a cached `CPM_USE_LOCAL_PACKAGES` (T1, T15), and `--fresh` resets only the tree it names, never a nested configure's (C8) |
-| C3 Substitution after resolution | Does the artifact carry the copy the records name? | The reads below | C8 when its reads show a second copy, else T11, T14, T7 or T15, by the read that differs |
+| C3 Substitution after resolution | Does the artifact carry the copy the records name? | The reads below | C8 when its reads show a second copy, else T11, T14, T7, T15 or the imported configuration, by the read that differs |
 | C4 Absent or rejected candidate | Where is the expected copy in step 2's candidate list? | Step 2's output, searched for the expected path | Never listed: the search space (T1, T3), or a nested configure's forwarded arguments (C8). `considered but not accepted`: the request (T13). Listed and beaten: precedence (T1) |
 | C5 Record shape | Does the read fit the mechanism that answered? | Step 1's table, re-run with `NAME` spelled as each declare spells it | An empty or zero result is absence only for a mechanism that writes that record (step 3, T2, the module row) |
-| C6 Gate stop in third-party code | Does the remedy change the dependency's input, with the gate on, on every CI line? | The T5 and T6 writes grep, the T12 grep | A warning switch, a scoped diagnostic, `CMAKE_SKIP_INSTALL_RULES`, or a knob the line ignores (T5, T6, T12) |
+| C6 Gate stop in third-party code | Does the remedy change the dependency's input, with the gate on, on every CI line? | The T5 and T6 writes grep, the T12 grep | A warning switch, a scoped diagnostic, `CMAKE_SKIP_INSTALL_RULES`, a knob the line ignores, or a variable that never reaches a child configure (T5, T6, T12) |
 | C7 Narrow proof | Does the proof run the consumer kind that failed? | The CMK-INST-01 round trip | A compiled consumer that calls one exported function, once per consumer kind that failed (T4) |
 | C8 Several lookups | Is every lookup that fed the artifact accounted for? | The C8 reads below | Two copies: resolve the library once (CMK-DEP-33). A nested configure: steps 1 to 3 on its tree |
 
@@ -179,16 +181,20 @@ DIR=build/_deps/dep-src
 git -C "$DIR" status --porcelain
 grep -rn --include='CMakeLists.txt' --include='*.cmake' -e 'PATCH_COMMAND' .
 grep -rn --include='CMakeLists.txt' --include='*.cmake' --include='CMakePresets.json' --include='CMakeUserPresets.json' --include='*.yml' --include='*.yaml' --include='*.sh' -e 'FETCHCONTENT_SOURCE_DIR_' .
+PKGDIR=/usr/local/lib/cmake/dep
+grep -rn --include='*.cmake' -e 'IMPORTED_CONFIGURATIONS' "$PKGDIR"
+grep -rn --include='CMakeCache.txt' -e '^CMAKE_BUILD_TYPE' -e '^CMAKE_CONFIGURATION_TYPES' -e '^CMAKE_MAP_IMPORTED_CONFIG_' build
 ```
 
 - **T11, `ldd` and `readelf -d`** on the binary and its build-tree twin. The
-  `ldd` line naming the library is the copy that loads, and none, or
-  `not a dynamic executable`, means not applicable. An installed binary with no
-  `RUNPATH` or `RPATH` line, whose twin has one, lost it at install, so a
-  same-SONAME copy on the loader's path wins with exit 0. Fix with CMK-INST-11
-  (`$ORIGIN`) for the same prefix, `INSTALL_RPATH_USE_LINK_PATH ON` for
-  another, never `LD_LIBRARY_PATH`. A `RUNPATH` naming two directories that
-  both hold the SONAME is C8, not T11.
+  `ldd` line naming the library is the copy that loads. Another file name of
+  the recorded package (a postfix such as `d`) is another build of it (the
+  imported configuration). None, or `not a dynamic executable`, means not
+  applicable. An installed binary with no `RUNPATH` or `RPATH` line, whose twin
+  has one, lost it at install, so a same-SONAME copy on the loader's path wins
+  with exit 0. Fix with CMK-INST-11 (`$ORIGIN`) for the same prefix,
+  `INSTALL_RPATH_USE_LINK_PATH ON` for another, never `LD_LIBRARY_PATH`. A
+  `RUNPATH` naming two directories that both hold the SONAME is C8, not T11.
 - **T14, the macro grep**, over each directory the include grep prints (empty:
   another generator, so step 1's prefixes). One hit passes, and empty output
   means a wrong macro or directory. A second hit under the same package's other
@@ -205,6 +211,13 @@ grep -rn --include='CMakeLists.txt' --include='*.cmake' --include='CMakePresets.
   A name in both whose override directory lacks the patched line is the
   finding (CMK-DEP-31). The probe always carries
   `-DCMAKE_POLICY_DEFAULT_CMP0170=NEW`, or a missing source directory exits 0.
+- **The imported configuration, the last two greps,** with `PKGDIR` from step
+  1's `dep_DIR`. Empty first output: not applicable. Empty second output:
+  `build` is not a configured tree. A leg configuration that
+  no `IMPORTED_CONFIGURATIONS` line lists and no map line maps links the first
+  listed, `DEBUG` by file order, with exit 0 and no warning ([lz4](references/failure-modes.md#c3-substitution-after-resolution)).
+  Map it in the leg's preset or toolchain, `CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO`
+  as `RelWithDebInfo;Release` as vcpkg's toolchain does, never empty (CMK-INST-22).
 
 The C8 reads, from the artifact's side, with `LIB` as the library's file name:
 
@@ -215,8 +228,9 @@ grep -rn --include='CMakeConfigureLog.yaml' -e "^    found: \"[^\"]*/${LIB}[.]" 
 grep -rl --include='CMakeCache.txt' -e '^CMAKE_HOME_DIRECTORY' build
 ```
 
-- **Link lines.** One directory passes, and empty output means a wrong `LIB`.
-  Two directories are two lookups on two copies: resolve the library once and
+- **Link lines.** One directory passes. Empty output means a wrong `LIB`, or a
+  link line naming another build: re-run with the `ldd` line's file name. Two
+  directories are two lookups on two copies: resolve the library once and
   link that target everywhere (CMK-DEP-33). The ungated `Cannot generate a safe
   runtime search path` warning with `cycle` is the same finding.
 - **`found:` lines** (4.1 and newer) are `find_library` answers, pkg-config's
@@ -226,7 +240,9 @@ grep -rl --include='CMakeCache.txt' -e '^CMAKE_HOME_DIRECTORY' build
   1 to 3 on the tree that holds the artifact, with the arguments in its
   `<name>-prefix/tmp/<name>-cfgcmd.txt`. A list forwarded through `CMAKE_ARGS`
   arrives cut to its first entry (CMK-DEP-34,
-  [forwarding](references/failure-modes.md#c8-one-library-several-lookups)).
+  [forwarding](references/failure-modes.md#c8-one-dependency-several-lookups)).
+  Count also under each `-B` the console names and a manager's root, where
+  HunterGate's bootstrap keeps its cache (C8).
 
 ## Pick the entry point
 
@@ -242,7 +258,7 @@ grep -rl --include='CMakeCache.txt' -e '^CMAKE_HOME_DIRECTORY' build
 | T8 | "Which version did Conan pick?" | `conan graph info`, then the generators folder | graph info: what the conanfile resolves to now. The folder: what this tree consumes | CMK-CONAN-07, CMK-CONAN-09 |
 | T9 | vcpkg: wrong tree or wrong version | Step 1 | `_DIR` not under the current `VCPKG_INSTALLED_DIR`: T1 through vcpkg. A version above a `version>=` floor: the baseline won | CMK-DEP-13, CMK-VCPKG-01, CMK-VCPKG-02 |
 | T10 | A provider registered, never called | Step 1, then the TC-04 grep | The project set or appended `CMAKE_PROJECT_TOP_LEVEL_INCLUDES` | CMK-TC-04 |
-| T11 | The configured copy is right, but the built or installed binary loads another | Step 4's `ldd` and `readelf -d` | No `RUNPATH` on the installed binary while the build-tree binary has one: install stripped it and a same-SONAME copy on the loader path wins | CMK-INST-11 |
+| T11 | The configured copy is right, but the built or installed binary loads another | Step 4's `ldd` and `readelf -d` | No `RUNPATH` on the installed binary while the build-tree binary has one: install stripped it and a same-SONAME copy on the loader path wins. Another file of the same package: step 4's imported configuration | CMK-INST-11, CMK-INST-22 |
 | T12 | 4.4 and newer: the gate stops on `install-absolute-destination` inside a fetched or vendored dependency | The error's file:line | The dependency installs to an absolute `DESTINATION` (`CMAKE_INSTALL_FULL_*`) | CMK-DEP-30, CMK-DEP-31 |
 | T13 | cmake-conan ran, and the consumer got a copy or version Conan did not install | Step 1, then step 2 | A `dep_DIR` cache line under `CMakeConfigDeps`, and `considered but not accepted` naming the generators copy | CMK-DEP-32, CMK-CONAN-07 |
 | T14 | A link error names two versions of one library ("did you mean" another inline namespace), or a static binary runs another version than `<dep>_DIR` names | Step 4's include and version-macro greps | Another package bundles a copy in its headers and library | CMK-DEP-33 |
@@ -345,10 +361,15 @@ Each is class C6: the remedy changes the dependency's input, never the gate.
 T5 is 4.x's "Compatibility with CMake < 3.5 has been removed". T6 is the gate
 on "< 3.10 will be removed" (`CMake Deprecation Error` on 3.31.12 and 4.3.4,
 `CMake Error (deprecated)` on 4.4.2). Both name the dependency's
-`cmake_minimum_required` line. On 4.x the fix is CMK-DEP-15, value 3.10 (never
+`cmake_minimum_required` line, relative to the configure that printed it: if
+the project's line holds no such call, the tree is the console's reproduce
+line's `-H` and `-B` (C8). On 4.x the fix is CMK-DEP-15, value 3.10 (never
 3.5), scoped to the one call that adds the dependency. On 3.x it is
 CMK-DEP-30, a re-pin or a one-line `PATCH_COMMAND`, because 3.31.12 ignores
-`CMAKE_POLICY_VERSION_MINIMUM`. T12 is 4.4's `install-absolute-destination`
+`CMAKE_POLICY_VERSION_MINIMUM`. A child configure (a manager's bootstrap,
+`execute_process` of `cmake`) sees neither the scoped value nor a `-D`, nor the
+gate on 3.x: on every line re-pin or patch the file that writes its floor (the
+third grep, [FM](references/failure-modes.md#c6-a-gate-stop-in-third-party-code-cleared-at-the-wrong-knob), CMK-DEP-06). T12 is 4.4's `install-absolute-destination`
 inside a dependency: only one `PATCH_COMMAND` over every absolute destination
 clears it on 4.4.2 ([FM11](references/failure-modes.md#c6-a-gate-stop-in-third-party-code-cleared-at-the-wrong-knob)).
 List the floor writes, then the absolute destinations:
@@ -356,13 +377,15 @@ List the floor writes, then the absolute destinations:
 ```sh
 grep -rn --include='*.cmake' --include='CMakeLists.txt' --include='CMakePresets.json' --include='*.yml' --include='*.yaml' -e 'CMAKE_POLICY_VERSION_MINIMUM' -e 'CMAKE_POLICY_DEFAULT_CMP' .
 grep -rn --include='CMakeLists.txt' --include='*.cmake' -e 'CMAKE_INSTALL_FULL_' build/_deps
+grep -rn --include='CMakeLists.txt' --include='*.cmake' -e '"cmake_minimum_required(VERSION' .
 ```
 
 Empty first output passes. Each hit must be a set/restore around one call that
 adds the dependency, a `set()` inside a function, or a vcpkg port's own
 arguments, and a preset, workflow or file-scope hit is the finding. Empty
-second output means a literal absolute path, so read the error's file:line. The
-gate never drops (CMK-CORE-01).
+second output means a literal absolute path, so read the error's file:line.
+The third lists floors written into a generated project, and empty output
+means none (not applicable). The gate never drops (CMK-CORE-01).
 
 ## T8 and T9 Which version the manager put in this tree
 
@@ -426,7 +449,7 @@ rows live in the `cmake-build` and `cpp-packaging` rule sets, which settle a dis
 | 1 | An application whose `requires` or `tool_requires` use a version range commits `conan.lock`. CI passes `--lockfile=conan.lock` explicitly and never `--lockfile-partial`. The lock is regenerated with `--lockfile-out` (plus `--lockfile-clean`), never edited by hand | CMK-CONAN-09 |
 | 2 | An installable library resolves its dependencies with `find_package` and never forces acquisition | CMK-DEP-07 |
 | 3 | Treat `<Pkg>_DIR` as the sticky record of which copy was found. To switch copies use a fresh build tree, `--fresh` or `-U <Pkg>_DIR`, and only a fresh tree or `--fresh` when the switch adds or changes the toolchain. A module that re-points `<Pkg>_ROOT` on reconfigure must `unset(<Pkg>_DIR CACHE)` whenever the hint's value changes | CMK-DEP-13 |
-| 4 | On CMake 4.x, set a third-party dependency's policy knobs with set/restore around the one `add_subdirectory`, `FetchContent_MakeAvailable` or `find_package` that loads it, with `CMAKE_POLICY_VERSION_MINIMUM` at 3.10. Never use a project-wide `set()`, a committed preset `cacheVariables` entry, or a CI environment variable | CMK-DEP-15 |
+| 4 | On CMake 4.x, set a third-party dependency's policy knobs with set/restore around the one `add_subdirectory`, `FetchContent_MakeAvailable` or `find_package` that loads it, with `CMAKE_POLICY_VERSION_MINIMUM` at 3.10. Never use a project-wide `set()`, a committed preset `cacheVariables` entry, or a CI environment variable. A dependency configured in a child process (a manager's bootstrap such as HunterGate, or `execute_process` of `cmake`) never sees the value or a `-D`: re-pin or patch the file that writes its floor, as CMK-DEP-30 does on 3.x | CMK-DEP-15 |
 | 5 | Make every configure-time network touch satisfiable offline | CMK-DEP-16 |
 | 6 | On CMake 3.x, clear a fetched or vendored dependency whose floor is 3.5 to 3.9 by re-pinning to a version that declares 3.10 or newer, or with a `PATCH_COMMAND` that rewrites that one `cmake_minimum_required` line. Never use `-DCMAKE_WARN_DEPRECATED=OFF`, `-Wno-dev`, `-Wno-deprecated`, `-Wno-error=deprecated` or a preset's `"warnings": {"deprecated": false}` as the remedy | CMK-DEP-30 |
 | 7 | Point an offline or override configure (`FETCHCONTENT_SOURCE_DIR_<X>`, including the CMK-DEP-16 probe) only at source that already carries the declare's `PATCH_COMMAND` result | CMK-DEP-31 |
@@ -436,11 +459,6 @@ rows live in the `cmake-build` and `cpp-packaging` rule sets, which settle a dis
 | 11 | Never design on a provider seeing `find_program`, `find_library` or `find_path`. With cmake-conan they see Conan content only under `CMakeConfigDeps`, only after the first intercepted `find_package`, and only in that directory scope, so the first `find_package` of a Conan package goes in the top-level `CMakeLists.txt` before any `add_subdirectory`. `DEFER` is not an ordering fix | CMK-TC-05 |
 | 12 | Link one copy of each library. When a consumed package can bundle a dependency that the project, or another package in the same link, also uses, consume the package's build that uses the external copy (spdlog: `SPDLOG_FMT_EXTERNAL=ON`) | CMK-DEP-33 |
 | 13 | Forward a list-valued search variable to an `ExternalProject_Add` configure through `CMAKE_CACHE_ARGS` with a `:STRING` type, never as `-D<VAR>=${list}` in `CMAKE_ARGS` | CMK-DEP-34 |
-
-## Failure classes
-
-C1 to C8 are the rows of step 4's table, one mechanism each. Statements,
-instances and evidence: [references/failure-modes.md](references/failure-modes.md).
 
 ## References
 

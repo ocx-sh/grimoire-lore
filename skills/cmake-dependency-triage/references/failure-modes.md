@@ -1,24 +1,18 @@
 # Failure classes, instance by instance
 
-Read this when a class check in `SKILL.md` fails and you want the measured
-case behind it, or when a symptom looks like one of the cases below. Each
-class is one mechanism. Its instances are the old failure modes FM1 to FM19
-and the steps that misled, stalled or went wrong when the skill ran on real
-trees, held-out trees included, with tree, versions, exit code and output. The
-fix is always the rule ID the instance cites. This file states no standard.
+Read this when a class check in `SKILL.md` fails, or a symptom looks like a
+case below. Each class is one mechanism, and the list under it holds its
+instances: FM1 to FM19 and the steps that misled, stalled or went wrong on real
+and held-out trees. The fix is always the rule the instance cites, and this
+file states no standard. Measured 2026-09-26 on CMake 3.31.12, 4.3.4 and 4.4.2,
+with the tool versions `SKILL.md` and [reading-the-answers.md](reading-the-answers.md) name.
 
-Measured 2026-09-26 on CMake 3.31.12, 4.3.4 and 4.4.2 (4.0.7, 4.1.6 and 4.2.7
-printed only), with the tool versions `SKILL.md` and
-[reading-the-answers.md](reading-the-answers.md) name.
-
-Contents: [C1 Proxy record](#c1-a-proxy-record-read-as-the-record) ·
-[C2 Sticky state](#c2-sticky-state-outlives-its-input) ·
+Contents: [C1 Proxy record](#c1-a-proxy-record-read-as-the-record) · [C2 Sticky state](#c2-sticky-state-outlives-its-input) ·
 [C3 Substitution after resolution](#c3-substitution-after-resolution) ·
-[C4 Absent or rejected candidate](#c4-an-absent-or-rejected-candidate-read-as-precedence) ·
-[C5 Record shape](#c5-a-read-calibrated-on-one-mechanism) ·
+[C4 Absent or rejected candidate](#c4-an-absent-or-rejected-candidate-read-as-precedence) · [C5 Record shape](#c5-a-read-calibrated-on-one-mechanism) ·
 [C6 Gate stop in third-party code](#c6-a-gate-stop-in-third-party-code-cleared-at-the-wrong-knob) ·
-[C7 Narrow proof](#c7-a-proof-that-exercises-one-consumer-kind) ·
-[C8 Several lookups](#c8-one-library-several-lookups) · [Re-check](#re-check-on-each-tool-bump)
+[C7 Narrow proof](#c7-a-proof-that-exercises-one-consumer-kind) · [C8 Several lookups](#c8-one-dependency-several-lookups) ·
+[Re-check](#re-check-on-each-tool-bump)
 
 ## C1 A proxy record read as the record
 
@@ -35,8 +29,6 @@ or the install that this tree actually ran.
 | `CMAKE_TOOLCHAIN_FILE` in the cache | The toolchain the cache was last given | The `include(` line of `CMakeSystem.cmake` |
 | `Package was found by the dependency provider` | That the provider's macro returned | The `The file was found at` path above it (T13) |
 | A passing CMK-VCPKG-01 check | That a baseline exists | The installed version, then the baseline's entry for the port |
-
-Instances:
 
 - **FM12. Reading vcpkg's `version>=` as the version installed** (T9,
   measured in [vcpkg](reading-the-answers.md#vcpkg)). Wave 5 A1-f misled:
@@ -77,6 +69,7 @@ everything removes the symptom without naming which input was sticky.
 | `CPM_USE_LOCAL_PACKAGES` | `option()` seeded from the environment, then cached | `-DCPM_USE_LOCAL_PACKAGES=OFF`, or `--fresh` with the variable unset |
 | A vendored module's `<name>_ROOT` `CACHE PATH ... FORCE` | Every configure | CMK-DEP-13's guarded `unset(<Pkg>_DIR CACHE)` |
 | A `CPM_SOURCE_CACHE` checkout | The first project to fetch the pin | Nothing in the build tree. Restore the checkout (C3) |
+| A manager root outside the tree (`HUNTER_ROOT`) | The first configure on the machine | Nothing in the build tree. Reproduce CI on a new, empty root |
 | A nested configure's cache (ExternalProject `<name>-prefix/src/<name>-build`) | Its configure step, which keeps a cached `_DIR` when the forwarded arguments change | That tree's own `--fresh`, with `-C <name>-prefix/tmp/<name>-cache-.cmake` when the project uses `CMAKE_CACHE_ARGS`. Never the outer `--fresh` (C8) |
 
 A vendored bootstrap module that writes `<name>_ROOT` as `CACHE PATH ... FORCE`
@@ -90,8 +83,6 @@ grep -rlzE --include='*.cmake' -e '_ROOT[^)]*CACHE' . | xargs -r grep -L -e '_DI
 Empty output passes. A listed file writes a `_ROOT` cache entry and never
 unsets a `_DIR` one. A `FORCE` in that call is the finding (CMK-DEP-13).
 
-Instances:
-
 - **FM5. Wiping the build tree first.** The stale `_DIR` was the evidence.
 - **FM13. Giving an existing build tree a toolchain, then clearing `_DIR`
   with `-U`.** The toolchain is never loaded, so `-U` finds the old copy (T1,
@@ -104,13 +95,16 @@ Instances:
 - **Wave 6 B2.** `CPM_USE_LOCAL_PACKAGES:BOOL=ON` stayed cached after `unset`
   (4.4.2). B2-c misled (not in the grep), B2-d wrong (`-U fmt_DIR` kept
   fmt@12.1.0), B2-e misled (`--fresh` fixed it, credited to a stale `_DIR`).
+- **Wave 8 B-j stalled.** HunterGate's bootstrap configure runs only while
+  `HUNTER_ROOT` lacks the release: an empty root exited 1 on 4.3.4 and 4.4.2,
+  a populated one 0. Only the developer tree cached `HUNTER_CACHED_ROOT`.
 
 ## C3 Substitution after resolution
 
 Every configure record names the intended copy, and the artifact still carries
-another. The substitution happens after `find_package`: at load time, inside
-another package's headers and library, or in the source a pinned fetch
-compiled. Only a read of the artifact or its source finds it.
+another. The substitution happens after `find_package`: at load time, at
+generate time, inside another package's headers and library, or in the source
+a pinned fetch compiled. Only a read of the artifact or its source finds it.
 
 | Where the other copy enters | The read |
 |---|---|
@@ -118,8 +112,7 @@ compiled. Only a read of the artifact or its source finds it.
 | A copy bundled in another package | The version macro over each prefix (T14) |
 | A source override that skips the declare's `PATCH_COMMAND` | The patch and override greps (T7) |
 | A shared source checkout someone edited | `git status --porcelain` on `_SOURCE_DIR` (T15) |
-
-Instances:
+| The generator, taking an installed configuration for the leg's | `IMPORTED_CONFIGURATIONS` beside the build type and map lines |
 
 - **FM6. Passing `FETCHCONTENT_SOURCE_DIR_<X>` for a patched dependency**,
   then debugging the dependency. The override skips `PATCH_COMMAND`, so
@@ -142,6 +135,12 @@ Instances:
   `Cache for fmt (...) is dirty` warning, exit 0 on 3.31.12 and 4.4.2. The
   step 1 grep was empty, steps 2 and 3 had no event, and the declare grep
   showed the same pin CI used.
+- **Wave 8 A, lz4 1.10.0 (`ebb370ca`), Debug (postfix `d`) and Release in one
+  prefix.** RelWithDebInfo and MinSizeRel loaded `liblz4d.so.1`, exit 0, no
+  warning, either install order (3.31.12, 4.3.4, 4.4.2): an unmapped
+  configuration takes the first listed, `DEBUG` by file name. A-h misled (`ldd`
+  printed the `d` file, read by directory), A-j stalled (a false stop). The
+  map to `RelWithDebInfo;Release` loaded `liblz4.so.1` on all three.
 
 ## C4 An absent or rejected candidate read as precedence
 
@@ -155,8 +154,6 @@ fixes one package and hardens the cause.
 | Never listed | The search space: find-root modes, an empty `CMAKE_LIBRARY_ARCHITECTURE`, a provider's directory scope, or the arguments a nested configure received | The toolchain (CMK-TC-08, CMK-TC-11), the first `find_package`'s placement (CMK-TC-05), or the forwarding line (C8) |
 | `considered but not accepted` | The request rejects it, and a wider search ran | The request or the conanfile (T13) |
 | Listed and beaten | Precedence: a stale `_DIR` or a rooted copy | T1, CMK-DEP-13, CMK-DEP-21 |
-
-Instances:
 
 - **FM3. Assuming a provider widens search paths like a toolchain file**, or
   that `DEFER` runs a call earlier. `find_program` sees Conan content only
@@ -192,8 +189,6 @@ finding.
 | CPM's local search | `CMake Debug Log at cmake/CPM.cmake` above the debug block |
 | pkg-config (`pkg_check_modules`, `pkg_search_module`) | `pkgcfg_lib_<PREFIX>_<lib>:FILEPATH=`, and `<PREFIX>_VERSION` and `<PREFIX>_LIBDIR` `INTERNAL` lines, never `<Pkg>_DIR`. A `find-v1` event (not `find_package-v1`) with `variable: "pkgcfg_lib_<PREFIX>_<lib>"`, and the console line `Found <module>, version` |
 
-Instances:
-
 - **FM4. Reading an empty `_DIR` grep as "never looked up"** when a Find
   module or a `CMakeConfigDeps` provider answered.
 - **FM9. Spelling a `FIND_PACKAGE_ARGS` declare's name differently from the
@@ -220,9 +215,8 @@ Instances:
 The gate promotes a diagnostic inside code the project does not own: a floor
 below 3.10, or an absolute install destination on 4.4. Lowering its severity
 or scope fails, is forbidden, or is a silent no-op on 3.x. Only a change to the
-dependency's input clears it: a scoped floor value, a re-pin, or a patch.
-
-Instances:
+dependency's input clears it: a scoped floor value, a re-pin, or a patch. A
+child configure never sees a scoped value or a `-D`, so there only the last two.
 
 - **FM1. "Fixing" a floor error with a global switch** (a warning switch, or
   a preset or CI `CMAKE_POLICY_VERSION_MINIMUM`), or with the value 3.5.
@@ -235,14 +229,17 @@ Instances:
   `CMAKE_SKIP_INSTALL_RULES ON` and `-Werror=dev` all exited 1 on 4.4.2, and
   4.3.4 exited 0. `PATCH_COMMAND sed -i "s/CMAKE_INSTALL_FULL_/CMAKE_INSTALL_/g" CMakeLists.txt`
   exited 0, and patching only the export line moved the error to line 149.
+- **Wave 8 B-h wrong.** cpp-pm/gate v0.9.2 (`958e65c6`) writes
+  `cmake_minimum_required(VERSION 3.2)` into HunterGate's bootstrap project.
+  CMK-DEP-15's set/unset around `HunterGate(` and a `-D` exited 1 on 4.4.2,
+  3.31.12 printed the child's deprecation ungated, and gate `92050736` (3.10)
+  exited 0 on all three.
 
 ## C7 A proof that exercises one consumer kind
 
 A proof passes with a consumer that cannot fail: a `LANGUAGES NONE` consumer
 never compiles, an empty `main` never pulls a static archive member, and a
 `CONFIG` consumer never meets the Find module a plain `find_package` loads.
-
-Instances:
 
 - **FM7. Proving a missing `find_dependency` fixed with a `LANGUAGES NONE`
   consumer.** It stays green either way. The proof is the CMK-INST-01 round
@@ -255,9 +252,9 @@ Instances:
   Config, and a `CMAKE_FIND_PACKAGE_PREFER_CONFIG` consumer of `ZLIB::ZLIB`
   exited 1 at configure (both lines).
 
-## C8 One library, several lookups
+## C8 One dependency, several lookups
 
-One library reaches the artifact through more than one lookup, each with its
+One dependency reaches the build through more than one lookup or configure, each with its
 own inputs, search order and record, so each can land on another copy with
 exit 0. A triage that reads one lookup's record credits it for the whole
 artifact. Only a read from the artifact's side (step 4's C8 reads) sees all.
@@ -267,8 +264,7 @@ artifact. Only a read from the artifact's side (step 4's C8 reads) sees all.
 | `pkg_check_modules` beside `find_package` | The pkg-config row of C5 | `FindPkgConfig.cmake` searches `$ENV{PKG_CONFIG_PATH}` before the `CMAKE_PREFIX_PATH` directories (4.4.2) |
 | A Find module's `find_path` beside its `find_library` | `<NAME>_INCLUDE_DIR` and `<NAME>_LIBRARY*` | Each call searches on its own, and the module reports the header's version |
 | An ExternalProject configure beside the outer one | The inner tree's `CMakeCache.txt` | Its forwarded arguments. `CMAKE_ARGS` splits a list at `;`, so `-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}` passes the first entry only |
-
-Instances:
+| A manager's bootstrap configure (HunterGate) | Its `CMakeCache.txt` under the manager's root | Only its own command line and environment reach it |
 
 - **FM19. Taking a Find module's reported version as the linked copy's.**
   Wave 6 C-i wrong: FindEXPAT printed `found suitable version "2.8.5"` (the
@@ -287,7 +283,11 @@ Instances:
   that step ran) and took 0.17 from the environment (exit 0 on 3.31.12, 4.3.4
   and 4.4.2). `CMAKE_CACHE_ARGS "-DCMAKE_PREFIX_PATH:STRING=${CMAKE_PREFIX_PATH}"`
   built 0.18 on new trees, and on a used tree only the inner `--fresh` moved
-  `json-c_DIR`. No rule owns the forwarding line yet.
+  `json-c_DIR`. CMK-DEP-34 owns the forwarding line.
+- **Wave 8 B-b and B-g misled.** `CMake Error at CMakeLists.txt:1` was the
+  bootstrap project's line (`3.2`), not the project's (`3.25...4.4`). The
+  console's `To reproduce` line named its `-H` and `-B`, and the cache count
+  over `build` printed one file (4.4.2).
 
 ## Re-check on each tool bump
 

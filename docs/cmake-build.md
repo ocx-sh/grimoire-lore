@@ -35,7 +35,7 @@ test.
 ## What is in it
 
 The index carries the gate, eighteen non-negotiables, and five cross-cutting
-rules it owns outright. 159 rules in total, 92 of them merge-blocking, spread
+rules it owns outright. 164 rules in total, 96 of them merge-blocking, spread
 over ten depth files: version floors and policies, the CMake language itself,
 module authoring, targets and linkage, install and export, dependency
 acquisition, toolchains and providers, testing, presets and CI, and the Bazel
