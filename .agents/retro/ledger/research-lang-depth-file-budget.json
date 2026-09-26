@@ -1,0 +1,27 @@
+{
+  "artifact": "research-lang",
+  "cost_min": 0,
+  "entries": [
+    "20260926T105944Z-3a46a562.json"
+  ],
+  "first_seen": "2026-09-26T11:00:00Z",
+  "fixed": {
+    "at": "2026-09-26T20:33:24Z",
+    "by": "report .agents/retro/reports/2026-09-26.md P-2",
+    "stale_versions": []
+  },
+  "folded_at": "2026-09-26T20:29:58Z",
+  "folds": 1,
+  "id": "research-lang-depth-file-budget",
+  "kind": "pitfall",
+  "last_seen": "2026-09-26T11:00:00Z",
+  "occurrences": 1,
+  "scope": "harness",
+  "severity": "medium",
+  "status": "fixed",
+  "title": "check-artifacts.py applies 200-line index budget to a depth file passed directly",
+  "v": 1,
+  "versions": [
+    "unknown"
+  ]
+}

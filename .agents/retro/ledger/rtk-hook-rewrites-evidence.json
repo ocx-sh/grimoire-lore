@@ -1,0 +1,28 @@
+{
+  "artifact": "rtk",
+  "cost_min": 0,
+  "entries": [
+    "20260926T000000Z-b12db3e0.json",
+    "20260926T113259Z-1ff3a1d5.json",
+    "20260926T115128Z-06292882.json",
+    "20260926T121958Z-5ccf987b.json",
+    "20260926T123314Z-90033b4d.json",
+    "20260926T170000Z-7c598b5c.json"
+  ],
+  "first_seen": "2026-09-26T00:00:00Z",
+  "fixed": null,
+  "folded_at": "2026-09-26T20:29:58Z",
+  "folds": 1,
+  "id": "rtk-hook-rewrites-evidence",
+  "kind": "pitfall",
+  "last_seen": "2026-09-26T17:00:00Z",
+  "occurrences": 6,
+  "scope": "harness",
+  "severity": "medium",
+  "status": "open",
+  "title": "rtk hook rewrites grep/diff/wc/cat output, hiding verbatim evidence and exit codes",
+  "v": 1,
+  "versions": [
+    "unknown"
+  ]
+}

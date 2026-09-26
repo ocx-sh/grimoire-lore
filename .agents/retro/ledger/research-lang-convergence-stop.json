@@ -1,0 +1,27 @@
+{
+  "artifact": "research-lang",
+  "cost_min": 0,
+  "entries": [
+    "20260926T143339Z-2c9d1d7a.json"
+  ],
+  "first_seen": "2026-09-26T14:33:39Z",
+  "fixed": {
+    "at": "2026-09-26T20:33:24Z",
+    "by": "report .agents/retro/reports/2026-09-26.md P-3",
+    "stale_versions": []
+  },
+  "folded_at": "2026-09-26T20:29:58Z",
+  "folds": 1,
+  "id": "research-lang-convergence-stop",
+  "kind": "defect",
+  "last_seen": "2026-09-26T14:33:39Z",
+  "occurrences": 1,
+  "scope": "harness",
+  "severity": "high",
+  "status": "fixed",
+  "title": "Stop condition on new failure modes never terminates on real trees",
+  "v": 1,
+  "versions": [
+    "unknown"
+  ]
+}

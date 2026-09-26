@@ -1,0 +1,23 @@
+{
+  "artifact": "research-lang",
+  "cost_min": 0,
+  "entries": [
+    "20260926T143339Z-e652de86.json"
+  ],
+  "first_seen": "2026-09-26T14:33:39Z",
+  "fixed": null,
+  "folded_at": "2026-09-26T20:29:58Z",
+  "folds": 1,
+  "id": "research-lang-host-cannot-measure",
+  "kind": "pitfall",
+  "last_seen": "2026-09-26T14:33:39Z",
+  "occurrences": 1,
+  "scope": "project",
+  "severity": "low",
+  "status": "deferred",
+  "title": "Host-cannot-measure recorded without checking the ocx tool catalog",
+  "v": 1,
+  "versions": [
+    "unknown"
+  ]
+}
