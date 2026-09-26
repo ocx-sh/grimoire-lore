@@ -1,0 +1,1 @@
+set(CMAKE_C_FLAGS_INIT "-ffile-prefix-map=/home/mherwig/.cache/cmake-measure-scratch/linkage/m5-file-prefix-map/dirA=/canon/src -ffile-prefix-map=/home/mherwig/.cache/cmake-measure-scratch/linkage/m5-file-prefix-map/dirA/build-toolchain=/canon/build")

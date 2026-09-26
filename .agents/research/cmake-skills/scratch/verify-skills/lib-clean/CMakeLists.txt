@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.25...4.4)
+project(mylib LANGUAGES C)
+add_library(mylib INTERFACE)
+if(PROJECT_IS_TOP_LEVEL)
+  include(CTest)
+  add_custom_target(mylib_unit_tests)
+  add_test(NAME t1 COMMAND ${CMAKE_COMMAND} -E true)
+endif()

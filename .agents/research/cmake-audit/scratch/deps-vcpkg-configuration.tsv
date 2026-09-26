@@ -1,0 +1,8 @@
+microsoft__vcpkg-tool	microsoft__vcpkg-tool/src/vcpkg-configuration.json	"kind": "git",
+microsoft__vcpkg-tool	microsoft__vcpkg-tool/azure-pipelines/e2e-projects/overlays-project-with-config/vcpkg-configuration.json	
+microsoft__vcpkg-tool	microsoft__vcpkg-tool/azure-pipelines/e2e-projects/overlays-not-quite-dot/vcpkg-configuration.json	
+microsoft__vcpkg-tool	microsoft__vcpkg-tool/azure-pipelines/e2e-projects/overlays-malformed-shadowing/vcpkg-configuration.json	
+microsoft__vcpkg-tool	microsoft__vcpkg-tool/azure-pipelines/e2e-projects/overlays-malformed-shadowing-builtin/vcpkg-configuration.json	
+microsoft__vcpkg-tool	microsoft__vcpkg-tool/azure-pipelines/e2e-projects/overlays-dot/vcpkg-configuration.json	
+microsoft__vcpkg-tool	microsoft__vcpkg-tool/azure-pipelines/e2e-projects/overlays-bad-paths/vcpkg-configuration.json	
+microsoft__vcpkg-tool	microsoft__vcpkg-tool/azure-pipelines/e2e-ports/mismatched-version-database/vcpkg-configuration.json	"kind": "filesystem",

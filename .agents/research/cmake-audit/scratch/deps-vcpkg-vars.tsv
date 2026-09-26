@@ -1,0 +1,9 @@
+metric	file_count	files(head5)
+VCPKG_CHAINLOAD_TOOLCHAIN_FILE	6	aminya__project_options/tests/rpi4-vcpkg/Taskfile.yml;aminya__project_options/src/Vcpkg.cmake;aminya__project_options/src/CrossCompiler.cmake;qt__qtbase/cmake/QtToolchainHelpers.cmake;qt__qtbase/cmake/QtFeature.cmake;
+VCPKG_MANIFEST_FEATURES	2	friendlyanon__cmake-init/cmake-init/templates/common/CMakePresets.json;qt__qtbase/cmake/QtProcessConfigureArgs.cmake;
+VCPKG_MANIFEST_MODE	2	apache__arrow/cpp/cmake_modules/Usevcpkg.cmake;apache__arrow/cpp/CMakePresets.json;
+VCPKG_TARGET_TRIPLET	15	apache__arrow/cpp/cmake_modules/Usevcpkg.cmake;apache__arrow/cpp/CMakePresets.json;duckdb__duckdb/.github/config/out_of_tree_extensions.cmake;curl__curl/.github/workflows/windows.yml;aminya__project_options/src/Vcpkg.cmake;
+VCPKG_OVERLAY_PORTS	0	;
+VCPKG_BINARY_SOURCES	7	apache__arrow/dev/tasks/vcpkg-tests/github.windows.yml;apache__arrow/dev/tasks/python-wheels/github.osx.yml;apache__arrow/dev/tasks/python-wheels/github.linux.yml;apache__arrow/compose.yaml;apache__arrow/.github/workflows/ruby.yml;
+X_VCPKG_ASSET_SOURCES	0	;
+scripts/buildsystems/vcpkg\.cmake	11	apache__arrow/cpp/cmake_modules/Usevcpkg.cmake;duckdb__duckdb/.github/workflows/NightlyTests.yml;duckdb__duckdb/.github/config/out_of_tree_extensions.cmake;curl__curl/.github/workflows/windows.yml;filipdutescu__modern-cpp-template/cmake/Vcpkg.cmake;

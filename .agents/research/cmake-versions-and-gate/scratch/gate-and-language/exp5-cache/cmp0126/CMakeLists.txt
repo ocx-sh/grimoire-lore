@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.25)
+project(cmp0126_test LANGUAGES NONE)
+cmake_policy(SET CMP0126 @POLICY@)
+set(Z "normal-value")
+set(Z "cache-value" CACHE STRING "d")
+message(STATUS "Z=${Z}")

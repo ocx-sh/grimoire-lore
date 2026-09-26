@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.25...4.4)
+project(app5 LANGUAGES NONE)
+set(CMAKE_POLICY_VERSION_MINIMUM ${PVM})
+add_subdirectory(${DEP} dep)
+unset(CMAKE_POLICY_VERSION_MINIMUM)

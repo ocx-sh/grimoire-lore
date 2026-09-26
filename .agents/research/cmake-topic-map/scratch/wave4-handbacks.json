@@ -1,0 +1,52 @@
+[
+ {
+  "from_topic": "skills-real",
+  "ledger": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-skills/wave4-real-tree.md",
+  "edit": "rules/cmake-build/install-and-export.md:19: replace with `# TARGETS (its imported targets), SRC (the absolute source directory), and SYM_DECL and SYM_CALL: an include and a call of one exported function per target, e.g. SYM_DECL='#include <mylib/mylib.h>' SYM_CALL='mylib_version() != 0'. CFG_ARGS (optional): the library's own -D options.`"
+ },
+ {
+  "from_topic": "skills-real",
+  "ledger": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-skills/wave4-real-tree.md",
+  "edit": "rules/cmake-build/install-and-export.md:22: replace with `: \"${PKG:?}\" \"${VER:?}\" \"${TARGETS:?}\" \"${SRC:?}\" \"${SYM_DECL:?}\" \"${SYM_CALL:?}\"`"
+ },
+ {
+  "from_topic": "skills-real",
+  "ledger": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-skills/wave4-real-tree.md",
+  "edit": "rules/cmake-build/install-and-export.md:25: replace with `cmake -S \"$SRC\" -B \"$W/build\" \"$GATE\" ${CFG_ARGS:-}`"
+ },
+ {
+  "from_topic": "skills-real",
+  "ledger": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-skills/wave4-real-tree.md",
+  "edit": "rules/cmake-build/install-and-export.md:40: replace with `printf '%s\\n' \"$SYM_DECL\" \"int main(void) { return $SYM_CALL; }\" > \"$W/consumer/main.c\"`"
+ },
+ {
+  "from_topic": "skills-real",
+  "ledger": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-skills/wave4-real-tree.md",
+  "edit": "rules/cmake-build/install-and-export.md:53 (CMK-INST-01 Rationale cell): append ` An empty consumer main pulls no member out of a static archive, so the consumer calls one exported function per target: a static target that never linked m passed with an empty main and failed with undefined reference to sincos once main called cpBodyNew (slembcke/Chipmunk2D, 3.31.12 and 4.4.2, 2026-09-26).`"
+ },
+ {
+  "from_topic": "skills-real",
+  "ledger": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-skills/wave4-real-tree.md",
+  "edit": "rules/cmake-build/dependencies.md:136 (CMK-DEP-17 Verification cell): replace `0 after a find_package ran = finding, and 0 on 3.x is expected.` with `0 after a find_package ran = finding, unless step 1 shows the _DIR under CMakeFiles/pkgRedirects or a CMakeConfigDeps provider answered (neither logs an event, 4.3.4 and 4.4.2), and 0 on 3.x is expected.`"
+ },
+ {
+  "from_topic": "skills-real",
+  "ledger": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-skills/wave4-real-tree.md",
+  "edit": "rules/cmake-build/targets.md:93 (CMK-TGT-05): append to Rule `When converting an explicit -std= flag, in C as in C++, also set the target's <LANG>_STANDARD to that level (with <LANG>_EXTENSIONS ON for a gnu spelling). The compile feature is a floor and adds no flag when the compiler's default is newer.`. Append to Rationale `gcc 15.2.1 defaults to C 23: c_std_99 alone emits no -std, while C_STANDARD 99 emits -std=gnu99 (measured 2026-09-26 on 3.31.12 and 4.4.2).`. Append to Verification `For a converted -std= flag, grep -rho --include='compile_commands.json' -e '-std=[a-z0-9+]*' build prints the same token before and after the diff. Empty after a non-empty before = finding.`. Append to Floor `, c_std_99 3.8, C_STANDARD 3.1`"
+ },
+ {
+  "from_topic": "skills-real",
+  "ledger": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-skills/wave4-real-tree.md",
+  "edit": "rules/cmake-build/testing.md:112 (CMK-TEST-09): append to Rule `Gate examples, demos and benchmarks the same way, on project-prefixed options.`. In Verification replace `or under an unprefixed option that defaults to ON, is the finding` with `or under an unprefixed option whatever its default, is the finding: option() never overrides a parent's entry of the same name, so a parent's BUILD_EXAMPLES=ON switches the library's on (measured 2026-09-26 on 3.31.12 and 4.4.2)`"
+ },
+ {
+  "from_topic": "skills-real",
+  "ledger": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-skills/wave4-real-tree.md",
+  "edit": "rules/cmake-build/install-and-export.md:134 (CMK-INST-11, stays SHOULD): append to Rule `For a dependency installed in another prefix, set INSTALL_RPATH_USE_LINK_PATH ON on the executable, or name that prefix's library directory in INSTALL_RPATH.`. Append to Rationale `Without it a same-SONAME copy on the loader's default path loads instead with exit 0 everywhere: cJSON 1.7.15 configured, the host 1.7.18 loaded (3.31.12 and 4.4.2, 2026-09-26).`"
+ },
+ {
+  "from_topic": "skills-real",
+  "ledger": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-skills/wave4-real-tree.md",
+  "edit": "rules/cmake-build/dependencies.md:99 (CMK-DEP-07 Rationale cell): append ` The FIND_PACKAGE_ARGS try-find searches the declare's name, so a declare spelled differently from the package's Config file, case included, needs NAMES <Package> or it fetches silently. The probe catches it (exit 1 on 3.31.12 and 4.3.4 for FetchContent_Declare(cjson ...) against an installed cJSONConfig.cmake, exit 0 with NAMES cJSON, 2026-09-26).`"
+ }
+]

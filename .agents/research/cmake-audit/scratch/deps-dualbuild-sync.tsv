@@ -1,0 +1,19 @@
+abseil__abseil-cpp	cmake_files_mentioning_bazel=1	ci_files_mentioning_bazel=1	readmes=
+catchorg__Catch2	cmake_files_mentioning_bazel=1	ci_files_mentioning_bazel=1	readmes=
+gflags__gflags	cmake_files_mentioning_bazel=0
+0	ci_files_mentioning_bazel=1	readmes=/tmp/claude-1000/-home-mherwig-dev-grimoire-lore--agents-worktrees-java/c4f22277-6831-442c-8bc3-1be41a79fdff/scratchpad/exemplars/gflags__gflags/cmake/README_runtime.txt
+google__benchmark	cmake_files_mentioning_bazel=0
+0	ci_files_mentioning_bazel=3	readmes=
+google__googletest	cmake_files_mentioning_bazel=0
+0	ci_files_mentioning_bazel=1	readmes=
+google__re2	cmake_files_mentioning_bazel=0
+0	ci_files_mentioning_bazel=6	readmes=
+grpc__grpc	cmake_files_mentioning_bazel=2	ci_files_mentioning_bazel=5	readmes=
+jbeder__yaml-cpp	cmake_files_mentioning_bazel=0
+0	ci_files_mentioning_bazel=2	readmes=
+madler__zlib	cmake_files_mentioning_bazel=0
+0	ci_files_mentioning_bazel=0
+0	readmes=
+nlohmann__json	cmake_files_mentioning_bazel=1	ci_files_mentioning_bazel=0
+0	readmes=
+protocolbuffers__protobuf	cmake_files_mentioning_bazel=1	ci_files_mentioning_bazel=20	readmes=/tmp/claude-1000/-home-mherwig-dev-grimoire-lore--agents-worktrees-java/c4f22277-6831-442c-8bc3-1be41a79fdff/scratchpad/exemplars/protocolbuffers__protobuf/cmake/README.md

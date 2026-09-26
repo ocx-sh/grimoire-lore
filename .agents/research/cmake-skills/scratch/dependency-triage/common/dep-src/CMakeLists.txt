@@ -1,0 +1,15 @@
+cmake_minimum_required(VERSION 3.10)
+project(dep LANGUAGES NONE)
+if(NOT DEFINED DEP_MARKER)
+  set(DEP_MARKER "unknown")
+endif()
+add_library(dep INTERFACE)
+add_library(dep::dep ALIAS dep)
+install(TARGETS dep EXPORT depTargets)
+install(EXPORT depTargets FILE depTargets.cmake NAMESPACE dep:: DESTINATION lib/cmake/dep)
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/depConfig.cmake"
+  "message(STATUS \"dep: resolved copy = ${DEP_MARKER}\")\ninclude(\"\${CMAKE_CURRENT_LIST_DIR}/depTargets.cmake\")\n")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/depConfig.cmake" DESTINATION lib/cmake/dep)
+# a tool the package ships, for CMK-DEP-14 style checks
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/depprog" "#!/bin/sh\necho depprog-${DEP_MARKER}\n")
+install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/depprog" DESTINATION bin)

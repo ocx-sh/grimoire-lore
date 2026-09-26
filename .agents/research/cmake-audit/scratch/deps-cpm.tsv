@@ -1,0 +1,13 @@
+metric	count
+repos_vendoring_CPM.cmake	4
+CPMAddPackage_calls	64
+shorthand_form_no_NAME_kw	30
+long_form_with_NAME_kw	34
+with_VERSION	21
+with_GIT_TAG	10
+with_FIND_PACKAGE_ARGS	0
+files_setting_CPM_SOURCE_CACHE	15
+files_setting_CPM_USE_LOCAL_PACKAGES	2
+files_setting_CPM_DOWNLOAD_ALL	1
+files_using_CPMUsePackageLock_or_package-lock.cmake	2
+repos_with_CPMLicenses.cmake	0

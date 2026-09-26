@@ -1,0 +1,5 @@
+[requires]
+pkga/1.0
+pkgb/1.0
+[generators]
+CMakeDeps

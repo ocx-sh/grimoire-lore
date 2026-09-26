@@ -1,0 +1,2073 @@
+{
+ "results": [
+  {
+   "set": "cmake skills: skills/cmake-dependency-triage (SKILL.md, references/reading-the-answers.md) and skills/cmake-modernize (SKILL.md, references/inventory.md, references/proofs.md)",
+   "files_read": [
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.claude/skills/research-lang/references/validation.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.claude/skills/research-lang/references/rule-distillation.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-topic-map.md (Skills, Wave 2 (e), Wave 3 (d), Authoring notes)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/skills/cmake-dependency-triage/SKILL.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/skills/cmake-dependency-triage/references/reading-the-answers.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/skills/cmake-modernize/SKILL.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/skills/cmake-modernize/references/inventory.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/skills/cmake-modernize/references/proofs.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-skills.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-skills/dependency-triage-procedure.md (graph explain sections)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-skills/verification-wave3.md (row 29)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-dependency-seam.md (DEP-19, DEP-21, resolution order)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-versions-and-gate.md (CORE-02)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-package-managers.md (VCPKG-01)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/cmake-build.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/cmake-build/dependencies.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/cmake-build/language.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/cmake-build/toolchains-and-providers.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/cmake-build/targets.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/cmake-build/install-and-export.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/cmake-build/testing.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/cmake-build/module-authoring.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/cmake-build/versions-and-policies.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/cpp-packaging/conan.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/cpp-packaging/vcpkg.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/skills/jvm-dependency-triage/SKILL.md (frontmatter and shape)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/skills/bazel-adopt/SKILL.md (frontmatter and shape)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/publish.toml (repository comments)"
+   ],
+   "findings": [
+    {
+     "file": "skills/cmake-modernize/references/proofs.md",
+     "line": 163,
+     "severity": "blocker",
+     "kind": "contradiction",
+     "finding": "The step-8 formatting gate is prescribed as `gersemi --check .`, but CMK-CORE-04 says `gersemi --check .` descends into build trees and fails on generated files, and the index's gate line is `git ls-files -z -- '*CMakeLists.txt' '*.cmake' | xargs -0 -r gersemi --check`. Measured with gersemi 0.29.1: a correctly formatted project that has an in-tree `build/` configured by 4.4.2 exits 1 under `gersemi --check <dir>` (build/CMakeFiles/4.4.2/CMakeCCompiler.cmake and others 'would be reformatted'). The index form exits 0 on the same tree. So the skill's exit check fails on compliant trees.",
+     "fix": "Replace lines 163-166 with: \"All five were run against a planted failing tree and a planted passing one. The formatting gate is the index's gate line, `git ls-files -z -- '*CMakeLists.txt' '*.cmake' | xargs -0 -r gersemi --check`, with gersemi 0.29.1: exit 1 on an unformatted file, exit 0 on a formatted one. Never `gersemi --check .`, which descends into build trees and fails on generated files, and never `gersemi --diff`, which exited 0 on both (measured 2026-09-26) (`CMK-CORE-04`).\""
+    },
+    {
+     "file": "skills/cmake-modernize/SKILL.md",
+     "line": 93,
+     "severity": "blocker",
+     "kind": "contradiction",
+     "finding": "Step 5 tells the agent to guard tests on `PROJECT_IS_TOP_LEVEL` directly. CMK-TEST-09 (MUST, cited by the same skill at step 7) says to gate a consumed library's test tree on a project-prefixed option that defaults to `PROJECT_IS_TOP_LEVEL`, with `include(CTest)` inside the gate. The two answer 'how do I gate the tests' differently, and following step 5 yields a tree that does not meet TEST-09's rule text: a consumer has no switch to turn the tests on.",
+     "fix": "Replace the step 5 Do cell with: \"Gate the test tree on a project-prefixed option that defaults to `PROJECT_IS_TOP_LEVEL`, with `include(CTest)` inside the gate (`CMK-TEST-09`). Guard examples, dev options, the `CMAKE_BUILD_TYPE` default and any non-test fetch on `PROJECT_IS_TOP_LEVEL`\", and replace the Cites cell with \"`CMK-DEP-07`, `CMK-TGT-17`, `CMK-TEST-09`\"."
+    },
+    {
+     "file": "skills/cmake-modernize/references/proofs.md",
+     "line": 151,
+     "severity": "fix",
+     "kind": "verification-dishonest",
+     "finding": "The CMK-CORE-01 preset gate-off grep matches only the literal `\"dev\": false` with one space. Measured: a `CMakePresets.json` written as `{\"warnings\":{\"dev\":false,\"deprecated\":false}}` gives empty output (a false pass), while the index's whitespace-tolerant spelling finds it.",
+     "fix": "grep -rn --include='CMakePresets.json' --include='CMakeUserPresets.json' -e '\"dev\"[[:space:]]*:[[:space:]]*false' -e '\"deprecated\"[[:space:]]*:[[:space:]]*false' ."
+    },
+    {
+     "file": "skills/cmake-modernize/SKILL.md",
+     "line": 185,
+     "severity": "fix",
+     "kind": "verification-dishonest",
+     "finding": "This copies the same whitespace-exact preset grep. It cannot go red on compact JSON (`\"dev\":false`). Measured.",
+     "fix": "  `grep -rn --include='CMakePresets.json' --include='CMakeUserPresets.json' -e '\"dev\"[[:space:]]*:[[:space:]]*false' -e '\"deprecated\"[[:space:]]*:[[:space:]]*false' .`"
+    },
+    {
+     "file": "skills/cmake-dependency-triage/SKILL.md",
+     "line": 259,
+     "severity": "fix",
+     "kind": "verification-dishonest",
+     "finding": "The T4 (CMK-INST-03) second grep includes only `${NAME}Targets.cmake`. An export file named `<name>-targets.cmake` (fmt's spelling) or `<name>ConfigTargets.cmake` (spdlog's) is never read, so a missing `find_dependency` reads as 'no finding'. Measured: a planted `dep2-targets.cmake` with `INTERFACE_LINK_LIBRARIES \"zlib::zlib\"` and a `dep2-config.cmake` with no find_dependency gave empty output from both greps. The proposed include found it.",
+     "fix": "grep -rn --include=\"${NAME}*argets.cmake\" -e 'INTERFACE_LINK_LIBRARIES' \"$PREFIX\""
+    },
+    {
+     "file": "skills/cmake-dependency-triage/SKILL.md",
+     "line": 280,
+     "severity": "fix",
+     "kind": "verification-dishonest",
+     "finding": "The T5 policy-knob grep includes `*.yml` but not `*.yaml`, unlike CMK-DEP-15's own grep in dependencies.md and modernize I8. Measured: a planted `.github/workflows/ci.yaml` with `env: CMAKE_POLICY_VERSION_MINIMUM: \"3.10\"` (a CI environment variable, which DEP-15 forbids) did not print.",
+     "fix": "grep -rn --include='*.cmake' --include='CMakeLists.txt' --include='CMakePresets.json' --include='*.yml' --include='*.yaml' -e 'CMAKE_POLICY_VERSION_MINIMUM' -e 'CMAKE_POLICY_DEFAULT_CMP' ."
+    },
+    {
+     "file": "skills/cmake-dependency-triage/SKILL.md",
+     "line": 120,
+     "severity": "fix",
+     "kind": "notes-violation",
+     "finding": "'Before you start' (line 73-75) says every configure in this skill passes `-DCMAKE_POLICY_DEFAULT_CMP0170=NEW`, and authoring note 7 requires it on configure probes that touch FetchContent. The step 2 preset form (lines 120-121) and the T3 capture (line 228) omit it.",
+     "fix": "Line 120-121: replace `cmake --preset \"$PRESET\" --fresh \"$GATE\"\n--debug-find-pkg=\"$NAME\"` with `cmake --preset \"$PRESET\" --fresh \"$GATE\" -DCMAKE_POLICY_DEFAULT_CMP0170=NEW\n--debug-find-pkg=\"$NAME\"`. Line 228: replace with `cmake --preset \"$PRESET\" --fresh \"$GATE\" -DCMAKE_POLICY_DEFAULT_CMP0170=NEW > logs/configure.log 2>&1`."
+    },
+    {
+     "file": "skills/cmake-dependency-triage/SKILL.md",
+     "line": 397,
+     "severity": "fix",
+     "kind": "era-unlabelled",
+     "finding": "The repeated CMK-DEP-15 row drops the rule's 'On CMake 4.x' scope. `CMAKE_POLICY_VERSION_MINIMUM` does not exist before 4.0. A hedge row read without the rule tells an agent to emit it on a 3.x leg, where 3.31.12 ignores it. This is failure mode 4 of the same file.",
+     "fix": "| 4 | On CMake 4.x, set a third-party dependency's policy knobs with set/restore around the one `add_subdirectory`, `FetchContent_MakeAvailable` or `find_package` that loads it, with `CMAKE_POLICY_VERSION_MINIMUM` at 3.10. Never use a project-wide `set()`, a committed preset `cacheVariables` entry, or a CI environment variable | CMK-DEP-15 |"
+    },
+    {
+     "file": "skills/cmake-modernize/SKILL.md",
+     "line": 305,
+     "severity": "fix",
+     "kind": "era-unlabelled",
+     "finding": "The same CMK-DEP-15 hedge row omits the 'On CMake 4.x' scope. The variable is 4.0+, and step 1 of this skill correctly routes 3.x to CMK-DEP-30.",
+     "fix": "| 4 | On CMake 4.x, set a third-party dependency's policy knobs with set and restore around the one `add_subdirectory`, `FetchContent_MakeAvailable` or `find_package` that loads it, with `CMAKE_POLICY_VERSION_MINIMUM` at 3.10 | CMK-DEP-15 |"
+    },
+    {
+     "file": "skills/cmake-modernize/references/proofs.md",
+     "line": 41,
+     "severity": "fix",
+     "kind": "verification-dishonest",
+     "finding": "The preset canary `cmake -S \"$W/canary\" --preset \"$LEG\" --fresh` has no `-B`. Measured on 3.31.12 and 4.4.2: when the project's preset declares no `binaryDir`, the canary writes `CMakeCache.txt` and `CMakeFiles/` into the current directory, which is the repository root. There, `--fresh` also discards any existing in-source cache.",
+     "fix": "cmake -S \"$W/canary\" -B \"$W/canary-build\" --preset \"$LEG\" --fresh"
+    },
+    {
+     "file": "skills/cmake-modernize/references/proofs.md",
+     "line": 147,
+     "severity": "fix",
+     "kind": "contradiction",
+     "finding": "The CI-checks comment says empty output from the workflow gate grep means 'no gate (finding)'. CMK-CORE-01's verification (b) says empty output is a finding unless the preset's `errors` carries the gate and the canary exits 1. So a preset-gated leg is misreported as ungated.",
+     "fix": "# CMK-CORE-01: a gate exists in the workflows. Empty output = no gate (finding), unless the leg's preset carries \"errors\": {\"dev\": true} and the preset canary exits 1."
+    },
+    {
+     "file": "skills/cmake-modernize/SKILL.md",
+     "line": 89,
+     "severity": "fix",
+     "kind": "contradiction",
+     "finding": "The step 1 exit check says 'F1 is empty'. F1 does not exclude vendored directories: measured, `third_party/old/CMakeLists.txt:1:cmake_minimum_required(VERSION 3.7)` prints. The skill also says vendored subtrees are never entered (lines 236, 243). Lines 120-125 then tell the agent to patch a vendored floor on 3.x. On a tree with a vendored bare floor the exit can never be reached, and the two instructions conflict.",
+     "fix": "Exit check cell: \"`F1` prints no line outside a vendored directory (a vendored hit is recorded `flagged-not-converted`), the canary exits 1 and the project's gated configure exits 0 on each CI binary\". Lines 120-125: replace \"On 3.x, where that variable does not exist, re-pin the dependency or patch its one `cmake_minimum_required` line (`CMK-DEP-30`).\" with \"On 3.x, where that variable does not exist, re-pin a fetched dependency or add a `PATCH_COMMAND` to its declare (`CMK-DEP-30`). A vendored subtree is never edited: record it `flagged-not-converted` with the `CMK-DEP-30` remedy named, and hand it to the owner.\""
+    },
+    {
+     "file": "skills/cmake-modernize/SKILL.md",
+     "line": 92,
+     "severity": "fix",
+     "kind": "contradiction",
+     "finding": "The step 4 exit check requires '`I12` is empty'. I12's reading (inventory.md line 164-166) and CMK-TGT-09 accept a literal `-Werror` inside a developer option that defaults OFF, so a compliant tree can never pass this exit.",
+     "fix": "`I3` shows no overwrite, `I11` hits sit in a `NOT DEFINED` guard, every `I12` hit sits in a developer option that defaults `OFF`, and every new `CMAKE_*` name passes the variable check"
+    },
+    {
+     "file": "skills/cmake-modernize/SKILL.md",
+     "line": 151,
+     "severity": "fix",
+     "kind": "era-unlabelled",
+     "finding": "`CMAKE_CXX_SCAN_FOR_MODULES OFF` (CMK-TGT-18, floor 3.28) is newer than the 3.25 floor and carries no `(CMake \u2265 X.Y)` gate, which authoring note 4.1 requires.",
+     "fix": "`CMAKE_CXX_SCAN_FOR_MODULES OFF` (CMake \u2265 3.28, `CMK-TGT-18`)."
+    },
+    {
+     "file": "skills/cmake-modernize/SKILL.md",
+     "line": 188,
+     "severity": "nit",
+     "kind": "era-unlabelled",
+     "finding": "Presets schema 12 is CMake 4.4, but the line gives no version gate.",
+     "fix": "- A presets file raised to schema 12 (CMake \u2265 4.4) renames `dev` to `author` in the same edit"
+    },
+    {
+     "file": "skills/cmake-dependency-triage/references/reading-the-answers.md",
+     "line": 60,
+     "severity": "fix",
+     "kind": "contradiction",
+     "finding": "This groups FindBoost with the modules whose `QUIET` call leaves `<X>_FOUND` empty. CMK-DEP-19 and the dependency-seam consolidation say a bare `find_package(Boost)` under CMP0167 NEW falls through to the `BoostConfig.cmake` that Boost ships from 1.70, so it is found. An agent would misread a found Boost as missing.",
+     "fix": "- A removed module (`FindCUDA`, `FindPythonInterp`, `FindPythonLibs`) under a `...4.4` range is policy `NEW`. A `QUIET` call is then silent and `<X>_FOUND` stays empty (CMK-DEP-19). A bare `find_package(Boost)` instead falls through to the `BoostConfig.cmake` that Boost ships from 1.70."
+    },
+    {
+     "file": "skills/cmake-modernize/references/inventory.md",
+     "line": 179,
+     "severity": "fix",
+     "kind": "duplication",
+     "finding": "The variable-existence check restates the CMK-LANG-11 lookup script. Wave-3 (d)10 resolves this to 'LANG-11 adopts the placeholder-expanded check. The skills text cites LANG-11'. The copy has already diverged: it writes `varcheck/` at the repository root, while language.md uses `build/varcheck`. That also contradicts line 4's 'reads only'.",
+     "fix": "Replace lines 174-194 (the section body) with: \"Run the `CMK-LANG-11` lookup block in `cmake-build/language.md` with the pinned binary for every `CMAKE_*` name a diff introduces. It expands `<LANG>` and `<CONFIG>` first, so the real `CMAKE_CXX_FLAGS` is not reported as invented. A count of 0 is an invented name, the finding. A count of 1 is a documented name. Measured on 3.31.12 and 4.4.2: `CMAKE_CXX_STANDARD_EXTENSIONS` and `CMAKE_DEBUG_PREFIX_MAP` read 0, while `CMAKE_CXX_FLAGS`, `CMAKE_CXX_EXTENSIONS`, `CMAKE_BUILD_TYPE` and `CMAKE_UNITY_BUILD` read 1.\""
+    },
+    {
+     "file": "skills/cmake-modernize/references/inventory.md",
+     "line": 4,
+     "severity": "nit",
+     "kind": "unsupported-claim",
+     "finding": "The claim 'Every command ... reads only ... Each one is a single `grep -r`' is false for I4, which pipes into `grep -v`, and for the variable check, which writes files.",
+     "fix": "was run against a planted violating tree and a planted compliant tree on CMake 3.31.12 and 4.4.2 (2026-09-26). Each is a `grep -r` with an explicit directory operand and no early-exiting reader (I4 adds a filtering `grep -v`), so it cannot zero a count under `set -o pipefail` (`CMK-CORE-05`)."
+    },
+    {
+     "file": "skills/cmake-modernize/references/inventory.md",
+     "line": 112,
+     "severity": "fix",
+     "kind": "style",
+     "finding": "A depth file points at a sibling depth file ('settled by the offline probe in `proofs.md`'). SKILL.md line 317 says 'These files do not link each other', and the distillation rule is 'depth files never point at other depth files'.",
+     "fix": "Any other hit is a step-5 row, settled by step 5's offline subproject probe."
+    },
+    {
+     "file": "skills/cmake-dependency-triage/references/reading-the-answers.md",
+     "line": 76,
+     "severity": "nit",
+     "kind": "portability",
+     "finding": "The upstream evidence is named bare ('arrow'), without the owner/repo at a commit plus path that authoring note 9 asks for. The sentence reads fine without it.",
+     "fix": "printed 0 lines for a declare kept in a `.cmake` module (4.4.2)."
+    },
+    {
+     "file": "skills/cmake-dependency-triage/SKILL.md",
+     "line": 343,
+     "severity": "nit",
+     "kind": "style",
+     "finding": "The four T8 Conan greps state no empty-output meaning for the first three (authoring note 7).",
+     "fix": "A hit from the first means ranges exist, and `git ls-files conan.lock` must then be non-empty. Empty output from the first means no ranges, so the rule is not applicable. Empty output from the second means CI runs no `conan install` (not applicable). An install line from the second that is missing from the third is the finding. The fourth must be empty: an empty `--lockfile=` switches the lock off."
+    },
+    {
+     "file": "skills/cmake-modernize/references/proofs.md",
+     "line": 108,
+     "severity": "nit",
+     "kind": "style",
+     "finding": "The round trip passes no dependency hint to the library's own configure, and the consumer's `-DCMAKE_PREFIX_PATH` names only the moved prefix. A library whose public dependency lives outside system paths fails both configures unless the environment `CMAKE_PREFIX_PATH` carries it. The script does not say so (reproduced while running it against a planted library with an installed dependency).",
+     "fix": "#   export PKG=mylib VER=1.0 TARGETS=mylib::mylib SRC=/abs/path/to/project GATE=-Werror=dev\n# A dependency outside system paths goes in the environment: export CMAKE_PREFIX_PATH=/abs/dep/prefix"
+    },
+    {
+     "file": "skills/cmake-modernize/references/proofs.md",
+     "line": 154,
+     "severity": "nit",
+     "kind": "style",
+     "finding": "The CMK-CORE-05 grep names `scripts` as an operand. On a tree without that directory it prints 'No such file or directory' and exits 2, which reads as neither pass nor finding.",
+     "fix": "grep -rsnE -e '[|] *grep( +-[a-zA-Z]+)* +-[a-zA-Z]*[qm]' -e '[|] *rg( +-[a-zA-Z]+)* +-[a-zA-Z]*[qm]' -e '[|] *head' scripts .github"
+    },
+    {
+     "file": "skills/cmake-modernize/SKILL.md",
+     "line": 322,
+     "severity": "nit",
+     "kind": "era-unlabelled",
+     "finding": "The skill carries dated tool facts (gersemi 0.29.1, CPS on 4.3, the preset `deprecated` gap on 3.31.12, Tutorial layout at v4.4.2) but no Re-check list. The triage skill ends with one.",
+     "fix": "Append after the References table: \"Re-check on each tool bump: the gate spelling split and preset `warnings` behaviour (CMake minor releases after 4.4.2), `gersemi --diff` exit code (gersemi after 0.29.1), and the `/cps/<pkg>` round-trip ending (CMake after 4.4.2), all as of 2026-09-26.\""
+    },
+    {
+     "file": "skills/cmake-dependency-triage/SKILL.md",
+     "line": 408,
+     "severity": "nit",
+     "kind": "deletion-candidate",
+     "finding": "Deletion test: failure modes 1 (lines 408-410), 2 (411-412), 9 (426-427) and 11 (430-431) restate the evidence rule (lines 52-65), step 2's reused-tree bullet (127-129) and T2's trace note (203-205) almost word for word. Line 18's second sentence repeats lines 388-390. Removing them causes no mistake.",
+     "fix": "Delete lines 408-412, 426-427 and 430-431, and renumber the remaining failure modes 1 to 7. Delete the sentence \"It cites their rules by ID and never restates their tables.\" on line 18."
+    },
+    {
+     "file": "skills/cmake-modernize/SKILL.md",
+     "line": 267,
+     "severity": "nit",
+     "kind": "deletion-candidate",
+     "finding": "Deletion test: 'What agents get wrong' 2 (lines 267-268), 3 (269-270), 10 (285) and 12 (288-290) restate 'What it refuses', the step 8 gersemi bullet and step 1's floor paragraph. Lines 19-22 repeat lines 296-298. Removing them causes no mistake.",
+     "fix": "Delete lines 267-270, 285 and 288-290 and renumber the list 1 to 9. Replace lines 19-22 with \"This skill assumes the `cmake-build` rule set is installed and cites rules by ID.\""
+    },
+    {
+     "file": "skills/cmake-dependency-triage/SKILL.md",
+     "line": 8,
+     "severity": "nit",
+     "kind": "portability",
+     "finding": "The frontmatter carries `repository: https://github.com/ocx-sh/grimoire-lore`. `check-artifacts.py --forbid ocx` flags it, and authoring note 9 lists `ocx-sh`. The house skills (jvm-dependency-triage, bazel-adopt) carry no repository key. The rules do, so this is a catalog-metadata call for the owner, not a content defect. The same line appears at skills/cmake-modernize/SKILL.md:8.",
+     "fix": "Delete line 8 (`  repository: https://github.com/ocx-sh/grimoire-lore`) in both skills' SKILL.md, matching the house skills, unless the catalog needs it from the file."
+    }
+   ],
+   "verifications_exercised": [
+    {
+     "id": "triage T1 CMK-DEP-13 module grep (MUST)",
+     "went_red": true,
+     "went_green": true,
+     "note": "Red on a FORCE `_ROOT` cache write split across two lines and on a one-line write. Green on the guarded `unset(dep_DIR CACHE)` module. The empty-output clause is true."
+    },
+    {
+     "id": "triage T5 CMK-DEP-15 knob grep (MUST)",
+     "went_red": true,
+     "went_green": true,
+     "note": "Red on a project-wide `set(CMAKE_POLICY_VERSION_MINIMUM 3.5)`. Missed a `.yaml` workflow env write (finding). Green on the clean tree."
+    },
+    {
+     "id": "triage T10 CMK-TC-04 grep (MUST)",
+     "went_red": true,
+     "went_green": true,
+     "note": "Red on `SET_DEPENDENCY_PROVIDER` and `list(APPEND CMAKE_PROJECT_TOP_LEVEL_INCLUDES)` in CMakeLists.txt. Empty on the clean tree."
+    },
+    {
+     "id": "triage T7 CMK-DEP-31 greps (MUST)",
+     "went_red": true,
+     "went_green": true,
+     "note": "Listed the `PATCH_COMMAND` declare and a workflow `-DFETCHCONTENT_SOURCE_DIR_OLD`. Both empty on the clean tree."
+    },
+    {
+     "id": "triage T8 CMK-CONAN-09 greps (MUST)",
+     "went_red": true,
+     "went_green": true,
+     "note": "Ranges found. The install without a lock was missing from list 3. `--lockfile=` at line end was caught by grep 4. The clean tree had grep 4 empty."
+    },
+    {
+     "id": "triage T4 CMK-INST-03 installed-Config greps (MUST)",
+     "went_red": false,
+     "went_green": true,
+     "note": "Could not go red on a `dep2-targets.cmake` spelling. `--include=\"${NAME}*argets.cmake\"` fixes it (measured)."
+    },
+    {
+     "id": "triage read order steps 1-3 (CMK-DEP-17/-13), two copies of dep",
+     "went_red": true,
+     "went_green": true,
+     "note": "3.31.12 and 4.4.2: the reused tree kept dep_DIR under prefixA while dep_ROOT read prefixB (UNINITIALIZED). A --fresh configure with the hint moved it to prefixB. The configure-log count was 0 on 3.31 and 1 on 4.4, and the name/path/mode grep paired correctly. As the skill warns, --fresh without re-passing -D gives NOTFOUND and rc 1."
+    },
+    {
+     "id": "modernize F1 floor grep (CMK-VER-01 MUST)",
+     "went_red": true,
+     "went_green": true,
+     "note": "Red on `3.15..4.3`, on the upper-case `CMAKE_MINIMUM_REQUIRED (VERSION 3.10 FATAL_ERROR)` and on a bare 3.7. Green on `3.25...4.4`. It also lists vendored third_party floors (finding against the step 1 exit)."
+    },
+    {
+     "id": "modernize I3 flag writes (CMK-TGT-04 MUST)",
+     "went_red": true,
+     "went_green": true,
+     "note": "Printed the overwrite, the self-append, `string(APPEND)` and upper-case `SET(CMAKE_SHARED_LINKER_FLAGS`. Empty on the modern tree."
+    },
+    {
+     "id": "modernize I4/I5/I6/I9/I10/I11/I12 and I1/I2",
+     "went_red": true,
+     "went_green": true,
+     "note": "Each printed the planted violation and was empty or listed only compliant lines on the modern tree. I9 prints a compliant `3.7...4.0`, and its reading clause covers that."
+    },
+    {
+     "id": "modernize LANG-11 variable check (MUST)",
+     "went_red": true,
+     "went_green": true,
+     "note": "3.31.12 and 4.4.2: STANDARD_EXTENSIONS, DEBUG_PREFIX_MAP and MY_KNOB read 0. CXX_FLAGS, CXX_EXTENSIONS, BUILD_TYPE, UNITY_BUILD and CXX_FLAGS_RELEASE read 1."
+    },
+    {
+     "id": "proofs gate canary (CMK-CORE-01 MUST)",
+     "went_red": true,
+     "went_green": true,
+     "note": "-Werror=dev rc 1 on 3.31.12, 4.3.4 and 4.4.2. -Werror=author rc 0 on 3.31/4.3 and 1 on 4.4. Preset errors.dev=true rc 1, warnings.dev=false rc 0, on all three. Without -B, the preset form writes the cache into cwd (finding)."
+    },
+    {
+     "id": "proofs preset gate-off grep (CMK-CORE-01)",
+     "went_red": false,
+     "went_green": true,
+     "note": "Empty on compact JSON `\"dev\":false`, where the index's whitespace-tolerant form went red."
+    },
+    {
+     "id": "proofs as-subproject smoke (CMK-DEP-07/CMK-TEST-09 MUST)",
+     "went_red": true,
+     "went_green": true,
+     "note": "All three lines. Guarded lib: `Total Tests: 0`, no target line. Unguarded: the tests grep was empty and it printed `mylib_unit_tests: phony`."
+    },
+    {
+     "id": "proofs offline subproject probe (CMK-DEP-07 MUST)",
+     "went_red": true,
+     "went_green": true,
+     "note": "All three lines. Unconditional declare rc 1. `FIND_PACKAGE_ARGS CONFIG` declare rc 0 against the installed dep2."
+    },
+    {
+     "id": "proofs gated round trip (CMK-INST-01 MUST)",
+     "went_red": true,
+     "went_green": true,
+     "note": "All three lines. The complete package rc 0, ending in `.../moved/lib64/cmake/mylib`. Missing find_dependency rc 1 ('target was not found'). Missing version file rc 1 ('version: unknown')."
+    },
+    {
+     "id": "proofs CI checks CORE-05/CORE-04/CORE-02/INST-18 and CPS greps INST-13/-16/-12",
+     "went_red": true,
+     "went_green": true,
+     "note": "Each went red on the planted failing tree and was empty, `false` or showed a consumer line on the passing tree."
+    },
+    {
+     "id": "step 9 CPS round trip",
+     "went_red": false,
+     "went_green": true,
+     "note": "With `install(PACKAGE_INFO)` behind the 4.3 gate: 3.31.12 ended in /cmake/mylib, 4.3.4 and 4.4.2 in /cps/mylib, all rc 0, as claimed."
+    },
+    {
+     "id": "gersemi claims",
+     "went_red": true,
+     "went_green": true,
+     "note": "gersemi 0.29.1: `--diff` rc 0 on an unformatted file (claim holds). `--check` on a formatted project with an in-tree build dir rc 1 (the skill's `gersemi --check .` fails compliant trees). The index git ls-files form rc 0. All four cmake fences pass `gersemi --check`."
+    },
+    {
+     "id": "fact checks (12 sampled)",
+     "went_red": false,
+     "went_green": true,
+     "note": "All held. find_package-v1 is 4.1 (consolidation) and measured 0 on 3.31, 1 on 4.4. -Werror=author is ignored below 4.4 (measured). T5 text 'has been removed from CMake' on 4.3.4 and 4.4.2 for floor 3.4 (measured). T6: 3.31.12 and 4.3.4 print `CMake Deprecation Error` and 4.4.2 prints `CMake Error (deprecated)` for floor 3.7 (measured). 3.31.12 prints the <3.10 deprecation for a 3.4 floor (measured). -DCMAKE_POLICY_VERSION_MINIMUM=3.10 clears both on 4.x and not on 3.31 (measured). Presets schema 12 is 4.4 (versions-and-gate). PROJECT_IS_TOP_LEVEL is 3.21 (skills consolidation). CMP0170 is 3.30 (DEP-16). conan graph explain on Conan 2.32.0: rc 1 'There is no missing binary' on a resolved graph, rc 0 with 'Missing binary', a remote query, 'Closest binaries' and expected/existing build_type on a missing one (measured). The resolved line is 'gamma/1.0#<rrev> - Cache'. The Ninja help format is 'name: phony'. FindBoost fall-through contradicts reading-the-answers:60 (finding)."
+    },
+    {
+     "id": "check-artifacts.py",
+     "went_red": false,
+     "went_green": true,
+     "note": "Clean (rc 0) on both skills. With --forbid ocx it flags only the `repository: https://github.com/ocx-sh/grimoire-lore` frontmatter line in each SKILL.md."
+    }
+   ],
+   "unresolved_ids": [],
+   "trigger_evals": [
+    {
+     "skill": "cmake-dependency-triage",
+     "should_trigger": [
+      "I changed Boost_ROOT to /opt/boost-1.86 but cmake still picks up the old 1.74 from /usr, what gives?",
+      "after bumping to cmake 4 our build dies inside some third-party subproject with 'Compatibility with CMake < 3.5 has been removed', how do I get past it without hacks?",
+      "cmake-conan runs fine but find_program(protoc) comes back NOTFOUND, why?"
+     ],
+     "should_not_trigger": "add fmt to our project through vcpkg and wire it into CMakeLists.txt",
+     "weakness": "All three fire on the description's symptom list. The exclusion clause keeps the vcpkg add-a-dependency neighbour quiet. A symptom seen only at link or run time, such as 'links against the wrong OpenSSL' or 'undefined reference after switching copies', is phrased only as 'wrong copy', so triggering on it rests on that phrase alone."
+    },
+    {
+     "skill": "cmake-modernize",
+     "should_trigger": [
+      "this CMakeLists is from 2012, include_directories and add_definitions everywhere, can you bring it up to modern CMake?",
+      "other teams want to find_package(ourlib), what do we need so it installs and exports properly?",
+      "when someone add_subdirectory's our library all our unit tests show up in their build, fix that"
+     ],
+     "should_not_trigger": "find_package keeps finding the wrong copy of fmt after I changed CMAKE_PREFIX_PATH",
+     "weakness": "Triggers correctly on the three, and the wrong-copy neighbour is excluded by name. The 'Use when' list also names single-edit tasks ('fix bare target_link_libraries calls', 'move cmake_parse_arguments off ARGN', 'wire gersemi into CI'). The always-loaded cmake-build rules already cover those, so a once-per-repository ten-step procedure with a plan file will overtrigger on one-line edits. Suggest narrowing those items to 'across a legacy tree'."
+    }
+   ],
+   "verdict": "fix-then-ship"
+  },
+  {
+   "set": "cpp-packaging (rules/cpp-packaging.md index, rules/cpp-packaging/conan.md, rules/cpp-packaging/vcpkg.md)",
+   "files_read": [
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.claude/skills/research-lang/references/validation.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.claude/skills/research-lang/references/rule-distillation.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-topic-map.md (Authoring notes 2005-2195, wave-2 (e) 1663-1692, wave-3 (d) 1846-1919, convergence D-items, map sections L/M/N and Artifact set decision 668-900)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/cpp-packaging.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/cpp-packaging/conan.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/cpp-packaging/vcpkg.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-package-managers.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-package-managers/verification-wave2.md (grep for CONAN-06)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-package-managers/verification-wave3.md (grep for CONAN-06, VCPKG-15, VCPKG-06)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-dependency-seam.md (TC-01 and user_toolchain lines)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-versions-and-gate.md and cmake-testing-and-ci/presets-and-ci-shape.md (runner-default CMake claim only)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/cmake-build.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/cmake-build/*.md (every row cited by the set: CORE-01, CORE-04, CI-02, TC-01..05, TGT-05, TGT-16, DEP-01..03, DEP-05, DEP-06, DEP-15, INST-06, INST-07, BZL-14, BZL-15, VER-02, VER-03)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/typescript-packaging.md"
+   ],
+   "findings": [
+    {
+     "file": "rules/cpp-packaging.md",
+     "line": 146,
+     "severity": "blocker",
+     "kind": "notes-violation",
+     "finding": "The index emits the reserved IDs CMK-PKG-05 and CMK-PKG-07 (\"`CMK-PKG-05` to `CMK-PKG-07` are retired and not reused.\"). Authoring note 5.2 says reserved IDs are never emitted. check-artifacts also sees them as cited IDs that no rule table defines.",
+     "fix": "Delete line 146 (\"`CMK-PKG-05` to `CMK-PKG-07` are retired and not reused.\") and the blank line 147 after it."
+    },
+    {
+     "file": "rules/cpp-packaging.md",
+     "line": 96,
+     "severity": "blocker",
+     "kind": "contradiction",
+     "finding": "Non-negotiable 11 says every `VCPKG_*` input is \"set by a configure preset or `-D`\". CMK-VCPKG-04 (and CMK-TC-03) instead allow a `set(VCPKG_...)` in the top-level CMakeLists.txt before the first project(), with the preset only preferred. VCPKG-04's grep passes the planted compliant fixture (set(VCPKG_TARGET_TRIPLET) on line 2, project() on line 3), which the index row forbids. So the index and the depth file give two different answers to one question.",
+     "fix": "Replace the row with: | 11 | vcpkg's toolchain file comes from a configure preset or `-D`, and every `VCPKG_*` input is set before the first `project()`, preferably in that same preset. A later write is a silent no-op. | CMK-VCPKG-04, CMK-TC-03 |"
+    },
+    {
+     "file": "rules/cpp-packaging/vcpkg.md",
+     "line": 81,
+     "severity": "fix",
+     "kind": "verification-dishonest",
+     "finding": "The first CMK-VCPKG-06 grep (MUST) misses the static-CRT community triplets `x64-windows-static-release` and `arm64-windows-static-release`, which ship in the pinned registry with VCPKG_CRT_LINKAGE static, because `windows-static[^-]` excludes every `-` suffix, not only `-md`. A planted preset naming `x64-windows-static-release` with no runtime set gave empty output (exit 1), so the check passed.",
+     "fix": "In the Rule cell replace \"(`*-windows-static`, or `VCPKG_CRT_LINKAGE static`)\" with \"(`*-windows-static`, `*-windows-static-release`, or `VCPKG_CRT_LINKAGE static`)\". In the Verification cell replace \"-e 'windows-static$' -e 'windows-static[^-]' -e 'VCPKG_CRT_LINKAGE static'\" with \"-e 'windows-static$' -e 'windows-static[^-]' -e 'windows-static-release' -e 'VCPKG_CRT_LINKAGE static'\"."
+    },
+    {
+     "file": "rules/cpp-packaging/vcpkg.md",
+     "line": 81,
+     "severity": "fix",
+     "kind": "contradiction",
+     "finding": "CMK-VCPKG-06 (following wave-2 (e)7) marks any CMakeLists.txt hit for CMAKE_MSVC_RUNTIME_LIBRARY after the first project() as a finding. CMK-TGT-16's rule text, which wave-3 (d)9 says owns the guard, lists `inside if(NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)` as an allowed placement. A planted TGT-16-style guarded set after project() on a static-triplet leg is flagged by VCPKG-06. TGT-16's own verification agrees with VCPKG-06, so the ambiguity starts in TGT-16's prose. VCPKG-06 should state the answer explicitly so the two rows cannot be read two ways.",
+     "fix": "Append to the CMK-VCPKG-06 Rule cell: \"A `set()` after the first `project()`, guarded or not, does not satisfy this row, because nothing on a vcpkg leg defines the variable first.\" Hand the matching edit back to cmake-build: CMK-TGT-16's placement list should read \"a preset's `cacheVariables`, before the first `project()`, or behind a default-`OFF` option\"."
+    },
+    {
+     "file": "rules/cpp-packaging/conan.md",
+     "line": 144,
+     "severity": "fix",
+     "kind": "verification-dishonest",
+     "finding": "The CMK-CONAN-10 configure check pipes cmake into grep, so cmake's exit status is lost, and the cell says empty output is the pass. Measured on 3.31.12, 4.3.4 and 4.4.2: a tree whose hand-written CMakeUserPresets.json made Conan skip its presets (the CONAN-08 case) fails with \"No such configure preset ... conan-release\" (exit 1), grep prints nothing, and the check reads as a pass while also planting the violation (set(CMAKE_CXX_STANDARD 20) after project()).",
+     "fix": "Replace line 143 with \"# CMK-CONAN-10: pass = the configure exits 0 and this prints nothing. Shown for CMake <= 4.3; use -Werror=author on CMake >= 4.4.\" In the CMK-CONAN-10 Verification cell (line 149) replace \"The block above: empty output is the pass.\" with \"The block above: empty output is the pass only when the configure itself succeeded. When grep prints nothing, rerun the configure without the pipe and require exit 0, because a missing `conan-release` preset also prints nothing.\""
+    },
+    {
+     "file": "rules/cpp-packaging/vcpkg.md",
+     "line": 42,
+     "severity": "fix",
+     "kind": "verification-dishonest",
+     "finding": "CMK-VCPKG-02 (MUST) bans overrides, registries and overlay-ports in shipped manifests, but its grep matches only \"overrides\" and \"overlay-ports\". A planted ports/foo/vcpkg-configuration.json that carries \"default-registry\" and \"registries\" gave empty output (exit 1), so the registries clause can never go red.",
+     "fix": "In the Verification cell replace \"-e '\"overrides\"' -e '\"overlay-ports\"' ports\" with \"-e '\"overrides\"' -e '\"overlay-ports\"' -e '\"registries\"' -e '\"default-registry\"' ports\"."
+    },
+    {
+     "file": "rules/cpp-packaging.md",
+     "line": 60,
+     "severity": "fix",
+     "kind": "verification-dishonest",
+     "finding": "The authors' gate line `\"$VCPKG_ROOT/vcpkg\" install \"$PORT\" --overlay-ports=ports` fails in any repository with a top-level vcpkg.json, which is the usual overlay-port layout. Measured with vcpkg-tool 2026-09-26: \"error: In manifest mode, `vcpkg install` does not support individual package arguments.\" With `--classic` added, vcpkg computes the install plan for the overlay port.",
+     "fix": "Replace line 60 with: \"$VCPKG_ROOT/vcpkg\" install \"$PORT\" --overlay-ports=ports --classic"
+    },
+    {
+     "file": "rules/cpp-packaging.md",
+     "line": 94,
+     "severity": "fix",
+     "kind": "contradiction",
+     "finding": "Non-negotiable 9 says every conandata.yml source entry carries a sha256, with no exception. The depth row CMK-CONAN-23 names two exceptions: googlesource +archive with a commit URL and a comment, and a git source with a full commit fetched by Git(self).fetch_commit. An agent that reads only the index would flag or \"fix\" entries the depth row clears.",
+     "fix": "Replace \"| 9 | Every `conandata.yml` source entry carries a `sha256` and is fetched through `get(self, **self.conan_data[...])`.\" with \"| 9 | Every `conandata.yml` source entry carries a `sha256` and is fetched through `get(self, **self.conan_data[...])`, bar the two exceptions `CMK-CONAN-23` names.\""
+    },
+    {
+     "file": "rules/cpp-packaging.md",
+     "line": 88,
+     "severity": "fix",
+     "kind": "contradiction",
+     "finding": "Non-negotiable 3 and the gate note (line 71) key the lock obligation on `requires` ranges only. CMK-CONAN-09 keys it on `requires` or `tool_requires` ranges. A ranged tool_requires with no lock passes the index's wording.",
+     "fix": "Line 88: replace \"An application whose `requires` use a version range\" with \"An application whose `requires` or `tool_requires` use a version range\". Line 71: replace \"where no `requires` uses a version range\" with \"where no `requires` or `tool_requires` uses a version range\"."
+    },
+    {
+     "file": "rules/cpp-packaging/conan.md",
+     "line": 22,
+     "severity": "fix",
+     "kind": "style",
+     "finding": "A depth file points at a sibling depth file (\"vcpkg is `CMK-VCPKG` in `cpp-packaging/vcpkg.md`\"). That breaks the no-chains rule and contradicts the index's statement on line 151, \"These files do not point at each other\".",
+     "fix": "Replace \"vcpkg is `CMK-VCPKG` in `cpp-packaging/vcpkg.md`. A `conanfile.py`\" with \"vcpkg is `CMK-VCPKG`. A `conanfile.py`\"."
+    },
+    {
+     "file": "rules/cpp-packaging/vcpkg.md",
+     "line": 14,
+     "severity": "fix",
+     "kind": "style",
+     "finding": "The depth file points at its sibling depth file twice: line 14-15 (\"Conan is CMK-CONAN in `conan.md`.\") and line 77 (\"belongs to CMK-CONAN-10 in `conan.md`\"). That contradicts the index's statement that these files do not point at each other.",
+     "fix": "Line 14-15: replace \"Conan is CMK-CONAN in\\n`conan.md`.\" with \"Conan is CMK-CONAN.\" Line 77: replace \"A Conan leg's runtime belongs to CMK-CONAN-10 in `conan.md`.\" with \"A Conan leg's runtime belongs to CMK-CONAN-10.\""
+    },
+    {
+     "file": "rules/cpp-packaging/vcpkg.md",
+     "line": 43,
+     "severity": "fix",
+     "kind": "era-unlabelled",
+     "finding": "Eleven vcpkg rows (lines 42, 43, 82, 97, 141, 143-148) say \"Floor: current\", which floats. Note 6 requires an exact dated tool or registry version, with no floating era word.",
+     "fix": "Line 42: replace \"Floor: current vcpkg-tool.\" with \"Floor: vcpkg-tool 2026-09-26 (as of 2026-09-26).\" Line 97: replace \"Floor: current, and the feature\" with \"Floor: vcpkg-tool 2026-09-26, and the feature\". Line 141: replace \"Floor: current registry.\" with \"Floor: vcpkg registry 2026.07.29 (as of 2026-09-26).\" Lines 43, 82, 143, 144, 145, 146, 147, 148: replace every \"Floor: current.\" with \"Floor: vcpkg registry 2026.07.29 (as of 2026-09-26).\""
+    },
+    {
+     "file": "rules/cpp-packaging/conan.md",
+     "line": 199,
+     "severity": "fix",
+     "kind": "era-unlabelled",
+     "finding": "CMK-CONAN-20 says \"Floor: current CCI policy.\", a floating era label.",
+     "fix": "Replace \"Floor: current CCI policy.\" with \"Floor: CCI policy as of 2026-09-26.\""
+    },
+    {
+     "file": "rules/cpp-packaging/conan.md",
+     "line": 88,
+     "severity": "fix",
+     "kind": "style",
+     "finding": "Several verification cells that run a command never say what empty output means (note 7): CONAN-06 (line 88), CONAN-12 (123), CONAN-17 (197) and CONAN-18 (198).",
+     "fix": "Line 88: append \" Empty output means not applicable.\" to the CONAN-06 Verification cell. Line 123: append \" Empty output means no install line, not applicable.\" to the CONAN-12 cell. Line 197: append \" Empty output is the pass.\" to the CONAN-17 cell. Line 198: replace \"The block above lists candidates.\" with \"The block above lists candidates, and empty output is the pass.\""
+    },
+    {
+     "file": "rules/cpp-packaging/vcpkg.md",
+     "line": 144,
+     "severity": "fix",
+     "kind": "style",
+     "finding": "Verification cells that run a command without an empty-output clause: VCPKG-13's third command (line 141), VCPKG-14 (144) and VCPKG-16 (145).",
+     "fix": "Line 141: replace \"lists the SHOULD clause.\" with \"lists the SHOULD clause's findings, and empty output is its pass.\" Line 144: append \" Empty output means not applicable.\" to the VCPKG-14 cell. Line 145: append \" Empty output means no port declares a linkage, so read every Windows-capable port.\" to the VCPKG-16 cell."
+    },
+    {
+     "file": "rules/cpp-packaging/vcpkg.md",
+     "line": 200,
+     "severity": "nit",
+     "kind": "notes-violation",
+     "finding": "Note 6 requires the Re-check list to name its D-items. conan.md does (D2, D4), but vcpkg.md's two bullets carry no D label (they are D3 and D4).",
+     "fix": "Line 200: prefix the bullet text with \"D3: \". Line 201: prefix the bullet text with \"D4: \"."
+    },
+    {
+     "file": "rules/cpp-packaging/vcpkg.md",
+     "line": 58,
+     "severity": "nit",
+     "kind": "style",
+     "finding": "The cmake fence carries a \"# wrong:\" and a \"# right:\" comment above code that is only the wrong form. The right form is the json fence that follows, so the block reads as if the shown code were also right.",
+     "fix": "Replace lines 58-59 with the single line \"# wrong: vcpkg.cmake already ran inside project(), so this is ignored and configure exits 0. The preset below is the right form.\""
+    },
+    {
+     "file": "rules/cpp-packaging.md",
+     "line": 106,
+     "severity": "nit",
+     "kind": "deletion-candidate",
+     "finding": "Deletion test on the index: the sentence \"The one-manager ban itself is `CMK-TC-02` and is not restated here.\" can go without causing any mistake, because non-negotiable 1 already cites CMK-TC-02. Line 146 is the other candidate (reported above as a blocker). The Gate, silent-pass and Severity boilerplate is house-wide and stays.",
+     "fix": "Delete \" The one-manager ban itself is `CMK-TC-02` and is not restated here.\" from line 105-106, leaving \"The acquisition choice, the lock of record, tool provisioning and the CI cache shape.\""
+    }
+   ],
+   "verifications_exercised": [
+    {
+     "id": "CMK-PKG-01",
+     "went_red": true,
+     "went_green": true,
+     "note": "MUST. Violation (a ranged conanfile.txt, a vcpkg.json without a baseline, GIT_TAG main) listed all three mechanisms. Compliant tree: all three lists empty. The empty-output clause holds."
+    },
+    {
+     "id": "CMK-CONAN-09",
+     "went_red": true,
+     "went_green": true,
+     "note": "MUST, steps 1-4 run exactly as written in a git repo. Violation: step 2 was empty (lock not committed), the install line without a lock was missing from step 3b, and step 4 hit on `--lockfile= `. Compliant tree: step 4 empty and every install line paired."
+    },
+    {
+     "id": "CMK-CONAN-10",
+     "went_red": true,
+     "went_green": true,
+     "note": "MUST. Real toolchain generated by Conan 2.32.0, run on 3.31.12 and 4.3.4 (-Werror=dev) and 4.4.2 (-Werror=author). Violation: configure exit 0 and the grep printed the 'has been modified to 20' line. Guarded tree: empty. False green: a hand-written CMakeUserPresets.json makes the preset vanish, configure exits 1 and grep prints nothing (finding). The static grep went red on the unguarded set and printed the guarded set for reading, as the cell says."
+    },
+    {
+     "id": "CMK-CONAN-16",
+     "went_red": true,
+     "went_green": true,
+     "note": "MUST. Red on self.info.header_only(). Green on the commented call plus info.clear()."
+    },
+    {
+     "id": "CMK-CONAN-23",
+     "went_red": true,
+     "went_green": true,
+     "note": "MUST. Red on a hashless conandata.yml and on a literal-URL download() with no sha256. Green on a hashed entry plus get(**conan_data)."
+    },
+    {
+     "id": "CMK-CONAN-02",
+     "went_red": true,
+     "went_green": true,
+     "note": "MUST, piped through xargs -r. Red on a names-only recipe. Green on the set_property recipe."
+    },
+    {
+     "id": "CMK-VCPKG-01",
+     "went_red": true,
+     "went_green": true,
+     "note": "MUST. Red lists the manifest without builtin-baseline. Green is empty."
+    },
+    {
+     "id": "CMK-VCPKG-02",
+     "went_red": true,
+     "went_green": true,
+     "note": "MUST. Red on overrides in ports/foo/vcpkg.json. Green on version>=. It stayed green on a planted ports/foo/vcpkg-configuration.json with registries and default-registry (finding)."
+    },
+    {
+     "id": "CMK-VCPKG-04",
+     "went_red": true,
+     "went_green": true,
+     "note": "MUST. The set on line 3 after project() on line 2 is red by line-number reading, the set before project() is green, and the if(VCPKG_TARGET_TRIPLET MATCHES) read is not matched. The compliant CMakeLists set violates index non-negotiable 11 (finding)."
+    },
+    {
+     "id": "CMK-VCPKG-06",
+     "went_red": true,
+     "went_green": true,
+     "note": "MUST. Red: preset x64-windows-static with no runtime (first grep hits, second empty). Green: runtime in the preset cacheVariables. Missed x64-windows-static-release (finding). A guarded set after project() is flagged (contradiction with TGT-16 prose)."
+    },
+    {
+     "id": "CMK-VCPKG-08",
+     "went_red": true,
+     "went_green": true,
+     "note": "MUST. Red on x-gha in VCPKG_BINARY_SOURCES. Green on nuget."
+    },
+    {
+     "id": "CMK-VCPKG-13",
+     "went_red": true,
+     "went_green": true,
+     "note": "MUST. Red on vcpkg_configure_cmake and the old extract overload. Green on the vcpkg_cmake_* helpers, with -w keeping z_vcpkg_apply_patches out."
+    },
+    {
+     "id": "CMK-VCPKG-15",
+     "went_red": true,
+     "went_green": true,
+     "note": "MUST. Red on a constant -D runtime in the portfile and in the triplet VCPKG_CMAKE_CONFIGURE_OPTIONS. Green: the first two commands empty, and the read list shows the derived portfile, as the cell says."
+    },
+    {
+     "id": "CMK-VCPKG-10",
+     "went_red": true,
+     "went_green": true,
+     "note": "MUST. Red on VCPKG_PREFER_SYSTEM_LIBS in CMakePresets.json. Green on a plain preset. Separately measured with the vcpkg.cmake from the pinned root: the deprecation warning exits 0 under -Werror=dev on 3.31.12 and 4.3.4 and under -Werror=author on 4.4.2, which confirms the section's claim."
+    },
+    {
+     "id": "CMK-VCPKG-11",
+     "went_red": true,
+     "went_green": true,
+     "note": "MUST. Red on hashFiles('vcpkg.lock') in a workflow. Green on vcpkg.json."
+    },
+    {
+     "id": "CMK-PKG-02",
+     "went_red": true,
+     "went_green": true,
+     "note": "SHOULD. Red on C:\\vcpkg and VCPKG_INSTALLATION_ROOT (the doubled backslash escape works). Green on a SHA-pinned checkout plus bootstrap."
+    },
+    {
+     "id": "index gate spelling claim",
+     "went_red": true,
+     "went_green": true,
+     "note": "Planted AUTHOR_WARNING through a preset. -Werror=dev exit 1 on 3.31.12, 4.3.4 and 4.4.2. -Werror=author exit 0 on 3.31.12 and 4.3.4, exit 1 on 4.4.2. The index's lines 65-68 are true."
+    },
+    {
+     "id": "CMK-CONAN-08 claim",
+     "went_red": true,
+     "went_green": false,
+     "note": "Conan 2.32.0 with a hand-written CMakeUserPresets.json: conan install exit 0, conan-release preset absent ('No such configure preset'). The claim is confirmed."
+    },
+    {
+     "id": "index authors gate (vcpkg install PORT)",
+     "went_red": true,
+     "went_green": true,
+     "note": "vcpkg-tool 2026-09-26 in a tree with a top-level vcpkg.json: the line as written errors in manifest mode, and with --classic it computes the plan (finding). Side effect: that dry run downloaded cmake-4.4.3 into /home/mherwig/.cache/cmake-measure-scratch/verify-package-managers/vcpkg/root/downloads/tools/cmake-4.4.3-linux. Removing it was denied by permissions, so the owner may delete it."
+    },
+    {
+     "id": "check-artifacts.py",
+     "went_red": true,
+     "went_green": false,
+     "note": "Flags dead globs **/conanws.yml, **/conanws.py and **/vcpkg-configuration.json. These are not defects: the repository holds no C++ tree, and note 1 keeps the 0-corpus globs deliberately. With --forbid, 'ocx' hits only the house repository: frontmatter URL (the same in typescript-packaging.md), and '__' hits only conans/__init__.py, not an owner__repo name. The rules/ run lists the reserved IDs as undefined citations (finding). fences: 4 python pass ruff format --check, 2 json pass jq, 3 cmake pass gersemi 0.29.1 --check, and all sh fences parse."
+    }
+   ],
+   "unresolved_ids": [
+    "CMK-PKG-05",
+    "CMK-PKG-07"
+   ],
+   "trigger_evals": [],
+   "verdict": "fix-then-ship"
+  },
+  {
+   "set": "cmake-build depth set B: rules/cmake-build/targets.md, install-and-export.md, dependencies.md, toolchains-and-providers.md, bazel-seam.md (plus rules/cmake-build.md index for contradiction, glob and deletion checks)",
+   "files_read": [
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.claude/skills/research-lang/references/validation.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.claude/skills/research-lang/references/rule-distillation.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-topic-map.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/cmake-build/targets.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/cmake-build/install-and-export.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/cmake-build/dependencies.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/cmake-build/toolchains-and-providers.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/cmake-build/bazel-seam.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/cmake-build.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/bazel-quality/cpp.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-targets-and-abi.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-consumable-library.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-consumable-library/verification-wave3.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-dependency-seam.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-skills.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-bazel-seam.md"
+   ],
+   "findings": [
+    {
+     "file": "rules/cmake-build.md",
+     "line": 97,
+     "severity": "blocker",
+     "kind": "contradiction",
+     "finding": "Index non-negotiable 7 allows the MSVC runtime \"only through CMAKE_MSVC_RUNTIME_LIBRARY in a preset or before the first project()\". CMK-TGT-16 (targets.md:96) also sanctions a set() inside if(NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY) after project() and a set() behind a default-OFF option. targets-and-abi conflict 3 explicitly rejected the \"never after project()\" reading. So the index and the depth file give different answers on whether a guarded set() after project() blocks a merge.",
+     "fix": "In rules/cmake-build.md line 97 replace \"the MSVC runtime only through `CMAKE_MSVC_RUNTIME_LIBRARY` in a preset or before the first `project()`,\" with \"the MSVC runtime only through `CMAKE_MSVC_RUNTIME_LIBRARY` or its property, never a `/MD` or `/MT` flag, and never by a `set()` that runs by default after `project()` outside `if(NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)`,\""
+    },
+    {
+     "file": "rules/cmake-build/bazel-seam.md",
+     "line": 195,
+     "severity": "blocker",
+     "kind": "contradiction",
+     "finding": "Failure mode 12 calls it an agent mistake to spell the gate -Werror=dev on 4.4. That contradicts pinned decision 2 and CMK-CORE-01, which both require -Werror=dev when one command line serves both sides, and the file's own simulation, which hard-codes GATE=-Werror=dev. I measured -Werror=dev on 4.4.2: it fails the configure exactly as -Werror=author does (install-absolute-destination fixture, rc 1 under both spellings). The real failure mode is the reverse: -Werror=author on 3.31 or 4.3 is accepted and does nothing (rc 0 on both lines).",
+     "fix": "Replace line 195 with: \"12. **Spelling the gate `-Werror=author` on the wrapper's 3.31 line,** where it is accepted and does nothing (`CMK-CORE-01`).\""
+    },
+    {
+     "file": "rules/cmake-build/dependencies.md",
+     "line": 100,
+     "severity": "fix",
+     "kind": "portability",
+     "finding": "The CMK-DEP-08 (MUST) command \"target_link_libraries\\([^)]*[[:space:]]$NAME[[:space:])]\" fails under zsh, the default agent shell on macOS and on this host. zsh reads `$NAME[` as an array subscript and aborts with \"invalid subscript\", so there is no output and no hit. Measured: under bash the command lists the planted three-line `dep` call and is empty on `dep::dep`. Under zsh it errors out on both fixtures.",
+     "fix": "In the CMK-DEP-08 verification cell replace `[[:space:]]$NAME[[:space:])]` with `[[:space:]]${NAME}[[:space:])]`"
+    },
+    {
+     "file": "rules/cmake-build/bazel-seam.md",
+     "line": 118,
+     "severity": "fix",
+     "kind": "era-unlabelled",
+     "finding": "CMK-BZL-09 to CMK-BZL-15 carry no Floor field, and neither do the three section intros that hold them (CI and Generated Descriptions, Before Reporting Drift, Package Managers Across the Seam). Authoring note 6 requires a Floor: field on every rule. The other sections in the file state one.",
+     "fix": "Append \" Floor: any CMake.\" to the paragraph ending at line 118 (after \"Set `FILE` to each file you will edit or report on.\"). Append \" Floor: any CMake.\" to the paragraph ending at line 139 (after \"catches a vendored directory (`googletest-1.16.0`).\"). Append \" Floor: Conan 2.30.0 and Bazel 7.2.0 for CMK-BZL-14, any vcpkg for CMK-BZL-15.\" to the paragraph ending at line 161 (after \"vcpkg-tool 2026-07-27.\")."
+    },
+    {
+     "file": "rules/cmake-build/bazel-seam.md",
+     "line": 199,
+     "severity": "fix",
+     "kind": "notes-violation",
+     "finding": "The Re-check list does not name its D-items, which authoring note 6 requires (every other depth file in the set labels D1, D4, D7 and so on). Line 202 also cites a bare \"#1129\" without its repository.",
+     "fix": "Replace lines 199-201 with three bullets: \"- D5: the rules_foreign_cc default CMake and version table (`CMK-BZL-08`) at every release after 0.16.0.\" / \"- D4: Conan and vcpkg-tool tags (`CMK-BZL-14`, `CMK-BZL-15`).\" / \"- D1: the simulation's gate spelling on CMake 4.5 (`CMK-CORE-01`).\". On line 202 replace \"(#1129,\" with \"(rules_foreign_cc#1129,\"."
+    },
+    {
+     "file": "rules/cmake-build/targets.md",
+     "line": 103,
+     "severity": "fix",
+     "kind": "style",
+     "finding": "This cmake fence (lines 99-112) is not in gersemi 0.29.1 layout. It indents with 2 spaces inside if() blocks, and `gersemi --check` fails with a 4-space diff. Authoring note 8 requires gersemi layout.",
+     "fix": "Indent line 103 as `    set(CMAKE_CXX_STANDARD 17)`, and lines 108, 109 and 110 as `    set(CMAKE_CXX_STANDARD 17)`, `    set(CMAKE_CXX_STANDARD_REQUIRED ON)` and `    set(CMAKE_CXX_EXTENSIONS OFF)` (4 spaces each)."
+    },
+    {
+     "file": "rules/cmake-build/toolchains-and-providers.md",
+     "line": 112,
+     "severity": "fix",
+     "kind": "style",
+     "finding": "The marker-provider cmake fence fails `gersemi --check` (0.29.1): its one-line cmake_language call exceeds the line width, and gersemi wraps it.",
+     "fix": "Replace line 112 with the four lines: `cmake_language(` / `    SET_DEPENDENCY_PROVIDER marker_provide` / `    SUPPORTED_METHODS FIND_PACKAGE` / `)`"
+    },
+    {
+     "file": "rules/cmake-build/toolchains-and-providers.md",
+     "line": 124,
+     "severity": "fix",
+     "kind": "verification-dishonest",
+     "finding": "The text says \"Repeat D1 for each file\" that a chainload or user_toolchain names. The inline command carries only two of D1's four patterns (it drops `message(FATAL_ERROR` and `project(`) and searches only a `cmake` directory. A chained toolchain elsewhere, or one containing project(), reads clean.",
+     "fix": "Replace the inline command with: `NAME=aarch64.cmake; grep -rniE --include=\"$NAME\" -e 'execute_process' -e 'message[[:space:]]*\\(FATAL_ERROR' -e 'project[[:space:]]*\\(' -e 'enable_language' .` Empty output = pass."
+    },
+    {
+     "file": "rules/cmake-build/install-and-export.md",
+     "line": 14,
+     "severity": "fix",
+     "kind": "unsupported-claim",
+     "finding": "The text says the round-trip script \"verifies CMK-INST-01 to -08\". CMK-INST-07 and CMK-INST-08 are reading heuristics, and their own verification cells say so. The consolidation scopes the script to -01 to -06.",
+     "fix": "Replace \"One script verifies CMK-INST-01 to -08 and\" with \"One script verifies CMK-INST-01 to -06 and\""
+    },
+    {
+     "file": "rules/cmake-build/dependencies.md",
+     "line": 213,
+     "severity": "nit",
+     "kind": "contradiction",
+     "finding": "CMK-DEP-11's rule says never set the retired CMAKE_EXPERIMENTAL_FIND_CPS_PACKAGES. Its verification then calls the gate \"legitimate only on a 4.0 to 4.2 leg\". Authoring note 4.4 says the retired experimental gates are deleted, and under the pinned stance CPS always ships beside a Config package, so a 4.0 to 4.2 consumer never needs the gate.",
+     "fix": "Replace \"The gate is legitimate only on a 4.0 to 4.2 leg, with the UUID that tag documents.\" with \"A hit is the finding on every leg: the Config package CPS ships beside serves 4.0 to 4.2.\""
+    },
+    {
+     "file": "rules/cmake-build/dependencies.md",
+     "line": 192,
+     "severity": "nit",
+     "kind": "unsupported-claim",
+     "finding": "The CMP0170 claim is true only for a bare `VERSION 3.25` floor. I measured on 3.31.12 and 4.4.2: a bare-3.25 tree missing a source directory exits 0 without the flag and 1 with it. The pinned `3.25...4.4` range already exits 1 without the flag. The phrase \"floor-3.25 tree\" reads as the pinned tree.",
+     "fix": "Replace \"a floor-3.25 tree missing one source directory still exits 0\" with \"a tree with a bare `VERSION 3.25` floor, no `...<max>`, missing one source directory still exits 0\""
+    },
+    {
+     "file": "rules/cmake-build/bazel-seam.md",
+     "line": 50,
+     "severity": "nit",
+     "kind": "verification-dishonest",
+     "finding": "The simulation pipes configure through `| tee`, so the configure exit code is lost. Measured on 3.31.12 with a gate failure: the script reports only gmake's \"No rule to make target 'Makefile'\" (rc 2) from the build step, not the configure error that CMK-BZL-08 names as the finding.",
+     "fix": "Replace `-DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DBUILD_SHARED_LIBS=OFF 2>&1 | tee wrap-configure.log` with `-DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DBUILD_SHARED_LIBS=OFF >wrap-configure.log 2>&1 || { cat wrap-configure.log; exit 1; }`"
+    },
+    {
+     "file": "rules/cmake-build/targets.md",
+     "line": 160,
+     "severity": "nit",
+     "kind": "style",
+     "finding": "The CMK-TGT-14 verification grep has no empty-output clause (note 7).",
+     "fix": "After \"a bare system name is a finding.\" insert \" Empty output = nothing to check.\""
+    },
+    {
+     "file": "rules/cmake-build/install-and-export.md",
+     "line": 184,
+     "severity": "nit",
+     "kind": "style",
+     "finding": "The CMK-INST-23 verification grep has no empty-output clause (note 7).",
+     "fix": "After \"then read each hit.\" insert \" Empty output means the row does not apply.\""
+    },
+    {
+     "file": "rules/cmake-build/bazel-seam.md",
+     "line": 155,
+     "severity": "nit",
+     "kind": "style",
+     "finding": "The CMK-BZL-13 verification names three commands but no empty-output clause (note 7).",
+     "fix": "Append to the cell: \" Empty output on either side means that side has no mapping to derive: read the other side only.\""
+    },
+    {
+     "file": "rules/cmake-build.md",
+     "line": 8,
+     "severity": "nit",
+     "kind": "notes-violation",
+     "finding": "check-artifacts.py flags two dead globs, '**/.gersemirc' and '**/.cmake-format*'. Authoring note 1 keeps both deliberately (0 corpus files, pinned), so this is expected checker output, not a defect.",
+     "fix": "No edit. Record in the publishing receipt that the two dead-glob findings are accepted under authoring note 1."
+    },
+    {
+     "file": "rules/cmake-build.md",
+     "line": 73,
+     "severity": "nit",
+     "kind": "deletion-candidate",
+     "finding": "Deletion test: \"No maintained semantic CMake linter exists ... are the lint layer\" restates CMK-CORE-04's rationale in the same file, so removing it causes no mistake.",
+     "fix": "Delete the sentence spanning lines 73-74: \"No maintained semantic CMake linter exists (as of 2026-09-26), so the gate and the named greps in each depth file are the lint layer.\""
+    },
+    {
+     "file": "rules/cmake-build.md",
+     "line": 158,
+     "severity": "nit",
+     "kind": "deletion-candidate",
+     "finding": "Deletion test: this routing row points at CMK-CORE-04 in the same file, whose rule text already says migrate and never extend.",
+     "fix": "Delete line 158 (the \"Finding a `.cmake-format*` file or a `cmake-format` step\" row)."
+    },
+    {
+     "file": "rules/cmake-build.md",
+     "line": 191,
+     "severity": "nit",
+     "kind": "deletion-candidate",
+     "finding": "Deletion test: the Siblings bullet for the two skills repeats routing rows 159-160, and the \"repeat only the MUST rows\" clause is author-facing.",
+     "fix": "Delete lines 191-192 (the `cmake-dependency-triage` and `cmake-modernize` Siblings bullet)."
+    },
+    {
+     "file": "rules/cmake-build.md",
+     "line": 193,
+     "severity": "nit",
+     "kind": "deletion-candidate",
+     "finding": "Deletion test: \"C++ source code has no rule in this set\" is implied by the globs, so removing it causes no mistake.",
+     "fix": "Delete lines 193-194."
+    }
+   ],
+   "verifications_exercised": [
+    {
+     "id": "CMK-TGT-01",
+     "went_red": true,
+     "went_green": true,
+     "note": "Gate line (1): red on `target_link_libraries(core m)` and `target_link_libraries (core2  pthread dl)`, empty on keyworded single-line, wrapped and INTERFACE-only calls. The empty = pass clause is true."
+    },
+    {
+     "id": "CMK-TGT-04",
+     "went_red": true,
+     "went_green": true,
+     "note": "Line (1) printed set(CMAKE_C_FLAGS \"-O2\"), SET(CMAKE_SHARED_LINKER_FLAGS \u2026), set (CMAKE_CXX_FLAGS_RELEASE \u2026) and the split set(CMAKE_C_FLAGS. It was empty on an append, on _INIT and on target_compile_options. Line (2) caught the append."
+    },
+    {
+     "id": "CMK-TGT-05",
+     "went_red": true,
+     "went_green": true,
+     "note": "guard_scan (1) printed the PROJECT_IS_TOP_LEVEL-only setter and the unguarded EXTENSIONS, and line (2) listed the file missing _REQUIRED. Both were empty on NOT DEFINED guards, including the `PROJECT_IS_TOP_LEVEL AND NOT DEFINED` form. Measured with bash."
+    },
+    {
+     "id": "CMK-TGT-09",
+     "went_red": true,
+     "went_green": true,
+     "note": "Grep hit a literal -Werror in target_compile_options and was empty with CMAKE_COMPILE_WARNING_AS_ERROR."
+    },
+    {
+     "id": "CMK-TGT-10",
+     "went_red": true,
+     "went_green": true,
+     "note": "Floor-3.12 dep via add_subdirectory. Plain set gave TYPE=STATIC_LIBRARY and gate rc 1 on 3.31.12 and 4.4.2. Scoped set/restore plus CMP0077 default gave SHARED_LIBRARY, rc 0."
+    },
+    {
+     "id": "CMK-TGT-18",
+     "went_red": true,
+     "went_green": true,
+     "note": "zig c++, Ninja and Ninja Multi-Config, on 3.31.12 and 4.4.2. cxx_std_20 listed build.ninja or impl-<Config>.ninja. SCAN_FOR_MODULES OFF and cxx_std_17 were empty. rules.ninja carries CXX_SCAN__ at C++20 even with OFF, so the added --exclude='rules.ninja' is load-bearing."
+    },
+    {
+     "id": "CMK-INST-01",
+     "went_red": true,
+     "went_green": true,
+     "note": "Shipped script run verbatim on 3.31.12 and 4.4.2 against a lib with PUBLIC Threads::Threads. Without find_dependency it exits 1 at consumer Generate. With it, it exits 0 and prints foo_DIR under moved/lib64/cmake/foo."
+    },
+    {
+     "id": "CMK-INST-21",
+     "went_red": true,
+     "went_green": true,
+     "note": "Shipped multi-config leg on 3.31.12 and 4.4.2. Without a postfix, step (e) printed ${_IMPORT_PREFIX}/lib64/libfoo.so, rc 1. A guarded CMAKE_DEBUG_POSTFIX d before add_library gave empty dup.txt, rc 0."
+    },
+    {
+     "id": "CMK-INST-03",
+     "went_red": true,
+     "went_green": true,
+     "note": "Grep hit raw find_package(Threads REQUIRED) in pConfig.cmake.in and was empty on the find_dependency template."
+    },
+    {
+     "id": "CMK-INST-10",
+     "went_red": true,
+     "went_green": true,
+     "note": "Grep hit DESTINATION /opt/\u2026 and DESTINATION ${CMAKE_INSTALL_PREFIX}/\u2026 and was empty on GNUInstallDirs, with in-source build trees present (the cmake_install.cmake exclude is load-bearing). Gate claim confirmed: 4.4.2 fails configure under both -Werror=dev and -Werror=author. 3.31.12 and 4.3.4 give rc 0 under both."
+    },
+    {
+     "id": "CMK-INST-16",
+     "went_red": true,
+     "went_green": true,
+     "note": "Pipeline hit VERSION_SCHEMA rpm and was empty on VERSION_SCHEMA simple."
+    },
+    {
+     "id": "CMK-INST-24",
+     "went_red": true,
+     "went_green": true,
+     "note": "Grep hit `export (PACKAGE p)` and was empty on export(PACKAGE_INFO \u2026)."
+    },
+    {
+     "id": "CMK-INST-14",
+     "went_red": true,
+     "went_green": true,
+     "note": "I checked the drafter's added precondition, which is not in the consolidation, by measurement. A .cps with a PUBLIC Threads::Threads dependency fails every consumer on 4.3.4 and 4.4.2 (\"Could not find a package configuration file provided by \\\"Threads\\\"\") and passes on 3.31.12. With a PRIVATE dependency it resolves /cps/foo on 4.3.4 and 4.4.2. The claim holds."
+    },
+    {
+     "id": "CMK-DEP-01",
+     "went_red": true,
+     "went_green": true,
+     "note": "Line 1 hit GIT_TAG main. Line 2 printed GIT_TAG with master on the next line. Both were empty on a 40-hex pin."
+    },
+    {
+     "id": "CMK-DEP-03",
+     "went_red": true,
+     "went_green": true,
+     "note": "Listed the file with an unhashed URL declare. Empty with URL_HASH."
+    },
+    {
+     "id": "CMK-DEP-08",
+     "went_red": true,
+     "went_green": true,
+     "note": "Under bash the -z grep listed a three-line `dep` link and was empty on dep::dep. Under zsh it aborts with \"invalid subscript\" (finding filed)."
+    },
+    {
+     "id": "CMK-DEP-16",
+     "went_red": true,
+     "went_green": true,
+     "note": "unshare -rn probe verbatim, file:// git repos, 3.31.12 and 4.4.2. A missing source dir exits 1 and a complete one exits 0. Without the CMP0170 default, a bare VERSION 3.25 tree falsely exits 0, while the 3.25...4.4 range exits 1."
+    },
+    {
+     "id": "CMK-TC-02",
+     "went_red": true,
+     "went_green": true,
+     "note": "A3 listed a preset naming vcpkg.cmake and conan_toolchain.cmake, and was empty on vcpkg only."
+    },
+    {
+     "id": "CMK-TC-03",
+     "went_red": true,
+     "went_green": true,
+     "note": "B1 printed SET(VCPKG_TARGET_TRIPLET) and list(APPEND VCPKG_OVERLAY_PORTS) after project(). B2 printed a subdirectory set(CMAKE_TOOLCHAIN_FILE). Both were empty on the compliant tree, and a VCPKG_ read in if() was not matched."
+    },
+    {
+     "id": "CMK-TC-04",
+     "went_red": true,
+     "went_green": true,
+     "note": "C1 hit the project set() of CMAKE_PROJECT_TOP_LEVEL_INCLUDES. The C3 marker count was 0 with the project set() and 1 without, on 3.31.12 and 4.4.2, and both configures exited 0."
+    },
+    {
+     "id": "CMK-TC-08",
+     "went_red": true,
+     "went_green": true,
+     "note": "E1-E3 each listed a toolchain setting only SYSTEM_NAME and SYSROOT, and were empty when all four modes were set."
+    },
+    {
+     "id": "CMK-BZL-02",
+     "went_red": true,
+     "went_green": true,
+     "note": "Shipped simulation verbatim on 3.31.12 and 4.4.2. A project set(CMAKE_TOOLCHAIN_FILE) before project() gave CALLER_TOOLCHAIN_LOADED count 0, and the clean tree gave 2."
+    },
+    {
+     "id": "CMK-BZL-03",
+     "went_red": true,
+     "went_green": true,
+     "note": "Same runs: set(CMAKE_C_FLAGS \"-O2\") gave WRAP_SEED count 0 in compile_commands.json, and target_compile_options gave 2."
+    }
+   ],
+   "unresolved_ids": [],
+   "trigger_evals": [],
+   "verdict": "fix-then-ship"
+  },
+  {
+   "set": "rules/cmake-build.md (index) + cmake-build/{versions-and-policies,language,module-authoring,testing,presets-and-ci}.md",
+   "files_read": [
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.claude/skills/research-lang/references/validation.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.claude/skills/research-lang/references/rule-distillation.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-topic-map.md (Artifact set decision, Wave 2 (e), Wave 3 (d)-(f), Authoring notes 1-12)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/cmake-build.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/cmake-build/versions-and-policies.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/cmake-build/language.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/cmake-build/module-authoring.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/cmake-build/testing.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/cmake-build/presets-and-ci.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-versions-and-gate.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-language.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-module-authoring.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/.agents/research/cmake-testing-and-ci.md",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/gradle-build.md (frontmatter)",
+    "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/rules/cmake-build/{install-and-export,dependencies,toolchains-and-providers,targets,bazel-seam}.md (cited rows only: INST-01, INST-18, DEP-13/15/16/21/30, TC-08, TGT-17/18, BZL-01, severities of every non-negotiable ID)"
+   ],
+   "findings": [
+    {
+     "file": "rules/cmake-build/language.md",
+     "line": 152,
+     "severity": "fix",
+     "kind": "verification-dishonest",
+     "finding": "The LANG-11 lookup (a MUST row) reads invented names as documented. Rewriting leading placeholders such as <PROJECT-NAME>_VERSION and <PackageName>_ROOT to [A-Za-z0-9_]+ turns them into patterns that match any CMAKE_* name with that suffix. Measured on 4.4.2: CMAKE_MYLIB_VERSION, CMAKE_MY_ROOT and CMAKE_MY_KNOB_BINARY_DIR each count 1 (documented). CMAKE_MY_KNOB still counts 0, so the check can go red, but it misses this class. With the filter below, all three count 0 and CMAKE_CXX_FLAGS, CMAKE_CXX_FLAGS_RELEASE and CMAKE_UNITY_BUILD still count 1.",
+     "fix": "Replace line 152 with these two lines:\nsed -e 's/<CONFIG>/[A-Z]+/g' -e 's/<[^>]*>/[A-Za-z0-9_]+/g' \"$D/c.txt\" \"$D/cxx.txt\" > \"$D/all.txt\"\ngrep -e '^CMAKE_' -e '^_CMAKE_' \"$D/all.txt\" > \"$D/patterns.txt\"\nAlso replace line 144 with: # CMK-LANG-11 lookup: expand <LANG> and <CONFIG> first, or CMAKE_CXX_FLAGS reads as invented. Keep only patterns that start with CMAKE_, or <PROJECT-NAME>_VERSION reads CMAKE_MYLIB_VERSION as documented."
+    },
+    {
+     "file": "rules/cmake-build/testing.md",
+     "line": 105,
+     "severity": "fix",
+     "kind": "verification-dishonest",
+     "finding": "The TEST-09 smoke (a MUST row) passes when the consumer fails to configure. ctest -N on a failed or partial build tree still prints 'Total Tests: 0'. Measured on 3.31.12 (-Werror=dev) and 4.4.2 (-Werror=author): a library whose AUTHOR_WARNING fails the gate, and which also leaks its BUILD_TESTING tests, gave configure rc=1, yet the final grep printed 'Total Tests: 0' (pass). A leaking library that configures cleanly went red, and a compliant one went green. With the chained form below, the failing library prints nothing (the finding).",
+     "fix": "Replace lines 105-106 with the single line:\ncmake -S \"$W/asub\" -B \"$W/asub-build\" -G Ninja \"$GATE\" && ctest --test-dir \"$W/asub-build\" -N > \"$W/asub-tests.txt\"\nReplace line 107 with: # Must print the line. Empty output means the library's tests leaked, or the consumer failed to configure: both are findings.\nOn line 99, change \"W: a scratch\" to \"W: a fresh, empty scratch\"."
+    },
+    {
+     "file": "rules/cmake-build.md",
+     "line": 57,
+     "severity": "fix",
+     "kind": "verification-dishonest",
+     "finding": "The CORE-01 canary cannot go red on the preset hole the index cites it for (lines 29-31, non-negotiable 1, the line 134 cell, presets-and-ci failure mode 7). The canary is an AUTHOR_WARNING. A preset with warnings.deprecated=false or errors.deprecated=false lets a real dependency deprecation through -Werror=dev with rc 0 on 3.31.12 and 4.3.4, but the canary through that same preset still exits 1 (pass). Only grep (a) catches the hole. A second canary with message(DEPRECATION) through the preset measured rc 0 (red) on 3.31.12 and 4.3.4 for both deprecated-false presets, rc 1 (green) on a clean preset, rc 0 under -Werror=author below 4.4, and rc 1 on 4.4.2.",
+     "fix": "After line 57 insert:\n# 1b. The deprecation canary. A preset that sets deprecated to false still passes canary 1 and fails this one on 4.3 or older. Exit 1 is the pass.\nprintf 'message(DEPRECATION \"gate canary\")\\n' > canary-dep.cmake\n\"$BIN/cmake\" --preset \"$PRESET\" --fresh -B build-canary-dep \"$GATE\" -DCMAKE_PROJECT_INCLUDE=\"$PWD/canary-dep.cmake\"\nIn the CMK-CORE-01 Verification cell (line 134), replace \"The Gate's canary on each leg's binary and preset: exit 0 is the finding.\" with \"The Gate's two canaries on each leg's binary and preset: exit 0 from either is the finding. Only the deprecation canary goes red on a preset that sets `deprecated` to `false` (measured 2026-09-26 on 3.31.12 and 4.3.4).\""
+    },
+    {
+     "file": "rules/cmake-build/versions-and-policies.md",
+     "line": 67,
+     "severity": "fix",
+     "kind": "verification-dishonest",
+     "finding": "The CMK-VER-05 dependency-floor scan (a MUST row) misses two old-floor shapes that fail the gate. Both configured under add_subdirectory with rc 1 on 3.31.12 (-Werror=dev) and on 4.4.2 (-Werror=author): 'cmake_minimum_required (VERSION 3.8)', with a space before the paren (common in old third-party trees), and a call split across lines ('cmake_minimum_required(' then 'VERSION 3.5)'). The scan printed neither. With the widened patterns below, both are caught, the four original hits still print, and the compliant tree stays empty.",
+     "fix": "In lines 67-71, replace each 'cmake_minimum_required\\(' with 'cmake_minimum_required[[:space:]]*\\(' and each 'cmake_policy\\(' with 'cmake_policy[[:space:]]*\\('. Before line 72 (the operands line), add the line:\n  -e '^[[:space:]]*cmake_minimum_required[[:space:]]*\\([[:space:]]*$' \\\nIn the paragraph at lines 75-83, after \"Commented lines do not match.\" add: \"A hit that ends in `cmake_minimum_required(` is a call split across lines, so read its next line.\""
+    },
+    {
+     "file": "rules/cmake-build/testing.md",
+     "line": 13,
+     "severity": "fix",
+     "kind": "contradiction",
+     "finding": "testing.md assigns the install-and-consume job to CMK-CI in presets-and-ci.md, and names CMK-INST-18 as 'the round trip itself'. presets-and-ci.md lines 19-20 say the round trip as a CI job is CMK-INST-18 in install-and-export.md. The index (lines 78 and 99) makes CMK-INST-01 the round trip. Three files name three different owners for the same thing.",
+     "fix": "Replace \"Test presets, the offline job and the install-and-consume job are `CMK-CI` in `presets-and-ci.md` (the round trip itself is `CMK-INST-18` in `install-and-export.md`).\" with \"Test presets and the offline job are `CMK-CI` in `presets-and-ci.md`. The install round trip is `CMK-INST-01`, and its CI job is `CMK-INST-18`, both in `install-and-export.md`.\""
+    },
+    {
+     "file": "rules/cmake-build/module-authoring.md",
+     "line": 155,
+     "severity": "fix",
+     "kind": "contradiction",
+     "finding": "Two different gersemi gate commands. module-authoring gives `gersemi --check \"${MODULE_DIR:-.}\"` (line 155 and the MOD-15 cell at line 167). The index gates on tracked listfiles only (line 59) because a directory walk reaches build trees. Measured with gersemi 0.29.1: in a git tree with an unignored in-tree build directory, `gersemi --check .` exits 1 on the generated CMakeFiles/*.cmake. The same tree with build/ in .gitignore exits 0. So MOD-15's own command goes red on a compliant module project whose configured fixtures sit in an unignored build*/ directory, which the file's own preamble (lines 21-23) expects.",
+     "fix": "Line 155: replace \"The gate is `gersemi --check \"${MODULE_DIR:-.}\"` (gersemi 0.29.1, released\" with \"The gate is the index's tracked-files form, `git ls-files -z -- '*CMakeLists.txt' '*.cmake' | xargs -0 -r gersemi --check` (gersemi 0.29.1, released\". Line 167 Verification cell: replace \"`gersemi --check \"${MODULE_DIR:-.}\"`. Exit 0 passes.\" with \"The gersemi gate above. Exit 0 passes.\""
+    },
+    {
+     "file": "rules/cmake-build.md",
+     "line": 58,
+     "severity": "fix",
+     "kind": "unsupported-claim",
+     "finding": "\"a build tree always fails it\" (line 58) and \"`gersemi --check .` descends into build trees and fails on generated files\" (the CORE-04 rationale, line 137) are false as stated. gersemi 0.29.1 honours .gitignore. Measured: rc 1 with an unignored in-tree build/, and rc 0 once build/ is in .gitignore. Neither of the two admissible consolidations for this row carries the claim.",
+     "fix": "Line 58: replace \"Tracked listfiles only: a build tree always fails it.\" with \"Tracked listfiles only: a build tree that .gitignore does not exclude fails it.\" Line 137 rationale: replace \"`gersemi --check .` descends into build trees and fails on generated files\" with \"`gersemi --check .` descends into any build tree that `.gitignore` does not exclude and fails on its generated files\"."
+    },
+    {
+     "file": "rules/cmake-build/module-authoring.md",
+     "line": 117,
+     "severity": "fix",
+     "kind": "notes-violation",
+     "finding": "The shipped CMK-MOD-11 configure probe hard-codes `-Werror=author` on a bare `cmake` taken from PATH. On a 3.31 or 4.3 binary that gate is inert, which is the exact pattern CMK-CORE-01 forbids. Authoring notes 3.5 and 7 require shipped probes to spell the gate per binary.",
+     "fix": "Replace line 117 with these two lines:\nGATE=-Werror=author # -Werror=dev on CMake 4.3 or older (CMK-CORE-01)\nMYMOD_AUTH_TOKEN=\"$DUMMY_SECRET\" cmake -S . -B \"$BUILD_DIR\" \"$GATE\""
+    },
+    {
+     "file": "rules/cmake-build.md",
+     "line": 129,
+     "severity": "fix",
+     "kind": "verification-dishonest",
+     "finding": "The CORE-05 grep (f), for a MUST row, misses the long-option early exits: `| grep --quiet` and `| grep --max-count=1` in a pipefail script printed nothing. `grep -E -q`, `| head` and `grep -m1` are caught. The widened form below catches both long forms and still ignores `| grep -c`.",
+     "fix": "Append to the xargs grep on line 129: -e '[|] *grep( +-[-a-zA-Z=0-9]+)* +--quiet' -e '[|] *grep( +-[-a-zA-Z=0-9]+)* +--silent' -e '[|] *grep( +-[-a-zA-Z=0-9]+)* +--max-count'. In the CMK-CORE-05 cell (line 138), replace \"It catches separated flags (`grep -E -q`), ripgrep's `-q` and `grep -m1`.\" with \"It catches separated flags (`grep -E -q`), ripgrep's `-q`, `grep -m1`, and `--quiet`, `--silent` and `--max-count`.\""
+    },
+    {
+     "file": "rules/cmake-build/versions-and-policies.md",
+     "line": 101,
+     "severity": "fix",
+     "kind": "contradiction",
+     "finding": "CMK-VER-04 (MUST) says to guard any variable newer than the floor, and its table lists CMAKE_CXX_SCAN_FOR_MODULES at 3.28 (confirmed versionadded 3.28 on 4.4.2). The same file's 'right' example (line 55) sets it unguarded under a 3.25 floor, as CMK-TGT-18 and non-negotiable 8 prescribe. The VER-04 grep ('CXX_MODULES') does not match it either. Two rules answer 'guard this set()?' differently. The unguarded set is harmless, because 3.25 simply never reads the variable.",
+     "fix": "In the CMK-VER-04 Rule cell, after \"and guard a policy with `if(POLICY CMPxxxx)`.\" insert \"Setting a variable that an older CMake never reads, such as `CMAKE_CXX_SCAN_FOR_MODULES`, needs no guard.\""
+    },
+    {
+     "file": "rules/cmake-build/presets-and-ci.md",
+     "line": 105,
+     "severity": "fix",
+     "kind": "style",
+     "finding": "The cmake fence at lines 99-110 is not in gersemi 0.29.1 layout. It uses 2-space indentation, and `gersemi --check` exits 1 ('would be reformatted'). The other eight cmake fences in the set pass.",
+     "fix": "Replace lines 105-108 with:\n    find_program(PROJ_LAUNCHER NAMES sccache ccache)\n    if(PROJ_LAUNCHER)\n        set(CMAKE_CXX_COMPILER_LAUNCHER \"${PROJ_LAUNCHER}\")\n    endif()"
+    },
+    {
+     "file": "rules/cmake-build.md",
+     "line": 155,
+     "severity": "fix",
+     "kind": "trigger",
+     "finding": "CMK-CI-01 binds 'every file it includes', but an included presets file can have any name (presets/linux.json) and loads no rule by glob. That is a residual miss of the same kind as --presets-file, and no routing line names it. Editing only the included file is the failure mode presets-and-ci lists as failure mode 2.",
+     "fix": "In the routing row, replace \"Editing a presets file, including one passed by `cmake --presets-file` (CMake \u2265 4.4), which loads no rule by glob,\" with \"Editing a presets file, including a file another presets file `include`s or one passed by `cmake --presets-file` (CMake \u2265 4.4), neither of which loads a rule by glob,\"."
+    },
+    {
+     "file": "rules/cmake-build/versions-and-policies.md",
+     "line": 88,
+     "severity": "nit",
+     "kind": "notes-violation",
+     "finding": "Authoring note 5.3 reduces CMK-VER-06 to a one-line citation naming its owners. The row still restates DEP-15's mechanism, its value 3.10 and its port-tool exception, and DEP-30's remedies. That duplicated text will drift from dependencies.md.",
+     "fix": "Replace the CMK-VER-06 Rule cell with: \"Citation only. A stale dependency floor is CMK-DEP-15's on CMake 4.x and CMK-DEP-30's on CMake 3.x, both in `dependencies.md`. Floor: `CMAKE_POLICY_VERSION_MINIMUM` is CMake 4.0.\""
+    },
+    {
+     "file": "rules/cmake-build/language.md",
+     "line": 139,
+     "severity": "nit",
+     "kind": "style",
+     "finding": "In the CMK-LANG-13 rationale, \"The two sanctioned hand-offs are CMK-MOD-12's `<Name>_ROOT` (module-authoring) and never `CMAKE_TOOLCHAIN_FILE`\" lists a prohibition as a sanctioned hand-off and does not parse.",
+     "fix": "Replace that sentence with: \"The one sanctioned `FORCE` hand-off is CMK-MOD-12's `<Name>_ROOT` (module-authoring). `CMAKE_TOOLCHAIN_FILE` is never forced (CMK-TC-01, toolchains-and-providers).\""
+    },
+    {
+     "file": "rules/cmake-build/presets-and-ci.md",
+     "line": 120,
+     "severity": "nit",
+     "kind": "style",
+     "finding": "\"The fix PR, #11489, closed unmerged\" is a bare issue number in shipped text, and it is ambiguous outside the runner-images context.",
+     "fix": "Replace \"The fix PR, #11489, closed unmerged.\" with \"The fix PR, actions/runner-images#11489, closed unmerged.\""
+    },
+    {
+     "file": "rules/cmake-build.md",
+     "line": 20,
+     "severity": "nit",
+     "kind": "deletion-candidate",
+     "finding": "Deletion test on the index. Removing these lines causes no mistake: 20-21 (a tagline that repeats the silent-pass paragraph), 73-74 (the no-linter sentence, which the CORE-04 rationale on line 137 already carries), 142-143 (author-facing meta about one level deep), and 177-179 (author guidance on writing new verifications).",
+     "fix": "Delete lines 20-21, 73-74, 142-143 and 177-179."
+    },
+    {
+     "file": "rules/cmake-build.md",
+     "line": 10,
+     "severity": "nit",
+     "kind": "portability",
+     "finding": "check-artifacts.py flags '**/.gersemirc' and '**/.cmake-format*' as dead globs. Both are deliberate per authoring note 1, and the checker is clean with --allow-absent. With --forbid ocx it also flags 'ocx' and 'ocx-sh' on line 15, the `repository:` catalog key that every house rule shares (rules/gradle-build.md:14). No other OCX name, fleet path, owner__repo name or repo@sha appears in the six files.",
+     "fix": "No text change. Run the checker as: check-artifacts.py rules/cmake-build.md --root . --allow-absent '**/.gersemirc' --allow-absent '**/.cmake-format*', and record the repository key as the sanctioned exception to note 9."
+    }
+   ],
+   "verifications_exercised": [
+    {
+     "id": "CMK-VER-01",
+     "went_red": true,
+     "went_green": true,
+     "note": "Planted VERSION 3.15..4.3 hit; 3.25...4.4 empty; build* copy excluded. Collapse confirmed: CMP0140/CMP0126 unset on 3.31.12 and 4.4.2. Empty-output clause true."
+    },
+    {
+     "id": "CMK-VER-05",
+     "went_red": true,
+     "went_green": true,
+     "note": "Hits 3.5, 3.5...3.9 and cmake_policy(VERSION 3.5); 2.8.12...3.10, 3.5...3.10 and commented lines stay empty. Misses 'cmake_minimum_required (VERSION 3.8)' and a split call, both rc 1 on 3.31.12 and 4.4.2, so the empty-output clause is too strong (finding)."
+    },
+    {
+     "id": "CMK-VER-09",
+     "went_red": true,
+     "went_green": true,
+     "note": "451f2fe2 counts 0 in 4.4.2 and 1 in 4.3.4, and f35a9ac6 counts 1 in 4.4.2, as the cell states. The CMAKE_EXPERIMENTAL_ grep hit the planted gate."
+    },
+    {
+     "id": "CMK-LANG-01",
+     "went_red": true,
+     "went_green": true,
+     "note": "Caught a bare left and right STREQUAL operand, GREATER, and while LESS. Quoted forms and ${pkg}_FOUND empty."
+    },
+    {
+     "id": "CMK-LANG-04",
+     "went_red": true,
+     "went_green": true,
+     "note": "The ${ARGN} parse printed. PARSE_ARGV was filtered out."
+    },
+    {
+     "id": "CMK-LANG-05",
+     "went_red": true,
+     "went_green": true,
+     "note": "Grep hit PARSE_ARGN. Measured VALUE=[] with rc 0 on 3.31.12 and 4.3.4, and VALUE=[a;b] on 4.4.2."
+    },
+    {
+     "id": "CMK-LANG-06",
+     "went_red": true,
+     "went_green": true,
+     "note": "The awk reported never-read and prefix-mismatch (hunter_) parses. The compliant fixture was empty."
+    },
+    {
+     "id": "CMK-LANG-11",
+     "went_red": true,
+     "went_green": true,
+     "note": "The lookup counts CMAKE_MY_KNOB 0 and CMAKE_CXX_FLAGS 1, but CMAKE_MYLIB_VERSION and CMAKE_MY_ROOT 1: false green on leading-placeholder suffixes (finding, fix verified)."
+    },
+    {
+     "id": "CMK-MOD-01",
+     "went_red": true,
+     "went_green": true,
+     "note": "file(DOWNLOAD) without STATUS printed. With STATUS, empty."
+    },
+    {
+     "id": "CMK-MOD-03",
+     "went_red": true,
+     "went_green": true,
+     "note": "'FILE (DOWNLOAD' without TLS_VERIFY caught (case-insensitive command). Compliant file empty."
+    },
+    {
+     "id": "CMK-MOD-04",
+     "went_red": true,
+     "went_green": true,
+     "note": "Unchecked execute_process printed. COMMAND_ERROR_IS_FATAL ANY empty."
+    },
+    {
+     "id": "CMK-MOD-05",
+     "went_red": true,
+     "went_green": true,
+     "note": "The awk reported a definition after POP at line 11. The compliant file was empty."
+    },
+    {
+     "id": "CMK-MOD-12",
+     "went_red": true,
+     "went_green": true,
+     "note": "Both greps red on a non-FORCE _ROOT with no _DIR unset, and both empty on the unset-plus-FORCE form."
+    },
+    {
+     "id": "CMK-MOD-17",
+     "went_red": true,
+     "went_green": true,
+     "note": "file(DOWNLOAD) and FetchContent_Declare URL without a timeout printed. GIT_REPOSITORY ${URL} not reported. INACTIVITY_TIMEOUT accepted."
+    },
+    {
+     "id": "CMK-TEST-03",
+     "went_red": true,
+     "went_green": true,
+     "note": "On the file's own wrong/right fence: WILL_FAIL and the message-only regex printed. The multi-line 'CMake Error at' regex was empty."
+    },
+    {
+     "id": "CMK-TEST-06",
+     "went_red": true,
+     "went_green": true,
+     "note": "A bare ctest line and a --target test run printed. The guarded line was empty."
+    },
+    {
+     "id": "CMK-TEST-07",
+     "went_red": true,
+     "went_green": true,
+     "note": "A file with no --timeout printed. The --timeout 300 file was empty."
+    },
+    {
+     "id": "CMK-TEST-09",
+     "went_red": true,
+     "went_green": true,
+     "note": "Measured on 3.31.12 and 4.4.2. A BUILD_TESTING-leaking library gave empty output and the prefixed option gave 'Total Tests: 0'. A library that fails the gate also gave 'Total Tests: 0' (false green, finding; the && fix verified)."
+    },
+    {
+     "id": "CMK-CI-01",
+     "went_red": true,
+     "went_green": true,
+     "note": "3.31.12 --list-presets rejected schema 12 and a schema-11 include under a schema-10 root with 'Unrecognized \"version\"', and accepted schema 6 with errors.dev. 'File not found' message confirmed. 4.3.4 accepts 11, and 3.31.12/4.3.4 reject --presets-file."
+    },
+    {
+     "id": "CMK-CI-02",
+     "went_red": true,
+     "went_green": true,
+     "note": "git ls-files printed a tracked user presets file. check-ignore --no-index printed the name when ignored and nothing when not."
+    },
+    {
+     "id": "CMK-CORE-01",
+     "went_red": true,
+     "went_green": true,
+     "note": "Canary rc 0 under -Werror=author on 3.31.12 and 4.3.4, and rc 1 under -Werror=dev on all three. Through a preset with deprecated=false it still returns rc 1 while a real deprecation passes with rc 0 on 3.31.12 and 4.3.4. Only grep (a) catches that preset (finding). A DEPRECATION canary goes red there."
+    },
+    {
+     "id": "CMK-CORE-02",
+     "went_red": true,
+     "went_green": true,
+     "note": "jq printed true for schema 12 with errors.dev, and false for schema 12 with author and for schema 10 with dev. 4.4.2 message 'File version must be 11 or lower for errors.dev support' confirmed."
+    },
+    {
+     "id": "CMK-CORE-05",
+     "went_red": true,
+     "went_green": true,
+     "note": "Caught 'grep -E -q' and '| head' in a pipefail script. Missed '| grep --quiet' and '--max-count=1' (finding, widened patterns verified)."
+    },
+    {
+     "id": "CMK-CORE-04/MOD-15 (fences)",
+     "went_red": true,
+     "went_green": true,
+     "note": "gersemi 0.29.1 --check: 8 of 9 cmake fences pass, and presets-and-ci's launcher fence exits 1. gersemi --check . exits 1 on an unignored build tree and 0 once it is gitignored."
+    }
+   ],
+   "unresolved_ids": [],
+   "trigger_evals": [],
+   "verdict": "fix-then-ship"
+  }
+ ],
+ "findings": [
+  {
+   "set": "cmake skills: skills/cmake-dependency-triage (SKILL.md, references/reading-the-answers.md) and skills/cmake-modernize (SKILL.md, references/inventory.md, references/proofs.md)",
+   "file": "skills/cmake-modernize/references/proofs.md",
+   "line": 163,
+   "severity": "blocker",
+   "kind": "contradiction",
+   "finding": "The step-8 formatting gate is prescribed as `gersemi --check .`, but CMK-CORE-04 says `gersemi --check .` descends into build trees and fails on generated files, and the index's gate line is `git ls-files -z -- '*CMakeLists.txt' '*.cmake' | xargs -0 -r gersemi --check`. Measured with gersemi 0.29.1: a correctly formatted project that has an in-tree `build/` configured by 4.4.2 exits 1 under `gersemi --check <dir>` (build/CMakeFiles/4.4.2/CMakeCCompiler.cmake and others 'would be reformatted'). The index form exits 0 on the same tree. So the skill's exit check fails on compliant trees.",
+   "fix": "Replace lines 163-166 with: \"All five were run against a planted failing tree and a planted passing one. The formatting gate is the index's gate line, `git ls-files -z -- '*CMakeLists.txt' '*.cmake' | xargs -0 -r gersemi --check`, with gersemi 0.29.1: exit 1 on an unformatted file, exit 0 on a formatted one. Never `gersemi --check .`, which descends into build trees and fails on generated files, and never `gersemi --diff`, which exited 0 on both (measured 2026-09-26) (`CMK-CORE-04`).\""
+  },
+  {
+   "set": "cmake skills: skills/cmake-dependency-triage (SKILL.md, references/reading-the-answers.md) and skills/cmake-modernize (SKILL.md, references/inventory.md, references/proofs.md)",
+   "file": "skills/cmake-modernize/SKILL.md",
+   "line": 93,
+   "severity": "blocker",
+   "kind": "contradiction",
+   "finding": "Step 5 tells the agent to guard tests on `PROJECT_IS_TOP_LEVEL` directly. CMK-TEST-09 (MUST, cited by the same skill at step 7) says to gate a consumed library's test tree on a project-prefixed option that defaults to `PROJECT_IS_TOP_LEVEL`, with `include(CTest)` inside the gate. The two answer 'how do I gate the tests' differently, and following step 5 yields a tree that does not meet TEST-09's rule text: a consumer has no switch to turn the tests on.",
+   "fix": "Replace the step 5 Do cell with: \"Gate the test tree on a project-prefixed option that defaults to `PROJECT_IS_TOP_LEVEL`, with `include(CTest)` inside the gate (`CMK-TEST-09`). Guard examples, dev options, the `CMAKE_BUILD_TYPE` default and any non-test fetch on `PROJECT_IS_TOP_LEVEL`\", and replace the Cites cell with \"`CMK-DEP-07`, `CMK-TGT-17`, `CMK-TEST-09`\"."
+  },
+  {
+   "set": "cmake skills: skills/cmake-dependency-triage (SKILL.md, references/reading-the-answers.md) and skills/cmake-modernize (SKILL.md, references/inventory.md, references/proofs.md)",
+   "file": "skills/cmake-modernize/references/proofs.md",
+   "line": 151,
+   "severity": "fix",
+   "kind": "verification-dishonest",
+   "finding": "The CMK-CORE-01 preset gate-off grep matches only the literal `\"dev\": false` with one space. Measured: a `CMakePresets.json` written as `{\"warnings\":{\"dev\":false,\"deprecated\":false}}` gives empty output (a false pass), while the index's whitespace-tolerant spelling finds it.",
+   "fix": "grep -rn --include='CMakePresets.json' --include='CMakeUserPresets.json' -e '\"dev\"[[:space:]]*:[[:space:]]*false' -e '\"deprecated\"[[:space:]]*:[[:space:]]*false' ."
+  },
+  {
+   "set": "cmake skills: skills/cmake-dependency-triage (SKILL.md, references/reading-the-answers.md) and skills/cmake-modernize (SKILL.md, references/inventory.md, references/proofs.md)",
+   "file": "skills/cmake-modernize/SKILL.md",
+   "line": 185,
+   "severity": "fix",
+   "kind": "verification-dishonest",
+   "finding": "This copies the same whitespace-exact preset grep. It cannot go red on compact JSON (`\"dev\":false`). Measured.",
+   "fix": "  `grep -rn --include='CMakePresets.json' --include='CMakeUserPresets.json' -e '\"dev\"[[:space:]]*:[[:space:]]*false' -e '\"deprecated\"[[:space:]]*:[[:space:]]*false' .`"
+  },
+  {
+   "set": "cmake skills: skills/cmake-dependency-triage (SKILL.md, references/reading-the-answers.md) and skills/cmake-modernize (SKILL.md, references/inventory.md, references/proofs.md)",
+   "file": "skills/cmake-dependency-triage/SKILL.md",
+   "line": 259,
+   "severity": "fix",
+   "kind": "verification-dishonest",
+   "finding": "The T4 (CMK-INST-03) second grep includes only `${NAME}Targets.cmake`. An export file named `<name>-targets.cmake` (fmt's spelling) or `<name>ConfigTargets.cmake` (spdlog's) is never read, so a missing `find_dependency` reads as 'no finding'. Measured: a planted `dep2-targets.cmake` with `INTERFACE_LINK_LIBRARIES \"zlib::zlib\"` and a `dep2-config.cmake` with no find_dependency gave empty output from both greps. The proposed include found it.",
+   "fix": "grep -rn --include=\"${NAME}*argets.cmake\" -e 'INTERFACE_LINK_LIBRARIES' \"$PREFIX\""
+  },
+  {
+   "set": "cmake skills: skills/cmake-dependency-triage (SKILL.md, references/reading-the-answers.md) and skills/cmake-modernize (SKILL.md, references/inventory.md, references/proofs.md)",
+   "file": "skills/cmake-dependency-triage/SKILL.md",
+   "line": 280,
+   "severity": "fix",
+   "kind": "verification-dishonest",
+   "finding": "The T5 policy-knob grep includes `*.yml` but not `*.yaml`, unlike CMK-DEP-15's own grep in dependencies.md and modernize I8. Measured: a planted `.github/workflows/ci.yaml` with `env: CMAKE_POLICY_VERSION_MINIMUM: \"3.10\"` (a CI environment variable, which DEP-15 forbids) did not print.",
+   "fix": "grep -rn --include='*.cmake' --include='CMakeLists.txt' --include='CMakePresets.json' --include='*.yml' --include='*.yaml' -e 'CMAKE_POLICY_VERSION_MINIMUM' -e 'CMAKE_POLICY_DEFAULT_CMP' ."
+  },
+  {
+   "set": "cmake skills: skills/cmake-dependency-triage (SKILL.md, references/reading-the-answers.md) and skills/cmake-modernize (SKILL.md, references/inventory.md, references/proofs.md)",
+   "file": "skills/cmake-dependency-triage/SKILL.md",
+   "line": 120,
+   "severity": "fix",
+   "kind": "notes-violation",
+   "finding": "'Before you start' (line 73-75) says every configure in this skill passes `-DCMAKE_POLICY_DEFAULT_CMP0170=NEW`, and authoring note 7 requires it on configure probes that touch FetchContent. The step 2 preset form (lines 120-121) and the T3 capture (line 228) omit it.",
+   "fix": "Line 120-121: replace `cmake --preset \"$PRESET\" --fresh \"$GATE\"\n--debug-find-pkg=\"$NAME\"` with `cmake --preset \"$PRESET\" --fresh \"$GATE\" -DCMAKE_POLICY_DEFAULT_CMP0170=NEW\n--debug-find-pkg=\"$NAME\"`. Line 228: replace with `cmake --preset \"$PRESET\" --fresh \"$GATE\" -DCMAKE_POLICY_DEFAULT_CMP0170=NEW > logs/configure.log 2>&1`."
+  },
+  {
+   "set": "cmake skills: skills/cmake-dependency-triage (SKILL.md, references/reading-the-answers.md) and skills/cmake-modernize (SKILL.md, references/inventory.md, references/proofs.md)",
+   "file": "skills/cmake-dependency-triage/SKILL.md",
+   "line": 397,
+   "severity": "fix",
+   "kind": "era-unlabelled",
+   "finding": "The repeated CMK-DEP-15 row drops the rule's 'On CMake 4.x' scope. `CMAKE_POLICY_VERSION_MINIMUM` does not exist before 4.0. A hedge row read without the rule tells an agent to emit it on a 3.x leg, where 3.31.12 ignores it. This is failure mode 4 of the same file.",
+   "fix": "| 4 | On CMake 4.x, set a third-party dependency's policy knobs with set/restore around the one `add_subdirectory`, `FetchContent_MakeAvailable` or `find_package` that loads it, with `CMAKE_POLICY_VERSION_MINIMUM` at 3.10. Never use a project-wide `set()`, a committed preset `cacheVariables` entry, or a CI environment variable | CMK-DEP-15 |"
+  },
+  {
+   "set": "cmake skills: skills/cmake-dependency-triage (SKILL.md, references/reading-the-answers.md) and skills/cmake-modernize (SKILL.md, references/inventory.md, references/proofs.md)",
+   "file": "skills/cmake-modernize/SKILL.md",
+   "line": 305,
+   "severity": "fix",
+   "kind": "era-unlabelled",
+   "finding": "The same CMK-DEP-15 hedge row omits the 'On CMake 4.x' scope. The variable is 4.0+, and step 1 of this skill correctly routes 3.x to CMK-DEP-30.",
+   "fix": "| 4 | On CMake 4.x, set a third-party dependency's policy knobs with set and restore around the one `add_subdirectory`, `FetchContent_MakeAvailable` or `find_package` that loads it, with `CMAKE_POLICY_VERSION_MINIMUM` at 3.10 | CMK-DEP-15 |"
+  },
+  {
+   "set": "cmake skills: skills/cmake-dependency-triage (SKILL.md, references/reading-the-answers.md) and skills/cmake-modernize (SKILL.md, references/inventory.md, references/proofs.md)",
+   "file": "skills/cmake-modernize/references/proofs.md",
+   "line": 41,
+   "severity": "fix",
+   "kind": "verification-dishonest",
+   "finding": "The preset canary `cmake -S \"$W/canary\" --preset \"$LEG\" --fresh` has no `-B`. Measured on 3.31.12 and 4.4.2: when the project's preset declares no `binaryDir`, the canary writes `CMakeCache.txt` and `CMakeFiles/` into the current directory, which is the repository root. There, `--fresh` also discards any existing in-source cache.",
+   "fix": "cmake -S \"$W/canary\" -B \"$W/canary-build\" --preset \"$LEG\" --fresh"
+  },
+  {
+   "set": "cmake skills: skills/cmake-dependency-triage (SKILL.md, references/reading-the-answers.md) and skills/cmake-modernize (SKILL.md, references/inventory.md, references/proofs.md)",
+   "file": "skills/cmake-modernize/references/proofs.md",
+   "line": 147,
+   "severity": "fix",
+   "kind": "contradiction",
+   "finding": "The CI-checks comment says empty output from the workflow gate grep means 'no gate (finding)'. CMK-CORE-01's verification (b) says empty output is a finding unless the preset's `errors` carries the gate and the canary exits 1. So a preset-gated leg is misreported as ungated.",
+   "fix": "# CMK-CORE-01: a gate exists in the workflows. Empty output = no gate (finding), unless the leg's preset carries \"errors\": {\"dev\": true} and the preset canary exits 1."
+  },
+  {
+   "set": "cmake skills: skills/cmake-dependency-triage (SKILL.md, references/reading-the-answers.md) and skills/cmake-modernize (SKILL.md, references/inventory.md, references/proofs.md)",
+   "file": "skills/cmake-modernize/SKILL.md",
+   "line": 89,
+   "severity": "fix",
+   "kind": "contradiction",
+   "finding": "The step 1 exit check says 'F1 is empty'. F1 does not exclude vendored directories: measured, `third_party/old/CMakeLists.txt:1:cmake_minimum_required(VERSION 3.7)` prints. The skill also says vendored subtrees are never entered (lines 236, 243). Lines 120-125 then tell the agent to patch a vendored floor on 3.x. On a tree with a vendored bare floor the exit can never be reached, and the two instructions conflict.",
+   "fix": "Exit check cell: \"`F1` prints no line outside a vendored directory (a vendored hit is recorded `flagged-not-converted`), the canary exits 1 and the project's gated configure exits 0 on each CI binary\". Lines 120-125: replace \"On 3.x, where that variable does not exist, re-pin the dependency or patch its one `cmake_minimum_required` line (`CMK-DEP-30`).\" with \"On 3.x, where that variable does not exist, re-pin a fetched dependency or add a `PATCH_COMMAND` to its declare (`CMK-DEP-30`). A vendored subtree is never edited: record it `flagged-not-converted` with the `CMK-DEP-30` remedy named, and hand it to the owner.\""
+  },
+  {
+   "set": "cmake skills: skills/cmake-dependency-triage (SKILL.md, references/reading-the-answers.md) and skills/cmake-modernize (SKILL.md, references/inventory.md, references/proofs.md)",
+   "file": "skills/cmake-modernize/SKILL.md",
+   "line": 92,
+   "severity": "fix",
+   "kind": "contradiction",
+   "finding": "The step 4 exit check requires '`I12` is empty'. I12's reading (inventory.md line 164-166) and CMK-TGT-09 accept a literal `-Werror` inside a developer option that defaults OFF, so a compliant tree can never pass this exit.",
+   "fix": "`I3` shows no overwrite, `I11` hits sit in a `NOT DEFINED` guard, every `I12` hit sits in a developer option that defaults `OFF`, and every new `CMAKE_*` name passes the variable check"
+  },
+  {
+   "set": "cmake skills: skills/cmake-dependency-triage (SKILL.md, references/reading-the-answers.md) and skills/cmake-modernize (SKILL.md, references/inventory.md, references/proofs.md)",
+   "file": "skills/cmake-modernize/SKILL.md",
+   "line": 151,
+   "severity": "fix",
+   "kind": "era-unlabelled",
+   "finding": "`CMAKE_CXX_SCAN_FOR_MODULES OFF` (CMK-TGT-18, floor 3.28) is newer than the 3.25 floor and carries no `(CMake \u2265 X.Y)` gate, which authoring note 4.1 requires.",
+   "fix": "`CMAKE_CXX_SCAN_FOR_MODULES OFF` (CMake \u2265 3.28, `CMK-TGT-18`)."
+  },
+  {
+   "set": "cmake skills: skills/cmake-dependency-triage (SKILL.md, references/reading-the-answers.md) and skills/cmake-modernize (SKILL.md, references/inventory.md, references/proofs.md)",
+   "file": "skills/cmake-modernize/SKILL.md",
+   "line": 188,
+   "severity": "nit",
+   "kind": "era-unlabelled",
+   "finding": "Presets schema 12 is CMake 4.4, but the line gives no version gate.",
+   "fix": "- A presets file raised to schema 12 (CMake \u2265 4.4) renames `dev` to `author` in the same edit"
+  },
+  {
+   "set": "cmake skills: skills/cmake-dependency-triage (SKILL.md, references/reading-the-answers.md) and skills/cmake-modernize (SKILL.md, references/inventory.md, references/proofs.md)",
+   "file": "skills/cmake-dependency-triage/references/reading-the-answers.md",
+   "line": 60,
+   "severity": "fix",
+   "kind": "contradiction",
+   "finding": "This groups FindBoost with the modules whose `QUIET` call leaves `<X>_FOUND` empty. CMK-DEP-19 and the dependency-seam consolidation say a bare `find_package(Boost)` under CMP0167 NEW falls through to the `BoostConfig.cmake` that Boost ships from 1.70, so it is found. An agent would misread a found Boost as missing.",
+   "fix": "- A removed module (`FindCUDA`, `FindPythonInterp`, `FindPythonLibs`) under a `...4.4` range is policy `NEW`. A `QUIET` call is then silent and `<X>_FOUND` stays empty (CMK-DEP-19). A bare `find_package(Boost)` instead falls through to the `BoostConfig.cmake` that Boost ships from 1.70."
+  },
+  {
+   "set": "cmake skills: skills/cmake-dependency-triage (SKILL.md, references/reading-the-answers.md) and skills/cmake-modernize (SKILL.md, references/inventory.md, references/proofs.md)",
+   "file": "skills/cmake-modernize/references/inventory.md",
+   "line": 179,
+   "severity": "fix",
+   "kind": "duplication",
+   "finding": "The variable-existence check restates the CMK-LANG-11 lookup script. Wave-3 (d)10 resolves this to 'LANG-11 adopts the placeholder-expanded check. The skills text cites LANG-11'. The copy has already diverged: it writes `varcheck/` at the repository root, while language.md uses `build/varcheck`. That also contradicts line 4's 'reads only'.",
+   "fix": "Replace lines 174-194 (the section body) with: \"Run the `CMK-LANG-11` lookup block in `cmake-build/language.md` with the pinned binary for every `CMAKE_*` name a diff introduces. It expands `<LANG>` and `<CONFIG>` first, so the real `CMAKE_CXX_FLAGS` is not reported as invented. A count of 0 is an invented name, the finding. A count of 1 is a documented name. Measured on 3.31.12 and 4.4.2: `CMAKE_CXX_STANDARD_EXTENSIONS` and `CMAKE_DEBUG_PREFIX_MAP` read 0, while `CMAKE_CXX_FLAGS`, `CMAKE_CXX_EXTENSIONS`, `CMAKE_BUILD_TYPE` and `CMAKE_UNITY_BUILD` read 1.\""
+  },
+  {
+   "set": "cmake skills: skills/cmake-dependency-triage (SKILL.md, references/reading-the-answers.md) and skills/cmake-modernize (SKILL.md, references/inventory.md, references/proofs.md)",
+   "file": "skills/cmake-modernize/references/inventory.md",
+   "line": 4,
+   "severity": "nit",
+   "kind": "unsupported-claim",
+   "finding": "The claim 'Every command ... reads only ... Each one is a single `grep -r`' is false for I4, which pipes into `grep -v`, and for the variable check, which writes files.",
+   "fix": "was run against a planted violating tree and a planted compliant tree on CMake 3.31.12 and 4.4.2 (2026-09-26). Each is a `grep -r` with an explicit directory operand and no early-exiting reader (I4 adds a filtering `grep -v`), so it cannot zero a count under `set -o pipefail` (`CMK-CORE-05`)."
+  },
+  {
+   "set": "cmake skills: skills/cmake-dependency-triage (SKILL.md, references/reading-the-answers.md) and skills/cmake-modernize (SKILL.md, references/inventory.md, references/proofs.md)",
+   "file": "skills/cmake-modernize/references/inventory.md",
+   "line": 112,
+   "severity": "fix",
+   "kind": "style",
+   "finding": "A depth file points at a sibling depth file ('settled by the offline probe in `proofs.md`'). SKILL.md line 317 says 'These files do not link each other', and the distillation rule is 'depth files never point at other depth files'.",
+   "fix": "Any other hit is a step-5 row, settled by step 5's offline subproject probe."
+  },
+  {
+   "set": "cmake skills: skills/cmake-dependency-triage (SKILL.md, references/reading-the-answers.md) and skills/cmake-modernize (SKILL.md, references/inventory.md, references/proofs.md)",
+   "file": "skills/cmake-dependency-triage/references/reading-the-answers.md",
+   "line": 76,
+   "severity": "nit",
+   "kind": "portability",
+   "finding": "The upstream evidence is named bare ('arrow'), without the owner/repo at a commit plus path that authoring note 9 asks for. The sentence reads fine without it.",
+   "fix": "printed 0 lines for a declare kept in a `.cmake` module (4.4.2)."
+  },
+  {
+   "set": "cmake skills: skills/cmake-dependency-triage (SKILL.md, references/reading-the-answers.md) and skills/cmake-modernize (SKILL.md, references/inventory.md, references/proofs.md)",
+   "file": "skills/cmake-dependency-triage/SKILL.md",
+   "line": 343,
+   "severity": "nit",
+   "kind": "style",
+   "finding": "The four T8 Conan greps state no empty-output meaning for the first three (authoring note 7).",
+   "fix": "A hit from the first means ranges exist, and `git ls-files conan.lock` must then be non-empty. Empty output from the first means no ranges, so the rule is not applicable. Empty output from the second means CI runs no `conan install` (not applicable). An install line from the second that is missing from the third is the finding. The fourth must be empty: an empty `--lockfile=` switches the lock off."
+  },
+  {
+   "set": "cmake skills: skills/cmake-dependency-triage (SKILL.md, references/reading-the-answers.md) and skills/cmake-modernize (SKILL.md, references/inventory.md, references/proofs.md)",
+   "file": "skills/cmake-modernize/references/proofs.md",
+   "line": 108,
+   "severity": "nit",
+   "kind": "style",
+   "finding": "The round trip passes no dependency hint to the library's own configure, and the consumer's `-DCMAKE_PREFIX_PATH` names only the moved prefix. A library whose public dependency lives outside system paths fails both configures unless the environment `CMAKE_PREFIX_PATH` carries it. The script does not say so (reproduced while running it against a planted library with an installed dependency).",
+   "fix": "#   export PKG=mylib VER=1.0 TARGETS=mylib::mylib SRC=/abs/path/to/project GATE=-Werror=dev\n# A dependency outside system paths goes in the environment: export CMAKE_PREFIX_PATH=/abs/dep/prefix"
+  },
+  {
+   "set": "cmake skills: skills/cmake-dependency-triage (SKILL.md, references/reading-the-answers.md) and skills/cmake-modernize (SKILL.md, references/inventory.md, references/proofs.md)",
+   "file": "skills/cmake-modernize/references/proofs.md",
+   "line": 154,
+   "severity": "nit",
+   "kind": "style",
+   "finding": "The CMK-CORE-05 grep names `scripts` as an operand. On a tree without that directory it prints 'No such file or directory' and exits 2, which reads as neither pass nor finding.",
+   "fix": "grep -rsnE -e '[|] *grep( +-[a-zA-Z]+)* +-[a-zA-Z]*[qm]' -e '[|] *rg( +-[a-zA-Z]+)* +-[a-zA-Z]*[qm]' -e '[|] *head' scripts .github"
+  },
+  {
+   "set": "cmake skills: skills/cmake-dependency-triage (SKILL.md, references/reading-the-answers.md) and skills/cmake-modernize (SKILL.md, references/inventory.md, references/proofs.md)",
+   "file": "skills/cmake-modernize/SKILL.md",
+   "line": 322,
+   "severity": "nit",
+   "kind": "era-unlabelled",
+   "finding": "The skill carries dated tool facts (gersemi 0.29.1, CPS on 4.3, the preset `deprecated` gap on 3.31.12, Tutorial layout at v4.4.2) but no Re-check list. The triage skill ends with one.",
+   "fix": "Append after the References table: \"Re-check on each tool bump: the gate spelling split and preset `warnings` behaviour (CMake minor releases after 4.4.2), `gersemi --diff` exit code (gersemi after 0.29.1), and the `/cps/<pkg>` round-trip ending (CMake after 4.4.2), all as of 2026-09-26.\""
+  },
+  {
+   "set": "cmake skills: skills/cmake-dependency-triage (SKILL.md, references/reading-the-answers.md) and skills/cmake-modernize (SKILL.md, references/inventory.md, references/proofs.md)",
+   "file": "skills/cmake-dependency-triage/SKILL.md",
+   "line": 408,
+   "severity": "nit",
+   "kind": "deletion-candidate",
+   "finding": "Deletion test: failure modes 1 (lines 408-410), 2 (411-412), 9 (426-427) and 11 (430-431) restate the evidence rule (lines 52-65), step 2's reused-tree bullet (127-129) and T2's trace note (203-205) almost word for word. Line 18's second sentence repeats lines 388-390. Removing them causes no mistake.",
+   "fix": "Delete lines 408-412, 426-427 and 430-431, and renumber the remaining failure modes 1 to 7. Delete the sentence \"It cites their rules by ID and never restates their tables.\" on line 18."
+  },
+  {
+   "set": "cmake skills: skills/cmake-dependency-triage (SKILL.md, references/reading-the-answers.md) and skills/cmake-modernize (SKILL.md, references/inventory.md, references/proofs.md)",
+   "file": "skills/cmake-modernize/SKILL.md",
+   "line": 267,
+   "severity": "nit",
+   "kind": "deletion-candidate",
+   "finding": "Deletion test: 'What agents get wrong' 2 (lines 267-268), 3 (269-270), 10 (285) and 12 (288-290) restate 'What it refuses', the step 8 gersemi bullet and step 1's floor paragraph. Lines 19-22 repeat lines 296-298. Removing them causes no mistake.",
+   "fix": "Delete lines 267-270, 285 and 288-290 and renumber the list 1 to 9. Replace lines 19-22 with \"This skill assumes the `cmake-build` rule set is installed and cites rules by ID.\""
+  },
+  {
+   "set": "cmake skills: skills/cmake-dependency-triage (SKILL.md, references/reading-the-answers.md) and skills/cmake-modernize (SKILL.md, references/inventory.md, references/proofs.md)",
+   "file": "skills/cmake-dependency-triage/SKILL.md",
+   "line": 8,
+   "severity": "nit",
+   "kind": "portability",
+   "finding": "The frontmatter carries `repository: https://github.com/ocx-sh/grimoire-lore`. `check-artifacts.py --forbid ocx` flags it, and authoring note 9 lists `ocx-sh`. The house skills (jvm-dependency-triage, bazel-adopt) carry no repository key. The rules do, so this is a catalog-metadata call for the owner, not a content defect. The same line appears at skills/cmake-modernize/SKILL.md:8.",
+   "fix": "Delete line 8 (`  repository: https://github.com/ocx-sh/grimoire-lore`) in both skills' SKILL.md, matching the house skills, unless the catalog needs it from the file."
+  },
+  {
+   "set": "cpp-packaging (rules/cpp-packaging.md index, rules/cpp-packaging/conan.md, rules/cpp-packaging/vcpkg.md)",
+   "file": "rules/cpp-packaging.md",
+   "line": 146,
+   "severity": "blocker",
+   "kind": "notes-violation",
+   "finding": "The index emits the reserved IDs CMK-PKG-05 and CMK-PKG-07 (\"`CMK-PKG-05` to `CMK-PKG-07` are retired and not reused.\"). Authoring note 5.2 says reserved IDs are never emitted. check-artifacts also sees them as cited IDs that no rule table defines.",
+   "fix": "Delete line 146 (\"`CMK-PKG-05` to `CMK-PKG-07` are retired and not reused.\") and the blank line 147 after it."
+  },
+  {
+   "set": "cpp-packaging (rules/cpp-packaging.md index, rules/cpp-packaging/conan.md, rules/cpp-packaging/vcpkg.md)",
+   "file": "rules/cpp-packaging.md",
+   "line": 96,
+   "severity": "blocker",
+   "kind": "contradiction",
+   "finding": "Non-negotiable 11 says every `VCPKG_*` input is \"set by a configure preset or `-D`\". CMK-VCPKG-04 (and CMK-TC-03) instead allow a `set(VCPKG_...)` in the top-level CMakeLists.txt before the first project(), with the preset only preferred. VCPKG-04's grep passes the planted compliant fixture (set(VCPKG_TARGET_TRIPLET) on line 2, project() on line 3), which the index row forbids. So the index and the depth file give two different answers to one question.",
+   "fix": "Replace the row with: | 11 | vcpkg's toolchain file comes from a configure preset or `-D`, and every `VCPKG_*` input is set before the first `project()`, preferably in that same preset. A later write is a silent no-op. | CMK-VCPKG-04, CMK-TC-03 |"
+  },
+  {
+   "set": "cpp-packaging (rules/cpp-packaging.md index, rules/cpp-packaging/conan.md, rules/cpp-packaging/vcpkg.md)",
+   "file": "rules/cpp-packaging/vcpkg.md",
+   "line": 81,
+   "severity": "fix",
+   "kind": "verification-dishonest",
+   "finding": "The first CMK-VCPKG-06 grep (MUST) misses the static-CRT community triplets `x64-windows-static-release` and `arm64-windows-static-release`, which ship in the pinned registry with VCPKG_CRT_LINKAGE static, because `windows-static[^-]` excludes every `-` suffix, not only `-md`. A planted preset naming `x64-windows-static-release` with no runtime set gave empty output (exit 1), so the check passed.",
+   "fix": "In the Rule cell replace \"(`*-windows-static`, or `VCPKG_CRT_LINKAGE static`)\" with \"(`*-windows-static`, `*-windows-static-release`, or `VCPKG_CRT_LINKAGE static`)\". In the Verification cell replace \"-e 'windows-static$' -e 'windows-static[^-]' -e 'VCPKG_CRT_LINKAGE static'\" with \"-e 'windows-static$' -e 'windows-static[^-]' -e 'windows-static-release' -e 'VCPKG_CRT_LINKAGE static'\"."
+  },
+  {
+   "set": "cpp-packaging (rules/cpp-packaging.md index, rules/cpp-packaging/conan.md, rules/cpp-packaging/vcpkg.md)",
+   "file": "rules/cpp-packaging/vcpkg.md",
+   "line": 81,
+   "severity": "fix",
+   "kind": "contradiction",
+   "finding": "CMK-VCPKG-06 (following wave-2 (e)7) marks any CMakeLists.txt hit for CMAKE_MSVC_RUNTIME_LIBRARY after the first project() as a finding. CMK-TGT-16's rule text, which wave-3 (d)9 says owns the guard, lists `inside if(NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)` as an allowed placement. A planted TGT-16-style guarded set after project() on a static-triplet leg is flagged by VCPKG-06. TGT-16's own verification agrees with VCPKG-06, so the ambiguity starts in TGT-16's prose. VCPKG-06 should state the answer explicitly so the two rows cannot be read two ways.",
+   "fix": "Append to the CMK-VCPKG-06 Rule cell: \"A `set()` after the first `project()`, guarded or not, does not satisfy this row, because nothing on a vcpkg leg defines the variable first.\" Hand the matching edit back to cmake-build: CMK-TGT-16's placement list should read \"a preset's `cacheVariables`, before the first `project()`, or behind a default-`OFF` option\"."
+  },
+  {
+   "set": "cpp-packaging (rules/cpp-packaging.md index, rules/cpp-packaging/conan.md, rules/cpp-packaging/vcpkg.md)",
+   "file": "rules/cpp-packaging/conan.md",
+   "line": 144,
+   "severity": "fix",
+   "kind": "verification-dishonest",
+   "finding": "The CMK-CONAN-10 configure check pipes cmake into grep, so cmake's exit status is lost, and the cell says empty output is the pass. Measured on 3.31.12, 4.3.4 and 4.4.2: a tree whose hand-written CMakeUserPresets.json made Conan skip its presets (the CONAN-08 case) fails with \"No such configure preset ... conan-release\" (exit 1), grep prints nothing, and the check reads as a pass while also planting the violation (set(CMAKE_CXX_STANDARD 20) after project()).",
+   "fix": "Replace line 143 with \"# CMK-CONAN-10: pass = the configure exits 0 and this prints nothing. Shown for CMake <= 4.3; use -Werror=author on CMake >= 4.4.\" In the CMK-CONAN-10 Verification cell (line 149) replace \"The block above: empty output is the pass.\" with \"The block above: empty output is the pass only when the configure itself succeeded. When grep prints nothing, rerun the configure without the pipe and require exit 0, because a missing `conan-release` preset also prints nothing.\""
+  },
+  {
+   "set": "cpp-packaging (rules/cpp-packaging.md index, rules/cpp-packaging/conan.md, rules/cpp-packaging/vcpkg.md)",
+   "file": "rules/cpp-packaging/vcpkg.md",
+   "line": 42,
+   "severity": "fix",
+   "kind": "verification-dishonest",
+   "finding": "CMK-VCPKG-02 (MUST) bans overrides, registries and overlay-ports in shipped manifests, but its grep matches only \"overrides\" and \"overlay-ports\". A planted ports/foo/vcpkg-configuration.json that carries \"default-registry\" and \"registries\" gave empty output (exit 1), so the registries clause can never go red.",
+   "fix": "In the Verification cell replace \"-e '\"overrides\"' -e '\"overlay-ports\"' ports\" with \"-e '\"overrides\"' -e '\"overlay-ports\"' -e '\"registries\"' -e '\"default-registry\"' ports\"."
+  },
+  {
+   "set": "cpp-packaging (rules/cpp-packaging.md index, rules/cpp-packaging/conan.md, rules/cpp-packaging/vcpkg.md)",
+   "file": "rules/cpp-packaging.md",
+   "line": 60,
+   "severity": "fix",
+   "kind": "verification-dishonest",
+   "finding": "The authors' gate line `\"$VCPKG_ROOT/vcpkg\" install \"$PORT\" --overlay-ports=ports` fails in any repository with a top-level vcpkg.json, which is the usual overlay-port layout. Measured with vcpkg-tool 2026-09-26: \"error: In manifest mode, `vcpkg install` does not support individual package arguments.\" With `--classic` added, vcpkg computes the install plan for the overlay port.",
+   "fix": "Replace line 60 with: \"$VCPKG_ROOT/vcpkg\" install \"$PORT\" --overlay-ports=ports --classic"
+  },
+  {
+   "set": "cpp-packaging (rules/cpp-packaging.md index, rules/cpp-packaging/conan.md, rules/cpp-packaging/vcpkg.md)",
+   "file": "rules/cpp-packaging.md",
+   "line": 94,
+   "severity": "fix",
+   "kind": "contradiction",
+   "finding": "Non-negotiable 9 says every conandata.yml source entry carries a sha256, with no exception. The depth row CMK-CONAN-23 names two exceptions: googlesource +archive with a commit URL and a comment, and a git source with a full commit fetched by Git(self).fetch_commit. An agent that reads only the index would flag or \"fix\" entries the depth row clears.",
+   "fix": "Replace \"| 9 | Every `conandata.yml` source entry carries a `sha256` and is fetched through `get(self, **self.conan_data[...])`.\" with \"| 9 | Every `conandata.yml` source entry carries a `sha256` and is fetched through `get(self, **self.conan_data[...])`, bar the two exceptions `CMK-CONAN-23` names.\""
+  },
+  {
+   "set": "cpp-packaging (rules/cpp-packaging.md index, rules/cpp-packaging/conan.md, rules/cpp-packaging/vcpkg.md)",
+   "file": "rules/cpp-packaging.md",
+   "line": 88,
+   "severity": "fix",
+   "kind": "contradiction",
+   "finding": "Non-negotiable 3 and the gate note (line 71) key the lock obligation on `requires` ranges only. CMK-CONAN-09 keys it on `requires` or `tool_requires` ranges. A ranged tool_requires with no lock passes the index's wording.",
+   "fix": "Line 88: replace \"An application whose `requires` use a version range\" with \"An application whose `requires` or `tool_requires` use a version range\". Line 71: replace \"where no `requires` uses a version range\" with \"where no `requires` or `tool_requires` uses a version range\"."
+  },
+  {
+   "set": "cpp-packaging (rules/cpp-packaging.md index, rules/cpp-packaging/conan.md, rules/cpp-packaging/vcpkg.md)",
+   "file": "rules/cpp-packaging/conan.md",
+   "line": 22,
+   "severity": "fix",
+   "kind": "style",
+   "finding": "A depth file points at a sibling depth file (\"vcpkg is `CMK-VCPKG` in `cpp-packaging/vcpkg.md`\"). That breaks the no-chains rule and contradicts the index's statement on line 151, \"These files do not point at each other\".",
+   "fix": "Replace \"vcpkg is `CMK-VCPKG` in `cpp-packaging/vcpkg.md`. A `conanfile.py`\" with \"vcpkg is `CMK-VCPKG`. A `conanfile.py`\"."
+  },
+  {
+   "set": "cpp-packaging (rules/cpp-packaging.md index, rules/cpp-packaging/conan.md, rules/cpp-packaging/vcpkg.md)",
+   "file": "rules/cpp-packaging/vcpkg.md",
+   "line": 14,
+   "severity": "fix",
+   "kind": "style",
+   "finding": "The depth file points at its sibling depth file twice: line 14-15 (\"Conan is CMK-CONAN in `conan.md`.\") and line 77 (\"belongs to CMK-CONAN-10 in `conan.md`\"). That contradicts the index's statement that these files do not point at each other.",
+   "fix": "Line 14-15: replace \"Conan is CMK-CONAN in\\n`conan.md`.\" with \"Conan is CMK-CONAN.\" Line 77: replace \"A Conan leg's runtime belongs to CMK-CONAN-10 in `conan.md`.\" with \"A Conan leg's runtime belongs to CMK-CONAN-10.\""
+  },
+  {
+   "set": "cpp-packaging (rules/cpp-packaging.md index, rules/cpp-packaging/conan.md, rules/cpp-packaging/vcpkg.md)",
+   "file": "rules/cpp-packaging/vcpkg.md",
+   "line": 43,
+   "severity": "fix",
+   "kind": "era-unlabelled",
+   "finding": "Eleven vcpkg rows (lines 42, 43, 82, 97, 141, 143-148) say \"Floor: current\", which floats. Note 6 requires an exact dated tool or registry version, with no floating era word.",
+   "fix": "Line 42: replace \"Floor: current vcpkg-tool.\" with \"Floor: vcpkg-tool 2026-09-26 (as of 2026-09-26).\" Line 97: replace \"Floor: current, and the feature\" with \"Floor: vcpkg-tool 2026-09-26, and the feature\". Line 141: replace \"Floor: current registry.\" with \"Floor: vcpkg registry 2026.07.29 (as of 2026-09-26).\" Lines 43, 82, 143, 144, 145, 146, 147, 148: replace every \"Floor: current.\" with \"Floor: vcpkg registry 2026.07.29 (as of 2026-09-26).\""
+  },
+  {
+   "set": "cpp-packaging (rules/cpp-packaging.md index, rules/cpp-packaging/conan.md, rules/cpp-packaging/vcpkg.md)",
+   "file": "rules/cpp-packaging/conan.md",
+   "line": 199,
+   "severity": "fix",
+   "kind": "era-unlabelled",
+   "finding": "CMK-CONAN-20 says \"Floor: current CCI policy.\", a floating era label.",
+   "fix": "Replace \"Floor: current CCI policy.\" with \"Floor: CCI policy as of 2026-09-26.\""
+  },
+  {
+   "set": "cpp-packaging (rules/cpp-packaging.md index, rules/cpp-packaging/conan.md, rules/cpp-packaging/vcpkg.md)",
+   "file": "rules/cpp-packaging/conan.md",
+   "line": 88,
+   "severity": "fix",
+   "kind": "style",
+   "finding": "Several verification cells that run a command never say what empty output means (note 7): CONAN-06 (line 88), CONAN-12 (123), CONAN-17 (197) and CONAN-18 (198).",
+   "fix": "Line 88: append \" Empty output means not applicable.\" to the CONAN-06 Verification cell. Line 123: append \" Empty output means no install line, not applicable.\" to the CONAN-12 cell. Line 197: append \" Empty output is the pass.\" to the CONAN-17 cell. Line 198: replace \"The block above lists candidates.\" with \"The block above lists candidates, and empty output is the pass.\""
+  },
+  {
+   "set": "cpp-packaging (rules/cpp-packaging.md index, rules/cpp-packaging/conan.md, rules/cpp-packaging/vcpkg.md)",
+   "file": "rules/cpp-packaging/vcpkg.md",
+   "line": 144,
+   "severity": "fix",
+   "kind": "style",
+   "finding": "Verification cells that run a command without an empty-output clause: VCPKG-13's third command (line 141), VCPKG-14 (144) and VCPKG-16 (145).",
+   "fix": "Line 141: replace \"lists the SHOULD clause.\" with \"lists the SHOULD clause's findings, and empty output is its pass.\" Line 144: append \" Empty output means not applicable.\" to the VCPKG-14 cell. Line 145: append \" Empty output means no port declares a linkage, so read every Windows-capable port.\" to the VCPKG-16 cell."
+  },
+  {
+   "set": "cpp-packaging (rules/cpp-packaging.md index, rules/cpp-packaging/conan.md, rules/cpp-packaging/vcpkg.md)",
+   "file": "rules/cpp-packaging/vcpkg.md",
+   "line": 200,
+   "severity": "nit",
+   "kind": "notes-violation",
+   "finding": "Note 6 requires the Re-check list to name its D-items. conan.md does (D2, D4), but vcpkg.md's two bullets carry no D label (they are D3 and D4).",
+   "fix": "Line 200: prefix the bullet text with \"D3: \". Line 201: prefix the bullet text with \"D4: \"."
+  },
+  {
+   "set": "cpp-packaging (rules/cpp-packaging.md index, rules/cpp-packaging/conan.md, rules/cpp-packaging/vcpkg.md)",
+   "file": "rules/cpp-packaging/vcpkg.md",
+   "line": 58,
+   "severity": "nit",
+   "kind": "style",
+   "finding": "The cmake fence carries a \"# wrong:\" and a \"# right:\" comment above code that is only the wrong form. The right form is the json fence that follows, so the block reads as if the shown code were also right.",
+   "fix": "Replace lines 58-59 with the single line \"# wrong: vcpkg.cmake already ran inside project(), so this is ignored and configure exits 0. The preset below is the right form.\""
+  },
+  {
+   "set": "cpp-packaging (rules/cpp-packaging.md index, rules/cpp-packaging/conan.md, rules/cpp-packaging/vcpkg.md)",
+   "file": "rules/cpp-packaging.md",
+   "line": 106,
+   "severity": "nit",
+   "kind": "deletion-candidate",
+   "finding": "Deletion test on the index: the sentence \"The one-manager ban itself is `CMK-TC-02` and is not restated here.\" can go without causing any mistake, because non-negotiable 1 already cites CMK-TC-02. Line 146 is the other candidate (reported above as a blocker). The Gate, silent-pass and Severity boilerplate is house-wide and stays.",
+   "fix": "Delete \" The one-manager ban itself is `CMK-TC-02` and is not restated here.\" from line 105-106, leaving \"The acquisition choice, the lock of record, tool provisioning and the CI cache shape.\""
+  },
+  {
+   "set": "cmake-build depth set B: rules/cmake-build/targets.md, install-and-export.md, dependencies.md, toolchains-and-providers.md, bazel-seam.md (plus rules/cmake-build.md index for contradiction, glob and deletion checks)",
+   "file": "rules/cmake-build.md",
+   "line": 97,
+   "severity": "blocker",
+   "kind": "contradiction",
+   "finding": "Index non-negotiable 7 allows the MSVC runtime \"only through CMAKE_MSVC_RUNTIME_LIBRARY in a preset or before the first project()\". CMK-TGT-16 (targets.md:96) also sanctions a set() inside if(NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY) after project() and a set() behind a default-OFF option. targets-and-abi conflict 3 explicitly rejected the \"never after project()\" reading. So the index and the depth file give different answers on whether a guarded set() after project() blocks a merge.",
+   "fix": "In rules/cmake-build.md line 97 replace \"the MSVC runtime only through `CMAKE_MSVC_RUNTIME_LIBRARY` in a preset or before the first `project()`,\" with \"the MSVC runtime only through `CMAKE_MSVC_RUNTIME_LIBRARY` or its property, never a `/MD` or `/MT` flag, and never by a `set()` that runs by default after `project()` outside `if(NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)`,\""
+  },
+  {
+   "set": "cmake-build depth set B: rules/cmake-build/targets.md, install-and-export.md, dependencies.md, toolchains-and-providers.md, bazel-seam.md (plus rules/cmake-build.md index for contradiction, glob and deletion checks)",
+   "file": "rules/cmake-build/bazel-seam.md",
+   "line": 195,
+   "severity": "blocker",
+   "kind": "contradiction",
+   "finding": "Failure mode 12 calls it an agent mistake to spell the gate -Werror=dev on 4.4. That contradicts pinned decision 2 and CMK-CORE-01, which both require -Werror=dev when one command line serves both sides, and the file's own simulation, which hard-codes GATE=-Werror=dev. I measured -Werror=dev on 4.4.2: it fails the configure exactly as -Werror=author does (install-absolute-destination fixture, rc 1 under both spellings). The real failure mode is the reverse: -Werror=author on 3.31 or 4.3 is accepted and does nothing (rc 0 on both lines).",
+   "fix": "Replace line 195 with: \"12. **Spelling the gate `-Werror=author` on the wrapper's 3.31 line,** where it is accepted and does nothing (`CMK-CORE-01`).\""
+  },
+  {
+   "set": "cmake-build depth set B: rules/cmake-build/targets.md, install-and-export.md, dependencies.md, toolchains-and-providers.md, bazel-seam.md (plus rules/cmake-build.md index for contradiction, glob and deletion checks)",
+   "file": "rules/cmake-build/dependencies.md",
+   "line": 100,
+   "severity": "fix",
+   "kind": "portability",
+   "finding": "The CMK-DEP-08 (MUST) command \"target_link_libraries\\([^)]*[[:space:]]$NAME[[:space:])]\" fails under zsh, the default agent shell on macOS and on this host. zsh reads `$NAME[` as an array subscript and aborts with \"invalid subscript\", so there is no output and no hit. Measured: under bash the command lists the planted three-line `dep` call and is empty on `dep::dep`. Under zsh it errors out on both fixtures.",
+   "fix": "In the CMK-DEP-08 verification cell replace `[[:space:]]$NAME[[:space:])]` with `[[:space:]]${NAME}[[:space:])]`"
+  },
+  {
+   "set": "cmake-build depth set B: rules/cmake-build/targets.md, install-and-export.md, dependencies.md, toolchains-and-providers.md, bazel-seam.md (plus rules/cmake-build.md index for contradiction, glob and deletion checks)",
+   "file": "rules/cmake-build/bazel-seam.md",
+   "line": 118,
+   "severity": "fix",
+   "kind": "era-unlabelled",
+   "finding": "CMK-BZL-09 to CMK-BZL-15 carry no Floor field, and neither do the three section intros that hold them (CI and Generated Descriptions, Before Reporting Drift, Package Managers Across the Seam). Authoring note 6 requires a Floor: field on every rule. The other sections in the file state one.",
+   "fix": "Append \" Floor: any CMake.\" to the paragraph ending at line 118 (after \"Set `FILE` to each file you will edit or report on.\"). Append \" Floor: any CMake.\" to the paragraph ending at line 139 (after \"catches a vendored directory (`googletest-1.16.0`).\"). Append \" Floor: Conan 2.30.0 and Bazel 7.2.0 for CMK-BZL-14, any vcpkg for CMK-BZL-15.\" to the paragraph ending at line 161 (after \"vcpkg-tool 2026-07-27.\")."
+  },
+  {
+   "set": "cmake-build depth set B: rules/cmake-build/targets.md, install-and-export.md, dependencies.md, toolchains-and-providers.md, bazel-seam.md (plus rules/cmake-build.md index for contradiction, glob and deletion checks)",
+   "file": "rules/cmake-build/bazel-seam.md",
+   "line": 199,
+   "severity": "fix",
+   "kind": "notes-violation",
+   "finding": "The Re-check list does not name its D-items, which authoring note 6 requires (every other depth file in the set labels D1, D4, D7 and so on). Line 202 also cites a bare \"#1129\" without its repository.",
+   "fix": "Replace lines 199-201 with three bullets: \"- D5: the rules_foreign_cc default CMake and version table (`CMK-BZL-08`) at every release after 0.16.0.\" / \"- D4: Conan and vcpkg-tool tags (`CMK-BZL-14`, `CMK-BZL-15`).\" / \"- D1: the simulation's gate spelling on CMake 4.5 (`CMK-CORE-01`).\". On line 202 replace \"(#1129,\" with \"(rules_foreign_cc#1129,\"."
+  },
+  {
+   "set": "cmake-build depth set B: rules/cmake-build/targets.md, install-and-export.md, dependencies.md, toolchains-and-providers.md, bazel-seam.md (plus rules/cmake-build.md index for contradiction, glob and deletion checks)",
+   "file": "rules/cmake-build/targets.md",
+   "line": 103,
+   "severity": "fix",
+   "kind": "style",
+   "finding": "This cmake fence (lines 99-112) is not in gersemi 0.29.1 layout. It indents with 2 spaces inside if() blocks, and `gersemi --check` fails with a 4-space diff. Authoring note 8 requires gersemi layout.",
+   "fix": "Indent line 103 as `    set(CMAKE_CXX_STANDARD 17)`, and lines 108, 109 and 110 as `    set(CMAKE_CXX_STANDARD 17)`, `    set(CMAKE_CXX_STANDARD_REQUIRED ON)` and `    set(CMAKE_CXX_EXTENSIONS OFF)` (4 spaces each)."
+  },
+  {
+   "set": "cmake-build depth set B: rules/cmake-build/targets.md, install-and-export.md, dependencies.md, toolchains-and-providers.md, bazel-seam.md (plus rules/cmake-build.md index for contradiction, glob and deletion checks)",
+   "file": "rules/cmake-build/toolchains-and-providers.md",
+   "line": 112,
+   "severity": "fix",
+   "kind": "style",
+   "finding": "The marker-provider cmake fence fails `gersemi --check` (0.29.1): its one-line cmake_language call exceeds the line width, and gersemi wraps it.",
+   "fix": "Replace line 112 with the four lines: `cmake_language(` / `    SET_DEPENDENCY_PROVIDER marker_provide` / `    SUPPORTED_METHODS FIND_PACKAGE` / `)`"
+  },
+  {
+   "set": "cmake-build depth set B: rules/cmake-build/targets.md, install-and-export.md, dependencies.md, toolchains-and-providers.md, bazel-seam.md (plus rules/cmake-build.md index for contradiction, glob and deletion checks)",
+   "file": "rules/cmake-build/toolchains-and-providers.md",
+   "line": 124,
+   "severity": "fix",
+   "kind": "verification-dishonest",
+   "finding": "The text says \"Repeat D1 for each file\" that a chainload or user_toolchain names. The inline command carries only two of D1's four patterns (it drops `message(FATAL_ERROR` and `project(`) and searches only a `cmake` directory. A chained toolchain elsewhere, or one containing project(), reads clean.",
+   "fix": "Replace the inline command with: `NAME=aarch64.cmake; grep -rniE --include=\"$NAME\" -e 'execute_process' -e 'message[[:space:]]*\\(FATAL_ERROR' -e 'project[[:space:]]*\\(' -e 'enable_language' .` Empty output = pass."
+  },
+  {
+   "set": "cmake-build depth set B: rules/cmake-build/targets.md, install-and-export.md, dependencies.md, toolchains-and-providers.md, bazel-seam.md (plus rules/cmake-build.md index for contradiction, glob and deletion checks)",
+   "file": "rules/cmake-build/install-and-export.md",
+   "line": 14,
+   "severity": "fix",
+   "kind": "unsupported-claim",
+   "finding": "The text says the round-trip script \"verifies CMK-INST-01 to -08\". CMK-INST-07 and CMK-INST-08 are reading heuristics, and their own verification cells say so. The consolidation scopes the script to -01 to -06.",
+   "fix": "Replace \"One script verifies CMK-INST-01 to -08 and\" with \"One script verifies CMK-INST-01 to -06 and\""
+  },
+  {
+   "set": "cmake-build depth set B: rules/cmake-build/targets.md, install-and-export.md, dependencies.md, toolchains-and-providers.md, bazel-seam.md (plus rules/cmake-build.md index for contradiction, glob and deletion checks)",
+   "file": "rules/cmake-build/dependencies.md",
+   "line": 213,
+   "severity": "nit",
+   "kind": "contradiction",
+   "finding": "CMK-DEP-11's rule says never set the retired CMAKE_EXPERIMENTAL_FIND_CPS_PACKAGES. Its verification then calls the gate \"legitimate only on a 4.0 to 4.2 leg\". Authoring note 4.4 says the retired experimental gates are deleted, and under the pinned stance CPS always ships beside a Config package, so a 4.0 to 4.2 consumer never needs the gate.",
+   "fix": "Replace \"The gate is legitimate only on a 4.0 to 4.2 leg, with the UUID that tag documents.\" with \"A hit is the finding on every leg: the Config package CPS ships beside serves 4.0 to 4.2.\""
+  },
+  {
+   "set": "cmake-build depth set B: rules/cmake-build/targets.md, install-and-export.md, dependencies.md, toolchains-and-providers.md, bazel-seam.md (plus rules/cmake-build.md index for contradiction, glob and deletion checks)",
+   "file": "rules/cmake-build/dependencies.md",
+   "line": 192,
+   "severity": "nit",
+   "kind": "unsupported-claim",
+   "finding": "The CMP0170 claim is true only for a bare `VERSION 3.25` floor. I measured on 3.31.12 and 4.4.2: a bare-3.25 tree missing a source directory exits 0 without the flag and 1 with it. The pinned `3.25...4.4` range already exits 1 without the flag. The phrase \"floor-3.25 tree\" reads as the pinned tree.",
+   "fix": "Replace \"a floor-3.25 tree missing one source directory still exits 0\" with \"a tree with a bare `VERSION 3.25` floor, no `...<max>`, missing one source directory still exits 0\""
+  },
+  {
+   "set": "cmake-build depth set B: rules/cmake-build/targets.md, install-and-export.md, dependencies.md, toolchains-and-providers.md, bazel-seam.md (plus rules/cmake-build.md index for contradiction, glob and deletion checks)",
+   "file": "rules/cmake-build/bazel-seam.md",
+   "line": 50,
+   "severity": "nit",
+   "kind": "verification-dishonest",
+   "finding": "The simulation pipes configure through `| tee`, so the configure exit code is lost. Measured on 3.31.12 with a gate failure: the script reports only gmake's \"No rule to make target 'Makefile'\" (rc 2) from the build step, not the configure error that CMK-BZL-08 names as the finding.",
+   "fix": "Replace `-DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DBUILD_SHARED_LIBS=OFF 2>&1 | tee wrap-configure.log` with `-DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DBUILD_SHARED_LIBS=OFF >wrap-configure.log 2>&1 || { cat wrap-configure.log; exit 1; }`"
+  },
+  {
+   "set": "cmake-build depth set B: rules/cmake-build/targets.md, install-and-export.md, dependencies.md, toolchains-and-providers.md, bazel-seam.md (plus rules/cmake-build.md index for contradiction, glob and deletion checks)",
+   "file": "rules/cmake-build/targets.md",
+   "line": 160,
+   "severity": "nit",
+   "kind": "style",
+   "finding": "The CMK-TGT-14 verification grep has no empty-output clause (note 7).",
+   "fix": "After \"a bare system name is a finding.\" insert \" Empty output = nothing to check.\""
+  },
+  {
+   "set": "cmake-build depth set B: rules/cmake-build/targets.md, install-and-export.md, dependencies.md, toolchains-and-providers.md, bazel-seam.md (plus rules/cmake-build.md index for contradiction, glob and deletion checks)",
+   "file": "rules/cmake-build/install-and-export.md",
+   "line": 184,
+   "severity": "nit",
+   "kind": "style",
+   "finding": "The CMK-INST-23 verification grep has no empty-output clause (note 7).",
+   "fix": "After \"then read each hit.\" insert \" Empty output means the row does not apply.\""
+  },
+  {
+   "set": "cmake-build depth set B: rules/cmake-build/targets.md, install-and-export.md, dependencies.md, toolchains-and-providers.md, bazel-seam.md (plus rules/cmake-build.md index for contradiction, glob and deletion checks)",
+   "file": "rules/cmake-build/bazel-seam.md",
+   "line": 155,
+   "severity": "nit",
+   "kind": "style",
+   "finding": "The CMK-BZL-13 verification names three commands but no empty-output clause (note 7).",
+   "fix": "Append to the cell: \" Empty output on either side means that side has no mapping to derive: read the other side only.\""
+  },
+  {
+   "set": "cmake-build depth set B: rules/cmake-build/targets.md, install-and-export.md, dependencies.md, toolchains-and-providers.md, bazel-seam.md (plus rules/cmake-build.md index for contradiction, glob and deletion checks)",
+   "file": "rules/cmake-build.md",
+   "line": 8,
+   "severity": "nit",
+   "kind": "notes-violation",
+   "finding": "check-artifacts.py flags two dead globs, '**/.gersemirc' and '**/.cmake-format*'. Authoring note 1 keeps both deliberately (0 corpus files, pinned), so this is expected checker output, not a defect.",
+   "fix": "No edit. Record in the publishing receipt that the two dead-glob findings are accepted under authoring note 1."
+  },
+  {
+   "set": "cmake-build depth set B: rules/cmake-build/targets.md, install-and-export.md, dependencies.md, toolchains-and-providers.md, bazel-seam.md (plus rules/cmake-build.md index for contradiction, glob and deletion checks)",
+   "file": "rules/cmake-build.md",
+   "line": 73,
+   "severity": "nit",
+   "kind": "deletion-candidate",
+   "finding": "Deletion test: \"No maintained semantic CMake linter exists ... are the lint layer\" restates CMK-CORE-04's rationale in the same file, so removing it causes no mistake.",
+   "fix": "Delete the sentence spanning lines 73-74: \"No maintained semantic CMake linter exists (as of 2026-09-26), so the gate and the named greps in each depth file are the lint layer.\""
+  },
+  {
+   "set": "cmake-build depth set B: rules/cmake-build/targets.md, install-and-export.md, dependencies.md, toolchains-and-providers.md, bazel-seam.md (plus rules/cmake-build.md index for contradiction, glob and deletion checks)",
+   "file": "rules/cmake-build.md",
+   "line": 158,
+   "severity": "nit",
+   "kind": "deletion-candidate",
+   "finding": "Deletion test: this routing row points at CMK-CORE-04 in the same file, whose rule text already says migrate and never extend.",
+   "fix": "Delete line 158 (the \"Finding a `.cmake-format*` file or a `cmake-format` step\" row)."
+  },
+  {
+   "set": "cmake-build depth set B: rules/cmake-build/targets.md, install-and-export.md, dependencies.md, toolchains-and-providers.md, bazel-seam.md (plus rules/cmake-build.md index for contradiction, glob and deletion checks)",
+   "file": "rules/cmake-build.md",
+   "line": 191,
+   "severity": "nit",
+   "kind": "deletion-candidate",
+   "finding": "Deletion test: the Siblings bullet for the two skills repeats routing rows 159-160, and the \"repeat only the MUST rows\" clause is author-facing.",
+   "fix": "Delete lines 191-192 (the `cmake-dependency-triage` and `cmake-modernize` Siblings bullet)."
+  },
+  {
+   "set": "cmake-build depth set B: rules/cmake-build/targets.md, install-and-export.md, dependencies.md, toolchains-and-providers.md, bazel-seam.md (plus rules/cmake-build.md index for contradiction, glob and deletion checks)",
+   "file": "rules/cmake-build.md",
+   "line": 193,
+   "severity": "nit",
+   "kind": "deletion-candidate",
+   "finding": "Deletion test: \"C++ source code has no rule in this set\" is implied by the globs, so removing it causes no mistake.",
+   "fix": "Delete lines 193-194."
+  },
+  {
+   "set": "rules/cmake-build.md (index) + cmake-build/{versions-and-policies,language,module-authoring,testing,presets-and-ci}.md",
+   "file": "rules/cmake-build/language.md",
+   "line": 152,
+   "severity": "fix",
+   "kind": "verification-dishonest",
+   "finding": "The LANG-11 lookup (a MUST row) reads invented names as documented. Rewriting leading placeholders such as <PROJECT-NAME>_VERSION and <PackageName>_ROOT to [A-Za-z0-9_]+ turns them into patterns that match any CMAKE_* name with that suffix. Measured on 4.4.2: CMAKE_MYLIB_VERSION, CMAKE_MY_ROOT and CMAKE_MY_KNOB_BINARY_DIR each count 1 (documented). CMAKE_MY_KNOB still counts 0, so the check can go red, but it misses this class. With the filter below, all three count 0 and CMAKE_CXX_FLAGS, CMAKE_CXX_FLAGS_RELEASE and CMAKE_UNITY_BUILD still count 1.",
+   "fix": "Replace line 152 with these two lines:\nsed -e 's/<CONFIG>/[A-Z]+/g' -e 's/<[^>]*>/[A-Za-z0-9_]+/g' \"$D/c.txt\" \"$D/cxx.txt\" > \"$D/all.txt\"\ngrep -e '^CMAKE_' -e '^_CMAKE_' \"$D/all.txt\" > \"$D/patterns.txt\"\nAlso replace line 144 with: # CMK-LANG-11 lookup: expand <LANG> and <CONFIG> first, or CMAKE_CXX_FLAGS reads as invented. Keep only patterns that start with CMAKE_, or <PROJECT-NAME>_VERSION reads CMAKE_MYLIB_VERSION as documented."
+  },
+  {
+   "set": "rules/cmake-build.md (index) + cmake-build/{versions-and-policies,language,module-authoring,testing,presets-and-ci}.md",
+   "file": "rules/cmake-build/testing.md",
+   "line": 105,
+   "severity": "fix",
+   "kind": "verification-dishonest",
+   "finding": "The TEST-09 smoke (a MUST row) passes when the consumer fails to configure. ctest -N on a failed or partial build tree still prints 'Total Tests: 0'. Measured on 3.31.12 (-Werror=dev) and 4.4.2 (-Werror=author): a library whose AUTHOR_WARNING fails the gate, and which also leaks its BUILD_TESTING tests, gave configure rc=1, yet the final grep printed 'Total Tests: 0' (pass). A leaking library that configures cleanly went red, and a compliant one went green. With the chained form below, the failing library prints nothing (the finding).",
+   "fix": "Replace lines 105-106 with the single line:\ncmake -S \"$W/asub\" -B \"$W/asub-build\" -G Ninja \"$GATE\" && ctest --test-dir \"$W/asub-build\" -N > \"$W/asub-tests.txt\"\nReplace line 107 with: # Must print the line. Empty output means the library's tests leaked, or the consumer failed to configure: both are findings.\nOn line 99, change \"W: a scratch\" to \"W: a fresh, empty scratch\"."
+  },
+  {
+   "set": "rules/cmake-build.md (index) + cmake-build/{versions-and-policies,language,module-authoring,testing,presets-and-ci}.md",
+   "file": "rules/cmake-build.md",
+   "line": 57,
+   "severity": "fix",
+   "kind": "verification-dishonest",
+   "finding": "The CORE-01 canary cannot go red on the preset hole the index cites it for (lines 29-31, non-negotiable 1, the line 134 cell, presets-and-ci failure mode 7). The canary is an AUTHOR_WARNING. A preset with warnings.deprecated=false or errors.deprecated=false lets a real dependency deprecation through -Werror=dev with rc 0 on 3.31.12 and 4.3.4, but the canary through that same preset still exits 1 (pass). Only grep (a) catches the hole. A second canary with message(DEPRECATION) through the preset measured rc 0 (red) on 3.31.12 and 4.3.4 for both deprecated-false presets, rc 1 (green) on a clean preset, rc 0 under -Werror=author below 4.4, and rc 1 on 4.4.2.",
+   "fix": "After line 57 insert:\n# 1b. The deprecation canary. A preset that sets deprecated to false still passes canary 1 and fails this one on 4.3 or older. Exit 1 is the pass.\nprintf 'message(DEPRECATION \"gate canary\")\\n' > canary-dep.cmake\n\"$BIN/cmake\" --preset \"$PRESET\" --fresh -B build-canary-dep \"$GATE\" -DCMAKE_PROJECT_INCLUDE=\"$PWD/canary-dep.cmake\"\nIn the CMK-CORE-01 Verification cell (line 134), replace \"The Gate's canary on each leg's binary and preset: exit 0 is the finding.\" with \"The Gate's two canaries on each leg's binary and preset: exit 0 from either is the finding. Only the deprecation canary goes red on a preset that sets `deprecated` to `false` (measured 2026-09-26 on 3.31.12 and 4.3.4).\""
+  },
+  {
+   "set": "rules/cmake-build.md (index) + cmake-build/{versions-and-policies,language,module-authoring,testing,presets-and-ci}.md",
+   "file": "rules/cmake-build/versions-and-policies.md",
+   "line": 67,
+   "severity": "fix",
+   "kind": "verification-dishonest",
+   "finding": "The CMK-VER-05 dependency-floor scan (a MUST row) misses two old-floor shapes that fail the gate. Both configured under add_subdirectory with rc 1 on 3.31.12 (-Werror=dev) and on 4.4.2 (-Werror=author): 'cmake_minimum_required (VERSION 3.8)', with a space before the paren (common in old third-party trees), and a call split across lines ('cmake_minimum_required(' then 'VERSION 3.5)'). The scan printed neither. With the widened patterns below, both are caught, the four original hits still print, and the compliant tree stays empty.",
+   "fix": "In lines 67-71, replace each 'cmake_minimum_required\\(' with 'cmake_minimum_required[[:space:]]*\\(' and each 'cmake_policy\\(' with 'cmake_policy[[:space:]]*\\('. Before line 72 (the operands line), add the line:\n  -e '^[[:space:]]*cmake_minimum_required[[:space:]]*\\([[:space:]]*$' \\\nIn the paragraph at lines 75-83, after \"Commented lines do not match.\" add: \"A hit that ends in `cmake_minimum_required(` is a call split across lines, so read its next line.\""
+  },
+  {
+   "set": "rules/cmake-build.md (index) + cmake-build/{versions-and-policies,language,module-authoring,testing,presets-and-ci}.md",
+   "file": "rules/cmake-build/testing.md",
+   "line": 13,
+   "severity": "fix",
+   "kind": "contradiction",
+   "finding": "testing.md assigns the install-and-consume job to CMK-CI in presets-and-ci.md, and names CMK-INST-18 as 'the round trip itself'. presets-and-ci.md lines 19-20 say the round trip as a CI job is CMK-INST-18 in install-and-export.md. The index (lines 78 and 99) makes CMK-INST-01 the round trip. Three files name three different owners for the same thing.",
+   "fix": "Replace \"Test presets, the offline job and the install-and-consume job are `CMK-CI` in `presets-and-ci.md` (the round trip itself is `CMK-INST-18` in `install-and-export.md`).\" with \"Test presets and the offline job are `CMK-CI` in `presets-and-ci.md`. The install round trip is `CMK-INST-01`, and its CI job is `CMK-INST-18`, both in `install-and-export.md`.\""
+  },
+  {
+   "set": "rules/cmake-build.md (index) + cmake-build/{versions-and-policies,language,module-authoring,testing,presets-and-ci}.md",
+   "file": "rules/cmake-build/module-authoring.md",
+   "line": 155,
+   "severity": "fix",
+   "kind": "contradiction",
+   "finding": "Two different gersemi gate commands. module-authoring gives `gersemi --check \"${MODULE_DIR:-.}\"` (line 155 and the MOD-15 cell at line 167). The index gates on tracked listfiles only (line 59) because a directory walk reaches build trees. Measured with gersemi 0.29.1: in a git tree with an unignored in-tree build directory, `gersemi --check .` exits 1 on the generated CMakeFiles/*.cmake. The same tree with build/ in .gitignore exits 0. So MOD-15's own command goes red on a compliant module project whose configured fixtures sit in an unignored build*/ directory, which the file's own preamble (lines 21-23) expects.",
+   "fix": "Line 155: replace \"The gate is `gersemi --check \"${MODULE_DIR:-.}\"` (gersemi 0.29.1, released\" with \"The gate is the index's tracked-files form, `git ls-files -z -- '*CMakeLists.txt' '*.cmake' | xargs -0 -r gersemi --check` (gersemi 0.29.1, released\". Line 167 Verification cell: replace \"`gersemi --check \"${MODULE_DIR:-.}\"`. Exit 0 passes.\" with \"The gersemi gate above. Exit 0 passes.\""
+  },
+  {
+   "set": "rules/cmake-build.md (index) + cmake-build/{versions-and-policies,language,module-authoring,testing,presets-and-ci}.md",
+   "file": "rules/cmake-build.md",
+   "line": 58,
+   "severity": "fix",
+   "kind": "unsupported-claim",
+   "finding": "\"a build tree always fails it\" (line 58) and \"`gersemi --check .` descends into build trees and fails on generated files\" (the CORE-04 rationale, line 137) are false as stated. gersemi 0.29.1 honours .gitignore. Measured: rc 1 with an unignored in-tree build/, and rc 0 once build/ is in .gitignore. Neither of the two admissible consolidations for this row carries the claim.",
+   "fix": "Line 58: replace \"Tracked listfiles only: a build tree always fails it.\" with \"Tracked listfiles only: a build tree that .gitignore does not exclude fails it.\" Line 137 rationale: replace \"`gersemi --check .` descends into build trees and fails on generated files\" with \"`gersemi --check .` descends into any build tree that `.gitignore` does not exclude and fails on its generated files\"."
+  },
+  {
+   "set": "rules/cmake-build.md (index) + cmake-build/{versions-and-policies,language,module-authoring,testing,presets-and-ci}.md",
+   "file": "rules/cmake-build/module-authoring.md",
+   "line": 117,
+   "severity": "fix",
+   "kind": "notes-violation",
+   "finding": "The shipped CMK-MOD-11 configure probe hard-codes `-Werror=author` on a bare `cmake` taken from PATH. On a 3.31 or 4.3 binary that gate is inert, which is the exact pattern CMK-CORE-01 forbids. Authoring notes 3.5 and 7 require shipped probes to spell the gate per binary.",
+   "fix": "Replace line 117 with these two lines:\nGATE=-Werror=author # -Werror=dev on CMake 4.3 or older (CMK-CORE-01)\nMYMOD_AUTH_TOKEN=\"$DUMMY_SECRET\" cmake -S . -B \"$BUILD_DIR\" \"$GATE\""
+  },
+  {
+   "set": "rules/cmake-build.md (index) + cmake-build/{versions-and-policies,language,module-authoring,testing,presets-and-ci}.md",
+   "file": "rules/cmake-build.md",
+   "line": 129,
+   "severity": "fix",
+   "kind": "verification-dishonest",
+   "finding": "The CORE-05 grep (f), for a MUST row, misses the long-option early exits: `| grep --quiet` and `| grep --max-count=1` in a pipefail script printed nothing. `grep -E -q`, `| head` and `grep -m1` are caught. The widened form below catches both long forms and still ignores `| grep -c`.",
+   "fix": "Append to the xargs grep on line 129: -e '[|] *grep( +-[-a-zA-Z=0-9]+)* +--quiet' -e '[|] *grep( +-[-a-zA-Z=0-9]+)* +--silent' -e '[|] *grep( +-[-a-zA-Z=0-9]+)* +--max-count'. In the CMK-CORE-05 cell (line 138), replace \"It catches separated flags (`grep -E -q`), ripgrep's `-q` and `grep -m1`.\" with \"It catches separated flags (`grep -E -q`), ripgrep's `-q`, `grep -m1`, and `--quiet`, `--silent` and `--max-count`.\""
+  },
+  {
+   "set": "rules/cmake-build.md (index) + cmake-build/{versions-and-policies,language,module-authoring,testing,presets-and-ci}.md",
+   "file": "rules/cmake-build/versions-and-policies.md",
+   "line": 101,
+   "severity": "fix",
+   "kind": "contradiction",
+   "finding": "CMK-VER-04 (MUST) says to guard any variable newer than the floor, and its table lists CMAKE_CXX_SCAN_FOR_MODULES at 3.28 (confirmed versionadded 3.28 on 4.4.2). The same file's 'right' example (line 55) sets it unguarded under a 3.25 floor, as CMK-TGT-18 and non-negotiable 8 prescribe. The VER-04 grep ('CXX_MODULES') does not match it either. Two rules answer 'guard this set()?' differently. The unguarded set is harmless, because 3.25 simply never reads the variable.",
+   "fix": "In the CMK-VER-04 Rule cell, after \"and guard a policy with `if(POLICY CMPxxxx)`.\" insert \"Setting a variable that an older CMake never reads, such as `CMAKE_CXX_SCAN_FOR_MODULES`, needs no guard.\""
+  },
+  {
+   "set": "rules/cmake-build.md (index) + cmake-build/{versions-and-policies,language,module-authoring,testing,presets-and-ci}.md",
+   "file": "rules/cmake-build/presets-and-ci.md",
+   "line": 105,
+   "severity": "fix",
+   "kind": "style",
+   "finding": "The cmake fence at lines 99-110 is not in gersemi 0.29.1 layout. It uses 2-space indentation, and `gersemi --check` exits 1 ('would be reformatted'). The other eight cmake fences in the set pass.",
+   "fix": "Replace lines 105-108 with:\n    find_program(PROJ_LAUNCHER NAMES sccache ccache)\n    if(PROJ_LAUNCHER)\n        set(CMAKE_CXX_COMPILER_LAUNCHER \"${PROJ_LAUNCHER}\")\n    endif()"
+  },
+  {
+   "set": "rules/cmake-build.md (index) + cmake-build/{versions-and-policies,language,module-authoring,testing,presets-and-ci}.md",
+   "file": "rules/cmake-build.md",
+   "line": 155,
+   "severity": "fix",
+   "kind": "trigger",
+   "finding": "CMK-CI-01 binds 'every file it includes', but an included presets file can have any name (presets/linux.json) and loads no rule by glob. That is a residual miss of the same kind as --presets-file, and no routing line names it. Editing only the included file is the failure mode presets-and-ci lists as failure mode 2.",
+   "fix": "In the routing row, replace \"Editing a presets file, including one passed by `cmake --presets-file` (CMake \u2265 4.4), which loads no rule by glob,\" with \"Editing a presets file, including a file another presets file `include`s or one passed by `cmake --presets-file` (CMake \u2265 4.4), neither of which loads a rule by glob,\"."
+  },
+  {
+   "set": "rules/cmake-build.md (index) + cmake-build/{versions-and-policies,language,module-authoring,testing,presets-and-ci}.md",
+   "file": "rules/cmake-build/versions-and-policies.md",
+   "line": 88,
+   "severity": "nit",
+   "kind": "notes-violation",
+   "finding": "Authoring note 5.3 reduces CMK-VER-06 to a one-line citation naming its owners. The row still restates DEP-15's mechanism, its value 3.10 and its port-tool exception, and DEP-30's remedies. That duplicated text will drift from dependencies.md.",
+   "fix": "Replace the CMK-VER-06 Rule cell with: \"Citation only. A stale dependency floor is CMK-DEP-15's on CMake 4.x and CMK-DEP-30's on CMake 3.x, both in `dependencies.md`. Floor: `CMAKE_POLICY_VERSION_MINIMUM` is CMake 4.0.\""
+  },
+  {
+   "set": "rules/cmake-build.md (index) + cmake-build/{versions-and-policies,language,module-authoring,testing,presets-and-ci}.md",
+   "file": "rules/cmake-build/language.md",
+   "line": 139,
+   "severity": "nit",
+   "kind": "style",
+   "finding": "In the CMK-LANG-13 rationale, \"The two sanctioned hand-offs are CMK-MOD-12's `<Name>_ROOT` (module-authoring) and never `CMAKE_TOOLCHAIN_FILE`\" lists a prohibition as a sanctioned hand-off and does not parse.",
+   "fix": "Replace that sentence with: \"The one sanctioned `FORCE` hand-off is CMK-MOD-12's `<Name>_ROOT` (module-authoring). `CMAKE_TOOLCHAIN_FILE` is never forced (CMK-TC-01, toolchains-and-providers).\""
+  },
+  {
+   "set": "rules/cmake-build.md (index) + cmake-build/{versions-and-policies,language,module-authoring,testing,presets-and-ci}.md",
+   "file": "rules/cmake-build/presets-and-ci.md",
+   "line": 120,
+   "severity": "nit",
+   "kind": "style",
+   "finding": "\"The fix PR, #11489, closed unmerged\" is a bare issue number in shipped text, and it is ambiguous outside the runner-images context.",
+   "fix": "Replace \"The fix PR, #11489, closed unmerged.\" with \"The fix PR, actions/runner-images#11489, closed unmerged.\""
+  },
+  {
+   "set": "rules/cmake-build.md (index) + cmake-build/{versions-and-policies,language,module-authoring,testing,presets-and-ci}.md",
+   "file": "rules/cmake-build.md",
+   "line": 20,
+   "severity": "nit",
+   "kind": "deletion-candidate",
+   "finding": "Deletion test on the index. Removing these lines causes no mistake: 20-21 (a tagline that repeats the silent-pass paragraph), 73-74 (the no-linter sentence, which the CORE-04 rationale on line 137 already carries), 142-143 (author-facing meta about one level deep), and 177-179 (author guidance on writing new verifications).",
+   "fix": "Delete lines 20-21, 73-74, 142-143 and 177-179."
+  },
+  {
+   "set": "rules/cmake-build.md (index) + cmake-build/{versions-and-policies,language,module-authoring,testing,presets-and-ci}.md",
+   "file": "rules/cmake-build.md",
+   "line": 10,
+   "severity": "nit",
+   "kind": "portability",
+   "finding": "check-artifacts.py flags '**/.gersemirc' and '**/.cmake-format*' as dead globs. Both are deliberate per authoring note 1, and the checker is clean with --allow-absent. With --forbid ocx it also flags 'ocx' and 'ocx-sh' on line 15, the `repository:` catalog key that every house rule shares (rules/gradle-build.md:14). No other OCX name, fleet path, owner__repo name or repo@sha appears in the six files.",
+   "fix": "No text change. Run the checker as: check-artifacts.py rules/cmake-build.md --root . --allow-absent '**/.gersemirc' --allow-absent '**/.cmake-format*', and record the repository key as the sanctioned exception to note 9."
+  }
+ ]
+}

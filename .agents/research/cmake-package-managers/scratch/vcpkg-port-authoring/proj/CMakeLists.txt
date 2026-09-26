@@ -1,0 +1,3 @@
+cmake_minimum_required(VERSION 3.25)
+project(crtprobe LANGUAGES NONE)
+message(STATUS "CMAKE_MSVC_RUNTIME_LIBRARY=${CMAKE_MSVC_RUNTIME_LIBRARY}")

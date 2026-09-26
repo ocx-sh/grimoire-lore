@@ -1,3 +1,62 @@
+# CMake and C++ package-management program (AUTHORED, ON BRANCH `java`)
+
+Written 2026-09-26, for a cold resume. Runs on the `java` worktree
+(`.agents/worktrees/java`, branch `java`, based on `main` fc26433). The
+worktree names are crossed (the JVM program ran on `.agents/worktrees/cmake`).
+Companion to the Bazel program: this set owns the wrapped CMake project's side
+of the rules_foreign_cc seam, `bazel-quality` owns the wrapper side.
+
+## What shipped (on the branch, unmerged)
+
+- `rules/cmake-build.md` (180 lines, 18 non-negotiables) + 10 depth files,
+  164 rules, 96 MUST. `rules/cpp-packaging.md` (189 lines, 16
+  non-negotiables) + `conan.md`, `vcpkg.md`, 46 rules, 21 MUST.
+- `skills/cmake-dependency-triage/` (470 lines, 15 entry points, 8 failure
+  classes, 13-row MUST table) and `skills/cmake-modernize/` (455 lines, steps
+  0-9, 9 failure classes, 19-row MUST table), each with a
+  `references/failure-modes.md`. Bundle `cmake-essentials` (untagged).
+- Wiring: `publish.toml` (5 entries, 0.1.0), `bundles/cmake-essentials.toml`,
+  `taskfile.yml` artifacts step, `assets/glyphs/cmake.svg`,
+  `assets/lore-cmake.svg`, 5 `docs/*.md` companions.
+- PR: https://github.com/ocx-sh/grimoire-lore/pull/10 (branch `cmake-set`).
+
+## Validation and convergence
+
+- Phase 8: 4 opus reviewers, 88 verifications on planted fixtures, 6
+  blockers, 47 fixes, 29 nits applied.
+- Waves 4-8 (2026-09-26, about 8.2M tokens): real Bazel 9.2.0 +
+  rules_foreign_cc 0.16.0 wrap; CMake 4.0.7/4.1.6/4.2.7 matrix; both skills
+  run literally on 7 real legacy trees and 10 real dependency scenarios;
+  every cmake-build cell swept over 6 real repos, every MUST cell over 4 more,
+  cpp-packaging over 6 real manifests. Scripts `cmake-wave4.mjs` to
+  `cmake-wave8.mjs`, ledgers `wave4-*` to `wave8-*` under the group dirs.
+- **Convergence method changed in wave 7**: real trees produce new
+  failure-mode instances forever (10, 14, 17 in waves 4-6), so failure modes
+  were grouped into classes (`cmake-skills/fm-classes-*.md`) and each
+  artifact re-tested on held-out trees. Stop = no new class and no new MUST.
+  Rules and modernize met it in wave 7, triage in wave 8.
+- Gates at close: checker clean with and without the exemplar root, `task ci`
+  and `task artifacts` 0, all 30 `cmake` fences gersemi 0.29.1 clean, JSON
+  fences valid, `grim publish --dry-run` builds all five.
+
+## Corpus
+
+Frame, 4 audits, 5 scouts, map (164 rows), 10 consolidations, verification
+ledgers per group, wave 4-8 ledgers, era re-check 2026-09-26. Index in
+`.agents/research/README.md`. Spend about 31M tokens in total.
+
+## Open, for the owner
+
+- Proposed one-line pointer in `rules/bazel-quality/cpp.md` › Wrapped Foreign
+  Builds: `cmake-topic-map/handoff/bazel-quality-pointer.md`. Not applied;
+  needs a `bazel-quality` version bump to ship.
+- find_ocx: 11 code fixes, 2 docs fixes, 7 harness fixes, measured, in
+  `cmake-audit/find-ocx-handoff.md`. The wave-1 FORCE defect is refuted. No
+  issue filed (owner default).
+- Dated re-checks D1-D8 and residue R1-R10 in `cmake-topic-map.md` ›
+  "Wave 3 landed". CONAN-04 flips to CMakeConfigDeps when Conan calls it
+  stable. Reserved IDs CONAN-19, VCPKG-19/20, PKG-05..07 are never emitted.
+
 # Go expertise artifact program (AUTHORED, ON BRANCH `go`)
 
 Started and finished 2026-09-26 in the `go` worktree (`.agents/worktrees/go`,

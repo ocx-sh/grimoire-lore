@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.28)
+project(scanprobe CXX)
+set(CMAKE_CXX_SCAN_FOR_MODULES 0)
+add_executable(app main.cpp)
+set_target_properties(app PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)

@@ -1,0 +1,11 @@
+catchorg__Catch2	third_party	0
+ClickHouse__ClickHouse	contrib	145
+duckdb__duckdb	third_party	28
+glfw__glfw	deps	2
+grpc__grpc	third_party	8
+llvm__llvm-project	third-party	4
+madler__zlib	contrib	17
+openssl__openssl	external	1
+protocolbuffers__protobuf	third_party	1
+Tencent__rapidjson	contrib	1
+Tencent__rapidjson	thirdparty	0

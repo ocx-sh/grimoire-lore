@@ -1,0 +1,42 @@
+cmake_minimum_required(VERSION 3.25)
+project(returns_test LANGUAGES NONE)
+
+# --- 1. PARENT_SCOPE through a nested helper: does it reach the caller of the caller? ---
+function(inner_ps)
+  set(RESULT_VAR "from-inner" PARENT_SCOPE)
+endfunction()
+function(outer_ps)
+  inner_ps()
+  message(STATUS "outer_ps sees RESULT_VAR=${RESULT_VAR} (after calling inner_ps)")
+  set(RESULT_VAR "${RESULT_VAR}-relayed" PARENT_SCOPE)
+endfunction()
+outer_ps()
+message(STATUS "top-level sees RESULT_VAR=${RESULT_VAR} (after outer_ps, one PARENT_SCOPE hop)")
+
+# --- 2. return(PROPAGATE) ---
+function(inner_prop)
+  set(PROP_VAR "from-inner-prop")
+  return(PROPAGATE PROP_VAR)
+endfunction()
+function(outer_prop)
+  inner_prop()
+  message(STATUS "outer_prop sees PROP_VAR=${PROP_VAR} (did return(PROPAGATE) cross one level automatically?)")
+endfunction()
+outer_prop()
+message(STATUS "top-level sees PROP_VAR=${PROP_VAR} (outer_prop did not itself PROPAGATE it further)")
+
+# --- 3. block(SCOPE_FOR VARIABLES) ---
+set(BLOCK_VAR "before-block")
+block(SCOPE_FOR VARIABLES)
+  set(BLOCK_VAR "inside-block")
+  message(STATUS "inside block: BLOCK_VAR=${BLOCK_VAR}")
+endblock()
+message(STATUS "after block: BLOCK_VAR=${BLOCK_VAR} (block(SCOPE_FOR VARIABLES) should isolate this)")
+
+set(BLOCK_PROP "before-propagate-block")
+block(SCOPE_FOR VARIABLES)
+  set(BLOCK_PROP "inside-propagate-block")
+  return(PROPAGATE BLOCK_PROP)
+endblock()
+message(STATUS "after propagate-block: BLOCK_PROP=${BLOCK_PROP} (return(PROPAGATE) inside block escapes it)")
+message(STATUS "END OF FILE MARKER REACHED")

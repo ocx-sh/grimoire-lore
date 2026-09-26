@@ -1,0 +1,8 @@
+Kitware__CMake/Tests/FindPackageCMakeTest/CMakeLists.txt
+Kitware__CMake/Modules/FindProtobuf.cmake
+microsoft__vcpkg/scripts/test_ports/vcpkg-ci-lapack/CMakeLists.txt
+microsoft__vcpkg/ports/sdl3-net/portfile.cmake
+microsoft__vcpkg/ports/sdl3-image/portfile.cmake
+microsoft__vcpkg/ports/openvpn3/portfile.cmake
+microsoft__vcpkg/ports/libsndfile/portfile.cmake
+llvm__llvm-project/clang/cmake/caches/Fuchsia.cmake

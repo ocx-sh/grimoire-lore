@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.15...4.3)
+project(floor_test LANGUAGES NONE)
+cmake_policy(GET CMP0126 pol126)
+cmake_policy(GET CMP0140 pol140)
+message(STATUS "CMP0126=${pol126} CMP0140=${pol140}")
+message(STATUS "CMAKE_MINIMUM_REQUIRED_VERSION=${CMAKE_MINIMUM_REQUIRED_VERSION}")
+message(STATUS "CMAKE_VERSION=${CMAKE_VERSION}")

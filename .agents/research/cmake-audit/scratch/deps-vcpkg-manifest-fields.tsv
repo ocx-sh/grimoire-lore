@@ -1,0 +1,16 @@
+metric	count
+consumer_vcpkg.json_files	209
+field_name	200
+field_version	168
+field_version-string	24
+field_version-semver	4
+field_version-date	4
+field_builtin-baseline	6
+field_dependencies	87
+dependencies_with_host_true	17
+field_features	49
+field_default-features	24
+field_overrides	5
+field_license	7
+field_supports	12
+field_port-version	3

@@ -1,0 +1,32 @@
+# Cross toolchain: sets CMAKE_SYSTEM_NAME + CMAKE_SYSROOT unconditionally.
+# CMAKE_FIND_ROOT_PATH_MODE_* are set ONLY if the matching env var is present,
+# so the harness can probe "what if the toolchain sets none" (no env vars set)
+# vs a specific combination (env vars set) from one file, without rewriting it.
+set(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_SYSTEM_PROCESSOR aarch64)
+set(CMAKE_SYSROOT "/home/mherwig/.cache/cmake-measure-scratch/cross/sysroot")
+set(CMAKE_C_COMPILER "/home/mherwig/.cache/cmake-measure-scratch/cross/toolchains/zig-cc-cross.sh")
+set(CMAKE_CXX_COMPILER "/home/mherwig/.cache/cmake-measure-scratch/cross/toolchains/zig-cxx-cross.sh")
+
+if(DEFINED ENV{TC_FIND_ROOT_PATH})
+  set(CMAKE_FIND_ROOT_PATH "$ENV{TC_FIND_ROOT_PATH}")
+endif()
+if(DEFINED ENV{TC_MODE_PROGRAM})
+  set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM "$ENV{TC_MODE_PROGRAM}")
+endif()
+if(DEFINED ENV{TC_MODE_LIBRARY})
+  set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY "$ENV{TC_MODE_LIBRARY}")
+endif()
+if(DEFINED ENV{TC_MODE_INCLUDE})
+  set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE "$ENV{TC_MODE_INCLUDE}")
+endif()
+if(DEFINED ENV{TC_MODE_PACKAGE})
+  set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE "$ENV{TC_MODE_PACKAGE}")
+endif()
+
+if(DEFINED ENV{TC_MARKER})
+  message(STATUS "TC-READ-MARKER $ENV{TC_MARKER}")
+endif()
+if(DEFINED ENV{TC_READ_LOG})
+  file(APPEND "$ENV{TC_READ_LOG}" "read at ${CMAKE_CURRENT_LIST_FILE}, IN_TRY_COMPILE=${CMAKE_BINARY_DIR}\n")
+endif()

@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.25)
+project(e06parent LANGUAGES C)
+include(CTest)
+enable_testing()
+add_test(NAME parent_test COMMAND ${CMAKE_COMMAND} -E true)
+include(FetchContent)
+FetchContent_Declare(dep SOURCE_DIR "/home/mherwig/.cache/cmake-measure-scratch/resolution-order/dep-gitsrc")
+FetchContent_MakeAvailable(dep)

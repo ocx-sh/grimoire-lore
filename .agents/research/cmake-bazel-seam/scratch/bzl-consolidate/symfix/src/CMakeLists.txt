@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.25)
+project(symfix NONE)
+install(FILES a.h DESTINATION include)
+file(REAL_PATH b.h b_real)
+install(FILES "${b_real}" DESTINATION include)

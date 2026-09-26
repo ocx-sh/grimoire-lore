@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.20)
+project(baseconsumer LANGUAGES C)
+find_package(base 1.0 CONFIG REQUIRED)
+add_executable(baseconsumer main.c)
+target_link_libraries(baseconsumer PRIVATE base::base)

@@ -1,0 +1,1 @@
+set(CMAKE_C_FLAGS_INIT "-fPIC -DSEED=1")

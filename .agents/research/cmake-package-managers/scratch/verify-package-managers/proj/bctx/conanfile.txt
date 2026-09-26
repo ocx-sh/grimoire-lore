@@ -1,0 +1,6 @@
+[requires]
+pkgb/1.0
+[tool_requires]
+tool/1.0
+[generators]
+CMakeDeps

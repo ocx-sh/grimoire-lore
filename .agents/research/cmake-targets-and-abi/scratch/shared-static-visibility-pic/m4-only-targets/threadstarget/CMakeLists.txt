@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.25)
+project(t5 C)
+set(CMAKE_LINK_LIBRARIES_ONLY_TARGETS ON)
+set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+find_package(Threads REQUIRED)
+add_executable(app ../main.c)
+target_link_libraries(app PRIVATE Threads::Threads)

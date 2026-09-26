@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.25)
+project(netprobe NONE)
+include(FetchContent)
+FetchContent_Declare(dep GIT_REPOSITORY https://github.com/madler/zlib.git GIT_TAG v1.3.1)
+FetchContent_MakeAvailable(dep)

@@ -1,0 +1,13 @@
+cmake_minimum_required(VERSION 3.25...4.4)
+project(good LANGUAGES NONE)
+include(FetchContent)
+FetchContent_Declare(depa GIT_REPOSITORY https://example.invalid/a.git GIT_TAG 0123456789abcdef0123456789abcdef01234567 # v1.2.3
+)
+FetchContent_Declare(depc URL https://example.invalid/c.tar.gz URL_HASH SHA256=00)
+FetchContent_Declare(dep GIT_REPOSITORY https://example.invalid/d.git GIT_TAG 0123456789abcdef0123456789abcdef01234567 FIND_PACKAGE_ARGS)
+if(PROJECT_IS_TOP_LEVEL)
+  FetchContent_MakeAvailable(depa depc dep)
+endif()
+add_library(x INTERFACE)
+target_link_libraries(x INTERFACE dep::dep)
+find_package(Python3 COMPONENTS Interpreter)

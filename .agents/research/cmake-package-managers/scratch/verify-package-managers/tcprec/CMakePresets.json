@@ -1,0 +1,3 @@
+{ "version": 6, "configurePresets": [
+  { "name": "both", "binaryDir": "/home/mherwig/.cache/cmake-measure-scratch/verify-package-managers/tcprec/b1", "toolchainFile": "/home/mherwig/.cache/cmake-measure-scratch/verify-package-managers/tcprec/a.cmake", "cacheVariables": { "CMAKE_TOOLCHAIN_FILE": "/home/mherwig/.cache/cmake-measure-scratch/verify-package-managers/tcprec/b.cmake" } },
+  { "name": "cv", "binaryDir": "/home/mherwig/.cache/cmake-measure-scratch/verify-package-managers/tcprec/b2", "cacheVariables": { "CMAKE_TOOLCHAIN_FILE": "/home/mherwig/.cache/cmake-measure-scratch/verify-package-managers/tcprec/a.cmake" } } ] }

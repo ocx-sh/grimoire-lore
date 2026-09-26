@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.25...4.4)
+project(bslf C)
+set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
+add_subdirectory(../dep312 dep312)
+get_target_property(_a depA TYPE)
+message(STATUS "DEP_TYPE=${_a}")

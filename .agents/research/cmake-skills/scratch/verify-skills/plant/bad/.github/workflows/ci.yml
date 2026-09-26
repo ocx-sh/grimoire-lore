@@ -1,0 +1,6 @@
+steps:
+  - run: cmake -S . -B b -Werror=dev -DCMAKE_WARN_DEPRECATED=OFF
+  - run: cmake -S . -B b -Wno-dev
+  - run: cmake -S . -B b -Werror=dev -Wno-error=deprecated
+  - run: cmake -S . -B b -Werror=dev -Wno-error=deprecated -G Ninja
+  - run: cmake -S . -B b -Werror=author -Wno-deprecated

@@ -1,0 +1,5 @@
+function(proj_provider method name)
+  message(STATUS "[proj-provider] called for ${name}")
+endfunction()
+cmake_language(SET_DEPENDENCY_PROVIDER proj_provider SUPPORTED_METHODS FIND_PACKAGE)
+message(STATUS "[proj-provider] registered")

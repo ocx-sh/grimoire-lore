@@ -1,0 +1,2 @@
+{"version": 6, "configurePresets": [{"name": "ci", "toolchainFile": "/opt/vcpkg/scripts/buildsystems/vcpkg.cmake",
+ "cacheVariables": {"CMAKE_TOOLCHAIN_FILE": "/x/conan_toolchain.cmake", "CMAKE_POLICY_VERSION_MINIMUM": "3.5"}}]}

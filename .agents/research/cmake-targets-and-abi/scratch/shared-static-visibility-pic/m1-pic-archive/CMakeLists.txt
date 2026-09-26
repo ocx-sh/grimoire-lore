@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.25)
+project(picarchive C)
+add_subdirectory(stat)
+add_library(shared SHARED shared.c)
+target_link_libraries(shared PRIVATE stat)

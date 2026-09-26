@@ -1,0 +1,9 @@
+prefix=/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: libfoo
+Description: fake target-arch libfoo
+Version: 1.0.0
+Libs: -L${libdir} -lfoo
+Cflags: -I${includedir}

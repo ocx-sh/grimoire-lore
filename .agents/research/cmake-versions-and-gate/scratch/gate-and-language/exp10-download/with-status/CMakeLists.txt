@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.25)
+project(dl_status_test LANGUAGES NONE)
+file(DOWNLOAD "file:///nonexistent/path/does-not-exist.txt" "${CMAKE_BINARY_DIR}/out.txt" STATUS dl_status)
+message(STATUS "download STATUS=${dl_status}")
+message(STATUS "REACHED AFTER DOWNLOAD (configure continues)")

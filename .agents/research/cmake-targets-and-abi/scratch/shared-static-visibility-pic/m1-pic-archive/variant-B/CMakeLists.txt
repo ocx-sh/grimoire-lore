@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.25)
+project(picarchive_b C)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+add_subdirectory(../stat stat-build)
+add_library(shared SHARED ../shared.c)
+target_link_libraries(shared PRIVATE stat)

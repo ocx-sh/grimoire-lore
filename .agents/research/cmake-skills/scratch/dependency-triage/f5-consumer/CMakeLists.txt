@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.25)
+project(consumer LANGUAGES NONE)
+include(FetchContent)
+FetchContent_Declare(old34 SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../f5-fetched-old34")
+set(CMAKE_POLICY_VERSION_MINIMUM 3.10)
+FetchContent_MakeAvailable(old34)
+unset(CMAKE_POLICY_VERSION_MINIMUM)

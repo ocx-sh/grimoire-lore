@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.25)
+project(consumer LANGUAGES NONE)
+include(FetchContent)
+FetchContent_Declare(old37 SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../f6-fetched-old37")
+FetchContent_MakeAvailable(old37)

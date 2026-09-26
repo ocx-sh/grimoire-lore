@@ -1,0 +1,193 @@
+{
+ "date": "2026-09-26",
+ "rules": [
+  {
+   "rule": "cmake-build",
+   "core_family": "CMK-CORE",
+   "glob_list": [
+    "**/CMakeLists.txt",
+    "**/*.cmake",
+    "**/*.cmake.in",
+    "**/CMakeLists.txt.in",
+    "**/CMakePresets.json",
+    "**/CMakeUserPresets.json",
+    "**/*.pc.in",
+    "**/.gersemirc",
+    "**/.cmake-format*"
+   ],
+   "index_sources": [
+    "cmake-versions-and-gate.md",
+    "cmake-module-authoring.md",
+    "cmake-testing-and-ci.md",
+    "cmake-topic-map.md"
+   ],
+   "depth": [
+    {
+     "file": "versions-and-policies.md",
+     "family": "CMK-VER",
+     "sources": [
+      "cmake-versions-and-gate.md",
+      "cmake-topic-map.md"
+     ],
+     "task_hint": "choosing or raising cmake_minimum_required, setting a policy, touching a CMAKE_EXPERIMENTAL_* variable, or making an old dependency configure on CMake 4 (VER-06 is a citation per (d)5; VER-03 gains the lock clause per (d)15)"
+    },
+    {
+     "file": "language.md",
+     "family": "CMK-LANG",
+     "sources": [
+      "cmake-language.md",
+      "cmake-topic-map.md"
+     ],
+     "task_hint": "writing any function, macro, if(), loop, cache variable or option; returning a value from a function; chasing \"my -D did not take\" (pinned decision 7 appends the LANG-04 migration clause; (d)10 and (d)24 apply)"
+    },
+    {
+     "file": "module-authoring.md",
+     "family": "CMK-MOD",
+     "sources": [
+      "cmake-module-authoring.md",
+      "cmake-topic-map.md"
+     ],
+     "task_hint": "writing a .cmake file other projects include: a Find module, a helper module, anything that downloads or runs a process at configure time, or ships copy-and-own (MOD-12 gains the (d)6 clause)"
+    },
+    {
+     "file": "targets.md",
+     "family": "CMK-TGT",
+     "sources": [
+      "cmake-targets-and-abi.md",
+      "cmake-consumable-library.md",
+      "cmake-topic-map.md"
+     ],
+     "task_hint": "adding or changing a library or executable, linking anything, setting a flag, a language standard, visibility, PIC, shared or static, or C++20 modules (TGT-01..09 from targets-and-abi \"Carried\" applied to consumable-library row text, then TGT-10..20; never the consumable-library TGT copy per note 5.1; (d)1 and (d)2 apply)"
+    },
+    {
+     "file": "install-and-export.md",
+     "family": "CMK-INST",
+     "sources": [
+      "cmake-consumable-library.md",
+      "cmake-topic-map.md"
+     ],
+     "task_hint": "making the project installable or consumable: install rules, the Config package, CPS export, pkg-config, RPATH, the package version file, CPack (CMK-INST section only, never its TGT section; (d)13 applies)"
+    },
+    {
+     "file": "dependencies.md",
+     "family": "CMK-DEP",
+     "sources": [
+      "cmake-dependency-seam.md",
+      "cmake-skills.md",
+      "cmake-topic-map.md"
+     ],
+     "task_hint": "adding, pinning or replacing a dependency (find_package, FetchContent, CPM, Hunter, vendoring, CPS import) or finding out which copy was used (DEP-01..23 plus DEP-30..32 from cmake-skills.md with its amendments; (d)4, (d)5, (d)7 apply)"
+    },
+    {
+     "file": "toolchains-and-providers.md",
+     "family": "CMK-TC",
+     "sources": [
+      "cmake-dependency-seam.md",
+      "cmake-skills.md",
+      "cmake-topic-map.md"
+     ],
+     "task_hint": "wiring a toolchain file, a package manager's toolchain, CMAKE_PROJECT_TOP_LEVEL_INCLUDES or a dependency provider; cross-compiling (TC-01..10; TC-05 takes the skills amendment text per (d)3; DEFER is never offered as a fix)"
+    },
+    {
+     "file": "testing.md",
+     "family": "CMK-TEST",
+     "sources": [
+      "cmake-module-authoring.md",
+      "cmake-testing-and-ci.md",
+      "cmake-topic-map.md"
+     ],
+     "task_hint": "adding tests, gating the test tree, running CTest in CI, or testing a CMake module itself (TEST-01..05 from module-authoring, TEST-06..10 from testing-and-ci; (d)11 applies)"
+    },
+    {
+     "file": "presets-and-ci.md",
+     "family": "CMK-CI",
+     "sources": [
+      "cmake-testing-and-ci.md",
+      "cmake-topic-map.md"
+     ],
+     "task_hint": "editing CMakePresets.json, standing up or changing a pipeline that runs CMake, or pinning the CMake a pipeline uses; cmake --presets-file (4.4) routes here ((d)8 and (d)14 apply)"
+    },
+    {
+     "file": "bazel-seam.md",
+     "family": "CMK-BZL",
+     "sources": [
+      "cmake-bazel-seam.md",
+      "cmake-topic-map.md"
+     ],
+     "task_hint": "making the project wrappable by rules_foreign_cc, or keeping a CMake build and a Bazel build of the same code in step (BZL-02/-03/-04/-07/-08 cut to citations per note 5.3 and (d)19-21; BZL-CC-22/23/24/28 cited, never restated)"
+    }
+   ]
+  },
+  {
+   "rule": "cpp-packaging",
+   "core_family": "CMK-PKG",
+   "glob_list": [
+    "**/conanfile.py",
+    "**/conanfile.txt",
+    "**/conandata.yml",
+    "**/conan.lock",
+    "**/conanws.yml",
+    "**/conanws.py",
+    "**/vcpkg.json",
+    "**/vcpkg-configuration.json",
+    "**/portfile.cmake"
+   ],
+   "index_sources": [
+    "cmake-package-managers.md",
+    "cmake-dependency-seam.md",
+    "cmake-bazel-seam.md",
+    "cmake-topic-map.md"
+   ],
+   "depth": [
+    {
+     "file": "conan.md",
+     "family": "CMK-CONAN",
+     "sources": [
+      "cmake-package-managers.md",
+      "cmake-topic-map.md"
+     ],
+     "task_hint": "editing a conanfile, a Conan profile or conan.lock; wiring Conan into CMake; publishing a recipe (CONAN-08 is a citation of CI-02 per (d)8; (d)9 applies; Conan profiles have no fixed name and route here)"
+    },
+    {
+     "file": "vcpkg.md",
+     "family": "CMK-VCPKG",
+     "sources": [
+      "cmake-package-managers.md",
+      "cmake-consumable-library.md",
+      "cmake-topic-map.md"
+     ],
+     "task_hint": "editing vcpkg.json or vcpkg-configuration.json, a triplet or a portfile.cmake; wiring vcpkg into CMake; caching its binaries in CI (VCPKG-05 is a citation of TC-02; owner decision 8 adds one unofficial-<name> citation line)"
+    }
+   ]
+  }
+ ],
+ "standalone": [
+  {
+   "kind": "skill",
+   "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/skills/cmake-dependency-triage/SKILL.md",
+   "sources": [
+    "cmake-skills.md",
+    "cmake-dependency-seam.md",
+    "cmake-package-managers.md",
+    "cmake-consumable-library.md",
+    "cmake-skills/dependency-triage-procedure.md",
+    "cmake-topic-map.md"
+   ],
+   "brief": "SKILL: cmake-dependency-triage. The procedure for \"which copy, which version and which mechanism resolved this dependency, and why not the one I expected\": symptom first, then the measured read order of (d)4 (cache grep for <Pkg>_DIR first, --fresh only, never -L or --graphviz as the first move), then how to read each answer across find_package modes, FetchContent redirects, providers, toolchain-injected paths, the Conan graph (conan graph info / explain) and vcpkg traces, then the rule that fixes it. Write a skill directory in the shape of /home/mherwig/dev/grimoire-lore/.agents/worktrees/java/skills/jvm-dependency-triage/SKILL.md and /home/mherwig/dev/grimoire-lore/.agents/worktrees/java/skills/bazel-adopt/ (frontmatter name equal to the directory name, a one-line third-person description with a \"Use when\" clause that does not open with a workflow verb, summary, keywords, license Apache-2.0, repository https://github.com/ocx-sh/grimoire-lore). SKILL.md under 500 lines; move long tables or per-mechanism detail into references/<name>.md files one level deep, each linked from SKILL.md. The skill mints no rule IDs and carries no depth that belongs in a rule (authoring notes \u00a710). It ends with a | # | Finding | Rule | table repeating exactly the MUST rows note 3.1 lists for it, ID last, one-line text copied from the consolidation. Every command in it follows the verification-command shape and states what empty output means. Prove the commands the procedure depends on against a tiny planted project on the local CMake binaries before shipping them."
+  },
+  {
+   "kind": "skill",
+   "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/java/skills/cmake-modernize/SKILL.md",
+   "sources": [
+    "cmake-skills.md",
+    "cmake-targets-and-abi.md",
+    "cmake-consumable-library.md",
+    "cmake-versions-and-gate.md",
+    "cmake-language.md",
+    "cmake-skills/modernize-procedure.md",
+    "cmake-topic-map.md"
+   ],
+   "brief": "SKILL: cmake-modernize. Take a legacy tree to target-based and consumable, once per repository, in order: inventory, floor (report and ask, never raise it on its own: owner decision 9), targets, link keywords, flags and standards to targets or presets, top-level gating, install and export with a consumer round trip, as-subproject smoke, the configure gate and gersemi in CI, optional CPS and pkg-config. It lists every existing ${ARGN} parse as a finding with the flatten line of pinned decision 7 in the fix and never rewrites a public command without it. Write a skill directory in the shape of /home/mherwig/dev/grimoire-lore/.agents/worktrees/java/skills/jvm-dependency-triage/SKILL.md and /home/mherwig/dev/grimoire-lore/.agents/worktrees/java/skills/bazel-adopt/ (frontmatter name equal to the directory name, a one-line third-person description with a \"Use when\" clause that does not open with a workflow verb, summary, keywords, license Apache-2.0, repository https://github.com/ocx-sh/grimoire-lore). SKILL.md under 500 lines; move long tables or per-mechanism detail into references/<name>.md files one level deep, each linked from SKILL.md. The skill mints no rule IDs and carries no depth that belongs in a rule (authoring notes \u00a710). It ends with a | # | Finding | Rule | table repeating exactly the MUST rows note 3.1 lists for it, ID last, one-line text copied from the consolidation. Every command in it follows the verification-command shape and states what empty output means. Prove the commands the procedure depends on against a tiny planted project on the local CMake binaries before shipping them."
+  }
+ ]
+}

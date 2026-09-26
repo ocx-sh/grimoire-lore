@@ -156,3 +156,45 @@ language programs, most corrections came from those measurements: flag
 names, exit codes, tag semantics and cache-outage behaviour in the shipped
 docs, ruleset READMEs and release notes were each found wrong at least once.
 
+
+## CMake and C++ package management
+
+An eight-wave program (2026-09-05 to 2026-09-26, paused for three weeks after
+wave 1) behind the `cmake-build` and `cpp-packaging` rules and the
+`cmake-dependency-triage` and `cmake-modernize` skills, indexed by
+[cmake-topic-map.md](cmake-topic-map.md) and framed by
+[cmake-frame.md](cmake-frame.md), whose appended Corrections blocks record
+what each wave overturned (later blocks win). It is the companion of the Bazel
+program: this corpus owns the wrapped CMake project's side of the
+`rules_foreign_cc` seam, and cites the `BZL-CC` rows for the wrapper side.
+
+Ten consolidations (`cmake-<group>.md`: `versions-and-gate`,
+`dependency-seam`, `consumable-library`, `module-authoring`,
+`package-managers`, `bazel-seam`, `language`, `targets-and-abi`,
+`testing-and-ci`, `skills`) carry 14 rule families under the `CMK-` prefix,
+205 IDs of which 112 are MUST. Each sits over its dives and an opus
+verification ledger (`cmake-<group>/verification-wave<N>.md`) that re-ran or
+re-fetched the version and MUST claims and corrected about one in five in
+place. The owner-commissioned Common Package Specification round lives in
+`cmake-dependency-seam/cps-*.md`. Grounding ran against one fleet CMake module
+and an exemplar corpus of 46 upstream C and C++ repositories
+(`cmake-audit/`, with its fetch script and measurement scripts under
+`cmake-audit/scratch/`). Most load-bearing corrections came from running real
+CMake 3.31.12, 4.3.4 and 4.4.2 binaries against scratch projects: the
+configure-gate spelling per CMake line, CPS precedence over Config packages,
+`CACHE INTERNAL` implying `FORCE`, `CMAKE_POLICY_VERSION_MINIMUM` values, and
+the provider and toolchain-file interactions were each found different from
+the docs or from wave 1 at least once. The workflow scripts that ran every
+phase, and the generators that bake a wave's selection into them, are under
+`cmake-topic-map/scratch/`.
+
+Waves 4 to 8 tested the drafted set against reality rather than fixtures: a
+real Bazel 9 `rules_foreign_cc` wrap, CMake 4.0 to 4.2, both skills run
+literally on real legacy trees and real dependency scenarios, and every
+verification cell swept over real repositories (`wave<N>-*.md` ledgers under
+`cmake-audit/`, `cmake-skills/`, `cmake-bazel-seam/`,
+`cmake-versions-and-gate/` and `cmake-package-managers/`). Real trees never
+stop producing failure-mode instances, so the program converged on failure
+classes instead (`cmake-skills/fm-classes-modernize.md`,
+`fm-classes-triage.md`): held-out trees produced no new class and no new MUST
+row.

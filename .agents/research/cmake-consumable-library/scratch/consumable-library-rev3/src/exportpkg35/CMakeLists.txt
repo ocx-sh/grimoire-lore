@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.5)
+project(exportpkg35 LANGUAGES NONE VERSION 1.0.0)
+add_library(exportpkg35 INTERFACE)
+install(TARGETS exportpkg35 EXPORT exportpkg35Targets)
+install(EXPORT exportpkg35Targets NAMESPACE exportpkg35:: DESTINATION share/cmake/exportpkg35)
+export(EXPORT exportpkg35Targets)
+export(PACKAGE exportpkg35)

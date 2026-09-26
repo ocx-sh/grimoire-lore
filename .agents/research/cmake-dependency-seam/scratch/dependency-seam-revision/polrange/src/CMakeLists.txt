@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.25...4.4)
+project(pr LANGUAGES NONE)
+find_package(PythonInterp)
+message(STATUS "PI_FOUND=${PYTHONINTERP_FOUND}")
+find_package(PythonInterp QUIET)
+message(STATUS "PI_QUIET_FOUND=${PYTHONINTERP_FOUND}")
+find_package(Python3 COMPONENTS Interpreter QUIET)
+message(STATUS "PY3_FOUND=${Python3_FOUND}")

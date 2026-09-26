@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.25...4.4)
+project(mylib LANGUAGES C)
+add_library(mylib INTERFACE)
+if(PROJECT_IS_TOP_LEVEL)
+  add_custom_target(mylib_unit_tests)
+endif()
+add_custom_target(mylib_examples_leaked)

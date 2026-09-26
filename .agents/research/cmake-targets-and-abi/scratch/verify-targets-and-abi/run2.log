@@ -1,0 +1,88 @@
+######## cmake 3.31
+== VIS HIDE=OFF
+000000000001e170 W header_inline(int)
+000000000001e110 T internal_helper(int)
+000000000001e150 T api_fn(int)
+== VIS HIDE=ON
+000000000001e0b0 T api_fn(int)
+== PREFIX MAP=OFF cmp: /home/mherwig/.cache/cmake-measure-scratch/verify-targets-and-abi/b2/3.31/dirA/src-OFF/build/CMakeFiles/lib.dir/lib.c.o /home/mherwig/.cache/cmake-measure-scratch/verify-targets-and-abi/b2/3.31/dirB_longer/src-OFF/build/CMakeFiles/lib.dir/lib.c.o differ: byte 41, line 1
+files embedding SRC_DIR: 1
+== PREFIX MAP=ON cmp: identical
+files embedding SRC_DIR: 0
+== SCAN Ninja STD=17
+configure exit=0
+-- CMP0155=[NEW]
+/home/mherwig/.cache/cmake-measure-scratch/verify-targets-and-abi/b2/3.31/Ninja-STD_17/build.ninja:0
+build exit=0
+== SCAN Ninja STD=20
+configure exit=0
+-- CMP0155=[NEW]
+/home/mherwig/.cache/cmake-measure-scratch/verify-targets-and-abi/b2/3.31/Ninja-STD_20/build.ninja:2
+build exit=127
+/bin/sh: line 1: CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS-NOTFOUND: command not found
+== SCAN Ninja STD=20 NOSCAN=ON
+configure exit=0
+-- CMP0155=[NEW]
+/home/mherwig/.cache/cmake-measure-scratch/verify-targets-and-abi/b2/3.31/Ninja-STD_20_NOSCAN_ON/build.ninja:0
+build exit=0
+== SCAN Unix Makefiles STD=17
+configure exit=0
+-- CMP0155=[NEW]
+build exit=0
+== SCAN Unix Makefiles STD=20
+configure exit=0
+-- CMP0155=[NEW]
+build exit=0
+== SCAN Unix Makefiles STD=20 NOSCAN=ON
+configure exit=0
+-- CMP0155=[NEW]
+build exit=0
+/home/mherwig/.cache/cmake-measure-scratch/verify-targets-and-abi/b2/3.31/Ninja-STD_20/CMakeCache.txt:CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS:FILEPATH=CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS-NOTFOUND
+/home/mherwig/.cache/cmake-measure-scratch/verify-targets-and-abi/b2/3.31/Ninja-STD_20/CMakeCache.txt://ADVANCED property for variable: CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS
+/home/mherwig/.cache/cmake-measure-scratch/verify-targets-and-abi/b2/3.31/Ninja-STD_20/CMakeCache.txt:CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS-ADVANCED:INTERNAL=1
+/home/mherwig/.cache/cmake-measure-scratch/verify-targets-and-abi/b2/3.31/Ninja-STD_20/CMakeFiles/3.31.12/CMakeCXXCompiler.cmake:set(CMAKE_CXX_COMPILER_VERSION "21.1.0")
+/home/mherwig/.cache/cmake-measure-scratch/verify-targets-and-abi/b2/3.31/Ninja-STD_20/CMakeFiles/3.31.12/CMakeCXXCompiler.cmake:set(CMAKE_CXX_COMPILER_VERSION_INTERNAL "")
+######## cmake 4.4
+== VIS HIDE=OFF
+000000000001e170 W header_inline(int)
+000000000001e110 T internal_helper(int)
+000000000001e150 T api_fn(int)
+== VIS HIDE=ON
+000000000001e0b0 T api_fn(int)
+== PREFIX MAP=OFF cmp: /home/mherwig/.cache/cmake-measure-scratch/verify-targets-and-abi/b2/4.4/dirA/src-OFF/build/CMakeFiles/lib.dir/lib.c.o /home/mherwig/.cache/cmake-measure-scratch/verify-targets-and-abi/b2/4.4/dirB_longer/src-OFF/build/CMakeFiles/lib.dir/lib.c.o differ: byte 41, line 1
+files embedding SRC_DIR: 1
+== PREFIX MAP=ON cmp: identical
+files embedding SRC_DIR: 0
+== SCAN Ninja STD=17
+configure exit=0
+-- CMP0155=[NEW]
+/home/mherwig/.cache/cmake-measure-scratch/verify-targets-and-abi/b2/4.4/Ninja-STD_17/build.ninja:0
+build exit=0
+== SCAN Ninja STD=20
+configure exit=0
+-- CMP0155=[NEW]
+/home/mherwig/.cache/cmake-measure-scratch/verify-targets-and-abi/b2/4.4/Ninja-STD_20/build.ninja:2
+build exit=127
+/bin/sh: line 1: CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS-NOTFOUND: command not found
+== SCAN Ninja STD=20 NOSCAN=ON
+configure exit=0
+-- CMP0155=[NEW]
+/home/mherwig/.cache/cmake-measure-scratch/verify-targets-and-abi/b2/4.4/Ninja-STD_20_NOSCAN_ON/build.ninja:0
+build exit=0
+== SCAN Unix Makefiles STD=17
+configure exit=0
+-- CMP0155=[NEW]
+build exit=0
+== SCAN Unix Makefiles STD=20
+configure exit=0
+-- CMP0155=[NEW]
+build exit=0
+== SCAN Unix Makefiles STD=20 NOSCAN=ON
+configure exit=0
+-- CMP0155=[NEW]
+build exit=0
+/home/mherwig/.cache/cmake-measure-scratch/verify-targets-and-abi/b2/4.4/Ninja-STD_20/CMakeCache.txt:CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS:FILEPATH=CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS-NOTFOUND
+/home/mherwig/.cache/cmake-measure-scratch/verify-targets-and-abi/b2/4.4/Ninja-STD_20/CMakeCache.txt://ADVANCED property for variable: CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS
+/home/mherwig/.cache/cmake-measure-scratch/verify-targets-and-abi/b2/4.4/Ninja-STD_20/CMakeCache.txt:CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS-ADVANCED:INTERNAL=1
+/home/mherwig/.cache/cmake-measure-scratch/verify-targets-and-abi/b2/4.4/Ninja-STD_20/CMakeFiles/4.4.2/CMakeCXXCompiler.cmake:set(CMAKE_CXX_COMPILER_VERSION "21.1.0")
+/home/mherwig/.cache/cmake-measure-scratch/verify-targets-and-abi/b2/4.4/Ninja-STD_20/CMakeFiles/4.4.2/CMakeCXXCompiler.cmake:set(CMAKE_CXX_COMPILER_VERSION_INTERNAL "")

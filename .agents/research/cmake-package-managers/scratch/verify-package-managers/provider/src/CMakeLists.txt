@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.25)
+project(p CXX)
+find_package(Beta REQUIRED)
+message(STATUS "Beta_FOUND=${Beta_FOUND} target=$<TARGET_EXISTS:Beta::beta>")
+if(TARGET Beta::beta)
+  message(STATUS "HAVE_TARGET Beta::beta")
+endif()

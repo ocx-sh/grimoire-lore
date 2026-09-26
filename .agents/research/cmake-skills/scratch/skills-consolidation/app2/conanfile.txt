@@ -1,0 +1,5 @@
+[requires]
+gamma/1.0
+[generators]
+CMakeConfigDeps
+CMakeToolchain

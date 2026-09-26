@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.25...4.4)
+project(provscope LANGUAGES CXX)
+add_subdirectory(sub)
+find_program(TOOL_TOP NAMES gammatool)
+message(STATUS "[top, after subdir find_package] find_program(gammatool)=${TOOL_TOP}")
+find_package(Gamma REQUIRED)
+find_program(TOOL_TOP2 NAMES gammatool)
+message(STATUS "[top, after own find_package] find_program(gammatool)=${TOOL_TOP2}")

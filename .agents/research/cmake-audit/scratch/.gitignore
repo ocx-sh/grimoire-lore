@@ -1,0 +1,5 @@
+# Generated file lists and call tables over the exemplar corpus (2-5 MB each).
+# Regenerate: fetch-exemplars.sh, then the shape-corpus-counts.sh and deps-*.sh scripts here.
+all-cmake-files.txt
+all-cmake-files-nokitware.txt
+calls.tsv

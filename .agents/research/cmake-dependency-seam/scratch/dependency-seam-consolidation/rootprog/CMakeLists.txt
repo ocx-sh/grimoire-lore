@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.25)
+project(rootprog LANGUAGES NONE)
+set(dep_ROOT "${WANT_ROOT}" CACHE PATH "hint" FORCE)
+find_program(DEPPROG_EXE NAMES depprog)
+message(STATUS "[rootprog] top-level find_program with dep_ROOT set: DEPPROG_EXE=${DEPPROG_EXE}")

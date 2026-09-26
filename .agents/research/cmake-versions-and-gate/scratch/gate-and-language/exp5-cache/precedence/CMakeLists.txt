@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.25)
+project(precedence_test LANGUAGES NONE)
+option(MYVAR "an option" OFF)
+message(STATUS "after-option MYVAR=${MYVAR}")
+set(MYVAR "from-set-no-cache")
+message(STATUS "after-plain-set MYVAR=${MYVAR}")

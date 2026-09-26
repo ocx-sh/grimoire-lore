@@ -1,0 +1,79 @@
+Warning: unknown command '__ocx_snapshot_env' used at:
+/home/mherwig/dev/find_ocx/ocx.cmake:391:3
+
+Warning: unknown command '__ocx_env_prefix' used at:
+/home/mherwig/dev/find_ocx/ocx.cmake:443:3
+/home/mherwig/dev/find_ocx/ocx.cmake:938:3
+/home/mherwig/dev/find_ocx/ocx.cmake:1164:3
+/home/mherwig/dev/find_ocx/ocx.cmake:1373:5
+
+Warning: unknown command '__ocx_default_hint' used at:
+/home/mherwig/dev/find_ocx/ocx.cmake:470:5
+
+Warning: unknown command 'ocx_bootstrap' used at:
+/home/mherwig/dev/find_ocx/ocx.cmake:595:7
+
+Warning: unknown command '__ocx_set_result' used at:
+/home/mherwig/dev/find_ocx/ocx.cmake:634:3
+/home/mherwig/dev/find_ocx/ocx.cmake:635:3
+/home/mherwig/dev/find_ocx/ocx.cmake:661:9
+/home/mherwig/dev/find_ocx/ocx.cmake:666:3
+/home/mherwig/dev/find_ocx/ocx.cmake:667:3
+/home/mherwig/dev/find_ocx/ocx.cmake:985:5
+/home/mherwig/dev/find_ocx/ocx.cmake:989:7
+/home/mherwig/dev/find_ocx/ocx.cmake:1197:5
+/home/mherwig/dev/find_ocx/ocx.cmake:1222:5
+/home/mherwig/dev/find_ocx/ocx.cmake:1226:7
+
+Warning: unknown command '__ocx_cli_version' used at:
+/home/mherwig/dev/find_ocx/ocx.cmake:704:5
+/home/mherwig/dev/find_ocx/ocx.cmake:932:3
+/home/mherwig/dev/find_ocx/ocx.cmake:1162:3
+
+Warning: unknown command '__ocx_host_info' used at:
+/home/mherwig/dev/find_ocx/ocx.cmake:712:3
+
+Warning: unknown command '__ocx_select_release' used at:
+/home/mherwig/dev/find_ocx/ocx.cmake:751:5
+
+Warning: unknown command '__ocx_register_name' used at:
+/home/mherwig/dev/find_ocx/ocx.cmake:882:3
+/home/mherwig/dev/find_ocx/ocx.cmake:1081:3
+
+Warning: unknown command '__ocx_default_toml' used at:
+/home/mherwig/dev/find_ocx/ocx.cmake:887:5
+
+Warning: unknown command '__ocx_require_cli' used at:
+/home/mherwig/dev/find_ocx/ocx.cmake:923:3
+/home/mherwig/dev/find_ocx/ocx.cmake:1099:3
+/home/mherwig/dev/find_ocx/ocx.cmake:1371:5
+
+Warning: unknown command '__ocx_memo_hit' used at:
+/home/mherwig/dev/find_ocx/ocx.cmake:941:3
+/home/mherwig/dev/find_ocx/ocx.cmake:1166:3
+
+Warning: unknown command '__ocx_run' used at:
+/home/mherwig/dev/find_ocx/ocx.cmake:958:3
+/home/mherwig/dev/find_ocx/ocx.cmake:967:5
+/home/mherwig/dev/find_ocx/ocx.cmake:976:5
+/home/mherwig/dev/find_ocx/ocx.cmake:1183:5
+/home/mherwig/dev/find_ocx/ocx.cmake:1189:5
+/home/mherwig/dev/find_ocx/ocx.cmake:1213:5
+
+Warning: unknown command '__ocx_export_env' used at:
+/home/mherwig/dev/find_ocx/ocx.cmake:981:5
+/home/mherwig/dev/find_ocx/ocx.cmake:1218:5
+
+Warning: unknown command '__ocx_memo_store' used at:
+/home/mherwig/dev/find_ocx/ocx.cmake:993:3
+/home/mherwig/dev/find_ocx/ocx.cmake:1230:3
+
+Warning: unknown command '__ocx_find_index' used at:
+/home/mherwig/dev/find_ocx/ocx.cmake:1116:7
+/home/mherwig/dev/find_ocx/ocx.cmake:1308:5
+/home/mherwig/dev/find_ocx/ocx.cmake:1340:7
+
+Warning: unknown command '__ocx_self_update' used at:
+/home/mherwig/dev/find_ocx/ocx.cmake:1507:3
+
+/home/mherwig/dev/find_ocx/ocx.cmake would be reformatted

@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.25...4.4)
+project(parent C)
+add_subdirectory(lib)
+message(STATUS "PARENT_AFTER_SUB=[${CMAKE_BUILD_TYPE}]")
+add_library(a STATIC a.c)

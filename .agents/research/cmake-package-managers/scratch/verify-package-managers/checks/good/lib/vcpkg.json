@@ -1,0 +1,4 @@
+{
+  "name": "good",
+  "dependencies": [{ "name": "zlib", "version>=": "1.3" }]
+}

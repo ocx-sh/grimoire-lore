@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.20)
+project(rj_consumer CXX)
+find_package(RapidJSON CONFIG REQUIRED)
+add_executable(app main.cpp)
+target_link_libraries(app PRIVATE RapidJSON)

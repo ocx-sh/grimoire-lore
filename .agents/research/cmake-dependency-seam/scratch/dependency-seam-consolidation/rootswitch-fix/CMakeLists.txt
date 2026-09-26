@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.25)
+project(rootswitchfix LANGUAGES NONE)
+if(DEFINED CACHE{dep_ROOT} AND NOT "$CACHE{dep_ROOT}" STREQUAL "${WANT_ROOT}")
+  unset(dep_DIR CACHE)
+endif()
+set(dep_ROOT "${WANT_ROOT}" CACHE PATH "hint" FORCE)
+find_package(dep CONFIG REQUIRED)
+message(STATUS "[rootswitch-fix] dep_DIR=${dep_DIR} dep_WHICH=${dep_WHICH}")

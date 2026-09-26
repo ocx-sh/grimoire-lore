@@ -1,0 +1,10 @@
+metric	count_of_40
+vcpkg_cmake_configure	32
+vcpkg_cmake_install	31
+vcpkg_cmake_config_fixup	24
+vcpkg_fixup_pkgconfig	9
+vcpkg_copy_pdbs	16
+vcpkg_from_github	36
+vcpkg_from_github_with_SHA512	40
+OPTIONS_-D_passed	26
+usage_file_present	5

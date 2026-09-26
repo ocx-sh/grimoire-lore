@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.25)
+project(guard_test LANGUAGES NONE)
+add_subdirectory(sub1)
+add_subdirectory(sub2)
+get_property(v GLOBAL PROPERTY MYMODULE_VERSION)
+message(STATUS "top-level GLOBAL property MYMODULE_VERSION=${v}")

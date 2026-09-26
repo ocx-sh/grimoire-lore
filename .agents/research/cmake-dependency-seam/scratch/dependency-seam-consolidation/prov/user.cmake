@@ -1,0 +1,5 @@
+function(user_provider method name)
+  message(STATUS "[user-provider] called for ${name}")
+endfunction()
+cmake_language(SET_DEPENDENCY_PROVIDER user_provider SUPPORTED_METHODS FIND_PACKAGE)
+message(STATUS "[user-provider] registered")

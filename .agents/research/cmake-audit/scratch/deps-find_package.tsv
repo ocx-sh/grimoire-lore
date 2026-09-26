@@ -1,0 +1,10 @@
+metric	count
+total_find_package_calls	6957
+with_CONFIG	2852
+with_MODULE	117
+with_REQUIRED	5156
+with_COMPONENTS	1528
+with_GLOBAL	6
+with_QUIET	350
+with_version_token	222
+with_version_range	13

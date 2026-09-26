@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.10)
+project(cpmleak LANGUAGES NONE)
+cmake_policy(GET CMP0077 before)
+include(cmake/CPM.cmake)
+cmake_policy(GET CMP0077 after)
+message(STATUS "[cpmleak] includer CMP0077 before='${before}' after='${after}' CMAKE_POLICY_DEFAULT_CMP0077='${CMAKE_POLICY_DEFAULT_CMP0077}' CMP0135='${CMAKE_POLICY_DEFAULT_CMP0135}'")

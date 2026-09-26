@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.25)
+project(rootswitch LANGUAGES NONE)
+set(dep_ROOT "${WANT_ROOT}" CACHE PATH "hint written the way a provisioning module does" FORCE)
+find_package(dep CONFIG REQUIRED)
+message(STATUS "[rootswitch] dep_ROOT=${dep_ROOT} dep_DIR=${dep_DIR} dep_WHICH=${dep_WHICH}")

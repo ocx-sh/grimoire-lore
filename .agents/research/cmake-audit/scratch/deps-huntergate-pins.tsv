@@ -1,0 +1,6 @@
+cpp-pm__hunter	examples/common.cmake	30	HunterGate	URL "${TESTING_URL}" SHA1 "${TESTING_SHA1}" ${TESTING_CONFIG_OPT}
+cpp-pm__hunter	examples/common.cmake	33	HunterGate	URL "x" SHA1 "xxxxxxxx" ${TESTING_CONFIG_OPT}
+cpp-pm__hunter	examples/Protobuf/cmake/host/CMakeLists.txt	7	HunterGate	URL "${HUNTER_HOST_URL}" SHA1 "${HUNTER_HOST_SHA1}"
+cpp-pm__hunter	examples/Protobuf-optimized/cmake/host/CMakeLists.txt	7	HunterGate	URL "${HUNTER_HOST_URL}" SHA1 "${HUNTER_HOST_SHA1}" FILEPATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Hunter/config.cmake
+cpp-pm__hunter	examples/Protobuf-legacy/cmake/host/CMakeLists.txt	7	HunterGate	URL "${HUNTER_HOST_URL}" SHA1 "${HUNTER_HOST_SHA1}"
+nlohmann__json	docs/mkdocs/docs/integration/hunter/CMakeLists.txt	4	HunterGate	URL "https://github.com/cpp-pm/hunter/archive/v0.23.297.tar.gz" SHA1 "3319fe6a3b08090df7df98dee75134d68e2ef5a3"

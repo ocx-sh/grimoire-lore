@@ -1,0 +1,64 @@
+base                   rc=1  CMake Deprecation Error at /home/mherwig/.cache/cmake-measur
+wnoerrdep-a            rc=1  CMake Deprecation Error at /home/mherwig/.cache/cmake-measur
+wnoerrdep-b            rc=1  CMake Deprecation Error at /home/mherwig/.cache/cmake-measur
+warndepoff             rc=0    Manually-specified variables were not used by the project:
+own-warndepoff         rc=0    Manually-specified variables were not used by the project:
+wnodev-a               rc=0  
+wnodev-b               rc=1  CMake Deprecation Error at /home/mherwig/.cache/cmake-measur
+wnodep-a               rc=0  
+wnodep-b               rc=0  
+wnodep-own             rc=0  
+range                  rc=0  
+pvm-ignored            rc=0    Manually-specified variables were not used by the project:
+base43                 rc=1  CMake Deprecation Error at /home/mherwig/.cache/cmake-measur
+range43                rc=0  
+wnodep43               rc=0  
+base44                 rc=1  CMake Error (deprecated) at /home/mherwig/.cache/cmake-measu
+range44                rc=0  
+wnodep44-a             rc=0  
+wnodep44-b             rc=1  CMake Error (deprecated) at /home/mherwig/.cache/cmake-measu
+wnoerrdep44            rc=0  
+warndepoff44           rc=1  CMake Error (deprecated) at /home/mherwig/.cache/cmake-measu
+dep34                  rc=1  CMake Error at /home/mherwig/.cache/cmake-measure-scratch/ve
+pvm35                  rc=1  CMake Error (deprecated) at /home/mherwig/.cache/cmake-measu
+pvm310                 rc=0  
+preset-nodep-3.31     rc=0
+preset-nodep-4.4      rc=1
+mo-srcdir-3.31         rc=0  
+mo-git-3.31            rc=0  
+mo-override-3.31       rc=1  CMake Deprecation Error at /home/mherwig/.cache/cmake-measur
+mo-srcdir-4.3          rc=0  
+mo-git-4.3             rc=0  
+mo-override-4.3        rc=1  CMake Deprecation Error at /home/mherwig/.cache/cmake-measur
+mo-srcdir-4.4          rc=0  
+mo-git-4.4             rc=0  
+mo-override-4.4        rc=1  CMake Error (deprecated) at /home/mherwig/.cache/cmake-measu
+f1-3.31                rc=0  
+f1-3.31/CMakeCache.txt:81:dep_DIR:PATH=f1-3.31/CMakeFiles/pkgRedirects
+f2a-3.31               rc=0  
+f2 reuse 3.31: -- dep_DIR=instA/lib/cmake/dep  debug names instB: 0
+cmake -L lists dep_ROOT: 0
+find_package-v1 events: f2-3.31/CMakeFiles/CMakeConfigureLog.yaml:0
+f1-4.4                 rc=0  
+f1-4.4/CMakeCache.txt:90:dep_DIR:PATH=f1-4.4/CMakeFiles/pkgRedirects
+f2a-4.4                rc=0  
+f2 reuse 4.4: -- dep_DIR=instA/lib/cmake/dep  debug names instB: 0
+cmake -L lists dep_ROOT: 0
+find_package-v1 events: f2-4.4/CMakeFiles/CMakeConfigureLog.yaml:2
+-- dep_DIR=instC-4.3/lib/cps/dep
+-- dep_DIR=instC-4.4/lib/cps/dep
+trace-mod              rc=0  
+declare lines traced: 0
+smoke 3.31 lib-clean
+tests grep: [smoke-3.31-lib-clean/asub-tests.txt:Total Tests: 0]
+target grep: []
+smoke 3.31 lib-leak
+tests grep: []
+target grep: [smoke-3.31-lib-leak/asub-targets.txt:mylib_unit_tests: phony]
+smoke 4.4 lib-clean
+tests grep: [smoke-4.4-lib-clean/asub-tests.txt:Total Tests: 0]
+target grep: []
+smoke 4.4 lib-leak
+tests grep: []
+target grep: [smoke-4.4-lib-leak/asub-targets.txt:mylib_unit_tests: phony]
+Unknown argument --directory

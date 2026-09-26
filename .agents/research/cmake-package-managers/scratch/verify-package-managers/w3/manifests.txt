@@ -1,0 +1,9 @@
+aminya__project_options/tests/emscripten/vcpkg.json
+aminya__project_options/tests/install/vcpkg.json
+aminya__project_options/tests/minimal/vcpkg.json
+aminya__project_options/tests/myproj/vcpkg.json
+aminya__project_options/tests/rpi4-vcpkg/vcpkg.json
+apache__arrow/c_glib/vcpkg.json
+apache__arrow/ci/vcpkg/vcpkg.json
+apache__arrow/cpp/vcpkg.json
+friendlyanon__cmake-init/cmake-init/templates/common/vcpkg.json

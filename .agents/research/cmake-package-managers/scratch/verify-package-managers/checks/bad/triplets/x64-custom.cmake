@@ -1,0 +1,3 @@
+set(VCPKG_CRT_LINKAGE static)
+include(${CMAKE_CURRENT_LIST_DIR}/common.cmake)
+set(VCPKG_DISABLE_COMPILER_TRACKING ON)

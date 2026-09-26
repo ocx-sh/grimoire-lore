@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.4)
+project(depold VERSION 9.0.0 LANGUAGES C)
+add_library(depold STATIC src/dep.c)
+target_include_directories(depold PUBLIC include)
+target_compile_definitions(depold PRIVATE DEP_TAG="old-3.4-floor")
+message(STATUS "[depold] configured OK, CMAKE_POLICY_VERSION set to floor")

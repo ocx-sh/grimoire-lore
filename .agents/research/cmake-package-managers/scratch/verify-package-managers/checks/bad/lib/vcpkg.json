@@ -1,0 +1,5 @@
+{
+  "name": "bad",
+  "dependencies": ["zlib", "vcpkg-cmake"],
+  "overrides": [{ "name": "zlib", "version": "1.3" }]
+}

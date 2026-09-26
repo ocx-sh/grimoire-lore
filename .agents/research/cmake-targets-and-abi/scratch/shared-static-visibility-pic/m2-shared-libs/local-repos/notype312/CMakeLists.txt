@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.12)
+project(depnotype C)
+cmake_policy(GET CMP0077 _pol)
+message(STATUS "CMP0077=${_pol} BEFORE_OPTION_BUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}")
+option(BUILD_SHARED_LIBS "Build shared" OFF)
+message(STATUS "AFTER_OPTION_BUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}")
+add_library(dep dep.c)
