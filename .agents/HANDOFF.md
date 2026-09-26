@@ -1,3 +1,57 @@
+# Go expertise artifact program (AUTHORED, ON BRANCH `go`)
+
+Started and finished 2026-09-26 in the `go` worktree (`.agents/worktrees/go`,
+branch `go`). Brief: one word, "go"; owner goal: fully autonomous run to Go and
+ecosystem expertise. Map owner-question defaults applied (`go-frame.md` ›
+"Orchestrator decisions").
+
+## What shipped (0.1.0, bazel-quality 0.3.0)
+
+| Artifact | Path | Notes |
+|---|---|---|
+| `go-quality` (rule) | `rules/go-quality.md` + 10 depth files | `**/*.go`; 179-line index, 18 non-negotiables, GO-CORE-01..05; 203 rule rows, 126 MUST |
+| `go-modules` (rule) | `rules/go-modules.md` + `gates.md`, `release.md`, `golangci/{baseline,cli,lib-sdk}.golangci.yml` | 13 globs (N-1); index owns GO-MOD-01..18; all three configs pass `golangci-lint config verify` (v2.14.0) |
+| `go-release`, `go-upgrade`, `go-diagnose` (skills) | `skills/go-*/` | procedures only; MUST rows duplicated in a Finding/Rule table |
+| `go-essentials` (bundle) | `bundles/go-essentials.toml` | five members, untagged; `bazel-quality/go.md` not a member |
+| `bazel-quality/go.md` | BZL-GO-01..15 | routing row, keywords, Siblings in `rules/bazel-quality.md`; version 0.2.0 → 0.3.0 |
+| Companions and mark | `docs/go-*.md`, `docs/bazel-quality.md`, `assets/lore-go.svg` (lucide squirrel on Go blue) | counts measured by command |
+
+## Program record
+
+| Phase | Result | Where |
+|---|---|---|
+| Ground + scout | 5 audits over a 35-repo exemplar corpus with real tool runs, 7 scouts | `go-audit/`, `go-topic-map/` |
+| Map | 238 rows, 26 conflicts, 15 families, 3 skills | `go-topic-map.md` |
+| Waves 2–4 | 36 dives, 14 consolidations; wave 4 added generics/iterators and performance by self-direction | `go-<group>.md` |
+| Converge | ready-to-draft: 269 IDs, 179 MUST, notes N-1..N-14 | `go-topic-map.md` › "Wave 4 landed" |
+| Author, review, fix | 18 drafters; 6 reviewers ran 99 verifications on planted fixtures (14 blockers, 50 fixes); 21 fixers; N-15..N-17 ratified | `go-topic-map.md` › "Authoring landed" |
+| Validate | checker clean; `task ci` green; glob liveness clean vs ko with `GO_CONSUMER`; `grim publish --dry-run` lists exactly the 7 packages | |
+
+Cost: ~27M subagent tokens (research ~16.2M, authoring 3.5M, review 1.5M, fix 1.1M, docs 0.6M).
+
+## Open, deliberately
+
+- Rule trigger evals in a fresh client session were not run (no Go consumer in the fleet).
+- Windows and macOS legs (GO-CLI-07/08/13, GO-API Windows kill path), GitHub OIDC keyless green path, and Bazel cross-platform byte identity need runners this host lacks; each consolidation lists them.
+- Dated re-checks live in the go-upgrade skill (N-12): gopls yield analyzer reaching vet, nojsonv2 and nogreenteagc removal, golang/go#74763, the vendored toonew.go json/v2 exclusion.
+- Two scratch paths are intentionally uncommitted (`go-topic-map/scratch/go.mod`, a worker's; `go-audit/scratch/filelists/`, regenerable) — delete them by hand.
+
+## Environment
+
+- Toolchain: Go 1.27.1 via ocx plus staticcheck 2026.2.1, golangci-lint 2.14.0,
+  govulncheck, gofumpt, goimports, deadcode, modernize, all under
+  `~/.cache/research-lang/go-tools/`; run anything as
+  `~/.cache/research-lang/go-tools/run.sh <cmd>` (caches on disk, never /tmp).
+  Planted fixtures live in `~/.cache/research-lang/go-tools/fixtures/<slug>/`.
+- Exemplars: `~/.cache/research-lang/exemplars/go/<owner>__<repo>` (974 MB,
+  disposable; recreate with `go-audit/scratch/fetch-exemplars.sh <dir>`).
+- Scripts: `go-topic-map/scratch/` — `go-wave1.mjs`, `go-map.mjs`,
+  `go-dive-wave.template.mjs` + `mkwave.py` (bakes a selection), 
+  `go-harvest.template.mjs` + `mkharvest.py` (bakes a receipt).
+- Cost so far: wave 1 2.26M, map 0.21M, wave 2 4.50M, harvest 0.38M subagent tokens.
+
+---
+
 # JVM quality artifact program (AUTHORED, ON BRANCH `cmake`)
 
 Started 2026-09-05 22:57 CEST in the `cmake` worktree

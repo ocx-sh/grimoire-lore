@@ -1,0 +1,200 @@
+aquasecurity__trivy:internal/gittest/server.go:28: When:  time.Now(),
+aquasecurity__trivy:internal/dbtest/db.go:86: NextUpdate: time.Now().Add(24 * time.Hour),
+aquasecurity__trivy:internal/dbtest/db.go:87: UpdatedAt:  time.Now(),
+aquasecurity__trivy:magefiles/vex.go:388: vex.SortStatements(statements, time.Now())
+aquasecurity__trivy:magefiles/vex.go:393: Timestamp: new(time.Now()),
+aquasecurity__trivy:pkg/mapfs/file.go:187: modTime: time.Now(),
+aquasecurity__trivy:pkg/mapfs/file.go:237: modTime: time.Now(),
+aquasecurity__trivy:pkg/mapfs/fs.go:57: modTime: time.Now(),
+aquasecurity__trivy:pkg/iac/scanners/terraform/parser/funcs/datetime.go:20: return cty.StringVal(time.Now().UTC().Format(time.RFC3339)), nil
+aquasecurity__trivy:pkg/iac/ignore/rule.go:112: return ok && time.Now().Before(expiry)
+aquasecurity__trivy:pkg/iac/ignore/parse.go:171: } else if time.Now().After(parsed) {
+aquasecurity__trivy:pkg/javadb/client.go:76: meta.DownloadedAt = time.Now().UTC()
+aquasecurity__trivy:pkg/javadb/client.go:88: now := time.Now().UTC()
+bazel-contrib__rules_go:go/tools/bazel_benchmark/bazel_benchmark.go:169: return recordResults(outPath, time.Now().UTC(), bazelVersion, commit, benchmarks)
+bazel-contrib__rules_go:go/tools/bazel_benchmark/bazel_benchmark.go:301: start := time.Now()
+bazel-contrib__rules_go:go/tools/bzltestutil/test2json.go:119: start: time.Now(),
+bazel-contrib__rules_go:go/tools/bzltestutil/test2json.go:407: t := time.Now()
+bazel-contrib__rules_go:go/tools/releaser/upgradedep.go:363: date := time.Now().Format("2006-01-02")
+bazelbuild__bazel-gazelle:cmd/autogazelle/server_unix.go:88: if err := uln.SetDeadline(time.Now().Add(*serverTimeout)); err != nil {
+bazelbuild__bazel-gazelle:cmd/autogazelle/client_unix.go:35: startTime := time.Now()
+caddyserver__caddy:modules/caddypki/maintain.go:114: return time.Now().After(renewalWindowStart)
+caddyserver__caddy:modules/caddypki/certificates.go:65: cert.NotBefore = time.Now().Truncate(time.Second)
+caddyserver__caddy:modules/caddytls/internalissuer.go:124: if time.Now().Add(lifetime).After(issuerCert.NotAfter) {
+caddyserver__caddy:modules/caddytls/internalissuer.go:195: cert.NotBefore = time.Now()
+caddyserver__caddy:modules/caddytls/tls.go:1060: storageClean = time.Now()
+caddyserver__caddy:modules/caddytls/distributedstek/distributedstek.go:170: } else if time.Now().After(dstek.NextRotation) {
+caddyserver__caddy:modules/caddytls/distributedstek/distributedstek.go:193: now := time.Now()
+caddyserver__caddy:modules/caddytls/standardstek/stek.go:65: lastRotation = time.Now()
+caddyserver__caddy:modules/caddytls/ech.go:261: ech.configs[publicName][i].meta.Replaced = time.Now()
+caddyserver__caddy:modules/caddytls/ech.go:478: pubTime := time.Now()
+caddyserver__caddy:modules/caddytls/ech.go:690: Created: time.Now(),
+caddyserver__caddy:modules/caddyhttp/metrics.go:341: start := time.Now()
+caddyserver__caddy:modules/caddyhttp/timeouts/timeouts.go:92: start := time.Now()
+caddyserver__caddy:modules/caddyhttp/server.go:552: start := time.Now()
+caddyserver__caddy:modules/caddyhttp/replacer.go:60: SetVar(req.Context(), "start_time", time.Now())
+caddyserver__caddy:modules/caddyhttp/reverseproxy/upstreams.go:175: cached.freshness = time.Now().Add(time.Duration(su.GracePeriod) - time.Duration(su.Refresh))
+caddyserver__caddy:modules/caddyhttp/reverseproxy/upstreams.go:213: freshness:    time.Now(),
+caddyserver__caddy:modules/caddyhttp/reverseproxy/upstreams.go:428: freshness:  time.Now(),
+caddyserver__caddy:modules/caddyhttp/reverseproxy/fastcgi/client.go:383: return c.rwc.SetReadDeadline(time.Now().Add(t))
+caddyserver__caddy:modules/caddyhttp/reverseproxy/fastcgi/client.go:392: return c.rwc.SetWriteDeadline(time.Now().Add(t))
+caddyserver__caddy:modules/caddyhttp/reverseproxy/hosts.go:155: entry.lastSeen = time.Now()
+caddyserver__caddy:modules/caddyhttp/reverseproxy/hosts.go:160: dynamicHosts[u.String()] = dynamicHostEntry{host: h, lastSeen: time.Now()}
+caddyserver__caddy:modules/caddyhttp/reverseproxy/streaming.go:159: start := time.Now()
+caddyserver__caddy:modules/caddyhttp/reverseproxy/httptransport.go:942: err := c.TCPConn.SetReadDeadline(time.Now().Add(c.readTimeout))
+caddyserver__caddy:modules/caddyhttp/reverseproxy/httptransport.go:954: err := c.TCPConn.SetWriteDeadline(time.Now().Add(c.writeTimeout))
+caddyserver__caddy:modules/caddyhttp/reverseproxy/reverseproxy.go:550: start := time.Now()
+caddyserver__caddy:modules/caddyhttp/reverseproxy/reverseproxy.go:1049: start := time.Now()
+caddyserver__caddy:modules/caddyhttp/idletimeout.go:64: deadline = time.Now().Add(d.Timeout)
+caddyserver__caddy:modules/caddyhttp/app.go:724: scheduledTime := time.Now().Add(time.Duration(app.ShutdownDelay))
+caddyserver__caddy:modules/logging/netwriter.go:196: reconn.lastRedial = time.Now()
+caddyserver__caddy:caddytest/caddytest.go:177: start := time.Now()
+caddyserver__caddy:caddy.go:1142: ts:     time.Now(),
+caddyserver__caddy:listen.go:218: timeInPast := time.Now().Add(-1 * time.Minute)
+caddyserver__caddy:listen.go:277: _ = fcpc.SetReadDeadline(time.Now()) // unblock ReadFrom() calls to kick old servers out of their loops
+charmbracelet__bubbletea:tea.go:1307: f, err := os.Create(fmt.Sprintf("bubbletea-panic-%d.log", time.Now().Unix()))
+charmbracelet__bubbletea:tea.go:1332: f, err := os.Create(fmt.Sprintf("bubbletea-panic-%d.log", time.Now().Unix()))
+charmbracelet__bubbletea:commands.go:103: n := time.Now()
+charmbracelet__bubbletea:examples/eyes/main.go:59: lastBlink:  time.Now(),
+charmbracelet__bubbletea:examples/eyes/main.go:99: currentTime := time.Now()
+charmbracelet__bubbletea:examples/doom-fire/main.go:115: return tickMsg(time.Now())
+charmbracelet__bubbletea:examples/doom-fire/main.go:124: startTime:   time.Now(),
+charmbracelet__bubbletea:examples/splash/main.go:71: t := float64(time.Now().UnixNano()*m.rate) / float64(time.Second)
+charmbracelet__bubbletea:examples/splash/main.go:167: return tickMsg(time.Now())
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/actions.go:38: deadline := time.Now().Add(time.Duration(milliseconds * float64(time.Millisecond)))
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/actions.go:39: for time.Now().Before(deadline) {
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/actions.go:159: runtime.lastActivity = time.Now()
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/actions.go:218: deadline := time.Now().Add(time.Second)
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/actions.go:219: for time.Now().Before(deadline) {
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/actions.go:246: deadline := time.Now().Add(time.Second)
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/actions.go:247: for time.Now().Before(deadline) {
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/actions.go:362: runtime.lastAction = time.Now()
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/actions.go:478: matchDeadline := time.Now().Add(time.Duration(waitForMatch * float64(time.Millisecond)))
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/actions.go:508: if !time.Now().Before(matchDeadline) {
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/actions.go:541: matchDeadline = time.Now().Add(time.Duration(waitForMatch * float64(time.Millisecond)))
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/actions.go:605: runtime.lastActivity = time.Now()
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/actions.go:701: start := time.Now()
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/runtime.go:81: now := time.Now()
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/runtime.go:334: runtime.lastActivity = time.Now()
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/runtime.go:347: runtime.origin, runtime.lastAction, runtime.lastActivity = time.Now(), time.Now(), time.Now()
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/runtime.go:496: finishedAt := time.Now()
+cli__cli:.github/skills/cli-exercise/tool/internal/execution/cli.go:380: deadline := time.Now().Add(time.Duration(options.timeout * float64(time.Second)))
+cli__cli:.github/skills/cli-exercise/tool/internal/execution/cli.go:381: for time.Now().Before(deadline) {
+cli__cli:script/api-host-gateway/gateway/main.go:134: Time:       time.Now().UTC().Format(time.RFC3339Nano),
+cli__cli:script/api-host-gateway/gateway/main.go:229: notBefore := time.Now().Add(-time.Hour)
+cli__cli:script/api-host-gateway/gateway/main.go:230: notAfter := time.Now().Add(24 * time.Hour)
+cli__cli:script/build.go:137: t := time.Now()
+cli__cli:internal/update/update.go:104: err = setStateEntry(stateFilePath, time.Now(), *releaseInfo)
+cli__cli:internal/docs/man.go:115: now := time.Now()
+cli__cli:internal/telemetry/telemetry.go:286: s.events = append(s.events, &recordedEvent{event: cloneEvent(event), recordedAt: time.Now()})
+cli__cli:internal/telemetry/telemetry.go:300: recordedAt: time.Now(),
+cli__cli:internal/skills/lockfile/lockfile.go:117: now := time.Now().UTC().Format(time.RFC3339)
+cli__cli:pkg/cmd/cache/list/list.go:129: opts.Now = time.Now()
+cli__cli:pkg/cmd/issue/status/status.go:115: issueShared.PrintIssues(opts.IO, time.Now(), "  ", issuePayload.Assigned.TotalCount, issuePayload.Assigned.Issues)
+cli__cli:pkg/cmd/issue/status/status.go:124: issueShared.PrintIssues(opts.IO, time.Now(), "  ", issuePayload.Mentioned.TotalCount, issuePayload.Mentioned.Issues)
+cli__cli:pkg/cmd/issue/status/status.go:132: issueShared.PrintIssues(opts.IO, time.Now(), "  ", issuePayload.Authored.TotalCount, issuePayload.Authored.Issues)
+cli__cli:pkg/cmd/label/create.go:106: r := rand.New(rand.NewSource(time.Now().UnixNano()))
+cli__cli:pkg/cmd/gpg-key/list/list.go:75: now := time.Now()
+cli__cli:pkg/cmd/release/list/list.go:139: table.AddTimeField(time.Now(), pubDate, cs.Muted)
+cli__cli:pkg/cmd/release/view/view.go:142: fmt.Fprintln(w, cs.Mutedf("%s created this %s", release.Author.Login, text.FuzzyAgo(time.Now(), release.CreatedAt)))
+cli__cli:pkg/cmd/release/view/view.go:144: fmt.Fprintln(w, cs.Mutedf("%s released this %s", release.Author.Login, text.FuzzyAgo(time.Now(), *release.PublishedAt)))
+cli__cli:pkg/cmd/ssh-key/list/list.go:83: now := time.Now()
+cli__cli:pkg/cmd/agent-task/list/list.go:144: tp.AddTimeField(time.Now(), s.CreatedAt, cs.Muted)
+cli__cli:pkg/cmd/agent-task/view/view.go:259: now := time.Now()
+cli__cli:pkg/cmd/agent-task/view/view.go:312: fmt.Fprintf(opts.IO.Out, "Started on behalf of %s %s\n", session.User.Login, text.FuzzyAgo(time.Now(), session.CreatedAt))
+cli__cli:pkg/cmd/agent-task/view/view.go:315: fmt.Fprintf(opts.IO.Out, "Started %s\n", text.FuzzyAgo(time.Now(), session.CreatedAt))
+cli__cli:pkg/cmd/repo/credits/credits.go:185: r := rand.New(rand.NewSource(time.Now().UnixNano()))
+cli__cli:pkg/cmd/repo/deploy-key/list/list.go:81: now := time.Now()
+cli__cli:pkg/cmd/pr/shared/comments.go:105: fmt.Fprint(&b, cs.Boldf(" • %s", text.FuzzyAgoAbbr(time.Now(), comment.Created())))
+cli__cli:pkg/cmd/codespace/list.go:181: tp.AddTimeField(time.Now(), ct, cs.Muted)
+cli__cli:pkg/cmd/workflow/view/view.go:51: now:        time.Now(),
+cli__cli:pkg/cmd/run/list/list.go:54: now:        time.Now(),
+cli__cli:pkg/cmd/run/shared/shared.go:539: now := time.Now()
+cli__cli:pkg/cmd/gist/list/list.go:209: tp.AddTimeField(time.Now(), gist.UpdatedAt, cs.Muted)
+cli__cli:pkg/cmd/gist/shared/shared.go:238: gistTime := text.FuzzyAgo(time.Now(), gist.UpdatedAt)
+cli__cli:pkg/cmd/search/commits/commits.go:160: now = time.Now()
+cli__cli:pkg/cmd/search/shared/shared.go:101: now = time.Now()
+cli__cli:pkg/cmd/search/repos/repos.go:166: now = time.Now()
+cli__cli:pkg/cmd/root/extension.go:98: return update.CheckForExtensionUpdate(em, ext, time.Now())
+cockroachdb__pebble:wal/failover_manager.go:573: time.Now(),
+cockroachdb__pebble:wal/failover_manager.go:1046: return time.Now()
+cockroachdb__pebble:vfs/mem_fs.go:74: n.mu.modTime = time.Now()
+cockroachdb__pebble:vfs/mem_fs.go:818: f.n.mu.modTime = time.Now()
+cockroachdb__pebble:vfs/mem_fs.go:855: f.n.mu.modTime = time.Now()
+cockroachdb__pebble:replay/sampled_metric.go:29: m.first = time.Now()
+cockroachdb__pebble:replay/replay.go:83: startTime := time.Now()
+cockroachdb__pebble:replay/replay.go:93: startTime := time.Now()
+cockroachdb__pebble:replay/replay.go:408: startAt := time.Now()
+cockroachdb__pebble:replay/replay.go:425: workloadExhaustedAt = time.Now()
+cockroachdb__pebble:replay/replay.go:671: writeStallBegin = time.Now()
+cockroachdb__pebble:internal/pacertoy/rocksdb/main.go:147: rng := rand.New(rand.NewPCG(0, uint64(time.Now().UnixNano())))
+cockroachdb__pebble:internal/pacertoy/rocksdb/main.go:220: rng := rand.New(rand.NewPCG(0, uint64(time.Now().UnixNano())))
+cockroachdb__pebble:internal/pacertoy/rocksdb/main.go:318: rng := rand.New(rand.NewPCG(0, uint64(time.Now().UnixNano())))
+cockroachdb__pebble:internal/pacertoy/rocksdb/main.go:327: rng := rand.New(rand.NewPCG(0, uint64(time.Now().UnixNano())))
+cockroachdb__pebble:internal/pacertoy/rocksdb/main.go:343: start := time.Now()
+cockroachdb__pebble:internal/pacertoy/rocksdb/main.go:367: now := time.Now()
+cockroachdb__pebble:internal/pacertoy/pebble/main.go:345: startTime := time.Now()
+cockroachdb__pebble:internal/pacertoy/pebble/main.go:356: percentileTimes = append(percentileTimes, time.Now())
+cockroachdb__pebble:internal/pacertoy/pebble/main.go:380: start := time.Now()
+cockroachdb__pebble:internal/pacertoy/pebble/main.go:404: now := time.Now()
+cockroachdb__pebble:internal/deletepacer/rate_calc.go:134: time.Now().Format(time.Stamp), rc.currentRate, rc.backlogRate, rc.freeSpaceRate, rc.debtBytes)
+cockroachdb__pebble:internal/cache/read_shard.go:212: e.mu.readStart = time.Now()
+cockroachdb__pebble:internal/compact/run.go:198: CreationTime: time.Now(),
+cockroachdb__pebble:valsep/value_separator.go:394: CreationTime: uint64(time.Now().Unix()),
+cockroachdb__pebble:objstorage/objstorageprovider/sharedcache/shared_cache.go:230: start := time.Now()
+cockroachdb__pebble:objstorage/objstorageprovider/sharedcache/shared_cache.go:285: start := time.Now()
+cockroachdb__pebble:objstorage/objstorageprovider/sharedcache/shared_cache.go:598: start := time.Now()
+cockroachdb__pebble:objstorage/objstorageprovider/sharedcache/shared_cache.go:604: start := time.Now()
+cockroachdb__pebble:objstorage/objstorageprovider/sharedcache/shared_cache.go:707: start := time.Now()
+cockroachdb__pebble:objstorage/objstorageprovider/sharedcache/shared_cache.go:868: start := time.Now()
+cockroachdb__pebble:objstorage/objstorageprovider/objiotracing/obj_io_tracing_on.go:333: e.StartUnixNano = time.Now().UnixNano()
+cockroachdb__pebble:objstorage/objstorageprovider/objiotracing/obj_io_tracing_on.go:389: filename := fmt.Sprintf("IOTRACES-%s", time.Now().UTC().Format(time.RFC3339Nano))
+cockroachdb__pebble:tool/db_analyze_data.go:102: startTime := time.Now()
+cockroachdb__pebble:tool/db_analyze_data.go:156: lastReportTime = time.Now()
+cockroachdb__pebble:tool/db_io_bench.go:260: startTime := time.Now()
+cockroachdb__pebble:tool/db_io_bench.go:271: endTime := time.Now()
+cockroachdb__pebble:tool/db_analyze_metadata.go:163: startTime := time.Now()
+cockroachdb__pebble:tool/db_analyze_metadata.go:195: lastReportTime = time.Now()
+cockroachdb__pebble:bench/fsbench.go:259: start := time.Now()
+cockroachdb__pebble:bench/fsbench.go:319: start := time.Now()
+cockroachdb__pebble:bench/fsbench.go:375: start := time.Now()
+cockroachdb__pebble:bench/fsbench.go:439: start := time.Now()
+cockroachdb__pebble:bench/fsbench.go:504: start := time.Now()
+cockroachdb__pebble:bench/ycsb.go:260: start := time.Now()
+cockroachdb__pebble:bench/ycsb.go:263: if now := time.Now(); now.Sub(last) >= time.Second {
+cockroachdb__pebble:bench/ycsb.go:343: start := time.Now()
+cockroachdb__pebble:bench/sync.go:58: rand := rand.New(rand.NewPCG(0, uint64(time.Now().UnixNano())))
+cockroachdb__pebble:bench/sync.go:65: start := time.Now()
+cockroachdb__pebble:bench/write_bench.go:163: cooloffStart = time.Now()
+cockroachdb__pebble:bench/write_bench.go:164: clockStart = time.Now()
+cockroachdb__pebble:bench/write_bench.go:182: clockStart = time.Now()
+cockroachdb__pebble:bench/write_bench.go:205: clockStart = time.Now()
+cockroachdb__pebble:bench/write_bench.go:263: clockStart = time.Now()
+cockroachdb__pebble:bench/write_bench.go:346: start := time.Now()
+cockroachdb__pebble:bench/histogram.go:87: start:      time.Now(),
+cockroachdb__pebble:bench/histogram.go:121: now := time.Now()
+cockroachdb__pebble:bench/replay.go:187: fmt.Printf("%s: Attempting to initialize with checkpoint %q.\n", time.Now().Format(time.RFC3339), checkpointDir)
+cockroachdb__pebble:bench/replay.go:200: fmt.Printf("%s: Run directory initialized with checkpoint %q.\n", time.Now().Format(time.RFC3339), checkpointDir)
+cockroachdb__pebble:bench/bench.go:151: start := time.Now()
+cockroachdb__pebble:bench/bench.go:216: start := time.Now()
+cockroachdb__pebble:bench/bench.go:276: start := time.Now()
+cockroachdb__pebble:ingest.go:74: CreationTime: time.Now().Unix(),
+cockroachdb__pebble:ingest.go:163: CreationTime: time.Now().Unix(),
+cockroachdb__pebble:ingest.go:326: meta.CreationTime = time.Now().Unix()
+cockroachdb__pebble:metamorphic/history.go:89: timestamp := time.Now().Format("15:04:05.000")
+cockroachdb__pebble:metamorphic/options.go:340: startTime := time.Now()
+cockroachdb__pebble:metamorphic/options.go:346: now := time.Now()
+cockroachdb__pebble:metamorphic/meta.go:151: runOpts.seed = uint64(time.Now().UnixNano())
+cockroachdb__pebble:metamorphic/meta.go:161: metaDir, err := os.MkdirTemp(rootDir, time.Now().Format("060102-150405.000"))
+cockroachdb__pebble:metamorphic/meta.go:700: historyPath := filepath.Join(rootDir, runDirs[i]+"-"+time.Now().Format("060102-150405.000"))
+containerd__containerd:plugins/mount/erofs/plugin_linux.go:155: t := time.Now()
+containerd__containerd:plugins/sandbox/controller.go:292: ExitedAt:  time.Now(),
+containerd__containerd:plugins/snapshots/lcow/lcow.go:450: r := uint32(time.Now().UnixNano() + int64(os.Getpid()))
+containerd__containerd:plugins/content/local/writer.go:75: w.updatedAt = time.Now()
+containerd__containerd:plugins/content/local/writer.go:118: start := time.Now()
+containerd__containerd:plugins/content/local/writer.go:175: commitTime := time.Now()
+containerd__containerd:plugins/content/local/store.go:239: info.UpdatedAt = time.Now()
+containerd__containerd:plugins/content/local/store.go:584: startedAt = time.Now()
+containerd__containerd:plugins/content/local/locks.go:39: now := time.Now()
+containerd__containerd:plugins/content/local/locks.go:46: s.locks[ref] = &lock{time.Now()}
+containerd__containerd:plugins/diff/walking/differ.go:210: t := time.Now()

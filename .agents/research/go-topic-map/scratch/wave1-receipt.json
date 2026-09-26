@@ -1,0 +1,3150 @@
+[
+ {
+  "type": "result",
+  "key": "v2:94932107164b8de4f30a72e5b0ecdecd7b7446d09096e5d5bf58ce6fa5c0730f",
+  "agentId": "a6005462b10ab4b39",
+  "result": {
+   "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-audit/config-inventory.md",
+   "headline_numbers": [
+    "7 sibling rule sets measured: index lines \u03a3=1045, depth-file lines \u03a3=10515 (wc -l per file)",
+    "6 of 7 use the index+support-dir shape; rust-quality is flat and has 0 index-owned rules vs 3-8 in every other set (no 'Rules This File Owns' section)",
+    "Bazel research corpus: rules_go=40 hits, gazelle(case-insens)=483 hits, nogo=16, golang=1, go_deps=0 hits (grep -rn/-rni over .agents/research/bazel-*)",
+    "Authoritative quote at bazel-topic-map.md:797: 'Zero Go in the fleet ... rules_go's own rules are not [in scope]'",
+    "ocx-sdk-python: 32 public names in __all__, 0 runtime deps, coverage fail_under=100",
+    "rust-quality/cli-contract.md: 27 rule rows \u2014 18 fully language-neutral, 7 neutral-concept/Rust-specific-mechanism, 1 genuinely inverted default (CLI-05, SIGPIPE), 1 language-capability gap (EXIT-07, exhaustiveness)",
+    "Fleet Go-release contract, measured: 0 hits for goreleaser/cosign/SBOM/checksums.txt across all mirror-*/ocx-mirror* repos; the 4 mirrored Go binaries (bazelisk/buildifier/buildozer/unused-deps) verify via github_asset_digest:true, never goreleaser's tar.gz+checksums+cosign bundle",
+    "docs-instrument/references/tested-examples-by-language.md:42-43 already names Go's testable-Example-function mechanism verbatim, correctly and completely"
+   ],
+   "top_smells": [
+    "rust-quality.md is the structural outlier among 6 sibling files (no index-owned rules, bare-topic IDs) that converged on <LANG>-<FAM>-nn + 3 owned *-CORE rules \u2014 a drafting pass must not copy it as the Go template",
+    "go_deps (bzlmod's external-Go-module extension) has zero prior research anywhere in the repo \u2014 bazel-quality/go.md starts from a cold research base, not a consolidation",
+    "The frame's axis-5 premise (goreleaser/cosign/SBOM as 'the fleet's real Go-release contract') does not match the repo: zero such references exist; the fleet's actual mechanism is simpler (raw per-platform binaries + github_asset_digest)",
+    "The 483-hit 'gazelle' grep is not a Go count \u2014 Gazelle is used generically across Python/JS/Rust/C++ too; spot-check suggests only ~30-50% is Go-specific",
+    "No existing --root precedent fits Go's actual situation: JVM's 'skip root entirely' and Bazel/Rust's 'point at a real fleet consumer repo' both fail cleanly for zero-fleet-Go-but-real-exemplar-corpus-on-disk"
+   ],
+   "patterns_worth_encoding": [
+    "Index+support-dir shape, <LANG>-<FAM>-nn IDs, 3 index-owned <LANG>-CORE-0{1,2,3} rules (never-weaken-the-gate, watched-go-red, empty-output-meaning) \u2014 the converged majority pattern across 5 of 6 non-flat sibling sets; apply verbatim to go-quality",
+    "The check-artifacts.py if-exists-else-warn shell guard (taskfile.yml, Rust/Python/Bazel/TS legs) fits Go better than the JVM's flat no-root branch, since a real go.mod exemplar tree exists on disk (e.g. spf13/cobra, smallest at 36 .go files)",
+    "bazel-quality/java.md's explicit 'what this file does NOT own, cited never restated' preamble is the right shape for go.md deferring go_deps to BZL-MOD, CGO_ENABLED hermeticity to BZL-HERM, etc.",
+    "ocx-sdk-python's underscored-module-plus-__all__ pattern has a stronger native Go equivalent already available (internal/ packages, compiler-enforced) \u2014 tell a future ocx-sdk-go to use internal/, not merely imitate the convention",
+    "os.UserConfigDir()/os.UserCacheDir() (Go stdlib since 1.13) beats Rust's directories crate for CLI-13's mechanism \u2014 state a stronger dependency-free default in Go's depth file",
+    "cobra's built-in completion generation beats Rust's clap_complete+clap_mangen two-crate split for CLI-14 \u2014 same direction, one native tool covers what Rust needs two crates for"
+   ],
+   "contradictions_of_frame": [
+    "H8-adjacent axis-5 framing ('the fleet's real contract with Go release engineering' = goreleaser/checksums.txt/sbom/cosign) is not supported by the repo: zero hits anywhere in mirror-*/ocx-mirror*, and the four Go binaries actually mirrored (bazelisk, buildifier, buildozer, unused-deps) use a simpler, goreleaser-independent raw-binary + github_asset_digest convention instead",
+    "'Existing AI config that already touches this domain: None in the catalog' (frame) is accurate for rules but not for docs-instrument's doc-testing coverage \u2014 tested-examples-by-language.md:42-43 already names Go's Example-function mechanism correctly and completely; a narrow miss, not a wrong framing",
+    "The Bazel-for-Go framing understates how little research exists: the prior Bazel program's own topic-map explicitly scoped rules_go OUT as policy (bazel-topic-map.md:797), unlike the dedicated Bazel dives every other language (rust/python/typescript/cpp/java) got \u2014 go.md starts closer to a cold start than 'just write the depth file beside java.md' implies"
+   ]
+  }
+ },
+ {
+  "type": "result",
+  "key": "v2:368625cce9b1377e754b242abcd36984cd6789eb654dba7a4196a2a238a5ca64",
+  "agentId": "aea6a025fbe9f00a9",
+  "result": {
+   "candidates": [
+    {
+     "slug": "loopvar-capture-workaround-dead",
+     "why": "Go 1.22 changed loop-variable semantics; the x:=x capture workaround an LLM still emits is now dead code or a misdiagnosed bug",
+     "source": "https://go.dev/doc/go1.22",
+     "covered": "no",
+     "surface": "lang",
+     "priority": "P1"
+    },
+    {
+     "slug": "iterator-vs-slice-returning-helper",
+     "why": "Range-over-func iterators are GA since 1.23; agents still default to building/returning a []T just to loop once",
+     "source": "https://go.dev/doc/go1.23",
+     "covered": "no",
+     "surface": "lang/stdlib",
+     "priority": "P1"
+    },
+    {
+     "slug": "go-fix-modernizers-in-ci",
+     "why": "Go 1.26 rebuilt go fix specifically as a CI-runnable modernizer suite with ~30 named analyzers",
+     "source": "https://github.com/golang/tools/blob/master/gopls/doc/analyzers.md",
+     "covered": "no",
+     "surface": "toolchain/lint",
+     "priority": "P0"
+    },
+    {
+     "slug": "golangci-lint-v2-version-key",
+     "why": "golangci-lint 2.x requires a top-level version: \"2\" key; a v1-format config fails to load",
+     "source": "https://raw.githubusercontent.com/golangci/golangci-lint/main/docs/content/docs/product/migration-guide.md",
+     "covered": "no",
+     "surface": "lint",
+     "priority": "P0"
+    },
+    {
+     "slug": "formatters-moved-out-of-linters",
+     "why": "gofmt/gofumpt/goimports/gci moved from linters.enable to formatters.enable in golangci-lint v2",
+     "source": "https://raw.githubusercontent.com/golangci/golangci-lint/main/docs/content/docs/product/migration-guide.md",
+     "covered": "no",
+     "surface": "lint",
+     "priority": "P0"
+    },
+    {
+     "slug": "staticcheck-absorbed-gosimple-stylecheck",
+     "why": "gosimple/stylecheck merged into staticcheck as one linter entry under golangci-lint v2",
+     "source": "https://raw.githubusercontent.com/golangci/golangci-lint/main/docs/content/docs/product/migration-guide.md",
+     "covered": "no",
+     "surface": "lint",
+     "priority": "P1"
+    },
+    {
+     "slug": "deleted-v2-linter-names",
+     "why": "13 deprecated linters (deadcode, structcheck, varcheck, golint, etc.) were deleted outright in golangci-lint v2, not just deprecated",
+     "source": "https://raw.githubusercontent.com/golangci/golangci-lint/main/docs/content/docs/product/migration-guide.md",
+     "covered": "no",
+     "surface": "lint",
+     "priority": "P1"
+    },
+    {
+     "slug": "waitgroup-go-vs-manual-add-done",
+     "why": "sync.WaitGroup.Go (1.25) replaces the manual Add/Done/defer boilerplate; has its own waitgroupgo modernizer",
+     "source": "https://go.dev/doc/go1.25",
+     "covered": "no",
+     "surface": "concurrency",
+     "priority": "P1"
+    },
+    {
+     "slug": "goroutine-ownership-by-caller",
+     "why": "Goroutine lifetime/leak is the frame's H3 correctness surface; Go 1.27 GA'd a dedicated goroutineleak pprof profile for it",
+     "source": "https://go.dev/doc/go1.27",
+     "covered": "no",
+     "surface": "concurrency",
+     "priority": "P0"
+    },
+    {
+     "slug": "goroutineleak-profile-wired-in",
+     "why": "New GA (1.27) diagnostic endpoint /debug/pprof/goroutineleak purpose-built for the leak class flagged in H3",
+     "source": "https://go.dev/doc/go1.27",
+     "covered": "no",
+     "surface": "concurrency/perf",
+     "priority": "P1"
+    },
+    {
+     "slug": "errors-astype-at-boundaries",
+     "why": "errors.AsType (generic As) is new in 1.26; error-wrapping/boundary discipline is the frame's H2 surface",
+     "source": "https://go.dev/doc/go1.26",
+     "covered": "no",
+     "surface": "errors",
+     "priority": "P0"
+    },
+    {
+     "slug": "errors-join-for-multi-close",
+     "why": "errors.Join for combining multiple Close()/cleanup failures instead of silently dropping all but one",
+     "source": "https://go.dev/doc/go1.26",
+     "covered": "no",
+     "surface": "errors/fs",
+     "priority": "P1"
+    },
+    {
+     "slug": "close-error-checked",
+     "why": "Resource Close() errors silently discarded via bare defer f.Close() is a named boring-but-bites correctness gap",
+     "source": "methodology note (task brief boring-but-bites list)",
+     "covered": "no",
+     "surface": "fs/errors",
+     "priority": "P1"
+    },
+    {
+     "slug": "atomic-file-writes",
+     "why": "CLI/SDK correctness for content-addressed store and release-artifact writes; temp-file+rename vs write-in-place",
+     "source": "methodology note (frame fleet-consumer context)",
+     "covered": "partial",
+     "surface": "fs",
+     "priority": "P0"
+    },
+    {
+     "slug": "os-root-for-path-confinement",
+     "why": "os.Root/OpenRoot (1.24) is the stdlib answer to path-traversal-safe file access, still unfamiliar to older-trained agents",
+     "source": "https://go.dev/doc/go1.24",
+     "covered": "no",
+     "surface": "fs/security",
+     "priority": "P0"
+    },
+    {
+     "slug": "context-cancellation-propagation",
+     "why": "Context/cancellation discipline is the frame's H2 single largest correctness surface",
+     "source": "methodology note (frame H2)",
+     "covered": "no",
+     "surface": "concurrency/errors",
+     "priority": "P0"
+    },
+    {
+     "slug": "synctest-test-vs-run-api",
+     "why": "testing/synctest API renamed Run->Test between 1.24 experimental and 1.25/1.26 GA; old-API samples no longer compile",
+     "source": "https://go.dev/doc/go1.25",
+     "covered": "no",
+     "surface": "testing/concurrency",
+     "priority": "P1"
+    },
+    {
+     "slug": "bloop-vs-bn-benchmarks",
+     "why": "testing.B.Loop() (1.24) replaces for i:=0;i<b.N;i++; has a dedicated bloop modernizer",
+     "source": "https://go.dev/doc/go1.24",
+     "covered": "no",
+     "surface": "testing/perf",
+     "priority": "P2"
+    },
+    {
+     "slug": "testify-vs-stdlib-gocmp-position",
+     "why": "Frame's H5 needs a resolved position; testify v2 (issue #306) is open with no resolution, so 'wait for v2' is not viable",
+     "source": "https://github.com/stretchr/testify/issues/306",
+     "covered": "no",
+     "surface": "testing",
+     "priority": "P1"
+    },
+    {
+     "slug": "golang-mock-archived-import",
+     "why": "golang/mock is archived (2024-01-08); go.uber.org/mock is the maintained fork with identical API",
+     "source": "https://github.com/golang/mock",
+     "covered": "no",
+     "surface": "testing/toolchain",
+     "priority": "P0"
+    },
+    {
+     "slug": "slog-vs-zap-logrus-decision-rule",
+     "why": "Frame's H7: slog is stdlib direction but zap/logrus remain viable for throughput; needs a decision rule not a ban",
+     "source": "methodology note (repo activity checks)",
+     "covered": "no",
+     "surface": "stdlib/observability",
+     "priority": "P1"
+    },
+    {
+     "slug": "viper-vs-koanf-proportionality",
+     "why": "Both actively maintained; question is proportionate weight (viper heavy/reflection-based) vs koanf (lighter, explicit alt-to-viper)",
+     "source": "https://github.com/knadh/koanf",
+     "covered": "no",
+     "surface": "cli",
+     "priority": "P2"
+    },
+    {
+     "slug": "cobra-vs-urfave-cli-v3-choice",
+     "why": "Both alive and current; choice should mirror the fleet's existing Rust cli-contract rather than re-litigate",
+     "source": "https://github.com/urfave/cli",
+     "covered": "partial",
+     "surface": "cli",
+     "priority": "P1"
+    },
+    {
+     "slug": "static-binary-release-hygiene",
+     "why": "CGO_ENABLED=0 + -trimpath for reproducible static release binaries gates whether ocx-mirror-distributed artifacts are well-formed",
+     "source": "methodology note (frame H8, goreleaser not directly fetched)",
+     "covered": "no",
+     "surface": "release",
+     "priority": "P0"
+    },
+    {
+     "slug": "buildinfo-vcs-stamping-vs-ldflags",
+     "why": "Go 1.24 auto-stamps VCS tag/commit into binaries; may obsolete hand-rolled -ldflags -X version plumbing",
+     "source": "https://go.dev/doc/go1.24",
+     "covered": "no",
+     "surface": "release",
+     "priority": "P1"
+    },
+    {
+     "slug": "gotoolchain-ci-version-match",
+     "why": "Frame's H6: GOTOOLCHAIN auto-upgrade semantics can silently change which Go version builds a release artifact vs a pinned CI image",
+     "source": "methodology note (GOTOOLCHAIN predates window, not re-verified)",
+     "covered": "no",
+     "surface": "toolchain/release",
+     "priority": "P1"
+    },
+    {
+     "slug": "tool-directive-vs-floating-go-install",
+     "why": "Go 1.24 tool directive pins dev-tool versions in go.mod/go.sum reproducibly vs a floating go install foo@latest in CI scripts",
+     "source": "https://go.dev/doc/go1.24",
+     "covered": "no",
+     "surface": "modules/toolchain",
+     "priority": "P1"
+    },
+    {
+     "slug": "go-work-committed-vs-ci-mismatch",
+     "why": "Frame's H6: go.work is rare and often uncommitted; when committed, CI/local divergence is a real footgun",
+     "source": "methodology note",
+     "covered": "no",
+     "surface": "modules",
+     "priority": "P2"
+    },
+    {
+     "slug": "gomod-ignore-directive-monorepo",
+     "why": "Go 1.25's go.mod ignore directive is a new, less-known way to exclude non-Go subdirectories from go build/vet ./...",
+     "source": "https://go.dev/doc/go1.25",
+     "covered": "no",
+     "surface": "modules",
+     "priority": "P2"
+    },
+    {
+     "slug": "govulncheck-gate-enforced",
+     "why": "govulncheck named explicitly in frame's quality-gate list; rule needs to specify fail-the-build behavior, not just tool existence",
+     "source": "methodology note (govulncheck not independently fetched)",
+     "covered": "no",
+     "surface": "security",
+     "priority": "P0"
+    },
+    {
+     "slug": "sbom-signing-release-artifacts",
+     "why": "SBOM + cosign/SLSA signing directly relevant to fleet's ocx-mirror consumer of goreleaser-built releases (frame H8)",
+     "source": "methodology note (not independently verified against exemplars this pass)",
+     "covered": "no",
+     "surface": "release/security",
+     "priority": "P0"
+    },
+    {
+     "slug": "fips140-mode-assumption",
+     "why": "FIPS 140-3 module (GOFIPS140, GODEBUG=fips140=on) changes which crypto primitives are reachable; wrong assumption is a hard security gap",
+     "source": "https://go.dev/doc/go1.24",
+     "covered": "no",
+     "surface": "security",
+     "priority": "P1"
+    },
+    {
+     "slug": "container-aware-gomaxprocs-sizing",
+     "why": "Worker-pool sizing off hardcoded NumCPU vs trusting the Go 1.25+ container-aware GOMAXPROCS default under cgroup limits",
+     "source": "https://go.dev/blog/container-aware-gomaxprocs",
+     "covered": "no",
+     "surface": "perf/release",
+     "priority": "P1"
+    },
+    {
+     "slug": "automaxprocs-redundant-on-125",
+     "why": "go.uber.org/automaxprocs import is redundant once go.mod declares go 1.25+, per the Go blog's own framing",
+     "source": "https://go.dev/blog/container-aware-gomaxprocs",
+     "covered": "no",
+     "surface": "perf/release",
+     "priority": "P2"
+    },
+    {
+     "slug": "stringsbuilder-modernizer-hotpath",
+     "why": "Hot-path += string building instead of strings.Builder is mechanically caught by the stringsbuilder modernizer",
+     "source": "https://github.com/golang/tools/blob/master/gopls/doc/analyzers.md",
+     "covered": "no",
+     "surface": "perf/lint",
+     "priority": "P2"
+    },
+    {
+     "slug": "strings-cut-family-adoption",
+     "why": "stringscut/stringscutprefix modernizers and the brand-new CutLast (1.27) replace hand-rolled Index+slicing",
+     "source": "https://go.dev/doc/go1.27",
+     "covered": "no",
+     "surface": "stdlib",
+     "priority": "P2"
+    },
+    {
+     "slug": "map-iteration-order-determinism",
+     "why": "Map-iteration-dependent output (JSON key order, diagnostics) assuming stable order is a named boring-but-bites determinism bug class",
+     "source": "methodology note (task brief boring-but-bites list)",
+     "covered": "no",
+     "surface": "lang/stdlib",
+     "priority": "P1"
+    },
+    {
+     "slug": "windows-symlink-godebug-defaults",
+     "why": "winsymlink/winreadlinkvolume (1.23, default 1) changed Windows reparse-point/symlink resolution behavior for cross-platform CLIs",
+     "source": "https://go.dev/doc/go1.23",
+     "covered": "no",
+     "surface": "fs",
+     "priority": "P2"
+    },
+    {
+     "slug": "reverseproxy-director-deprecated",
+     "why": "net/http/httputil.ReverseProxy.Director formally deprecated (accepted 2025-04-07) in favor of Rewrite",
+     "source": "https://go.dev/doc/go1.26",
+     "covered": "no",
+     "surface": "http",
+     "priority": "P2"
+    },
+    {
+     "slug": "jsonv2-premature-adoption-warning",
+     "why": "encoding/json/v2 is real and shipped but still GOEXPERIMENT=nojsonv2-gated as of 1.27; a rule should track, not adopt, it yet",
+     "source": "https://go.dev/doc/go1.27",
+     "covered": "no",
+     "surface": "stdlib/toolchain",
+     "priority": "P1"
+    },
+    {
+     "slug": "unique-make-for-interning",
+     "why": "unique.Make[T] (1.23+) is the correct primitive for value interning/dedup patterns agents currently hand-roll",
+     "source": "https://go.dev/doc/go1.23",
+     "covered": "no",
+     "surface": "stdlib/perf",
+     "priority": "P2"
+    },
+    {
+     "slug": "weak-pointers-for-caches",
+     "why": "weak package (1.24) solves a class of memory-growth bug in cache-heavy data structures holding strong references",
+     "source": "https://go.dev/doc/go1.24",
+     "covered": "no",
+     "surface": "stdlib/perf",
+     "priority": "P3"
+    },
+    {
+     "slug": "stdversion-vet-default-on-test",
+     "why": "go vet's stdversion analyzer now runs by default under go test as of Go 1.27, flagging stdlib symbols too new for the module's go directive",
+     "source": "https://go.dev/doc/go1.27",
+     "covered": "no",
+     "surface": "toolchain/lint",
+     "priority": "P1"
+    },
+    {
+     "slug": "go-cli-exit-code-stream-contract",
+     "why": "Frame names the Rust cli-contract depth file as the reference a Go CLI rule should mirror for exit codes/stderr/TTY-aware output",
+     "source": "methodology note (frame fleet-consumer context)",
+     "covered": "partial",
+     "surface": "cli",
+     "priority": "P0"
+    },
+    {
+     "slug": "gazelle-build-drift-check",
+     "why": "Bazel-for-Go's gazelle BUILD.bazel regeneration belongs to bazel-quality's future go.md depth file, not this rule set",
+     "source": "methodology note (frame sibling-set note)",
+     "covered": "partial",
+     "surface": "bazel-go",
+     "priority": "P3"
+    },
+    {
+     "slug": "nogo-static-analysis-wiring",
+     "why": "nogo wiring go vet/staticcheck-equivalent analyzers into every go_library build is bazel-quality's Bazel-Go complement, not this set",
+     "source": "methodology note (frame sibling-set note)",
+     "covered": "partial",
+     "surface": "bazel-go",
+     "priority": "P3"
+    },
+    {
+     "slug": "vet-tests-analyzer-catching-malformed-signatures",
+     "why": "go vet's tests analyzer (1.24) catches malformed Test/Fuzz/Benchmark/Example signatures, mechanically checkable via go vet ./...",
+     "source": "https://go.dev/doc/go1.24",
+     "covered": "no",
+     "surface": "testing/lint",
+     "priority": "P2"
+    },
+    {
+     "slug": "hostport-analyzer-ipv6-bug",
+     "why": "go vet's hostport analyzer (1.25) catches fmt.Sprintf host:port construction that breaks on IPv6 literals",
+     "source": "https://go.dev/doc/go1.25",
+     "covered": "no",
+     "surface": "http/lint",
+     "priority": "P1"
+    },
+    {
+     "slug": "lint-toolchain-version-pinning-in-ci",
+     "why": "golangci-lint/staticcheck/gopls check catalogs and config schemas are moving fast enough that unpinned CI tool versions can silently change build behavior",
+     "source": "https://raw.githubusercontent.com/golangci/golangci-lint/main/CHANGELOG.md",
+     "covered": "no",
+     "surface": "toolchain/lint",
+     "priority": "P1"
+    }
+   ],
+   "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-topic-map/shifts.md",
+   "sources_count": 18,
+   "primary_sources_count": 18,
+   "recent_shifts": [
+    "Go 1.22 (Mar 2024): per-iteration loop variables end the x:=x capture-workaround idiom.",
+    "Go 1.23 (Aug 2024): range-over-func iterators GA (iter.Seq/Seq2); strings/bytes/slices/maps grow *Seq iterator functions; Timer/Ticker channels become unbuffered and immediately GC-eligible; go telemetry opt-in ships.",
+    "Go 1.24 (Feb 2025): os.Root path confinement, weak pointers, tool directive, testing/synctest experimental, FIPS 140-3 module, generic type aliases default-on, Swiss-Tables maps.",
+    "Go 1.25 (Aug 2025): container-aware GOMAXPROCS (makes go.uber.org/automaxprocs redundant), Green Tea GC experimental, sync.WaitGroup.Go, testing/synctest promoted (Run->Test rename), encoding/json/v2 experimental, go.mod ignore directive, vet hostport/waitgroup analyzers.",
+    "Go 1.26 (Feb 2026): go fix completely rewritten into a modernizer suite (30 analyzers) with a source inliner; Green Tea GC default-on; new(expr); errors.AsType; cmd/doc removed.",
+    "Go 1.27 (Aug 2026, confirmed current): generic methods, struct-literal-key selectors, function-type-inference generalization; encoding/json/v2 ships as a real (still experiment-gated) package; mass GODEBUG removal (asynctimerchan, gotypesalias, four TLS flags); go test runs stdversion by default; goroutineleak pprof profile GA.",
+    "golangci-lint v1->v2 (current 2.14.0, released 2026-09-24): mandatory version:\"2\" key, formatters section split out, staticcheck absorbs gosimple/stylecheck, 13 linters deleted outright, presets removed, several CLI flags removed.",
+    "staticcheck 2024.1 (Aug 2024) through 2026.2.1 (Aug 2026): SA9010 added, SA5011 disabled in favor of gopls's nilness analyzer, SA4023 reimplemented (behavior change), check names case-insensitive, GOCACHEPROG support added.",
+    "Ecosystem: golang/mock archived 2024-01-08 in favor of go.uber.org/mock; testify's own v2 issue (#306) remains open with no resolution as of 2026-09; gorilla/mux last pushed 2024-08-15 (stale but not archived)."
+   ]
+  }
+ },
+ {
+  "type": "result",
+  "key": "v2:619517271a194e7abd62fd3cb1fd01a37885368f72c8e61b8d9abd3f0546f3ac",
+  "agentId": "ab86c83e14a9b3038",
+  "result": {
+   "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-topic-map/practitioner.md",
+   "sources_count": 25,
+   "primary_sources_count": 12,
+   "candidates": [
+    {
+     "slug": "goroutine-ownership-errgroup",
+     "why": "H3's core claim; now backed by a shipped runtime leak detector, not just opinion",
+     "source": "https://go.dev/doc/go1.27",
+     "covered": "no",
+     "surface": "concurrency",
+     "priority": "P0"
+    },
+    {
+     "slug": "goroutine-leak-profile-mechanics",
+     "why": "Go 1.27 GA pprof goroutineleak profile gives a literal verification command and a documented blind spot",
+     "source": "https://go.dev/doc/go1.26",
+     "covered": "no",
+     "surface": "concurrency",
+     "priority": "P0"
+    },
+    {
+     "slug": "context-cancelcause-adoption",
+     "why": "converts undiagnosable context-canceled errors into an inspectable cause; under-adopted per corpus",
+     "source": "https://rednafi.com/go/context-cancellation-cause/",
+     "covered": "no",
+     "surface": "concurrency",
+     "priority": "P1"
+    },
+    {
+     "slug": "context-value-typesafety-line",
+     "why": "even context.Value's defenders (Merovius) are unresolved on a generics wrapper; needs a judgment call not a ban",
+     "source": "https://blog.merovius.de/posts/2020-07-20-parametric-context/",
+     "covered": "no",
+     "surface": "concurrency",
+     "priority": "P2"
+    },
+    {
+     "slug": "testify-vs-stdlib-gocmp",
+     "why": "H5's core claim; corpus shows a dated 2026 specific practitioner attack plus a converging cmp.Diff alternative",
+     "source": "https://boldlygo.tech/posts/2026-04-20-testify-is-making-your-go-tests-worse/",
+     "covered": "no",
+     "surface": "testing",
+     "priority": "P0"
+    },
+    {
+     "slug": "assertion-helpers-take-testingT",
+     "why": "Google's stronger claim than avoid-testify: home-grown t.Helper assertion wrappers are also discouraged",
+     "source": "https://google.github.io/styleguide/go/best-practices",
+     "covered": "no",
+     "surface": "testing",
+     "priority": "P1"
+    },
+    {
+     "slug": "tfatal-from-goroutine",
+     "why": "concrete checkable footgun: t.FailNow from a spawned goroutine corrupts test state",
+     "source": "https://google.github.io/styleguide/go/best-practices",
+     "covered": "no",
+     "surface": "testing",
+     "priority": "P1"
+    },
+    {
+     "slug": "synctest-run-vs-test",
+     "why": "synctest.Run deprecated in favor of Test in Go 1.25; direct API deprecation inside the program's era",
+     "source": "https://antonz.org/go-1-25/",
+     "covered": "no",
+     "surface": "testing",
+     "priority": "P1"
+    },
+    {
+     "slug": "error-wrap-w-vs-v-placement",
+     "why": "specific checkable convention beyond wrap-your-errors: %w belongs at message end to mirror chain order",
+     "source": "https://google.github.io/styleguide/go/best-practices",
+     "covered": "no",
+     "surface": "errors",
+     "priority": "P0"
+    },
+    {
+     "slug": "error-types-in-public-api",
+     "why": "Cheney's stronger-than-usual claim that error types (not just sentinels) should stay out of a public API",
+     "source": "https://dave.cheney.net/practical-go",
+     "covered": "no",
+     "surface": "errors",
+     "priority": "P1"
+    },
+    {
+     "slug": "post-error-syntax-boilerplate-remedies",
+     "why": "Go team formally stopped pursuing error-handling syntax in 2025; rule must never suggest a dead-end try/? pattern",
+     "source": "https://go.dev/blog/error-syntax",
+     "covered": "no",
+     "surface": "errors",
+     "priority": "P0"
+    },
+    {
+     "slug": "functional-options-vs-builder-decision-rule",
+     "why": "a real measured disagreement with Cheney's own canonical pattern over allocation cost and readability",
+     "source": "https://rednafi.com/go/dysfunctional-options-pattern/",
+     "covered": "no",
+     "surface": "any",
+     "priority": "P1"
+    },
+    {
+     "slug": "pkg-dir-not-official",
+     "why": "golang-standards/project-layout is explicitly non-official per its own issue tracker; high false-positive-review risk if a rule requires it",
+     "source": "https://github.com/golang-standards/project-layout/issues/117",
+     "covered": "no",
+     "surface": "any",
+     "priority": "P0"
+    },
+    {
+     "slug": "internal-dir-earns-its-place",
+     "why": "specific falsifiable claim (99% of projects don't need internal/) that should be checked against the exemplar corpus",
+     "source": "https://laurentsv.com/blog/2024/10/19/no-nonsense-go-package-layout.html",
+     "covered": "no",
+     "surface": "any",
+     "priority": "P1"
+    },
+    {
+     "slug": "accept-interfaces-return-structs-exceptions",
+     "why": "prevents the rule from encoding a proverb as an absolute; documented exception cases exist",
+     "source": "https://bitfieldconsulting.com/posts/tao-of-go",
+     "covered": "partial",
+     "surface": "any",
+     "priority": "P1"
+    },
+    {
+     "slug": "consumer-side-interface-litmus-test",
+     "why": "distinguishes correct decoupling from a speculative interface with one implementation",
+     "source": "https://bitfieldconsulting.com/posts/tao-of-go",
+     "covered": "partial",
+     "surface": "any",
+     "priority": "P1"
+    },
+    {
+     "slug": "why-contracts-were-abandoned",
+     "why": "explains why today's generics are interface-constrained rather than a bespoke contracts syntax",
+     "source": "https://blog.merovius.de/posts/2018-09-05-scrapping_contracts/",
+     "covered": "no",
+     "surface": "lang",
+     "priority": "P2"
+    },
+    {
+     "slug": "self-referential-generic-constraints",
+     "why": "Go 1.26 feature new enough that no source argues a settled idiom; must be flagged open",
+     "source": "https://go.dev/doc/go1.26",
+     "covered": "no",
+     "surface": "lang",
+     "priority": "P2"
+    },
+    {
+     "slug": "generic-methods-sdk-shape",
+     "why": "Go 1.27 generic methods directly relevant to a future OCX Go SDK's API shape; interface-method restriction bites",
+     "source": "https://go.dev/doc/go1.27",
+     "covered": "no",
+     "surface": "lang",
+     "priority": "P1"
+    },
+    {
+     "slug": "container-aware-gomaxprocs",
+     "why": "Go 1.25 changes default scheduler behavior with zero code change; directly relevant to fleet Go services in OCI images",
+     "source": "https://antonz.org/go-1-25/",
+     "covered": "no",
+     "surface": "toolchain",
+     "priority": "P0"
+    },
+    {
+     "slug": "waitgroup-go-method",
+     "why": "Go 1.25 collapses the Add/go/Done triad into one call; old triad is now the harder-to-get-wrong predecessor idiom",
+     "source": "https://antonz.org/go-1-25/",
+     "covered": "no",
+     "surface": "concurrency",
+     "priority": "P1"
+    },
+    {
+     "slug": "json-v2-behavior-change-on-upgrade",
+     "why": "Go 1.27 makes json/v2 back the original package with stricter defaults inherited silently on toolchain upgrade",
+     "source": "https://go.dev/doc/go1.27",
+     "covered": "no",
+     "surface": "stdlib",
+     "priority": "P0"
+    },
+    {
+     "slug": "go-fix-modernizer-framework",
+     "why": "concrete mechanism behind a toolchain-upgrade-and-modernization skill; a rule/skill can literally shell out to go fix",
+     "source": "https://go.dev/doc/go1.26",
+     "covered": "no",
+     "surface": "toolchain",
+     "priority": "P0"
+    },
+    {
+     "slug": "loop-var-shadow-guard-dead-code",
+     "why": "per-iteration loop vars since Go 1.22 make the tc:=tc guard dead weight; a modernizer can flag it mechanically",
+     "source": "https://go.dev/doc/go1.22",
+     "covered": "no",
+     "surface": "testing",
+     "priority": "P1"
+    },
+    {
+     "slug": "godebug-tracks-gomod-not-toolchain",
+     "why": "load-bearing mechanism: GODEBUG defaults track the go.mod go line, not the installed toolchain; CI matrices get this wrong",
+     "source": "https://go.dev/blog/toolchain",
+     "covered": "no",
+     "surface": "modules",
+     "priority": "P0"
+    },
+    {
+     "slug": "godebug-removal-lifecycle",
+     "why": "concrete removal list exists for 1.26 to 1.27; a rule must warn against relying on an old default across a bump",
+     "source": "https://go.dev/doc/go1.27",
+     "covered": "no",
+     "surface": "toolchain",
+     "priority": "P0"
+    },
+    {
+     "slug": "toolchain-directive-real-world-adoption",
+     "why": "frame's H6 is explicitly untested; a stale toolchain directive could mask a security-patch bump",
+     "source": "https://go.dev/blog/toolchain",
+     "covered": "no",
+     "surface": "modules",
+     "priority": "P1"
+    },
+    {
+     "slug": "tool-directive-replaces-toolsgo-hack",
+     "why": "Go 1.24 tool directive is a concrete, dated migration a rule should push over the tools.go blank-import hack",
+     "source": "https://www.alexedwards.net/blog/how-to-manage-tool-dependencies-in-go-1.24-plus",
+     "covered": "no",
+     "surface": "modules",
+     "priority": "P1"
+    },
+    {
+     "slug": "fips140-mode-behavior-change",
+     "why": "security rule must name FIPS mode as a build-time mode changing observable crypto/TLS behavior, not just a library",
+     "source": "https://go.dev/blog/fips140",
+     "covered": "no",
+     "surface": "security",
+     "priority": "P1"
+    },
+    {
+     "slug": "post-quantum-mldsa-readiness",
+     "why": "brand-new in Go 1.27; needs an explicit not-yet verdict rather than silence",
+     "source": "https://go.dev/doc/go1.27",
+     "covered": "no",
+     "surface": "security",
+     "priority": "P2"
+    },
+    {
+     "slug": "os-root-scoped-fs-pattern",
+     "why": "directly matches the fleet's OCX-style content-addressed store use case; full API only complete as of 1.24-1.25",
+     "source": "https://antonz.org/go-1-25/",
+     "covered": "no",
+     "surface": "security",
+     "priority": "P0"
+    },
+    {
+     "slug": "filepath-vs-path-windows",
+     "why": "classic boring-but-biting mistake explicitly named in the brief; needs exemplar-corpus grounding",
+     "source": "https://100go.co/",
+     "covered": "no",
+     "surface": "fs",
+     "priority": "P1"
+    },
+    {
+     "slug": "map-iteration-order-determinism",
+     "why": "ties directly to fleet's atomic-file-write and deterministic-output concerns for CLIs and SDKs",
+     "source": "https://100go.co/",
+     "covered": "no",
+     "surface": "any",
+     "priority": "P1"
+    },
+    {
+     "slug": "deferred-close-error-swallowing",
+     "why": "named mistake category with high verification-command potential; unclear if errcheck/wrapcheck actually catch it",
+     "source": "https://100go.co/",
+     "covered": "no",
+     "surface": "errors",
+     "priority": "P0"
+    },
+    {
+     "slug": "run-function-cli-pattern",
+     "why": "highest-transfer practitioner pattern found for the fleet's future Go CLIs; maps onto the existing Rust cli-contract convention",
+     "source": "https://grafana.com/blog/how-i-write-http-services-in-go-after-13-years/",
+     "covered": "partial",
+     "surface": "cli",
+     "priority": "P0"
+    },
+    {
+     "slug": "library-never-calls-os-exit",
+     "why": "direct, checkable MUST NOT with a named source; Go's panic-vs-os.Exit split differs from the Rust equivalent",
+     "source": "https://bitfieldconsulting.com/posts/tao-of-go",
+     "covered": "partial",
+     "surface": "cli",
+     "priority": "P0"
+    },
+    {
+     "slug": "golangci-lint-v2-default-linters",
+     "why": "default-enabled set is narrow (errcheck, govet, ineffassign, staticcheck, unused); a rule naming just the tool is underspecified",
+     "source": "https://golangci-lint.run/docs/linters/",
+     "covered": "no",
+     "surface": "lint",
+     "priority": "P0"
+    },
+    {
+     "slug": "golangci-lint-bundled-vs-standalone-staticcheck",
+     "why": "the two can drift in version; verifiable directly with the installed toolchain",
+     "source": "https://raw.githubusercontent.com/golangci/golangci-lint/master/CHANGELOG.md",
+     "covered": "no",
+     "surface": "lint",
+     "priority": "P2"
+    },
+    {
+     "slug": "govulncheck-not-bundled",
+     "why": "concrete checkable fact per golangci-lint's own issue tracker: govulncheck must stay a separate CI step",
+     "source": "https://github.com/golangci/golangci-lint/issues/4623",
+     "covered": "no",
+     "surface": "lint",
+     "priority": "P1"
+    },
+    {
+     "slug": "slog-vs-zap-adoption",
+     "why": "tests H7 directly against slog.GroupAttrs (1.25) closing an ergonomic gap; needs exemplar-corpus grounding",
+     "source": "https://antonz.org/go-1-25/",
+     "covered": "no",
+     "surface": "any",
+     "priority": "P1"
+    },
+    {
+     "slug": "goreleaser-reproducible-build-recipe",
+     "why": "ties directly to the fleet's own ocx-mirror consumer of upstream Go releases (H8)",
+     "source": "https://go.dev/blog/toolchain",
+     "covered": "no",
+     "surface": "release",
+     "priority": "P0"
+    },
+    {
+     "slug": "ldflags-x-vs-readbuildinfo-stamping",
+     "why": "common practitioner gotcha with a real interaction effect against -trimpath",
+     "source": "https://go.dev/doc/go1.27",
+     "covered": "no",
+     "surface": "release",
+     "priority": "P1"
+    },
+    {
+     "slug": "goexperiment-flag-lifecycle",
+     "why": "prevents the rule set from hard-pinning to an experimental flag whose default or name is about to change",
+     "source": "https://go.dev/doc/go1.26",
+     "covered": "no",
+     "surface": "toolchain",
+     "priority": "P1"
+    },
+    {
+     "slug": "hung-process-diagnosis-runbook",
+     "why": "concrete SIGQUIT/GOTRACEBACK/Delve/coredumpctl sequence with a dated known-broken-kernel caveat",
+     "source": "https://michael.stapelberg.ch/posts/2025-02-27-debug-hanging-go-programs/",
+     "covered": "no",
+     "surface": "perf",
+     "priority": "P1"
+    },
+    {
+     "slug": "http-graceful-shutdown-pattern",
+     "why": "named MUST for any Go HTTP service the fleet builds: signal.NotifyContext plus Server.Shutdown with a timeout",
+     "source": "https://grafana.com/blog/how-i-write-http-services-in-go-after-13-years/",
+     "covered": "no",
+     "surface": "http",
+     "priority": "P0"
+    }
+   ],
+   "recent_shifts": [
+    "June 2025: Go team formally stopped pursuing error-handling syntax changes (check/handle, try(), ? operator all closed) after golang/go#71203/#71460 \u2014 invalidates any advice speculating about an incoming try/? construct",
+    "Go 1.22 (2024): per-iteration loop variables make the classic tc:=tc shadow-copy guard in table tests and goroutine loops obsolete; a go fix modernizer now targets it",
+    "Go 1.24-1.25 (Feb-Aug 2025): os.Root grew from a narrow Open/OpenFile primitive into a full filesystem API (Chmod, Chown, Rename, Symlink, MkdirAll, WriteFile) \u2014 invalidates advice treating os.Root as too narrow for a real content-addressed store",
+    "Go 1.24 (Feb 2025): FIPS 140-3 crypto module and the go.mod tool directive both land, replacing the tools.go blank-import hack for pinning dev-tool versions",
+    "Go 1.25 (Aug 2025): container-aware default GOMAXPROCS (cgroup-quota-based) and sync.WaitGroup.Go() ship; testing/synctest.Run deprecated in favor of Test",
+    "Go 1.26 (Feb 2026): go fix rewritten around a modernizer analysis framework; Green Tea GC on by default; goroutine-leak profiling ships experimental (GOEXPERIMENT=goroutineleakprofile)",
+    "Go 1.27 (Aug 2026, current per frame): goroutine-leak profiling reaches general availability (pprof profile goroutineleak); encoding/json/v2 now backs the original encoding/json with stricter UTF-8/duplicate-key defaults inherited silently on upgrade; generic methods land; crypto/mldsa post-quantum signing ships; GODEBUG settings tlsunsafeekm/tlsrsakex/tls10server/tls3des/x509keypairleaf/gotypesalias/asynctimerchan permanently removed",
+    "2026-04: a specific, checkable practitioner case against testify (nil-vs-empty-slice mismatch, 30+ overlapping assertions, argument-order inconsistency) reaches a named form with cmp.Diff as the converging replacement \u2014 sharper than older generic stdlib-over-testify advice",
+    "golangci-lint v2.14.0 released 2026-09-23 (three days before this research), confirming the frame's version hypothesis directly from the tool's own changelog"
+   ]
+  }
+ },
+ {
+  "type": "result",
+  "key": "v2:5b8972d24ffeea9b83fdde2b8ee3db561f59f62391860304515e992d14ee2b3c",
+  "agentId": "acbcf71cc43c95c7c",
+  "result": {
+   "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-topic-map/failure.md",
+   "sources_count": 25,
+   "primary_sources_count": 23,
+   "recent_shifts": [
+    "Go 1.22 (Feb 2024): per-iteration loop-variable scoping, gated by go.mod's go directive \u2014 downgrades but does not eliminate closure-capture bugs in mixed-version repos.",
+    "Go 1.23 (Aug 2024): unreferenced Timer/Ticker becomes GC-eligible without Stop \u2014 softens time.After leak to an allocation-cost concern only.",
+    "Go 1.24 (Feb 2025): os.Root/OpenRoot gives a first-class, kernel-enforced answer to path traversal and symlink escape.",
+    "Go 1.25 (Aug 2025): sync.WaitGroup.Go() and GA testing/synctest \u2014 corrects the frame's assumption these were 1.24; synctest was experimental (GOEXPERIMENT=synctest) through 1.24.",
+    "Go 1.26: go fix modernizers now wired into golangci-lint v2 as the govet-modernize linter, not just a standalone go fix -w.",
+    "Go 1.27 (Aug 2026, current): goroutine leak profiler (runtime/pprof goroutineleak) reaches GA \u2014 confirms the frame's open question that it exists, and post-dates every academic concurrency-bug study surveyed by 4-7 years.",
+    "staticcheck 2026.2/v0.8.0 (last ~2 months) added SA9010, the first mechanized check for 'deferred a function that itself returns a function to defer' \u2014 previously only covered narratively by 100 Go Mistakes.",
+    "golangci-lint v2.14.0 (2026-09-24, 2 days before this research) rolled forward gosec 2.29.0, revive 1.17.0, staticcheck 0.8.1, gocritic 0.15.0 \u2014 confirms the frame's toolchain-era hypothesis directly from the tool's own changelog."
+   ],
+   "candidates": [
+    {
+     "slug": "nil-interface-vs-nil-pointer",
+     "why": "Permanent language property (interface is a type+value pair); most-cited Go gotcha across every source surveyed, no version fixes it.",
+     "source": "https://go.dev/doc/faq#nil_error",
+     "covered": "no",
+     "surface": "errors/lang",
+     "priority": "P0"
+    },
+    {
+     "slug": "loop-var-capture-post-1.22",
+     "why": "Uber study: 48/879 Go-specific races were loop-var capture; fix is per-module (go.mod directive), so mixed-version repos still carry the bug.",
+     "source": "https://go.dev/blog/loopvar-preview",
+     "covered": "no",
+     "surface": "concurrency/lang",
+     "priority": "P1"
+    },
+    {
+     "slug": "append-aliasing-vs-realloc",
+     "why": "Largest quantified Go-specific race category in Uber's study: 391 of 879 races traced to slice/append semantics.",
+     "source": "https://arxiv.org/html/2204.00764v2",
+     "covered": "no",
+     "surface": "lang/concurrency",
+     "priority": "P0"
+    },
+    {
+     "slug": "copylock-analyzer-gaps",
+     "why": "go vet's copylock check has documented historical gaps (embedded structs, reassignment); 'vet passed' is not a complete guarantee.",
+     "source": "https://github.com/golang/tools/blob/master/go/analysis/passes/copylock/copylock.go",
+     "covered": "no",
+     "surface": "lint/concurrency",
+     "priority": "P1"
+    },
+    {
+     "slug": "goroutine-ownership-errgroup",
+     "why": "Root cause behind both goroutine-leak studies (Uber: 857 pre-existing leaks); direct instance of the requested topic shape.",
+     "source": "https://go.dev/wiki/CodeReviewComments",
+     "covered": "no",
+     "surface": "concurrency/cli/sdk",
+     "priority": "P0"
+    },
+    {
+     "slug": "waitgroup-go-1.25-fix",
+     "why": "Uber Observation 8: dynamic Add() placement races with Wait(); sync.WaitGroup.Go() (1.25) is the fix but version-gated.",
+     "source": "https://go.dev/doc/go1.25",
+     "covered": "no",
+     "surface": "concurrency",
+     "priority": "P1"
+    },
+    {
+     "slug": "time-after-post-1.23-severity",
+     "why": "1.23 made unreferenced timers GC-eligible; the leak is fixed but per-call allocation cost in hot loops remains \u2014 severity downgrade, not elimination.",
+     "source": "https://go.dev/doc/go1.23",
+     "covered": "no",
+     "surface": "perf/concurrency",
+     "priority": "P2"
+    },
+    {
+     "slug": "synctest-goleak-interaction",
+     "why": "Both GA only since 1.25; whether synctest's fake clock changes what 'leaked' means for goleak is untested in any source surveyed.",
+     "source": "https://github.com/uber-go/goleak",
+     "covered": "no",
+     "surface": "testing/concurrency",
+     "priority": "P2"
+    },
+    {
+     "slug": "goroutine-leak-profiler-cli-relevance",
+     "why": "Go 1.27's GA goroutine leak profiler is a production-server tool (profiles a running process) \u2014 unclear if it applies to the fleet's short-lived CLI processes at all.",
+     "source": "https://go.dev/blog/goroutine-leak-profiles",
+     "covered": "no",
+     "surface": "toolchain/perf/cli",
+     "priority": "P1"
+    },
+    {
+     "slug": "errorf-v-vs-w",
+     "why": "Kubernetes' own codebase is mid-migration (open issue) from %v to %w specifically because %v silently breaks errors.As/Is chains \u2014 the most concrete recurring review objection found.",
+     "source": "https://github.com/kubernetes/kubernetes/issues/123234",
+     "covered": "no",
+     "surface": "errors",
+     "priority": "P0"
+    },
+    {
+     "slug": "errors-join-traversal",
+     "why": "Newer stdlib feature; whether errors.Join preserves errors.Is/As traversal through every joined error, or only the first, is untested by any source surveyed.",
+     "source": "frame brief H2",
+     "covered": "partial",
+     "surface": "errors",
+     "priority": "P1"
+    },
+    {
+     "slug": "panic-in-library-vs-cli",
+     "why": "100 Go Mistakes #48 frames panic narrowly; needs to translate into an explicit SDK-vs-CLI-boundary contract for the fleet's own Go SDK.",
+     "source": "https://100go.co/",
+     "covered": "partial",
+     "surface": "errors/sdk",
+     "priority": "P1"
+    },
+    {
+     "slug": "defer-close-error-handling",
+     "why": "Correct pattern for checking Close() error on a writable os.File without discarding or double-reporting is a direct data-loss risk.",
+     "source": "https://100go.co/",
+     "covered": "no",
+     "surface": "errors/fs",
+     "priority": "P0"
+    },
+    {
+     "slug": "http-body-drain-vs-close",
+     "why": "Closing without draining an http.Response.Body breaks connection-pool reuse silently \u2014 a perf bug that looks correct in review.",
+     "source": "https://100go.co/",
+     "covered": "no",
+     "surface": "http/sdk",
+     "priority": "P0"
+    },
+    {
+     "slug": "json-unmarshal-interface-precision",
+     "why": "json.Unmarshal into interface{} silently turns large integers into imprecise float64 \u2014 explicitly named in the corpus brief.",
+     "source": "https://100go.co/",
+     "covered": "no",
+     "surface": "stdlib",
+     "priority": "P0"
+    },
+    {
+     "slug": "time-equal-vs-==",
+     "why": "time.Time == comparison breaks after serialization or monotonic-reading loss; explicitly named in the corpus brief, deterministic-output relevant.",
+     "source": "https://100go.co/",
+     "covered": "no",
+     "surface": "stdlib",
+     "priority": "P0"
+    },
+    {
+     "slug": "gosec-g115-real-vs-false-positive",
+     "why": "Multiple large projects (docker/cli, moby/moby) have open, unresolved issues on whether G115 is worth enabling given its false-positive rate on provably-safe conversions.",
+     "source": "https://github.com/securego/gosec/issues/1185",
+     "covered": "no",
+     "surface": "security/lint",
+     "priority": "P1"
+    },
+    {
+     "slug": "unkeyed-struct-literals-cross-module",
+     "why": "Classic 'dependency upgrade broke us silently' shape when a struct field is added/reordered \u2014 directly relevant to the OCX SDK's own public structs.",
+     "source": "frame brief",
+     "covered": "no",
+     "surface": "lang/sdk",
+     "priority": "P1"
+    },
+    {
+     "slug": "init-order-2026-incidence",
+     "why": "100 Go Mistakes #3; needs grounding-wave measurement to see if it still produces real bugs given current linter coverage.",
+     "source": "https://100go.co/",
+     "covered": "no",
+     "surface": "lang",
+     "priority": "P2"
+    },
+    {
+     "slug": "os-exit-skips-defers",
+     "why": "os.Exit/log.Fatal from library code skips caller-registered defers; directly relevant to the CLI exit-code contract the fleet already commits to in Rust.",
+     "source": "https://100go.co/",
+     "covered": "partial",
+     "surface": "errors/cli",
+     "priority": "P0"
+    },
+    {
+     "slug": "sql-injection-sprintf-incidence",
+     "why": "Named in brief; needs a grounding-wave count against the 35-repo corpus to see if it's already fully displaced by parameterized queries and linters.",
+     "source": "https://100go.co/",
+     "covered": "no",
+     "surface": "security",
+     "priority": "P1"
+    },
+    {
+     "slug": "sa9010-defer-returned-func-incidence",
+     "why": "Brand-new (2026.2) staticcheck check for defer-of-a-function-that-returns-a-function; no real-world incidence data yet, needs grounding.",
+     "source": "https://staticcheck.dev/changes/2026.2/",
+     "covered": "no",
+     "surface": "lint",
+     "priority": "P1"
+    },
+    {
+     "slug": "golangci-lint-v2-default-set",
+     "why": "v2's opt-in roster (bodyclose, sqlclosecheck, gosec) is much larger than defaults \u2014 this directly decides the go-quality rule's own default config.",
+     "source": "https://github.com/golangci/golangci-lint/blob/master/CHANGELOG.md",
+     "covered": "no",
+     "surface": "lint/toolchain",
+     "priority": "P0"
+    },
+    {
+     "slug": "vet-vs-staticcheck-coverage-gap",
+     "why": "Decides whether a Go rule can rely on go vet alone or must mandate staticcheck/golangci-lint \u2014 a concrete scoping question for the rule set.",
+     "source": "golang/tools analyzer passes",
+     "covered": "no",
+     "surface": "lint/toolchain",
+     "priority": "P1"
+    },
+    {
+     "slug": "go-fix-modernizer-behavior-change-risk",
+     "why": "H1 hypothesis (pre-1.21 idioms) needs a mechanized fix via go fix's 1.26 modernizers, but some rewrites could silently change runtime behavior rather than just syntax.",
+     "source": "frame H1",
+     "covered": "no",
+     "surface": "toolchain/lang",
+     "priority": "P1"
+    },
+    {
+     "slug": "govulncheck-reflection-false-negatives",
+     "why": "Decides whether govulncheck's call-graph analysis alone is a sufficient security gate for CLI frameworks using reflection-heavy DI/plugin loading.",
+     "source": "frame brief",
+     "covered": "no",
+     "surface": "security/toolchain",
+     "priority": "P1"
+    },
+    {
+     "slug": "os-root-vs-entry-name-validation",
+     "why": "os.Root closes the destination-confinement half of zip-slip but not entry-name validation \u2014 both halves are load-bearing and often conflated.",
+     "source": "https://go.dev/blog/osroot",
+     "covered": "no",
+     "surface": "security/fs",
+     "priority": "P0"
+    },
+    {
+     "slug": "decompression-bomb-bound",
+     "why": "Idiomatic io.Copy bound from a decompressing reader to prevent DoS; named in brief, needs a grounding count against the corpus.",
+     "source": "frame brief",
+     "covered": "no",
+     "surface": "security/fs",
+     "priority": "P1"
+    },
+    {
+     "slug": "regexp-redos-immunity-limits",
+     "why": "Corrects the overclaim that RE2 is 'just always fine' \u2014 there are still input-size/memory-limit caveats on the compiled program worth stating.",
+     "source": "https://checkmarx.com/blog/redos-go/",
+     "covered": "no",
+     "surface": "security/stdlib",
+     "priority": "P2"
+    },
+    {
+     "slug": "http-smuggling-cve-mitigation-scope",
+     "why": "Decides whether recent net/http CVEs (bare-LF smuggling, Host-header injection) need application-level defenses or whether patch-currency is the complete mitigation.",
+     "source": "https://www.sentinelone.com/vulnerability-database/cve-2025-22871/",
+     "covered": "no",
+     "surface": "security/http",
+     "priority": "P1"
+    },
+    {
+     "slug": "gomemlimit-cli-relevance",
+     "why": "Corrects a blanket 'always set GOMEMLIMIT' instinct against the fleet's actual CLI-shaped (short-lived) Go consumers, vs. future long-running SDK/daemon consumers.",
+     "source": "https://go.dev/doc/gc-guide",
+     "covered": "no",
+     "surface": "perf/release",
+     "priority": "P1"
+    },
+    {
+     "slug": "gc-pause-cache-smell",
+     "why": "Turns Discord's postmortem (large live cache scanned every GC cycle) into an actionable, nameable review smell a reviewer can spot in a diff.",
+     "source": "https://discord.com/blog/why-discord-is-switching-from-go-to-rust",
+     "covered": "no",
+     "surface": "perf/concurrency",
+     "priority": "P2"
+    },
+    {
+     "slug": "netip-vs-net-ip-mandate",
+     "why": "Directly informs the OCX-SDK-for-Go's networking surface: does netip's comparability/allocation profile matter enough to mandate over net.IP, or is it situational.",
+     "source": "https://tailscale.com/blog/netaddr-new-ip-type-for-go",
+     "covered": "no",
+     "surface": "stdlib/sdk",
+     "priority": "P1"
+    },
+    {
+     "slug": "map-iteration-order-determinism",
+     "why": "CLI output-stability contract question; named in brief, directly matters to deterministic JSON/text output.",
+     "source": "frame brief",
+     "covered": "partial",
+     "surface": "cli/stdlib",
+     "priority": "P1"
+    },
+    {
+     "slug": "atomic-file-write-pattern-go-vs-rust",
+     "why": "Decides whether Go needs its own atomic-write depth-file section or can defer to the Rust cli-contract pattern by reference \u2014 needs a grounding-wave dive.",
+     "source": "frame brief",
+     "covered": "partial",
+     "surface": "cli/fs",
+     "priority": "P1"
+    },
+    {
+     "slug": "rune-vs-byte-slicing",
+     "why": "Multi-byte-safe string indexing; named in brief ('encoding and byte/rune handling'), classic silent UTF-8 corruption bug.",
+     "source": "https://100go.co/",
+     "covered": "no",
+     "surface": "lang/stdlib",
+     "priority": "P1"
+    },
+    {
+     "slug": "windows-path-handling",
+     "why": "Cross-platform CLI correctness; named in brief, needs a grounding-wave count against the corpus's CLI tools.",
+     "source": "frame brief",
+     "covered": "no",
+     "surface": "fs/cli",
+     "priority": "P1"
+    },
+    {
+     "slug": "godebug-flip-stability",
+     "why": "Whether a GODEBUG default-value flip between the two supported releases (1.26/1.27) changes observable behavior the fleet depends on; affects reproducible CI.",
+     "source": "Go release notes",
+     "covered": "no",
+     "surface": "toolchain/release",
+     "priority": "P2"
+    },
+    {
+     "slug": "sa1019-deprecated-list-vs-h1",
+     "why": "Directly tests H1 (pre-1.21 idiom hypothesis) against staticcheck's actual, current deprecated-API database rather than assumption.",
+     "source": "https://staticcheck.dev/changes/2026.2/",
+     "covered": "no",
+     "surface": "lint/toolchain",
+     "priority": "P1"
+    },
+    {
+     "slug": "channels-not-always-safer",
+     "why": "ASPLOS'19 primary data directly contradicts the common 'channels are safer than mutexes' framing \u2014 message-passing bugs were as common as shared-memory bugs.",
+     "source": "https://cseweb.ucsd.edu/~yiying/GoStudy-ASPLOS19.pdf",
+     "covered": "no",
+     "surface": "concurrency",
+     "priority": "P0"
+    },
+    {
+     "slug": "cancellation-race-with-shared-write",
+     "why": "Uber Observation 7 (select-cancellation racing with a shared-struct write) needs a grounding-wave dive to confirm it's a distinct, nameable smell in the corpus.",
+     "source": "https://arxiv.org/html/2204.00764v2",
+     "covered": "no",
+     "surface": "concurrency",
+     "priority": "P2"
+    },
+    {
+     "slug": "errgroup-first-error-vs-collect-all",
+     "why": "errgroup's cancel-on-first-error semantics may be wrong for a batch CLI command that must report every failure, not abort early.",
+     "source": "frame brief",
+     "covered": "no",
+     "surface": "concurrency/cli",
+     "priority": "P1"
+    },
+    {
+     "slug": "context-on-struct-exceptions",
+     "why": "Tests whether CodeReviewComments' 'never put Context on a struct' rule has real, accepted exceptions in the exemplar corpus.",
+     "source": "https://go.dev/wiki/CodeReviewComments",
+     "covered": "no",
+     "surface": "concurrency/lang",
+     "priority": "P2"
+    },
+    {
+     "slug": "llm-go-hallucination-gap",
+     "why": "No Go-specific LLM stdlib-hallucination study exists in the literature; H1 remains untested by any external source and needs an empirical dive instead.",
+     "source": "search (negative result)",
+     "covered": "no",
+     "surface": "meta/H1",
+     "priority": "P1"
+    }
+   ]
+  }
+ },
+ {
+  "type": "result",
+  "key": "v2:bec8f551586439fb034cdddd4c2840c29518ea6114ac82e03f67811e5ee71310",
+  "agentId": "a758cc68d4c13a2c7",
+  "result": {
+   "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-topic-map/codified.md",
+   "sources_count": 16,
+   "primary_sources_count": 16,
+   "recent_shifts": [
+    "Go 1.22 per-iteration loop variables removed the closure-capture bug class; copyloopvar/intrange auto-fix linters risk mis-rewriting modules whose go directive predates 1.22.",
+    "Go 1.24 (Feb 2025): tool directive in go.mod, os.Root, experimental testing/synctest; vet gained a copylock 3-clause-loop check, a printf non-constant-format check, and the new tests analyzer for malformed test signatures.",
+    "Go 1.25 (Aug 2025): sync.WaitGroup.Go removes the Add/Done mismatch bug class; no language changes; testing/synctest graduating toward GA.",
+    "Go 1.26 (Feb 2026): go fix completely revamped into \"the home of Go's modernizers\" plus a //go:fix inline source-level inliner; obsolete historical fixers removed; Green Tea GC on by default; errors.AsType added.",
+    "Go 1.27 (Aug 2026, current): go test now runs stdversion by default; go fix's modernizer set changed again (added atomictypes/embedlit/slicesbackward/unsafefuncs, removed fmtappendf, renamed waitgroup to waitgroupgo); asynctimerchan GODEBUG fully removed; new goroutineleak pprof profile; go mod tidy auto-merges duplicate require blocks; a stale godebug value for a removed setting now fails the build.",
+    "staticcheck 2026.2 added SA9010 (\"returned function should be called in defer\") \u2014 new enough that no existing advice corpus documents it.",
+    "golangci-lint v2 shrank the always-on default to exactly 5 linters (errcheck, govet, ineffassign, staticcheck, unused) and deprecated gomodguard/wsl/exhaustruct in favor of _v2/_v5 successors \u2014 configs written against v1's larger default set now silently under-lint.",
+    "gosec's rule surface grew past classic G1-G602 AST checks with SSA-based G113/G115-G124 and a full G701-G710 taint suite; G105 retired and G307's meaning reassigned from \"deferred Close error\" to \"file creation permissions\"."
+   ],
+   "candidates": [
+    {
+     "slug": "go-test-vet-subset-gap",
+     "why": "An agent that trusts go test's green result alone misses 25 of 36 registered vet analyzers, including the ones that catch concurrency and composite-literal bugs.",
+     "source": "https://pkg.go.dev/cmd/go#hdr-Testing_flags",
+     "covered": "no",
+     "surface": "toolchain/lint",
+     "priority": "P0"
+    },
+    {
+     "slug": "golangci-lint-standard-vs-highvalue",
+     "why": "The default is far narrower than most agents assume; a .golangci.yml written from memory undershoots.",
+     "source": "golangci-lint help linters (own binary, v2.14.0)",
+     "covered": "no",
+     "surface": "lint",
+     "priority": "P0"
+    },
+    {
+     "slug": "golangci-lint-autofix-allowlist",
+     "why": "Auto-fix changes code without a human; an autonomous fleet needs an explicit allow-list, not just \"auto-fix is available\".",
+     "source": "golangci-lint help linters (own binary)",
+     "covered": "no",
+     "surface": "lint",
+     "priority": "P1"
+    },
+    {
+     "slug": "staticcheck-nondefault-checks",
+     "why": "Non-default checks are invisible unless a config explicitly enables them; the rule must decide, not inherit silence.",
+     "source": "dominikh/go-tools source (own repo)",
+     "covered": "no",
+     "surface": "lint",
+     "priority": "P1"
+    },
+    {
+     "slug": "staticcheck-sa9010-defer-return",
+     "why": "Brand-new check (2026.2) with zero training-era coverage; worth a planted-fixture test.",
+     "source": "dominikh/go-tools source",
+     "covered": "no",
+     "surface": "lint/resource cleanup",
+     "priority": "P1"
+    },
+    {
+     "slug": "modernize-excluded-analyzers",
+     "why": "Distinguishes \"modernize is safe to run unattended\" from \"modernize has known correctness carve-outs\" per the tool's own source comments.",
+     "source": "golang/tools source (own repo)",
+     "covered": "no",
+     "surface": "lang/lint",
+     "priority": "P1"
+    },
+    {
+     "slug": "go-fix-ci-mandate",
+     "why": "Direct test of H1 (pre-1.21-idiom cleanup) against the tool's own admitted caveats about imperfect fixes.",
+     "source": "golang/tools doc.go",
+     "covered": "no",
+     "surface": "toolchain",
+     "priority": "P1"
+    },
+    {
+     "slug": "gopls-only-analyzers-unreachable",
+     "why": "If nothing in CI ever invokes gopls, ~20 analyzers are structurally unreachable regardless of rule content.",
+     "source": "go.dev/gopls/analyzers + golang/tools source",
+     "covered": "no",
+     "surface": "toolchain/lint",
+     "priority": "P2"
+    },
+    {
+     "slug": "gosec-ssa-taint-build-capability",
+     "why": "An older/lighter gosec build silently skips the newest and most dangerous-class rules (request smuggling, TOCTOU, SSRF).",
+     "source": "securego/gosec RULES.md (own repo)",
+     "covered": "no",
+     "surface": "security/lint",
+     "priority": "P1"
+    },
+    {
+     "slug": "gosec-g307-retired-meaning",
+     "why": "A rule authored against stale gosec knowledge (old G307 = deferred-Close-error) actively misdirects reviewers today.",
+     "source": "securego/gosec RULES.md",
+     "covered": "no",
+     "surface": "security",
+     "priority": "P2"
+    },
+    {
+     "slug": "revive-unique-coverage",
+     "why": "Justifies (or not) paying revive's own config-and-noise cost on top of golangci-lint's default 5.",
+     "source": "mgechev/revive RULES_DESCRIPTIONS.md (own repo)",
+     "covered": "no",
+     "surface": "lint",
+     "priority": "P1"
+    },
+    {
+     "slug": "gocritic-tags-security-empty",
+     "why": "Prevents a rule from assuming go-critic covers security when its #security tag is documented as disabled-by-default and empty.",
+     "source": "go-critic/go-critic README (own repo)",
+     "covered": "no",
+     "surface": "lint/security",
+     "priority": "P1"
+    },
+    {
+     "slug": "errcheck-vs-bodyclose-overlap",
+     "why": "Resource cleanup is an explicitly named boring-but-bites surface; overlap analysis avoids redundant config.",
+     "source": "kisielk/errcheck + timakin/bodyclose READMEs (own repos)",
+     "covered": "no",
+     "surface": "resource cleanup/lint",
+     "priority": "P0"
+    },
+    {
+     "slug": "wrapcheck-ignoresigs-sdk",
+     "why": "Directly shapes the rule's error-wrapping convention (H2) and its lint config for the OCX SDK's own error types.",
+     "source": "tomarrell/wrapcheck README (own repo)",
+     "covered": "no",
+     "surface": "errors/lint",
+     "priority": "P0"
+    },
+    {
+     "slug": "errorlint-errorf-off-by-default",
+     "why": "A deliberate policy decision (turn on what the tool's own author treats as opt-in), not a default to inherit uncritically.",
+     "source": "polyfloyd/go-errorlint README (own repo)",
+     "covered": "no",
+     "surface": "errors/lint",
+     "priority": "P0"
+    },
+    {
+     "slug": "nilerr-nilnil-behavior",
+     "why": "Named in the brief as a characteristic LLM mistake surface: checked-non-nil-err-but-returned-nil, and (nil, nil) returns.",
+     "source": "golangci-lint roster (own binary)",
+     "covered": "no",
+     "surface": "errors/lang",
+     "priority": "P0"
+    },
+    {
+     "slug": "contextcheck-containedctx-pair",
+     "why": "Two linters check opposite failure shapes of the same context-discipline surface (H2/H3); the rule needs both, not either.",
+     "source": "golangci-lint roster",
+     "covered": "no",
+     "surface": "concurrency/context",
+     "priority": "P0"
+    },
+    {
+     "slug": "noctx-http-context-convention",
+     "why": "Directly informs the Go SDK's HTTP layer design (context.Context-carrying requests), not just its lint config.",
+     "source": "golangci-lint roster",
+     "covered": "no",
+     "surface": "http/context",
+     "priority": "P0"
+    },
+    {
+     "slug": "copyloopvar-intrange-version-risk",
+     "why": "Auto-fix linters interacting with the Go 1.22 loop-variable-semantics boundary is a correctness trap, not a style nit.",
+     "source": "golangci-lint roster + go.dev/doc/go1.22",
+     "covered": "no",
+     "surface": "lang/lint",
+     "priority": "P1"
+    },
+    {
+     "slug": "paralleltest-trio-fit",
+     "why": "Prevents over-adopting a linter trio calibrated for large parallel test suites onto a fleet writing small sequential tests.",
+     "source": "golangci-lint roster",
+     "covered": "no",
+     "surface": "testing/lint",
+     "priority": "P2"
+    },
+    {
+     "slug": "usetesting-testify-conflict",
+     "why": "Testify-style tests may not have a *testing.T in scope at the call site usetesting's replacements expect.",
+     "source": "golangci-lint roster",
+     "covered": "no",
+     "surface": "testing/lint",
+     "priority": "P1"
+    },
+    {
+     "slug": "perfsprint-cli-volume",
+     "why": "Distinguishes cosmetic churn from a real perf win worth gating on, at the OCX CLI's realistic output volumes.",
+     "source": "golangci-lint roster",
+     "covered": "no",
+     "surface": "perf/cli",
+     "priority": "P2"
+    },
+    {
+     "slug": "sloglint-slog-contract",
+     "why": "H7 names log/slog as the likely fleet default logger; this linter is its lint-time contract (static keys, matched kv pairs).",
+     "source": "golangci-lint roster",
+     "covered": "no",
+     "surface": "stdlib/observability",
+     "priority": "P1"
+    },
+    {
+     "slug": "spancheck-applicability-gate",
+     "why": "Avoids shipping a rule for a dependency (OpenTelemetry) the fleet doesn't use yet.",
+     "source": "golangci-lint roster",
+     "covered": "no",
+     "surface": "observability",
+     "priority": "P3"
+    },
+    {
+     "slug": "protogetter-applicability-gate",
+     "why": "Same pattern as spancheck \u2014 a dependency-gated linter (protobuf), not universal.",
+     "source": "golangci-lint roster",
+     "covered": "no",
+     "surface": "any",
+     "priority": "P3"
+    },
+    {
+     "slug": "exhaustive-enum-switch-ci",
+     "why": "Determines whether adding a new typed-const value becomes a hard CI gate everywhere it's switched on.",
+     "source": "golangci-lint roster",
+     "covered": "no",
+     "surface": "lang/lint",
+     "priority": "P1"
+    },
+    {
+     "slug": "forcetypeassert-false-positive",
+     "why": "Distinguishes always-require-,ok from knowing when a single-value assertion is provably safe, which matters for review fatigue.",
+     "source": "golangci-lint roster",
+     "covered": "no",
+     "surface": "lang/lint",
+     "priority": "P1"
+    },
+    {
+     "slug": "wrapcheck-errcheck-overlap",
+     "why": "Prevents double-reporting the same line under two linters in the authored rule's examples.",
+     "source": "kisielk/errcheck + tomarrell/wrapcheck READMEs",
+     "covered": "no",
+     "surface": "errors/lint",
+     "priority": "P2"
+    },
+    {
+     "slug": "codeql-gosec-gap-queries",
+     "why": "Documents CodeQL security queries with zero gosec equivalent (missing JWT signature check, impossible interface-nil-check, incomplete hostname regex) that the rule should still name.",
+     "source": "codeql.github.com/codeql-query-help/go/",
+     "covered": "no",
+     "surface": "security",
+     "priority": "P1"
+    },
+    {
+     "slug": "codeql-sa9010-nilerr-distinct",
+     "why": "Avoids citing three sources for one bug pattern, or missing that CodeQL's wrapped-error-always-nil query is actually distinct.",
+     "source": "codeql.github.com + dominikh/go-tools",
+     "covered": "no",
+     "surface": "errors",
+     "priority": "P2"
+    },
+    {
+     "slug": "uber-handle-errors-once-gap",
+     "why": "\"Handle Errors Once\" (never both log and return the same error) has zero mechanical linter coverage found in this corpus \u2014 pure guide/review territory.",
+     "source": "uber-go/guide style.md (own repo)",
+     "covered": "no",
+     "surface": "errors",
+     "priority": "P0"
+    },
+    {
+     "slug": "uber-copy-boundaries-sdk",
+     "why": "Directly shapes the OCX SDK's public API surface design (aliasing caller-owned backing arrays); no mechanical check found.",
+     "source": "uber-go/guide style.md",
+     "covered": "no",
+     "surface": "api-design/sdk",
+     "priority": "P1"
+    },
+    {
+     "slug": "uber-channel-goroutine-lifetime",
+     "why": "Concurrency-lifetime discipline for goroutines a CLI spawns during fan-out work (H3); largely review-only beyond vet's waitgroup analyzer.",
+     "source": "uber-go/guide style.md + go tool vet help",
+     "covered": "no",
+     "surface": "concurrency",
+     "priority": "P0"
+    },
+    {
+     "slug": "copylock-3clause-loop-1.24",
+     "why": "Distinguishes a still-live vet enhancement from an idiom the language itself already fixed via per-iteration loop vars.",
+     "source": "go.dev/doc/go1.24",
+     "covered": "no",
+     "surface": "concurrency/lang-version",
+     "priority": "P1"
+    },
+    {
+     "slug": "tests-analyzer-signature-mismatch",
+     "why": "A specific, checkable LLM-diff failure mode: a test function with a wrong signature that silently never runs.",
+     "source": "go.dev/doc/go1.24",
+     "covered": "no",
+     "surface": "testing",
+     "priority": "P1"
+    },
+    {
+     "slug": "govulncheck-scan-symbol-semantics",
+     "why": "Directly informs the release-gate rule's exact command line, not just \"run govulncheck\" \u2014 avoids false vulnerable flags on unreachable code.",
+     "source": "golang/vuln govulncheck -h (own binary)",
+     "covered": "no",
+     "surface": "security/release",
+     "priority": "P0"
+    },
+    {
+     "slug": "govulncheck-mode-binary-mirror",
+     "why": "Two distinct fleet use cases named directly in the frame (H8): auditing mirrored upstream binaries vs future first-party source.",
+     "source": "golang/vuln govulncheck -h",
+     "covered": "no",
+     "surface": "security/release",
+     "priority": "P0"
+    },
+    {
+     "slug": "stdversion-vet-modmismatch",
+     "why": "A free correctness signal the fleet gets automatically on Go 1.27 \u2014 worth documenting so no one re-implements it.",
+     "source": "go.dev/doc/go1.27",
+     "covered": "no",
+     "surface": "toolchain/modules",
+     "priority": "P1"
+    },
+    {
+     "slug": "go-mod-tidy-merge-1.27",
+     "why": "Simplifies go.mod-hygiene advice written against older go directives; stale advice would now over-specify.",
+     "source": "go.dev/doc/go1.27",
+     "covered": "no",
+     "surface": "modules",
+     "priority": "P2"
+    },
+    {
+     "slug": "godebug-stale-value-migration",
+     "why": "A concrete, mechanical migration check tied to a specific version boundary (removed GODEBUG settings now fail the build if set to old values).",
+     "source": "go.dev/doc/go1.27",
+     "covered": "no",
+     "surface": "modules/toolchain",
+     "priority": "P1"
+    },
+    {
+     "slug": "go-fix-inline-own-deprecation",
+     "why": "Directly actionable for the future OCX SDK's own deprecation timeline via //go:fix inline.",
+     "source": "go.dev/doc/go1.26",
+     "covered": "no",
+     "surface": "api-design/deprecation",
+     "priority": "P1"
+    },
+    {
+     "slug": "sa6003-rune-byte-nonascii",
+     "why": "Names the encoding/byte-vs-rune boring-but-bites surface with a specific, checkable default-off staticcheck rule.",
+     "source": "go.dev/gopls/analyzers (staticcheck defaults table)",
+     "covered": "no",
+     "surface": "encoding/i18n",
+     "priority": "P1"
+    },
+    {
+     "slug": "filepath-windows-lint-gap",
+     "why": "If the answer is no coverage anywhere in vet/staticcheck/gosec/revive/CodeQL, that's a real, citable gap the rule must close itself.",
+     "source": "vet+staticcheck+gosec+revive+CodeQL surveys (this document)",
+     "covered": "no",
+     "surface": "fs/windows",
+     "priority": "P0"
+    },
+    {
+     "slug": "map-iteration-determinism-gap",
+     "why": "A real bug class (nondeterministic diffs/snapshots from randomized map iteration) with apparently zero lint coverage in this survey.",
+     "source": "staticcheck check index (no matching check found)",
+     "covered": "no",
+     "surface": "determinism/cli",
+     "priority": "P0"
+    },
+    {
+     "slug": "sa5001-vs-bodyclose-coverage",
+     "why": "Determines whether staticcheck alone already covers boring-but-bites resource cleanup or three more linters (bodyclose/sqlclosecheck/rowserrcheck) are load-bearing.",
+     "source": "dominikh/go-tools source + golangci-lint roster",
+     "covered": "no",
+     "surface": "resource cleanup",
+     "priority": "P0"
+    },
+    {
+     "slug": "atomic-file-write-no-tool-coverage",
+     "why": "Direct test of whether atomic file writing (temp-then-rename) is codified anywhere in the Go tool corpus, or needs cross-language import from the fleet's Rust set.",
+     "source": "full corpus survey + sibling rust-state-and-resources.md",
+     "covered": "partial",
+     "surface": "fs/atomic-writes",
+     "priority": "P1"
+    },
+    {
+     "slug": "nolintlint-suppression-hygiene",
+     "why": "Cheap to mandate before the fleet accumulates unexplained //nolint suppressions with no linter name or reason.",
+     "source": "golangci-lint roster",
+     "covered": "no",
+     "surface": "lint hygiene",
+     "priority": "P1"
+    },
+    {
+     "slug": "cli-exit-code-mirror-rust",
+     "why": "Names the artifact-set overlap explicitly \u2014 avoids re-deriving an exit-code/stream contract the fleet already owns in Rust.",
+     "source": "sibling rust-cli-contract.md",
+     "covered": "yes",
+     "surface": "cli",
+     "priority": "P1"
+    },
+    {
+     "slug": "bazel-nogo-analyzer-set-unknown",
+     "why": "Unresolved in this scout; a genuine follow-up for the bazel-quality/go.md depth file \u2014 does nogo default to full go vet or a narrower subset.",
+     "source": "unresolved \u2014 flagged for dive wave",
+     "covered": "no",
+     "surface": "bazel-go",
+     "priority": "P1"
+    },
+    {
+     "slug": "sdk-atomic-dependency-conflict",
+     "why": "A live guide-vs-tooling contradiction (Uber's go.uber.org/atomic vs modernize's atomictypes pushing to stdlib) with a direct SDK-design consequence.",
+     "source": "uber-go/guide + golang/tools modernize source",
+     "covered": "no",
+     "surface": "sdk/contested",
+     "priority": "P2"
+    }
+   ]
+  }
+ },
+ {
+  "type": "result",
+  "key": "v2:203e40d8398353adc311e05f8065656a0a68a235179d19889cf95ad7f048dc0e",
+  "agentId": "adb4276bca5901800",
+  "result": {
+   "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-topic-map/ecosystem-tooling.md",
+   "sources_count": 22,
+   "primary_sources_count": 21,
+   "recent_shifts": [
+    "Go 1.24 (Feb 2025): tool directive in go.mod replaces tools.go; GOAUTH env var; os.Root; testing.B.Loop; sync.WaitGroup.Go; testing/synctest experimental; Swiss-table maps.",
+    "Go 1.25 (Aug 2025): runtime/trace.FlightRecorder; GOEXPERIMENT=greenteagc; experimental encoding/json/v2 + jsontext.",
+    "Go 1.26 (early 2026): go fix rewritten as the home of modernizers; go mod init now emits a LOWER go line than the running toolchain; cmd/doc deleted; Green Tea GC on by default; goroutineleak GOEXPERIMENT.",
+    "Go 1.27 (Aug 2026, frame's 'current'): go vet's stdversion check now runs by default under go test; asynctimerchan and gotypesalias GODEBUG settings permanently removed; goroutineleak profile GA; go mod tidy auto-merges duplicate require blocks; bzr VCS support removed.",
+    "goreleaser deprecated 'brews' in favor of 'homebrew_casks' since v2.10 -- documented as NOT a rename (different directory, binaries: field, quarantine post-install hook needed).",
+    "github.com/golang/mock is archived; go.uber.org/mock is the only actively-maintained fork tracking current Go releases.",
+    "rules_go/gazelle's bzlmod path (go_deps, go_sdk module extensions) is now the documented default; WORKSPACE setup is legacy.",
+    "OpenTelemetry Go Logs API/SDK only reached release-candidate status in 2026, years after traces/metrics stabilized -- prior 'use OTel for logging' advice was recommending pre-v1 surface.",
+    "Prometheus's own docs now unconditionally recommend native histograms over both classic histograms and summaries, a stronger position than the older 'summaries are fine for SLOs' guidance."
+   ],
+   "candidates": [
+    {
+     "slug": "gotoolchain-pin-vs-auto-ci-drift",
+     "why": "Auto-download in CI means a flaky network or a new point release changes what compiled yesterday",
+     "source": "https://go.dev/doc/toolchain",
+     "covered": "no",
+     "surface": "toolchain",
+     "priority": "P1"
+    },
+    {
+     "slug": "go-line-mandatory-min-toolchain",
+     "why": "The go.mod go line refusing to load on an older toolchain is a hard stop agents mistake for a lint warning",
+     "source": "https://go.dev/doc/toolchain",
+     "covered": "no",
+     "surface": "toolchain",
+     "priority": "P1"
+    },
+    {
+     "slug": "tool-directive-vs-toolsgo-pattern",
+     "why": "Only 4/35 exemplars use the Go 1.24 tool directive; the legacy tools.go pattern is still majority practice and both must be recognized",
+     "source": "https://go.dev/ref/mod",
+     "covered": "no",
+     "surface": "modules",
+     "priority": "P1"
+    },
+    {
+     "slug": "go-work-commit-policy",
+     "why": "Docs say don't commit go.work but 4/35 exemplars (all multi-module monorepos) do anyway",
+     "source": "https://go.dev/ref/mod",
+     "covered": "no",
+     "surface": "modules",
+     "priority": "P1"
+    },
+    {
+     "slug": "mvs-silent-old-version-pick",
+     "why": "go.sum is not a lockfile; go list -m all is the only ground truth for the resolved build list",
+     "source": "https://go.dev/ref/mod",
+     "covered": "no",
+     "surface": "modules",
+     "priority": "P1"
+    },
+    {
+     "slug": "mod-readonly-vs-mod-mod-ci-default",
+     "why": "Wrong -mod default either rewrites go.mod silently in CI or fails builds that should pass",
+     "source": "https://go.dev/ref/mod",
+     "covered": "no",
+     "surface": "modules",
+     "priority": "P1"
+    },
+    {
+     "slug": "goprivate-vs-goproxy-off",
+     "why": "Getting this wrong either leaks private-repo probing to the public proxy or breaks all fetching",
+     "source": "https://go.dev/ref/mod",
+     "covered": "no",
+     "surface": "modules",
+     "priority": "P1"
+    },
+    {
+     "slug": "retract-directive-requires-new-tag",
+     "why": "Agents assume retract is retroactive; nothing changes until a new, higher version ships it",
+     "source": "https://go.dev/ref/mod",
+     "covered": "no",
+     "surface": "modules",
+     "priority": "P2"
+    },
+    {
+     "slug": "v2-suffix-import-compatibility",
+     "why": "Import-compatibility violations compile fine and break silently at a diamond dependency via +incompatible",
+     "source": "https://go.dev/ref/mod",
+     "covered": "no",
+     "surface": "modules",
+     "priority": "P1"
+    },
+    {
+     "slug": "vendor-auto-activation-ci",
+     "why": "Vendor mode auto-activates from go>=1.14 + consistent modules.txt without any explicit flag",
+     "source": "https://go.dev/ref/mod",
+     "covered": "no",
+     "surface": "modules",
+     "priority": "P2"
+    },
+    {
+     "slug": "goauth-ci-credential-mode",
+     "why": "New GOAUTH modes (off/netrc/git dir) are the primary lever for private-module CI auth; most existing configs predate it",
+     "source": "https://go.dev/src/cmd/go/internal/auth/auth.go",
+     "covered": "no",
+     "surface": "security",
+     "priority": "P1"
+    },
+    {
+     "slug": "gobuild-vs-legacy-buildtag-gotcha",
+     "why": "Silent file exclusion from a build via a stale/mismatched build tag is one of the hardest-to-spot Go bugs",
+     "source": "go help buildconstraint",
+     "covered": "no",
+     "surface": "lang",
+     "priority": "P1"
+    },
+    {
+     "slug": "stdversion-vet-check-default",
+     "why": "New default analyzer in go1.27's go test; not yet reflected in most agent training data",
+     "source": "https://go.dev/doc/go1.27",
+     "covered": "no",
+     "surface": "lint",
+     "priority": "P2"
+    },
+    {
+     "slug": "integration-coverage-merge-gate",
+     "why": "Two disjoint coverage pipelines (unit vs GOCOVERDIR) exist; agents default to only the easy one",
+     "source": "https://go.dev/doc/build-cover",
+     "covered": "no",
+     "surface": "testing",
+     "priority": "P0"
+    },
+    {
+     "slug": "covdata-subcommand-choice",
+     "why": "percent vs textfmt vs merge each fit a different CI use case; wrong choice can't gate or can't render",
+     "source": "https://go.dev/doc/build-cover",
+     "covered": "no",
+     "surface": "testing",
+     "priority": "P2"
+    },
+    {
+     "slug": "gocoverdir-unset-silent-drop",
+     "why": "Missing GOCOVERDIR warns but doesn't fail -- CI can pass green with zero coverage collected",
+     "source": "https://go.dev/doc/build-cover",
+     "covered": "no",
+     "surface": "testing",
+     "priority": "P1"
+    },
+    {
+     "slug": "pgo-profile-invalidation",
+     "why": "Committed default.pgo silently degrades (not errors) when a hot function is renamed or moved",
+     "source": "https://go.dev/doc/pgo",
+     "covered": "no",
+     "surface": "perf",
+     "priority": "P2"
+    },
+    {
+     "slug": "pgo-production-profile-collection",
+     "why": "Collecting a representative profile without permanently exposing net/http/pprof is a real tradeoff",
+     "source": "https://go.dev/doc/pgo",
+     "covered": "no",
+     "surface": "security",
+     "priority": "P2"
+    },
+    {
+     "slug": "flightrecorder-vs-full-trace",
+     "why": "New 1.25 API changes the always-trace vs never-trace tradeoff for production diagnosis",
+     "source": "https://go.dev/blog/flight-recorder",
+     "covered": "no",
+     "surface": "perf",
+     "priority": "P2"
+    },
+    {
+     "slug": "runtime-metrics-vs-handrolled-gauges",
+     "why": "New 1.26 /sched/* runtime/metrics keys duplicate common hand-rolled goroutine-count metrics",
+     "source": "https://go.dev/doc/go1.26",
+     "covered": "no",
+     "surface": "perf",
+     "priority": "P2"
+    },
+    {
+     "slug": "goreleaser-reproducible-build-config",
+     "why": "The wall-clock {{.Date}} default is the single most common reproducibility leak in Go release configs",
+     "source": "https://goreleaser.com/customization/builds/builders/go/",
+     "covered": "no",
+     "surface": "release",
+     "priority": "P0"
+    },
+    {
+     "slug": "trimpath-insufficient-vcs-stamping",
+     "why": "Fixing -trimpath doesn't fix the independent VCS-stamping embedding mechanism (-buildvcs, debug.ReadBuildInfo)",
+     "source": "https://go.dev/ref/mod",
+     "covered": "no",
+     "surface": "release",
+     "priority": "P1"
+    },
+    {
+     "slug": "cgo-enabled-transitive-reenable",
+     "why": "net's resolver and some crypto backends transitively re-enable cgo even with CGO_ENABLED=0 set at the top",
+     "source": "https://goreleaser.com/customization/builds/builders/go/",
+     "covered": "no",
+     "surface": "release",
+     "priority": "P1"
+    },
+    {
+     "slug": "brews-vs-homebrew-casks-migration",
+     "why": "Not a rename: directory, binaries field, and a quarantine post-install hook all differ between the two",
+     "source": "https://goreleaser.com/customization/publish/homebrew_casks/",
+     "covered": "no",
+     "surface": "release",
+     "priority": "P1"
+    },
+    {
+     "slug": "goreleaser-sbom-container-image-gap",
+     "why": "Documented current limitation: container images built by the same pipeline aren't SBOM'd by the default Syft step",
+     "source": "https://goreleaser.com/customization/sbom/",
+     "covered": "no",
+     "surface": "security",
+     "priority": "P1"
+    },
+    {
+     "slug": "cosign-keyless-vs-keyed",
+     "why": "Direct tradeoff a secret-free CI pipeline must decide once, project-wide",
+     "source": "https://docs.sigstore.dev/cosign/signing/overview/",
+     "covered": "no",
+     "surface": "security",
+     "priority": "P0"
+    },
+    {
+     "slug": "ko-vs-goreleaser-distribution",
+     "why": "ko's no-Dockerfile model changes base-image CVE patch-cadence ownership vs a self-built binary archive",
+     "source": "https://ko.build/",
+     "covered": "no",
+     "surface": "release",
+     "priority": "P1"
+    },
+    {
+     "slug": "slsa-level-goreleaser-cosign",
+     "why": "Signed and provenance-attested are not the same claim; agents conflate them",
+     "source": "https://goreleaser.com/customization/docker_sign/",
+     "covered": "no",
+     "surface": "security",
+     "priority": "P2"
+    },
+    {
+     "slug": "setup-go-cache-key-gomod-only",
+     "why": "Default cache key hashes go.mod only, not go.sum -- indirect-dep-only bumps can reuse a stale module cache",
+     "source": "https://github.com/actions/setup-go",
+     "covered": "no",
+     "surface": "cli",
+     "priority": "P1"
+    },
+    {
+     "slug": "govulncheck-action-json-exit-zero",
+     "why": "Documented in the action's own README: json/sarif output exits 0 on a real finding, unlike text mode",
+     "source": "https://github.com/golang/govulncheck-action",
+     "covered": "no",
+     "surface": "security",
+     "priority": "P0"
+    },
+    {
+     "slug": "govulncheck-callgraph-false-negative",
+     "why": "The tool's low-noise selling point is also its blind spot for generic/reflection-based dispatch",
+     "source": "https://github.com/golang/govulncheck-action",
+     "covered": "no",
+     "surface": "security",
+     "priority": "P2"
+    },
+    {
+     "slug": "bzlmod-go-work-divergence",
+     "why": "Documented, tracked limitation (bazel-gazelle#1797): Bazel and plain go build can resolve indirect deps differently under go.work",
+     "source": "https://github.com/bazel-contrib/rules_go/blob/master/docs/go/core/bzlmod.md",
+     "covered": "no",
+     "surface": "bazel-go",
+     "priority": "P1"
+    },
+    {
+     "slug": "go-sdk-host-nonreproducible",
+     "why": "go_sdk.host() is an explicit, named footgun in rules_go's own docs, still commonly reached for",
+     "source": "https://github.com/bazel-contrib/rules_go/blob/master/docs/go/core/bzlmod.md",
+     "covered": "no",
+     "surface": "bazel-go",
+     "priority": "P1"
+    },
+    {
+     "slug": "nogo-scope-and-config",
+     "why": "A Bazel-only Go repo that skips nogo config silently loses a whole static-analysis layer beyond go vet/golangci-lint",
+     "source": "https://github.com/bazel-contrib/rules_go/blob/master/docs/go/core/bzlmod.md",
+     "covered": "no",
+     "surface": "bazel-go",
+     "priority": "P1"
+    },
+    {
+     "slug": "gazelle-resolve-directive-staleness",
+     "why": "Gazelle-generated BUILD files are meant to be regenerated, but resolve overrides are hand-maintained and can silently pin a stale target after a refactor",
+     "source": "https://github.com/bazel-contrib/bazel-gazelle/blob/master/gazelle-reference.md",
+     "covered": "no",
+     "surface": "bazel-go",
+     "priority": "P2"
+    },
+    {
+     "slug": "tool-directive-gazelle-version-gate",
+     "why": "GO_TOOLS bridging needs Gazelle >=0.47.0; silently absent below that threshold with no error",
+     "source": "https://github.com/bazel-contrib/rules_go/blob/master/docs/go/core/bzlmod.md",
+     "covered": "no",
+     "surface": "bazel-go",
+     "priority": "P2"
+    },
+    {
+     "slug": "gomod-vs-godeps-pin-divergence",
+     "why": "Two independent resolution algorithms (MVS vs Bazel module resolution) over the same dependency graph can disagree",
+     "source": "https://github.com/bazel-contrib/rules_go/blob/master/docs/go/core/bzlmod.md",
+     "covered": "no",
+     "surface": "bazel-go",
+     "priority": "P1"
+    },
+    {
+     "slug": "gazelle-naming-convention-collision",
+     "why": "Default go_naming_convention import can collide with legacy go_default_library-named targets from an older repo",
+     "source": "https://github.com/bazel-contrib/bazel-gazelle/blob/master/language/go/reference.md",
+     "covered": "no",
+     "surface": "bazel-go",
+     "priority": "P2"
+    },
+    {
+     "slug": "golang-mock-archived-migration",
+     "why": "Upstream golang/mock is archived; go.uber.org/mock is the only actively-updated fork but training data still defaults to the old import path",
+     "source": "https://github.com/uber-go/mock",
+     "covered": "no",
+     "surface": "sdk",
+     "priority": "P1"
+    },
+    {
+     "slug": "generated-code-checkin-drift-check",
+     "why": "go.dev's own convention says check in generated code; a CI regenerate-and-diff step is needed to verify it's still current",
+     "source": "https://go.dev/blog/generate",
+     "covered": "no",
+     "surface": "cli",
+     "priority": "P1"
+    },
+    {
+     "slug": "doc-comment-syntax-pkggodev-render",
+     "why": "Genuinely Go-specific in-source documentation, distinct from docs-quality's markup-file-only scope",
+     "source": "https://go.dev/doc/comment",
+     "covered": "no",
+     "surface": "docs",
+     "priority": "P2"
+    },
+    {
+     "slug": "example-test-output-comment-contract",
+     "why": "Missing the trailing Output: comment silently downgrades a runnable example to a compile-only check",
+     "source": "go help testfunc",
+     "covered": "no",
+     "surface": "testing",
+     "priority": "P1"
+    },
+    {
+     "slug": "sdk-otel-logging-rc-maturity",
+     "why": "Traces/metrics are stable but Logs API/SDK only reached RC in 2026 -- determines whether a new SDK's instrumentation surface is pre-v1",
+     "source": "https://opentelemetry.io/docs/languages/go/",
+     "covered": "no",
+     "surface": "sdk",
+     "priority": "P1"
+    },
+    {
+     "slug": "prometheus-metric-naming-type-conventions",
+     "why": "Wrong type choice (summary over histogram) breaks cross-instance aggregation later, expensively, and is a checkable rule",
+     "source": "https://prometheus.io/docs/practices/histograms/",
+     "covered": "no",
+     "surface": "any",
+     "priority": "P0"
+    },
+    {
+     "slug": "prometheus-high-cardinality-labels",
+     "why": "Classic production-incident pattern with a purely textual tell (unbounded label value source) in code review",
+     "source": "https://prometheus.io/docs/practices/histograms/",
+     "covered": "no",
+     "surface": "any",
+     "priority": "P1"
+    },
+    {
+     "slug": "godebug-removed-settings-obsolete-advice",
+     "why": "Old workaround advice (set this GODEBUG) is now a no-op or an error on Go 1.27 after asynctimerchan/gotypesalias/tls* removals",
+     "source": "https://go.dev/doc/go1.27",
+     "covered": "no",
+     "surface": "security",
+     "priority": "P1"
+    },
+    {
+     "slug": "go127-modtidy-automerge",
+     "why": "New version-gated automatic rewrite behavior a reviewer must not hand-revert",
+     "source": "https://go.dev/doc/go1.27",
+     "covered": "no",
+     "surface": "modules",
+     "priority": "P2"
+    },
+    {
+     "slug": "go-doc-remote-package-lookup",
+     "why": "go doc pkg@version (1.27+) avoids a throwaway module pin just to check an upstream API surface",
+     "source": "https://go.dev/doc/go1.27",
+     "covered": "no",
+     "surface": "toolchain",
+     "priority": "P3"
+    },
+    {
+     "slug": "goroutineleak-ga-vs-goleak",
+     "why": "New GA stdlib profile (1.27) may replace or only complement the common third-party goleak testing dependency",
+     "source": "https://go.dev/doc/go1.27",
+     "covered": "no",
+     "surface": "testing",
+     "priority": "P1"
+    },
+    {
+     "slug": "goproxy-404-vs-410-fallback",
+     "why": "Protocol-level detail determining whether a private-proxy misconfiguration degrades gracefully or hard-fails direct fallback",
+     "source": "https://go.dev/ref/mod",
+     "covered": "no",
+     "surface": "modules",
+     "priority": "P2"
+    },
+    {
+     "slug": "homebrew-cask-platform-coverage-loss",
+     "why": "Casks are macOS-only; migrating off brews/Linuxbrew has a real platform-coverage consequence, not just a config rename",
+     "source": "https://goreleaser.com/customization/publish/homebrew_casks/",
+     "covered": "no",
+     "surface": "release",
+     "priority": "P2"
+    },
+    {
+     "slug": "go-build-json-stderr-leakage",
+     "why": "Documented edge case where non-JSON error text can appear on stderr even with -json, breaking naive JSON-only log parsers",
+     "source": "go help buildjson",
+     "covered": "no",
+     "surface": "toolchain",
+     "priority": "P3"
+    },
+    {
+     "slug": "goflags-vs-cli-flag-precedence",
+     "why": "CLI flags silently override GOFLAGS with no warning, an easy source of a 'why didn't my env var work' report",
+     "source": "go help environment",
+     "covered": "no",
+     "surface": "toolchain",
+     "priority": "P3"
+    }
+   ]
+  }
+ },
+ {
+  "type": "result",
+  "key": "v2:fbb356a89061c61b3531d7c0d92fddbbcab38dd337a04795b29a1b34d6a03f5a",
+  "agentId": "a60572de6c91b009f",
+  "result": {
+   "candidates": [
+    {
+     "slug": "loopvar-capture-still-needed-pre-122",
+     "why": "Directly tests H1's premise that pre-1.21 idioms cluster; version-gated against the go directive, grep-checkable",
+     "source": "https://go.dev/ref/spec#Language_versions",
+     "covered": "no",
+     "surface": "lang",
+     "priority": "P0"
+    },
+    {
+     "slug": "any-vs-interface-empty",
+     "why": "Style guide explicitly says prefer any in new code since 1.18; mechanical, high-volume check",
+     "source": "https://google.github.io/styleguide/go/decisions#use-any",
+     "covered": "no",
+     "surface": "lang",
+     "priority": "P1"
+    },
+    {
+     "slug": "reject-assertion-libraries",
+     "why": "Three independent canonical sources reject testify-style assert/require, directly falsifying the ecosystem-popularity argument (H5)",
+     "source": "https://go.dev/wiki/TestComments#assert-libraries",
+     "covered": "no",
+     "surface": "testing",
+     "priority": "P0"
+    },
+    {
+     "slug": "errors-is-as-vs-equality",
+     "why": "Core error-handling correctness surface (H2); errors.AsType (1.26) is the new generic form",
+     "source": "https://go.dev/ref/spec#Errors",
+     "covered": "no",
+     "surface": "errors",
+     "priority": "P0"
+    },
+    {
+     "slug": "percent-w-placement-direction",
+     "why": "Placement changes whether the printed error chain reads newest-to-oldest, oldest-to-newest, or neither; sentinel errors get the opposite rule",
+     "source": "https://google.github.io/styleguide/go/best-practices#error-percent-w",
+     "covered": "no",
+     "surface": "errors",
+     "priority": "P1"
+    },
+    {
+     "slug": "errors-join-for-independent-failures",
+     "why": "Combining a primary error with a Close/cleanup error without dropping one; ties to resource-cleanup boring-but-bites category",
+     "source": "https://go.dev/blog/error-syntax",
+     "covered": "no",
+     "surface": "errors",
+     "priority": "P0"
+    },
+    {
+     "slug": "goroutine-owned-by-waitgroup-or-errgroup",
+     "why": "Core of H3; sync.WaitGroup.Go (1.25) and its go fix modernizer (waitgroupgo) change the idiom",
+     "source": "https://go.dev/wiki/CodeReviewComments#goroutine-lifetimes",
+     "covered": "no",
+     "surface": "concurrency",
+     "priority": "P0"
+    },
+    {
+     "slug": "synctest-replaces-sleep-based-tests",
+     "why": "New (GA 1.25) primitive purpose-built to remove timing-dependent test flakiness",
+     "source": "https://go.dev/blog/synctest",
+     "covered": "no",
+     "surface": "testing",
+     "priority": "P0"
+    },
+    {
+     "slug": "time-after-leak-workaround-obsolete",
+     "why": "Refines H3: asynctimerchan opt-out removed in 1.27 makes the pre-1.23 leak fix permanent, invalidating the old defer-Stop-and-drain workaround for go1.23+ modules",
+     "source": "https://go.dev/doc/godebug#go-1-27",
+     "covered": "no",
+     "surface": "concurrency",
+     "priority": "P1"
+    },
+    {
+     "slug": "goroutine-leak-profiler-vs-goleak",
+     "why": "New experimental (1.26) production leak profiler distinct from goleak/synctest's test-time detection",
+     "source": "https://go.dev/blog/goroutine-leak-profiles",
+     "covered": "no",
+     "surface": "concurrency",
+     "priority": "P2"
+    },
+    {
+     "slug": "context-never-a-struct-field",
+     "why": "Strict rule with one narrow named exception (external interface signature); common violation",
+     "source": "https://google.github.io/styleguide/go/decisions#contexts",
+     "covered": "no",
+     "surface": "concurrency",
+     "priority": "P0"
+    },
+    {
+     "slug": "testing-tb-context-in-tests",
+     "why": "Small mechanical version-gated (1.24) preference over context.Background() in tests",
+     "source": "https://google.github.io/styleguide/go/decisions#contexts",
+     "covered": "no",
+     "surface": "testing",
+     "priority": "P2"
+    },
+    {
+     "slug": "generic-methods-1-27",
+     "why": "Brand-new (Go 1.27, Aug 2026) language feature; nothing written before it uses generic methods",
+     "source": "https://go.dev/ref/spec#Method_declarations",
+     "covered": "no",
+     "surface": "lang",
+     "priority": "P1"
+    },
+    {
+     "slug": "generic-type-alias-migration",
+     "why": "Version-gated correctness of generic re-export advice since 1.24",
+     "source": "https://go.dev/doc/go1.24#language",
+     "covered": "no",
+     "surface": "lang",
+     "priority": "P2"
+    },
+    {
+     "slug": "type-alias-only-for-migration",
+     "why": "Style guide: type aliases are rare, primarily a migration shim; flags misuse",
+     "source": "https://google.github.io/styleguide/go/decisions#type-aliases",
+     "covered": "no",
+     "surface": "lang",
+     "priority": "P2"
+    },
+    {
+     "slug": "new-with-expression-operand",
+     "why": "Go 1.26 new(expr) simplifies populating optional pointer fields, replacing a helper-function idiom",
+     "source": "https://go.dev/doc/go1.26#language",
+     "covered": "no",
+     "surface": "lang",
+     "priority": "P2"
+    },
+    {
+     "slug": "generics-as-testing-dsl-antipattern",
+     "why": "Style guide explicitly names generics-built assertion/DSL frameworks as an anti-pattern tied to the assertion-library rejection",
+     "source": "https://google.github.io/styleguide/go/decisions#generics",
+     "covered": "no",
+     "surface": "lang",
+     "priority": "P1"
+    },
+    {
+     "slug": "interface-ownership-consumer-side",
+     "why": "Two explicit rules (consumer-side ownership + don't-define-before-used) both contradict a Java/C#-style interface-first habit (H1)",
+     "source": "https://go.dev/wiki/CodeReviewComments#interfaces",
+     "covered": "no",
+     "surface": "api-design",
+     "priority": "P0"
+    },
+    {
+     "slug": "package-level-global-mutable-state",
+     "why": "Named litmus test: does removing this global break every caller's test setup? Then it should not be global",
+     "source": "https://google.github.io/styleguide/go/best-practices#global-state",
+     "covered": "no",
+     "surface": "api-design",
+     "priority": "P1"
+    },
+    {
+     "slug": "functional-options-vs-struct",
+     "why": "Two named, contrasted API patterns with explicit tradeoffs for growing argument lists",
+     "source": "https://google.github.io/styleguide/go/best-practices#function-argument-lists",
+     "covered": "no",
+     "surface": "api-design",
+     "priority": "P2"
+    },
+    {
+     "slug": "deferred-close-error-discarded",
+     "why": "Explicit resource-cleanup ask; deferred Close() return value silently dropped is a classic Go bug class",
+     "source": "https://go.dev/doc/effective_go#defer",
+     "covered": "no",
+     "surface": "errors",
+     "priority": "P0"
+    },
+    {
+     "slug": "os-exit-skips-defers",
+     "why": "Well-known but easy-to-miss stdlib gotcha; cleanup logic in defer never runs if os.Exit is called first",
+     "source": "https://go.dev/doc/effective_go#defer",
+     "covered": "partial",
+     "surface": "cli",
+     "priority": "P0"
+    },
+    {
+     "slug": "go-cli-exit-code-contract",
+     "why": "Direct alignment ask with the fleet's Rust CLI contract (ocx/grimoire mould); Go stdlib itself is silent beyond os.Exit(code)",
+     "source": "https://go.dev/doc/effective_go",
+     "covered": "partial",
+     "surface": "cli",
+     "priority": "P1"
+    },
+    {
+     "slug": "byte-offset-vs-rune-indexing",
+     "why": "Explicit boring-but-bites ask; string indexing yields a byte not a rune, len(s) undercounts multi-byte UTF-8",
+     "source": "https://go.dev/ref/spec#String_types",
+     "covered": "no",
+     "surface": "lang",
+     "priority": "P0"
+    },
+    {
+     "slug": "map-iteration-order-determinism",
+     "why": "No canonical source promises any map iteration order; explicit output-determinism ask for golden files/CLI text/hashes",
+     "source": "https://go.dev/ref/spec#For_statements",
+     "covered": "no",
+     "surface": "lang",
+     "priority": "P0"
+    },
+    {
+     "slug": "monotonic-clock-stripped-on-marshal",
+     "why": "Explicit time/monotonic-clock ask; time.Time loses its monotonic reading across marshal/equality boundaries, a classic subtle bug",
+     "source": "https://pkg.go.dev/time",
+     "covered": "no",
+     "surface": "stdlib",
+     "priority": "P0"
+    },
+    {
+     "slug": "on-disk-format-versioning",
+     "why": "Explicit ask; a cache/lock/index file without a version field or magic number breaks silently on a future incompatible reader, central to the fleet's content-addressed-store CLIs",
+     "source": "https://go.dev/doc/modules/layout",
+     "covered": "no",
+     "surface": "fs",
+     "priority": "P1"
+    },
+    {
+     "slug": "atomic-file-writes-via-rename",
+     "why": "Explicit ask; writing directly to a final path instead of write-temp-then-os.Rename risks partial writes on crash, central to the fleet's CLI domain",
+     "source": "https://pkg.go.dev/os#Rename",
+     "covered": "no",
+     "surface": "fs",
+     "priority": "P0"
+    },
+    {
+     "slug": "signal-handling-graceful-drain",
+     "why": "Explicit ask; a long-running service should trap SIGINT/SIGTERM via os/signal.Notify to drain work before exit",
+     "source": "https://pkg.go.dev/os/signal",
+     "covered": "no",
+     "surface": "cli",
+     "priority": "P1"
+    },
+    {
+     "slug": "cli-subcommand-idempotency",
+     "why": "Explicit ask; a mutating subcommand should behave safely if re-run after a mid-operation crash, central to a mirror/publish tool",
+     "source": "https://go.dev/doc/effective_go",
+     "covered": "partial",
+     "surface": "cli",
+     "priority": "P2"
+    },
+    {
+     "slug": "gomaxprocs-container-aware-default",
+     "why": "Directly changes hand-tuned worker-pool sizing logic that assumed GOMAXPROCS equals runtime.NumCPU()",
+     "source": "https://go.dev/blog/container-aware-gomaxprocs",
+     "covered": "no",
+     "surface": "perf",
+     "priority": "P0"
+    },
+    {
+     "slug": "vcs-stamping-disabled-multi-vcs",
+     "why": "Directly tests H8; Go 1.25 disables debug.ReadBuildInfo VCS stamping by default under multi-VCS detection, silently breaking reproducible-build checks",
+     "source": "https://go.dev/doc/godebug#go-1-25",
+     "covered": "no",
+     "surface": "release",
+     "priority": "P0"
+    },
+    {
+     "slug": "go-directive-vs-toolchain-directive",
+     "why": "Tests H6; the go directive (mandatory minimum since 1.21) and toolchain directive (suggested, GOTOOLCHAIN=auto) are commonly confused",
+     "source": "https://go.dev/ref/mod#go-mod-file-go",
+     "covered": "no",
+     "surface": "modules",
+     "priority": "P0"
+    },
+    {
+     "slug": "tool-directive-for-dev-tool-pinning",
+     "why": "Directly actionable: the fleet's future Go SDK/CLI should pin staticcheck/golangci-lint via the 1.24 tool directive instead of a tools.go blank-import file",
+     "source": "https://go.dev/ref/mod#tool-dep",
+     "covered": "no",
+     "surface": "modules",
+     "priority": "P0"
+    },
+    {
+     "slug": "go-work-committed-intentionally",
+     "why": "Tests H6 directly; a committed go.work file is often an accidental-commit mistake",
+     "source": "https://go.dev/ref/mod#workspaces",
+     "covered": "no",
+     "surface": "modules",
+     "priority": "P1"
+    },
+    {
+     "slug": "major-version-release-workflow-steps",
+     "why": "Directly relevant the first time the fleet publishes a Go SDK v2; ordered steps for the /v2 path-suffix migration",
+     "source": "https://go.dev/doc/modules/release-workflow#publishing-breaking-api-changes",
+     "covered": "no",
+     "surface": "release",
+     "priority": "P1"
+    },
+    {
+     "slug": "retract-directive-for-bad-tags",
+     "why": "Directly relevant to the fleet's bundles-never-pin / release-hygiene posture for un-recommending a bad published tag",
+     "source": "https://go.dev/ref/mod#go-mod-file-retract",
+     "covered": "no",
+     "surface": "release",
+     "priority": "P2"
+    },
+    {
+     "slug": "govulncheck-in-ci-reachability",
+     "why": "Runnable CI check; team must understand it reports call-graph-reachable vulnerabilities, not every vulnerable module in go.sum",
+     "source": "https://go.dev/doc/security/best-practices#vulnerability-management",
+     "covered": "no",
+     "surface": "security",
+     "priority": "P0"
+    },
+    {
+     "slug": "fuzz-target-for-parsers",
+     "why": "Concrete runnable check; a parser/decoder handling external input (OCI manifests, config files) should have a FuzzXxx test and seed corpus",
+     "source": "https://go.dev/doc/security/fuzz#writing-and-running-fuzz-tests",
+     "covered": "no",
+     "surface": "security",
+     "priority": "P1"
+    },
+    {
+     "slug": "race-detector-ci-cost-tradeoff",
+     "why": "Concrete numeric threshold (5-10x memory, 2-20x time) to base a CI-tiering decision on for -race",
+     "source": "https://go.dev/doc/articles/race_detector#runtime-overhead",
+     "covered": "no",
+     "surface": "testing",
+     "priority": "P1"
+    },
+    {
+     "slug": "stdversion-vet-check-default",
+     "why": "New (1.27) default go test guard catches use of a stdlib symbol newer than the module's declared go line, for free",
+     "source": "https://go.dev/doc/go1.27#go-test",
+     "covered": "no",
+     "surface": "toolchain",
+     "priority": "P1"
+    },
+    {
+     "slug": "go-fix-as-ongoing-modernization-gate",
+     "why": "go fix (rewritten 1.26) is now a maintained, ongoing modernization gate, not a one-off migration tool; directly actionable runnable command",
+     "source": "https://go.dev/blog/gofix",
+     "covered": "no",
+     "surface": "toolchain",
+     "priority": "P0"
+    },
+    {
+     "slug": "self-service-modernizer-infrastructure",
+     "why": "Forward-looking design option: the fleet could build an org-specific modernizer/analyzer on the new go fix/inliner infrastructure",
+     "source": "https://go.dev/blog/inliner",
+     "covered": "no",
+     "surface": "toolchain",
+     "priority": "P2"
+    },
+    {
+     "slug": "generics-for-single-instantiated-type",
+     "why": "Explicit anti-pattern distinct from the DSL-misuse one: making a container generic when only one concrete type is ever used",
+     "source": "https://google.github.io/styleguide/go/decisions#generics",
+     "covered": "no",
+     "surface": "lang",
+     "priority": "P1"
+    },
+    {
+     "slug": "slog-vs-zap-zerolog-adoption",
+     "why": "Directly tests H7; the Google style guide's own Logging section is Google-internal (glog), not slog, so needs empirical grounding beyond canonical sources",
+     "source": "https://go.dev/blog/slog",
+     "covered": "partial",
+     "surface": "stdlib",
+     "priority": "P1"
+    },
+    {
+     "slug": "unique-weak-vs-hand-rolled-interning",
+     "why": "New stdlib primitives (1.24) as a direct simplification over a hand-rolled interning map/cache",
+     "source": "https://go.dev/doc/gc-guide#weak",
+     "covered": "no",
+     "surface": "perf",
+     "priority": "P2"
+    },
+    {
+     "slug": "addcleanup-vs-setfinalizer",
+     "why": "GC guide explicitly names AddCleanup (1.24) as the modern, safer replacement for SetFinalizer, with distinct named pitfall categories for each",
+     "source": "https://go.dev/doc/gc-guide#weak",
+     "covered": "no",
+     "surface": "perf",
+     "priority": "P2"
+    },
+    {
+     "slug": "stale-goexperiment-pins",
+     "why": "Two consecutive releases flipped experiment defaults (swissmap 1.24, greenteagc 1.26); a stale CI/Dockerfile pin may re-enable a superseded opt-in or hold a stale opt-out",
+     "source": "https://go.dev/doc/go1.26#runtime",
+     "covered": "no",
+     "surface": "toolchain",
+     "priority": "P2"
+    },
+    {
+     "slug": "jsonv2-experimental-status",
+     "why": "encoding/json/v2 is still experimental as of this reading; adoption without an explicit GOEXPERIMENT flag risks shipping on an unstable API",
+     "source": "https://go.dev/blog/jsonv2-exp",
+     "covered": "no",
+     "surface": "stdlib",
+     "priority": "P2"
+    },
+    {
+     "slug": "deprecated-doc-comment-exact-prefix",
+     "why": "Mechanical, easy-to-miss convention: tooling keys off the exact 'Deprecated: ' prefix (capital D, colon, space)",
+     "source": "https://go.dev/doc/comment#deprecated",
+     "covered": "no",
+     "surface": "lang",
+     "priority": "P1"
+    },
+    {
+     "slug": "package-doc-comment-convention",
+     "why": "pkg.go.dev-rendering-relevant convention outside the generic docs-quality glob, which never parses .go files",
+     "source": "https://go.dev/doc/comment#package",
+     "covered": "no",
+     "surface": "lang",
+     "priority": "P2"
+    },
+    {
+     "slug": "go-mod-missing-go-directive-default",
+     "why": "Explicit spec-level surprise: a go.mod with no go line is silently assumed to be go 1.16",
+     "source": "https://go.dev/ref/mod#go-mod-file-go",
+     "covered": "no",
+     "surface": "modules",
+     "priority": "P1"
+    },
+    {
+     "slug": "pgo-profile-representativeness",
+     "why": "Low-effort, high-payoff perf lever many teams skip; explicit caveat that a profile drifts stale after a refactor",
+     "source": "https://go.dev/doc/pgo#notes",
+     "covered": "no",
+     "surface": "perf",
+     "priority": "P2"
+    },
+    {
+     "slug": "testing-b-loop-vs-b-n",
+     "why": "testing.B.Loop (1.24) fixes real correctness pitfalls (compiler-optimized-away work, per-iteration setup cost) in the classic b.N loop, not just style",
+     "source": "https://go.dev/blog/testing-b-loop",
+     "covered": "no",
+     "surface": "testing",
+     "priority": "P1"
+    },
+    {
+     "slug": "interface-typeswitch-vs-generics-decision",
+     "why": "Style guide's explicit decision tree: prefer a shared interface, then consider generics, over excessive any-based type switching",
+     "source": "https://google.github.io/styleguide/go/decisions#generics",
+     "covered": "no",
+     "surface": "lang",
+     "priority": "P2"
+    }
+   ],
+   "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-topic-map/canonical.md",
+   "primary_sources_count": 25,
+   "recent_shifts": [
+    "Go 1.22 (Feb 2024): per-iteration for-loop variables retire the v := v capture workaround for code declaring go 1.22+.",
+    "Go 1.23 (Aug 2024): range-over-func iterators stabilized; unique package added; opt-in telemetry infrastructure introduced.",
+    "Go 1.24 (Feb 2025): generic type aliases, tool directive, os.Root, weak package, runtime.AddCleanup, testing/synctest (experimental), testing.B.Loop, (testing.TB).Context(); Swiss-table maps become the default map implementation.",
+    "Go 1.25 (Aug 2025): container-aware GOMAXPROCS by default; Green Tea GC experimental; testing/synctest reaches general availability; encoding/json/v2 experimental; sync.WaitGroup.Go added; VCS build-info stamping disabled by default under multi-VCS detection.",
+    "Go 1.26 (Feb 2026): Green Tea GC becomes the default GC; errors.AsType added; go fix completely rewritten into a modernizer + source-level-inliner framework; self-referencing generic type constraints allowed; new(expr) allows an expression operand.",
+    "Go 1.27 (Aug 2026): generic methods added; go test runs the stdversion vet check by default; the asynctimerchan GODEBUG opt-out is removed, making the pre-1.23 time.After leak fix permanent; struct-literal keys may be any field selector.",
+    "June 2025: the Go team formally and publicly closed the door on syntactic error-handling sugar (no check/handle/try/? construct), anchoring error-handling guidance permanently on %w wrapping, errors.Join, and cmp.Or rather than a hoped-for future language change."
+   ],
+   "sources_count": 28
+  }
+ },
+ {
+  "type": "result",
+  "key": "v2:2186cf211261c70a76e05d79b39d8ef96c1b33dbfcdc7560734e05d22ef92802",
+  "agentId": "a55e73bc17a476a8e",
+  "result": {
+   "candidates": [
+    {
+     "slug": "exit-codes-reuse-pinned-table",
+     "why": "Scripts already branch on the fleet's pinned sysexits numbers across ocx/grim; a Go tool with its own scheme breaks cross-tool composition",
+     "source": "file:///home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/rust-quality/cli-contract.md",
+     "covered": "partial",
+     "surface": "cli",
+     "priority": "P0"
+    },
+    {
+     "slug": "main-only-caller-of-os-exit",
+     "why": "Matches gh's own pattern (2-line main calling a testable Main() int); calling os.Exit deep in a function skips every deferred cleanup",
+     "source": "https://github.com/cli/cli",
+     "covered": "no",
+     "surface": "cli",
+     "priority": "P0"
+    },
+    {
+     "slug": "exhaustive-error-to-exit-code-dispatch",
+     "why": "gh's own dispatch chain (SilentError/CancelError/PendingError/*AuthError/*ExternalCommandExitError via errors.Is/errors.AsType) is a concrete, working reference shape",
+     "source": "https://github.com/cli/cli",
+     "covered": "no",
+     "surface": "errors",
+     "priority": "P0"
+    },
+    {
+     "slug": "sigpipe-default-vs-notify-interference",
+     "why": "Registering signal.Notify for a broad signal set that happens to include SIGPIPE silently switches fd 1/2 writes from process-exit to returning EPIPE",
+     "source": "https://pkg.go.dev/os/signal",
+     "covered": "no",
+     "surface": "cli",
+     "priority": "P0"
+    },
+    {
+     "slug": "silence-usage-and-errors-both-set",
+     "why": "Cobra defaults SilenceUsage/SilenceErrors both false; the common bug is a usage dump on every runtime error or a doubled error print",
+     "source": "https://github.com/spf13/cobra",
+     "covered": "no",
+     "surface": "cli",
+     "priority": "P0"
+    },
+    {
+     "slug": "digest-verifier-checks-only-at-eof",
+     "why": "go-containerregistry's verify.ReadCloser and go-digest's Verifier both only compare the hash on EOF/Verified(); an early-return caller gets silent non-verification",
+     "source": "https://github.com/google/go-containerregistry",
+     "covered": "no",
+     "surface": "security",
+     "priority": "P0"
+    },
+    {
+     "slug": "content-store-atomic-publish-vs-write-in-place",
+     "why": "oras-go v2's content/file.Store writes directly to the final path (os.Create(target)); a concurrent reader can observe a partial file at its real name",
+     "source": "https://github.com/oras-project/oras-go",
+     "covered": "partial",
+     "surface": "fs",
+     "priority": "P0"
+    },
+    {
+     "slug": "retry-after-header-date-form-parsing",
+     "why": "regclient's time.ParseDuration(header+\"s\") fails on an HTTP-date Retry-After value; the error is discarded and it falls back to a fixed backoff-count limit",
+     "source": "https://github.com/regclient/regclient",
+     "covered": "no",
+     "surface": "http",
+     "priority": "P0"
+    },
+    {
+     "slug": "http-429-distribution-spec-backoff",
+     "why": "go-containerregistry ships load-bearing retry defaults (3 steps, 1s to 3s, factor 3.0, jitter 0.1) with 429 explicitly tied to OCI distribution-spec rate limiting",
+     "source": "https://github.com/google/go-containerregistry",
+     "covered": "no",
+     "surface": "http",
+     "priority": "P0"
+    },
+    {
+     "slug": "exec-errdot-relative-path-security",
+     "why": "Any fleet Go binary shelling out to a bare-named helper depends on this Go 1.19 fix by default; flipping GODEBUG=execerrdot=0 for convenience reopens the vulnerability class",
+     "source": "https://github.com/golang/go",
+     "covered": "no",
+     "surface": "security",
+     "priority": "P0"
+    },
+    {
+     "slug": "exec-exitcode-passthrough",
+     "why": "Matches the fleet's own extension-passthrough pattern (gh's ExternalCommandExitError); collapsing every child failure into a generic 1 breaks scripts branching on the real code",
+     "source": "https://github.com/cli/cli",
+     "covered": "no",
+     "surface": "cli",
+     "priority": "P0"
+    },
+    {
+     "slug": "sdk-context-first-param-cancellation",
+     "why": "Matches the fleet's own SDK contract (ocx-sdk-python); a call ignoring ctx can't be canceled or timed out by its caller when shelling out via exec.CommandContext",
+     "source": "https://github.com/golang/go",
+     "covered": "no",
+     "surface": "sdk",
+     "priority": "P0"
+    },
+    {
+     "slug": "http-client-defaults-dial-idle-tls-timeouts",
+     "why": "Concrete, load-bearing numbers from a widely-used registry client (30s dial, MaxIdleConnsPerHost 50, IdleConnTimeout 90s, TLSHandshakeTimeout 10s); copying them is cheaper than re-deriving",
+     "source": "https://github.com/google/go-containerregistry",
+     "covered": "no",
+     "surface": "http",
+     "priority": "P1"
+    },
+    {
+     "slug": "fsync-file-and-parent-directory",
+     "why": "renameio's README states the containing-directory fsync is what makes a rename durable across a crash; skipping it is a silent data-loss window",
+     "source": "https://github.com/google/renameio",
+     "covered": "partial",
+     "surface": "fs",
+     "priority": "P1"
+    },
+    {
+     "slug": "windows-atomic-write-fallback",
+     "why": "renameio refuses to export anything on Windows because there is no reliable atomic rename there; a cross-platform fleet tool needs its own remove-then-rename retry loop instead of silence",
+     "source": "https://github.com/google/renameio",
+     "covered": "partial",
+     "surface": "fs",
+     "priority": "P1"
+    },
+    {
+     "slug": "os-root-explicit-non-guarantees",
+     "why": "os.Root's own doc comment lists real gaps (bind mounts, /proc, device files) and GOOS=js/plan9 degrade to name-based tracking; agents will treat it as a complete traversal-safety silver bullet",
+     "source": "https://github.com/golang/go",
+     "covered": "no",
+     "surface": "fs",
+     "priority": "P1"
+    },
+    {
+     "slug": "notifycontext-cancel-cause-go126",
+     "why": "Go 1.26 changed NotifyContext to cancel via context.CancelCauseFunc so context.Cause names the signal; pre-1.26-shaped code loses this information for free",
+     "source": "https://go.dev/doc/go1.26",
+     "covered": "no",
+     "surface": "concurrency",
+     "priority": "P1"
+    },
+    {
+     "slug": "notifycontext-signal-set-windows-portability",
+     "why": "A fleet CLI must run on Windows CI at minimum; syscall.SIGTERM is not a real signal there, so the registered signal set needs a portable choice",
+     "source": "https://github.com/golang/go",
+     "covered": "no",
+     "surface": "cli",
+     "priority": "P1"
+    },
+    {
+     "slug": "godebug-execwait-leaked-subprocess-detector",
+     "why": "GODEBUG=execwait=2 is present in the local Go 1.27.1 stdlib but absent from any go.dev release note found; enabling it in CI catches a goroutine that Start()s a helper and forgets to Wait()",
+     "source": "https://github.com/golang/go",
+     "covered": "no",
+     "surface": "concurrency",
+     "priority": "P1"
+    },
+    {
+     "slug": "cmd-cancel-waitdelay-vs-handrolled-timeout",
+     "why": "Cmd.Cancel/Cmd.WaitDelay (Go 1.20) replace a whole class of racy hand-rolled timeout-then-Process.Kill() code with a stdlib-guaranteed bound and a distinguishable ErrWaitDelay",
+     "source": "https://github.com/golang/go",
+     "covered": "no",
+     "surface": "concurrency",
+     "priority": "P1"
+    },
+    {
+     "slug": "sysprocattr-process-group-for-cancel",
+     "why": "Without a process group (or Windows job object), Cancel/WaitDelay only reaches the immediate child; a helper that forks its own children survives cancellation",
+     "source": "https://github.com/golang/go",
+     "covered": "no",
+     "surface": "concurrency",
+     "priority": "P1"
+    },
+    {
+     "slug": "functional-options-mutual-exclusivity",
+     "why": "go-containerregistry's Option func(*options) error returns an error from the option itself for mutually-exclusive choices (WithAuth vs WithAuthFromKeychain); an SDK mirroring ocx-sdk-python's near-zero-dependency goal needs the same discipline",
+     "source": "https://github.com/google/go-containerregistry",
+     "covered": "no",
+     "surface": "sdk",
+     "priority": "P1"
+    },
+    {
+     "slug": "gorelease-apidiff-in-ci",
+     "why": "Direct Go analogue of the Rust SDK crates' semver-checker; skipping it lets a minor SDK release silently break callers",
+     "source": "https://github.com/golang/exp",
+     "covered": "no",
+     "surface": "release",
+     "priority": "P1"
+    },
+    {
+     "slug": "sanitize-registry-supplied-strings",
+     "why": "oh-my-posh's real GHSA shows terminal-escape injection (CWE-150, OSC 8/52, CSI cursor moves) is not theoretical for a Go CLI printing untrusted upstream text like a tag or annotation",
+     "source": "https://github.com/JanDeDobbeleer/oh-my-posh/security/advisories/GHSA-fwjx-9p69-h25h",
+     "covered": "no",
+     "surface": "security",
+     "priority": "P1"
+    },
+    {
+     "slug": "tty-detection-stdout-stderr-independent",
+     "why": "clig.dev explicitly says to check stdout and stderr independently; a single shared TTY check disables color everywhere once either stream is redirected",
+     "source": "https://clig.dev/",
+     "covered": "no",
+     "surface": "cli",
+     "priority": "P1"
+    },
+    {
+     "slug": "no-color-exact-value-semantics",
+     "why": "The spec requires present-and-non-empty regardless of value; a common bug checks NO_COLOR==\"1\" or \"true\", rejecting the spec's own NO_COLOR= example",
+     "source": "https://no-color.org/",
+     "covered": "partial",
+     "surface": "cli",
+     "priority": "P1"
+    },
+    {
+     "slug": "tui-signal-handler-opt-out",
+     "why": "bubbletea's WithoutSignalHandler/WithoutSignals exist specifically so an outer CLI's own signal.NotifyContext doesn't race the TUI's default handler on SIGINT/SIGWINCH",
+     "source": "https://github.com/charmbracelet/bubbletea",
+     "covered": "no",
+     "surface": "cli",
+     "priority": "P1"
+    },
+    {
+     "slug": "os-root-chmod-chown-toctou",
+     "why": "os.Root's own doc admits a documented TOCTOU race on Chmod/Chown/Chtimes if the target changes from file to symlink mid-operation; treating Root as a complete permission sandbox is wrong",
+     "source": "https://github.com/golang/go",
+     "covered": "no",
+     "surface": "security",
+     "priority": "P1"
+    },
+    {
+     "slug": "standardize-oci-client-library",
+     "why": "go-containerregistry, oras-go v2, regclient, and containerd's content package all use incompatible content-store abstractions (Store vs Ingester/Manager vs Target); picking late means a rewrite",
+     "source": "survey sections 9-12 (go-containerregistry, oras-go, regclient, containerd)",
+     "covered": "no",
+     "surface": "sdk",
+     "priority": "P1"
+    },
+    {
+     "slug": "credential-layer-docker-config-and-helpers",
+     "why": "oras-go v2's NewStoreWithFallbacks(native, file) is the ecosystem-standard shape; users expect existing docker login state to just work",
+     "source": "https://github.com/oras-project/oras-go",
+     "covered": "no",
+     "surface": "sdk",
+     "priority": "P1"
+    },
+    {
+     "slug": "bounded-http-response-body-reads",
+     "why": "A registry (or compromised mirror) can send an unbounded or falsely-small Content-Length; unbounded buffering into memory is a DoS vector",
+     "source": "https://github.com/google/go-containerregistry",
+     "covered": "no",
+     "surface": "security",
+     "priority": "P1"
+    },
+    {
+     "slug": "redirect-policy-strips-authorization",
+     "why": "net/http's default CheckRedirect (nil) forwards headers on same-scheme redirects; a registry redirecting to a CDN host can leak a bearer token across hosts",
+     "source": "task domain description (HTTP client hygiene)",
+     "covered": "no",
+     "surface": "security",
+     "priority": "P1"
+    },
+    {
+     "slug": "createtemp-cross-filesystem-risk",
+     "why": "oras-go v2's pushDir gzip-staging uses os.CreateTemp(\"\", ...) (OS default temp dir); applied to a final blob path this breaks the same-filesystem requirement for an atomic rename",
+     "source": "https://github.com/oras-project/oras-go",
+     "covered": "no",
+     "surface": "fs",
+     "priority": "P1"
+    },
+    {
+     "slug": "verify-size-before-hash",
+     "why": "image-spec states size SHOULD be verified before computing the hash to reduce hash collision space; hashing first wastes CPU on content already known to fail",
+     "source": "https://github.com/opencontainers/image-spec",
+     "covered": "no",
+     "surface": "perf",
+     "priority": "P2"
+    },
+    {
+     "slug": "digest-algorithm-grammar-not-just-sha256",
+     "why": "image-spec's EBNF grammar allows unregistered algorithms to validate; a Go type recognizing only sha256 rejects spec-valid content like blake3:...",
+     "source": "https://github.com/opencontainers/image-spec",
+     "covered": "no",
+     "surface": "lang",
+     "priority": "P2"
+    },
+    {
+     "slug": "resumable-ingest-writer-commit-contract",
+     "why": "containerd's Writer.Commit contract (size/expected may be zero, Commit always closes, ErrAlreadyExists aborts) is a concrete reference for a resumable, concurrency-safe ingest API",
+     "source": "https://github.com/containerd/containerd",
+     "covered": "no",
+     "surface": "sdk",
+     "priority": "P2"
+    },
+    {
+     "slug": "concurrent-ingest-lock-keyed-on-digest",
+     "why": "containerd's Ref string serializes two goroutines pulling the same layer onto one in-progress ingest rather than racing two temp files",
+     "source": "https://github.com/containerd/containerd",
+     "covered": "no",
+     "surface": "concurrency",
+     "priority": "P2"
+    },
+    {
+     "slug": "cobra-vs-urfave-cli-v3-choice",
+     "why": "A real, current API-shape difference: urfave/cli v3's context-first Action(ctx, cmd) vs cobra's RunE(cmd, args) is not merely stylistic",
+     "source": "https://github.com/urfave/cli",
+     "covered": "no",
+     "surface": "cli",
+     "priority": "P2"
+    },
+    {
+     "slug": "urfave-cli-exit-coder-multierror",
+     "why": "cli.Exit/cli.ExitCoder/cli.MultiError is urfave/cli v3's equivalent mechanism to cobra's error-to-exit-code path; a rule needs to name both frameworks' idioms",
+     "source": "https://github.com/urfave/cli",
+     "covered": "no",
+     "surface": "cli",
+     "priority": "P2"
+    },
+    {
+     "slug": "cobra-composable-arg-validators",
+     "why": "cobra.MatchAll(ExactArgs(2), OnlyValidArgs) beats hand-rolled len(args) checks, which produce inconsistent usage-error text and miss allow-listing",
+     "source": "https://github.com/spf13/cobra",
+     "covered": "no",
+     "surface": "cli",
+     "priority": "P2"
+    },
+    {
+     "slug": "secrets-never-via-flag-or-plain-env",
+     "why": "Flag values land in ps/shell history; env vars leak via /proc and CI log dumps \u2014 the Go analogue of the fleet's pinned CLI-11 rule",
+     "source": "file:///home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/rust-quality/cli-contract.md",
+     "covered": "partial",
+     "surface": "security",
+     "priority": "P2"
+    },
+    {
+     "slug": "term-readpassword-for-secret-entry",
+     "why": "A plain bufio.Scanner read echoes a secret to the terminal and to any terminal-recording tool; term.ReadPassword suppresses local echo",
+     "source": "https://github.com/golang/term",
+     "covered": "no",
+     "surface": "cli",
+     "priority": "P2"
+    },
+    {
+     "slug": "go-isatty-cygwin-terminal-check",
+     "why": "A Cygwin/MSYS2 pty fails the native Windows TTY check; missing IsCygwinTerminal disables interactive prompts/color under a common Windows dev shell",
+     "source": "https://github.com/mattn/go-isatty",
+     "covered": "no",
+     "surface": "cli",
+     "priority": "P2"
+    },
+    {
+     "slug": "map-iteration-order-output-determinism",
+     "why": "Go's map iteration order is intentionally randomized; unsorted output leaking into JSON, a manifest, or a printed diff breaks byte-for-byte reproducibility",
+     "source": "general Go language semantics",
+     "covered": "no",
+     "surface": "lang",
+     "priority": "P2"
+    },
+    {
+     "slug": "close-error-checked-not-swallowed",
+     "why": "The single most common resource-cleanup bug in Go; a deferred f.Close() silently swallowing a flush failure is directly relevant to a content store writing blobs to disk",
+     "source": "general Go knowledge, cross-checked against oras-go's defer fp.Close() pattern",
+     "covered": "no",
+     "surface": "errors",
+     "priority": "P2"
+    },
+    {
+     "slug": "time-time-monotonic-reading-after-serialize",
+     "why": "A time.Time round-tripped through JSON drops its monotonic component; diffing two such values afterward uses wall-clock time, which can go backward",
+     "source": "general Go language semantics",
+     "covered": "no",
+     "surface": "lang",
+     "priority": "P2"
+    },
+    {
+     "slug": "on-disk-schema-version-field-from-day-one",
+     "why": "Retrofitting a version field after shipping a v1 on-disk format requires sniffing field presence to distinguish versions, exactly the ambiguity an explicit field avoids",
+     "source": "general fleet knowledge, cross-checked against ocx_store layout",
+     "covered": "no",
+     "surface": "fs",
+     "priority": "P2"
+    },
+    {
+     "slug": "print-within-100ms-of-network-io",
+     "why": "A silent CLI during a slow registry call reads as hung; ports the Rust fleet's low-severity but easy CLI-16 responsiveness guidance",
+     "source": "file:///home/mherwig/dev/grimoire-lore/.agents/worktrees/go/rules/rust-quality/cli-contract.md",
+     "covered": "partial",
+     "surface": "cli",
+     "priority": "P3"
+    },
+    {
+     "slug": "godebug-deprecation-timeline",
+     "why": "Code relying on a GODEBUG opt-out (execerrdot, tls3des) to keep old behavior has a limited, documented shelf life before the setting is removed permanently",
+     "source": "https://go.dev/doc/go1.27",
+     "covered": "no",
+     "surface": "toolchain",
+     "priority": "P3"
+    },
+    {
+     "slug": "byte-vs-rune-string-indexing",
+     "why": "for i := range s over bytes vs for i, r := range s over runes silently diverge on any non-ASCII registry name or annotation",
+     "source": "general Go language semantics",
+     "covered": "no",
+     "surface": "lang",
+     "priority": "P3"
+    },
+    {
+     "slug": "windows-reserved-filename-sanitization",
+     "why": "os.Root's own doc calls out rejection of Windows-reserved device names (NUL, COM1); a Linux-only CI matrix won't catch a digest- or tag-derived filename colliding with one",
+     "source": "https://github.com/golang/go",
+     "covered": "partial",
+     "surface": "fs",
+     "priority": "P3"
+    }
+   ],
+   "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-topic-map/domain.md",
+   "sources_count": 28,
+   "primary_sources_count": 26,
+   "recent_shifts": [
+    "errors.AsType (Go 1.26) \u2014 generic, type-safe replacement for errors.As, already load-bearing in cli/cli's exit-code dispatch",
+    "os/signal.NotifyContext cancel-cause (Go 1.26) \u2014 the returned context now cancels via context.CancelCauseFunc so context.Cause(ctx) names the signal",
+    "GODEBUG=execwait=2 leaked-exec.Cmd finalizer \u2014 present in local Go 1.27.1 stdlib source but not mentioned in Go 1.25/1.26/1.27 release notes text fetched; under-announced, verify landing version before citing",
+    "os.Root / OpenInRoot (Go 1.24) \u2014 stdlib now offers a real traversal-safety primitive where pre-1.24 code hand-rolled filepath.Clean + prefix-check (a pattern the Rust fleet's own platform-and-paths.md flags as a WONTFIX footgun)",
+    "renameio v2 changed WriteFile to apply the process umask to permissions (v1 ignored it) \u2014 code copied from v1-era examples silently changes behavior on upgrade unless IgnoreUmask() is added",
+    "BLAKE3 registered as an OCI digest algorithm alongside SHA-256/512 in the current image-spec descriptor.md \u2014 older material hardcoding 'OCI digests are always sha256 or sha512' is now incomplete",
+    "urfave/cli v3's Action signature changed to func(context.Context, *cli.Command) error from v2's func(*cli.Context) error \u2014 v2-era example code does not compile against v3 without a mechanical rewrite"
+   ]
+  }
+ },
+ {
+  "type": "result",
+  "key": "v2:9f2e63d7b93a2257ea6029155439b34185e9aefa1cc3d8016a02ca94b752e5d9",
+  "agentId": "a02801c2a813c97ee",
+  "result": {
+   "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-audit/exemplar-modules-and-release.md",
+   "headline_numbers": [
+    "toolchain directive in only 5/35 (14%) root go.mod \u2014 contradicts H6",
+    "go directive: 17/35 (49%) on 1.26, 28/35 (80%) on 1.25+",
+    "Bazel-for-Go present in exactly 2/35 (6%) repos, and both are rules_go/bazel-gazelle themselves (pure dogfooding, zero app/CLI adoption)",
+    "govulncheck on 6 repos: 22 total findings, only 3 (14%) reachable by the repo's own code (86% not-reachable)",
+    "import \"C\" grep: 69 hits but 67/69 (97%) are test fixtures; real production cgo use is 2/35 repos (pebble, tailscale)",
+    "CI Action pins: 961/1171 (82%) SHA-pinned, bimodal by repo (release-pipeline repos ~100% SHA, lint-only libraries ~0%)",
+    "goreleaser config in 11/35 (31%) repos; go.yaml.in/yaml already a direct dep in 9/35 (26%), ahead of older gopkg.in/yaml.v3 (5) and sigs.k8s.io/yaml (4)",
+    "exclude directive: 0/167 go.mod files corpus-wide",
+    "real vendoring (source + modules.txt): 3/35 (9%) repos",
+    "direct deps 1380 / indirect 2593 across 35 root modules; golang.org/x/sync is the single most-adopted dep (22/35, 63%)"
+   ],
+   "top_smells": [
+    "YAML library fragmentation: 4 coexisting direct-dependency answers (gopkg.in/yaml.v3, sigs.k8s.io/yaml, go.yaml.in/yaml v2/v3/v4, transitively .v2), prometheus depends on 3 majors of go.yaml.in/yaml at once",
+    "toolchain directive adoption (14%) is a minority practice, not the norm H6 assumed",
+    "import \"C\" as a cgo-shipping proxy has a 97% false-positive rate (build-system self-tests dominate the raw grep)",
+    "Dockerfile-only base-image census undercounts minimalism because goreleaser dockers:/kos: blocks (scratch/distroless) never touch a standalone Dockerfile",
+    "version-stamping has no single dominant mechanism: 49% use -X, 40% use ReadBuildInfo, 29% use both, 40% neither detectably",
+    "SHA-pinning in CI is bimodal by repo role (release pipeline vs lint-only library), not a gradient \u2014 a blanket SHA-pin rule would misfire on lint-only workflows",
+    "Bazel-for-Go has zero real-world exemplar to draw from; the depth file must lean entirely on rules_go's own bzlmod.md rather than observed practice"
+   ],
+   "patterns_worth_encoding": [
+    "go_deps.from_file(go_mod=...) + explicit use_repo(...) per direct dep is the doc-verified current bzlmod recipe for external Go deps (cite rules_go docs/go/core/bzlmod.md verbatim; Bazel >=7.1.1 auto-updates use_repo via bazel mod tidy)",
+    "-ldflags -X for semver + runtime/debug.ReadBuildInfo for VCS metadata, used together (10/35 repos already do this) is the strongest version-stamping recipe to teach",
+    "replace directives in a multi-module repo should be 100% local-path self-references (every multi-module exemplar except syncthing follows this \u2014 a real third-party-fork replace should carry a justification comment)",
+    "govulncheck's symbol-level reachability, not module-level scanning, is the defensible default for a Go security gate \u2014 86% not-reachable rate measured directly",
+    "ignore (...) in go.mod (1.25+) is real but rare (1/35) \u2014 a one-line mention, not a headline recommendation",
+    "CGO-detection heuristics must exclude tests/, testdata/, and cgo-syntax-parsing test files, not just grep import \"C\""
+   ],
+   "contradictions_of_frame": [
+    "H5 (testify dominates) is only partially true: testify is a direct dep in 15/35 (43%), beaten by golang.org/x/sync (22/35, 63%) \u2014 57% of repos have no direct testify dependency at all",
+    "H6 (toolchain directives common) is false: 14% adoption measured; go.work's 'usually not committed' half also fails \u2014 every observed go.work with a real reason to exist commits go.work.sum",
+    "the frame's cgo rationale (sqlite, OS keychains) matches neither real cgo user found (pebble: manual memory management; tailscale: macOS IOKit device-posture call)",
+    "Bazel-for-Go isn't merely underused \u2014 it is exclusively used by rules_go and bazel-gazelle themselves in this 35-repo sample; no application/CLI/library exemplar adopts it"
+   ]
+  }
+ },
+ {
+  "type": "result",
+  "key": "v2:9d451c4b79841d7138e7479bbd6362570745ccb36db36aaa198dd3ce8670ee14",
+  "agentId": "ad3fbe89eacfb22fd",
+  "result": {
+   "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-audit/exemplar-quality-gates.md",
+   "headline_numbers": [
+    "23/35 (66%) exemplars have a golangci-lint config; 0/23 are on the v1 schema (all already v2)",
+    "12/35 have no golangci-lint config, but 4 run standalone staticcheck.conf and 1 a standalone revive.toml",
+    "De-facto consensus set (>=1/3 of 23 configured repos) is 17 linters, not golangci-lint's 5-linter 'standard' default: govet(22) ineffassign(21) unused(20) staticcheck(19) misspell(17) revive(17) unconvert(15) errcheck(13) gosec(11) whitespace(11) depguard(10) bodyclose(10) gocritic(10) unparam(10) nolintlint(10) errorlint(9) modernize(8)",
+    "gofmt(15/23) beats gofumpt(8/23) as the formatter of choice; gci(5/23)",
+    "go vet on 10 hand-run repos: 9/10 zero findings; only google/go-cmp has 7, all deliberate test fixtures",
+    "staticcheck on same 10: top check IDs U1000(32) SA1019(21) SA4026(12) across 88 total findings",
+    "golangci-lint with own config (5 repos have one): 4/5 report 0 issues; ko-build/ko has exactly 1 (gosec G703, config drift not a bug)",
+    "Strict default:all pass on cobra/oras-go/ko: 2,156 / 19,268 / 2,784 issues; top noise linters wsl+wsl_v5, noinlineerr, paralleltest, nlreturn, exhaustruct fire hundreds-to-thousands of times and are enabled in 0/23 real configs",
+    "Test libraries (34 full-source repos, generated files excluded): testify (any submodule) in 17/34, go-cmp in 19/34 -- roughly even, go-cmp slightly ahead",
+    "t.Context() appears 6,629 times corpus-wide post-generated-file-exclusion with 0% false positives in a 9-hit spot check across 3 repos; testing/synctest used in 10/34 repos"
+   ],
+   "top_smells": [
+    "default: all in golangci-lint 2.14.0 double-counts deprecated/successor linter pairs (wsl+wsl_v5, gomodguard+gomodguard_v2, exhaustruct+exhaustruct_v5), inflating noise-linter counts ~2x for anyone using it as a literal audit baseline",
+    "gosec exclude lists drift behind the shipped ruleset: ko-build/ko's own config excludes only G115 yet its own-config run still surfaces a live G703 finding at pkg/build/gobuild.go:436",
+    "Naive single-dash CI-flag grepping is a real trap: raw '-tags' census was ~57% false positive (matching '--tags' on git/az/skopeo commands); '-timeout' and '-short' had the same double-dash substring collision",
+    "Generated test files silently dominate raw counts: one generated file in google/go-github accounted for 69% of the corpus's pre-correction t.Parallel() count (8,887 -> 2,387 after excluding 'Code generated ... DO NOT EDIT' files)",
+    "staticcheck findings on a mature unconfigured library often live in vendored-in forks, not the library's own code (testify's 12 findings are almost all inside internal/spew and internal/difflib, forked from other projects)",
+    "kubernetes/kubernetes's golangci formatters: section is present but empty -- formatting is enforced by a separate shell script outside the linter config, unlike everything else it governs"
+   ],
+   "patterns_worth_encoding": [
+    "The 17-linter consensus set (govet, ineffassign, unused, staticcheck, misspell, revive, unconvert, errcheck, gosec, whitespace, depguard, bodyclose, gocritic, unparam, nolintlint, errorlint, modernize) is a better MUST-enable baseline for an authored go-quality rule than golangci-lint's own 5-linter 'standard' default",
+    "issues.max-issues-per-linter: 0 + max-same-issues: 0 used by ~half the configured corpus (11/23) to show every occurrence instead of golangci-lint's hidden default caps (50/3) -- worth recommending explicitly",
+    "depguard's most common deny targets are io/ioutil and github.com/pkg/errors, giving concrete citable evidence for pre-1.16/pre-1.13 anti-pattern rules",
+    "t.Context() adoption is corpus-wide and clean (Go 1.24+) -- strong grounding for a rule preferring it over context.Background() in test setup",
+    "cockroachdb/pebble's lint-as-go-test pattern (internal/lint run via `go test`) is a legitimate zero-dependency alternative to an external linter for project-specific forbidden-import checks",
+    "go mod tidy -diff/--diff (non-destructive) is the more modern of two tidy-check idioms seen and should be the one an authored CI-gate skill recommends over a tidy-then-git-diff dance",
+    "Standalone staticcheck.conf correlates with NOT having golangci-lint in all 4 cases found; tailscale is the one partial exception and is a real gotcha worth flagging (golangci-lint's bundled staticcheck ignores the standalone conf file)"
+   ],
+   "contradictions_of_frame": [
+    "H4 ('golangci-lint v2 is the de-facto gate in most exemplars') needs a correction: true at the headline level (23/35) but the uncofigured third includes some of the most-used libraries in the corpus (golang/tools, golang/vuln, go-cmp, grpc-go, terraform, pebble, go-tools, testify), each with a different, equally rigorous gate -- 'no golangci-lint' is not a smell for a meaningful fraction of the repos the fleet should imitate",
+    "H4's 'go vet defaults are universal' is well-supported and stronger than implied: 9/10 hand-run repos have zero vet findings, and govet is enabled in 22/23 configured repos",
+    "H5 ('testify dominates tests in the ecosystem') is contradicted by the numbers: testify (any submodule) is in 17/34 full-source repos vs go-cmp in 19/34 -- go-cmp is ahead, not behind, and the split is close to even; prometheus even actively discourages testify/assert via its own depguard rule in favor of require",
+    "The frame's wave-5 worry that a repo's own v1 golangci config would fail under v2 did not materialize: 0/23 configured repos are on the v1 schema -- this corpus's maintainers already keep pace with golangci-lint's breaking-change cadence"
+   ]
+  }
+ },
+ {
+  "type": "result",
+  "key": "v2:dc1ebb5a638f074cfdcc73858bb80fdead5eafd290c75c5b712a7100484542b4",
+  "agentId": "ab2ece07d442bf20f",
+  "result": {
+   "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-audit/exemplar-runtime-posture.md",
+   "headline_numbers": [
+    "fmt.Errorf: 9,310 calls use %w vs 2,300 that format an err-named arg with %v/%s instead (breaks errors.Is/As); grpc-go inverts 16:1, caddy 8:1, terraform 2:1",
+    "log/slog imported in 11/34 repos (239 files) \u2014 more repos than zap (6 repos, 347 files) \u2014 contradicts frame H7 as literally stated",
+    "exec.CommandContext used in only 141/584 exec sites (24%) vs exec.Command, despite CommandContext existing since Go 1.7",
+    "gosec G112 exposure: 41/56 (73%) of &http.Server{} literals set no ReadHeaderTimeout; 87/143 (61%) of &http.Client{} literals set no Timeout",
+    "time.Now() called directly 1,576 times vs 7 real injected-clock imports (clockwork, all in etcd-io/etcd only); benbjohnson/clock 0, k8s.io/utils/clock unused beyond a wrapper",
+    "math/rand/v2 (Go 1.22) already at 83 files, on par with legacy math/rand (91)",
+    "Legacy bare 0644 octal literal (212) still outnumbers 0o644 (123) in 2026-fetched code",
+    "Go 1.21 context APIs (WithoutCancel/AfterFunc/WithCancelCause/Cause) combined only 82 hits across 2.66M LOC",
+    "sync.WaitGroup.Go (Go 1.25) already has 108 production sites across 12 repos; only 54/248 (22%) errgroup.Go calls pair with SetLimit",
+    "Corpus: 34 repos, 2,662,258 LOC after excluding vendor/testdata/third_party/generated/_test.go"
+   ],
+   "top_smells": [
+    "&http.Server{} without ReadHeaderTimeout (gosec G112): 41/56 (73%) unguarded, led by tailscale",
+    "exec.Command over exec.CommandContext: 443 vs 141 (76% non-context-aware)",
+    "&http.Client{} without Timeout: 87/143 (61%) unguarded",
+    "errgroup.Go without a paired SetLimit: 194/248 (78%) unbounded fan-out",
+    "fmt.Errorf with %v/%s of an err value instead of %w: 2,300 sites, grpc-go worst at 16:1 ratio",
+    "Archive (tar/zip) extraction with no traversal-guard idiom visible in a 40-line window: 83/92 (90%, but a weak lower bound \u2014 guards can live in a called helper)",
+    "Direct err == io.EOF comparison instead of errors.Is: 222 sites",
+    "strings.Contains(err.Error(), ...) string-matching on errors: 91 sites, heaviest in etcd/tailscale/containerd",
+    "Legacy bare 0644 outnumbering 0o644: 212 vs 123",
+    "os.MkdirAll(..., 0777) world-writable directories: 64 sites, concentrated in bazel-contrib/rules_go"
+   ],
+   "patterns_worth_encoding": [
+    "errors.Join to compose independent failure causes \u2014 cockroachdb/pebble@13596f1e1cea:open.go:867",
+    "//nolint:gosec / #nosec with an inline reason, not bare \u2014 aquasecurity/trivy@ae561f8cca36:pkg/iac/adapters/terraform/aws/provider/adapt.go:12",
+    "sync.Mutex embedded in an unexported nested field, not the exported struct itself \u2014 cockroachdb/pebble@13596f1e1cea:wal/failover_writer.go:355-358",
+    "sync.WaitGroup.Go (Go 1.25) for fire-and-forget fan-out without error propagation \u2014 aquasecurity/trivy@ae561f8cca36:pkg/rpc/client/client.go:64; cli/cli@9b031151a825:internal/skills/installer/installer.go:102",
+    "errgroup.Group + SetLimit for bounded fan-out with error propagation \u2014 ko-build/ko@fcaeb337b6bd:pkg/publish/kind/write.go:67 (pair with a SetLimit call)",
+    "os.Root/os.OpenInRoot (Go 1.24) wrapped as a project-local traversal-safe helper type \u2014 aquasecurity/trivy@ae561f8cca36:pkg/x/os/root.go:12-16",
+    "signal.NotifyContext over signal.Notify + manual cancel plumbing \u2014 bazel-contrib/rules_go@970e99d77c8b:go/tools/releaser/releaser.go:31",
+    "create-temp-then-rename as the default atomic-write shape, no external dependency needed \u2014 corpus-wide, 105 CreateTemp / 101 Rename sites near 1:1"
+   ],
+   "contradictions_of_frame": [
+    "H7 as literally stated ('log/slog ... not in the exemplars') is wrong: slog is in 11/34 repos (239 files), broader repo-adoption than zap's 6 repos",
+    "Bare octal 0644 (212) still outnumbers 0o644 (123) in 2026-fetched code \u2014 the assumption that Go 1.13's 0o syntax has displaced the legacy form isn't supported",
+    "exec.CommandContext adoption (24%) is low despite a nine-year-old API (Go 1.7) \u2014 not an under-a-year newness gap like the Go-1.21 context APIs, a genuinely persistent one",
+    "sync.WaitGroup.Go (Go 1.25, months old at fetch time) already has 108 sites in 12 repos \u2014 faster real uptake than the 3-4-year-old Go-1.21 context APIs (82 hits combined); API ergonomics seems to matter more than release recency",
+    "H3 (goroutine-lifetime incidents cluster where bounding is missing) is supported but starker than expected: 78% of errgroup.Go call sites have no paired SetLimit even among repos that did adopt errgroup"
+   ]
+  }
+ },
+ {
+  "type": "result",
+  "key": "v2:0d9a4d9743232d0841fba2d7883686bb0e6940296782c892d6ae8beb2d42d3fc",
+  "agentId": "a1acf461fdfc95141",
+  "result": {
+   "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-audit/exemplar-code-shape.md",
+   "headline_numbers": [
+    "Corpus (34 repos, kubernetes/kubernetes excluded): 12,831 non-test/non-generated source files, 2,576,477 LOC production; 7,151 test files, 2,462,974 LOC test (test:prod LOC ratio 0.956)",
+    "The frame's own .go-file counts include vendor/testdata and are up to 4x inflated: containerd's frame count of 5505 is 75% vendored (4125 files); real production Go there is 974 files/180,120 LOC",
+    "The brief's own generated-file rule ('first line matches') undercounts by up to 15x: tailscale goes from 14 (naive) to 211 (corrected, scanning first 15 lines); corpus-wide corrected generated count is 460 vs 188 naive",
+    "13/34 repos (38%) have no golangci-lint config anywhere in the tree, including golang/tools, google/go-cmp, grpc/grpc-go, hashicorp/terraform, cockroachdb/pebble \u2014 partially contradicts frame hypothesis H4",
+    "interface{} still written 6,186 times corpus-wide vs any 24,570 times (any dominates 4:1 but interface{} is far from dead; terraform alone has 3,337)",
+    "math/rand v1 imported 271 times vs math/rand/v2 345 times \u2014 v2 has only a plurality, v1 alive in 20/34 repos",
+    "modernize (real tool, 12 repos) found 491 diagnostics over 183,100 LOC = 26.8 per 10k LOC; 62% of all diagnostics are interface{}->any; uber-go/zap is the extreme at 257/10k LOC",
+    "t.Context() (Go 1.24) has 7,448 real call sites corpus-wide; naive .Context() grep found 8,587 (13% false-positive rate from other .Context() accessors); google/go-github test suite is 99.7% t.Context()-adopted",
+    "Loop-variable-copy dead code (x := x) still exists post-1.22: 142 corpus-wide hits, 100% true positive on spot-check (etcd alone has 32)"
+   ],
+   "top_smells": [
+    "os.Exit/log.Fatal* outside main packages: 644 combined hits corpus-wide (worst: golang/tools 48+122, etcd 88) \u2014 aborts the process without running defers or letting callers handle it",
+    "Naive generated-file detection (first-line-only) undercounts by up to 15x (tailscale 14->211 corrected) \u2014 any LOC/churn tooling using this rule silently counts generated code as hand-written",
+    "context.Context stored in 219 struct fields across 15 repos, including etcd/terraform/tailscale/grpc-go \u2014 a documented anti-pattern (golangci-lint's containedctx linter exists specifically for this) that flagship projects do anyway",
+    "Two incompatible functional-options shapes coexist (func-typed vs interface-typed, e.g. grpc-go's DialOption is 100% interface-based) with no convergence \u2014 a rule recognizing only one shape misjudges half the ecosystem",
+    "13/34 repos (38%) have zero golangci-lint config anywhere, including major Go-team-adjacent repos (golang/tools, google/go-cmp) \u2014 a rule set assuming golangci-lint output is always available needs a go-vet-only fallback",
+    "bazel-contrib/rules_go's cgo/legacy-build-tag hits (61 import \"C\", 35 // +build) are almost entirely test fixtures exercising the Bazel rules, not organic usage \u2014 a measurement trap for any corpus-wide idiom count that doesn't exclude rule-testing repos",
+    "cockroachdb/pebble alone accounts for ~27% of the corpus's non-test panic() calls (1,148) \u2014 a deliberate documented invariant-panic style, but looks like a bug-smell under a naive corpus-wide panic count without that context"
+   ],
+   "patterns_worth_encoding": [
+    "for _, x := range xs { x := x } is now flaggable as dead code post-1.22, not just harmless \u2014 142 real hits are candidates for an automated fix rule (modernize already flags this as 'copying variable is unneeded')",
+    "t.Context() (1.24) is the emerging default for context in tests (7,448 real sites, 99.7% adoption in go-github) \u2014 a Go testing skill should teach it over context.Background()/context.TODO() in _test.go, with the caveat that adoption is bursty per-repo (caddy is only 4%)",
+    "b.Loop() vs b.N split (340 vs 358) tracks 'when a repo last touched its benchmarks', not code maturity \u2014 a modernization skill should suggest the switch opportunistically, not flag b.N as automatically stale",
+    "Functional options must be taught in both shapes: func-typed (type FooOption func(*cfg)) and interface-typed (grpc-go's type DialOption interface{ apply(*dialOptions) })",
+    "'Accept interfaces, return structs' holds up empirically: 80% of sampled constructors (16/20) return concrete types, only 20% return interfaces \u2014 safe to state as a default rule, not folklore",
+    "panic() as a documented internal-invariant mechanism (pebble's style: panic on invariant violation, recover at API boundary, wrap in a typed assertion-failure error) is a legitimate, citable pattern for a 'when panic is OK' section",
+    "staticcheck's own testdata/ golden-file corpus (172 dirs, 5x the corpus's average density) is the right reference shape for a linter/analyzer skill's own test-writing guidance"
+   ],
+   "contradictions_of_frame": [
+    "H4 (golangci-lint v2 is the de-facto gate in most exemplars) partially contradicted: only 62% (21/34) have a config file; the 38% without it skew toward Go-team-adjacent and large-infra repos (golang/tools, google/go-cmp, grpc-go, terraform, pebble, etcd, go-tools) rather than fringe projects",
+    "H5 (testify dominates; Go team/Google prefer stdlib+go-cmp) overstates a clean split: most substantial repos use both testify and go-cmp together (etcd 276/35, containerd 247/10, cosign 17/14); the real pattern is lineage-based segments, not ecosystem-wide testify dominance",
+    "H6 (toolchain directives common) contradicted by volume: toolchain directive present in only 6/34 repos and completely absent from tailscale, terraform, containerd, prometheus, pebble; tool directive (6/34) and go.work (3/34, all committed) roughly matched the 'rare' half of H6, but 'uncommitted go.work' is unfalsifiable from a git clone",
+    "H7 (slog has displaced zap/zerolog for new code but not in the exemplars) confirmed cleanly: zerolog has zero real usage in the corpus (only appears in zap's own benchmark comparison suite); zap remains dominant in etcd/caddy/tailscale; slog adoption (prometheus, syncthing, regclient) is a separate greenfield choice, not migration away from zap",
+    "H8 (goreleaser-configured release hygiene in most CLI exemplars) has real exceptions among prominent CLIs: restic and regclient, both real distributed CLIs, have no goreleaser config anywhere in the tree; trivy uses a non-dotfile goreleaser.yml that the standard glob misses entirely"
+   ]
+  }
+ }
+]

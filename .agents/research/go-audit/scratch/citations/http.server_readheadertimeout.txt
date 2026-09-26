@@ -1,0 +1,15 @@
+aquasecurity__trivy:pkg/rpc/server/listen.go:67: server := &http.Server{
+caddyserver__caddy:admin.go:428: localAdminServer = &http.Server{
+caddyserver__caddy:admin.go:590: remoteAdminServer = &http.Server{
+caddyserver__caddy:modules/caddyhttp/app.go:485: srv.server = &http.Server{
+cli__cli:script/api-host-gateway/gateway/main.go:121: server := &http.Server{
+containerd__containerd:plugins/server/metrics/plugin.go:71: s.srv = &http.Server{
+containerd__containerd:internal/pprof/plugin.go:51: return &http.Server{
+containerd__containerd:cmd/containerd-stress/main.go:274: srv := &http.Server{
+etcd-io__etcd:server/embed/serve.go:176: srv = &http.Server{
+etcd-io__etcd:server/embed/serve.go:264: srv = &http.Server{
+google__go-containerregistry:cmd/registry/main.go:39: s := &http.Server{
+google__go-containerregistry:cmd/crane/cmd/serve.go:88: s := &http.Server{
+kubernetes-sigs__controller-runtime:pkg/internal/httpserver/server.go:28: return &http.Server{
+sigstore__cosign:test/cmd/getoidctoken/main.go:57: srv := &http.Server{
+tailscale__tailscale:cmd/hello/helloserver/helloserver.go:69: hs := &http.Server{

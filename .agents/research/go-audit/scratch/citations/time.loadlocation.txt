@@ -1,0 +1,3 @@
+ko-build__ko:test/main.go:57: loc, _ := time.LoadLocation("UTC")
+ko-build__ko:test/main.go:59: loc, _ = time.LoadLocation("America/New_York")
+syncthing__syncthing:lib/syncthing/time_android.go:21: z, err := time.LoadLocation(strings.TrimSpace(string(out)))

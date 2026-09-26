@@ -1,0 +1,144 @@
+# baseline.golangci.yml: the golangci-lint v2 baseline for a Go module that is
+# neither a CLI nor a library/SDK. Copy this whole file to the module root as
+# .golangci.yml. A CLI copies cli.golangci.yml, a library or SDK copies
+# lib-sdk.golangci.yml; both are this file plus a delta (GO-GATE-22).
+# Implements GO-GATE-09, GO-GATE-10, GO-GATE-11, GO-GATE-12, GO-GATE-13,
+# GO-GATE-14, GO-GATE-15, GO-GATE-16 and GO-GATE-20 (go-modules rule, gates.md).
+# Measured 2026-09-26, golangci-lint v2.14.0 built with Go 1.27.1.
+# Re-run `golangci-lint config verify` and the superset check on every bump.
+version: "2"
+
+linters:
+  default: none
+  enable:
+    # golangci-lint v2 "standard", kept explicit
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    # exemplar consensus; bodyclose is GO-GATE-19, modernize is replaced by go fix (GO-GATE-03)
+    - unconvert
+    - misspell
+    - whitespace
+    - unparam
+    - nolintlint
+    - depguard
+    - gosec
+    # measured signal linters that back a family's MUST
+    - errorlint       # GO-ERR
+    - nilerr          # GO-ERR
+    - nilnil          # GO-ERR
+    - noctx           # GO-CONC / GO-IO
+    - contextcheck    # GO-CONC
+    - containedctx    # GO-CONC
+    - fatcontext      # GO-CONC
+    - usestdlibvars   # GO-NET
+    - canonicalheader # GO-NET
+    - wastedassign
+    - predeclared
+    - copyloopvar
+    - revive          # curated rules only (GO-GATE-15)
+    - thelper         # GO-TEST
+    - usetesting      # GO-TEST
+    - testifylint
+    - sloglint        # bare here; no-global lives in lib-sdk.golangci.yml only (GO-GATE-23)
+  settings:
+    govet:
+      enable-all: true          # adds nilness, the SA5011 replacement (GO-GATE-11)
+      disable: [shadow, fieldalignment]
+    errorlint:
+      errorf: true
+      errorf-multi: true
+      asserts: true
+      comparison: true
+    errcheck:
+      exclude-functions:
+        - (io.ReadCloser).Close   # GO-GATE-20: declared io.ReadCloser only; write-path closes stay checked
+    nilnil:
+      checked-types: [chan, func, iface, ptr, uintptr, unsafeptr]   # GO-ERR-12: map dropped, a nil map is a valid empty read
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+      allow-unused: false
+    revive:
+      rules:                    # a rules list REPLACES revive's defaults (GO-GATE-15)
+        - name: context-as-argument
+        - name: deep-exit
+        - name: time-equal      # GO-LANG-07
+    thelper:
+      test: { begin: true, first: false, name: false }
+      benchmark: { begin: true, first: false, name: false }
+      tb: { begin: true, first: false, name: false }
+      fuzz: { begin: true, first: false, name: false }
+    usetesting:
+      context-background: true
+      context-todo: true
+    depguard:
+      rules:
+        superseded: # GO-MOD-08, verbatim, 13 entries (GO-OBS-06 automaxprocs, GO-LANG-22 x/exp/constraints)
+          files: ["$all"]
+          deny:
+            - pkg: io/ioutil
+              desc: "use io and os (go1.16)"
+            - pkg: github.com/pkg/errors
+              desc: "use errors and fmt.Errorf %w (go1.13/1.20)"
+            - pkg: golang.org/x/xerrors
+              desc: "use errors (go1.13)"
+            - pkg: golang.org/x/exp/slices
+              desc: "use slices (go1.21)"
+            - pkg: golang.org/x/exp/maps
+              desc: "use maps (go1.21)"
+            - pkg: golang.org/x/exp/constraints
+              desc: "use stdlib cmp.Ordered (Go 1.21)"
+            - pkg: github.com/golang/mock
+              desc: "archived 2024-01-08; use go.uber.org/mock"
+            - pkg: gopkg.in/yaml.v2
+              desc: "go-yaml archived 2025-04-01; use go.yaml.in/yaml/v3"
+            - pkg: gopkg.in/yaml.v3
+              desc: "go-yaml archived 2025-04-01; use go.yaml.in/yaml/v3"
+            - pkg: github.com/ghodss/yaml
+              desc: "unmaintained; use sigs.k8s.io/yaml"
+            - pkg: github.com/satori/go.uuid
+              desc: "abandoned; use github.com/google/uuid or stdlib uuid (go1.27)"
+            - pkg: github.com/hashicorp/go-multierror
+              desc: "use stdlib errors.Join (go1.20)"
+            - pkg: go.uber.org/automaxprocs
+              desc: "the runtime is container-aware at go>=1.25 (GO-OBS-06); use runtime.GOMAXPROCS(0)"
+        logging: # GO-OBS-01, verbatim; SHOULD everywhere, MUST for the SDK through GO-MOD-10
+          files: ["$all"]
+          deny:
+            - pkg: go.uber.org/zap
+              desc: "new fleet code logs through log/slog"
+            - pkg: github.com/rs/zerolog
+              desc: "new fleet code logs through log/slog"
+            - pkg: github.com/sirupsen/logrus
+              desc: "new fleet code logs through log/slog"
+        no-testify: # GO-TEST-02
+          files: ["$test"]
+          deny:
+            - pkg: github.com/stretchr/testify
+              desc: "stdlib testing + go-cmp (GO-TEST); drop this rule only in an incumbent-testify repo"
+    gosec:
+      excludes:
+        - G104 # duplicates errcheck
+        - G115 # ignores prior bounds checks (securego/gosec#1187); re-review this list on every golangci-lint bump
+        - G304 # file inclusion via variable; untrusted names go through os.Root (GO-IO-02, GO-SEC-01)
+      config:
+        G301: "0755"
+        G302: "0644"
+        G306: "0644"
+  exclusions:
+    generated: lax
+    presets: [comments] # the only preset in this file (GO-GATE-09, GO-SEC-01, GO-ERR-09)
+    rules:
+      - path: _test\.go
+        linters: [gosec]
+
+formatters:
+  enable: [gofmt]
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  uniq-by-line: false

@@ -1,0 +1,74 @@
+aquasecurity__trivy:pkg/fanal/analyzer/fs.go:58: if err = os.Chmod(f.Name(), 0o600); err != nil {
+bazel-contrib__rules_go:go/tools/builders/replicate.go:87: if err := os.Chmod(dst, s.Mode()); err != nil {
+caddyserver__caddy:listeners.go:197: err = os.Chmod(address, unixFileMode)
+caddyserver__caddy:modules/logging/filewriter.go:246: if err = os.Chmod(fw.Filename, configuredMode); err != nil {
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/contract.go:681: return os.Chmod(saved, 0o400)
+containerd__containerd:plugins/cri/runtime/plugin.go:86: if err := os.Chmod(stateDir, 0o700); err != nil {
+containerd__containerd:plugins/sandbox/controller.go:75: if err := os.Chmod(d, 0o700); err != nil {
+containerd__containerd:plugins/snapshots/btrfs/btrfs.go:58: if err := os.Chmod(root, 0700); err != nil {
+containerd__containerd:plugins/snapshots/native/native.go:225: if err := os.Chmod(td, 0755); err != nil {
+containerd__containerd:plugins/content/local/writer.go:199: if err := os.Chmod(target, (fi.Mode()&os.ModePerm)&^0333); err != nil {
+containerd__containerd:client/container_opts_unix.go:143: return os.Chmod(path, mode)
+containerd__containerd:core/runtime/v2/shim_unix.go:120: if err := os.Chmod(dir, 0700); err != nil {
+containerd__containerd:core/runtime/v2/bundle_linux.go:41: return os.Chmod(path, 0710)
+containerd__containerd:pkg/archive/tar_windows.go:107: if err := os.Chmod(path, fi.Mode()); err != nil {
+containerd__containerd:pkg/archive/tar_unix.go:97: return os.Chmod(path, perm)
+containerd__containerd:pkg/archive/tar_unix.go:173: if err := os.Chmod(path, fi.Mode()); err != nil {
+containerd__containerd:pkg/archive/tar_mostunix.go:50: if err := os.Chmod(path, mode); err != nil {
+containerd__containerd:pkg/shim/util_unix.go:137: if err := os.Chmod(path, sockPerm); err != nil {
+containerd__containerd:pkg/sys/socket_unix.go:57: if err := os.Chmod(path, 0660); err != nil {
+containerd__containerd:cmd/containerd/server/server.go:77: if err := os.Chmod(config.Root, 0o700); err != nil && !errors.Is(err, os.ErrPermission) {
+containerd__containerd:cmd/containerd/server/server.go:93: if err := os.Chmod(config.TempDir, 0o700); err != nil && !errors.Is(err, os.ErrPermission) {
+containerd__containerd:cmd/ctr/commands/images/build_erofs_cache.go:185: if err := os.Chmod(tmpPath, 0644); err != nil {
+dominikh__go-tools:internal/xtools-internal/packagestest/export.go:632: os.Chmod(path, 0777)
+etcd-io__etcd:client/pkg/fileutil/lock_plan9.go:24: if err := os.Chmod(path, syscall.DMEXCL|PrivateFileMode); err != nil {
+etcd-io__etcd:client/pkg/fileutil/lock_plan9.go:35: if err := os.Chmod(path, syscall.DMEXCL|PrivateFileMode); err != nil {
+golang__tools:internal/packagestest/export.go:632: os.Chmod(path, 0777)
+google__go-github:github/gen-stringify-test.go:382: if err := os.Chmod(t.filename, 0o644); err != nil {
+google__go-github:github/gen-stringify-test.go:383: return fmt.Errorf("os.Chmod(%q, 0644): %v", t.filename, err)
+google__go-github:github/gen-stringify-test.go:390: if err := os.Chmod(t.filename, 0o444); err != nil {
+google__go-github:github/gen-stringify-test.go:391: return fmt.Errorf("os.Chmod(%q, 0444): %v", t.filename, err)
+google__go-github:github/gen-accessors.go:260: if err := os.Chmod(filename, 0o644); err != nil {
+google__go-github:github/gen-accessors.go:261: return fmt.Errorf("os.Chmod(%q, 0644): %v", filename, err)
+google__go-github:github/gen-accessors.go:268: if err := os.Chmod(filename, 0o444); err != nil {
+google__go-github:github/gen-accessors.go:269: return fmt.Errorf("os.Chmod(%q, 0444): %v", filename, err)
+goreleaser__goreleaser:internal/builders/node/download.go:166: if err := os.Chmod(bin, 0o755); err != nil {
+goreleaser__goreleaser:internal/client/git.go:208: if err = os.Chmod(path, 0o600); err != nil {
+hashicorp__terraform:internal/replacefile/writefile.go:57: if err := os.Chmod(tmpName, perm); err != nil {
+hashicorp__terraform:internal/configs/configload/copy_dir.go:90: return os.Chmod(dstPath, info.Mode())
+hashicorp__terraform:internal/command/cliconfig/credentials.go:432: if err := os.Chmod(filename, 0600); err != nil {
+hashicorp__terraform:internal/copy/copy_dir.go:117: return os.Chmod(dstPath, info.Mode())
+hashicorp__terraform:internal/copy/copy_file.go:47: err = os.Chmod(dst, si.Mode())
+junegunn__fzf:src/server.go:104: os.Chmod(address.sock, 0600)
+oras-project__oras-go:content/oci/storage.go:162: if err := os.Chmod(path, 0444); err != nil {
+oras-project__oras-go:content/file/utils.go:238: if err := os.Chmod(filePath, os.FileMode(header.Mode)); err != nil {
+regclient__regclient:internal/conffile/conffile.go:176: if err := os.Chmod(tmpFullname, mode); err != nil {
+restic__restic:helpers/build-release-binaries/main.go:161: err := os.Chmod(file, mode)
+restic__restic:internal/backend/local/local_windows.go:25: err := os.Chmod(f, 0666)
+restic__restic:internal/backend/local/local_unix.go:45: err := os.Chmod(f, mode&^0222)
+restic__restic:internal/test/helpers.go:186: return os.Chmod(path, 0777)
+restic__restic:internal/test/helpers.go:190: return os.Chmod(path, 0666)
+restic__restic:internal/fs/file.go:61: if err := os.Chmod(fixpath(path), 0600); err != nil {
+restic__restic:internal/fs/file_windows.go:46: return os.Chmod(fixpath(name), mode)
+restic__restic:internal/fs/file_unix.go:26: err := os.Chmod(fixpath(name), mode)
+restic__restic:internal/selfupdate/download.go:109: return os.Chmod(target, mode)
+syncthing__syncthing:lib/upgrade/upgrade_supported.go:430: err = os.Chmod(outFile.Name(), os.FileMode(0o755))
+syncthing__syncthing:lib/api/api.go:192: err = os.Chmod(guiCfg.Address(), guiCfg.UnixSocketPermissions())
+syncthing__syncthing:lib/fs/basicfs_windows.go:133: if os.Chmod(name, 0o600) == nil {
+syncthing__syncthing:lib/fs/basicfs.go:148: return os.Chmod(name, os.FileMode(mode))
+syncthing__syncthing:test/util.go:102: os.Chmod(p1, os.FileMode(rand.Intn(0o777)|0o400))
+syncthing__syncthing:test/util.go:154: if err = os.Chmod(path, 0o644); err != nil {
+syncthing__syncthing:test/util.go:295: os.Chmod(path, 0o777)
+syncthing__syncthing:cmd/dev/stgenfiles/main.go:82: os.Chmod(p1, os.FileMode(rand.Intn(0o777)|0o400))
+syncthing__syncthing:build.go:781: os.Chmod(dst, perm)
+tailscale__tailscale:misc/git_hook/githook/install.go:137: if err := os.Chmod(tmp, 0755); err != nil {
+tailscale__tailscale:ssh/tailssh/process_unix.go:136: if err := os.Chmod(socket, 0600); err != nil {
+tailscale__tailscale:ssh/tailssh/process_unix.go:143: if err := os.Chmod(dir, 0755); err != nil {
+tailscale__tailscale:cmd/tailscaled/install_darwin.go:173: if err := os.Chmod(tmpBin, 0755); err != nil {
+tailscale__tailscale:cmd/tailscale/cli/configure-synology.go:93: if err := os.Chmod("/dev/net", 0755); err != nil {
+tailscale__tailscale:cmd/tailscale/cli/configure-synology.go:96: if err := os.Chmod("/dev/net/tun", 0666); err != nil {
+tailscale__tailscale:net/dns/direct.go:693: return os.Chmod(fs.path(name), mode)
+tailscale__tailscale:paths/paths_unix.go:90: return os.Chmod(dir, perm)
+tailscale__tailscale:safesocket/unixsocket.go:59: if err := os.Chmod(sockDir, 0755); err != nil {
+tailscale__tailscale:safesocket/unixsocket.go:69: os.Chmod(path, perm)
+urfave__cli:scripts/build.go:232: return os.Chmod(dest, perm)

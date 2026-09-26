@@ -1,0 +1,7 @@
+etcd-io__etcd:server/etcdserver/api/v3compactor/compactor.go:22: "github.com/jonboulle/clockwork"
+etcd-io__etcd:server/etcdserver/api/v3compactor/revision.go:23: "github.com/jonboulle/clockwork"
+etcd-io__etcd:server/etcdserver/api/v3compactor/periodic.go:23: "github.com/jonboulle/clockwork"
+etcd-io__etcd:server/etcdserver/api/v2store/node_extern.go:21: "github.com/jonboulle/clockwork"
+etcd-io__etcd:server/etcdserver/api/v2store/store.go:26: "github.com/jonboulle/clockwork"
+etcd-io__etcd:server/etcdserver/api/v2store/node.go:22: "github.com/jonboulle/clockwork"
+etcd-io__etcd:server/etcdserver/api/v3discovery/discovery.go:29: "github.com/jonboulle/clockwork"

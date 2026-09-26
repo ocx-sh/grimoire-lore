@@ -1,0 +1,26 @@
+bazel-contrib__rules_go:tests/core/go_binary/pgo.go:8: _ "net/http/pprof"
+bazelbuild__bazel-gazelle:language/go/std_package_list.go:928: "net/http/pprof": true,
+bazelbuild__bazel-gazelle:language/go/std_package_list.go:929: "net/http/pprof/testdata": true,
+caddyserver__caddy:admin.go:32: "net/http/pprof"
+containerd__containerd:internal/pprof/plugin.go:22: "net/http/pprof"
+etcd-io__etcd:pkg/debugutil/pprof.go:19: "net/http/pprof"
+golang__tools:internal/stdlib/deps.go:313: {"net/http/pprof", "\x02\x01\nu\x18.\x11-\x04\x13\x16\x01\r\x04\x03\x01\x02\x01\x11"},
+golang__tools:internal/stdlib/manifest.go:9575: "net/http/pprof": {
+golang__tools:gopls/internal/debug/serve.go:18: "net/http/pprof"
+grpc__grpc-go:benchmark/server/main.go:35: _ "net/http/pprof"
+grpc__grpc-go:benchmark/worker/main.go:30: _ "net/http/pprof"
+kubernetes-sigs__controller-runtime:pkg/manager/internal.go:25: "net/http/pprof"
+prometheus__prometheus:documentation/examples/remote_storage/remote_storage_adapter/main.go:22: _ "net/http/pprof"
+prometheus__prometheus:web/web.go:26: "net/http/pprof"
+restic__restic:internal/global/global_debug.go:9: _ "net/http/pprof"
+syncthing__syncthing:cmd/syncthing/main.go:20: _ "net/http/pprof" // Need to import this to support STPROFILER.
+syncthing__syncthing:cmd/infra/ursrv/serve/serve.go:20: _ "net/http/pprof"
+syncthing__syncthing:cmd/infra/stcrashreceiver/main.go:23: "net/http/pprof"
+syncthing__syncthing:cmd/strelaysrv/status.go:9: "net/http/pprof"
+tailscale__tailscale:wgengine/bench/bench.go:14: "net/http/pprof"
+tailscale__tailscale:tsweb/pprof_default.go:10: "net/http/pprof"
+tailscale__tailscale:tsweb/pprof_default.go:17: // But register the other ones from net/http/pprof directly:
+tailscale__tailscale:ipn/ipnlocal/c2n_pprof.go:18: // Support same optional gc parameter as net/http/pprof:
+tailscale__tailscale:ipn/localapi/pprof.go:13: "net/http/pprof"
+tailscale__tailscale:cmd/tailscaled/debug.go:19: "net/http/pprof"
+tailscale__tailscale:cmd/derper/derper.go:417: // and not hit net/http/pprof's "profile

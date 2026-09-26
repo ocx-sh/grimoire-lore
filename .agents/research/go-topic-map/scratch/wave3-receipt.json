@@ -1,0 +1,923 @@
+{
+ "wave": 3,
+ "groups": [
+  {
+   "group": "gates",
+   "dives": [
+    {
+     "slug": "config-revision",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-gates/config-revision.md",
+     "sources_count": 14,
+     "verifications_run": 15,
+     "top_rules": [
+      "Never enable linters.exclusions.presets:[std-error-handling] (GO-ERR-09) \u2014 removing it flips the fleet's own cligood twin from 0 to 2 real errcheck findings",
+      "errcheck.exclude-functions:[\"(io.ReadCloser).Close\"] only matches a call site whose DECLARED type is literally io.ReadCloser (http.Response.Body); it never suppresses *os.File.Close() from os.Open, even though *os.File implements the interface",
+      "No exclude-functions entry can separate read-only from write-path *os.File closes \u2014 (*os.File).Close would suppress both, reopening GO-ERR-08's hole; the read/write split stays a reading heuristic + per-site //nolint:errcheck",
+      "nilnil.checked-types must drop map from the default list (verified: default flags 2 issues, tuned drops to 1)",
+      "depguard's superseded rule is GO-MOD-08's 11 entries (not 12 as the brief said), on files:[\"$all\"]; all 11 verified to fire individually against a synthetic module, clean on its twin",
+      "Never enable golangci-lint run --fix for errorlint unattended: its asserts fixer rewrote a real type switch in uber-go/zap without adding the needed errors import (go build exit 1), and once repaired, changed test-observable behaviour (TestErrorEncoding FAIL)",
+      "The verified-safe unattended --fix allowlist is only usetesting, testifylint, misspell, canonicalheader, whitespace; every other [auto-fix]-tagged baseline linter fired no fix in any fixture here and stays unverified",
+      "exhaustive has a real FP shape: a switch over an imported package's enum with a deliberate default (100% of ko-build/ko's 6 hits, all on foreign types.MediaType, 4.05 FP/10k LOC) \u2014 fix with ignore-enum-types or a targeted nolint, never a blanket disable",
+      "go vet's testinggoroutine (and staticcheck -checks all, and golangci govet enable-all) catches a literal go func(){t.Fatal()}() but is completely blind to the identical defect inside sync.WaitGroup.Go or errgroup.Group.Go closures \u2014 proven with a positive control",
+      "golangci-lint's errcheck does NOT inherit the standalone binary's 'ignore fmt package' default \u2014 fmt.Fprintf/Fprintln calls are real findings (104 hits on regclient alone), correcting a stale 'errcheck: 0' row in the prior gates dive"
+     ],
+     "surprises": [
+      "errcheck's exclude-functions setting is scoped to the call site's declared type, not to any type that structurally implements the named interface \u2014 GO-ERR-09's config fix is dead code for the common os.Open()/defer f.Close() idiom despite verifying against http.Response.Body",
+      "golangci-lint's own errcheck does not apply the standalone errcheck binary's documented 'fmt package ignored by default' behaviour, invalidating the prior gates dive's 'errcheck: 0 across all 8 exemplars' headline",
+      "errorlint's --fix can leave a tree that does not compile (missing errors import) and, once repaired, silently changes runtime behaviour by walking wrapped causes a direct type switch never inspected \u2014 confirmed on a real exemplar (zap), not a toy case, and matches the tool's own README caution",
+      "exhaustive's entire false-positive volume on ko-build/ko (6/6 hits, 4x over the admission bar) is one single shape: switching over an imported package's enum with an intentional default, mechanically fixable via ignore-enum-types",
+      "No go/analysis pass, staticcheck check, or golangci-lint govet setting can see a t.Fatal or require.NoError inside a closure passed to sync.WaitGroup.Go or errgroup.Group.Go, because the analyzer only walks literal go statements in the analyzed source \u2014 the blind spot has a clean mechanical cause, not just an absence of findings",
+      "GO-MOD-08's depguard list is 11 entries, not the 12 the brief specified \u2014 a direct line count of go-modules.md:58 settles it"
+     ],
+     "ok": true
+    }
+   ],
+   "consolidation": {
+    "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-gates.md",
+    "rule_ids": [
+     "GO-GATE-01 \u2014 Run the ordered gate block from every go.mod root; every step blocks. On a matrix, steps 1-4 and 7-9 run once on the stable leg and steps 5-6 on every leg.",
+     "GO-GATE-02 \u2014 Run go vet ./... as its own step; never treat a green go test as a vet pass.",
+     "GO-GATE-03 \u2014 Gate modernization on go fix -diff ./...; do not enable golangci modernize.",
+     "GO-GATE-04 \u2014 Run go test -race on every PR in a job with CGO_ENABLED=1 explicit.",
+     "GO-GATE-05 \u2014 Gate generate drift with go generate plus git status --porcelain, never git diff --exit-code.",
+     "GO-GATE-06 \u2014 Make gofmt output the formatting MUST; goimports is SHOULD and gofumpt opt-in.",
+     "GO-GATE-07 \u2014 Run the SDK and CLI test jobs on windows-latest and macos-latest legs too.",
+     "GO-GATE-08 \u2014 Pin golangci-lint to an exact v2 release; never latest.",
+     "GO-GATE-09 \u2014 Use the corrected v2 config verbatim, with exclusions.presets limited to comments and common-false-positives; config verify exits 0.",
+     "GO-GATE-10 \u2014 Set uniq-by-line false and both issue caps to 0.",
+     "GO-GATE-11 \u2014 Enable govet enable-all minus shadow and fieldalignment (nilness replaces SA5011).",
+     "GO-GATE-12 \u2014 Require nolintlint specific-linter and explanation, allow-unused false.",
+     "GO-GATE-13 \u2014 Cite GO-MOD-08 (11-entry superseded rule) and GO-TEST-02 (no-testify) for depguard; add no list here.",
+     "GO-GATE-14 \u2014 Exclude exactly G104 and G115 from gosec with the fleet permission thresholds; re-justify on every bump.",
+     "GO-GATE-15 \u2014 Enable revive and gocritic only with explicit rule or check lists.",
+     "GO-GATE-16 \u2014 Never use default: all or the listed noise linters.",
+     "GO-GATE-17 \u2014 Run exactly one staticcheck entry point per repo.",
+     "GO-GATE-18 \u2014 Add the CLI overlay (exhaustive, forbidigo, exitAfterDefer); a foreign-enum switch with a deliberate default gets a reasoned nolint or a targeted ignore-enum-types.",
+     "GO-GATE-19 \u2014 Enable bodyclose only where resp.Body is not handed to a wrapper (SHOULD).",
+     "GO-GATE-20 \u2014 Keep errcheck exclude-functions at exactly (io.ReadCloser).Close; never a concrete type; annotate read-only concrete closes.",
+     "GO-GATE-21 \u2014 Run unattended golangci-lint --fix only with the five allowlisted linters, never errorlint, and follow every fix run with go build and go test."
+    ],
+    "conflicts_resolved": [
+     "Map contradiction 1: removed std-error-handling from the GO-GATE-09 config (GO-ERR-09 wins) and added the (io.ReadCloser).Close exemption. The prior text overclaimed that the preset was safe; it had hidden 2 real errcheck findings in the fleet's own cligood twin (C-14).",
+     "Map contradiction 4: GO-GATE-13 becomes a citation row. The config quotes GO-MOD-08's list, which has 11 entries, not the map's 12 (verified at go-modules.md:58).",
+     "Map contradiction 11: nilnil checked-types without map added to the config (CR-10). A deliberate nil-means-absent return uses a reasoned //nolint. The SDK (nil,nil) stance belongs to api/sdk-surface.",
+     "Map contradiction 14: the GO-GATE-01 text now states which steps run once and which run per matrix leg.",
+     "GO-ERR-09's unanchored grep went red on the corrected config because a comment named the preset (C-16). Config comments now avoid the token, and GO-GATE-09 uses the anchored grep '^[^#]*std-error-handling'. GO-ERR-09's own verification should adopt the anchor.",
+     "[GC] \u00a73 counts (errcheck 0 on all 8, errorlint 45 on oras-go) are superseded by the CR-6/CR-8 measurements under default: none.",
+     "GO-GATE-18's twin: under the corrected config, cligood is red on 2 baseline errcheck findings. The overlay linters alone stay green (C-14), so GO-GATE-18 keeps MUST and the twin is recorded as fixture debt.",
+     "M-M-15 closed: GO-GATE-21 allowlist, with errorlint's fix watched breaking zap's build and then its tests (CR-12)."
+    ],
+    "needs_another_round": [
+     "network/http-client-server \u2014 bodyclose precision on regclient's 78 non-test hits: linter or reading heuristic for GO-NET?",
+     "gates \u2014 staticcheck ST1000/ST1020-22 on library code: FP bar, and overlap with revive exported (M-M-09)?",
+     "api/sdk-surface \u2014 should the SDK's typed exit-code errors be switched exhaustively, and at what FP cost; may the SDK return (nil, nil) at all?",
+     "gates \u2014 widen the --fix allowlist: plant one fixable violation each for govet, staticcheck, copyloopvar, fatcontext, nolintlint, revive, sloglint, usestdlibvars; which pass go build and go test?",
+     "gates/errors \u2014 annotating 74+ read-only *os.File closes vs a small custom analyzer: which is the cheaper gate for the SDK?",
+     "errors \u2014 GO-ERR-09's verification grep needs the '^[^#]*' anchor; it currently goes red on a comment in a compliant config (C-16)."
+    ],
+    "must_count": 20
+   }
+  },
+  {
+   "group": "cli",
+   "dives": [
+    {
+     "slug": "reference-skeleton",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-cli/reference-skeleton.md",
+     "sources_count": 15,
+     "verifications_run": 14,
+     "top_rules": [
+      "A root that sets any non-nil Args (for any reason) with subcommands must have that validator explicitly reject an unrecognized first token \u2014 Find() only calls legacyArgs when Args==nil",
+      "root.TraverseChildren=true must pair with an explicit root Args validator \u2014 Traverse() returns a nil error on an unmatched token unconditionally, with no legacyArgs equivalent at all",
+      "markStarted must wrap RunE after AddCommand and before Execute; cobra adds completion/help/__complete inside ExecuteC, too late to wrap, but this is harmless since none of those three need the started classification",
+      "SilenceErrors/SilenceUsage on the root are required even with TraverseChildren and a custom Args, or cobra double-prints on top of the skeleton's own classified render",
+      "A report-all fan-out must use WaitGroup+mutex+[]error+errors.Join, never errgroup.WithContext \u2014 watched: errgroup.Wait drops 2 of 3 planted failures every run",
+      "A classify() that returns on the first typed match inside a joined error's Unwrap() is picking scheduler order, not severity \u2014 do not read it as 'most severe wins'",
+      "Only termenv.NewOutput(w), constructed per stream, backs GO-CLI-13 \u2014 never the package-level termenv.* functions, and never colorprofile/lipgloss-v2 for NO_COLOR (its ParseBool check misses NO_COLOR=yes/0/anything)",
+      "Prefer the hand-rolled NO_COLOR+term.IsTerminal check over termenv (+44.3% binary size) or colorprofile (+75.1%) when x/term is already a dependency for TTY prompts"
+     ],
+     "surprises": [
+      "TraverseChildren silently disables unknown-subcommand detection unconditionally (even with Args nil) \u2014 worse than the Args-set case, and zero exemplars in the 35-repo corpus set it on their own command trees (only cobra's own source has the identifier)",
+      "cobra.NoArgs happens to reproduce legacyArgs' exact error wording, so it looks safe, but any other custom Args validator that doesn't re-check against cmd.Commands() silently swallows a typo'd subcommand as a positional arg",
+      "charmbracelet/colorprofile (what lipgloss v2 documents as its NO_COLOR mechanism) uses strconv.ParseBool, so NO_COLOR=yes/0/anything-non-boolean fail to disable colour \u2014 a live, corpus-grounded bug: charmbracelet/bubbletea@d5bfd5c2ff74:tea.go:1091-1093 calls colorprofile.Detect directly with no override",
+      "lipgloss v1 (termenv-backed) is spec-correct on NO_COLOR; lipgloss v2 (colorprofile-backed) regressed \u2014 this is a versioned library defect, not a stdlib or cobra issue",
+      "errors.Join's classify() winner in the watched run (NotFoundError beat a co-occurring PermissionError) was stable across GOMAXPROCS=1 and 8, but nothing in the Go memory model guarantees goroutine-append order, so a rule assuming a specific typed error 'wins' is unverifiable in general",
+      "a non-runnable cobra subcommand (no RunE/Run) invoked directly, or with --help, printed nothing and exited 0 in this build \u2014 noted but not root-caused, tangential to the brief"
+     ],
+     "ok": true
+    }
+   ],
+   "consolidation": {
+    "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-cli.md",
+    "rule_ids": [
+     "GO-CLI-01 \u2014 Declare one typed ExitCode holding the fleet table, and check every switch over it with exhaustive",
+     "GO-CLI-02 \u2014 Keep main to run/reraise/os.Exit, and let nothing else exit, log.Fatal or cobra.CheckErr",
+     "GO-CLI-03 \u2014 Write only the result to stdout, through an injected writer, and ban fmt.Print* with forbidigo",
+     "GO-CLI-04 \u2014 Buffer output in one bufio.Writer, and join its Flush error into the classified error",
+     "GO-CLI-05 \u2014 Classify errors in one ordered chain, whose case order is also the precedence for joined errors, and lock each code with a test",
+     "GO-CLI-06 \u2014 Silence cobra, run markStarted after the last AddCommand, and send an untyped pre-RunE error to 64 (unknown-subcommand coverage is conditional on GO-CLI-17)",
+     "GO-CLI-07 \u2014 Register SIGPIPE, and map a broken pipe to 0 only in classify, through a per-OS isBrokenPipe",
+     "GO-CLI-08 \u2014 Derive SIGINT/SIGTERM status from a typed SignalError cause, and re-raise on Unix",
+     "GO-CLI-09 \u2014 Prompt only on a TTY without --yes, and never take secrets from flag values or plain env vars",
+     "GO-CLI-10 \u2014 Make a mutating subcommand safe to re-run after a crash (stage, then an atomic, idempotent commit)",
+     "GO-CLI-11 \u2014 Render the error once to stderr, through a named sanitize for C0/C1 and bidi runes",
+     "GO-CLI-12 \u2014 Check WaitStatus.Signaled before forwarding a child's ExitCode, and map a signal to 128+N",
+     "GO-CLI-13 \u2014 Decide colour per stream with a hand-rolled NO_COLOR != \"\" check, and never let fatih/color globals, package-level termenv or colorprofile be the gate",
+     "GO-CLI-14 \u2014 Take config and cache dirs from os.UserConfigDir/UserCacheDir, and prefix tool env vars",
+     "GO-CLI-15 \u2014 Walk precedence explicitly (flags > env > project > user > system), and do not add viper without a stated need",
+     "GO-CLI-16 \u2014 Use cobra+pflag with global PersistentFlags and no TraverseChildren (stdlib flag for single commands); do not adopt urfave v3",
+     "GO-CLI-17 \u2014 (new) Leave TraverseChildren unset; a root with TraverseChildren or a non-nil Args must be runnable and reject leftover tokens as UsageError",
+     "GO-CLI-18 \u2014 (new) Choose a joined error's exit code by classify's case order via errors.AsType, never by walking Unwrap() []error",
+     "GO-CLI-19 \u2014 (new) Add no colour dependency for the colour decision; if you use termenv, build NewOutput(w) per stream"
+    ],
+    "conflicts_resolved": [
+     "GO-CLI-06 overclaimed: 'unknown subcommand -> 64' fails when TraverseChildren is set or the root Args is non-nil (the typo exits 0). Rule text fixed in place with the precondition; the mechanism moves to new GO-CLI-17.",
+     "The dive's fix (an explicit rejecting root Args) was watched FAILING on a non-runnable root: cobra command.go:955-957 returns flag.ErrHelp before ValidateArgs, so it exits 0 with usage on stdout. GO-CLI-17 is stricter than the dive: the root must also be runnable (watched: travnr_fix 0, travnr_runnable 64).",
+     "Dive candidate 6 ('first typed match is scheduler order, so sort explicitly') is true only for a slice-walk classifier. The existing GO-CLI-05 case chain via errors.AsType searches the whole tree and is deterministic (watched: chain 77/77, slice-walk 79/77). Codified as GO-CLI-18. GO-ERR-18's slice-walk stays scoped to counting or reporting every match.",
+     "GO-CLI-13's verification failed to go red: the LookupEnv grep stayed green on a colorprofile/package-level-termenv violator. A second grep was added and watched red (exit 0, 2 hits) and green (exit 1).",
+     "The dive framed TraverseChildren as the way to put global flags first. Watched: root PersistentFlags already parse `app --name x --verbose sub` without it, so GO-CLI-16/17 say leave it unset.",
+     "The owner question on whether an untyped PersistentPreRunE error gives 64 is settled by watched runs (typed 78, untyped 64, also under TraverseChildren) and removed from Open questions.",
+     "Dive candidate 5 (errgroup delivers 1 of 3, join delivers 3 of 3) is GO-CONC-14 evidence. It is recorded as a cross-family note for go-concurrency.md to fold in, not as a GO-CLI rule."
+    ],
+    "needs_another_round": [
+     "cli/windows \u2014 GO-CLI-07 ERROR_NO_DATA vs ERROR_BROKEN_PIPE on a console vs a pipe, GO-CLI-08 Ctrl-Break and os.Interrupt delivery to a same-console child, and GO-CLI-13 MSYS2/Cygwin detection each need a watched run on a windows-latest runner (only the compile was verified)"
+    ],
+    "must_count": 14
+   }
+  },
+  {
+   "group": "io",
+   "dives": [
+    {
+     "slug": "process-group-sweep",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-io/process-group-sweep.md",
+     "sources_count": 16,
+     "verifications_run": 4,
+     "top_rules": [
+      "Treat ESRCH from the post-Wait group sweep as success, never an error \u2014 it is kill(2)'s documented response to an already-empty group.",
+      "The sweep is reuse-safe exactly while a target descendant is alive: the kernel keeps a pgid attached (unrecyclable) as long as any group member exists, leader-reaped or not.",
+      "Add SysProcAttr.Pdeathsig: SIGKILL to the SDK's direct child on Linux as a SHOULD companion to the sweep \u2014 it's the only mechanism covering the SDK's own process being SIGKILLed/OOM-killed, since no Go code runs to perform the sweep then.",
+      "Never set Pdeathsig without pairing it with runtime.LockOSThread() around Start-through-Wait \u2014 the ecosystem's own shipped fix (containerd's vendored go-runc) for the golang/go#27505 thread-vs-process footgun.",
+      "Pdeathsig exists only on syscall.SysProcAttr for linux and freebsd (verified from exec_linux.go/exec_freebsd.go vs exec_libc2.go/exec_bsd.go/exec_libc.go); GOOS=darwin go vet ./... proves its absence elsewhere.",
+      "Scope the Pdeathsig SHOULD to Linux only, not the stdlib's wider linux||freebsd \u2014 no fleet target or exemplar, including go-runc itself, exercises FreeBSD.",
+      "Never add a delay or retry between Cmd.Wait() returning and the sweep's Kill(-pgid, SIGKILL) call \u2014 any extra step only widens the narrow already-empty-group coincidence window.",
+      "pidfd (Go 1.23+) fixes the single-pid wait/kill race but has no group-scoped analogue \u2014 never credit it with making the group sweep safe; that safety comes from process-group membership semantics."
+     ],
+     "surprises": [
+      "An initial corpus re-grep for Pdeathsig wrongly reported zero hits; the corrected unfiltered re-grep found 10, including two real containerd production sites (pkg/sys/unshare_linux.go, core/mount/mount_idmapped_utils_linux.go).",
+      "containerd's vendored go-runc already ships the exact runtime.LockOSThread mitigation for golang/go#27505, citing it by name and warning GOMAXPROCS=1 can hang \u2014 this dive adopted that shape rather than inventing one.",
+      "The Linux kernel keeps a process-group's numeric id unrecyclable as long as ANY member (even a lone surviving descendant, with the leader already reaped) exists \u2014 the sweep's safety comes from group membership, not from timing relative to Wait.",
+      "go-runc itself gates Pdeathsig support to plain linux (command_other.go: //go:build !linux), narrower than the Go stdlib's actual linux||freebsd availability \u2014 no exemplar anywhere exercises FreeBSD.",
+      "Go's own os/pidfd_linux.go source comment explicitly names CL 23967 and confirms the single-pid wait/kill race is real, but pidfd has no group-scoped analogue, so it can't rescue the numeric -pgid sweep.",
+      "The camelCase grep for unpaired Pdeathsig usage false-positives on a variable literally named usePdeathsig, since Go identifiers give grep -w no word boundary there \u2014 worth flagging as a reading-heuristic limitation."
+     ],
+     "ok": true
+    }
+   ],
+   "consolidation": {
+    "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-io.md",
+    "rule_ids": [
+     "GO-IO-01 \u2014 Start every child with exec.CommandContext; never call exec.Command (MUST)",
+     "GO-IO-02 \u2014 Open every name the program did not choose through os.Root/os.OpenInRoot (MUST)",
+     "GO-IO-03 \u2014 Bound every decompression of external data before copying (MUST)",
+     "GO-IO-04 \u2014 Never request world-writable modes; pin gosec G301/G302/G306 to 0755/0644 (MUST)",
+     "GO-IO-05 \u2014 Pin tarinsecurepath=0 and zipinsecurepath=0 in go.mod in any archive-parsing binary; never set execerrdot=0 (MUST)",
+     "GO-IO-06 \u2014 Put OS-specific process attributes in files constrained to the OSes that declare them; Pdeathsig needs a linux gate, never unix (MUST, changed in wave 3)",
+     "GO-IO-07 \u2014 Set a nonzero Cmd.WaitDelay on every exec.Cmd (MUST)",
+     "GO-IO-08 \u2014 Pass argv directly; never run sh -c, bash -c or cmd /c with a composed string (MUST)",
+     "GO-IO-09 \u2014 Pass secrets to a child on stdin or in env, never in argv (MUST)",
+     "GO-IO-10 \u2014 Classify a timeout or cancel from ctx.Err()/context.Cause after Wait, never with errors.Is on the Wait error (MUST)",
+     "GO-IO-11 \u2014 Write crash-surviving state only through CreateTemp-in-dir, Sync, checked Close, Rename, dir fsync (MUST)",
+     "GO-IO-12 \u2014 Remove the temp file only if the rename did not happen (MUST)",
+     "GO-IO-13 \u2014 Spawn from exactly one internal function in the SDK, which applies 01/07/08/14/20/21 (SHOULD)",
+     "GO-IO-14 \u2014 Tear down the child's process group: Setpgid, pgid captured once at Start, group SIGTERM Cancel, one SIGKILL sweep right after Wait, ESRCH = success (MUST, narrowed from 'whole tree' in wave 3)",
+     "GO-IO-15 \u2014 Capture output through Cmd.Stdout/Stderr writers; drain every pipe concurrently; never truncate stdout (SHOULD)",
+     "GO-IO-16 \u2014 Reject Windows-reserved device names in externally derived file names on every GOOS (MUST)",
+     "GO-IO-17 \u2014 Retry the atomic rename on Windows, bounded, only on access-denied/sharing-violation (SHOULD)",
+     "GO-IO-18 \u2014 Stage content-addressed blobs off the final path; verify, then rename (SHOULD)",
+     "GO-IO-19 \u2014 Take cross-process file locks through a GOOS split in CLIs; the SDK takes none (SHOULD)",
+     "GO-IO-20 \u2014 Build the SDK child's environment from an explicit allowlist (SHOULD)",
+     "GO-IO-21 \u2014 On Linux, give the direct child Pdeathsig: SIGKILL with runtime.LockOSThread held from before Start until Wait returns; never as a sweep substitute or under GOMAXPROCS=1 (SHOULD, new in wave 3)"
+    ],
+    "conflicts_resolved": [
+     "GO-IO-06 allowed a //go:build unix gate for Pdeathsig, which breaks darwin and the BSDs. Changed in place to require a linux gate. [r] unixgate/: GOOS=darwin go vet ./unixgate/bad/... exits 1 with 'unknown field Pdeathsig'; the _linux.go twin exits 0 on darwin, freebsd and linux.",
+     "The [pgs] Pdeathsig grep fallback (grep -L 'go:build') failed in both directions. It printed nothing for the unix-gated violation and flagged the compliant filename-constrained _linux.go twin (exit 123). It was removed; GOOS=darwin go vet is the only check.",
+     "The first wave-3 edit folded Pdeathsig into GO-IO-14 as an inline SHOULD. It is split out as new GO-IO-21, so GO-IO-14 keeps its original MUST meaning.",
+     "GO-IO-14 claimed it 'tears down the whole process tree'. [r] escape/ watched a setsid grandchild survive the sweep (alive=true) while an in-group grandchild died, so the title was narrowed to 'the child's process group' and the escape is recorded as a documented gap (Verdict 9).",
+     "GO-IO-14 said 'ignore ESRCH'. It now says 'treat ESRCH as success', with a single sweep as the next statement after Wait: no retry and no sleep.",
+     "[pgs]'s first pass said no exemplar sets Pdeathsig. The unfiltered re-grep found 10 hits: containerd production code, plus go-runc's LockOSThread pairing. The only unprecedented claim is Pdeathsig combined with the sweep.",
+     "linux || freebsd versus linux for Pdeathsig: the stdlib has the field on both. GO-IO-21 binds linux only, following go-runc and the fleet's targets; a linux || freebsd gate still satisfies GO-IO-06."
+    ],
+    "needs_another_round": [
+     "io/windows-runtime: does os.Rename onto a held target fail with ERROR_SHARING_VIOLATION/ACCESS_DENIED, and does GO-IO-17's retry fix it? Does dir Sync error? Does a job object reap an immediately spawned grandchild? Does the GO-IO-16 validator pass? (needs a windows-latest runner)",
+     "network/registry-client: absorb GO-IO-18 \u2014 concurrent two-process ingest of one digest, verify-before-rename, rename-over-existing on Windows (needs a planted two-writer fixture)"
+    ],
+    "must_count": 14
+   }
+  },
+  {
+   "group": "language",
+   "dives": [
+    {
+     "slug": "era-and-modernizers",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-language/era-and-modernizers.md",
+     "sources_count": 21,
+     "verifications_run": 10,
+     "top_rules": [
+      "Gate all 26 go-fix idioms via go fix -diff ./...; state zero style guidance for anything the fixers already own.",
+      "Never hand-apply a fixer's declined risky half: min/max on floats (NaN), SplitSeq on a reused slice, or omitzero's behavior-changing alternative.",
+      "Read the module go line (go list -m -f '{{.GoVersion}}') before trusting an empty go fix -diff \u2014 forvar, errorsastype and inline (io/ioutil, reflect.Ptr/PtrTo) all silently under-fire below their floor.",
+      "Generics-adoption restraint and iterator yield-stop authoring are rule-stated, not fixer-covered \u2014 no fixer decides whether to genericize or writes new iter.Seq producers.",
+      "Maintain a version-anchored table of stdlib behavior changes with no compile error on a go-line bump (slices.Insert panics, rand.Seed no-op, errors.AsType floor, timer channels) for the go-upgrade skill to check against.",
+      "Audit every GOEXPERIMENT= pin on each bump via a plain grep \u2014 jsonv2 flipped from opt-in to default-with-opt-out across exactly the window a stale pin would span.",
+      "SA1019 catches deprecations go fix cannot touch (ReverseProxy.Director, reflect.SliceHeader) \u2014 only APIs carrying a stdlib //go:fix inline shim are go fix's job.",
+      "Run the go-upgrade procedure in strict order: release notes -> GODEBUG diff (in-workspace and GOWORK=off) -> go/toolchain bump -> go fix -> stdversion -> golangci pin/config -> GOEXPERIMENT audit -> full gate; never rely on dependabot for a toolchain-only bump."
+     ],
+     "surprises": [
+      "asynctimerchan is a removed GODEBUG as of Go 1.27: on the 1.27.1 toolchain, a go1.22-line AND a go1.23-line module both measure unbuffered timer channels (cap 0) \u2014 the release note's per-module-line gate only held on toolchains 1.23-1.26; setting the env var is now a fatal build error, not a revert.",
+      "In workspace mode a member module's own godebug default=\u2026 line in go.mod is silently and completely ignored; only go.work's godebug block is consulted. GOWORK=off flips this exactly \u2014 verified live with go list -f '{{.DefaultGODEBUG}}'.",
+      "io/ioutil's own deprecated wrappers (TempFile, ReadFile, etc.) carry //go:fix inline directives in stdlib source itself \u2014 the generic inline fixer, not a dedicated ioutil fixer, migrates them, and it is file-go-line-gated: confirmed declining live on google/go-cmp (go1.21) and stretchr/testify (go1.17).",
+      "dependabot-core will never open a PR whose sole purpose is bumping the go/toolchain line (open issue #13520); it only lets that line move as an incidental side effect of an unrelated dependency bump, since a 2024-era bug that reverted the Go tool's own edit was fixed by PR #12228.",
+      "go fix's own driver (via go vet -vettool=$(go tool -n fix)) diverges from the x/tools modernize library used in the prior wave's census: go1.27's go fix gained atomictypes/embedlit/slicesbackward/unsafefuncs and dropped fmtappendf, so the two 'modernization census' tools are not interchangeable.",
+      "minmax, rangeint and stringsseq all verified to decline their risky case by construction (NaN, body-mutated loop var, reused split slice) rather than merely being 'safe on average' \u2014 none of the 459 fresh-census diagnostics across 12 exemplars was a case where the self-limit should have fired but didn't."
+     ],
+     "ok": true
+    },
+    {
+     "slug": "stdlib-semantics",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-language/stdlib-semantics.md",
+     "sources_count": 14,
+     "verifications_run": 3,
+     "top_rules": [
+      "P0 resolved: default jsonv2-backing in Go 1.27.1 changes zero bytes of v1 encoding/json output \u2014 verified byte-identical vs GOEXPERIMENT=nojsonv2 across dup-names, invalid UTF-8, case-mismatch, large-int-into-any, omitempty, MarshalIndent, HTML escaping.",
+      "A go-1.26-floor library needs one golden fixture for v1 encoding/json output, not two per toolchain leg, and must never import encoding/json/v2 or jsontext directly while that floor stands.",
+      "No GODEBUG restores v1 json behaviour \u2014 jsonv2 is a build-wide GOEXPERIMENT, not a go-line-keyed runtime toggle, and the nojsonv2 escape hatch itself is announced for future removal.",
+      "omitempty and omitzero are not interchangeable on a slice: omitempty drops both nil and []T{}; omitzero drops only nil and keeps []T{} as [] \u2014 a mechanical rename silently changes envelope shape.",
+      "Map iteration order into any observable output has zero linter/vet coverage in golangci-lint 2.14.0 or staticcheck/gocritic (enable-all) \u2014 the only check is `go test -run <golden> -count=5` watched for a flip.",
+      "time.Time == is false after a JSON round-trip of the same instant (monotonic reading lost), and a map[time.Time] lookup with that value silently misses; no analyzer catches it \u2014 use .Equal(), never a mixed-provenance time.Time map key.",
+      "Decoding into any/map[string]interface{} silently loses integer precision above 2^53 with err==nil; Decoder.UseNumber() fixes it and is unaffected by the jsonv2 backend.",
+      "rand.Seed is a fully-covered no-op (SA1019, watched red/green via both staticcheck and golangci-lint on a planted fixture); math/rand/v2 has no global Seed at all, only local rand.New(rand.NewPCG(...))."
+     ],
+     "surprises": [
+      "staticcheck's SA6003 does NOT catch byte-vs-rune string slicing (it targets a different, performance-only []rune-before-range pattern) \u2014 the map's classification of M-A-09 as staticcheck-covered was wrong; it stays a pure reading heuristic.",
+      "gocritic with every check enabled (`enable-all: true`) finds zero issues on a time.Time == time.Time comparison \u2014 no linter catalogue in scope covers this footgun at all, not even opportunistically.",
+      "google/go-github@48d0a668cde8 already declares go 1.26.0 with hand-written (Un)MarshalJSON methods \u2014 a live exemplar sitting exactly on the SDK's own floor scenario, and its custom Marshaler/Unmarshaler dispatch is unaffected by the jsonv2 backend.",
+      "GOEXPERIMENT and GODEBUG are fully separate mechanisms: GODEBUG can be keyed to an importing module's go line (like containermaxprocs), but GOEXPERIMENT cannot \u2014 it is fixed for the whole build, so no library's go.mod can ever protect its consumers from a jsonv2 toolchain default.",
+      "The go1.27 notes explicitly flag GOEXPERIMENT=nojsonv2 itself as temporary ('expected to be removed in a future release'), meaning the escape hatch this whole P0 investigation revolves around has its own expiration risk.",
+      "stdlib uuid and google/uuid v1.6.0 are fully format-and-parse-compatible in both directions including braced/URN/bare-hex forms \u2014 a real network `go get` round-trip test, not just a doc read, found zero incompatibility."
+     ],
+     "ok": true
+    }
+   ],
+   "consolidation": {
+    "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-language.md",
+    "rule_ids": [
+     "GO-LANG-01 \u2014 Never hand-apply a modernization a go fix fixer declines (float min/max, reused SplitSeq, mutated rangeint, omitzero swap)",
+     "GO-LANG-02 \u2014 Read the effective language version (module go line plus per-file //go:build go1.N) before judging an idiom or trusting an empty go fix -diff",
+     "GO-LANG-03 \u2014 Never raise a library/SDK go line to adopt a language feature; generic methods/embedlit wait for the floor, new(expr) via newexpr",
+     "GO-LANG-04 \u2014 Never import encoding/json/v2 or jsontext in a module below go 1.27; go vet stdversion is the check",
+     "GO-LANG-05 \u2014 Never disable SA1019 repo-wide; suppress per site, and hand-rewrite deprecations that have no //go:fix inline shim",
+     "GO-LANG-06 \u2014 Never call math/rand.Seed; use a local math/rand/v2 generator for reproducible sequences",
+     "GO-LANG-07 \u2014 Compare time.Time with Equal and never key maps by raw time.Time; enforce with revive time-equal",
+     "GO-LANG-08 \u2014 Make every iter.Seq producer return when yield returns false, and give each one an early-break test",
+     "GO-LANG-09 \u2014 Never let map iteration order reach output; sort hand ranges, use >=8-entry golden fixtures, never re-record a flaky golden",
+     "GO-LANG-10 \u2014 Never swap omitempty to omitzero on contract JSON without a golden covering nil and empty-non-nil",
+     "GO-LANG-11 \u2014 Import plain encoding/json with no 1.27 shims, build-tag splits or nojsonv2 pins; keep one golden per test",
+     "GO-LANG-12 \u2014 Decode integers that may exceed 2^53 into typed fields or with UseNumber, never into any",
+     "GO-LANG-13 \u2014 Slice and truncate non-ASCII strings by rune, never by byte offset",
+     "GO-LANG-14 \u2014 Add a type parameter only for two or more instantiations or type-indifferent algorithms",
+     "GO-LANG-15 \u2014 Move a Go release in the go-upgrade order, running go fix after the bump",
+     "GO-LANG-16 \u2014 Re-justify and comment every GOEXPERIMENT pin on each go-line bump",
+     "GO-LANG-17 \u2014 Keep go.work godebug identical to each member module's godebug"
+    ],
+    "conflicts_resolved": [
+     "rand.Seed no-op since 1.20 (stdlib-semantics) vs 1.24 (era, map): 1.24, keyed on the main-module go line (randseednop), and it still seeds at go 1.23 \u2014 measured L3 plus go1.27.1 rand.go:398-400",
+     "errors.AsType 'compiles only at go 1.26+' (era table) vs frame correction (d): compilation is not gated for stdlib symbols, only vet stdversion catches it; the fixer gating stands",
+     "'No exemplar imports encoding/json/v2' (stdlib-semantics) vs re-measurement: trivy imports it in 13 files at go 1.27.0 and tailscale rewrites it away; grep also hits string literals, so the check is go vet stdversion",
+     "Iterator yield contract 'reading heuristic only' (era) vs runtime: since 1.23 an early-break test panics, so the rule is promoted to MUST (L1)",
+     "time.Time == 'no analyzer' (stdlib-semantics, gocritic only) vs revive time-equal (L2, 0 FP on 5 exemplars); amends GO-GATE-15's two-rule revive list to add time-equal",
+     "-count=5 as a sufficient map-order check (map M-A-10, dive) vs L6: it misses 2-key maps 51% of the time; golden fixtures now need >=8 map entries",
+     "Timer channels 'unbuffered since 1.23' (map M-A-13) vs era \u00a74: go-line gated only on toolchains 1.23-1.26, unconditional on 1.27",
+     "omitzero fixer framed as offering the slice swap (stdlib-semantics) vs era/frame correction: the fixer only drops the no-op omitempty on struct fields, so the slice swap is a hand edit",
+     "SA6003 as the byte-vs-rune slicing check (map M-A-09) vs SS run 6: it does not fire; the row is a reading heuristic plus fuzzing",
+     "waitgroup to waitgroupgo 'rename' (era sources) vs map conflict 15c: they are two different tools",
+     "Map conflict 14 'v1 API inherited stricter defaults' falsified: bytes are identical, only error text may differ (GO-ERR-14)"
+    ],
+    "needs_another_round": [
+     "language/stdlib-semantics \u2014 does Swiss-table map iteration bias (1.24+) make -count=N unreliable for 2-7 entry maps across key types, deletions and growth, and should GO-LANG-09 prescribe a shuffle-insertion helper instead of the >=8-entry rule?",
+     "api/sdk-surface \u2014 should the Go SDK export iter.Seq or []T for collections (the unanswered 'when' half of M-A-05)?",
+     "language/era-and-modernizers (dated re-check per Go minor) \u2014 was GOEXPERIMENT=nojsonv2 removed, and did the go fix fixer roster change?"
+    ],
+    "must_count": 9
+   }
+  },
+  {
+   "group": "api",
+   "dives": [
+    {
+     "slug": "package-and-api-shape",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-api/package-and-api-shape.md",
+     "sources_count": 23,
+     "verifications_run": 9,
+     "top_rules": [
+      "Never add a new pkg/ directory; go.dev's own layout doc never mentions pkg/ at all -- check a new repo's diff for an added top-level pkg/.",
+      "Exported interface with exactly one implementation and no documented reason is the defect, not producer-side interfaces generally (measured ~55/45 producer/consumer split) -- ireturn watched red/green.",
+      "Options are a decision procedure (positional / config struct / func-typed-with-error-on-conflict / interface-typed), not one winning pattern -- grpc-go's 100% interface-typed DialOption proves a naive func( grep alone misjudges half the ecosystem.",
+      "gochecknoglobals already exempts Err*-named sentinels by default -- verified directly (ErrTimeout unflagged; DefaultTimeout/timeoutFailure/defaultTimeout all flagged) -- enable with no extra allowlist.",
+      "Doc-comment enforcement is staticcheck ST1000/ST1020/ST1021/ST1022 plus revive exported -- all non-default, must be explicitly enabled via staticcheck.checks:[all] -- watched red/green two independent ways.",
+      "Self-deprecation is Deprecated: plus //go:fix inline (1.26+); go fix -diff exits 1 on a pending rewrite and 0 once callers migrate -- watched end-to-end on a real fixture.",
+      "apidiff always exits 0 (report-only, confirmed on 3 diff pairs); the real CI gate is gorelease, whose exit code is major-version-dependent by design -- identical removed-method change exits 0 on a v0 module and 1 on a v1+ module, confirmed via a local file-based module proxy.",
+      "go vet's composites check catches an unkeyed literal of another module's exported struct only across module boundaries, not same-package -- watched red/green on a real 3-module fixture with a replace directive.",
+      "No linter exists for slice/map aliasing at a boundary (M-D-07) or embedding leaks (M-D-13) -- both are reading heuristics; the aliasing row got a behavioral-proof test pair instead of a red/green analyzer signal.",
+      "A fleet library's major-version strategy (stay at v1 forever vs. periodic /vN) is a one-time stated project decision, not decided per release -- grpc-go and go-github both succeed with opposite strategies; gorelease enforces whichever is chosen."
+     ],
+     "surprises": [
+      "apidiff never fails on its own -- it exits 0 unconditionally even reporting an incompatible removal; only gorelease's exit code is major-version-conditional, and that had to be proven by hand-building a local file-based Go module proxy since the fixture modules have no real VCS/proxy presence.",
+      "gochecknoglobals already has a built-in Err*-name exemption for sentinel errors -- not documented in the wave-2 map as a settled fact, but trivially discoverable by planting three differently-named package vars side by side.",
+      "go.dev/doc/modules/layout never mentions pkg/ at all, not even to reject it -- the community's pkg/-vs-internal/ debate is entirely absent from Go's own canonical layout doc.",
+      "exhaustive tolerates a default: clause as long as every real case is also listed -- it does not treat default's presence as automatically satisfying exhaustiveness, contrary to a plausible assumption.",
+      "Getting gorelease to run at all against fixture modules required constructing a hand-rolled Go module proxy directory (@v/<ver>.info/.mod/.zip) since gorelease resolves its -base version through normal module resolution, not a local directory or git tag.",
+      "The same //go:fix inline fixture, run before and after applying go fix, gave a clean three-state demonstration (red diff -> apply -> green) that ended up being the single cleanest verification in the whole brief."
+     ],
+     "ok": true
+    },
+    {
+     "slug": "sdk-surface",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-api/sdk-surface.md",
+     "sources_count": 18,
+     "verifications_run": 4,
+     "top_rules": [
+      "NewClient(opts ...Option) (*Client, error) with func-typed options is the constructor shape for a published SDK whose option set grows across versions (confirmed against google/go-github@48d0a668cde8)",
+      "*ExitError carries Code, raw Stderr, and a decoded *ErrorEnvelope (nil if absent) \u2014 never carries or Unwraps to *exec.ExitError (GO-ERR-16's flattening)",
+      "Timeout shape resolves contradiction 12: context.WithTimeoutCause + a distinct *TimeoutError whose Is() matches sentinel ErrOcxTimeout; *TimeoutError must never match *ExitError via errors.As \u2014 watched red/green",
+      "exhaustive (default-signifies-exhaustive:false) DOES fire on the SDK's own ExitCode switch, resolving contradiction 13 \u2014 the CLI-only overlay framing understates its reach; watched red on a missing-case switch, green on the full one",
+      "nilnil (checked-types: ptr,iface) is a MUST for the SDK: no surface method may ever return (nil, nil) \u2014 watched red on a planted violation, green once removed",
+      "Retry lives in exactly one function, internal/process.Run, driven by Attempts from the Client's options; predicate is code==75 only, never duplicated per public method",
+      "The 100% coverage gate MUST run on a -coverpkg=./... profile, never the bare default: measured on the fixture, default total 25.7% vs -coverpkg=./... total 65.7% on the identical test run \u2014 the default silently zeroes out a spawn-point package with no test files of its own",
+      "go doc -all . must be grepped for any/interface{} on declaration lines only (func/type/var/const), not full text \u2014 the naive full-text grep false-positives on ordinary English 'any' inside doc-comment prose"
+     ],
+     "surprises": [
+      "Default `go test ./...` coverage dramatically under-reports an SDK with a spawn-point internal/ package: 25.7% default vs 65.7% with -coverpkg=./... on the identical run, because internal/process has no test files of its own",
+      "The TestMain helper-process branch is structurally invisible to any coverage profile the parent process collects \u2014 it only runs inside the re-exec'd child, so it needs a named exclusion, not a fix",
+      "exhaustive fires on the SDK's own ExitCode switch exactly as it does on a CLI's, so GO-GATE-18's CLI-only overlay framing (from wave 2) actually understates the linter's needed reach \u2014 a correction to an already-settled row, not just a new decision",
+      "The naive full-text grep for `any`/`interface{}` on `go doc -all .` output false-positives on ordinary English prose ('true for any TimeoutError') \u2014 the M-D-20 check as literally specified in the topic map needs refining to declaration-line-only",
+      "oras-go v2 cleanly demonstrates both halves of map conflict 4 (config-struct options AND one functional-option constructor) inside a single module, which is stronger evidence for 'decision procedure, not winner' than either google/go-github or cli/cli alone gave",
+      "Collapsing ocx-sdk-python's two-step error_envelope(exc) recovery into one eager Envelope field on Go's *ExitError is a deliberate divergence from the Python template, not a mechanical port \u2014 flagged as contested since its cost under high non-zero-exit load was never measured"
+     ],
+     "ok": true
+    }
+   ],
+   "consolidation": {
+    "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-api.md",
+    "rule_ids": [
+     "GO-API-01 \u2014 MUST (SDK): Export exactly one package; put everything else under internal/ (go list count == 1).",
+     "GO-API-02 \u2014 MUST (SDK): Keep any/interface{} off the exported surface, including struct fields and interface methods; decode each command into a typed result struct.",
+     "GO-API-03 \u2014 MUST (SDK): Construct with NewClient(opts ...Option) (*Client, error) and type Option func(*options) error from the first tag.",
+     "GO-API-04 \u2014 MUST (library, SDK): Doc-comment every package and exported identifier; enable staticcheck checks [all] and revive exported, and drop the comments exclusion preset.",
+     "GO-API-05 \u2014 SHOULD: Name the Go way (initialisms, one receiver name, no Get/util/stutter) via ST1003/ST1016/ST1006; do not add the duplicate revive naming rules.",
+     "GO-API-06 \u2014 MUST (SDK) / SHOULD (library): Keep no mutable package vars and no init(); enforce with gochecknoglobals and gochecknoinits.",
+     "GO-API-07 \u2014 SHOULD: Declare interfaces at the consumer and return concrete types from constructors (ireturn); an exported interface needs 2+ implementations or a stated reason.",
+     "GO-API-08 \u2014 MUST (SDK, CLI) / SHOULD: Check every typed-enum switch with exhaustive (default-signifies-exhaustive: false); package-defined enums start at iota+1.",
+     "GO-API-09 \u2014 MUST (SDK): Never return (nil, nil) from an exported SDK method and never suppress nilnil.",
+     "GO-API-10 \u2014 MUST (library, SDK): Gate releases with pinned gorelease -base (blocking at v1+, report read at v0); never gate on apidiff's exit code; state the major-version strategy once (SDK: v0, exact pin).",
+     "GO-API-11 \u2014 SHOULD: Deprecate with an exact 'Deprecated: ' paragraph plus //go:fix inline where the replacement is expressible as a call (go1.26).",
+     "GO-API-12 \u2014 MUST (SDK): Feed the 100% coverage gate a -coverpkg=./... profile; exclude no internal/ package and no TestMain branch.",
+     "GO-API-13 \u2014 SHOULD (library): Pick the parameter shape by procedure: positional required inputs, then a config struct for a closed set, then func(*options) error for a growing constructor, then interface options only for opacity.",
+     "GO-API-14 \u2014 SHOULD: Clone slices and maps at API boundaries unless documented as shared and read-only; prove it with a behavioural test.",
+     "GO-API-15 \u2014 SHOULD: Embed types in exported structs only when the promoted method set is intended API; never embed *exec.ExitError in the SDK's error.",
+     "GO-API-16 \u2014 SHOULD: State concurrency safety in the doc comment of every exported type with mutable state (SDK Client: safe for concurrent use).",
+     "GO-API-17 \u2014 SHOULD: Never add pkg/ to a new repo; keep main at the root for one binary; use cmd/<name>/ only with 2+ binaries or when the repo is also a library.",
+     "GO-API-18 \u2014 SHOULD (SDK): Give *ExitError Stderr and an eagerly decoded, nil-safe Envelope; export TestedOcxVersion/MinSupportedOcx and return *VersionCompatError below the floor."
+    ],
+    "conflicts_resolved": [
+     "sdk-surface said Option func(*Client) can later become func(*Client) error without breaking; apidiff [C3] reports it incompatible, so func(*options) error is fixed from the first tag",
+     "package-and-api-shape watched the doc-comment checks with no exclusion preset; the GO-GATE baseline's 'comments' preset silences ST1000/ST1020-22 and revive exported [C1], so the library/SDK overlay removes it",
+     "package-and-api-shape added revive var-naming/receiver-naming beside ST1003/ST1016; they duplicate hit for hit [C1], so only staticcheck checks [all] plus revive exported are kept",
+     "sdk-surface's declaration-only go doc any-grep misses struct fields and interface methods [C2]; replaced with a tab-line-aware grep",
+     "sdk-surface's named coverage exclusion for the TestMain helper branch is unnecessary: _test.go files never enter a profile (0 lines [C4]); only -coverpkg=./... matters",
+     "GO-GATE-18 put exhaustive in the CLI overlay only, but sdk-surface measured it on the SDK ExitCode switch; the library/SDK overlay now includes it",
+     "GO-ERR-12 (nil,nil) SHOULD vs sdk-surface MUST: MUST on the SDK surface only (exit 79 already types absence), SHOULD elsewhere",
+     "package-and-api-shape wanted a stored context.Context as SHOULD with a reason; GO-CONC-02 MUST binds and the exemplars that store contexts are recorded as violating",
+     "package-and-api-shape's 'interface must have >1 implementation' is demoted to SHOULD with the ireturn override until the FP rate is measured",
+     "gorelease version cited as the 2022 pseudo-version; the installed build is x/exp v0.0.0-20260908205506-85c1c2202aba, and GO-API-10 pins it"
+    ],
+    "needs_another_round": [
+     "api/interface-placement: does the ~55/45 producer/consumer interface split hold at n=60 across shapes A and D, and what is ireturn's FP rate per 10k LOC on go-cmp, zap, oras-go, go-containerregistry and go-github (it decides whether GO-API-07 can become a library MUST)?",
+     "api/overlay-noise: do gochecknoglobals, gochecknoinits and ST1003 meet the <=1 FP/10k LOC admission bar on the five library exemplars ([C7] measured only the ST family, on three repos)?",
+     "api/sdk-version-handshake: how does the SDK discover the ocx version, when does it check it (per Client or lazily), and what contract test pins *VersionCompatError (GO-API-18 stays SHOULD until then)?",
+     "api/signal-exit-path: does a signal-blocking helper child under the GO-TEST-12 pattern reach the ws.Signaled() -> 128+n branch of the SDK spawn point on Linux/macOS, and what does Windows report?"
+    ],
+    "must_count": 9
+   }
+  },
+  {
+   "group": "network",
+   "dives": [
+    {
+     "slug": "http-client-server",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-network/http-client-server.md",
+     "sources_count": 17,
+     "verifications_run": 7,
+     "top_rules": [
+      "Every constructed *http.Client sets Timeout>0; never http.DefaultClient/Get/Post/Head \u2014 belt-and-suspenders beyond GO-CONC's context rule (watched: hangs at 1.5s without Timeout, fails at ~300ms with it)",
+      "bodyclose fails the <=1 FP/10k-LOC bar on regclient (~92% FP, wrapper-close-elsewhere shape) but 2 real leaks survive hand-reading (BlobDelete, BlobGet's error branch) \u2014 GO-NET's close-and-drain MUST rests on a reading heuristic; bodyclose stays SHOULD-only on direct net/http code",
+      "Bound every response body with io.LimitReader(resp.Body, n+1) before io.ReadAll \u2014 unbounded ReadAll pulled a full 1GiB body into memory in 1.24s; the +1 read distinguishes truncation from a body that fit",
+      "net/http's client body Close() auto-drains up to 256KiB (maxPostHandlerReadBytes) before giving up on reuse \u2014 closing without draining only churns connections once the unread remainder exceeds that threshold (watched via httptrace)",
+      "Retry only 429/503/5xx-except-501 and only idempotent methods unless an idempotency key exists \u2014 hashicorp/go-retryablehttp's DefaultRetryPolicy ignores method entirely and will retry a POST on a 500",
+      "Parse Retry-After with both delay-seconds and HTTP-date forms \u2014 regclient's time.ParseDuration(header+\"s\") silently drops the HTTP-date form to a 0 delay (confirmed by fixture); go-retryablehttp gets both right",
+      "Default http.Client strips Authorization on redirect keyed on url.Hostname() only (port-blind) and asymmetrically (dest-subdomain-of-origin keeps it, reverse strips it) \u2014 confirmed on 1.27.1 by fixture",
+      "vet's hostport analyzer only fires when Sprintf-built host:port reaches net.Dial in the SAME function \u2014 an identical bug split across a helper is silently missed (confirmed: crossfunc.go not flagged, samefunc_bad.go flagged)"
+     ],
+     "surprises": [
+      "net/http's client-side body Close() silently auto-drains up to 256KiB (maxPostHandlerReadBytes, server.go:1164) of an unread body so the connection can still be pooled \u2014 'close without draining' is only actually harmful above that threshold, not always",
+      "Two httptest.Server instances both bound to 127.0.0.1 on different ports are NOT a cross-host redirect to net/http's Authorization-stripping check, because it compares url.Hostname() only (port-excluded) \u2014 had to rewrite the Location header to 'localhost' to get a genuine cross-host test",
+      "The redirect-Authorization stripping rule is directionally asymmetric: origin->subdomain keeps credentials, subdomain->origin strips them, which is backwards from how many registry/CDN layouts are actually arranged",
+      "hashicorp/go-retryablehttp's DefaultRetryPolicy has no method/idempotency check at all \u2014 it will retry a POST on a bare 500 exactly like a GET, a live divergence from RFC 9110 in the ecosystem's most-cited Go retry library",
+      "bodyclose's hand-classified false-positive rate on regclient is ~92%, but the 2 survivors are genuine: BlobDelete leaks on every path, and BlobGet leaks only on its non-200 error branch after correctly transferring ownership on the success path \u2014 a defect shape invisible to both the linter and a quick read",
+      "gosec G107's own documentation example is itself the rule's false-positive shape (a hardcoded var string flagged as tainted input)"
+     ],
+     "ok": true
+    },
+    {
+     "slug": "registry-client",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-network/registry-client.md",
+     "sources_count": 14,
+     "verifications_run": 8,
+     "top_rules": [
+      "MUST: never treat a partial (non-EOF) read as verified \u2014 verify.ReadCloser/go-digest only check at io.EOF, so a stream must be drained to completion before trust",
+      "MUST: compare digest and size by exact value only, never by prefix/substring \u2014 a wrong-size payload can share an arbitrary digest prefix with the real one",
+      "MUST: validate digests against the full OCI grammar plus per-algorithm exact length/lower-case-hex; a well-formed-but-unknown algorithm is a distinct, milder error than a malformed one",
+      "MUST: stage every content-addressed blob write in a uniquely-named temp file and rename into place; never os.Create/O_TRUNC directly at the final path (oras-go's pushFile shape corrupts under concurrent writers)",
+      "SHOULD: a verified content-addressed store needs no cross-process lock for concurrent same-digest ingest \u2014 atomic rename of independently-verified temp files is safe by construction; a lock only serializes shared partial-ingest state, which staging removes the need for",
+      "MUST: sweep orphaned *.tmp on store open and never rename a partially-verified temp file \u2014 a SIGKILL mid-ingest must leave the final path absent, watched behaviorally",
+      "MUST: every on-disk format a Go tool owns carries an explicit version/magic marker checked on open, refusing a NEWER-than-supported version explicitly, not just an older one \u2014 precedented by OCI's oci-layout imageLayoutVersion and containerd's schemaVersion/dbVersion migration table",
+      "MUST: resolve credentials via config.json credHelpers/credsStore and the docker-credential-<suffix> get protocol; treat a configured helper's exec failure as a hard error, never silently as 'no credentials' \u2014 errcheck/gosec catch only the adjacent ignored-JSON-error half, not the swallowed-exec-error half"
+     ],
+     "surprises": [
+      "opencontainers/go-digest, the reference Go digest library, implements only sha256/sha384/sha512 \u2014 it does NOT support blake3 even though image-spec registers it, so a client needs its own hasher for blake3",
+      "A content-addressed store needs NO cross-process lock for correctness under concurrent same-digest ingest \u2014 verified content + atomic rename makes the race harmless by construction; containerd's own Ref-keyed lock is in-process-only and solves a different problem, not this one",
+      "containerd's local content store treats a rename-target collision as ErrAlreadyExists (terminal success), never as an overwrite \u2014 most callers swallow it",
+      "oras-go's credential-store API is mid-migration in the read exemplar: module path has moved to /v3 and it now carries a NamespaceMatcher interface plus Hierarchical matching for containers-auth.json (Podman/Buildah) compatibility, beyond the v2 shape the brief named",
+      "errcheck/gosec DO catch an ignored json.Unmarshal error sitting right next to the naive credential resolver's real bug, but neither catches the actual bug (swallowing exec.Command's error as 'no credentials') \u2014 a lint hit is a good trigger to read the function by hand, not proof it's fine",
+      "The deterministic two-writer splice (channel-forced interleaving, not a timing race) reproduced exactly as predicted: os.Create truncates the SAME inode a concurrent writer is mid-write on, leaving a file matching neither writer's content at the trusted final path"
+     ],
+     "ok": true
+    }
+   ],
+   "consolidation": {
+    "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-network.md",
+    "rule_ids": [
+     "GO-NET-01 \u2014 Construct every http.Server with ReadHeaderTimeout > 0; never call http.ListenAndServe/ListenAndServeTLS/Serve (gosec G112/G114)",
+     "GO-NET-02 \u2014 Never reference http.DefaultClient, including DefaultClient.Do, which noctx accepts",
+     "GO-NET-03 \u2014 Derive every Transport from http.DefaultTransport.(*http.Transport).Clone(); never write a bare &http.Transport{} literal; registry clients raise MaxIdleConnsPerHost",
+     "GO-NET-04 \u2014 Build host:port with net.JoinHostPort; check with a grep, since vet hostport is blind to DialContext",
+     "GO-NET-05 \u2014 Every credentialed client sets a CheckRedirect with a hop cap and an https->http refusal, and binds credentials to the destination origin (scheme, host, port)",
+     "GO-NET-06 \u2014 Build clients in one constructor with a stall bound: Client.Timeout for API clients; ResponseHeaderTimeout plus a context deadline or idle watchdog for blob streams",
+     "GO-NET-07 \u2014 Bound every network body: LimitReader(max+1) with reject on the client, MaxBytesReader in handlers",
+     "GO-NET-08 \u2014 Parse Retry-After in both forms (ParseInt, then http.ParseTime) and cap the honoured delay",
+     "GO-NET-09 \u2014 Close every response on every return path, error branches included, or transfer ownership to a returned io.Closer",
+     "GO-NET-10 \u2014 Never drain an untrusted body unbounded; stdlib already drains <=256 KiB on Close",
+     "GO-NET-11 \u2014 Retry only transport errors, 408, 429 and 5xx except 501, on idempotent or replayable requests, with capped jittered backoff",
+     "GO-NET-12 \u2014 Drain a verifying reader to io.EOF and check its error before using any byte; check size, then digest",
+     "GO-NET-13 \u2014 Parse digests strictly (lower-hex, exact length) and compare them whole, never by prefix",
+     "GO-NET-14 \u2014 Stage blobs via CreateTemp in the store dir, verify, then rename; an existing target means success; no lock as the fix; sweep own temp files on open",
+     "GO-NET-15 \u2014 Version every owned on-disk format and refuse a newer version on open",
+     "GO-NET-16 \u2014 Resolve credentials via credHelpers, then credsStore, then auths; a configured helper's failure is a hard error",
+     "GO-NET-17 \u2014 CLIs wrap go-containerregistry with a context deadline and a cloned transport; the SDK imports no OCI library",
+     "GO-NET-18 \u2014 Set User-Agent <tool>/<version> on every outbound request",
+     "GO-NET-19 \u2014 Servers stop via signal.NotifyContext plus Shutdown with a bounded grace period"
+    ],
+    "conflicts_resolved": [
+     "Both dives numbered their candidates GO-NET-01..10; renumbered into one sequence",
+     "hcs's blanket Client.Timeout MUST vs blob streaming: a fixture showed Timeout kills a live stream (5120/10240 bytes); split by client kind (GO-NET-06)",
+     "hcs said the stdlib redirect default is safe; a fixture watched Authorization forwarded over an https->http hop (the check is Hostname-only); now a MUST CheckRedirect (GO-NET-05), merging hcs's SHOULD and MUST",
+     "hostport scope: the analyzer checks only Dial/DialTimeout/Dialer.Dial (hostport.go:166-170) and a fixture watched it stay silent on the DialContext form GO-CONC-03 mandates; a grep becomes the check",
+     "The 256 KiB auto-drain citation was corrected from server doEarlyClose to transport.go:2420/2605 maxPostCloseReadBytes; behaviour confirmed at 1 KiB, 64 KiB and 2 MiB",
+     "go-containerregistry retry is not opt-in: remote installs defaultRetryStatusCodes (options.go:95-104); all three reference libraries ignore the method, so the method check is a fleet addition",
+     "Retry status set: hcs's list vs map M-H-05 (408) vs oras-go (501); resolved as transport errors, 408, 429 and 5xx except 501",
+     "GO-IO-18 (SHOULD, unwatched) promoted to a watched MUST as GO-NET-14; io.md keeps a pointer",
+     "reg's no-lock claim vs GO-IO-19: different scopes; the Windows rename onto an in-use same-digest target counts as success",
+     "M-G-15 format versioning is filed GO-IO by the map and GO-NET by the dive; kept as GO-NET-15 with an io.md pointer",
+     "reg's library argument cited the SDK's stdlib-only promise for go-containerregistry; now go-containerregistry is for CLIs only, and the SDK's network surface is the stdlib bootstrap download (C-005)",
+     "bodyclose: GO-GATE-19's unclassified regclient hits were classified (about 92% false positives, 2 real leaks); the SHOULD stands, and the close MUST is a reading heuristic"
+    ],
+    "needs_another_round": [
+     "network/stream-stall \u2014 What is the smallest correct idle-read watchdog for a blob-streaming client, watched red on a server that sends headers and then stalls mid-body? (GO-NET-06's streaming branch is unfixtured)",
+     "network/retry-replay \u2014 Does go-containerregistry's retryTransport replay a consumed request body, or leak the discarded response, on a retried PUT/PATCH that gets a 503?",
+     "network/http-server-modern \u2014 Answer map rows M-H-12 (ServeMux patterns), M-H-13 (net/netip) and M-H-14 (CrossOriginProtection, ReverseProxy.Rewrite), which had no dive",
+     "network/dist-user-agent \u2014 Does the setup.ocx.sh CDN reject Go-http-client/1.1 the way it rejects Python-urllib? A yes promotes GO-NET-18 to MUST"
+    ],
+    "must_count": 15
+   }
+  },
+  {
+   "group": "security",
+   "dives": [
+    {
+     "slug": "untrusted-input-and-crypto",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-security/untrusted-input-and-crypto.md",
+     "sources_count": 19,
+     "verifications_run": 11,
+     "top_rules": [
+      "Every token/key/nonce/salt uses crypto/rand.Text() (Go 1.24+); math/rand and math/rand/v2 forbidden regardless of version - verified via gosec G404, red/green.",
+      "Never InsecureSkipVerify:true outside _test.go, never MinVersion below TLS 1.2 - verified via gosec G402, red/green.",
+      "Wave-2's 'G101 fires only at package scope, never local :=' is WRONG - re-verified on 10 planted variants: G101 fires at any scope on vendor-shaped or high-entropy literals; the real gap is low-entropy dictionary secrets and values built via concatenation or a second variable, at ANY scope.",
+      "Secrets must be compared with crypto/subtle.ConstantTimeCompare, never == ; no gosec rule or linter catches == comparisons - confirmed 0 issues on a planted violation, closed with a grep heuristic instead.",
+      "html/template is MUST for any HTML-bound template; text/template must never reach an HTTP response - no analyzer catches this (0 issues on fixture); closed with a two-step grep (text/template import intersect http.ResponseWriter reference).",
+      "unsafe, //go:linkname and cgo are forbidden without a merged ADR; enforcement is a grep since gosec G103 did not fire on any planted unsafe.Pointer/String/SliceData call in golangci-lint 2.14.0 despite matching its own rule source.",
+      "Wrap r.Body in http.MaxBytesReader before json.NewDecoder or ParseMultipartForm; a smaller ParseMultipartForm(maxMemory) argument alone does NOT silence gosec G120 - verified still-red without MaxBytesReader, green only with it.",
+      "A struct field named like a secret reaching json.Marshal fires gosec G117; json:\"-\" silences it - verified red/green."
+     ],
+     "surprises": [
+      "Wave 2's G101 'package-scope only' claim is false for gosec's current source and golangci-lint 2.14.0: G101 registers on local AssignStmt exactly like package-scope ValueSpec; the real gap is entropy/value-shape (dictionary secrets, concatenated or indirected literals), not scope - re-verified on 10 planted variants.",
+      "gosec G120 (unbounded ParseMultipartForm) fires unconditionally on any call regardless of the maxMemory argument passed; a smaller maxMemory does not silence it, only wrapping r.Body in http.MaxBytesReader first does - matches G120's own doc comment but contradicts the intuitive 'just pass a smaller number' fix.",
+      "gosec G103 (audit use of unsafe) did not fire on any planted unsafe.Pointer/unsafe.String/unsafe.SliceData call under golangci-lint 2.14.0's bundled gosec, despite G103's own upstream source registering exactly those call identifiers - an unexplained vendored-build vs upstream-source discrepancy.",
+      "Caddy's own HTTP template middleware deliberately uses text/template (not html/template) for response bodies, documenting the real risk as server-side template injection (untrusted template content) rather than missing output-escaping - html/template would not fix that risk either; Caddy's directory-listing handler separately uses text/template with correct manual per-sink escaping plus a CSP nonce as defense in depth.",
+      "A 20-site classification of math/rand v1 production usage found zero real security-sensitive uses (all jitter/backoff, temp-filename disambiguation, or test/benchmark data) except one borderline case: a local dev/test OCI registry minting an upload-session ID with math/rand and returning it in a URL - low stakes only because it's a test fixture registry.",
+      "gosec's G101 hardcoded-credentials rule contains ~25 built-in vendor-specific regexes (AWS AKIA..., Stripe sk_live_..., GitHub ghp_..., Slack, Google, Twilio, Heroku, Mailgun, etc.) that fire on a matching literal at ANY scope with no name-match requirement at all, independent of its separate name+entropy check."
+     ],
+     "ok": true
+    }
+   ],
+   "consolidation": {
+    "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-security.md",
+    "rule_ids": [
+     "GO-SEC-01 \u2014 Drop the common-false-positives preset from the gosec config and exclude G304 by name, so G103 and G204 fire and every suppression of them carries a reason (MUST)",
+     "GO-SEC-02 \u2014 Use crypto/rand (Text or Read) for every token, key, nonce, salt and ID; use math/rand/v2 only for jitter or shuffling, with a reasoned G404 nolint (MUST)",
+     "GO-SEC-03 \u2014 Never set InsecureSkipVerify outside tests, even behind a flag; extend trust with RootCAs and allow plaintext only for listed exact host:port entries (MUST)",
+     "GO-SEC-04 \u2014 Keep secret-named fields off marshalled structs; a wire DTO that must carry a secret is unexported, filled via Reveal(), and annotated for G117 (MUST)",
+     "GO-SEC-05 \u2014 Bound every untrusted stream before decoding or parsing it: MaxBytesReader for request bodies (G120), io.LimitReader(max+1) for responses, files and archives (MUST)",
+     "GO-SEC-06 \u2014 Forbid unsafe, //go:linkname and cgo unless a merged ADR allows them; annotate each unsafe call with a G103 nolint naming the ADR and test that unsafe.String sources are never mutated (MUST)",
+     "GO-SEC-07 \u2014 Hold credentials in a redacting Secret type (String, GoString, LogValue, MarshalText) and prove the redaction with a slog text/JSON and fmt-verb test (MUST for SDK and CLI)",
+     "GO-SEC-08 \u2014 Never commit credential literals; pair G101 (entropy- or vendor-shaped values at any scope) with a name-and-literal grep (MUST)",
+     "GO-SEC-09 \u2014 Compare caller-supplied secrets with subtle.ConstantTimeCompare or hmac.Equal, never ==; checked by reading, with a grep only for triage (MUST for code that authenticates a caller)",
+     "GO-SEC-10 \u2014 Render every HTML sink with html/template and never parse template source from untrusted input; any text/template deviation documents its trust boundary (MUST)",
+     "GO-SEC-11 \u2014 Do not raise ReDoS findings against stdlib regexp; bound input length instead (SHOULD)"
+    ],
+    "conflicts_resolved": [
+     "G103 silence: the dive blamed drift in golangci's bundled copy of gosec. The measured cause is the fleet config's common-false-positives preset, which filters G103, G204 and G304 by message text (golangci-lint@032d962e0399:pkg/result/processors/exclusion_presets.go:64-89). Resolved by GO-SEC-01, verified in C-1.",
+     "GO-IO-13's prescribed reasoned G204 nolint fails nolintlint (allow-unused:false) under the current GO-GATE-09 config (C-2). Resolved by dropping the preset and excluding G304 by name. G304 is 3.3/10k LOC on 6 exemplars and is owned by GO-IO-02; G204 is 0.6/10k and stays on.",
+     "G101 was said to inspect only package scope (go-gates/golangci-config \u00a74, go-gates.md failure mode 12). The dive's reading is confirmed instead: G101 is gated by entropy or vendor shape, not scope. A low-entropy package const and a concatenated literal both miss, while a high-entropy local fires (C-4).",
+     "The dive's summary claims G117 keeps secrets out of logs. Measured: G117 covers marshalling only and is silent on slog and on %+v (C-6), and slog.JSONHandler bypasses LogValue on nested fields (C-7). This adds GO-SEC-07, a redacting Secret type that also implements MarshalText.",
+     "InsecureSkipVerify: the map's 'confined to annotated test code' conflicts with registry CLIs' flag-driven --insecure (oras, oras-go). Decided: never outside tests, even behind a flag. The fleet shape is ocx's OCX_INSECURE_REGISTRIES exact-host plaintext list plus RootCAs.",
+     "Request-body bounds: the dive's MUST (verified) against the GO-NET-11 candidate's SHOULD (unverified). Merged into one GO-SEC-05 covering request and response decoders. GO-NET-11 folds in; GO-NET-03 keeps io.ReadAll.",
+     "Constant-time comparison: the dive gated it on a grep. The grep flags 83 candidate files across 5 exemplars, and a narrower grep missed the planted violation (C-9). Demoted to a reading-heuristic MUST, with the grep for triage only.",
+     "The dive's template candidates 6 and 7 are merged into GO-SEC-10, with caddy's documented trust boundary as the deviation bar. Its unsafe.String candidate 9 is folded into GO-SEC-06, because it only arises under an ADR."
+    ],
+    "needs_another_round": [
+     "gates/gosec-taint \u2014 with the preset removed, do gosec's G701-G708 taint rules (e.g. G703 on ko pkg/build/gobuild.go:436) meet the <=1 FP/10k LOC admission bar on the 8 named exemplars, or does GO-GATE-14 need taint-rule excludes?",
+     "io/cli-spawn \u2014 GO-IO-13 is only CONSIDER for CLIs, and ko has 6 G204 hits in 9k LOC. Should CLIs route every spawn through one function, or accept per-call reasoned G204 suppressions?",
+     "security/secret-type-jsonv2 \u2014 under Go 1.27's default-on json/v2, does MarshalText still redact a nested Secret through slog.JSONHandler and the encoding/json v1 API, including with omitzero/omitempty? Does a MarshalJSONTo method take precedence?"
+    ],
+    "must_count": 10
+   }
+  },
+  {
+   "group": "release",
+   "dives": [
+    {
+     "slug": "reproducible-builds-and-stamping",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-release/reproducible-builds-and-stamping.md",
+     "sources_count": 18,
+     "verifications_run": 5,
+     "top_rules": [
+      "GO-REL-01 MUST: -trimpath on every release build \u2014 omitting it leaked the absolute build path into the binary and broke bit-reproducibility (watched red/green)",
+      "GO-REL-02 MUST: CGO_ENABLED=0 explicit in build/release jobs \u2014 unset resolves to 1 whenever gcc is on PATH, silently producing a dynamically-linked binary (watched red/green)",
+      "GO-REL-04 MUST: cross-compile with CGO_ENABLED=0 \u2014 CGO_ENABLED=1 to a non-native GOARCH dies in the assembler (watched: exit 1 vs exit 0)",
+      "GO-REL-05 MUST: stamp semver via -ldflags -X AND VCS metadata via runtime/debug.ReadBuildInfo together, never one alone (10/35 corpus precedent)",
+      "GO-REL-07 MUST-NOT: release version must never carry a +dirty suffix \u2014 CI fails if go version -m shows it (watched red/green)",
+      "GO-REL-09 SHOULD: bake -X main.date from CommitDate, never wall-clock Date \u2014 same-path builds seconds apart produced different sha256 otherwise (watched)",
+      "GO-REL-10 SHOULD: run govulncheck -mode=binary on the unstripped artifact before stripping \u2014 stripped build over-reported 4 findings vs 1 on the identical reachable CVE (independently re-measured, matches GO-MOD-13)",
+      "GO-REL-08 SHOULD: pin archive mtimes via goreleaser mod_timestamp \u2014 it is a post-build os.Chtimes call, not a go-build flag, and covers a second reproducibility layer the binary-level flags don't touch"
+     ],
+     "surprises": [
+      "mod_timestamp is not a go-build/GOFLAGS knob at all \u2014 it's goreleaser's own post-build os.Chtimes() call on the artifact file (confirmed by reading goreleaser's own source, internal/gio/chtimes.go / internal/builders/base/build.go), so a binary can be byte-reproducible while its release archive is not, and vice versa is impossible to fix without it",
+      "-s -w does not touch the embedded runtime/debug.BuildInfo at all \u2014 go version -m was byte-identical between stripped and unstripped twins; only govulncheck -mode=binary's reachability precision degrades, and it over-reports (4 vs 1 finding), it does not miss the real reachable CVE",
+      "CGO_ENABLED is legitimately scoped per-build-id, not per-repo: sigstore/cosign sets CGO_ENABLED=1 at the top level for one pkcs11/pivkey variant but overrides it back to 0 inside its plain linux build entry \u2014 a single goreleaser file can need three different CGO_ENABLED postures",
+      "Go 1.25 added a real, currently-open regression/behavior change (golang/go#74763): a repo with more than one independent VCS root now hard-fails buildvcs with 'multiple VCS detected', and a nested-module-without-root-go.mod topology silently degrades from a real pseudo-version to '(devel)' \u2014 neither existed under Go 1.24",
+      "os/user and net both degrade gracefully to pure-Go with CGO_ENABLED=0 (identical uid output either way) \u2014 the real hazard isn't that these packages 'need' cgo, it's that CGO_ENABLED left unset defaults to 1 on any host with a C compiler on PATH, producing an unintentionally dynamic binary",
+      "goreleaser's own unpinned defaults (GOARCH: [386, amd64, arm64], GOARM: [6], GOAMD64: [v1]) are narrower than actual corpus practice (windows+arm64 in 9/11 configs), and GOARM/GOAMD64 pins never appear standalone \u2014 always alongside an already-broad arm matrix tied to a real hardware target"
+     ],
+     "ok": true
+    },
+    {
+     "slug": "distribution-and-provenance",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-release/distribution-and-provenance.md",
+     "sources_count": 19,
+     "verifications_run": 6,
+     "top_rules": [
+      "Fleet Go releases publish raw <tool>-<goos>-<goarch>[.exe] binaries + checksums.txt, never an archive \u2014 verified via anchored per-platform regex, red on default goreleaser naming, green on Q4 naming",
+      "Verify release asset names against dist/checksums.txt or dist/artifacts.json, never `find dist -type f` \u2014 a --snapshot build leaves binaries at the build-target path and only renames them in metadata",
+      "`goreleaser check` (v2.17.1) does NOT fail on a config missing `version: 2` (exit 0, warning only) \u2014 gate on `grep -c -E -e '^version:[[:space:]]*2$'` over the config file instead",
+      "Run govulncheck -mode=binary on any shipped/mirrored Go binary before trusting it \u2014 all 4 real fleet-mirrored bazelbuild binaries fail it (5-53 stdlib CVEs each), and github_asset_digest verification catches tampering, not staleness",
+      "Cosign keyless signing cannot run non-interactively offline \u2014 it blocks on an OAuth2 device-flow URL (verified, exit 124 on timeout); CI must grant `id-token: write` for the ambient OIDC token",
+      "cosign v3.x deprecates --output-signature/--output-certificate/--tlog-upload=false in favor of --bundle and an explicit --signing-config file with no rekor service",
+      "retract only takes effect once a higher, actually-published version's go.mod carries it \u2014 verified live via a hand-built file:// GOPROXY (Retracted field absent before publish, present after)",
+      "Every `uses:` in a governed workflow must be pinned to a 40-char commit SHA with a version trailer comment, in every workflow \u2014 measured pinning correlates with maintainer practice, not release-vs-lint status, so don't scope the MUST to release workflows only"
+     ],
+     "surprises": [
+      "goreleaser 2.17.1's `check` does not fail on a config missing `version: 2` (exit 0, warning only) \u2014 contradicts the brief's assumption; the real gate must grep the config text",
+      "All 4 real, currently-mirrored bazelbuild Go binaries (bazelisk, buildifier, buildozer, unused-deps) fail govulncheck -mode=binary, up to 53 stdlib CVEs; buildifier/buildozer were built with go1.20.3 and carry no VCS/module stamp at all",
+      "cosign keyless sign-blob silently blocks (no error) on an OAuth2 device-flow URL in any non-interactive/offline context \u2014 looks like a hang, not a config error",
+      "cosign v3.x's default signing path now requires an explicit --signing-config file to disable the transparency log; the old --tlog-upload=false flag is rejected outright once a signing-config is in play",
+      "The topic map's SHA-pinning 'release repos ~100%, lint-only libraries ~0%' bimodal claim did not hold on a 4-repo spot check \u2014 two lint-only libraries (testify, go-cmp) are fully SHA-pinned with no release workflow, one CLI (urfave/cli) is entirely tag-pinned",
+      "A --snapshot goreleaser build's raw binary artifact lives at the build-target directory path on disk; only checksums.txt/artifacts.json carries the final, renamed asset name \u2014 `find dist/` is the wrong verification surface"
+     ],
+     "ok": true
+    }
+   ],
+   "consolidation": {
+    "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-release.md",
+    "rule_ids": [
+     "GO-REL-01 \u2014 Build release binaries with -trimpath and only commit-derived -X values; stamp no build date; prove it with a two-clone sha256 match",
+     "GO-REL-02 \u2014 Set CGO_ENABLED=0 explicitly on every release build id (commented per-id exception only); check every artifact with go version -m",
+     "GO-REL-03 \u2014 Ship only clean, VCS-stamped artifacts (no +dirty, vcs.modified=false) and never pass -buildvcs=false on the release path",
+     "GO-REL-04 \u2014 Keep GOAMD64=v1 and GOARM unset unless a named hardware target requires a level",
+     "GO-REL-05 \u2014 Do not strip with -s -w by default; if stripping, scan the exact artifact and triage stripped-only findings against an unstripped twin",
+     "GO-REL-06 \u2014 Provide --version from -X main.version, falling back to BuildInfo Main.Version plus the short vcs.revision; never a bare \"dev\" default; release checkout uses fetch-depth: 0",
+     "GO-REL-07 \u2014 Require version: 2 in the goreleaser config, gated by grep, not by goreleaser check's exit code",
+     "GO-REL-08 \u2014 Publish raw <tool>-<goos>-<goarch>[.exe] binaries plus checksums.txt for linux/darwin/windows x amd64/arm64 with vX.Y.Z tags; PR CI runs a snapshot and asserts six anchored names in checksums.txt",
+     "GO-REL-09 \u2014 Emit a per-binary SPDX SBOM through goreleaser sboms (syft) and never count it as covering container images",
+     "GO-REL-10 \u2014 Ship no container image unless asked; when one is needed, use ko build, not goreleaser dockers:",
+     "GO-REL-11 \u2014 Sign only in CI, keyless: id-token: write, attest-build-provenance over the binaries, cosign sign-blob --bundle over checksums.txt; no stored keys or deprecated --output-* flags",
+     "GO-REL-12 \u2014 SHA-pin every uses: in every workflow of a fleet Go repo, with a # vX.Y.Z trailer",
+     "GO-REL-13 \u2014 Run gorelease -base=<prev> -version=<next> before tagging a library or SDK; a non-zero exit blocks the tag"
+    ],
+    "conflicts_resolved": [
+     "goreleaser check as the v2 gate (map M-N-07) vs DP measurement: re-run on 2.17.1, exit 0 on a config missing version:, so the gate is a grep (GO-REL-07)",
+     "SHA-pin scope: modrel Smell 7 (release workflows only) vs DP (all workflows). Grep over exemplars shows fzf's release.yml unpinned while testify and go-cmp have no release workflow and are fully pinned, so every workflow is pinned, matching rust-cargo CI-02",
+     "Stamping: RB MUST (-X and ReadBuildInfo always both) vs 4/35 exemplars using ReadBuildInfo only. Resolved as a fallback order, -X then Main.Version; a fixture shows a \"dev\"-only binary built at a tag reports dev",
+     "Binary scan input: GO-MOD-13 (exact artifact) vs RB GO-REL-10 (unstripped artifact). The fleet doesn't strip; where a repo strips, the exact artifact is scanned and the unstripped twin is used only for triage",
+     "mod_timestamp as a reproducibility P0 (map M-N-01) vs its real mechanism (post-build os.Chtimes, which only matters inside archives). No rule under Q4's raw-binary format",
+     "Build date: RB CommitDate vs stamping none. None, because vcs.time is already embedded",
+     "Mirrored binaries failing govulncheck: DP blocks vs GO-MOD-13 SHOULD. Fleet-built binaries block via GO-MOD-12; the 4/4 mirrored binaries are reported without blocking (owner question)",
+     "CGO: RB's three MUSTs (two verified only by reading) merged into one rule checked per artifact with go version -m",
+     "SBOM: Q4 omits it vs rust-cargo REL-04 requires it. SHOULD, because BuildInfo is the embedded dependency record and survives -s -w",
+     "Citation fixes: mirror-base.yml verify block is at lines 23-24, not 22-23; the -buildvcs default is auto, not true (modrel \u00a74)"
+    ],
+    "needs_another_round": [
+     "release/reproducible-builds \u2014 Does Go 1.27.1 still fail with 'multiple VCS detected' (golang/go#74763) on git-in-git or submodule layouts, and does the fleet release build then need -buildvcs guidance?",
+     "release/cgo-on-darwin \u2014 Does CGO_ENABLED=0 on darwin degrade DNS resolution (VPN or split-DNS) enough to justify cli/cli keeping cgo on for its macOS build? Needs a macOS runner",
+     "release/keyless-green-path \u2014 Run the GO-REL-11 workflow in a throwaway GitHub repo and watch gh attestation verify and cosign verify-blob go green on the asset and red on a tampered one, so the MUST gets a watched verification"
+    ],
+    "must_count": 9
+   }
+  },
+  {
+   "group": "observability",
+   "dives": [
+    {
+     "slug": "logging-and-diagnosis",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-observability/logging-and-diagnosis.md",
+     "sources_count": 20,
+     "verifications_run": 11,
+     "top_rules": [
+      "Library/SDK code never calls slog.SetDefault or log.SetOutput; accept *slog.Logger/Handler, default to slog.DiscardHandler.",
+      "No package-level slog calls in library code \u2014 enforce with sloglint no-global:\"all\" (off by default, must be set explicitly).",
+      "go vet's slog analyzer, not sloglint, is what catches mismatched key-value pairs and non-string keys.",
+      "net/http/pprof must never be blank-imported into a binary serving DefaultServeMux/any public mux; mount pprof on its own listener.",
+      "Long-lived services read GOMAXPROCS(0) directly on go>=1.25 toolchains; automaxprocs is redundant (confirmed live under a real cgroup quota: 32->2 under CPUQuota=200%, back to 32 with containermaxprocs=0).",
+      "GOGC/GOMEMLIMIT tuning is a long-lived-service concern only; never set GOMEMLIMIT on a CLI with unbounded/unknown input.",
+      "Diagnose a hung-but-alive process with SIGQUIT first (dumps all goroutines, no rebuild needed) before reaching for Delve or a rebuild.",
+      "Revise GO-CONC-11: a ~100-line stdlib runtime.Stack-diff TestMain catches 3/3 planted leak shapes (matching goleak, beating synctest/goroutineleak-profile's 1/3 each) \u2014 drop goleak, SDK stays go-cmp-only.",
+      "GODEBUG=execwait=2 is CI/diagnosis-only (panics on first leaked exec.Cmd), never a production runtime default.",
+      "A stall with no CPU sample and no leak needs runtime/trace.FlightRecorder (GA 1.25), snapshotted only when a symptom is already detected."
+     ],
+     "surprises": [
+      "The Linux 6.12/6.13 core-dump claim is real but lives in elfutils's sourceware bugzilla (#32713), not the Go issue tracker; the nearest golang/go lookalike (#73141, vgetrandom SIGSEGV) is a wholly unrelated bug.",
+      "pprof.Lookup(\"goroutineleak\") works in a module whose go.mod line is 1.26 as long as it's built by the 1.27.1 toolchain \u2014 profile availability is toolchain-gated, not go-line-gated, so the SDK's 1.26.0 floor is not a blocker.",
+      "sloglint at its defaults (no settings block) catches neither the global-logger pattern nor mismatched key-value pairs; both need an explicit setting (no-global) or a different tool (go vet) entirely.",
+      "The stdlib leak detector's own call site cancels out of the before/after diff for free (stripping file:line frames makes both snapshots' self-referential frame identical), so no special-casing of the detector's own goroutine was needed.",
+      "Go's automatic 'all goroutines are asleep' deadlock detector actively interfered with the first SIGQUIT fixture attempt \u2014 it exited the process before SIGQUIT could be sent, because a real full-deadlock (no runnable goroutine) self-reports; a realistic hung-service fixture needed a heartbeat goroutine to suppress that and force a genuine SIGQUIT read.",
+      "goroutineleak was already experimental in Go 1.26, not new in 1.27 as the topic map's framing implied; only the GA promotion (and deletion of the goroutineleakprofile GOEXPERIMENT flag) is new in 1.27."
+     ],
+     "ok": true
+    }
+   ],
+   "consolidation": {
+    "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-observability.md",
+    "rule_ids": [
+     "GO-OBS-01 \u2014 Log through log/slog in new code; deny zap/zerolog/logrus via a depguard 'logging' rule in fleet modules (SHOULD; MUST for SDK via GO-MOD-10)",
+     "GO-OBS-02 \u2014 Never call slog.SetDefault/log.SetOutput/SetFlags/SetPrefix in library or SDK code; accept a *slog.Logger and default to slog.New(slog.DiscardHandler) (MUST)",
+     "GO-OBS-03 \u2014 Route every library/SDK log call through an injected *slog.Logger; enforce with sloglint no-global: \"all\" (CLI config omits it) (MUST)",
+     "GO-OBS-04 \u2014 Never count bare sloglint as slog coverage; configure it explicitly and rely on vet's slog analyzer for key/value pairs (SHOULD)",
+     "GO-OBS-05 \u2014 Never blank-import net/http/pprof; register handlers explicitly on a dedicated operator-only mux behind an off-by-default flag; gosec G108 enforces (MUST)",
+     "GO-OBS-06 \u2014 Never import go.uber.org/automaxprocs in a fleet module (depguard superseded entry); size from runtime.GOMAXPROCS(0), never set it to n>0 (MUST)",
+     "GO-OBS-07 \u2014 Set GODEBUG=execwait=2 only in CI env or a manual repro, never in Dockerfiles/units/launchers (MUST)",
+     "GO-OBS-08 \u2014 Name the signals in signal.Notify; never subscribe to all signals unless forwarding to a child, since it swallows the SIGQUIT dump (SHOULD)",
+     "GO-OBS-09 \u2014 Tune GOGC/GOMEMLIMIT only in a long-lived service's main against a measured heap; never in libraries or CLIs (SHOULD)",
+     "GO-OBS-10 \u2014 Diagnose a live hang with kill -QUIT first and read repeated blocked states sharing a creator (SHOULD)",
+     "GO-OBS-11 \u2014 Chase an unreproduced race with GORACE=halt_on_error=1 go test -race -count=20; never trust one green run (SHOULD)",
+     "GO-OBS-12 \u2014 Read a zero goroutineleak profile as 'none found', not 'no leak'; the test gate is goleak (SHOULD)",
+     "GO-OBS-13 \u2014 Locate CPU hotspots with pprof -top then -list; chase CPU-less stalls with a pre-armed trace.FlightRecorder snapshot (SHOULD)",
+     "GO-OBS-14 \u2014 go-diagnose never attaches, profiles or SIGQUITs a process the operator has not named as theirs; production needs in-the-moment consent (MUST)"
+    ],
+    "conflicts_resolved": [
+     "C1 GOMAXPROCS gate: dive summary said toolchain-gated regardless of go line; measured [C-8] go 1.24 line built by 1.27.1 records DefaultGODEBUG containermaxprocs=0 and reports 32 under a 2-CPU quota vs 2 at go 1.25 \u2014 go line gates it, GO-MOD-09 stands",
+     "C2 automaxprocs importers: audit said caddy/etcd/+1, dive said all at go<=1.24; re-measured caddy (1.25.1), restic (1.25.8), prometheus (1.26.7) \u2014 all above the gate, recorded as violations",
+     "C3 contradiction 5 (stdlib runtime.Stack diff vs goleak): rejected the dive's revision \u2014 the stdlib detector fails compliant signal.NotifyContext code (os/signal.loop) while goleak passes [C-1]; GO-CONC-11 unchanged, SDK test deps are go-cmp + goleak",
+     "C4 GO-GATE-09 'sloglint self-gating' at defaults vs dive: bare sloglint gives 0 issues on both defects [C-3]; baseline gains no-global: \"all\" (not \"default\", which misses package-level logger vars [C-4]); CLI overlay omits it; pairs stay with vet",
+     "C5 pprof check: dive's same-file grep pipeline vs gosec G108 \u2014 G108 (already on in baseline) chosen, rule forbids the blank import outright [C-5]",
+     "C6 map M-P-03 'core dumps broken on Linux 6.12/6.13': it is an elfutils bug (sourceware 32713), not a Go issue; skill cites that, never a golang/go number"
+    ],
+    "needs_another_round": [
+     "observability/deferred-perf \u2014 once a fleet Go CLI/service exists: do stale GOEXPERIMENT pins or the tracebacklabels default (0 below go 1.27, seen in DefaultGODEBUG) need a check, and do PGO or SDK OTel hooks pay for themselves (M-J-07/09/10/11/12)",
+     "observability/pprof-census \u2014 read the remaining 26 pprof import sites for public exposure (low priority; fleet rule forbids the shape outright)",
+     "concurrency/leak-detection-stdlib \u2014 closed negative; reopen only if goleak is archived or gains dependencies"
+    ],
+    "must_count": 6
+   }
+  },
+  {
+   "group": "bazel",
+   "dives": [
+    {
+     "slug": "rules-go-and-nogo",
+     "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-bazel/rules-go-and-nogo.md",
+     "sources_count": 19,
+     "verifications_run": 7,
+     "top_rules": [
+      "Never hand-write a use_repo entry name \u2014 run `bazel mod tidy` and diff MODULE.bazel in CI; a deleted entry fails the build, mod tidy restores it exactly.",
+      "go_sdk.from_file's toolchain line beats its go line for SDK version selection \u2014 measured both ways (1.27.1 vs 1.27.0) on the same fixture.",
+      "Never combine nogo's vet=True with TOOLS_NOGO \u2014 TOOLS_NOGO's tree already contains vet=True's 5 analyzers, and combining them is a hard duplicate-label build error, not a semantic no-op.",
+      "TOOLS_NOGO alone is not GO-GATE-02/11 parity (37 vet analyzers, nilness) \u2014 audit its roster against `go tool vet help` explicitly; this dive flags the gap rather than assuming coverage.",
+      "staticcheck's SA-checks (SA4023, SA9010) wire into nogo as ordinary go_library deps with no bridge needed, because every staticcheck check is a plain analysis.Analyzer \u2014 confirmed by reading dominikh/go-tools' own source and building it.",
+      "There is no usable golangci-lint-to-nogo bridge: the only community project (sluongng/nogo-analyzer) marks its golangci-lint half \"POC-only, should NOT be used\"; only its staticcheck half is \"Stable,\" and even that is missing SA9010.",
+      "Add a Gazelle drift check (`gazelle -mode=diff`, exit 1 on drift) as its own CI step \u2014 Bazel's own build goes green over a stale BUILD.bazel as long as existing rules still compile.",
+      "Stamp Go binaries only via x_defs + --stamp/--workspace_status_command, never a hand-rolled -ldflags -X wired around Bazel \u2014 verified end to end (dev unstamped, v9.9.9-bzlfix stamped) on one fixture binary."
+     ],
+     "surprises": [
+      "nogo's vet=True and TOOLS_NOGO overlap and combining them is a hard Bazel duplicate-label error at analysis time, not a harmless redundancy \u2014 hit this live while wiring the fixture.",
+      "The one public golangci-lint-to-nogo bridge (sluongng/nogo-analyzer) is explicitly self-labeled POC-only by its own maintainer, has no MODULE.bazel/BCR listing, and its staticcheck analyzer list is missing SA9010 (stale pin).",
+      "rules_go's own bzlmod.md example snippet pins rules_go/gazelle versions 6 and 9 minors behind the current BCR versions (0.57.0/0.45.0 vs measured-current 0.63.0/0.54.0) \u2014 the doc-lag is real and larger than the map's prior 'three minors' estimate.",
+      "gazelle's own dogfood MODULE.bazel resolves Go deps from go.work, not go.mod, while rules_go's own MODULE.bazel uses go.mod \u2014 the two canonical exemplars deliberately exercise the two different go_deps.from_file shapes.",
+      "Zero '# gazelle:resolve' overrides exist in either Bazel-for-Go dogfood exemplar, undermining the topic map's 'stale resolve overrides' worry as far as this corpus goes.",
+      "The Go 1.24+ tool directive concretely surfaces as a generated, buildable GO_TOOLS dict (confirmed by reading the generated repository file directly) once Gazelle >=0.47.0 has run."
+     ],
+     "ok": true
+    }
+   ],
+   "consolidation": {
+    "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/go/.agents/research/go-bazel.md",
+    "rule_ids": [
+     "BZL-GO-01 \u2014 Declare the SDK with go_sdk.from_file(go_mod = \"//:go.mod\") (the toolchain line wins over the go line); never use go_sdk.host()",
+     "BZL-GO-02 \u2014 In a library or SDK, add go_sdk.download for the stable patch and run a CI leg with --@rules_go//go/toolchain:sdk_version, because from_file alone builds only at the .0 floor",
+     "BZL-GO-03 \u2014 Never hand-write use_repo(go_deps, ...) names; run bazel mod tidy behind BZL-MOD-10's diff gate",
+     "BZL-GO-04 \u2014 Keep analyzer and tool modules out of a library or SDK go.mod: use a dev_dependency go_deps.module proxy and list its requirements by hand (a CLI may use the tool directive)",
+     "BZL-GO-05 \u2014 If you use nogo, register it with go_sdk.nogo in the root MODULE.bazel; a nogo() target or a WORKSPACE go_register_nogo analyzes nothing under Bzlmod",
+     "BZL-GO-06 \u2014 Build nogo deps as TOOLS_NOGO plus hostport, waitgroup and the named staticcheck SA analyzers; never write vet = True, and re-derive the gap on every rules_go or Go bump",
+     "BZL-GO-07 \u2014 Keep the gate of record outside nogo (bazel run @rules_go//go -- vet ./... plus golangci-lint or staticcheck); never treat a green bazel build as the vet pass",
+     "BZL-GO-08 \u2014 Run the race lane as bazel test --@rules_go//go/config:race; set per-target race = \"on\" only by exception, and never write race or pure as booleans",
+     "BZL-GO-09 \u2014 In a CLI, stamp both the semver and the VCS revision through x_defs from STABLE_* keys, because ReadBuildInfo has no vcs.* under rules_go; never put -X in gc_linkopts",
+     "BZL-GO-10 \u2014 Cross-compile with --platforms=@rules_go//go/toolchain:<goos>_<goarch>, never with GOOS/GOARCH in the environment",
+     "BZL-GO-11 \u2014 Audit a Bazel-built binary with go version -m and govulncheck -mode=binary, never with go list -m all, because go_deps MVS spans every Bazel module's go.mod",
+     "BZL-GO-12 \u2014 Fix a module's BUILD generation with a per-module gazelle_override; never use gazelle_default_attributes (SHOULD)",
+     "BZL-GO-13 \u2014 When a version looks wrong, read bazel_dep first, then go_deps.config(check_direct_dependencies), then the rule-set go.mod files (CONSIDER)"
+    ],
+    "conflicts_resolved": [
+     "Dive said TOOLS_NOGO lacks nilness. Measured: rules_go 0.63.0 TOOLS_NOGO includes nilness, and the real gap against go vet 1.27.1 is cgocall, hostport, stdversion and waitgroup. A waitgroup plant builds green with TOOLS_NOGO alone and red once waitgroup is added.",
+     "Dive BZL-GO-06 (gazelle -mode=diff) contradicted the published BZL-ARCH-12 (gazelle_test). The sibling wins: gazelle_test was verified for Go here (exit 3 on drift, 0 when clean), and no BZL-GO ID is allocated for it.",
+     "Dive advised feeding staticcheck to nogo through tools.go or a tool directive, which GO-MOD-11 forbids for a library or SDK. Resolved with a dev_dependency go_deps.module; transitive requirements must be listed by hand (measured unknown-repo failure, then SA9010 red and twins green, with go.mod holding 0 honnef lines).",
+     "The dive was internally inconsistent: per-target race = \"on\" versus the documented command-line flag. Measured: the default auto setting runs a racy test green without the flag, so the lane is the flag.",
+     "Dive read the library's .0-floor SDK as matching wave-2 guidance, but it drops GO-MOD-16's stable leg. Resolved by go_sdk.download plus sdk_version (measured: 1.27.0 by default, 1.27.1 with the flag).",
+     "GO-REL-05 stamps with -X plus ReadBuildInfo; under rules_go ReadBuildInfo has 0 vcs.* settings (measured). Under Bazel, x_defs carries both the semver and the commit.",
+     "The map said gazelle's README lags its MODULE.bazel, but the audit shows the README ahead (0.62.0 vs 0.59.0), and the dive shows bzlmod.md lagging the BCR by 6 and 9 minors. Only BCR metadata.json is current (BZL-FLAG-28).",
+     "Dive's go_deps.config(checks=...) does not exist. The real attribute is check_direct_dependencies, and its default is a print (gazelle 0.54.0 go_deps.bzl:400,418-423,928).",
+     "The dive's two doc-derived MVS divergences were joined by a third, measured one: go_deps MVS includes rules_go's own go.mod (x/text 2017 raised to v0.26.0, GO-2026-5970). govulncheck -mode=binary exits 3 on the Bazel binary and 0 on the go-build binary; after the bump it exits 0. This became the MUST BZL-GO-11.",
+     "The audit said both dogfood repos declare nogo, but declared is not registered: both register it only in WORKSPACE, with no go_sdk.nogo. The BZL-GO-05 violation was confirmed by an unregistered-build-green fixture.",
+     "The dive (gazelle has no go_sdk call) and the audit (dev download) were both partial: MODULE.bazel:18-23 uses go_sdk only for use_repo, and :58-59 is go_sdk_dev.download(1.24.12).",
+     "The map framed M-O-05 as nogo parity with the gate. Decision: parity is not the goal; the gate of record keeps running outside nogo (BZL-GO-07, bazel run @rules_go//go -- vet verified red and green)."
+    ],
+    "needs_another_round": [
+     "bazel-go / nogo stdversion \u2014 does rules_go 0.63.0 pass each package's go version to analyzers, so that adding passes/stdversion to nogo enforces GO-MOD-01's floor? Plant a 1.27-only API under go 1.26.0 and build.",
+     "bazel-go / release artifacts \u2014 the default go_binary is stripped: does govulncheck -mode=binary over-report as GO-MOD-13 found for -s -w, which --strip and -c opt settings does a reproducible Bazel release use, and are two --stamp builds with only STABLE_* keys byte-identical?",
+     "bazel-go / workspace_status_command path forms \u2014 ./status.sh, status.sh and a command-line %workspace% all failed with exit 1 on Bazel 9.2.0 under ocx exec, and only an absolute path worked; test the .bazelrc %workspace% form before the depth file prints a recipe.",
+     "bazel-go / go_work + #1797 and Windows \u2014 the go_deps.from_file(go_work) cycle divergence was never fixture-run, and the windows_amd64 artifact was compiled but never executed."
+    ],
+    "must_count": 11
+   }
+  }
+ ],
+ "surprises": [
+  "gates/config-revision: errcheck's exclude-functions setting is scoped to the call site's declared type, not to any type that structurally implements the named interface \u2014 GO-ERR-09's config fix is dead code for the common os.Open()/defer f.Close() idiom despite verifying against http.Response.Body",
+  "gates/config-revision: golangci-lint's own errcheck does not apply the standalone errcheck binary's documented 'fmt package ignored by default' behaviour, invalidating the prior gates dive's 'errcheck: 0 across all 8 exemplars' headline",
+  "gates/config-revision: errorlint's --fix can leave a tree that does not compile (missing errors import) and, once repaired, silently changes runtime behaviour by walking wrapped causes a direct type switch never inspected \u2014 confirmed on a real exemplar (zap), not a toy case, and matches the tool's own README caution",
+  "gates/config-revision: exhaustive's entire false-positive volume on ko-build/ko (6/6 hits, 4x over the admission bar) is one single shape: switching over an imported package's enum with an intentional default, mechanically fixable via ignore-enum-types",
+  "gates/config-revision: No go/analysis pass, staticcheck check, or golangci-lint govet setting can see a t.Fatal or require.NoError inside a closure passed to sync.WaitGroup.Go or errgroup.Group.Go, because the analyzer only walks literal go statements in the analyzed source \u2014 the blind spot has a clean mechanical cause, not just an absence of findings",
+  "gates/config-revision: GO-MOD-08's depguard list is 11 entries, not the 12 the brief specified \u2014 a direct line count of go-modules.md:58 settles it",
+  "cli/reference-skeleton: TraverseChildren silently disables unknown-subcommand detection unconditionally (even with Args nil) \u2014 worse than the Args-set case, and zero exemplars in the 35-repo corpus set it on their own command trees (only cobra's own source has the identifier)",
+  "cli/reference-skeleton: cobra.NoArgs happens to reproduce legacyArgs' exact error wording, so it looks safe, but any other custom Args validator that doesn't re-check against cmd.Commands() silently swallows a typo'd subcommand as a positional arg",
+  "cli/reference-skeleton: charmbracelet/colorprofile (what lipgloss v2 documents as its NO_COLOR mechanism) uses strconv.ParseBool, so NO_COLOR=yes/0/anything-non-boolean fail to disable colour \u2014 a live, corpus-grounded bug: charmbracelet/bubbletea@d5bfd5c2ff74:tea.go:1091-1093 calls colorprofile.Detect directly with no override",
+  "cli/reference-skeleton: lipgloss v1 (termenv-backed) is spec-correct on NO_COLOR; lipgloss v2 (colorprofile-backed) regressed \u2014 this is a versioned library defect, not a stdlib or cobra issue",
+  "cli/reference-skeleton: errors.Join's classify() winner in the watched run (NotFoundError beat a co-occurring PermissionError) was stable across GOMAXPROCS=1 and 8, but nothing in the Go memory model guarantees goroutine-append order, so a rule assuming a specific typed error 'wins' is unverifiable in general",
+  "cli/reference-skeleton: a non-runnable cobra subcommand (no RunE/Run) invoked directly, or with --help, printed nothing and exited 0 in this build \u2014 noted but not root-caused, tangential to the brief",
+  "io/process-group-sweep: An initial corpus re-grep for Pdeathsig wrongly reported zero hits; the corrected unfiltered re-grep found 10, including two real containerd production sites (pkg/sys/unshare_linux.go, core/mount/mount_idmapped_utils_linux.go).",
+  "io/process-group-sweep: containerd's vendored go-runc already ships the exact runtime.LockOSThread mitigation for golang/go#27505, citing it by name and warning GOMAXPROCS=1 can hang \u2014 this dive adopted that shape rather than inventing one.",
+  "io/process-group-sweep: The Linux kernel keeps a process-group's numeric id unrecyclable as long as ANY member (even a lone surviving descendant, with the leader already reaped) exists \u2014 the sweep's safety comes from group membership, not from timing relative to Wait.",
+  "io/process-group-sweep: go-runc itself gates Pdeathsig support to plain linux (command_other.go: //go:build !linux), narrower than the Go stdlib's actual linux||freebsd availability \u2014 no exemplar anywhere exercises FreeBSD.",
+  "io/process-group-sweep: Go's own os/pidfd_linux.go source comment explicitly names CL 23967 and confirms the single-pid wait/kill race is real, but pidfd has no group-scoped analogue, so it can't rescue the numeric -pgid sweep.",
+  "io/process-group-sweep: The camelCase grep for unpaired Pdeathsig usage false-positives on a variable literally named usePdeathsig, since Go identifiers give grep -w no word boundary there \u2014 worth flagging as a reading-heuristic limitation.",
+  "language/era-and-modernizers: asynctimerchan is a removed GODEBUG as of Go 1.27: on the 1.27.1 toolchain, a go1.22-line AND a go1.23-line module both measure unbuffered timer channels (cap 0) \u2014 the release note's per-module-line gate only held on toolchains 1.23-1.26; setting the env var is now a fatal build error, not a revert.",
+  "language/era-and-modernizers: In workspace mode a member module's own godebug default=\u2026 line in go.mod is silently and completely ignored; only go.work's godebug block is consulted. GOWORK=off flips this exactly \u2014 verified live with go list -f '{{.DefaultGODEBUG}}'.",
+  "language/era-and-modernizers: io/ioutil's own deprecated wrappers (TempFile, ReadFile, etc.) carry //go:fix inline directives in stdlib source itself \u2014 the generic inline fixer, not a dedicated ioutil fixer, migrates them, and it is file-go-line-gated: confirmed declining live on google/go-cmp (go1.21) and stretchr/testify (go1.17).",
+  "language/era-and-modernizers: dependabot-core will never open a PR whose sole purpose is bumping the go/toolchain line (open issue #13520); it only lets that line move as an incidental side effect of an unrelated dependency bump, since a 2024-era bug that reverted the Go tool's own edit was fixed by PR #12228.",
+  "language/era-and-modernizers: go fix's own driver (via go vet -vettool=$(go tool -n fix)) diverges from the x/tools modernize library used in the prior wave's census: go1.27's go fix gained atomictypes/embedlit/slicesbackward/unsafefuncs and dropped fmtappendf, so the two 'modernization census' tools are not interchangeable.",
+  "language/era-and-modernizers: minmax, rangeint and stringsseq all verified to decline their risky case by construction (NaN, body-mutated loop var, reused split slice) rather than merely being 'safe on average' \u2014 none of the 459 fresh-census diagnostics across 12 exemplars was a case where the self-limit should have fired but didn't.",
+  "language/stdlib-semantics: staticcheck's SA6003 does NOT catch byte-vs-rune string slicing (it targets a different, performance-only []rune-before-range pattern) \u2014 the map's classification of M-A-09 as staticcheck-covered was wrong; it stays a pure reading heuristic.",
+  "language/stdlib-semantics: gocritic with every check enabled (`enable-all: true`) finds zero issues on a time.Time == time.Time comparison \u2014 no linter catalogue in scope covers this footgun at all, not even opportunistically.",
+  "language/stdlib-semantics: google/go-github@48d0a668cde8 already declares go 1.26.0 with hand-written (Un)MarshalJSON methods \u2014 a live exemplar sitting exactly on the SDK's own floor scenario, and its custom Marshaler/Unmarshaler dispatch is unaffected by the jsonv2 backend.",
+  "language/stdlib-semantics: GOEXPERIMENT and GODEBUG are fully separate mechanisms: GODEBUG can be keyed to an importing module's go line (like containermaxprocs), but GOEXPERIMENT cannot \u2014 it is fixed for the whole build, so no library's go.mod can ever protect its consumers from a jsonv2 toolchain default.",
+  "language/stdlib-semantics: The go1.27 notes explicitly flag GOEXPERIMENT=nojsonv2 itself as temporary ('expected to be removed in a future release'), meaning the escape hatch this whole P0 investigation revolves around has its own expiration risk.",
+  "language/stdlib-semantics: stdlib uuid and google/uuid v1.6.0 are fully format-and-parse-compatible in both directions including braced/URN/bare-hex forms \u2014 a real network `go get` round-trip test, not just a doc read, found zero incompatibility.",
+  "api/package-and-api-shape: apidiff never fails on its own -- it exits 0 unconditionally even reporting an incompatible removal; only gorelease's exit code is major-version-conditional, and that had to be proven by hand-building a local file-based Go module proxy since the fixture modules have no real VCS/proxy presence.",
+  "api/package-and-api-shape: gochecknoglobals already has a built-in Err*-name exemption for sentinel errors -- not documented in the wave-2 map as a settled fact, but trivially discoverable by planting three differently-named package vars side by side.",
+  "api/package-and-api-shape: go.dev/doc/modules/layout never mentions pkg/ at all, not even to reject it -- the community's pkg/-vs-internal/ debate is entirely absent from Go's own canonical layout doc.",
+  "api/package-and-api-shape: exhaustive tolerates a default: clause as long as every real case is also listed -- it does not treat default's presence as automatically satisfying exhaustiveness, contrary to a plausible assumption.",
+  "api/package-and-api-shape: Getting gorelease to run at all against fixture modules required constructing a hand-rolled Go module proxy directory (@v/<ver>.info/.mod/.zip) since gorelease resolves its -base version through normal module resolution, not a local directory or git tag.",
+  "api/package-and-api-shape: The same //go:fix inline fixture, run before and after applying go fix, gave a clean three-state demonstration (red diff -> apply -> green) that ended up being the single cleanest verification in the whole brief.",
+  "api/sdk-surface: Default `go test ./...` coverage dramatically under-reports an SDK with a spawn-point internal/ package: 25.7% default vs 65.7% with -coverpkg=./... on the identical run, because internal/process has no test files of its own",
+  "api/sdk-surface: The TestMain helper-process branch is structurally invisible to any coverage profile the parent process collects \u2014 it only runs inside the re-exec'd child, so it needs a named exclusion, not a fix",
+  "api/sdk-surface: exhaustive fires on the SDK's own ExitCode switch exactly as it does on a CLI's, so GO-GATE-18's CLI-only overlay framing (from wave 2) actually understates the linter's needed reach \u2014 a correction to an already-settled row, not just a new decision",
+  "api/sdk-surface: The naive full-text grep for `any`/`interface{}` on `go doc -all .` output false-positives on ordinary English prose ('true for any TimeoutError') \u2014 the M-D-20 check as literally specified in the topic map needs refining to declaration-line-only",
+  "api/sdk-surface: oras-go v2 cleanly demonstrates both halves of map conflict 4 (config-struct options AND one functional-option constructor) inside a single module, which is stronger evidence for 'decision procedure, not winner' than either google/go-github or cli/cli alone gave",
+  "api/sdk-surface: Collapsing ocx-sdk-python's two-step error_envelope(exc) recovery into one eager Envelope field on Go's *ExitError is a deliberate divergence from the Python template, not a mechanical port \u2014 flagged as contested since its cost under high non-zero-exit load was never measured",
+  "network/http-client-server: net/http's client-side body Close() silently auto-drains up to 256KiB (maxPostHandlerReadBytes, server.go:1164) of an unread body so the connection can still be pooled \u2014 'close without draining' is only actually harmful above that threshold, not always",
+  "network/http-client-server: Two httptest.Server instances both bound to 127.0.0.1 on different ports are NOT a cross-host redirect to net/http's Authorization-stripping check, because it compares url.Hostname() only (port-excluded) \u2014 had to rewrite the Location header to 'localhost' to get a genuine cross-host test",
+  "network/http-client-server: The redirect-Authorization stripping rule is directionally asymmetric: origin->subdomain keeps credentials, subdomain->origin strips them, which is backwards from how many registry/CDN layouts are actually arranged",
+  "network/http-client-server: hashicorp/go-retryablehttp's DefaultRetryPolicy has no method/idempotency check at all \u2014 it will retry a POST on a bare 500 exactly like a GET, a live divergence from RFC 9110 in the ecosystem's most-cited Go retry library",
+  "network/http-client-server: bodyclose's hand-classified false-positive rate on regclient is ~92%, but the 2 survivors are genuine: BlobDelete leaks on every path, and BlobGet leaks only on its non-200 error branch after correctly transferring ownership on the success path \u2014 a defect shape invisible to both the linter and a quick read",
+  "network/http-client-server: gosec G107's own documentation example is itself the rule's false-positive shape (a hardcoded var string flagged as tainted input)",
+  "network/registry-client: opencontainers/go-digest, the reference Go digest library, implements only sha256/sha384/sha512 \u2014 it does NOT support blake3 even though image-spec registers it, so a client needs its own hasher for blake3",
+  "network/registry-client: A content-addressed store needs NO cross-process lock for correctness under concurrent same-digest ingest \u2014 verified content + atomic rename makes the race harmless by construction; containerd's own Ref-keyed lock is in-process-only and solves a different problem, not this one",
+  "network/registry-client: containerd's local content store treats a rename-target collision as ErrAlreadyExists (terminal success), never as an overwrite \u2014 most callers swallow it",
+  "network/registry-client: oras-go's credential-store API is mid-migration in the read exemplar: module path has moved to /v3 and it now carries a NamespaceMatcher interface plus Hierarchical matching for containers-auth.json (Podman/Buildah) compatibility, beyond the v2 shape the brief named",
+  "network/registry-client: errcheck/gosec DO catch an ignored json.Unmarshal error sitting right next to the naive credential resolver's real bug, but neither catches the actual bug (swallowing exec.Command's error as 'no credentials') \u2014 a lint hit is a good trigger to read the function by hand, not proof it's fine",
+  "network/registry-client: The deterministic two-writer splice (channel-forced interleaving, not a timing race) reproduced exactly as predicted: os.Create truncates the SAME inode a concurrent writer is mid-write on, leaving a file matching neither writer's content at the trusted final path",
+  "security/untrusted-input-and-crypto: Wave 2's G101 'package-scope only' claim is false for gosec's current source and golangci-lint 2.14.0: G101 registers on local AssignStmt exactly like package-scope ValueSpec; the real gap is entropy/value-shape (dictionary secrets, concatenated or indirected literals), not scope - re-verified on 10 planted variants.",
+  "security/untrusted-input-and-crypto: gosec G120 (unbounded ParseMultipartForm) fires unconditionally on any call regardless of the maxMemory argument passed; a smaller maxMemory does not silence it, only wrapping r.Body in http.MaxBytesReader first does - matches G120's own doc comment but contradicts the intuitive 'just pass a smaller number' fix.",
+  "security/untrusted-input-and-crypto: gosec G103 (audit use of unsafe) did not fire on any planted unsafe.Pointer/unsafe.String/unsafe.SliceData call under golangci-lint 2.14.0's bundled gosec, despite G103's own upstream source registering exactly those call identifiers - an unexplained vendored-build vs upstream-source discrepancy.",
+  "security/untrusted-input-and-crypto: Caddy's own HTTP template middleware deliberately uses text/template (not html/template) for response bodies, documenting the real risk as server-side template injection (untrusted template content) rather than missing output-escaping - html/template would not fix that risk either; Caddy's directory-listing handler separately uses text/template with correct manual per-sink escaping plus a CSP nonce as defense in depth.",
+  "security/untrusted-input-and-crypto: A 20-site classification of math/rand v1 production usage found zero real security-sensitive uses (all jitter/backoff, temp-filename disambiguation, or test/benchmark data) except one borderline case: a local dev/test OCI registry minting an upload-session ID with math/rand and returning it in a URL - low stakes only because it's a test fixture registry.",
+  "security/untrusted-input-and-crypto: gosec's G101 hardcoded-credentials rule contains ~25 built-in vendor-specific regexes (AWS AKIA..., Stripe sk_live_..., GitHub ghp_..., Slack, Google, Twilio, Heroku, Mailgun, etc.) that fire on a matching literal at ANY scope with no name-match requirement at all, independent of its separate name+entropy check.",
+  "release/reproducible-builds-and-stamping: mod_timestamp is not a go-build/GOFLAGS knob at all \u2014 it's goreleaser's own post-build os.Chtimes() call on the artifact file (confirmed by reading goreleaser's own source, internal/gio/chtimes.go / internal/builders/base/build.go), so a binary can be byte-reproducible while its release archive is not, and vice versa is impossible to fix without it",
+  "release/reproducible-builds-and-stamping: -s -w does not touch the embedded runtime/debug.BuildInfo at all \u2014 go version -m was byte-identical between stripped and unstripped twins; only govulncheck -mode=binary's reachability precision degrades, and it over-reports (4 vs 1 finding), it does not miss the real reachable CVE",
+  "release/reproducible-builds-and-stamping: CGO_ENABLED is legitimately scoped per-build-id, not per-repo: sigstore/cosign sets CGO_ENABLED=1 at the top level for one pkcs11/pivkey variant but overrides it back to 0 inside its plain linux build entry \u2014 a single goreleaser file can need three different CGO_ENABLED postures",
+  "release/reproducible-builds-and-stamping: Go 1.25 added a real, currently-open regression/behavior change (golang/go#74763): a repo with more than one independent VCS root now hard-fails buildvcs with 'multiple VCS detected', and a nested-module-without-root-go.mod topology silently degrades from a real pseudo-version to '(devel)' \u2014 neither existed under Go 1.24",
+  "release/reproducible-builds-and-stamping: os/user and net both degrade gracefully to pure-Go with CGO_ENABLED=0 (identical uid output either way) \u2014 the real hazard isn't that these packages 'need' cgo, it's that CGO_ENABLED left unset defaults to 1 on any host with a C compiler on PATH, producing an unintentionally dynamic binary",
+  "release/reproducible-builds-and-stamping: goreleaser's own unpinned defaults (GOARCH: [386, amd64, arm64], GOARM: [6], GOAMD64: [v1]) are narrower than actual corpus practice (windows+arm64 in 9/11 configs), and GOARM/GOAMD64 pins never appear standalone \u2014 always alongside an already-broad arm matrix tied to a real hardware target",
+  "release/distribution-and-provenance: goreleaser 2.17.1's `check` does not fail on a config missing `version: 2` (exit 0, warning only) \u2014 contradicts the brief's assumption; the real gate must grep the config text",
+  "release/distribution-and-provenance: All 4 real, currently-mirrored bazelbuild Go binaries (bazelisk, buildifier, buildozer, unused-deps) fail govulncheck -mode=binary, up to 53 stdlib CVEs; buildifier/buildozer were built with go1.20.3 and carry no VCS/module stamp at all",
+  "release/distribution-and-provenance: cosign keyless sign-blob silently blocks (no error) on an OAuth2 device-flow URL in any non-interactive/offline context \u2014 looks like a hang, not a config error",
+  "release/distribution-and-provenance: cosign v3.x's default signing path now requires an explicit --signing-config file to disable the transparency log; the old --tlog-upload=false flag is rejected outright once a signing-config is in play",
+  "release/distribution-and-provenance: The topic map's SHA-pinning 'release repos ~100%, lint-only libraries ~0%' bimodal claim did not hold on a 4-repo spot check \u2014 two lint-only libraries (testify, go-cmp) are fully SHA-pinned with no release workflow, one CLI (urfave/cli) is entirely tag-pinned",
+  "release/distribution-and-provenance: A --snapshot goreleaser build's raw binary artifact lives at the build-target directory path on disk; only checksums.txt/artifacts.json carries the final, renamed asset name \u2014 `find dist/` is the wrong verification surface",
+  "observability/logging-and-diagnosis: The Linux 6.12/6.13 core-dump claim is real but lives in elfutils's sourceware bugzilla (#32713), not the Go issue tracker; the nearest golang/go lookalike (#73141, vgetrandom SIGSEGV) is a wholly unrelated bug.",
+  "observability/logging-and-diagnosis: pprof.Lookup(\"goroutineleak\") works in a module whose go.mod line is 1.26 as long as it's built by the 1.27.1 toolchain \u2014 profile availability is toolchain-gated, not go-line-gated, so the SDK's 1.26.0 floor is not a blocker.",
+  "observability/logging-and-diagnosis: sloglint at its defaults (no settings block) catches neither the global-logger pattern nor mismatched key-value pairs; both need an explicit setting (no-global) or a different tool (go vet) entirely.",
+  "observability/logging-and-diagnosis: The stdlib leak detector's own call site cancels out of the before/after diff for free (stripping file:line frames makes both snapshots' self-referential frame identical), so no special-casing of the detector's own goroutine was needed.",
+  "observability/logging-and-diagnosis: Go's automatic 'all goroutines are asleep' deadlock detector actively interfered with the first SIGQUIT fixture attempt \u2014 it exited the process before SIGQUIT could be sent, because a real full-deadlock (no runnable goroutine) self-reports; a realistic hung-service fixture needed a heartbeat goroutine to suppress that and force a genuine SIGQUIT read.",
+  "observability/logging-and-diagnosis: goroutineleak was already experimental in Go 1.26, not new in 1.27 as the topic map's framing implied; only the GA promotion (and deletion of the goroutineleakprofile GOEXPERIMENT flag) is new in 1.27.",
+  "bazel/rules-go-and-nogo: nogo's vet=True and TOOLS_NOGO overlap and combining them is a hard Bazel duplicate-label error at analysis time, not a harmless redundancy \u2014 hit this live while wiring the fixture.",
+  "bazel/rules-go-and-nogo: The one public golangci-lint-to-nogo bridge (sluongng/nogo-analyzer) is explicitly self-labeled POC-only by its own maintainer, has no MODULE.bazel/BCR listing, and its staticcheck analyzer list is missing SA9010 (stale pin).",
+  "bazel/rules-go-and-nogo: rules_go's own bzlmod.md example snippet pins rules_go/gazelle versions 6 and 9 minors behind the current BCR versions (0.57.0/0.45.0 vs measured-current 0.63.0/0.54.0) \u2014 the doc-lag is real and larger than the map's prior 'three minors' estimate.",
+  "bazel/rules-go-and-nogo: gazelle's own dogfood MODULE.bazel resolves Go deps from go.work, not go.mod, while rules_go's own MODULE.bazel uses go.mod \u2014 the two canonical exemplars deliberately exercise the two different go_deps.from_file shapes.",
+  "bazel/rules-go-and-nogo: Zero '# gazelle:resolve' overrides exist in either Bazel-for-Go dogfood exemplar, undermining the topic map's 'stale resolve overrides' worry as far as this corpus goes.",
+  "bazel/rules-go-and-nogo: The Go 1.24+ tool directive concretely surfaces as a generated, buildable GO_TOOLS dict (confirmed by reading the generated repository file directly) once Gazelle >=0.47.0 has run."
+ ],
+ "needs_another_round": [
+  "gates: network/http-client-server \u2014 bodyclose precision on regclient's 78 non-test hits: linter or reading heuristic for GO-NET?",
+  "gates: gates \u2014 staticcheck ST1000/ST1020-22 on library code: FP bar, and overlap with revive exported (M-M-09)?",
+  "gates: api/sdk-surface \u2014 should the SDK's typed exit-code errors be switched exhaustively, and at what FP cost; may the SDK return (nil, nil) at all?",
+  "gates: gates \u2014 widen the --fix allowlist: plant one fixable violation each for govet, staticcheck, copyloopvar, fatcontext, nolintlint, revive, sloglint, usestdlibvars; which pass go build and go test?",
+  "gates: gates/errors \u2014 annotating 74+ read-only *os.File closes vs a small custom analyzer: which is the cheaper gate for the SDK?",
+  "gates: errors \u2014 GO-ERR-09's verification grep needs the '^[^#]*' anchor; it currently goes red on a comment in a compliant config (C-16).",
+  "cli: cli/windows \u2014 GO-CLI-07 ERROR_NO_DATA vs ERROR_BROKEN_PIPE on a console vs a pipe, GO-CLI-08 Ctrl-Break and os.Interrupt delivery to a same-console child, and GO-CLI-13 MSYS2/Cygwin detection each need a watched run on a windows-latest runner (only the compile was verified)",
+  "io: io/windows-runtime: does os.Rename onto a held target fail with ERROR_SHARING_VIOLATION/ACCESS_DENIED, and does GO-IO-17's retry fix it? Does dir Sync error? Does a job object reap an immediately spawned grandchild? Does the GO-IO-16 validator pass? (needs a windows-latest runner)",
+  "io: network/registry-client: absorb GO-IO-18 \u2014 concurrent two-process ingest of one digest, verify-before-rename, rename-over-existing on Windows (needs a planted two-writer fixture)",
+  "language: language/stdlib-semantics \u2014 does Swiss-table map iteration bias (1.24+) make -count=N unreliable for 2-7 entry maps across key types, deletions and growth, and should GO-LANG-09 prescribe a shuffle-insertion helper instead of the >=8-entry rule?",
+  "language: api/sdk-surface \u2014 should the Go SDK export iter.Seq or []T for collections (the unanswered 'when' half of M-A-05)?",
+  "language: language/era-and-modernizers (dated re-check per Go minor) \u2014 was GOEXPERIMENT=nojsonv2 removed, and did the go fix fixer roster change?",
+  "api: api/interface-placement: does the ~55/45 producer/consumer interface split hold at n=60 across shapes A and D, and what is ireturn's FP rate per 10k LOC on go-cmp, zap, oras-go, go-containerregistry and go-github (it decides whether GO-API-07 can become a library MUST)?",
+  "api: api/overlay-noise: do gochecknoglobals, gochecknoinits and ST1003 meet the <=1 FP/10k LOC admission bar on the five library exemplars ([C7] measured only the ST family, on three repos)?",
+  "api: api/sdk-version-handshake: how does the SDK discover the ocx version, when does it check it (per Client or lazily), and what contract test pins *VersionCompatError (GO-API-18 stays SHOULD until then)?",
+  "api: api/signal-exit-path: does a signal-blocking helper child under the GO-TEST-12 pattern reach the ws.Signaled() -> 128+n branch of the SDK spawn point on Linux/macOS, and what does Windows report?",
+  "network: network/stream-stall \u2014 What is the smallest correct idle-read watchdog for a blob-streaming client, watched red on a server that sends headers and then stalls mid-body? (GO-NET-06's streaming branch is unfixtured)",
+  "network: network/retry-replay \u2014 Does go-containerregistry's retryTransport replay a consumed request body, or leak the discarded response, on a retried PUT/PATCH that gets a 503?",
+  "network: network/http-server-modern \u2014 Answer map rows M-H-12 (ServeMux patterns), M-H-13 (net/netip) and M-H-14 (CrossOriginProtection, ReverseProxy.Rewrite), which had no dive",
+  "network: network/dist-user-agent \u2014 Does the setup.ocx.sh CDN reject Go-http-client/1.1 the way it rejects Python-urllib? A yes promotes GO-NET-18 to MUST",
+  "security: gates/gosec-taint \u2014 with the preset removed, do gosec's G701-G708 taint rules (e.g. G703 on ko pkg/build/gobuild.go:436) meet the <=1 FP/10k LOC admission bar on the 8 named exemplars, or does GO-GATE-14 need taint-rule excludes?",
+  "security: io/cli-spawn \u2014 GO-IO-13 is only CONSIDER for CLIs, and ko has 6 G204 hits in 9k LOC. Should CLIs route every spawn through one function, or accept per-call reasoned G204 suppressions?",
+  "security: security/secret-type-jsonv2 \u2014 under Go 1.27's default-on json/v2, does MarshalText still redact a nested Secret through slog.JSONHandler and the encoding/json v1 API, including with omitzero/omitempty? Does a MarshalJSONTo method take precedence?",
+  "release: release/reproducible-builds \u2014 Does Go 1.27.1 still fail with 'multiple VCS detected' (golang/go#74763) on git-in-git or submodule layouts, and does the fleet release build then need -buildvcs guidance?",
+  "release: release/cgo-on-darwin \u2014 Does CGO_ENABLED=0 on darwin degrade DNS resolution (VPN or split-DNS) enough to justify cli/cli keeping cgo on for its macOS build? Needs a macOS runner",
+  "release: release/keyless-green-path \u2014 Run the GO-REL-11 workflow in a throwaway GitHub repo and watch gh attestation verify and cosign verify-blob go green on the asset and red on a tampered one, so the MUST gets a watched verification",
+  "observability: observability/deferred-perf \u2014 once a fleet Go CLI/service exists: do stale GOEXPERIMENT pins or the tracebacklabels default (0 below go 1.27, seen in DefaultGODEBUG) need a check, and do PGO or SDK OTel hooks pay for themselves (M-J-07/09/10/11/12)",
+  "observability: observability/pprof-census \u2014 read the remaining 26 pprof import sites for public exposure (low priority; fleet rule forbids the shape outright)",
+  "observability: concurrency/leak-detection-stdlib \u2014 closed negative; reopen only if goleak is archived or gains dependencies",
+  "bazel: bazel-go / nogo stdversion \u2014 does rules_go 0.63.0 pass each package's go version to analyzers, so that adding passes/stdversion to nogo enforces GO-MOD-01's floor? Plant a 1.27-only API under go 1.26.0 and build.",
+  "bazel: bazel-go / release artifacts \u2014 the default go_binary is stripped: does govulncheck -mode=binary over-report as GO-MOD-13 found for -s -w, which --strip and -c opt settings does a reproducible Bazel release use, and are two --stamp builds with only STABLE_* keys byte-identical?",
+  "bazel: bazel-go / workspace_status_command path forms \u2014 ./status.sh, status.sh and a command-line %workspace% all failed with exit 1 on Bazel 9.2.0 under ocx exec, and only an absolute path worked; test the .bazelrc %workspace% form before the depth file prints a recipe.",
+  "bazel: bazel-go / go_work + #1797 and Windows \u2014 the go_deps.from_file(go_work) cycle divergence was never fixture-run, and the windows_amd64 artifact was compiled but never executed."
+ ],
+ "must_count": 117
+}

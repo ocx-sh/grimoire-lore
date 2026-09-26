@@ -1,0 +1,7 @@
+caddyserver__caddy:listeners.go:567: ctx, cancel := context.WithCancelCause(context.Background())
+caddyserver__caddy:context.go:74: c, cancel := context.WithCancelCause(ctx.Context)
+oras-project__oras-go:internal/syncutil/limit.go:70: ctx, cancel := context.WithCancelCause(ctx)
+tailscale__tailscale:ssh/tailssh/tailssh.go:781: ctx, cancel := context.WithCancelCause(s.Context())
+tailscale__tailscale:ipn/ipnlocal/local.go:574: ctx, cancel := context.WithCancelCause(context.Background())
+tailscale__tailscale:ipn/ipnlocal/node_backend.go:183: ctx, ctxCancel := context.WithCancelCause(ctx)
+tailscale__tailscale:feature/conn25/conn25.go:147: ctx, cancel := context.WithCancelCause(context.Background())

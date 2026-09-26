@@ -1,0 +1,179 @@
+aquasecurity__trivy:pkg/result/filter.go:73: policyFile := filepath.ToSlash(filepath.Clean(opt.PolicyFile))
+aquasecurity__trivy:pkg/result/ignore.go:253: conf.FilePath = filepath.ToSlash(filepath.Clean(ignoreFile))
+aquasecurity__trivy:pkg/downloader/download.go:60: dst = filepath.Clean(dst)
+aquasecurity__trivy:pkg/mapfs/fs.go:289: path = filepath.Clean(path)
+aquasecurity__trivy:pkg/dependency/parser/java/pom/parse.go:158: rootPath:        filepath.Clean(filePath),
+aquasecurity__trivy:pkg/fanal/analyzer/secret/secret.go:74: return filepath.ToSlash(filepath.Clean(p))
+aquasecurity__trivy:pkg/fanal/walker/vm.go:132: pathName := strings.TrimPrefix(filepath.Clean(path), "/")
+aquasecurity__trivy:pkg/fanal/artifact/local/fs.go:71: rootPath:       filepath.ToSlash(filepath.Clean(rootPath)),
+aquasecurity__trivy:pkg/fanal/artifact/sbom/sbom.go:36: filePath:       filepath.Clean(filePath),
+aquasecurity__trivy:pkg/fanal/utils/utils.go:88: skipPath = filepath.ToSlash(filepath.Clean(skipPath))
+bazel-contrib__rules_go:go/tools/bazel_testing/bazel_testing.go:290: tmpDir = filepath.Clean(tmpDir)
+bazelbuild__bazel-gazelle:tools/convert-go-deps-test-case/dir_to_bzl.go:88: origGOMODCACHE = filepath.Clean(origGOMODCACHE)
+bazelbuild__bazel-gazelle:tools/convert-go-deps-test-case/dir_to_bzl.go:96: u := url.URL{Scheme: "file", Path: filepath.ToSlash(filepath.Clean(path))}
+bazelbuild__bazel-gazelle:tools/convert-go-deps-test-case/bzl_to_dir.go:759: newPath = filepath.ToSlash(filepath.Clean(filepath.Join(absGoWorkDir, newPath)))
+bazelbuild__bazel-gazelle:tools/convert-go-deps-test-case/bzl_to_dir.go:803: newPath := filepath.ToSlash(filepath.Clean(filepath.Join(absGoModDir, r.New.Path)))
+bazelbuild__bazel-gazelle:tools/convert-go-deps-test-case/bzl_to_dir.go:826: joined := filepath.ToSlash(filepath.Clean(filepath.Join(pkg, useDiskPath)))
+bazelbuild__bazel-gazelle:repo/repo.go:217: rel := strings.Replace(filepath.Clean(l.Name()), ":", string(filepath.Separator), 1)
+bazelbuild__bazel-gazelle:cmd/gazelle/update-repos.go:265: macroPath = filepath.Join(c.RepoRoot, filepath.Clean(uc.macroFileName))
+caddyserver__caddy:filepath.go:31: return filepath.Clean(path), nil
+caddyserver__caddy:modules/caddyhttp/fileserver/matcher.go:336: root := filepath.Clean(repl.ReplaceAll(m.Root, "."))
+caddyserver__caddy:modules/caddyhttp/fileserver/caddyfile.go:222: file = filepath.Clean(file)
+cli__cli:.github/skills/cli-exercise/tool/internal/cliutil/files.go:85: for component := range strings.SplitSeq(filepath.Clean(relative), string(os.PathSeparator)) {
+cli__cli:pkg/findsh/find_windows.go:25: return filepath.Clean(shPath), nil
+cli__cli:pkg/findsh/find_windows.go:31: return filepath.Clean(shPath), nil
+cli__cli:pkg/cmd/attestation/verify/options.go:52: opts.BundlePath = filepath.Clean(opts.BundlePath)
+cli__cli:pkg/cmd/attestation/inspect/options.go:27: opts.BundlePath = filepath.Clean(opts.BundlePath)
+cli__cli:pkg/cmd/attestation/artifact/artifact.go:51: return filepath.Clean(path), fileArtifactType, nil
+cli__cli:pkg/cmd/attestation/artifact/artifact.go:54: return filepath.Clean(reference), fileArtifactType, nil
+cli__cli:pkg/cmd/release/verify-asset/verify_asset.go:73: opts.AssetFilePath = filepath.Clean(opts.AssetFilePath)
+cockroachdb__pebble:metamorphic/meta.go:501: opsPath := filepath.Join(filepath.Dir(filepath.Clean(runDir)), "ops")
+containerd__containerd:internal/cri/server/podsandbox/sandbox_run.go:173: if filepath.Clean(k.Destination) == "/sys" {
+containerd__containerd:internal/cri/server/helpers.go:223: if filepath.Clean(m.ContainerPath) == filepath.Clean(dst) {
+containerd__containerd:internal/cri/server/container_create.go:325: mountMap[filepath.Clean(v.HostPath)] = v.ContainerPath
+containerd__containerd:internal/cri/opts/spec_linux_opts.go:57: if filepath.Clean(e.ContainerPath) == filepath.Clean(c.ContainerPath) {
+containerd__containerd:internal/cri/opts/spec_linux_opts.go:111: mountSet[filepath.Clean(m.ContainerPath)] = struct{}{}
+containerd__containerd:internal/cri/opts/spec_linux_opts.go:118: dst := filepath.Clean(m.Destination)
+containerd__containerd:internal/cri/opts/spec_darwin_opts.go:67: mountSet[filepath.Clean(m.ContainerPath)] = struct{}{}
+containerd__containerd:internal/cri/opts/spec_windows_opts.go:46: return filepath.Clean(p)
+containerd__containerd:internal/cri/opts/spec_windows_opts.go:78: src = filepath.Clean(src)
+containerd__containerd:internal/cri/opts/spec_windows_opts.go:85: dst = filepath.Clean(dst)
+containerd__containerd:internal/cri/opts/spec_opts.go:108: return strings.Count(filepath.Clean(m[i].ContainerPath), string(os.PathSeparator))
+containerd__containerd:core/mount/mount_windows.go:104: if err := os.WriteFile(filepath.Clean(target)+":"+sourceStreamName, []byte(m.Source), 0666); err != nil {
+containerd__containerd:core/mount/mount_windows.go:131: mount = filepath.Clean(mount)
+containerd__containerd:core/runtime/v2/shim_manager.go:93: config.SocketDir = filepath.Clean(config.SocketDir)
+containerd__containerd:pkg/archive/tar.go:142: root = filepath.Clean(root)
+containerd__containerd:pkg/archive/tar.go:249: hdr.Name = filepath.Clean(hdr.Name)
+containerd__containerd:pkg/oci/spec_opts.go:314: mDestination := filepath.Clean(m.Destination)
+containerd__containerd:pkg/oci/spec_opts.go:1573: if filepath.Clean(m.Destination) == "/dev/shm" && m.Source == "shm" && m.Type == "tmpfs" {
+containerd__containerd:pkg/cio/io.go:295: path = filepath.Clean(path)
+containerd__containerd:cmd/containerd/server/config/config.go:573: path = filepath.Clean(path)
+etcd-io__etcd:server/storage/wal/wal.go:111: tmpdirpath := filepath.Clean(dirpath) + ".tmp"
+golang__tools:internal/imports/mod.go:254: mod.Dir = filepath.Clean(mod.Dir)
+golang__tools:internal/imports/mod.go:582: if r.env.SkipPathInScan(filepath.Clean(dir)) {
+golang__tools:internal/imports/mod_cache.go:267: Path: filepath.Clean(dir),
+golang__tools:gopls/internal/cache/view.go:550: f.prefixes = append(f.prefixes, filepath.Clean(d)+string(filepath.Separator))
+golang__tools:gopls/internal/cache/port.go:144: path = filepath.Clean(path)
+golang__tools:gopls/internal/server/link.go:78: path = filepath.Join(filepath.Clean(path), "go.mod")
+golang__tools:gopls/internal/filewatcher/poll_watcher.go:133: dir = filepath.Clean(dir)
+golang__tools:gopls/internal/filewatcher/fsnotify_watcher.go:176: event.Name = filepath.Clean(event.Name)
+golang__tools:gopls/internal/filewatcher/fsnotify_watcher.go:300: return filepath.WalkDir(filepath.Clean(dir), func(path string, dirent fs.DirEntry, err error) error {
+golang__tools:gopls/internal/work/completion.go:67: if filepath.Clean(pathPrefixSlash) != "." && !strings.HasSuffix(pathPrefixSlash, "/") {
+golang__tools:gopls/internal/golang/move_decl.go:232: dir = filepath.Clean(dir)
+golang__tools:gopls/internal/golang/move_decl.go:238: if filepath.Clean(f.DirPath()) == dir {
+golang__tools:gopls/internal/protocol/uri.go:72: return URIFromPath(filepath.Clean(uri.Path()))
+golang__tools:cmd/present/dir.go:142: strippedPath := strings.TrimPrefix(name, filepath.Clean(*contentPath))
+golang__tools:go/buildutil/util.go:112: root = filepath.Clean(root)
+golang__tools:go/buildutil/util.go:117: dir = filepath.Clean(dir)
+golang__tools:go/buildutil/overlay.go:79: filename = filepath.Clean(strings.TrimSpace(filename))
+golang__tools:go/buildutil/allpackages.go:80: root = filepath.Clean(root) + string(os.PathSeparator)
+golang__tools:blog/blog.go:122: content := filepath.Clean(cfg.ContentPath)
+golangci__golangci-lint:pkg/commands/internal/builder.go:210: source, err := os.Open(filepath.Clean(src))
+golangci__golangci-lint:pkg/commands/internal/dirhash.go:38: dir = filepath.Clean(dir)
+golangci__golangci-lint:pkg/commands/internal/imports.go:37: err = os.WriteFile(filepath.Clean(importsDest), source, info.Mode())
+golangci__golangci-lint:pkg/commands/fmt.go:141: expanded = append(expanded, filepath.Clean(strings.ReplaceAll(arg, "...", "")))
+golangci__golangci-lint:pkg/commands/run.go:709: goModPath := filepath.Clean(values[goenv.GOMOD])
+golangci__golangci-lint:pkg/config/base_loader.go:121: absPath = filepath.Clean(firstArg)
+golangci__golangci-lint:pkg/config/config.go:166: raw, err := os.ReadFile(filepath.Clean(goMod))
+google__go-containerregistry:internal/cmd/edit.go:473: return filepath.Clean("/" + name)
+google__go-containerregistry:pkg/authn/keychain.go:127: } else if path := filepath.Clean(os.Getenv("REGISTRY_AUTH_FILE")); fileExists(path) {
+google__go-containerregistry:pkg/authn/keychain.go:137: } else if path := filepath.Clean(podmanAuth); fileExists(path) {
+google__go-github:example/contents/main.go:50: outputPath = filepath.Clean(strings.TrimSpace(outputPath))
+goreleaser__goreleaser:internal/pipe/chocolatey/chocolatey.go:218: filepath.Clean(art.Path),
+goreleaser__goreleaser:internal/pipe/aur/aur.go:238: path := filepath.ToSlash(filepath.Clean(filepath.Join(folder, bin)))
+goreleaser__goreleaser:internal/pipe/metadata/metadata.go:62: a.Path = filepath.ToSlash(filepath.Clean(a.Path))
+goreleaser__goreleaser:internal/pipe/ko/ko.go:408: dir := filepath.Clean(cfg.WorkingDir)
+goreleaser__goreleaser:internal/pipe/sbom/sbom.go:164: distDir = filepath.Clean(distDir)
+goreleaser__goreleaser:internal/pipe/sbom/sbom.go:165: path = filepath.Clean(path)
+goreleaser__goreleaser:internal/gio/copy.go:20: dst = filepath.Clean(dst)
+hashicorp__terraform:internal/getproviders/filesystem_search.go:37: if finalDir != filepath.Clean(baseDir) {
+hashicorp__terraform:internal/backend/remote-state/oci/auth.go:200: certsDir := filepath.Clean(getEnvSettingWithDefault("test_certificates_location", defaultCertsDir))
+hashicorp__terraform:internal/backend/remote/backend_plan.go:227: configDir = filepath.Clean(strings.TrimSuffix(
+hashicorp__terraform:internal/backend/remote/backend_plan.go:228: filepath.Clean(configDir),
+hashicorp__terraform:internal/backend/remote/backend_plan.go:229: filepath.Clean(w.WorkingDirectory),
+hashicorp__terraform:internal/cloud/backend_common.go:574: configDir = filepath.Clean(strings.TrimSuffix(
+hashicorp__terraform:internal/cloud/backend_common.go:575: filepath.Clean(configDir),
+hashicorp__terraform:internal/cloud/backend_common.go:576: filepath.Clean(w.WorkingDirectory),
+hashicorp__terraform:internal/rpcapi/dependencies.go:53: localDir := filepath.Clean(req.LocalPath)
+hashicorp__terraform:internal/configs/configload/loader_snapshot.go:189: snapMod.Files[filepath.Clean(filename)] = src
+hashicorp__terraform:internal/configs/configload/loader_snapshot.go:241: directDir := filepath.Clean(name)
+hashicorp__terraform:internal/configs/configload/loader_snapshot.go:248: modDir := filepath.Clean(candidate.Dir)
+hashicorp__terraform:internal/configs/configload/loader_snapshot.go:263: modDir := filepath.Clean(candidate.Dir)
+hashicorp__terraform:internal/command/workdir/dir.go:76: mainPath = filepath.Clean(mainPath)
+hashicorp__terraform:internal/command/workdir/dir.go:92: d.originalDir = filepath.Clean(originalPath)
+hashicorp__terraform:internal/command/workdir/dir.go:104: d.dataDir = filepath.Clean(dataDir)
+hashicorp__terraform:internal/command/workdir/normalize_path.go:38: return filepath.Clean(given)
+hashicorp__terraform:internal/command/workdir/normalize_path.go:51: return filepath.Clean(given)
+hashicorp__terraform:internal/command/cliconfig/provider_installation.go:273: dirPath := filepath.Clean(interpolatedPath)
+hashicorp__terraform:internal/pluginshared/testing.go:71: path := filepath.Clean(r.URL.Path)
+hashicorp__terraform:internal/lang/funcs/filesystem.go:187: path = filepath.Clean(path)
+hashicorp__terraform:internal/lang/funcs/filesystem.go:386: path = filepath.Clean(path)
+hashicorp__terraform:internal/providercache/dir.go:75: return filepath.Clean(d.baseDir)
+hashicorp__terraform:internal/providercache/dir.go:180: packageDir := filepath.Clean(string(meta.Location.(getproviders.PackageLocalDir)))
+hashicorp__terraform:internal/plugin/discovery/find.go:84: ret = append(ret, filepath.Clean(absPath))
+hashicorp__terraform:internal/plugin/discovery/find.go:103: ret = append(ret, filepath.Clean(absPath))
+junegunn__fzf:src/reader.go:289: absRoots = append(absRoots, filepath.Clean(abs))
+junegunn__fzf:src/reader.go:334: abs = filepath.Clean(abs)
+ko-build__ko:pkg/build/gobuild.go:207: dir := filepath.Clean(g.dir)
+ko-build__ko:pkg/build/gobuild.go:249: dir := filepath.Clean(g.dir)
+ko-build__ko:pkg/build/gobuild.go:390: dir = filepath.Clean(dir)
+ko-build__ko:pkg/build/gobuild.go:550: sbomDir := filepath.Clean(dir)
+ko-build__ko:pkg/build/gobuild.go:705: dir := filepath.Clean(g.dir)
+ko-build__ko:pkg/commands/options/build.go:281: dir := filepath.Clean(baseDir)
+oras-project__oras:cmd/oras/internal/display/metadata/model/pull.go:46: path = filepath.Clean(path)
+oras-project__oras:cmd/oras/root/file.go:40: name := filepath.Clean(filename)
+oras-project__oras-go:content/file/utils.go:258: cleanPath := filepath.ToSlash(filepath.Clean(path))
+regclient__regclient:types/blob/tar.go:129: filename = filepath.Clean(filename)
+regclient__regclient:types/blob/tar.go:149: thFile := filepath.Clean(th.Name)
+regclient__regclient:internal/copyfs/copy.go:29: dest = filepath.Clean(dest)
+regclient__regclient:internal/copyfs/copy.go:30: src = filepath.Clean(src)
+regclient__regclient:image.go:1420: trd.handlers[filepath.ToSlash(filepath.Clean(trd.dockerManifestList[index].Config))] = func(header *tar.Header, trd *tarReadData) error {
+regclient__regclient:image.go:1438: trd.handlers[filepath.ToSlash(filepath.Clean(layerFile))] = func(header *tar.Header, trd *tarReadData) error {
+regclient__regclient:image.go:1763: name := filepath.ToSlash(filepath.Clean(header.Name))
+regclient__regclient:image.go:1774: target = filepath.ToSlash(filepath.Clean("/" + target)[1:])
+regclient__regclient:pkg/archive/tar.go:151: fn := filepath.Join(path, filepath.Clean("/"+hdr.Name))
+restic__restic:internal/data/snapshot_find.go:49: absTargets = append(absTargets, filepath.Clean(target))
+restic__restic:internal/filter/filter.go:44: pathParts := splitPath(filepath.Clean(patternStr))
+restic__restic:internal/fs/path_prefix.go:20: base = filepath.Clean(base)
+restic__restic:internal/fs/path_prefix.go:21: p = filepath.Clean(p)
+restic__restic:internal/fs/node_windows.go:463: cleanPath := filepath.Clean(path)
+restic__restic:internal/fs/node_windows.go:464: cleanVolume := filepath.Clean(volName + `\`)
+restic__restic:internal/fs/fs_local.go:87: return filepath.Clean(p)
+restic__restic:cmd/restic/cmd_restore.go:141: if opts.Delete && filepath.Clean(opts.Target) == "/" && !hasExcludes && !hasIncludes {
+restic__restic:cmd/restic/cmd_backup.go:293: // filepath.Clean("") == ".".
+sigstore__cosign:pkg/cosign/verify.go:1913: blobPath: filepath.Clean(filepath.Join("blobs", "sha256", layer.Digest.Hex)),
+sigstore__cosign:pkg/cosign/keys.go:138: kb, err := os.ReadFile(filepath.Clean(keyPath))
+sigstore__cosign:pkg/blob/load.go:75: raw, err = os.ReadFile(filepath.Clean(fileRef))
+sigstore__cosign:cmd/cosign/cli/verify/verify.go:203: sct, err := os.ReadFile(filepath.Clean(c.SCTRef))
+sigstore__cosign:cmd/cosign/cli/verify/verify_blob_attestation.go:164: f, err := os.Open(filepath.Clean(artifactPath))
+sigstore__cosign:cmd/cosign/cli/verify/verify_blob_attestation.go:223: artifactFile, err := os.Open(filepath.Clean(artifactPath))
+sigstore__cosign:cmd/cosign/cli/verify/verify_blob_attestation.go:293: encodedSig, err = os.ReadFile(filepath.Clean(c.SignaturePath))
+sigstore__cosign:cmd/cosign/cli/verify/verify_blob_attestation.go:345: sct, err := os.ReadFile(filepath.Clean(c.SCTRef))
+sigstore__cosign:cmd/cosign/cli/verify/verify_attestation.go:178: sct, err := os.ReadFile(filepath.Clean(c.SCTRef))
+sigstore__cosign:cmd/cosign/cli/verify/verify_blob.go:228: sct, err := os.ReadFile(filepath.Clean(c.SCTRef))
+sigstore__cosign:cmd/cosign/cli/attest/attest_blob.go:92: payload, err = os.ReadFile(filepath.Clean(c.StatementPath))
+sigstore__cosign:cmd/cosign/cli/attest/attest_blob.go:108: artifact, err = os.ReadFile(filepath.Clean(artifactPath))
+sigstore__cosign:cmd/cosign/cli/sign/sign_blob.go:48: f, err := os.Open(filepath.Clean(payloadPath))
+sigstore__cosign:cmd/cosign/cli/sign/sign.go:80: staticPayload, err = os.ReadFile(filepath.Clean(signOpts.PayloadPath))
+sigstore__cosign:cmd/cosign/cli/attach/sbom.go:145: return os.ReadFile(filepath.Clean(sbomRef))
+sigstore__cosign:cmd/cosign/cli/attach/sig.go:61: payload, err = os.ReadFile(filepath.Clean(payloadRef))
+sigstore__cosign:cmd/cosign/cli/attach/sig.go:85: cert, err = os.ReadFile(filepath.Clean(certRef))
+sigstore__cosign:cmd/cosign/cli/attach/sig.go:92: certChain, err = os.ReadFile(filepath.Clean(certChainRef))
+sigstore__cosign:cmd/cosign/cli/attach/sig.go:99: timeStampedSig, err = os.ReadFile(filepath.Clean(timeStampedSigRef))
+sigstore__cosign:cmd/cosign/cli/attach/sig.go:107: rekorBundleByte, err := os.ReadFile(filepath.Clean(rekorBundleRef))
+sigstore__cosign:cmd/cosign/cli/attach/sig.go:159: sig, err = os.ReadFile(filepath.Clean(sigRef))
+syncthing__syncthing:lib/locations/locations.go:90: locations[locationName] = filepath.Clean(path)
+syncthing__syncthing:lib/locations/locations.go:105: baseDirs[baseDirName] = filepath.Clean(path)
+syncthing__syncthing:lib/locations/locations.go:149: newLocations[key] = filepath.Clean(dir)
+syncthing__syncthing:lib/fs/filesystem.go:336: file = filepath.Clean(file)
+syncthing__syncthing:lib/fs/util.go:190: firstParts := PathComponents(filepath.Clean(first))
+syncthing__syncthing:lib/fs/util.go:191: secondParts := PathComponents(filepath.Clean(second))
+syncthing__syncthing:lib/fs/util.go:224: return filepath.Clean(result)
+syncthing__syncthing:lib/fs/basicfs_windows.go:280: if filepath.Clean(name) == "." && len(root) <= 7 && len(root) > 4 && root[:4] == `\\?\` {
+syncthing__syncthing:lib/fs/basicfs.go:80: root = filepath.Clean(filepath.Dir(root + sep))
+syncthing__syncthing:cmd/syncthing/cli/utils.go:135: return filepath.ToSlash(filepath.Clean(path))
+syncthing__syncthing:cmd/dev/stfileinfo/main.go:33: log.Println(" ", filepath.Clean(path))
+tailscale__tailscale:packages/deb/deb.go:143: if filepath.Clean(hdr.Name) != "control" {
+tailscale__tailscale:cmd/tsconnect/build-pkg.go:130: if filepath.Clean(src) == filepath.Clean(dst) {
+tailscale__tailscale:cmd/tailscale/cli/serve_v2.go:1265: target = filepath.Clean(target)
+tailscale__tailscale:cmd/tailscale/cli/serve_legacy.go:346: source = filepath.Clean(source)

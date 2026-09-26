@@ -1,0 +1,200 @@
+charmbracelet__bubbletea:tea.go:676: if atomic.LoadUint32(&p.ignoreSignals) == 0 {
+charmbracelet__bubbletea:tea.go:1349: atomic.StoreUint32(&p.ignoreSignals, 1)
+charmbracelet__bubbletea:tea.go:1370: atomic.StoreUint32(&p.ignoreSignals, 0)
+charmbracelet__bubbletea:options.go:93: atomic.StoreUint32(&p.ignoreSignals, 1)
+cli__cli:pkg/cmd/label/clone.go:139: atomic.AddUint32(&successCount, 1)
+cli__cli:pkg/cmd/codespace/delete.go:190: atomic.AddUint32(&deletedCodespaces, 1)
+containerd__containerd:internal/cri/server/container_stop.go:210: sswt = atomic.CompareAndSwapUint32(container.IsStopSignaledWithTimeout, 0, 1)
+dominikh__go-tools:lintcmd/runner/runner.go:294: return atomic.AddUint32(&act.pending, ^uint32(0)) == 0
+dominikh__go-tools:lintcmd/runner/stats.go:31: func (s *Stats) setState(state uint32)    { atomic.StoreUint32(&s.state, state) }
+dominikh__go-tools:lintcmd/runner/stats.go:32: func (s *Stats) State() int               { return int(atomic.LoadUint32(&s.state)) }
+dominikh__go-tools:lintcmd/runner/stats.go:33: func (s *Stats) setInitialPackages(n int) { atomic.StoreUint32(&s.initialPackages, uint32(n)) }
+dominikh__go-tools:lintcmd/runner/stats.go:34: func (s *Stats) InitialPackages() int     { return int(atomic.LoadUint32(&s.initialPackages)) }
+dominikh__go-tools:lintcmd/runner/stats.go:35: func (s *Stats) setTotalPackages(n int)   { atomic.StoreUint32(&s.totalPackages, uint32(n)) }
+dominikh__go-tools:lintcmd/runner/stats.go:36: func (s *Stats) TotalPackages() int       { return int(atomic.LoadUint32(&s.totalPackages)) }
+dominikh__go-tools:lintcmd/runner/stats.go:38: func (s *Stats) finishPackage()         { atomic.AddUint32(&s.processedPackages, 1) }
+dominikh__go-tools:lintcmd/runner/stats.go:39: func (s *Stats) finishInitialPackage()  { atomic.AddUint32(&s.processedInitialPackages, 1) }
+dominikh__go-tools:lintcmd/runner/stats.go:40: func (s *Stats) ProcessedPackages() int { return int(atomic.LoadUint32(&s.processedPackages)) }
+dominikh__go-tools:lintcmd/runner/stats.go:42: return int(atomic.LoadUint32(&s.processedInitialPackages))
+etcd-io__etcd:tools/benchmark/cmd/watch.go:263: if atomic.AddInt32(nrRxed, -1) <= 0 {
+etcd-io__etcd:server/etcdserver/cindex/cindex.go:91: if index := atomic.LoadUint64(&ci.consistentIndex); index > 0 {
+etcd-io__etcd:server/etcdserver/cindex/cindex.go:103: if index := atomic.LoadUint64(&ci.consistentIndex); index > 0 {
+etcd-io__etcd:server/etcdserver/cindex/cindex.go:113: atomic.StoreUint64(&ci.consistentIndex, v)
+etcd-io__etcd:server/etcdserver/cindex/cindex.go:114: atomic.StoreUint64(&ci.term, term)
+etcd-io__etcd:server/etcdserver/cindex/cindex.go:118: index := atomic.LoadUint64(&ci.consistentIndex)
+etcd-io__etcd:server/etcdserver/cindex/cindex.go:119: term := atomic.LoadUint64(&ci.term)
+etcd-io__etcd:server/etcdserver/cindex/cindex.go:132: return atomic.LoadUint64(&ci.applyingIndex), atomic.LoadUint64(&ci.applyingTerm)
+etcd-io__etcd:server/etcdserver/cindex/cindex.go:136: atomic.StoreUint64(&ci.applyingIndex, v)
+etcd-io__etcd:server/etcdserver/cindex/cindex.go:137: atomic.StoreUint64(&ci.applyingTerm, term)
+etcd-io__etcd:server/etcdserver/cindex/cindex.go:150: return atomic.LoadUint64(&f.index)
+etcd-io__etcd:server/etcdserver/cindex/cindex.go:154: return atomic.LoadUint64(&f.index), atomic.LoadUint64(&f.term)
+etcd-io__etcd:server/etcdserver/cindex/cindex.go:158: return atomic.LoadUint64(&f.index)
+etcd-io__etcd:server/etcdserver/cindex/cindex.go:162: atomic.StoreUint64(&f.index, index)
+etcd-io__etcd:server/etcdserver/cindex/cindex.go:163: atomic.StoreUint64(&f.term, term)
+etcd-io__etcd:server/etcdserver/cindex/cindex.go:167: atomic.StoreUint64(&f.index, index)
+etcd-io__etcd:server/etcdserver/cindex/cindex.go:168: atomic.StoreUint64(&f.term, term)
+etcd-io__etcd:server/etcdserver/api/v2store/watcher_hub.go:104: atomic.AddInt64(&wh.count, -1)
+etcd-io__etcd:server/etcdserver/api/v2store/watcher_hub.go:111: atomic.AddInt64(&wh.count, 1)
+etcd-io__etcd:server/etcdserver/api/v2store/watcher_hub.go:161: atomic.AddInt64(&wh.count, -1)
+etcd-io__etcd:server/etcdserver/api/v2store/stats.go:88: GetSuccess:              atomic.LoadUint64(&s.GetSuccess),
+etcd-io__etcd:server/etcdserver/api/v2store/stats.go:89: GetFail:                 atomic.LoadUint64(&s.GetFail),
+etcd-io__etcd:server/etcdserver/api/v2store/stats.go:90: SetSuccess:              atomic.LoadUint64(&s.SetSuccess),
+etcd-io__etcd:server/etcdserver/api/v2store/stats.go:91: SetFail:                 atomic.LoadUint64(&s.SetFail),
+etcd-io__etcd:server/etcdserver/api/v2store/stats.go:92: DeleteSuccess:           atomic.LoadUint64(&s.DeleteSuccess),
+etcd-io__etcd:server/etcdserver/api/v2store/stats.go:93: DeleteFail:              atomic.LoadUint64(&s.DeleteFail),
+etcd-io__etcd:server/etcdserver/api/v2store/stats.go:94: UpdateSuccess:           atomic.LoadUint64(&s.UpdateSuccess),
+etcd-io__etcd:server/etcdserver/api/v2store/stats.go:95: UpdateFail:              atomic.LoadUint64(&s.UpdateFail),
+etcd-io__etcd:server/etcdserver/api/v2store/stats.go:96: CreateSuccess:           atomic.LoadUint64(&s.CreateSuccess),
+etcd-io__etcd:server/etcdserver/api/v2store/stats.go:97: CreateFail:              atomic.LoadUint64(&s.CreateFail),
+etcd-io__etcd:server/etcdserver/api/v2store/stats.go:98: CompareAndSwapSuccess:   atomic.LoadUint64(&s.CompareAndSwapSuccess),
+etcd-io__etcd:server/etcdserver/api/v2store/stats.go:99: CompareAndSwapFail:      atomic.LoadUint64(&s.CompareAndSwapFail),
+etcd-io__etcd:server/etcdserver/api/v2store/stats.go:100: CompareAndDeleteSuccess: atomic.LoadUint64(&s.CompareAndDeleteSuccess),
+etcd-io__etcd:server/etcdserver/api/v2store/stats.go:101: CompareAndDeleteFail:    atomic.LoadUint64(&s.CompareAndDeleteFail),
+etcd-io__etcd:server/etcdserver/api/v2store/stats.go:102: ExpireCount:             atomic.LoadUint64(&s.ExpireCount),
+etcd-io__etcd:server/etcdserver/api/v2store/stats.go:103: Watchers:                atomic.LoadUint64(&s.Watchers),
+etcd-io__etcd:server/etcdserver/api/v2store/stats.go:115: atomic.AddUint64(&s.SetSuccess, 1)
+etcd-io__etcd:server/etcdserver/api/v2store/stats.go:117: atomic.AddUint64(&s.SetFail, 1)
+etcd-io__etcd:server/etcdserver/api/v2store/stats.go:119: atomic.AddUint64(&s.CreateSuccess, 1)
+etcd-io__etcd:server/etcdserver/api/v2store/stats.go:121: atomic.AddUint64(&s.CreateFail, 1)
+etcd-io__etcd:server/etcdserver/api/v2store/stats.go:123: atomic.AddUint64(&s.DeleteSuccess, 1)
+etcd-io__etcd:server/etcdserver/api/v2store/stats.go:125: atomic.AddUint64(&s.DeleteFail, 1)
+etcd-io__etcd:server/etcdserver/api/v2store/stats.go:127: atomic.AddUint64(&s.GetSuccess, 1)
+etcd-io__etcd:server/etcdserver/api/v2store/stats.go:129: atomic.AddUint64(&s.GetFail, 1)
+etcd-io__etcd:server/etcdserver/api/v2store/stats.go:131: atomic.AddUint64(&s.UpdateSuccess, 1)
+etcd-io__etcd:server/etcdserver/api/v2store/stats.go:133: atomic.AddUint64(&s.UpdateFail, 1)
+etcd-io__etcd:server/etcdserver/api/v2store/stats.go:135: atomic.AddUint64(&s.CompareAndSwapSuccess, 1)
+etcd-io__etcd:server/etcdserver/api/v2store/stats.go:137: atomic.AddUint64(&s.CompareAndSwapFail, 1)
+etcd-io__etcd:server/etcdserver/api/v2store/stats.go:139: atomic.AddUint64(&s.CompareAndDeleteSuccess, 1)
+etcd-io__etcd:server/etcdserver/api/v2store/stats.go:141: atomic.AddUint64(&s.CompareAndDeleteFail, 1)
+etcd-io__etcd:server/etcdserver/api/v2store/stats.go:143: atomic.AddUint64(&s.ExpireCount, 1)
+etcd-io__etcd:server/proxy/grpcproxy/lease.go:383: atomic.AddInt64(&ac.counter, delta)
+etcd-io__etcd:server/proxy/grpcproxy/lease.go:387: return atomic.LoadInt64(&ac.counter)
+etcd-io__etcd:server/auth/store.go:1001: atomic.AddUint64(&as.revision, 1)
+etcd-io__etcd:server/auth/store.go:1006: atomic.StoreUint64(&as.revision, rev)
+etcd-io__etcd:server/auth/store.go:1010: return atomic.LoadUint64(&as.revision)
+etcd-io__etcd:server/storage/backend/batch_tx.go:298: atomic.AddInt64(&t.backend.commits, 1)
+etcd-io__etcd:server/storage/backend/backend.go:456: return atomic.LoadInt64(&b.size)
+etcd-io__etcd:server/storage/backend/backend.go:460: return atomic.LoadInt64(&b.sizeInUse)
+etcd-io__etcd:server/storage/backend/backend.go:491: return atomic.LoadInt64(&b.commits)
+etcd-io__etcd:server/storage/backend/backend.go:605: atomic.StoreInt64(&b.size, size)
+etcd-io__etcd:server/storage/backend/backend.go:606: atomic.StoreInt64(&b.sizeInUse, size-(int64(db.Stats().FreePageN)*int64(db.Info().PageSize)))
+etcd-io__etcd:server/storage/backend/backend.go:1094: atomic.StoreInt64(&b.size, size)
+etcd-io__etcd:server/storage/backend/backend.go:1095: atomic.StoreInt64(&b.sizeInUse, size-(int64(stats.FreePageN)*int64(db.Info().PageSize)))
+etcd-io__etcd:server/storage/backend/backend.go:1096: atomic.StoreInt64(&b.openReadTxN, int64(stats.OpenTxN))
+etcd-io__etcd:server/storage/backend/backend.go:1112: return atomic.LoadInt64(&b.openReadTxN)
+etcd-io__etcd:etcdctl/ctlv3/command/make_mirror_command.go:153: fmt.Println(atomic.LoadInt64(&total))
+etcd-io__etcd:etcdctl/ctlv3/command/make_mirror_command.go:180: atomic.AddInt64(&total, 1)
+etcd-io__etcd:etcdctl/ctlv3/command/make_mirror_command.go:222: atomic.AddInt64(&total, 1)
+etcd-io__etcd:etcdctl/ctlv3/command/make_mirror_command.go:225: atomic.AddInt64(&total, 1)
+etcd-io__etcd:client/v3/ordering/util.go:36: if atomic.LoadInt32(&violationCount) > int32(5*len(c.Endpoints())) {
+etcd-io__etcd:client/v3/ordering/util.go:39: atomic.AddInt32(&violationCount, 1)
+etcd-io__etcd:tests/framework/integration/cluster.go:533: c := atomic.AddInt32(&UniqueCount, 1)
+etcd-io__etcd:tests/framework/integration/cluster.go:628: UniqNumber:   int(atomic.AddInt32(&UniqueCount, 1)),
+etcd-io__etcd:pkg/grpctesting/stub_server.go:102: newCount := atomic.AddUint64(&d.counter, 1)
+etcd-io__etcd:pkg/idutil/id.go:68: suffix := atomic.AddUint64(&g.suffix, 1)
+golang__tools:internal/event/export/id.go:66: id = atomic.AddUint64(&nextSpanID, spanIDInc)
+golang__tools:gopls/internal/cache/load.go:51: id := atomic.AddUint64(&loadID, 1)
+golang__tools:gopls/internal/cache/session.go:39: index := atomic.AddInt64(&sessionIndex, 1)
+golang__tools:gopls/internal/cache/session.go:159: index := atomic.AddInt64(&viewIndex, 1)
+golang__tools:gopls/internal/cache/check.go:1030: if atomic.AddInt32(&pred.unfinishedSuccs, -1) == 0 {
+golang__tools:gopls/internal/cache/cache.go:70: index := atomic.AddInt64(&cacheIndex, 1)
+golang__tools:gopls/internal/util/persistent/map.go:97: atomic.AddInt32(&node.value.refCount, 1)
+golang__tools:gopls/internal/util/persistent/map.go:108: atomic.AddInt32(&node.refCount, 1)
+golang__tools:gopls/internal/util/persistent/map.go:117: if atomic.AddInt32(&node.refCount, -1) == 0 {
+golang__tools:gopls/internal/util/persistent/map.go:118: if atomic.AddInt32(&node.value.refCount, -1) == 0 {
+golang__tools:gopls/internal/filecache/filecache.go:340: return atomic.LoadInt64(&budget)
+golang__tools:gopls/internal/filecache/filecache.go:600: budget := atomic.LoadInt64(&budget)
+golang__tools:go/ssa/interp/interp.go:282: atomic.AddInt32(&fr.i.goroutines, 1)
+golang__tools:go/ssa/interp/interp.go:285: atomic.AddInt32(&fr.i.goroutines, -1)
+golang__tools:go/analysis/passes/modernize/atomictypes.go:73: // in calls to atomic.AddInt32(&v, ...) et al.
+golang__tools:go/analysis/passes/modernize/atomictypes.go:138: // appear in calls of the form atomic.AddInt32(&v, ...).
+golang__tools:go/analysis/passes/modernize/atomictypes.go:180: // sync/atomic import, while file "b" calls atomic.LoadInt32(v). After
+golang__tools:go/analysis/passes/modernize/atomictypes.go:207: // v must appear beneath atomic.AddInt32(&v, ...) call.
+golang__tools:go/analysis/passes/modernize/atomictypes.go:239: // atomic.AddInt32(&v,    ...)
+golang__tools:go/analysis/passes/modernize/doc.go:86: atomic.AddInt32(&x, 1)
+golang__tools:go/analysis/passes/atomic/doc.go:14: //	x = atomic.AddUint64(&x, 1)
+golangci__golangci-lint:pkg/goanalysis/runner_loadingpackage.go:443: dependents := atomic.AddInt32(&lp.dependents, -1)
+golangci__golangci-lint:pkg/goanalysis/runners_cache.go:53: atomic.AddInt64(&savedIssuesCount, int64(len(encodedIssues)))
+google__go-containerregistry:pkg/v1/remote/progress.go:34: atomic.AddInt64(&p.lastUpdate.Total, delta)
+google__go-containerregistry:pkg/v1/remote/progress.go:42: Complete: atomic.AddInt64(&p.lastUpdate.Complete, delta),
+google__go-containerregistry:pkg/v1/remote/progress.go:70: atomic.AddInt64(r.count, int64(n))
+grpc__grpc-go:internal/profiling/buffer/buffer.go:62: for atomic.LoadUint32(&q.acquired) != atomic.LoadUint32(&q.written) {
+grpc__grpc-go:internal/profiling/buffer/buffer.go:91: if atomic.CompareAndSwapPointer(&qp.q, qp.q0, qp.q1) {
+grpc__grpc-go:internal/profiling/buffer/buffer.go:95: atomic.CompareAndSwapPointer(&qp.q, qp.q1, qp.q0)
+grpc__grpc-go:internal/profiling/buffer/buffer.go:174: n := atomic.AddUint32(&cb.qpn, 1) & cb.qpMask
+grpc__grpc-go:internal/profiling/buffer/buffer.go:178: acquired := atomic.AddUint32(&q.acquired, 1) - 1
+grpc__grpc-go:internal/profiling/buffer/buffer.go:191: atomic.AddUint32(&q.written, 1)
+grpc__grpc-go:internal/profiling/buffer/buffer.go:217: atomic.AddUint32(&q.written, 1)
+grpc__grpc-go:internal/profiling/buffer/buffer.go:258: if acquired := atomic.LoadUint32(&qs[i].acquired); acquired < qs[i].size {
+grpc__grpc-go:internal/profiling/buffer/buffer.go:266: atomic.StoreUint32(&qs[i].acquired, 0)
+grpc__grpc-go:internal/profiling/buffer/buffer.go:267: atomic.StoreUint32(&qs[i].written, 0)
+grpc__grpc-go:internal/profiling/profiling.go:50: return atomic.LoadUint32(&profilingEnabled) > 0
+grpc__grpc-go:internal/profiling/profiling.go:64: atomic.StoreUint32(&profilingEnabled, 1)
+grpc__grpc-go:internal/profiling/profiling.go:66: atomic.StoreUint32(&profilingEnabled, 0)
+grpc__grpc-go:internal/profiling/profiling.go:209: if !atomic.CompareAndSwapInt32(&statsInitialized, 0, 1) {
+grpc__grpc-go:internal/grpctest/grpctest.go:44: atomic.StoreUint32(&lcFailed, 1)
+grpc__grpc-go:internal/grpctest/grpctest.go:72: if atomic.LoadUint32(&lcFailed) == 1 {
+grpc__grpc-go:internal/grpctest/grpctest.go:76: if atomic.LoadUint32(&lcFailed) == 1 {
+grpc__grpc-go:internal/grpctest/grpctest.go:80: if atomic.LoadUint32(&lcFailed) == 1 {
+grpc__grpc-go:internal/channelz/trace.go:39: atomic.StoreInt32(&maxTraceEntry, i)
+grpc__grpc-go:internal/channelz/trace.go:45: atomic.StoreInt32(&maxTraceEntry, defaultMaxTraceEntry)
+grpc__grpc-go:internal/channelz/trace.go:49: i := atomic.LoadInt32(&maxTraceEntry)
+grpc__grpc-go:internal/channelz/subchannel.go:139: atomic.AddInt32(&sc.traceRefCount, 1)
+grpc__grpc-go:internal/channelz/subchannel.go:143: atomic.AddInt32(&sc.traceRefCount, -1)
+grpc__grpc-go:internal/channelz/subchannel.go:147: i := atomic.LoadInt32(&sc.traceRefCount)
+grpc__grpc-go:internal/channelz/channel.go:256: atomic.AddInt32(&c.traceRefCount, 1)
+grpc__grpc-go:internal/channelz/channel.go:260: atomic.AddInt32(&c.traceRefCount, -1)
+grpc__grpc-go:internal/channelz/channel.go:264: i := atomic.LoadInt32(&c.traceRefCount)
+grpc__grpc-go:internal/channelz/funcs.go:44: atomic.StoreInt32(&curState, 1)
+grpc__grpc-go:internal/channelz/funcs.go:49: atomic.StoreInt32(&curState, 0)
+grpc__grpc-go:internal/channelz/funcs.go:55: return atomic.LoadInt32(&curState) == 1
+grpc__grpc-go:internal/channelz/funcs.go:217: atomic.StoreInt64(&i.id, 0)
+grpc__grpc-go:internal/channelz/funcs.go:221: return atomic.AddInt64(&i.id, 1)
+grpc__grpc-go:internal/xds/xdsclient/clientimpl.go:172: return atomic.AddInt32(&c.refCount, 1)
+grpc__grpc-go:internal/xds/xdsclient/clientimpl.go:176: return atomic.AddInt32(&c.refCount, -1)
+grpc__grpc-go:internal/xds/xdsclient/requests_counter.go:72: if atomic.LoadUint32(&c.numRequests) >= max {
+grpc__grpc-go:internal/xds/xdsclient/requests_counter.go:75: atomic.AddUint32(&c.numRequests, 1)
+grpc__grpc-go:internal/xds/xdsclient/requests_counter.go:82: atomic.AddUint32(&c.numRequests, ^uint32(0))
+grpc__grpc-go:internal/xds/httpfilter/fault/fault.go:153: defer atomic.AddUint32(&activeFaults, ^uint32(0)) // decrement counter
+grpc__grpc-go:internal/xds/httpfilter/fault/fault.go:154: if af := atomic.AddUint32(&activeFaults, 1); af > maxAF.GetValue() {
+grpc__grpc-go:internal/xds/balancer/outlierdetection/callcounter.go:63: numSuccesses: atomic.LoadUint32(&ab.numSuccesses),
+grpc__grpc-go:internal/xds/balancer/outlierdetection/callcounter.go:64: numFailures:  atomic.LoadUint32(&ab.numFailures),
+grpc__grpc-go:internal/xds/balancer/outlierdetection/balancer.go:471: atomic.AddUint32(&ab.numSuccesses, 1)
+grpc__grpc-go:internal/xds/balancer/outlierdetection/balancer.go:473: atomic.AddUint32(&ab.numFailures, 1)
+grpc__grpc-go:internal/xds/clients/internal/syncutil/event.go:41: atomic.StoreInt32(&e.fired, 1)
+grpc__grpc-go:internal/xds/clients/internal/syncutil/event.go:55: return atomic.LoadInt32(&e.fired) == 1
+grpc__grpc-go:internal/xds/clients/lrsclient/load_store.go:201: atomic.AddUint64(d.(*uint64), 1)
+grpc__grpc-go:internal/xds/clients/lrsclient/load_store.go:366: atomic.AddUint64(rcd.succeeded, 1)
+grpc__grpc-go:internal/xds/clients/lrsclient/load_store.go:374: atomic.AddUint64(rcd.errored, 1)
+grpc__grpc-go:internal/xds/clients/lrsclient/load_store.go:382: atomic.AddUint64(rcd.inProgress, 1)
+grpc__grpc-go:internal/xds/clients/lrsclient/load_store.go:386: atomic.AddUint64(rcd.inProgress, ^uint64(0)) // atomic.Add(x, -1)
+grpc__grpc-go:internal/xds/clients/lrsclient/load_store.go:390: return atomic.LoadUint64(rcd.inProgress) // InProgress count is not clear when reading.
+grpc__grpc-go:internal/xds/clients/lrsclient/load_store.go:394: atomic.AddUint64(rcd.issued, 1)
+grpc__grpc-go:internal/idle/idle.go:112: if atomic.LoadInt32(&m.activeCallsCount) > 0 {
+grpc__grpc-go:internal/idle/idle.go:119: if atomic.LoadInt32(&m.activeSinceLastTimerCheck) == 1 {
+grpc__grpc-go:internal/idle/idle.go:122: atomic.StoreInt32(&m.activeSinceLastTimerCheck, 0)
+grpc__grpc-go:internal/idle/idle.go:123: m.resetIdleTimer(time.Duration(atomic.LoadInt64(&m.lastCallEndTime)-time.Now().UnixNano()) + m.timeout)
+grpc__grpc-go:internal/idle/idle.go:153: if !atomic.CompareAndSwapInt32(&m.activeCallsCount, 0, -math.MaxInt32) {
+grpc__grpc-go:internal/idle/idle.go:166: if atomic.LoadInt32(&m.activeCallsCount) != -math.MaxInt32 {
+grpc__grpc-go:internal/idle/idle.go:168: atomic.AddInt32(&m.activeCallsCount, math.MaxInt32)
+grpc__grpc-go:internal/idle/idle.go:171: if checkActivity && atomic.LoadInt32(&m.activeSinceLastTimerCheck) == 1 {
+grpc__grpc-go:internal/idle/idle.go:175: atomic.AddInt32(&m.activeCallsCount, math.MaxInt32)
+grpc__grpc-go:internal/idle/idle.go:198: if atomic.AddInt32(&m.activeCallsCount, 1) > 0 {
+grpc__grpc-go:internal/idle/idle.go:200: atomic.StoreInt32(&m.activeSinceLastTimerCheck, 1)
+grpc__grpc-go:internal/idle/idle.go:207: atomic.StoreInt32(&m.activeSinceLastTimerCheck, 1)
+grpc__grpc-go:internal/idle/idle.go:235: atomic.AddInt32(&m.activeCallsCount, math.MaxInt32)
+grpc__grpc-go:internal/idle/idle.go:254: atomic.AddInt32(&m.activeCallsCount, math.MaxInt32)
+grpc__grpc-go:internal/idle/idle.go:266: atomic.StoreInt64(&m.lastCallEndTime, time.Now().UnixNano())
+grpc__grpc-go:internal/idle/idle.go:272: atomic.AddInt32(&m.activeCallsCount, -1)
+grpc__grpc-go:internal/idle/idle.go:276: return atomic.LoadInt32(&m.closed) == 1
+grpc__grpc-go:internal/idle/idle.go:281: atomic.StoreInt32(&m.closed, 1)
+grpc__grpc-go:internal/binarylog/method_logger.go:41: id := atomic.AddUint64(&g.id, 1)
+grpc__grpc-go:internal/transport/flowcontrol.go:56: if atomic.LoadInt32(&w.quota) > 0 {
+grpc__grpc-go:internal/transport/flowcontrol.go:57: atomic.AddInt32(&w.quota, -sz)
+grpc__grpc-go:internal/transport/flowcontrol.go:71: newQuota := atomic.AddInt32(&w.quota, sz)
+grpc__grpc-go:internal/transport/flowcontrol.go:111: atomic.StoreUint32(&f.effectiveWindowSize, f.limit-f.unacked)
+grpc__grpc-go:internal/transport/flowcontrol.go:115: return atomic.LoadUint32(&f.effectiveWindowSize)
+grpc__grpc-go:internal/transport/transport.go:426: return atomic.CompareAndSwapUint32((*uint32)(&s.state), uint32(oldState), uint32(newState))
+grpc__grpc-go:internal/transport/transport.go:430: return streamState(atomic.LoadUint32((*uint32)(&s.state)))
+grpc__grpc-go:internal/transport/http2_server.go:280: atomic.StoreUint32(&t.resetPingStrikes, 1)
+grpc__grpc-go:internal/transport/http2_server.go:308: t.connectionID = atomic.AddUint64(&serverConnectionCounter, 1)

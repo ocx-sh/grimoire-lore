@@ -1,0 +1,3 @@
+caddyserver__caddy:cmd/main.go:40: "go.uber.org/automaxprocs/maxprocs"
+prometheus__prometheus:cmd/prometheus/main.go:57: "go.uber.org/automaxprocs/maxprocs"
+restic__restic:cmd/restic/main.go:15: "go.uber.org/automaxprocs/maxprocs"

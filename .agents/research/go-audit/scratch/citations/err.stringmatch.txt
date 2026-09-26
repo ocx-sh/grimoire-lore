@@ -1,0 +1,91 @@
+caddyserver__caddy:modules/caddyhttp/reverseproxy/reverseproxy.go:1646: if errors.Is(err, context.Canceled) || strings.Contains(err.Error(), "operation was canceled") {
+caddyserver__caddy:modules/caddyhttp/reverseproxy/addresses.go:81: if strings.Contains(err.Error(), "invalid port") && strings.Contains(err.Error(), "-") {
+caddyserver__caddy:caddytest/caddytest.go:371: if !strings.Contains(err.Error(), expectedError) {
+cli__cli:script/build.go:190: return errors.As(err, &pe) && strings.Contains(pe.Err.Error(), "Access is denied")
+cli__cli:internal/ghcmd/cmd.go:216: if strings.Contains(err.Error(), "Incorrect function") {
+cli__cli:internal/codespaces/portforwarder/port_forwarder.go:149: if err != nil && !strings.Contains(err.Error(), "404") {
+cli__cli:internal/codespaces/portforwarder/port_forwarder.go:186: if err != nil && !strings.Contains(err.Error(), "409") {
+cli__cli:pkg/cmd/ruleset/shared/http.go:62: if strings.Contains(err.Error(), "requires one of the following scopes: ['admin:org']") {
+cli__cli:pkg/cmd/pr/update-branch/update_branch.go:127: if strings.Contains(err.Error(), "GraphQL: merge conflict between base and head (updatePullRequestBranch)") {
+cli__cli:pkg/cmd/pr/merge/http.go:150: if strings.Contains(err.Error(), "Field 'viewerMergeHeadlineText' doesn't exist") ||
+cli__cli:pkg/cmd/pr/merge/http.go:151: strings.Contains(err.Error(), "Field 'viewerMergeBodyText' doesn't exist") {
+cli__cli:api/queries_repo.go:1029: if err != nil && !strings.Contains(err.Error(), errorResolvingOrganization) {
+cli__cli:api/queries_repo.go:1535: if err != nil && !strings.Contains(err.Error(), errorResolvingOrganization) {
+cli__cli:api/queries_repo.go:1589: !strings.Contains(err.Error(), errorResolvingOrganization) {
+cockroachdb__pebble:metamorphic/test.go:148: if info.Err != nil && !strings.Contains(info.Err.Error(), "pebble: empty table") {
+containerd__containerd:plugins/snapshots/devmapper/pool_device.go:414: if strings.Contains(err.Error(), "invalid argument") || strings.Contains(err.Error(), "device busy") {
+containerd__containerd:plugins/snapshots/devmapper/pool_device.go:447: if strings.Contains(err.Error(), "invalid argument") || strings.Contains(err.Error(), "device busy") {
+containerd__containerd:integration/client/daemon.go:90: if p.InitErr != nil && !strings.Contains(p.InitErr.Message, plugin.ErrSkipPlugin.Error()) {
+containerd__containerd:core/mount/losetup_linux.go:181: if strings.Contains(err.Error(), ebusyString) {
+containerd__containerd:core/remotes/docker/resolver.go:1065: if strings.Contains(err.Error(), "TLS handshake timeout") {
+containerd__containerd:cmd/ctr/commands/plugins/plugins.go:132: if strings.Contains(plugin.InitErr.Message, pluginutils.ErrSkipPlugin.Error()) {
+containerd__containerd:cmd/containerd-stress/cri_worker.go:80: !strings.Contains(err.Error(), context.DeadlineExceeded.Error()) {
+containerd__containerd:cmd/containerd-stress/exec_worker.go:99: !strings.Contains(err.Error(), context.DeadlineExceeded.Error()) {
+containerd__containerd:cmd/containerd-stress/worker.go:62: !strings.Contains(err.Error(), context.DeadlineExceeded.Error()) {
+containerd__containerd:cmd/containerd-shim-runc-v2/process/init.go:311: if strings.Contains(err.Error(), "does not exist") {
+containerd__containerd:cmd/containerd-shim-runc-v2/process/utils.go:119: if strings.Contains(err.Error(), "os: process already finished") ||
+containerd__containerd:cmd/containerd-shim-runc-v2/process/utils.go:120: strings.Contains(err.Error(), "container not running") ||
+containerd__containerd:cmd/containerd-shim-runc-v2/process/utils.go:121: strings.Contains(strings.ToLower(err.Error()), "no such process") ||
+containerd__containerd:cmd/containerd-shim-runc-v2/process/utils.go:124: } else if strings.Contains(err.Error(), "does not exist") {
+dominikh__go-tools:staticcheck/sa1001/sa1001.go:76: if strings.Contains(err.Error(), "unexpected") ||
+dominikh__go-tools:staticcheck/sa1001/sa1001.go:77: strings.Contains(err.Error(), "bad character") {
+etcd-io__etcd:server/etcdmain/etcd.go:144: if strings.Contains(err.Error(), "include") && strings.Contains(err.Error(), "--initial-cluster") {
+etcd-io__etcd:client/v3/client.go:657: return strings.Contains(err.Error(), "grpc: the client connection is closing")
+etcd-io__etcd:client/pkg/transport/listener.go:621: return err != nil && strings.Contains(err.Error(), "closed")
+etcd-io__etcd:tests/integration/clientv3/util.go:58: strings.Contains(err.Error(), "context deadline exceeded")
+etcd-io__etcd:tests/framework/integration/cluster.go:456: if err == nil || strings.Contains(err.Error(), "Key not found") {
+etcd-io__etcd:tests/framework/e2e/cluster_proxy.go:83: if !strings.Contains(eerr.Error(), "exit status 2") {
+etcd-io__etcd:tests/framework/e2e/cluster_proxy.go:94: if !strings.Contains(eerr.Error(), "exit status 2") {
+etcd-io__etcd:tests/framework/e2e/cluster_proxy.go:152: if !(strings.Contains(err.Error(), "unexpected exit code") ||
+etcd-io__etcd:tests/framework/e2e/cluster_proxy.go:154: strings.Contains(err.Error(), "exit status 1")) {
+etcd-io__etcd:tests/framework/e2e/etcd_process.go:213: if err != nil && !strings.Contains(err.Error(), "unexpected exit code") {
+etcd-io__etcd:tests/framework/e2e/downgrade.go:65: if strings.Contains(err.Error(), "no inflight downgrade job") {
+etcd-io__etcd:tests/framework/e2e/cluster.go:842: if err != nil && strings.Contains(err.Error(), "member not found") {
+etcd-io__etcd:tests/framework/e2e/cluster.go:1131: if err == nil || strings.Contains(err.Error(), "Key not found") {
+etcd-io__etcd:tests/framework/e2e/cluster.go:1153: if strings.Contains(err.Error(), "connection refused") {
+etcd-io__etcd:tests/robustness/model/history.go:290: if strings.Contains(err.Error(), mvcc.ErrCompacted.Error()) {
+etcd-io__etcd:tests/robustness/model/history.go:294: if strings.Contains(err.Error(), mvcc.ErrFutureRev.Error()) {
+etcd-io__etcd:tests/robustness/failpoint/gofail.go:144: if err != nil && !strings.Contains(err.Error(), "unexpected exit code") {
+etcd-io__etcd:tests/robustness/failpoint/gofail.go:205: if err != nil && !strings.Contains(err.Error(), "unexpected exit code") {
+etcd-io__etcd:tests/robustness/failpoint/cluster.go:86: if err != nil && !strings.Contains(err.Error(), "unexpected exit code") {
+etcd-io__etcd:tests/robustness/failpoint/trigger.go:111: return strings.Contains(err.Error(), "error reading from server: EOF") || strings.HasSuffix(err.Error(), "read: connection reset by peer")
+etcd-io__etcd:tests/robustness/failpoint/kill.go:46: if err != nil && !strings.Contains(err.Error(), "unexpected exit code") {
+golang__tools:internal/imports/imports.go:193: if !fragment || !strings.Contains(err.Error(), "expected 'package'") {
+golang__tools:internal/imports/imports.go:227: if !strings.Contains(err.Error(), "expected declaration") {
+golang__tools:internal/imports/mkindex.go:153: if strings.Contains(err.Error(), "no buildable Go source files in") {
+golang__tools:gopls/internal/cache/mod.go:328: if strings.Contains(goCmdError.Error(), "errors parsing go.mod") {
+golang__tools:gopls/internal/mod/diagnostics.go:118: if err != cache.ErrNoModOnDisk && !strings.Contains(err.Error(), "GOPROXY=off") {
+goreleaser__goreleaser:internal/pipe/docker/manifest.go:233: return strings.Contains(err.Error(), "manifest verification failed for digest")
+goreleaser__goreleaser:internal/pipe/snapcraft/snapcraft.go:469: if strings.Contains(err.Error(), fmt.Sprintf("[%d]", code)) {
+goreleaser__goreleaser:internal/pipe/blob/upload.go:245: if strings.Contains(err.Error(), sub) {
+grpc__grpc-go:internal/transport/handler_server.go:502: if strings.Contains(err.Error(), "body closed by handler") {
+hashicorp__terraform:internal/backend/remote-state/consul/client.go:265: } else if !strings.Contains(err.Error(), "too large") {
+hashicorp__terraform:internal/backend/remote-state/oci/retry.go:63: return strings.Contains(err.Error(), "i/o timeout")
+hashicorp__terraform:internal/backend/remote-state/cos/client.go:330: if strings.Contains(err.Error(), "not exists") {
+hashicorp__terraform:internal/backend/remote-state/oss/backend.go:547: if strings.Contains(err.Error(), catcher.Reason) {
+hashicorp__terraform:internal/cloud/state.go:557: if strings.Contains(err.Error(), "service unavailable") {
+regclient__regclient:cmd/regctl/main.go:49: case strings.Contains(err.Error(), "http: server gave HTTP response to HTTPS client"):
+restic__restic:internal/backend/rclone/backend.go:251: strings.Contains(err.Error(), "http2: client conn could not be established")) {
+restic__restic:internal/archiver/archiver.go:206: if !strings.Contains(err.Error(), item) {
+sigstore__cosign:pkg/providers/github/github.go:87: if strings.Contains(err.Error(), "HTTP_1_1_REQUIRED") {
+syncthing__syncthing:test/util.go:497: return strings.Contains(err.Error(), "use of closed network connection") ||
+syncthing__syncthing:test/util.go:498: strings.Contains(err.Error(), "request canceled while waiting") ||
+syncthing__syncthing:test/util.go:499: strings.Contains(err.Error(), "operation timed out")
+tailscale__tailscale:derp/derpserver/derpserver.go:1776: if strings.Contains(err.Error(), "invalid 'addr' parameter") {
+tailscale__tailscale:k8s-operator/reconciler/dnsrecords/dnsrecords.go:160: if strings.Contains(err.Error(), optimisticLockErrorMsg) {
+tailscale__tailscale:k8s-operator/reconciler/nameserver/nameserver.go:164: if strings.Contains(err.Error(), optimisticLockErrorMsg) {
+tailscale__tailscale:wgengine/router/osrouter/router_linux.go:1251: if errCode(err) == 2 && strings.Contains(err.Error(), "RTNETLINK answers: File exists") {
+tailscale__tailscale:cmd/k8s-operator/proxygroup.go:152: if strings.Contains(err.Error(), optimisticLockErrorMsg) {
+tailscale__tailscale:cmd/k8s-operator/proxygroup.go:474: if strings.Contains(updateErr.Error(), optimisticLockErrorMsg) {
+tailscale__tailscale:cmd/k8s-operator/proxygroup.go:1316: if strings.Contains(err.Error(), optimisticLockErrorMsg) {
+tailscale__tailscale:cmd/k8s-operator/ingress.go:85: if strings.Contains(err.Error(), optimisticLockErrorMsg) {
+tailscale__tailscale:cmd/k8s-operator/egress-services.go:164: if strings.Contains(err.Error(), optimisticLockErrorMsg) {
+tailscale__tailscale:cmd/k8s-operator/tsrecorder.go:153: if strings.Contains(err.Error(), optimisticLockErrorMsg) {
+tailscale__tailscale:cmd/k8s-operator/connector.go:149: if strings.Contains(err.Error(), optimisticLockErrorMsg) {
+tailscale__tailscale:cmd/k8s-operator/api-server-proxy-pg.go:88: if err = r.maybeCleanup(ctx, serviceName, pg, logger, tsClient); err != nil && strings.Contains(err.Error(), optimisticLockErrorMsg) {
+tailscale__tailscale:cmd/k8s-operator/api-server-proxy-pg.go:98: if strings.Contains(err.Error(), optimisticLockErrorMsg) {
+tailscale__tailscale:cmd/k8s-operator/svc-for-pg.go:143: if strings.Contains(err.Error(), optimisticLockErrorMsg) {
+tailscale__tailscale:cmd/k8s-operator/svc.go:126: if strings.Contains(err.Error(), optimisticLockErrorMsg) {
+tailscale__tailscale:cmd/tailscale/cli/dns-status.go:164: if strings.Contains(err.Error(), "not supported") {
+tailscale__tailscale:cmd/tailscale/cli/tailnet-lock.go:532: if err != nil && strings.Contains(err.Error(), tsconst.TailnetLockNotTrustedMsg) {
+tailscale__tailscale:net/neterror/neterror_plan9.go:23: strings.Contains(err.Error(), "closed pipe")

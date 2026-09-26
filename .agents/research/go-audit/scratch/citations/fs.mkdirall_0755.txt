@@ -1,0 +1,100 @@
+aquasecurity__trivy:magefiles/config_schema.go:59: if err := os.MkdirAll("schema", 0755); err != nil {
+bazel-contrib__rules_go:go/tools/builders/replicate.go:50: if err := os.MkdirAll(dir, 0755); err != nil {
+bazelbuild__bazel-gazelle:tools/convert-go-deps-test-case/dir_to_bzl.go:61: if err := os.MkdirAll(dir, 0o755); err != nil {
+caddyserver__caddy:modules/caddypki/acmeserver/acmeserver.go:285: err := os.MkdirAll(dbFolder, 0o755)
+caddyserver__caddy:cmd/commands.go:472: if err := os.MkdirAll(dir, 0o755); err != nil {
+cli__cli:internal/telemetry/telemetry.go:51: if err := os.MkdirAll(stateDir, 0o755); err != nil {
+cli__cli:internal/skills/installer/installer.go:185: if err := os.MkdirAll(skillDir, 0o755); err != nil {
+cli__cli:internal/skills/installer/installer.go:228: if err := os.MkdirAll(dir, 0o755); err != nil {
+cli__cli:internal/skills/installer/installer.go:253: if err := os.MkdirAll(skillDir, 0o755); err != nil {
+cli__cli:internal/skills/installer/installer.go:289: if err := os.MkdirAll(dir, 0o755); err != nil {
+cli__cli:pkg/cmd/release/download/download.go:442: if copyErr = os.MkdirAll(dir, 0755); copyErr != nil {
+cli__cli:pkg/cmd/copilot/copilot.go:319: if err := os.MkdirAll(installDir, 0755); err != nil {
+cli__cli:pkg/cmd/run/view/view.go:49: if err := os.MkdirAll(c.cacheDir, 0755); err != nil {
+cli__cli:pkg/cmd/extension/manager.go:348: if err = os.MkdirAll(targetDir, 0755); err != nil {
+cli__cli:pkg/cmd/extension/manager.go:730: if err := os.MkdirAll(dir, 0755); err != nil {
+cli__cli:pkg/cmd/skills/update/update.go:424: if err := os.MkdirAll(parent, 0o755); err != nil {
+cli__cli:pkg/cmd/skills/update/update.go:457: if err := os.MkdirAll(u.local.dir, 0o755); err != nil {
+cli__cli:cmd/gen-docs/main.go:60: if err := os.MkdirAll(*dir, 0755); err != nil {
+cockroachdb__pebble:metamorphic/meta.go:160: require.NoError(t, os.MkdirAll(rootDir, 0755))
+cockroachdb__pebble:metamorphic/meta.go:163: require.NoError(t, os.MkdirAll(metaDir, 0755))
+cockroachdb__pebble:metamorphic/meta.go:220: require.NoError(t, os.MkdirAll(runDir, 0755))
+containerd__containerd:plugins/content/local/store.go:93: if err := os.MkdirAll(root, 0755); err != nil {
+containerd__containerd:internal/cri/server/cni_conf_syncer.go:54: if err := os.MkdirAll(confDirParent, 0755); err != nil {
+containerd__containerd:internal/cri/server/podsandbox/helpers_linux.go:108: if err := os.MkdirAll(baseDir, 0755); err != nil {
+containerd__containerd:internal/cri/server/podsandbox/sandbox_run.go:106: if err := c.os.MkdirAll(sandboxRootDir, 0755); err != nil {
+containerd__containerd:internal/cri/server/podsandbox/sandbox_run.go:121: if err := c.os.MkdirAll(volatileSandboxRootDir, 0755); err != nil {
+containerd__containerd:internal/cri/server/container_image_mount.go:151: err = os.MkdirAll(target, 0755)
+containerd__containerd:internal/cri/server/update_runtime_config.go:132: if err := os.MkdirAll(confDir, 0755); err != nil {
+containerd__containerd:internal/cri/server/container_create.go:192: if err := c.os.MkdirAll(containerRootDir, 0755); err != nil {
+containerd__containerd:internal/cri/server/container_create.go:211: if err := c.os.MkdirAll(volatileContainerRootDir, 0755); err != nil {
+containerd__containerd:pkg/netns/netns_linux.go:66: if err := os.MkdirAll(baseDir, 0755); err != nil {
+containerd__containerd:cmd/ctr/commands/images/build_erofs_cache.go:155: if err := os.MkdirAll(cacheDir, 0755); err != nil {
+containerd__containerd:cmd/ctr/commands/images/build_erofs_cache.go:191: if err := os.MkdirAll(destDir, 0755); err != nil {
+dominikh__go-tools:internal/xtools-internal/proxydir/proxydir.go:22: if err := os.MkdirAll(dir, 0755); err != nil {
+dominikh__go-tools:internal/xtools-internal/packagestest/modules.go:69: if err := os.MkdirAll(primaryDir, 0755); err != nil {
+etcd-io__etcd:pkg/report/perfdash.go:78: err := os.MkdirAll(artifactsDir, 0o755)
+golang__tools:internal/proxydir/proxydir.go:22: if err := os.MkdirAll(dir, 0755); err != nil {
+golang__tools:internal/packagestest/modules.go:69: if err := os.MkdirAll(primaryDir, 0755); err != nil {
+golang__tools:gopls/internal/vulncheck/vulntest/db.go:123: if err := os.MkdirAll(idDir, 0755); err != nil {
+golang__tools:gopls/internal/test/integration/runner.go:189: if err := os.MkdirAll(rootDir, 0755); err != nil {
+golang__tools:gopls/internal/test/integration/fake/sandbox.go:121: if err := os.MkdirAll(modcache, 0755); err != nil {
+golang__tools:gopls/internal/test/integration/fake/sandbox.go:127: if err := os.MkdirAll(dir, 0755); err != nil {
+golang__tools:gopls/internal/test/integration/fake/sandbox.go:160: if err := os.MkdirAll(workdir, 0755); err != nil {
+golang__tools:cmd/splitdwarf/splitdwarf.go:265: err := os.MkdirAll(outDwarf, 0755)
+golang__vuln:cmd/govulncheck/test_utils.go:48: if err := os.MkdirAll(dest, 0755); err != nil {
+goreleaser__goreleaser:internal/pipe/gomod/gomod_proxy.go:189: if err := os.MkdirAll(dir, 0o755); err != nil {
+goreleaser__goreleaser:internal/pipe/chocolatey/chocolatey.go:142: if err := os.MkdirAll(toolsPath, 0o755); err != nil {
+goreleaser__goreleaser:internal/pipe/makeself/makeself.go:243: if err := os.MkdirAll(dir, 0o755); err != nil {
+goreleaser__goreleaser:internal/pipe/dist/dist.go:61: return os.MkdirAll(ctx.Config.Dist, 0o755)
+goreleaser__goreleaser:internal/pipe/flatpak/flatpak.go:168: if err := os.MkdirAll(workDir, 0o755); err != nil {
+goreleaser__goreleaser:internal/pipe/snapcraft/snapcraft.go:259: if err = os.MkdirAll(metaDir, 0o755); err != nil {
+goreleaser__goreleaser:internal/pipe/snapcraft/snapcraft.go:271: if err := os.MkdirAll(destinationDir, 0o755); err != nil {
+goreleaser__goreleaser:internal/testlib/path.go:107: if err := os.MkdirAll(dir, 0o755); err != nil {
+goreleaser__goreleaser:internal/client/git.go:92: if err := os.MkdirAll(parent, 0o755); err != nil {
+hashicorp__terraform:internal/moduletest/states/manifest.go:511: return os.MkdirAll(manifest.dataDir, 0755)
+hashicorp__terraform:internal/backend/local/backend.go:503: err = os.MkdirAll(stateDir, 0755)
+hashicorp__terraform:internal/configs/configload/copy_dir.go:54: if err := os.MkdirAll(dstPath, 0755); err != nil {
+hashicorp__terraform:internal/command/cloud.go:254: err = os.MkdirAll(packagesPath, 0755)
+hashicorp__terraform:internal/command/stacks.go:401: err = os.MkdirAll(pluginPath, 0755)
+hashicorp__terraform:internal/command/workdir/dir.go:153: err := os.MkdirAll(d.dataDir, 0755)
+hashicorp__terraform:internal/provider-simple-v6/state_store_fs.go:240: err := os.MkdirAll(dir, 0755)
+hashicorp__terraform:internal/copy/copy_dir.go:81: if err := os.MkdirAll(dstPath, 0755); err != nil {
+hashicorp__terraform:internal/providercache/package_install.go:236: err = os.MkdirAll(parentDir, 0755)
+ko-build__ko:pkg/build/gobuild.go:332: err = os.MkdirAll(cloneDir, 0755)
+oras-project__oras:test/e2e/suite/command/backup.go:499: err := os.MkdirAll(tarDirPath, 0755)
+oras-project__oras:test/e2e/suite/command/restore.go:653: err := os.MkdirAll(backupDir, 0755)
+oras-project__oras:test/e2e/suite/command/restore.go:668: err := os.MkdirAll(backupDir, 0755)
+oras-project__oras-go:registry/remote/signature/lookaside.go:231: if err := os.MkdirAll(dir, 0755); err != nil {
+restic__restic:helpers/build-release-binaries/main.go:83: err := os.MkdirAll(dir, 0755)
+restic__restic:cmd/restic/cmd_check.go:201: err := os.MkdirAll(cachedir, 0755)
+syncthing__syncthing:test/util.go:63: err = os.MkdirAll(p0, 0o755)
+syncthing__syncthing:test/util.go:218: err = os.MkdirAll(path, 0755)
+syncthing__syncthing:cmd/dev/stgenfiles/main.go:46: err = os.MkdirAll(p0, 0o755)
+tailscale__tailscale:release/dist/qnap/pkgs.go:197: return os.MkdirAll(outPath, 0755)
+tailscale__tailscale:release/dist/qnap/pkgs.go:242: if err = os.MkdirAll(tmpDir, 0755); err != nil {
+tailscale__tailscale:log/sockstatlog/logger.go:109: if err := os.MkdirAll(logdir, 0755); err != nil && !os.IsExist(err) {
+tailscale__tailscale:client/systray/startup-creator.go:73: if err := os.MkdirAll(systemdDir, 0o755); err != nil {
+tailscale__tailscale:client/systray/startup-creator.go:124: if err := os.MkdirAll(autostartDir, 0o755); err != nil {
+tailscale__tailscale:tka/tailchonk.go:315: if err := os.MkdirAll(dir, 0755); err != nil && !os.IsExist(err) {
+tailscale__tailscale:tka/tailchonk.go:729: if err := os.MkdirAll(dir, 0755); err != nil && !os.IsExist(err) {
+tailscale__tailscale:tool/gocross/toolchain.go:192: if err := os.MkdirAll(toolchainDir, 0755); err != nil {
+tailscale__tailscale:tstest/integration/service_windows.go:152: if err := os.MkdirAll(dir, 0o755); err != nil {
+tailscale__tailscale:tstest/natlab/vmtest/images.go:163: if err := os.MkdirAll(cacheDir, 0755); err != nil {
+tailscale__tailscale:tstest/natlab/vmtest/version.go:132: if err := os.MkdirAll(dir, 0755); err != nil {
+tailscale__tailscale:tstest/natlab/vmtest/vmtest.go:683: if err := os.MkdirAll(e.binDir, 0755); err != nil {
+tailscale__tailscale:tstest/natlab/vmtest/vmtest.go:2180: if err := os.MkdirAll(outDir, 0755); err != nil {
+tailscale__tailscale:tstest/natlab/vmtest/tailmac.go:174: os.MkdirAll(base, 0755)
+tailscale__tailscale:tstest/natlab/vmtest/tailmac.go:489: if err := os.MkdirAll(cloneDir, 0755); err != nil {
+tailscale__tailscale:tstest/natlab/vmtest/tailmac.go:562: os.MkdirAll(vmBase, 0755)
+tailscale__tailscale:cmd/k8s-operator/e2e/setup.go:138: if err = os.MkdirAll(tmp, 0755); err != nil {
+tailscale__tailscale:cmd/k8s-operator/e2e/setup.go:238: if err = os.MkdirAll(certsDir, 0755); err != nil {
+tailscale__tailscale:cmd/tsconnect/common.go:125: return os.MkdirAll(dirPath, 0755)
+tailscale__tailscale:cmd/distsign/distsign.go:35: if err := os.MkdirAll(tempDir, 0755); err != nil {
+tailscale__tailscale:cmd/tailscale/cli/configure-jetkvm.go:51: if err := os.MkdirAll("/userdata/init.d", 0755); err != nil {
+tailscale__tailscale:cmd/tailscale/cli/configure-synology.go:86: if err := os.MkdirAll("/dev/net", 0755); err != nil {
+tailscale__tailscale:cmd/tailscale/cli/configure-kube.go:279: if err := os.MkdirAll(dir, 0755); err != nil {
+tailscale__tailscale:net/dns/debian_resolvconf.go:104: if err := os.MkdirAll(resolvconfLibcHookPath, 0755); err != nil {
+tailscale__tailscale:net/dns/manager_darwin.go:80: if err := os.MkdirAll(c.resolverDir, 0755); err != nil {
+tailscale__tailscale:safesocket/unixsocket.go:49: os.MkdirAll(sockDir, 0755) // best effort
+tailscale__tailscale:logpolicy/logpolicy.go:740: if err := os.MkdirAll(tmpfsLogs, 0755); err == nil {

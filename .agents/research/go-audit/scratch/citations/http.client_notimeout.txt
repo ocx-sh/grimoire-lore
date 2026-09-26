@@ -1,0 +1,87 @@
+aquasecurity__trivy:pkg/dependency/parser/java/pom/parse.go:165: httpClient: &http.Client{
+aquasecurity__trivy:pkg/x/http/client.go:23: c := &http.Client{
+cli__cli:internal/codespaces/connection/tunnels_api_server_mock.go:218: return &http.Client{
+containerd__containerd:internal/cri/server/images/image_pull.go:544: client    = &http.Client{Transport: transport}
+containerd__containerd:core/remotes/docker/resolver.go:699: client := &http.Client{}
+containerd__containerd:core/remotes/docker/registry.go:179: config.Client = &http.Client{
+containerd__containerd:core/remotes/docker/config/hosts.go:152: client := &http.Client{
+containerd__containerd:cmd/ctr/commands/shim/pprof.go:172: return &http.Client{Transport: tr}, nil
+containerd__containerd:cmd/ctr/commands/pprof/pprof.go:275: client := &http.Client{Transport: tr}
+etcd-io__etcd:tools/etcd-dump-metrics/metrics.go:35: cli := &http.Client{Transport: tr}
+etcd-io__etcd:server/etcdserver/cluster_util.go:296: cc := &http.Client{
+etcd-io__etcd:server/etcdserver/corrupt.go:470: cc := &http.Client{
+etcd-io__etcd:server/etcdmain/grpc_proxy.go:630: return &http.Client{Transport: transport}
+etcd-io__etcd:server/lease/leasehttp/http.go:179: cc := &http.Client{
+etcd-io__etcd:server/lease/leasehttp/http.go:244: cc := &http.Client{
+etcd-io__etcd:tests/framework/integration/cluster.go:1325: cli := &http.Client{Transport: tr}
+google__go-containerregistry:pkg/v1/google/list.go:86: l.client = &http.Client{Transport: tr}
+google__go-containerregistry:pkg/v1/remote/write.go:95: return &http.Client{Transport: tr, CheckRedirect: checkRedirectSSRF}, nil
+google__go-containerregistry:pkg/v1/remote/write.go:119: client:               &http.Client{Transport: tr, CheckRedirect: checkRedirectSSRF},
+google__go-containerregistry:pkg/v1/remote/write.go:162: w.client = &http.Client{Transport: wt, CheckRedirect: checkRedirectSSRF}
+google__go-containerregistry:pkg/v1/remote/check.go:53: client: &http.Client{Transport: tr, CheckRedirect: checkRedirectSSRF},
+google__go-containerregistry:pkg/v1/remote/fetcher.go:76: client: &http.Client{
+google__go-containerregistry:pkg/v1/remote/fetcher.go:407: safeClient := &http.Client{
+google__go-github:github/github.go:592: c.client = &http.Client{}
+google__go-github:github/github.go:2281: return &http.Client{Transport: t}
+google__go-github:github/github.go:2329: return &http.Client{Transport: t}
+google__go-github:scrape/scrape.go:56: Client: &http.Client{
+goreleaser__goreleaser:internal/pipe/webhook/webhook.go:95: client := &http.Client{
+goreleaser__goreleaser:internal/client/gitlab.go:96: gitlab.WithHTTPClient(&http.Client{
+goreleaser__goreleaser:internal/client/gitea.go:77: httpClient := &http.Client{Transport: transport}
+hashicorp__terraform:internal/backend/remote-state/oss/backend.go:655: httpClient := &http.Client{}
+kubernetes-sigs__controller-runtime:pkg/internal/testing/process/process.go:215: client := &http.Client{
+oras-project__oras:cmd/oras/internal/option/remote.go:440: Client: &http.Client{
+oras-project__oras-go:registry/remote/retry/client.go:28: return &http.Client{
+oras-project__oras-go:registry/remote/builder.go:230: return &http.Client{
+oras-project__oras-go:registry/remote/logging_transport.go:53: //	    Client: &http.Client{
+prometheus__prometheus:discovery/marathon/marathon.go:164: client:     &http.Client{Transport: rt},
+prometheus__prometheus:discovery/eureka/eureka.go:139: client: &http.Client{Transport: rt},
+prometheus__prometheus:discovery/moby/docker.go:169: client.WithHTTPClient(&http.Client{
+prometheus__prometheus:discovery/moby/dockerswarm.go:161: client.WithHTTPClient(&http.Client{
+prometheus__prometheus:discovery/triton/triton.go:166: client := &http.Client{Transport: transport}
+prometheus__prometheus:scrape/scrape.go:224: client = &http.Client{Transport: failingRoundTripper{err: fmt.Errorf("creating unix socket scrape client for %q: %w", socketPath, err)}}
+regclient__regclient:internal/reghttp/http.go:137: httpClient: &http.Client{},
+regclient__regclient:internal/reghttp/http.go:234: c.httpClient = &http.Client{Transport: t}
+regclient__regclient:internal/retryable/retryable.go:93: httpClient: &http.Client{},
+regclient__regclient:internal/retryable/retryable.go:217: r.httpClient = &http.Client{Transport: t}
+regclient__regclient:internal/auth/auth.go:112: httpClient: &http.Client{},
+restic__restic:internal/backend/gs/gs.go:56: httpClient := &http.Client{
+restic__restic:internal/backend/s3/s3.go:130: client := &http.Client{Transport: tr}
+restic__restic:internal/backend/azure/azure.go:73: Transport: &http.Client{Transport: rt},
+sigstore__cosign:pkg/providers/github/github.go:91: client = &http.Client{
+syncthing__syncthing:lib/ur/failurereporting.go:201: client := &http.Client{
+syncthing__syncthing:lib/ur/usage_report.go:360: client := &http.Client{
+syncthing__syncthing:lib/upnp/upnp.go:606: httpClient := &http.Client{
+syncthing__syncthing:lib/relay/client/dynamic.go:38: var relayPoolClient = &http.Client{
+syncthing__syncthing:cmd/syncthing/crash_reporting.go:35: var crashReportClient = &http.Client{
+tailscale__tailscale:sessionrecording/connect.go:403: return &http.Client{Transport: tr}
+tailscale__tailscale:kube/kubeclient/client.go:115: client: &http.Client{
+tailscale__tailscale:wgengine/netlog/netlog.go:148: httpc := &http.Client{Transport: logpolicy.NewLogtailTransport(logtail.DefaultHost, netMon, health, logf)}
+tailscale__tailscale:log/sockstatlog/logger.go:139: HTTPC: &http.Client{Transport: logger.tr},
+tailscale__tailscale:client/local/local.go:150: lc.tsClient = &http.Client{
+tailscale__tailscale:client/web/qnap.go:109: client := &http.Client{Transport: tr}
+tailscale__tailscale:prober/http.go:85: c := &http.Client{
+tailscale__tailscale:prober/http.go:176: c := &http.Client{
+tailscale__tailscale:prober/derp.go:1205: var httpOrFileClient = &http.Client{Transport: httpOrFileTransport()}
+tailscale__tailscale:tsnet/tsnet.go:433: return &http.Client{Transport: tr}
+tailscale__tailscale:tsnet/tsnet.go:1123: HTTPC:        &http.Client{Transport: logpolicy.NewLogtailTransport(logtail.DefaultHost, s.netMon, health, tsLogf)},
+tailscale__tailscale:tstest/mts/mts.go:226: return &http.Client{
+tailscale__tailscale:tstest/natlab/vnet/vnet.go:3029: HTTPClient: &http.Client{
+tailscale__tailscale:cmd/containerboot/egressservices.go:157: ep.client = &http.Client{} // default HTTP client
+tailscale__tailscale:cmd/k8s-operator/e2e/setup.go:967: dialer := spdy.NewDialer(upgrader, &http.Client{Transport: transport}, "POST", u)
+tailscale__tailscale:cmd/fbstatus/fbstatus.go:288: hc := &http.Client{
+tailscale__tailscale:cmd/cigocacher/cigocacher.go:184: return &http.Client{
+tailscale__tailscale:cmd/tsconnect/wasm/wasm_js.go:99: HTTPC: &http.Client{Transport: &noCORSTransport{http.DefaultTransport}},
+tailscale__tailscale:cmd/tsconnect/wasm/wasm_js.go:526: c := &http.Client{
+tailscale__tailscale:cmd/tta/tta.go:379: client := &http.Client{
+tailscale__tailscale:cmd/stunstamp/stunstamp.go:282: client := &http.Client{}
+tailscale__tailscale:net/dnsfallback/dnsfallback.go:148: c := &http.Client{Transport: tr}
+tailscale__tailscale:net/tsdial/tsdial.go:744: d.peerClient = &http.Client{Transport: t}
+tailscale__tailscale:net/netcheck/netcheck.go:1186: hc := &http.Client{Transport: tr}
+tailscale__tailscale:net/portmapper/upnp.go:64: goupnp.HTTPClientDefault = &http.Client{
+tailscale__tailscale:clientupdate/distsign/distsign.go:337: hc := &http.Client{
+tailscale__tailscale:clientupdate/clientupdate_gokrazy.go:176: return &http.Client{
+tailscale__tailscale:control/ts2021/client.go:178: np.Client = &http.Client{Transport: tr}
+tailscale__tailscale:control/controlclient/direct.go:366: httpc = &http.Client{Transport: tr}
+tailscale__tailscale:logpolicy/logpolicy.go:652: conf.HTTPC = &http.Client{Transport: noopPretendSuccessTransport{}}
+tailscale__tailscale:logpolicy/logpolicy.go:674: conf.HTTPC = &http.Client{Transport: TransportOptions{
