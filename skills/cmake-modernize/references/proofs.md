@@ -53,8 +53,9 @@ case. Pass the plan file's configure options to each `cmake -S`.
 # SRC = absolute library source, W = an empty scratch dir, GATE per binary.
 mkdir -p "$W/asub"
 printf '%s\n' 'cmake_minimum_required(VERSION 3.25...4.4)' 'project(asub LANGUAGES C)' \
-  'include(CTest)' "add_subdirectory($SRC lib-build)" > "$W/asub/CMakeLists.txt"
-cmake -S "$W/asub" -B "$W/asub-build" -G Ninja "$GATE"
+  'include(CTest)' "add_subdirectory($SRC lib-build)" 'message(STATUS "asub_bsl=[${BUILD_SHARED_LIBS}]")' > "$W/asub/CMakeLists.txt"
+cmake -S "$W/asub" -B "$W/asub-build" -G Ninja "$GATE" > "$W/asub-configure.txt"
+grep -r --include='asub-configure.txt' -e 'asub_bsl=\[ON\]' "$W"
 ctest --test-dir "$W/asub-build" -N > "$W/asub-tests.txt"
 grep -r --include='asub-tests.txt' -e 'Total Tests: 0' "$W"
 cmake --build "$W/asub-build" --target help > "$W/asub-targets.txt"
@@ -62,8 +63,14 @@ NAME=mylib_unit_tests
 grep -r --include='asub-targets.txt' -e "$NAME" "$W"
 ```
 
-The first `grep` must print a line. Empty output = tests leaked (finding). Run
-the second `grep` once per developer-only target name recorded from a top-level
+The configure must exit 0. After a failed configure, `ctest -N` still prints
+`Total Tests: 0` and every target grep is empty, so a red configure reads as a
+pass (tinyformat, both lines). The `asub_bsl` grep: empty output = pass. A line
+means the library's `option(BUILD_SHARED_LIBS ... ON)` created the parent's
+cache entry, and every `add_library()` the parent adds afterwards builds
+`SHARED` (jsoncpp at `3347a4b8`: `asub_bsl=[ON]` before the step 5 guard, empty
+after it, 3.31.12 and 4.4.2). The tests `grep` must print a line. Empty output
+= tests leaked (finding). Run the last `grep` once per developer-only target name recorded from a top-level
 configure of the same tree. Empty output = pass. Measured on all three lines: a
 library guarded on `PROJECT_IS_TOP_LEVEL` prints `Total Tests: 0` and no
 `mylib_unit_tests`, and the same library unguarded prints `Total Tests: 1` and
@@ -101,6 +108,26 @@ parent's `ON` (measured 2026-09-26 on 3.31.12 and 4.4.2: the example target
 leaks, while the same library with `mylib_BUILD_EXAMPLES` prints nothing).
 Chipmunk2D's unprefixed `BUILD_DEMOS` failed the parent's configure with
 `Could NOT find OpenGL` on both lines.
+
+The third pass compiles a consumer through `add_subdirectory`. The first pass
+only lists targets, and the round trip reads only `INSTALL_INTERFACE`, so a
+usage requirement built on `CMAKE_SOURCE_DIR` passes both.
+
+```sh
+# TARGETS, SYM_DECL and SYM_CALL as in the round trip. Exit 0 from both commands = pass.
+mkdir -p "$W/asub3"
+printf '%s\n' "$SYM_DECL" "int main(void) { return $SYM_CALL; }" > "$W/asub3/main.c"
+printf '%s\n' 'cmake_minimum_required(VERSION 3.25...4.4)' 'project(asub3 LANGUAGES C)' \
+  "add_subdirectory($SRC lib-build)" 'add_executable(app main.c)' "target_link_libraries(app PRIVATE $TARGETS)" > "$W/asub3/CMakeLists.txt"
+cmake -S "$W/asub3" -B "$W/asub3-build" -G Ninja "$GATE"
+cmake --build "$W/asub3-build"
+```
+
+For a C++ library, declare `LANGUAGES CXX` and write `main.cpp`, as in the
+round trip. Measured on tinyformat (3.31.12 and 4.4.2): with
+`$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>` the configure exits 0 and the build
+exits 1 with `'tinyformat.h' file not found`, and with
+`${CMAKE_CURRENT_SOURCE_DIR}` both exit 0.
 
 ## The offline subproject probe
 
@@ -177,7 +204,11 @@ linked `m`, passed with an empty `main` and exits 1 with
 (both lines, 2026-09-26). One call pulls in only its own object file, so a gap
 in another object stays hidden. The script runs a single-config generator, so multi-config
 defects need `CMK-INST-22`'s leg. For a C++ library, the consumer declares
-`LANGUAGES CXX` and writes `main.cpp` instead.
+`LANGUAGES CXX` and writes `main.cpp` instead. Run it once more with each
+option that adds a `PUBLIC` definition switched on in `CFG_ARGS`: upstream
+jsoncpp's directory-scoped `JSONCPP_USE_SECURE_MEMORY` never reached the
+installed target, and its consumer exits 2 with
+`undefined symbol: Json::Value::operator[]` (3.31.12 and 4.4.2).
 
 ## CI checks
 
@@ -190,7 +221,8 @@ grep -rn -e 'Werror=author' -e 'Werror=dev' .github/workflows
 # A preset that switches the gate off. Empty output = pass.
 grep -rn --include='CMakePresets.json' --include='CMakeUserPresets.json' -e '"dev"[[:space:]]*:[[:space:]]*false' -e '"deprecated"[[:space:]]*:[[:space:]]*false' .
 # CMK-CORE-05: an early-exiting reader in a script. Empty output = pass. A hit in
-# a file that also sets pipefail is the finding.
+# a file that also sets pipefail is the finding. Name only operands that exist:
+# a missing scripts exits 2, and -s hides the message while the hits still print.
 grep -rsnE -e '[|] *grep( +-[a-zA-Z]+)* +-[a-zA-Z]*[qm]' -e '[|] *rg( +-[a-zA-Z]+)* +-[a-zA-Z]*[qm]' -e '[|] *head' scripts .github
 # CMK-CORE-04: a dead formatter. Empty output = pass. Any hit means migrate.
 grep -rn --include='*.yml' --include='*.yaml' --include='*.txt' --include='*.toml' \

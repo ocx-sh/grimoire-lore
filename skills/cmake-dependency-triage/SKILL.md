@@ -1,6 +1,6 @@
 ---
 name: cmake-dependency-triage
-description: Symptom-first triage for a CMake dependency that resolved to the wrong copy, version or mechanism, with the exact cache, configure-log, Conan and vcpkg reads and what each output means. Use when find_package picked a different installed copy than expected, a re-pointed _ROOT hint or CMAKE_PREFIX_PATH had no effect, a fetched copy was built although an installed one was on the path, a dependency provider or cmake-conan never supplied a package or find_program cannot see it, a binary links or loads a different copy than the one configured, a consumer fails with "link interface of target ... not found", CMake 4 reports "Compatibility with CMake < 3.5 has been removed" or the configure gate stops on "< 3.10 will be removed" or on install-absolute-destination in a dependency, an offline or FETCHCONTENT_SOURCE_DIR configure fails where the online one passed, or someone asks which version Conan or vcpkg picked. Not for choosing a package manager or writing build files (the cmake-build and cpp-packaging rules).
+description: Symptom-first triage for a CMake dependency that resolved to the wrong copy, version or mechanism, with the exact cache, configure-log, Conan and vcpkg reads and what each output means. Use when find_package picked a different installed copy than expected, a re-pointed _ROOT, CMAKE_PREFIX_PATH or toolchain had no effect, a fetched copy was built although an installed one was on the path, a dependency provider or cmake-conan never supplied a package or find_program cannot see it, a binary links or loads a different copy than the one configured, a consumer fails with "link interface of target ... not found", CMake 4 reports "Compatibility with CMake < 3.5 has been removed" or the configure gate stops on "< 3.10 will be removed" or on install-absolute-destination in a dependency, an offline or FETCHCONTENT_SOURCE_DIR configure fails where the online one passed, or someone asks which version Conan or vcpkg picked. Not for choosing a package manager or writing build files (the cmake-build and cpp-packaging rules).
 license: Apache-2.0
 metadata:
   summary: Ordered triage for "which copy, which version and which mechanism resolved this dependency", read from the configure's own records before any debug flag
@@ -17,13 +17,14 @@ This skill assumes the `cmake-build` and `cpp-packaging` rule sets are
 installed. The merge-blocking rows the procedure leans on are repeated at the
 end, on purpose.
 Everything below was run on CMake 3.31.12, 4.3.4 and 4.4.2, Conan 2.32.0 with
-cmake-conan `develop2`, and vcpkg-tool 2026-09-26 (verified 2026-09-26). The
-read order was also run on real `DaveGamble/cJSON` 1.7.15 and 1.7.18 installs
-beside a host `libcjson.so.1`, on 3.31.12, 4.3.4 and 4.4.2 (2026-09-26).
+cmake-conan `develop2` (`b1593849`), and vcpkg-tool 2026-09-26, or 2026-07-27
+where a line says so (the tool registry commit `11ace808` bootstraps). The read
+order was also run on real `DaveGamble/cJSON` 1.7.15 to 1.7.19 installs, through
+vcpkg, Conan and a host `libcjson.so.1` (2026-09-26).
 
 Contents: [Stop condition](#stop-condition) · [The evidence rule](#the-evidence-rule) ·
 [Before you start](#before-you-start) · [The read order](#the-read-order) ·
-[Pick the entry point](#pick-the-entry-point) · [T1 to T12](#t1-wrong-copy-or-a-re-pointed-hint-had-no-effect) ·
+[Pick the entry point](#pick-the-entry-point) · [T1 to T13](#t1-wrong-copy-or-a-re-pointed-hint-had-no-effect) ·
 [Pinned defaults](#pinned-defaults) · [MUST rows this procedure enforces](#must-rows-this-procedure-enforces) ·
 [Failure modes](#failure-modes) · [References](#references)
 
@@ -39,33 +40,27 @@ Stop when the triage names all three. Any one missing and it is a guess.
 - **The rule that fixes it, and its check passing.** Applied at the file and
   line that decided, never at a layer that did not.
 
-If the configured copy is right and the binary reports another version at
-run time, the loader picked another copy (T11). If the copy is right and the
-version is wrong at configure time, the cause sits in the manager's
-resolution. Hand it to `conan graph info` (T8) or the vcpkg manifest (T9).
+A right copy with another version at run time is the loader (T11). A right
+copy with a wrong version at configure time is the manager's: read what it
+wrote into this tree (T8, T9), never only what it would resolve now.
 
-Four moves stay out of scope, each turning a diagnosis into a new defect:
-fixing a floor error with a global `CMAKE_POLICY_VERSION_MINIMUM` or a warning
-switch, deleting a build tree before recording which `_DIR` was stale, editing
-a manager lockfile by hand (CMK-CONAN-09), and offering
-`cmake_language(DEFER)` as an ordering fix (CMK-TC-05).
+Out of scope, because each turns a diagnosis into a defect: a global floor
+switch, wiping the tree before step 1, a hand-edited lockfile (CMK-CONAN-09),
+and `cmake_language(DEFER)` as an ordering fix (CMK-TC-05).
 
 ## The evidence rule
 
 Provenance comes only from the configure's own records:
 
-- `CMakeCache.txt`, read by `grep`, never by `cmake -L`. `-L` omits
-  `UNINITIALIZED` entries, which is exactly the type a plain `-Ddep_ROOT=...`
-  gets (measured, both lines).
+- `CMakeCache.txt`, read by `grep`, never by `cmake -L`, which omits the
+  `UNINITIALIZED` type a plain `-Ddep_ROOT=...` gets (both lines).
 - `CMakeFiles/pkgRedirects/`.
-- `CMakeFiles/CMakeConfigureLog.yaml` `find_package-v1` events, on CMake 4.1
-  and newer only. 3.31.12 writes none.
+- `CMakeConfigureLog.yaml` `find_package-v1` events, on 4.1 and newer only.
 - `--debug-find-pkg=NAME` output, but only from a `--fresh` configure.
 
 It never comes from the call site, a green configure, a manager's trace
-(`VCPKG_TRACE_FIND_PACKAGE`, `vcpkg depend-info`), or `cmake --graphviz`, which
-draws the target graph only and on a `find_package`-only project renders just
-its legend.
+(`VCPKG_TRACE_FIND_PACKAGE`, `vcpkg depend-info`), `conan graph info`, or
+`cmake --graphviz`, which draws the target graph only.
 
 ## Before you start
 
@@ -84,9 +79,8 @@ be involved, `-DCMAKE_POLICY_DEFAULT_CMP0170=NEW`. Shipped probes assume
 | 4.0 to 4.3 (4.3.4) | `-Werror=dev` | T6, fixed by CMK-DEP-15 | T5, fixed by CMK-DEP-15 |
 | 4.4 and newer (4.4.2) | `-Werror=author` | T6, fixed by CMK-DEP-15 | T5, fixed by CMK-DEP-15 |
 
-When one command line must serve both sides of 4.4, use `-Werror=dev`: 4.4.2
-still honours it and prints a deprecation note. `-Werror=author` below 4.4 is
-ignored silently (CMK-CORE-01).
+`-Werror=author` below 4.4 is ignored silently, so one command line serving
+both sides uses `-Werror=dev`, which 4.4.2 still honours (CMK-CORE-01).
 
 ## The read order
 
@@ -101,16 +95,20 @@ NAME=dep
 grep -rn --include='CMakeCache.txt' -e "^${NAME}_DIR" -e "^${NAME}_ROOT" -e '^CMAKE_PREFIX_PATH' -e '^VCPKG_INSTALLED_DIR' -e '^CMAKE_TOOLCHAIN_FILE' -e '^CMAKE_PROJECT_TOP_LEVEL_INCLUDES' build
 ```
 
-The patterns are a union, so read each line. Non-empty output is expected.
-Save it before step 2, because `--fresh` deletes the cache it came from.
+The patterns are a union, so read each line, and the first row below that
+matches decides. Non-empty output is expected. Save it before step 2, because
+`--fresh` deletes the cache it came from.
 
 | What the output shows | Reading | Go to |
 |---|---|---|
+| `CMAKE_TOOLCHAIN_FILE` names `vcpkg.cmake`, and no `VCPKG_INSTALLED_DIR` line | vcpkg's toolchain never ran. A toolchain given to an existing build tree is cached and never loaded: `grep -rn --include='CMakeSystem.cmake' -e 'include(' build/CMakeFiles` prints nothing (3.31.12 and 4.4.2) | T1 |
+| A `dep_DIR` line while `CMAKE_PROJECT_TOP_LEVEL_INCLUDES` names cmake-conan with `CMakeConfigDeps` | The provider's own search failed, and its fallback `find_package` found a copy outside Conan | T13 |
+| `dep_DIR` is a Conan `generators` folder | That folder is the copy of record, whatever version it now describes. Read the version there, never from `conan graph info` | T8 |
 | `dep_DIR` not under the current `dep_ROOT`, `CMAKE_PREFIX_PATH` entry or `VCPKG_INSTALLED_DIR` | A stale cache entry, or a rooted copy. Step 2 tells them apart | T1, T9 |
 | `dep_DIR:PATH=<build>/CMakeFiles/pkgRedirects` | A FetchContent redirect answered. An installed copy was never consulted | T2 |
 | No `dep_DIR` line, with `CMAKE_PROJECT_TOP_LEVEL_INCLUDES` naming a provider | Expected under cmake-conan with `CMakeConfigDeps`: the provider sets `dep_DIR` as a normal variable (measured 3.31.12 and 4.4.2) | T3 |
 | No `dep_DIR` line and no provider | A Find module answered, or the call never ran. Step 2 prints which | [references](references/reading-the-answers.md#module-mode-find_package) |
-| `dep_DIR` under the expected prefix | The configured copy is right. A binary that reports another version at run time is the loader: T11. Otherwise a wrong version is the manager's | T11, T8, T9 |
+| `dep_DIR` under the expected prefix, and no row above matches | The configured copy is right. A binary that reports another version at run time is the loader: T11. Otherwise a wrong version is the manager's | T11, T8, T9 |
 
 ### 2. Reconfigure fresh, with the search printed
 
@@ -119,14 +117,16 @@ GATE=-Werror=dev
 cmake -S . -B build --fresh "$GATE" -DCMAKE_POLICY_DEFAULT_CMP0170=NEW --debug-find-pkg="$NAME"
 ```
 
-Pass the same `-D` hints and `--toolchain` the leg passes. A leg that
-configures through a preset runs `cmake --preset "$PRESET" --fresh "$GATE" -DCMAKE_POLICY_DEFAULT_CMP0170=NEW
---debug-find-pkg="$NAME"` instead, so the preset's cache variables and its
-`warnings` block apply exactly as in CI. `PRESET` is the leg's configure
-preset.
+Pass the same `-D` hints and `--toolchain` the leg passes. A preset leg runs
+`cmake --preset "$PRESET" --fresh "$GATE" -DCMAKE_POLICY_DEFAULT_CMP0170=NEW
+--debug-find-pkg="$NAME"` with its configure preset, so its cache variables
+and `warnings` block apply exactly as in CI.
 
 - `The file was found at` followed by a path names the file that answered.
-- `Package was found by the dependency provider` means a provider answered.
+- `Package was found by the dependency provider` means the provider returned,
+  not that it supplied the copy: cmake-conan prints it after its fallback
+  search too. The `The file was found at` path above it is the answer, and a
+  `considered but not accepted` `generators` copy is the one Conan supplied (T13).
 - On a reused tree the same flag lists only the cached candidate and prints
   the old answer with no warning (measured, both lines). That is why it never
   runs before step 1, and never without `--fresh`.
@@ -141,17 +141,24 @@ is a rooted copy winning (T1, CMK-DEP-21).
 
 ```sh
 grep -rc --include='CMakeConfigureLog.yaml' -e 'kind: "find_package-v1"' build
-grep -rn --include='CMakeConfigureLog.yaml' -e '^    name: ' -e '^      path: ' -e '^      mode: ' build
+grep -rn --include='CMakeConfigureLog.yaml' -e '^    name: ' -e '^      path: ' -e '^      mode: ' -e '^      version: ' build
 ```
 
 Run both only after the `--fresh` configure of step 2, because the log appends
 on a reused tree (4.4.2 counted 2 events after one reconfigure). A count of 0
 on 3.x is expected. A count of 0 on 4.1 or newer after a `find_package` ran is
-a finding (CMK-DEP-17), except for a provider under `CMakeConfigDeps` and for
-a call answered by a FetchContent redirect (`dep_DIR` under `pkgRedirects`),
-neither of which logs an event (4.3.4 and 4.4.2). The second command pairs each package `name:` with the
-`path:` it resolved and its `mode:` (`config` or `module`). Empty output from
-it means no `find_package` resolved in this configure.
+a finding (CMK-DEP-17), except for a call a FetchContent redirect answered
+(`dep_DIR` under `pkgRedirects`), which logs no event. A cmake-conan call logs
+events only under `--debug-find-pkg`: one `mode: "config"` event per search it
+ran, then a `mode: "provider"` event whose `path:` is
+`dependency_provider::conan_provide_dependency`. The copy is the last `config`
+event's `path:`, never the provider event (4.3.4 and 4.4.2). The second
+command pairs each package `name:` with its `path:`, `mode:` and `version:`
+lines, the request's version first when the call names one, then the found
+copy's. A found version other than the one the manager reports is the finding.
+Empty output means no `find_package` resolved in this configure. On 3.x, read
+the version file beside step 1's `_DIR`
+([references](references/reading-the-answers.md#config-mode-find_package)).
 
 ## Pick the entry point
 
@@ -164,27 +171,30 @@ it means no `find_package` resolved in this configure.
 | T5 | 4.x: "Compatibility with CMake < 3.5 has been removed" | The error's file:line | A dependency's floor | CMK-DEP-15 |
 | T6 | Gate error: "Compatibility with CMake < 3.10 will be removed" | The error's file:line and `cmake --version` | 4.x: CMK-DEP-15. 3.x: CMK-DEP-30 | CMK-DEP-15, CMK-DEP-30 |
 | T7 | Online configure passes, offline or override configure fails | The patch and override greps | An override of a patched dependency | CMK-DEP-31, CMK-DEP-16 |
-| T8 | "Which version did Conan pick?" | `conan graph info` | The resolved reference and revision | CMK-CONAN-09 |
-| T9 | vcpkg: wrong tree or wrong version | Step 1 | `_DIR` not under the current `VCPKG_INSTALLED_DIR`: T1 through vcpkg | CMK-DEP-13, CMK-VCPKG-01 |
+| T8 | "Which version did Conan pick?" | `conan graph info`, then the generators folder | graph info: what the conanfile resolves to now. The folder: what this tree consumes | CMK-CONAN-07, CMK-CONAN-09 |
+| T9 | vcpkg: wrong tree or wrong version | Step 1 | `_DIR` not under the current `VCPKG_INSTALLED_DIR`: T1 through vcpkg. A version above a `version>=` floor: the baseline won | CMK-DEP-13, CMK-VCPKG-01, CMK-VCPKG-02 |
 | T10 | A provider registered, never called | Step 1, then the TC-04 grep | The project set or appended `CMAKE_PROJECT_TOP_LEVEL_INCLUDES` | CMK-TC-04 |
 | T11 | The configured copy is right, but the built or installed binary loads another | `ldd` and `readelf -d` on the binary | No `RUNPATH` on the installed binary while the build-tree binary has one: install stripped it and a same-SONAME copy on the loader path wins | CMK-INST-11 |
 | T12 | 4.4 and newer: the gate stops on `install-absolute-destination` inside a fetched or vendored dependency | The error's file:line | The dependency installs to an absolute `DESTINATION` (`CMAKE_INSTALL_FULL_*`) | CMK-DEP-30, CMK-DEP-31 |
+| T13 | cmake-conan ran, and the consumer got a copy or version Conan did not install | Step 1, then step 2 | A `dep_DIR` cache line under `CMakeConfigDeps`, and `considered but not accepted` naming the generators copy | CMK-DEP-32, CMK-CONAN-07 |
 
 ## T1 Wrong copy, or a re-pointed hint had no effect
 
-A resolved `find_package` keeps `<Pkg>_DIR` in the cache and reuses it on every
-reconfigure. Re-pointing `<Pkg>_ROOT`, `CMAKE_PREFIX_PATH`, `VCPKG_INSTALLED_DIR`
-or a Conan output folder leaves the old copy in force while the hint prints the
-new value (measured, both lines). Step 2 settles which case you have:
+A resolved `find_package` keeps `<Pkg>_DIR` in the cache, so re-pointing
+`<Pkg>_ROOT`, `CMAKE_PREFIX_PATH`, `VCPKG_INSTALLED_DIR` or a Conan output
+folder keeps the old copy while the hint prints the new value (both lines):
 
-- **`_DIR` moves under `--fresh`.** Stale cache. For a person, `--fresh`, a new
-  build tree or `-U <Pkg>_DIR` is the fix. For a module that writes a `_ROOT`
-  cache entry on every configure, the fix is CMK-DEP-13's guarded
-  `unset(<Pkg>_DIR CACHE)` when the value changes. Worked example: a vendored
-  bootstrap module writes `<name>_ROOT` as `CACHE PATH ... FORCE` and never
-  unsets `<name>_DIR`, so after the pinned package changes, a Config-mode
-  `find_package` keeps the old copy for as long as it exists on disk. List
-  modules with that shape:
+- **A toolchain was added or changed on this tree.** It is cached and never
+  loaded, with one `unused-cli` warning and exit 0, so `-U <Pkg>_DIR` finds
+  the old copy again. Only `--fresh` or a new tree loads it (CMK-TC-03,
+  [references](references/reading-the-answers.md#toolchain-injected-paths)).
+- **`_DIR` moves under `--fresh`.** Stale cache. For a person, `--fresh` or a
+  new build tree is the fix, and `-U <Pkg>_DIR` is enough only when the
+  toolchain did not change. For a module that writes a `_ROOT` cache entry on
+  every configure, the fix is CMK-DEP-13's guarded `unset(<Pkg>_DIR CACHE)`
+  when the value changes. A vendored bootstrap module that writes `<name>_ROOT`
+  as `CACHE PATH ... FORCE` keeps the old copy for as long as it exists on
+  disk. List modules with that shape:
 
   ```sh
   grep -rlzE --include='*.cmake' -e '_ROOT[^)]*CACHE' . | xargs -r grep -L -e '_DIR CACHE'
@@ -196,6 +206,8 @@ new value (measured, both lines). Step 2 settles which case you have:
   or `CMAKE_SYSROOT` is non-empty, typically from vcpkg's toolchain or a cross
   toolchain, and every rooted candidate beats an unrooted `_ROOT` hint. Pin the
   copy with `<Pkg>_DIR` (CMK-DEP-21, and CMK-TC-10 under a Conan cross build).
+  Both empty while step 1 names cmake-conan means its fallback search found
+  the copy again: T13, never a `_DIR` pin.
 
 A `<Pkg>_ROOT` hint also never reaches a top-level `find_program` or
 `find_library`. Only `find_package(<Pkg>)` and the scripts it loads read it
@@ -204,36 +216,30 @@ A `<Pkg>_ROOT` hint also never reaches a top-level `find_program` or
 ## T2 Installed copy ignored, fetched copy built
 
 `dep_DIR` under `CMakeFiles/pkgRedirects` means an `OVERRIDE_FIND_PACKAGE`
-declare, or a `FIND_PACKAGE_ARGS` declare that fell through to a fetch, won.
-The installed prefix never appears in `--debug-find-pkg` output (measured with
-it on `CMAKE_PREFIX_PATH`, both lines). Name the declaring line with a grep, not
-a trace: `--trace-source=CMakeLists.txt` misses a declare kept in a `.cmake`
-module.
+declare, or a `FIND_PACKAGE_ARGS` declare that fell through to a fetch, won,
+and `--debug-find-pkg` never names the installed prefix (both lines). Name the
+declaring line with a grep, never a trace:
 
 ```sh
 grep -rn --include='*.cmake' --include='CMakeLists.txt' -e 'OVERRIDE_FIND_PACKAGE' .
 ```
 
 Empty output means no override declare exists, so look for a
-`FIND_PACKAGE_ARGS` declare whose `find_package` missed. The try-find searches
-the declare's name, so `FetchContent_Declare(cjson ... FIND_PACKAGE_ARGS)`
-misses a package that ships `cJSONConfig.cmake` on a case-sensitive file system
-and fetches silently (cJSON 1.7.18 installed, 3.31.12 and 4.4.2). Its record is
-`cjson_DIR:INTERNAL=.../pkgRedirects`, under the declare's spelling, so re-run
-step 1 with `NAME` set to that spelling. The fix is
-`FIND_PACKAGE_ARGS NAMES <Package> <version> CONFIG`, after which both `_DIR`
-lines name the installed prefix. A hit in an installable
-library outside a top-level guard is a CMK-DEP-07 finding. Any later
-`find_package(dep 2.0 ...)` against the redirect passes with a blank version
-(CMK-DEP-09). A CI leg that must test the installed copy asserts the step 1
-path (CMK-DEP-32).
+`FIND_PACKAGE_ARGS` declare whose try-find missed: it searches the declare's
+name, so `cjson` misses `cJSONConfig.cmake` and fetches silently. Re-run step 1
+with `NAME` set to the declare's spelling, and fix it with
+`FIND_PACKAGE_ARGS NAMES <Package> <version> CONFIG`
+([references](references/reading-the-answers.md#fetchcontent-redirects)). A hit
+in an installable library outside a top-level guard is a CMK-DEP-07 finding.
+Any later `find_package(dep 2.0 ...)` against the redirect passes with a blank
+version (CMK-DEP-09). A CI leg that must test the installed copy asserts the
+step 1 path (CMK-DEP-32).
 
 ## T3 cmake-conan active, and a find_program or find_library is NOTFOUND
 
-Providers intercept only `find_package` and `FetchContent_MakeAvailable`.
-Capture the configure's console output. The tell appears there, and as the
-file `build/conan/conan_cmakedeps_paths.cmake`, never in
-`CMakeConfigureLog.yaml`:
+Providers intercept only `find_package` and `FetchContent_MakeAvailable`. The
+tell is in the console output (and `build/conan/conan_cmakedeps_paths.cmake`),
+never in `CMakeConfigureLog.yaml`:
 
 ```sh
 PRESET=default
@@ -242,28 +248,24 @@ cmake --preset "$PRESET" --fresh "$GATE" -DCMAKE_POLICY_DEFAULT_CMP0170=NEW > lo
 grep -rn --include='configure.log' -e 'conan_cmakedeps_paths' logs
 ```
 
-A leg without presets captures the step 2 `-S`/`-B` command the same way.
+A leg without presets captures the step 2 command the same way.
 
 - **Empty output:** the generator is `CMakeDeps`, and no `find_program`,
   `find_library` or `find_path` ever sees Conan content.
 - **`CMake-Conan: Loading conan_cmakedeps_paths.cmake file`:** `CMakeConfigDeps`.
-  The paths exist only after the first intercepted `find_package`, and only in
-  that directory scope and subdirectories added after it. A first call inside a
-  subdirectory leaves the top level NOTFOUND even after its own later
-  `find_package` (measured, 4.4.2).
+  The paths exist only after the first intercepted `find_package`, in that
+  directory scope and subdirectories added after it (4.4.2).
 
 The fix is CMK-TC-05: the first `find_package` of a Conan package goes in the
-top-level `CMakeLists.txt`, before any `add_subdirectory`. `DEFER` runs at the
-end of the directory, so it never helps. Details:
-[references/reading-the-answers.md](references/reading-the-answers.md#dependency-providers).
+top-level `CMakeLists.txt`, before any `add_subdirectory`, and `DEFER` never
+helps ([references](references/reading-the-answers.md#dependency-providers)).
 
 ## T4 Consumer fails after Configuring done
 
-The error names the installed `*Targets.cmake` and "The link interface of
-target ... contains: ... but the target was not found". The exporter never
-redeclared a dependency on its link interface. The exporter's own build and
-install, and a `LANGUAGES NONE` or interface-only consumer, all stay green.
-Only a compiled consumer's Generate step fails (measured, both lines).
+The error names the installed `*Targets.cmake`: the exporter never redeclared
+a dependency on its link interface. Its own build and install, and a
+`LANGUAGES NONE` or interface-only consumer, stay green. Only a compiled
+consumer's Generate step fails (measured, both lines).
 
 ```sh
 NAME=dep2
@@ -278,46 +280,36 @@ round trip with a compiled consumer, never a green install.
 
 ## T5 CMake 4 removed compatibility below 3.5
 
-```text
-CMake Error at <dep>/CMakeLists.txt:1 (cmake_minimum_required):
-  Compatibility with CMake < 3.5 has been removed from CMake.
-```
-
-The file:line is the dependency's floor. CMake's own text suggests
-`-DCMAKE_POLICY_VERSION_MINIMUM=3.5` on the command line. Both halves are
-wrong for a fix: the value must be 3.10, because 3.5 leaves the "< 3.10 will be
-removed" deprecation that the gate turns into T6, and the scope must be the one
-call that adds the dependency (CMK-DEP-15). List the existing writes:
+The error's file:line is the dependency's floor. CMake's own text suggests
+`-DCMAKE_POLICY_VERSION_MINIMUM=3.5` on the command line, and both halves are
+wrong: 3.5 leaves the "< 3.10 will be removed" deprecation the gate turns into
+T6, so the value is 3.10, scoped to the one call that adds the dependency
+(CMK-DEP-15). List the existing writes:
 
 ```sh
 grep -rn --include='*.cmake' --include='CMakeLists.txt' --include='CMakePresets.json' --include='*.yml' --include='*.yaml' -e 'CMAKE_POLICY_VERSION_MINIMUM' -e 'CMAKE_POLICY_DEFAULT_CMP' .
 ```
 
-Empty output passes. Each hit must be a set/restore around one
-`add_subdirectory`, `FetchContent_MakeAvailable`, `ExternalProject_Add` or
-`find_package`, a `set()` inside a function, or a vcpkg port's own arguments. A
-preset, workflow or file-scope hit is the finding.
+Empty output passes. Each hit must be a set/restore around one call that adds
+the dependency, a `set()` inside a function, or a vcpkg port's own arguments.
+A preset, workflow or file-scope hit is the finding.
 
 ## T6 The gate stops on "< 3.10 will be removed"
 
 3.31.12 and 4.3.4 print `CMake Deprecation Error`, 4.4.2 prints
-`CMake Error (deprecated)`, each at the dependency's `cmake_minimum_required`
-line. `cmake --version` picks the rule:
+`CMake Error (deprecated)`, at the dependency's `cmake_minimum_required` line.
 
 - **4.x:** CMK-DEP-15, value 3.10, scoped as in T5.
-- **3.x:** `CMAKE_POLICY_VERSION_MINIMUM` does not exist before 4.0. 3.31.12
-  accepts it, prints "Manually-specified variables were not used" and changes
-  nothing. The remedy is CMK-DEP-30: re-pin to a version that declares 3.10 or
-  newer, or a `PATCH_COMMAND` that rewrites that one line (a `...4.0` range
-  also clears it). Never a warning switch: `CMAKE_WARN_DEPRECATED=OFF`,
-  `-Wno-dev` and `-Wno-deprecated` can each get past the gate on 3.31.12, and
-  each silences the project's own deprecations with it.
+- **3.x:** 3.31.12 accepts `CMAKE_POLICY_VERSION_MINIMUM`, prints
+  "Manually-specified variables were not used" and changes nothing. The remedy
+  is CMK-DEP-30: re-pin to a version that declares 3.10 or newer, or a
+  `PATCH_COMMAND` that rewrites that one line (a `...4.0` range also clears
+  it). Never a warning switch, which silences the project's own deprecations too.
 
 ## T7 Online passes, offline or override fails
 
-`FETCHCONTENT_SOURCE_DIR_<X>` skips the declare's `PATCH_COMMAND`, so a patched
-dependency pointed at pristine source fails the gate or builds differently
-(measured on 3.31.12, 4.3.4 and 4.4.2).
+`FETCHCONTENT_SOURCE_DIR_<X>` skips the declare's `PATCH_COMMAND`, so pristine
+source fails the gate or builds differently (3.31.12, 4.3.4 and 4.4.2).
 
 ```sh
 grep -rn --include='CMakeLists.txt' --include='*.cmake' -e 'PATCH_COMMAND' .
@@ -326,9 +318,8 @@ grep -rn --include='CMakeLists.txt' --include='*.cmake' --include='CMakePresets.
 
 Empty first output means no dependency is patched, so the cause is elsewhere in
 the offline probe (CMK-DEP-16). A name in both lists whose override directory
-lacks the patched line is the finding (CMK-DEP-31). The offline probe itself
-always carries `-DCMAKE_POLICY_DEFAULT_CMP0170=NEW`. Without it, a missing
-source directory configures and exits 0.
+lacks the patched line is the finding (CMK-DEP-31). The probe always carries
+`-DCMAKE_POLICY_DEFAULT_CMP0170=NEW`, or a missing source directory exits 0.
 
 ## T8 Which version did Conan pick
 
@@ -337,46 +328,50 @@ conan graph info . --profile:host=default --profile:build=default
 ```
 
 Pass the profiles, settings, options and lockfile the build's `conan install`
-uses. Read the `Requirements` block: each line is `name/version#revision`,
-then `- Cache` or `- Missing`. `conan graph explain` answers a
-different question, why no existing binary matches: on a resolved graph it
-exits 1 with `ERROR: There is no missing binary`, and on a missing binary it
-exits 0 with a `Closest binaries` block whose `diff` lists `expected:` against
-`existing:` settings. A range that did not float, or floated only in CI, starts
-at the lock: a `conan.lock` in the working directory is picked up with no flag
-(CMK-CONAN-09).
+uses. The `Requirements` block (`name/version#revision`, then `- Cache` or
+`- Missing`) is what the conanfile resolves to now, not what a build tree
+consumes. The tree consumes the generators folder the last `conan install`
+wrote, and `cmake --preset` never re-runs it. Read the folder:
 
 ```sh
-grep -rn --include='conanfile.py' --include='conanfile.txt' -e '/\[' .
-grep -rn -e 'conan install' .github
-grep -rn -e '--lockfile[= ]' -e ' -l ' .github
-grep -rn -e '--lockfile=""' -e "--lockfile=''" -e '--lockfile= ' -e '--lockfile=$' -e '--lockfile-partial' .github
+grep -rn --include='*ConfigVersion.cmake' --include='*-config-version.cmake' --include='*-data.cmake' -e 'set(PACKAGE_VERSION ' -e '_PACKAGE_FOLDER_[A-Z]* "' build
 ```
 
-A hit from the first means ranges exist, and `git ls-files conan.lock` must then
-be non-empty. Empty output from the first means no ranges, so the rule is not
-applicable. Empty output from the second means CI runs no `conan install` (not
-applicable). An install line from the second that is missing from the third is
-the finding. The fourth must be empty: an empty `--lockfile=` switches the lock
-off.
+Read the hits under a `generators` directory: the version this tree builds
+against, and under `CMakeDeps` the package folder it links. Empty output means
+no generators folder, so the read does not apply. A version other than graph
+info's means `conan install` did not run after the conanfile, profile or
+lockfile changed (CMK-CONAN-07). A range that did not float, or floated only in
+CI, starts at the lock (CMK-CONAN-09). `conan graph explain` and the lock
+checks: [references](references/reading-the-answers.md#the-conan-graph).
 
 ## T9 vcpkg: wrong tree or wrong version
 
 Step 1's `VCPKG_INSTALLED_DIR` and `<Pkg>_DIR` lines answer "which tree". A
 `_DIR` not under the current installed directory is T1 through vcpkg, fixed
-the same way (measured 2026-09-26 with vcpkg-tool 2026-09-26).
-`VCPKG_TRACE_FIND_PACKAGE` logs every `find_package` call whoever answers it,
-and `vcpkg depend-info` reads only the manifest, so neither is provenance. A
-wrong version is the manifest's baseline (CMK-VCPKG-01). vcpkg has no lockfile
-(CMK-VCPKG-11). A `VCPKG_*` variable set after the first `project()` is
-ignored with exit 0 (CMK-TC-03, CMK-VCPKG-04).
+the same way. No `VCPKG_INSTALLED_DIR` line while `CMAKE_TOOLCHAIN_FILE` names
+`vcpkg.cmake` means the toolchain never ran on this tree (T1).
+`VCPKG_TRACE_FIND_PACKAGE` and `vcpkg depend-info` are not provenance. For the
+version, read what vcpkg installed into this tree:
+
+```sh
+grep -rn --include='status' -e '^Package: ' -e '^Version: ' -e '^Status: ' build/vcpkg_installed/vcpkg
+```
+
+Only an `install ok installed` entry counts. Empty output means no manifest
+install ran into this tree. vcpkg installs the highest of the baseline's
+version and every `version>=` floor, so a version above the floor is the
+baseline winning, not a defect. An exact version is an `overrides` entry in
+the top-level manifest (CMK-VCPKG-02,
+[references](references/reading-the-answers.md#vcpkg)). A wrong baseline is
+CMK-VCPKG-01, and vcpkg has no lockfile (CMK-VCPKG-11). A `VCPKG_*` variable
+set after the first `project()` is ignored with exit 0 (CMK-TC-03, CMK-VCPKG-04).
 
 ## T10 A provider registered, never called
 
 Step 1 shows the user's file in `CMAKE_PROJECT_TOP_LEVEL_INCLUDES`, and step 2
-never prints `Package was found by the dependency provider`. A project `set()`
-of that variable hides the user's file entirely, and a `list(APPEND)` loads it
-and then registers its own provider last, which wins silently.
+never credits the provider. A project `set()` of that variable hides the user's
+file, and a `list(APPEND)` registers the project's provider last, which wins.
 
 ```sh
 grep -rn --include='CMakeLists.txt' --include='*.cmake' -e 'SET_DEPENDENCY_PROVIDER' -e 'CMAKE_PROJECT_TOP_LEVEL_INCLUDES' .
@@ -393,40 +388,46 @@ ldd "$BIN"
 readelf -d "$BIN"
 ```
 
-Neither prints empty output for a dynamic binary, and `ldd` printing
-`not a dynamic executable` means T11 does not apply. The `ldd` line naming the
-library is the copy that loads. An installed binary with no `RUNPATH` or
-`RPATH` line, whose build-tree twin has one, lost it at install, and a
-same-SONAME copy on the loader's default path wins with exit 0 everywhere
-(3.31.12 and 4.4.2: cJSON 1.7.15 configured, a host 1.7.18 loaded). For a
-dependency in the same prefix the fix is CMK-INST-11 (`$ORIGIN`). For one in
-another prefix, `INSTALL_RPATH_USE_LINK_PATH ON` on the executable bakes that
-library directory in (measured: 1.7.15 loads on both lines). Never
-`LD_LIBRARY_PATH`.
+`ldd` printing `not a dynamic executable` means T11 does not apply. The `ldd`
+line naming the library is the copy that loads. An installed binary with no
+`RUNPATH` or `RPATH` line, whose build-tree twin has one, lost it at install,
+and a same-SONAME copy on the loader's path wins with exit 0 (3.31.12 and
+4.4.2: cJSON 1.7.15 configured, a host 1.7.18 loaded). The fix is CMK-INST-11
+(`$ORIGIN`) for the same prefix, and `INSTALL_RPATH_USE_LINK_PATH ON` on the
+executable for another (both lines). Never `LD_LIBRARY_PATH`.
 
 ## T12 The 4.4 gate stops inside a dependency's install()
 
-`CMake Error (install-absolute-destination) at <dep>/CMakeLists.txt:<n> (install)`.
-CMK-INST-10 cannot be applied to third-party code. cJSON 1.7.15, 1.7.18 and
-master `6d9f2443ab` all install to `CMAKE_INSTALL_FULL_*`, so no re-pin clears
-it. Neither `-Werror=dev`, a scoped `CMAKE_SKIP_INSTALL_RULES ON`, nor a scoped
-`cmake_diagnostic(SET CMD_INSTALL_ABSOLUTE_DESTINATION WARN)` clears it on
-4.4.2, and 4.3.4 is unaffected (2026-09-26). Patch every absolute destination
-in one `PATCH_COMMAND` (CMK-DEP-30's shape): a patch of the first hit only
-moves the error to the next `install()`. List them:
+CMK-INST-10 cannot be applied to third-party code, and cJSON 1.7.15, 1.7.18
+and master `6d9f2443ab` all install to `CMAKE_INSTALL_FULL_*`, so no re-pin
+clears it. A scoped `CMAKE_SKIP_INSTALL_RULES ON` or `cmake_diagnostic(SET
+CMD_INSTALL_ABSOLUTE_DESTINATION WARN)` does not clear it on 4.4.2, and 4.3.4
+is unaffected (2026-09-26). Patch every absolute destination in one
+`PATCH_COMMAND` (CMK-DEP-30's shape), or the error moves to the next
+`install()`. List them:
 
 ```sh
 grep -rn --include='CMakeLists.txt' --include='*.cmake' -e 'CMAKE_INSTALL_FULL_' build/_deps
 ```
 
-Empty output means the stop comes from a literal absolute path, so read the
-error's file:line instead. An offline or override configure must point at the
-patched source (CMK-DEP-31). Never drop the gate to get past it (CMK-CORE-01).
+Empty output means a literal absolute path, so read the error's file:line. An
+override configure points at the patched source (CMK-DEP-31), and the gate
+never drops (CMK-CORE-01).
+
+## T13 The provider ran, and another copy answered
+
+cmake-conan searches its generators folder first, and when that fails it
+re-runs the call with CMake's default search. It fails when the consumer's
+version request rejects Conan's copy (`EXACT`, or a version the version file
+refuses) or the conanfile lacks the package. A copy the default search reaches
+then wins with exit 0, and step 2 still credits the provider
+([references](references/reading-the-answers.md#dependency-providers)). Fix
+the request or the conanfile, never the search path. A leg that must use
+Conan's copy asserts that step 1 prints no `<Pkg>_DIR` line for it (CMK-DEP-32).
 
 ## Pinned defaults
 
-Agreed decisions, not derivations. Each is a default an adopter overrides once,
-and none is re-litigated during a triage.
+Agreed defaults an adopter overrides once, never re-litigated during a triage.
 
 | Decision | Default (pinned) |
 |---|---|
@@ -438,15 +439,14 @@ and none is re-litigated during a triage.
 
 ## MUST rows this procedure enforces
 
-Duplicated as a hedge against the scoped rule set not being loaded. The rule
-text, rationale and full verification live in the `cmake-build` and
-`cpp-packaging` rule sets, and a disputed row is settled there.
+Duplicated as a hedge against the scoped rule set not being loaded. The full
+rows live in the `cmake-build` and `cpp-packaging` rule sets, which settle a dispute.
 
 | # | Finding | Rule |
 |---|---|---|
 | 1 | An application whose `requires` or `tool_requires` use a version range commits `conan.lock`. CI passes `--lockfile=conan.lock` explicitly and never `--lockfile-partial`. The lock is regenerated with `--lockfile-out` (plus `--lockfile-clean`), never edited by hand | CMK-CONAN-09 |
 | 2 | An installable library resolves its dependencies with `find_package` and never forces acquisition | CMK-DEP-07 |
-| 3 | Treat `<Pkg>_DIR` as the sticky record of which copy was found. To switch copies use a fresh build tree, `--fresh` or `-U <Pkg>_DIR`. A module that re-points `<Pkg>_ROOT` on reconfigure must `unset(<Pkg>_DIR CACHE)` whenever the hint's value changes | CMK-DEP-13 |
+| 3 | Treat `<Pkg>_DIR` as the sticky record of which copy was found. To switch copies use a fresh build tree, `--fresh` or `-U <Pkg>_DIR`, and only a fresh tree or `--fresh` when the switch adds or changes the toolchain. A module that re-points `<Pkg>_ROOT` on reconfigure must `unset(<Pkg>_DIR CACHE)` whenever the hint's value changes | CMK-DEP-13 |
 | 4 | On CMake 4.x, set a third-party dependency's policy knobs with set/restore around the one `add_subdirectory`, `FetchContent_MakeAvailable` or `find_package` that loads it, with `CMAKE_POLICY_VERSION_MINIMUM` at 3.10. Never use a project-wide `set()`, a committed preset `cacheVariables` entry, or a CI environment variable | CMK-DEP-15 |
 | 5 | Make every configure-time network touch satisfiable offline | CMK-DEP-16 |
 | 6 | On CMake 3.x, clear a fetched or vendored dependency whose floor is 3.5 to 3.9 by re-pinning to a version that declares 3.10 or newer, or with a `PATCH_COMMAND` that rewrites that one `cmake_minimum_required` line. Never use `-DCMAKE_WARN_DEPRECATED=OFF`, `-Wno-dev`, `-Wno-deprecated`, `-Wno-error=deprecated` or a preset's `"warnings": {"deprecated": false}` as the remedy | CMK-DEP-30 |
@@ -458,32 +458,31 @@ text, rationale and full verification live in the `cmake-build` and
 
 ## Failure modes
 
-1. **"Fixing" a floor error with a global switch** (`CMAKE_WARN_DEPRECATED=OFF`,
-   `-Wno-dev`, `-Wno-deprecated`, a preset's `"deprecated": false`, a preset
-   or CI `CMAKE_POLICY_VERSION_MINIMUM`), or with the value 3.5.
-2. **Emitting `CMAKE_POLICY_VERSION_MINIMUM` for a 3.x build.** It is 4.0 and
-   newer, and 3.31.12 ignores it with exit 0.
-3. **Assuming a provider widens search paths like a toolchain file**, or that
-   `DEFER` makes a call run earlier. It runs later.
+1. **"Fixing" a floor error with a global switch** (a warning switch, or a
+   preset or CI `CMAKE_POLICY_VERSION_MINIMUM`), or with the value 3.5.
+2. **Emitting `CMAKE_POLICY_VERSION_MINIMUM` for a 3.x build.** 3.31.12
+   ignores it with exit 0.
+3. **Assuming a provider widens search paths like a toolchain file**, or that `DEFER` runs a call earlier.
 4. **Reading an empty `_DIR` grep as "never looked up"** when a Find module or
    a `CMakeConfigDeps` provider answered.
 5. **Wiping the build tree first.** The stale `_DIR` was the evidence.
-   Record step 1, then `--fresh`.
-6. **Passing `FETCHCONTENT_SOURCE_DIR_<X>` for a patched dependency**, then
-   debugging the dependency instead of the dropped patch.
-7. **Proving a missing `find_dependency` fixed with a `LANGUAGES NONE` smoke
-   consumer.** It stays green either way. Only a compiled consumer fails.
-8. **Stopping at "the configured copy is right"** when the binary reports
-   another version. Configure-time records cannot see the loader (T11).
+6. **Passing `FETCHCONTENT_SOURCE_DIR_<X>` for a patched dependency**, then debugging the dependency.
+7. **Proving a missing `find_dependency` fixed with a `LANGUAGES NONE` consumer.** It stays green either way.
+8. **Stopping at "the configured copy is right"** when the binary reports another version (T11).
 9. **Spelling a `FIND_PACKAGE_ARGS` declare's name differently from the
-   package's Config file**, case included. The try-find misses and the fetch
-   runs silently. Grepping step 1 under the `find_package` spelling never shows
-   the declare's own `_DIR:INTERNAL` record.
-10. **Reporting a CMK-DEP-17 finding for a zero event count** when a FetchContent
-    redirect answered. A redirect logs no `find_package-v1` event.
+   package's Config file**, case included. The try-find misses, the fetch runs
+   silently, and step 1 under the `find_package` spelling never shows it.
+10. **Reporting a CMK-DEP-17 finding for a zero event count** when a redirect answered, which logs no event.
 11. **Clearing 4.4's `install-absolute-destination` stop in a dependency with a
-    scoped `cmake_diagnostic` or `CMAKE_SKIP_INSTALL_RULES`.** Neither beats the
-    command-line gate. Only a patch of every absolute destination does (T12).
+    scoped `cmake_diagnostic` or `CMAKE_SKIP_INSTALL_RULES`.** Only a patch does (T12).
+12. **Reading vcpkg's `version>=` as the version installed.** The result is the
+    highest of the baseline and every floor. Only `overrides` pins lower (T9).
+13. **Giving an existing build tree a toolchain, then clearing `_DIR` with
+    `-U`.** The toolchain is never loaded, so `-U` finds the old copy (T1).
+14. **Taking `conan graph info` as the build tree's record.** The tree builds
+    against what the last `conan install` wrote to its generators folder (T8).
+15. **Trusting `Package was found by the dependency provider`.** cmake-conan
+    prints it after its fallback search found a copy outside Conan (T13).
 
 ## References
 
@@ -494,6 +493,7 @@ Read one level down, on demand.
 | [references/reading-the-answers.md](references/reading-the-answers.md) | An output does not match a row above. Holds, per mechanism, what each writes into the cache, the redirects directory and the configure log: Config and Module mode, FetchContent redirects, providers, toolchain-injected paths, the Conan graph and vcpkg |
 
 Re-check on each tool bump: the cmake-conan provider's `CMakeConfigDeps`
-behaviour and whether `CMakeConfigDeps` leaves experimental status (Conan
-2.32.0, 2026-09-26), the `find_package-v1` event layout (4.4.2), and vcpkg's
-no-lockfile, no-provider stance (vcpkg-tool 2026-09-26).
+behaviour and fallback search (`b1593849`), whether `CMakeConfigDeps` leaves
+experimental status (Conan 2.32.0, 2026-09-26), the `find_package-v1` event
+layout (4.4.2), and vcpkg's no-lockfile, no-provider stance and version
+selection (vcpkg-tool 2026-09-26 and 2026-07-27).

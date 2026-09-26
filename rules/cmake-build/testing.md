@@ -94,8 +94,8 @@ fetched. A pure top-level application is exempt. The static grep finds each test
 subtree, the smoke build proves the gate.
 
 ```sh
-# 1. Each hit must sit inside the gate below. Empty output means there is no test tree to gate.
-grep -rn --include='CMakeLists.txt' -e 'add_subdirectory(test' -e 'add_subdirectory (test' -e 'add_subdirectory(unittest' .
+# 1. Each hit must sit inside a project-prefixed gate. Empty output means there is no test, example, demo or benchmark tree to gate.
+grep -rn --include='CMakeLists.txt' -e 'add_subdirectory(test' -e 'add_subdirectory (test' -e 'add_subdirectory(unittest' -e 'add_subdirectory(example' -e 'add_subdirectory(demo' -e 'add_subdirectory(bench' .
 # 2. The as-subproject smoke. SRC: the library's absolute source directory. W: a fresh, empty scratch
 #    directory outside the tree. GATE: -Werror=author on CMake 4.4 and later, -Werror=dev
 #    on 4.3 and older (CMK-CORE-01).
@@ -109,7 +109,7 @@ grep -e 'Total Tests: 0' "$W/asub-tests.txt"
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| CMK-TEST-09 | Gate the test tree of a library that others consume on a project-prefixed option whose default is `PROJECT_IS_TOP_LEVEL` (or `OFF`). Never gate it on `BUILD_TESTING` alone. Call `include(CTest)` inside the gate. Run the smoke build above as a named CI job. | A consumer's `include(CTest)` turns `BUILD_TESTING` on for the whole tree, so a `BUILD_TESTING`-guarded dependency lands its tests in the consumer's `ctest -N`. The prefixed option keeps them out, and the standalone build still has them (measured 2026-09-26 on 3.31.12, 4.3.4 and 4.4.2). fmt and spdlog gate this way, and curl runs the as-subproject job in CI. Floor: `PROJECT_IS_TOP_LEVEL` 3.21. Below that, compare `CMAKE_SOURCE_DIR` with `PROJECT_SOURCE_DIR`. | Command 1 first. A hit under a `BUILD_TESTING`-only guard, or under an unprefixed option that defaults to `ON`, is the finding. Then the smoke block on the leg's CMake with that line's gate (3.31.x: `-Werror=dev`, 4.4.x: `-Werror=author`): the final grep printing `Total Tests: 0` passes, and empty output is the finding. | MUST |
+| CMK-TEST-09 | Gate the test tree of a library that others consume on a project-prefixed option whose default is `PROJECT_IS_TOP_LEVEL` (or `OFF`). Never gate it on `BUILD_TESTING` alone. Call `include(CTest)` inside the gate. Run the smoke build above as a named CI job. Gate examples, demos and benchmarks the same way, on project-prefixed options. | A consumer's `include(CTest)` turns `BUILD_TESTING` on for the whole tree, so a `BUILD_TESTING`-guarded dependency lands its tests in the consumer's `ctest -N`. The prefixed option keeps them out, and the standalone build still has them (measured 2026-09-26 on 3.31.12, 4.3.4 and 4.4.2). fmt and spdlog gate this way, and curl runs the as-subproject job in CI. Floor: `PROJECT_IS_TOP_LEVEL` 3.21. Below that, compare `CMAKE_SOURCE_DIR` with `PROJECT_SOURCE_DIR`. | Command 1 first. A hit under a `BUILD_TESTING`-only guard, or under an unprefixed option whatever its default, is the finding: `option()` never overrides a parent's entry of the same name, so a parent's `BUILD_EXAMPLES=ON` switches the library's on (measured 2026-09-26 on 3.31.12 and 4.4.2). Then the smoke block on the leg's CMake with that line's gate (3.31.x: `-Werror=dev`, 4.4.x: `-Werror=author`): the final grep printing `Total Tests: 0` passes, and empty output is the finding. | MUST |
 
 ```cmake
 # wrong: the consumer's include(CTest) turns BUILD_TESTING on and pulls these in

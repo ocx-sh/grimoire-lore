@@ -2068,7 +2068,7 @@ The globs are unchanged from "Artifact set decision". Corpus counts were re-meas
 
 1. **The skills repeat the MUST rows their steps cite, and only those, in a `| # | Finding | Rule |` table.**
    - `cmake-dependency-triage` repeats the MUST rows its procedure cites (`cmake-skills.md` "The cmake-dependency-triage procedure"): CONAN-09, DEP-07, DEP-13, DEP-15, DEP-16, DEP-30, DEP-31, INST-01, INST-03, TC-04 and TC-05 (11 rows).
-   - `cmake-modernize` repeats the MUST rows its procedure cites ("The cmake-modernize procedure"): CORE-01, CORE-05, DEP-07, DEP-15, INST-01, LANG-11, TGT-01, TGT-04 (overwrite half), TGT-17, VER-01 and VER-05. It adds LANG-04 with its migration clause (12 rows).
+   - `cmake-modernize` repeats the MUST rows its procedure cites ("The cmake-modernize procedure"): CORE-01, CORE-05, DEP-07, DEP-15, INST-01, LANG-11, TGT-01, TGT-04 (overwrite half), TGT-17, VER-01 and VER-05. It adds LANG-04 with its migration clause (12 rows). Wave 5 (2026-09-26) adds the MUST halves of TGT-03, TGT-11 and TGT-21 and INST-06 with its migration clause, which steps 2, 5, 6 and 7 now cite (16 rows).
    - Measured with the rule-count script above, 2026-09-26.
 2. **`portfile.cmake`** loads both rules. **`conanfile.py`** also loads `python-quality` (conflict 13).
 3. **CPS rows are split by direction:** export in `install-and-export.md`, import in `dependencies.md`. Each cites the other, and neither restates it.

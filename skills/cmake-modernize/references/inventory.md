@@ -40,13 +40,16 @@ grep -rni -A2 --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_dep
 ```
 
 `I2`, directory scope (`CMK-TGT-03`, SHOULD, flag and never auto-rewrite).
-Empty output = pass. Each hit is a step-2 row.
+Empty output = pass. Each hit is a step-2 row. A call inside an
+`if(CMAKE_VERSION VERSION_LESS ...)` branch is usually a dead twin of the live
+call, so record both (jsoncpp at `3347a4b8` pairs three `add_compile_definitions`
+calls with dead `add_definitions` twins).
 
 ```sh
 grep -rniE --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_deps' --exclude-dir='build*' \
   -e '^[[:space:]]*include_directories[[:space:]]*\(' -e '^[[:space:]]*add_definitions[[:space:]]*\(' \
   -e '^[[:space:]]*add_compile_options[[:space:]]*\(' -e '^[[:space:]]*link_directories[[:space:]]*\(' \
-  -e '^[[:space:]]*link_libraries[[:space:]]*\(' .
+  -e '^[[:space:]]*link_libraries[[:space:]]*\(' -e '^[[:space:]]*add_compile_definitions[[:space:]]*\(' .
 ```
 
 `I3`, global flag writes (`CMK-TGT-04`). Empty output = pass. Read each hit: a
@@ -151,7 +154,8 @@ hands off to `cpp-packaging`: the tree needs a manager migration first.
 grep -rni --include='CMakeLists.txt' --include='*.cmake' -e 'conan_basic_setup' -e 'conanbuildinfo' .
 ```
 
-`F1`, the own-code floor, is in SKILL.md step 1.
+`F1`, the own-code floor, and `F1b`, floors through a variable and own-code
+policy pins, are in SKILL.md step 1.
 
 ## Standards and warnings-as-errors
 
@@ -193,6 +197,9 @@ diff flags-before.txt flags-after.txt
 
 Empty `diff` output = pass. A line starting `<` is a flag the diff lost, the
 finding. A line starting `>` is a flag it added, which the plan file must name.
+A `<` and a `>` line for two `-I` spellings of one directory are not a loss:
+compare the two paths with `realpath` first (jsoncpp: `-I.../include` against
+`-I.../src/lib_json/../../include`, both lines).
 Measured on Chipmunk2D (3.31.12 and 4.4.2, gcc 15.2.1, 2026-09-26): the step-2
 and the corrected step-4 diffs print nothing, and a step 4 that replaced
 `-std=gnu99` with `target_compile_features(... c_std_99)` alone prints

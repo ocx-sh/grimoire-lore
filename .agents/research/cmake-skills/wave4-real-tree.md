@@ -486,3 +486,20 @@ severity.
 
 No new MUST row. Eight new failure modes are in shipped skill files, so wave 4
 did not converge.
+
+## Handbacks applied (2026-09-26)
+
+Applier: opus, wave 5. Scratch: `/home/mherwig/.cache/cmake-measure-scratch/w5/handbacks/`, whose `run.sh` re-runs each command below (log in `run.log`). Tools printed once: cmake 3.31.12, 4.0.7, 4.1.6, 4.2.7, 4.3.4, 4.4.2, ninja 1.13.2, gcc 15.2.1. All ten handbacks reproduced and were applied. Each keeps its ID and severity.
+
+| # | Target | Re-run command | Result (exit, excerpt) | Applied |
+|---|---|---|---|---|
+| H1-H5 | CMK-INST-01 script (`:19`, `:22`, `:25`, `:40`) and Rationale | `apply/a1-roundtrip-sym.sh`, then `w5/handbacks/shipped-rt.sh` (the block as shipped, extracted from the rule file) | Both lines: `dd99a35` exit 1, ``undefined reference to `sincos'``. `91913ae` exit 0, `chipmunk_DIR:PATH=.../moved/lib64/cmake/chipmunk` | Yes. Header comment split over four lines. Also added `${CFG_ARGS:-}` to the CMK-INST-22 multi-config configure, which runs the same library and would otherwise lose the options |
+| H6 | CMK-DEP-17 Verification | `triage/t04-t5-fix.sh`, `w5/handbacks/dep17-44.sh` | 4.3.4: configure exit 0, `cJSON_DIR` under `pkgRedirects`, 0 `find_package-v1`. 4.4.2 (t04 exits 1 on `install-absolute-destination`, so re-measured on t07's patched tree): configure exit 0, `_DIR` under `pkgRedirects`, 0 `find_package-v1` against 17 `find-v1` | Yes, verbatim with backticks |
+| H7 | CMK-TGT-05 Rule, Rationale, Verification, Floor | `modernize/cstd/probe.sh`, `w5/handbacks/tgt05-guard.sh`, `cmake --help-property CMAKE_C_KNOWN_FEATURES` and `C_STANDARD` on 4.4.2 | Both lines: `feature` form no `-std`, `prop` and `flags` `-std=gnu99`, `CMAKE_C_STANDARD_COMPUTED_DEFAULT "23"`. The verification grep prints nothing for `feature`, `-std=gnu99` for the others. Docs: `c_std_*` versionadded 3.8, `C_STANDARD` 3.1. Guard probe, both lines, all configure exit 0: unguarded `C_STANDARD 99` gives `-std=gnu99` under a consumer's `-DCMAKE_C_STANDARD=11`. Inside `if(NOT DEFINED CMAKE_C_STANDARD)` the consumer's 11 gives `-std=gnu11` and its 90 is raised to `-std=gnu99` by `c_std_99` | Yes, with one wording change: the property is set inside `if(NOT DEFINED CMAKE_<LANG>_STANDARD)`. Unguarded, it overrides the consumer's standard, which is the defect the row's own rationale forbids. The guard probe went into the Rationale. The Verification also says to configure with `-DCMAKE_EXPORT_COMPILE_COMMANDS=ON` |
+| H8 | CMK-TEST-09 Rule and Verification | `apply/a4-option-collision.sh` | Both lines, configure exit 0: unprefixed `BUILD_EXAMPLES` leaks `mylib_example: phony` (grep exit 0), prefixed leaks nothing (grep exit 1) | Yes. Command 1 gained `-e 'add_subdirectory(example'`, `-e 'add_subdirectory(demo'` and `-e 'add_subdirectory(bench'`, and its comment now reads "project-prefixed gate". Without that, the new Rule clause had no command that lists what it binds |
+| H9 | CMK-INST-11 Rule and Rationale (stays SHOULD) | `triage/t08-scenario2.sh`, `triage/t10-scenario2-fix.sh` | Both lines: the installed binary prints `library 1.7.18`, `ldd` shows `/lib64/libcjson.so.1`, and there is no installed RUNPATH. With `INSTALL_RPATH_USE_LINK_PATH ON`: exit 0, `library 1.7.15`, RUNPATH `[.../pfx/cjson-1.7.15/lib64]` | Yes |
+| H10 | CMK-DEP-07 Rationale | `apply/a3-dep07-probe-case.sh` | Fix A: exit 1 on 3.31.12 and 4.3.4 (FetchContent offline error). Fix B (`NAMES cJSON`): exit 0 on both | Yes, placed before the cell's `Floor:` clause |
+
+Rejected: none. Checker (`check-artifacts.py` with the five `--forbid` flags over both indexes): `clean`, exit 0. Budgets: `install-and-export.md` 205, `dependencies.md` 280, `targets.md` 197, `testing.md` 201 lines.
+
+No new MUST row and no new failure mode. The guard in H7 and the CMK-INST-22 `CFG_ARGS` are consistency fixes inside the rows the handbacks named.

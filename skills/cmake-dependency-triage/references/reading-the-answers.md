@@ -7,8 +7,9 @@ that identifies it. It states no standard: every fix is a rule ID owned by the
 `cmake-build` or `cpp-packaging` rule sets.
 
 Measured 2026-09-26 on CMake 3.31.12, 4.3.4 and 4.4.2, Conan 2.32.0 with
-cmake-conan `develop2` (as of 2026-09-26), and vcpkg-tool 2026-09-26, unless a
-row says otherwise.
+cmake-conan `develop2` (`b1593849`, as of 2026-09-26), and vcpkg-tool
+2026-09-26, unless a row says otherwise. Rows that name vcpkg-tool 2026-07-27
+used the tool that registry commit `11ace808` (2026-09-26) bootstraps.
 
 Contents: [Config mode](#config-mode-find_package) ·
 [Module mode](#module-mode-find_package) ·
@@ -44,6 +45,18 @@ a `_ROOT` hint (see [Toolchain-injected paths](#toolchain-injected-paths)).
 - On 4.4.2 each `find_package-v1` event carries a `settings` block. Its
   `CMAKE_FIND_ROOT_PATH_MODE` line shows the package mode that was in force
   for that call.
+- On 4.1 and newer an event holds `version_request.version` (when the call
+  names one) and `found.version`, both matched by `^      version: `. On 3.x,
+  read the version file beside the step 1 `_DIR`:
+
+```sh
+DIR=build/vcpkg_installed/x64-linux/share/dep
+grep -rn --include='*ConfigVersion.cmake' --include='*-config-version.cmake' -e 'set(PACKAGE_VERSION ' "$DIR"
+```
+
+Empty output means the package ships no version file, so CMake knows no
+version for it (cJSON 1.7.19 through vcpkg printed its version on 3.31.12,
+4.3.4 and 4.4.2).
 
 ## Module mode `find_package`
 
@@ -91,11 +104,29 @@ one file is a first-declare-wins question (CMK-DEP-10).
 | Output | Meaning |
 |---|---|
 | `CMAKE_PROJECT_TOP_LEVEL_INCLUDES:UNINITIALIZED=...` in the step 1 grep | The user passed a top-level include. It is the provider of record only if nothing in the project sets or appends the variable (CMK-TC-04) |
-| `Package was found by the dependency provider` in `--debug-find-pkg` output | The provider answered this call (both `CMakeDeps` and `CMakeConfigDeps`, 4.4.2) |
+| `Package was found by the dependency provider` in `--debug-find-pkg` output | The provider's macro returned (both `CMakeDeps` and `CMakeConfigDeps`, 4.4.2). Under cmake-conan that includes its fallback search, so read the `The file was found at` path and any `considered but not accepted` line above it |
 | cmake-conan under `CMakeDeps`: `<X>_DIR:PATH=<build>/conan` in the cache | The provider installed with Conan and answered the call. No `find_program`, `find_library` or `find_path` sees Conan content |
-| cmake-conan under `CMakeConfigDeps`: no `<X>_DIR` cache line, and 4.4.2's configure log has no `find_package-v1` event for the package | Expected. The provider sets `<X>_DIR` as a normal variable from `conan_cmakedeps_paths.cmake` (measured 4.4.2 and 3.31.12). Read `--debug-find-pkg` instead |
+| cmake-conan under `CMakeConfigDeps`: no `<X>_DIR` cache line, and no `find_package-v1` event for the package without `--debug-find-pkg` | Expected. The provider sets `<X>_DIR` as a normal variable from `conan_cmakedeps_paths.cmake` (measured 4.4.2 and 3.31.12). With `--debug-find-pkg` the log holds a `mode: "config"` event naming the generators copy, then a `mode: "provider"` event whose `path` is `dependency_provider::conan_provide_dependency` (4.3.4 and 4.4.2) |
+| cmake-conan under `CMakeConfigDeps` with a `<X>_DIR:PATH=` cache line | The fallback search answered, from outside Conan (SKILL T13) |
 | Console line `CMake-Conan: Loading conan_cmakedeps_paths.cmake file`, or the file `<build>/conan/conan_cmakedeps_paths.cmake` | `CMakeConfigDeps` is in use. From that call on, and in that directory scope and subdirectories added later, `CMAKE_PROGRAM_PATH`, `CMAKE_LIBRARY_PATH` and `CMAKE_INCLUDE_PATH` carry the package's `bin`, `lib` and `include`. `CMakeConfigureLog.yaml` never carries this line |
 | `CMake-Conan: find_package(<X>) found, 'conan install' already ran` in a directory whose `find_program` is NOTFOUND | The first intercepted call ran in a subdirectory. The paths were set in that scope only (CMK-TC-05) |
+
+cmake-conan's `conan_provide_dependency` (`conan_provider.cmake` at
+`b1593849`, line 665) first runs `find_package(<X> ... BYPASS_PROVIDER PATHS
+<generators> NO_DEFAULT_PATH)`. When that fails, line 678 re-runs
+`find_package(<X> ${ARGN} BYPASS_PROVIDER)` with CMake's full default search.
+Measured with cjson 1.7.19 in the conanfile and 1.7.15 on the environment's
+`CMAKE_PREFIX_PATH` (3.31.12 and 4.4.2, exit 0, the binary printed 1.7.15):
+
+- `find_package(cJSON 1.7.15 EXACT CONFIG REQUIRED)`: step 2 printed
+  `considered but not accepted: .../generators/cJSONConfig.cmake, version:
+  1.7.19`, then the host path, then `Package was found by the dependency
+  provider`. The log held 3 events: the generators search rejected with
+  `reason: "insufficient_version"`, the host copy, then the provider event.
+- cjson missing from the conanfile: the same console lines without the
+  not-accepted one (4.4.2).
+- The passing control (no version request) logged 0 events without
+  `--debug-find-pkg`, 2 with it, and had no `cJSON_DIR` cache line.
 
 `CMAKE_PREFIX_PATH` stays empty before and after the intercepted call under
 both generators, so printing it proves nothing. `cmake_language(DEFER CALL
@@ -111,8 +142,26 @@ through the same file.
 
 ## Toolchain-injected paths
 
-The step 1 grep's `CMAKE_TOOLCHAIN_FILE` line names the one toolchain this
-build tree loaded. A preset's `toolchainFile` beats its own
+The step 1 grep's `CMAKE_TOOLCHAIN_FILE` line names the toolchain the cache was
+last given, not the one the tree loaded. `CMakeFiles/<version>/CMakeSystem.cmake`
+is written on the first configure only, and its `include(` line is the loaded
+toolchain:
+
+```sh
+grep -rn --include='CMakeSystem.cmake' -e 'include(' build/CMakeFiles
+```
+
+Empty output while the cache names a toolchain means the toolchain was given
+to an existing tree and never read. Empty output and no cache line means no
+toolchain, so this does not apply. Measured with a preset `toolchainFile`
+naming `vcpkg.cmake` added to a tree first configured without it: one
+`CMake Warning (unused-cli)` naming `CMAKE_TOOLCHAIN_FILE`, exit 0 under
+`-Werror=dev` (3.31.12) and `-Werror=author` (4.4.2), no `VCPKG_INSTALLED_DIR`
+cache line, and the host copy kept. `-U <X>_DIR` found the host copy again.
+`--fresh` wrote the `include(` line and vcpkg installed its copy (vcpkg-tool
+2026-07-27). The fix is a new tree or `--fresh` (CMK-TC-03, CMK-DEP-13).
+
+A preset's `toolchainFile` beats its own
 `cacheVariables.CMAKE_TOOLCHAIN_FILE`, and a command-line `-D` beats both. The
 losing file is never read (CMK-TC-01).
 
@@ -157,20 +206,58 @@ A `conan.lock` in the working directory is picked up implicitly and pins
 every ranged requirement it lists, with no flag. An empty `--lockfile=`
 switches it off, and `--lockfile-partial` lets an unlisted requirement
 resolve (CMK-CONAN-09). A version that "should have floated" and did not,
-or floated in CI but not locally, starts there.
+or floated in CI but not locally, starts there:
+
+```sh
+grep -rn --include='conanfile.py' --include='conanfile.txt' -e '/\[' .
+grep -rn -e 'conan install' .github
+grep -rn -e '--lockfile[= ]' -e ' -l ' .github
+grep -rn -e '--lockfile=""' -e "--lockfile=''" -e '--lockfile= ' -e '--lockfile=$' -e '--lockfile-partial' .github
+```
+
+A hit from the first means ranges exist, and `git ls-files conan.lock` must then
+be non-empty. Empty output from the first means no ranges, so the rule is not
+applicable. Empty output from the second means CI runs no `conan install` (not
+applicable). An install line from the second that is missing from the third is
+the finding. The fourth must be empty: an empty `--lockfile=` switches the lock
+off.
+
+`conan graph info` never describes a build tree. After a requirement bump to
+cjson 1.7.19 without `conan install`, it printed `cjson/1.7.19#bb87c8e7...`
+while `cmake --preset conan-release` reconfigured with exit 0, the generators
+folder's `cJSONConfigVersion.cmake` still read 1.7.17 and the binary printed
+1.7.17 (Conan 2.32.0, `CMakeDeps`, 4.4.2). SKILL T8's generators-folder grep
+is the tree's record.
 
 ## vcpkg
 
 vcpkg has no lockfile, no dependency provider and no CPS support
 (CMK-VCPKG-11). Its version record is the manifest's `builtin-baseline` (or
 a registry `baseline`) plus the vcpkg root commit CI checks out (CMK-VCPKG-01,
-CMK-PKG-02).
+CMK-PKG-02). The installed version is the highest of the baseline's version
+and every `version>=` in the graph, and only an `overrides` entry in the
+top-level manifest pins one below the baseline (CMK-VCPKG-02). Measured with
+vcpkg-tool 2026-07-27 on baseline `11ace808`: `version>=` 1.7.15 installed
+cjson 1.7.19 with exit 0 on 3.31.12, 4.3.4 and 4.4.2, and
+`"overrides": [{ "name": "cjson", "version": "1.7.15", "port-version": 2 }]`
+installed 1.7.15 (4.4.2). The baseline's entry for a port:
+
+```sh
+BASELINE=11ace808cc8a3a941f386e33726b992b22ba9e5a
+git -C "${VCPKG_ROOT:-vcpkg}" show "$BASELINE:versions/baseline.json" | jq -c '.default.cjson'
+```
+
+Set `BASELINE` to the manifest's `builtin-baseline` and `cjson` to the port.
+It printed `{"baseline":"1.7.19","port-version":0}`, and `null` means the
+baseline has no entry for the port.
 
 | Tool | What it answers | What it does not |
 |---|---|---|
 | The step 1 grep's `VCPKG_INSTALLED_DIR` and `<X>_DIR` lines | Which installed tree this build tree resolved | Nothing else is needed for "which tree" |
 | `VCPKG_TRACE_FIND_PACKAGE=ON` | That a `find_package` call happened. It is a macro override of `find_package` inside `vcpkg.cmake` | Which prefix answered. It logs every call, whoever satisfies it |
 | `vcpkg depend-info` | What the manifest declares | Anything about a configure |
+| The `Version:` lines of `build/vcpkg_installed/vcpkg/status`, or the `<port>:<triplet>@<version>` lines of `vcpkg-manifest-install.log` | The version installed into this tree. Only an `install ok installed` entry counts | Why that version: read the baseline's entry |
+| `vcpkg install --dry-run` in the manifest directory | What the manifest resolves to now | What an existing build tree consumed |
 | `vcpkg x-update-baseline` | Nothing. It moves the baseline (`--add-initial-baseline` the first time), and the `x-` prefix marks it experimental | It is the only way to move a baseline, never a hand edit (CMK-VCPKG-01) |
 
 Re-pointing `VCPKG_INSTALLED_DIR`, the triplet or the manifest root on a
