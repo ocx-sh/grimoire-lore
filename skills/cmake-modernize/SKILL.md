@@ -17,14 +17,14 @@ project's minimum CMake on its own.
 
 This skill assumes the `cmake-build` rule set is installed and cites rules by ID.
 Every command here was run against planted violating and compliant projects on CMake 3.31.12, 4.3.4 and 4.4.2 (2026-09-26).
-The whole procedure was also run end to end on a real legacy C library,
-`slembcke/Chipmunk2D` at commit `f2f3d662`, and on the C++ trees
+The whole procedure was also run end to end on the real legacy C trees
+`slembcke/Chipmunk2D` at commit `f2f3d662`, `uclouvain/openjpeg` at `8314119b`
+and `madler/zlib` at `v1.3.1`, and on the C++ trees
 `open-source-parsers/jsoncpp` at `3347a4b8` and `c42f/tinyformat` at `aef402d8`,
 on 3.31.12 and 4.4.2 (2026-09-26).
 
 Contents: [Stop condition](#stop-condition) · [Before you start](#before-you-start) ·
-[The procedure](#the-procedure) · [Legacy parses](#legacy-parses) ·
-[Reviewable units](#reviewable-units) · [What it refuses](#what-it-refuses) ·
+[The procedure](#the-procedure) · [Reviewable units](#reviewable-units) · [What it refuses](#what-it-refuses) ·
 [Pinned defaults](#pinned-defaults) · [What agents get wrong](#what-agents-get-wrong) ·
 [MUST rows this procedure enforces](#must-rows-this-procedure-enforces) ·
 [References](#references)
@@ -57,6 +57,16 @@ does not configure even then, stop. A wrong copy of a dependency is
 `cmake-dependency-triage`. An absent host dependency or compiler is the
 owner's to install or switch off, not a triage.
 
+Run `git status --short` after the entry configure. Empty output = pass. A
+tracked file the configure changed is restored before every step's diff is
+committed, or it rides along as a change no plan row names (madler/zlib at
+`v1.3.1` renames its `zconf.h` in the source tree on every configure). A 4.4
+gate error whose category step 6 owns (`install-absolute-destination`,
+`CMK-INST-10`) is demoted on the 4.4 line alone until step 6, with
+`-Werror=author -Wno-error=install-absolute-destination`, and recorded as a
+step-6 row. On zlib that configure exits 0 with six warnings instead of six
+errors, and the canary still exits 1 (4.4.2). Step 6's round trip runs without it.
+
 **The gate is on from step 1, not step 8.** Every configure this skill runs
 uses the configure gate spelled for its binary (`CMK-CORE-01`):
 
@@ -83,7 +93,7 @@ adopter may name it otherwise, once). One row per inventory hit:
 | Command | The inventory command ID that printed it (`I1` to `I12`, `F1`, `F1b`) |
 | Rule | The rule ID the hit violates |
 | Step | The step that will touch it |
-| Status | `open`, `converted`, `flagged-not-converted` (vendored, or the owner declined) or `vacuous` |
+| Status | `open`, `converted`, `flagged-not-converted` (vendored, the owner declined, or a component the host cannot configure, with the missing prerequisite named) or `vacuous` |
 
 ## The procedure
 
@@ -95,12 +105,12 @@ result decides "done". The full commands with their readings are in
 | Step | Do | Exit check | Cites |
 |---|---|---|---|
 | 0 Inventory | Run `I1` to `I12`, `F1` and `F1b` read-only. Write every hit into the plan file | The plan file lists every hit, possibly none. No command in the inventory pipes into an early-exiting reader | `CMK-TGT-01/-03/-04/-17`, `CMK-LANG-04/-11`, `CMK-VER-05`, `CMK-DEP-07/-15`, `CMK-CORE-05` |
-| 1 Floor | Keep the existing minimum. Add `...<max>`, where `<max>` is the newest CMake CI runs. Re-scan fetched and vendored trees | `F1` prints no line outside a vendored directory (a vendored hit is recorded `flagged-not-converted`), every `F1b` line is settled as step 1 below says, the canary exits 1 and the project's gated configure exits 0 on each CI binary | `CMK-VER-01/-02/-05`, `CMK-DEP-15/-30` |
+| 1 Floor | Keep the existing minimum. Add `...<max>`, or raise an existing `...<max>` below it, where `<max>` is the newest CMake CI runs. Re-scan fetched and vendored trees | `F1` prints no line outside a vendored directory (a vendored hit is recorded `flagged-not-converted`), every `F1b` line is settled as step 1 below says, the canary exits 1, the project's gated configure exits 0 on each CI binary, and the configured-file check prints nothing | `CMK-VER-01/-02/-05`, `CMK-DEP-15/-30` |
 | 2 Targets | Move directory scope onto `target_*`, one target at a time, leaves of the in-tree graph first. A `PUBLIC` or `INTERFACE` include directory under the source or build tree is written `$<BUILD_INTERFACE:...>` from the start, because `install(EXPORT)` rejects a raw source path at generate time. A definition that an installed header reads is `PUBLIC`, never `PRIVATE` (see below) | `I2`, scoped to that target's directory, is empty, the gated configure and build exit 0, and the flag-set diff for one source of that target is empty | `CMK-TGT-03` |
-| 3 Keywords | Name `PUBLIC`, `PRIVATE` or `INTERFACE` on that target's links. Default to `PRIVATE` unless the type is in its installed headers. Add the namespaced `ALIAS`. A header-only library with no target gets `add_library(<pkg> INTERFACE)`, its `ALIAS` and a `$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>` include directory here, as a `new:` plan row, so step 6 carries no `CMK-TGT` change | `I1` on that file shows only keyworded calls | `CMK-TGT-01/-02` |
+| 3 Keywords | Name `PUBLIC`, `PRIVATE` or `INTERFACE` on that target's links. Default to `PRIVATE` unless the type is in its installed headers. Add the namespaced `ALIAS`. A header-only library with no target gets `add_library(<pkg> INTERFACE)`, its `ALIAS` and a `$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>` include directory here, as a `new:` plan row, so step 6 carries no `CMK-TGT` change | `I1` on that file shows only keyworded calls, and the gated build exits 0 with every option that adds an in-tree dependent of the target switched on, tests included | `CMK-TGT-01/-02` |
 | 4 Flags and standards | Overwrites and appends become `target_compile_options`, a toolchain file or a preset. A `-std=` flag becomes the target property `<LANG>_STANDARD NN` (with `<LANG>_EXTENSIONS ON` for a `gnu` spelling) plus `target_compile_features(<t> PUBLIC <lang>_std_NN)` for consumers. The compile feature alone is a floor: when the compiler's default is newer, CMake adds no flag. Fix the parses `I4` listed | `I3` shows no overwrite, `I11` hits sit in a `NOT DEFINED` guard, every `I12` hit sits in a developer option that defaults `OFF`, every new `CMAKE_*` name passes the variable check, and the flag-set diff for one source per converted target is empty | `CMK-TGT-04..09`, `CMK-LANG-04/-11` |
-| 5 Top-level gating | Gate the test tree on a project-prefixed option that defaults to `PROJECT_IS_TOP_LEVEL`, with `include(CTest)` inside the gate (`CMK-TEST-09`). Gate examples, demos and developer options on project-prefixed options (`<PROJECT>_BUILD_EXAMPLES`) that default to `PROJECT_IS_TOP_LEVEL`. An unprefixed name such as `BUILD_DEMOS` reads the parent's own entry of that name. Guard the `CMAKE_BUILD_TYPE` default and any non-test fetch on `PROJECT_IS_TOP_LEVEL`. A library whose `option(BUILD_SHARED_LIBS ...)` defaults `ON` first sets it as a normal variable under `if(NOT PROJECT_IS_TOP_LEVEL AND NOT DEFINED BUILD_SHARED_LIBS)`, or the option creates the parent's cache entry and every later `add_library()` of the parent turns `SHARED` | The step 7 smoke, run here too, and the `CMK-DEP-07` probe when `I7` listed a hit | `CMK-DEP-07`, `CMK-TGT-11/-17`, `CMK-TEST-09` |
-| 6 Install and export | `GNUInstallDirs` destinations, `configure_package_config_file`, `find_dependency` per public dependency, `write_basic_package_version_file`, `NAMESPACE`, all in one diff | The gated round trip exits 0 on every CI line, and its leak greps are empty | `CMK-INST-01..06/-09` |
+| 5 Top-level gating | Gate the test tree on a project-prefixed option that defaults to `PROJECT_IS_TOP_LEVEL`, or `OFF` where the legacy option defaulted `OFF`, with `include(CTest)` inside the gate (`CMK-TEST-09`). Gate examples, demos and developer options on project-prefixed options (`<PROJECT>_BUILD_EXAMPLES`) that default to `PROJECT_IS_TOP_LEVEL`. An unprefixed name such as `BUILD_DEMOS` reads the parent's own entry of that name. Guard the `CMAKE_BUILD_TYPE` default and any non-test fetch on `PROJECT_IS_TOP_LEVEL`. A library whose `option(BUILD_SHARED_LIBS ...)` defaults `ON` first sets it as a normal variable under `if(NOT PROJECT_IS_TOP_LEVEL AND NOT DEFINED BUILD_SHARED_LIBS)`, or the option creates the parent's cache entry and every later `add_library()` of the parent turns `SHARED` | The step 7 smoke, run here too, the top-level gated build with the plan options, the old `-D` spelling of each renamed option, and the `CMK-DEP-07` probe when `I7` listed a hit | `CMK-DEP-07`, `CMK-TGT-11/-17`, `CMK-TEST-09` |
+| 6 Install and export | `GNUInstallDirs` destinations, `configure_package_config_file`, `find_dependency` per public dependency, `write_basic_package_version_file`, `NAMESPACE`, all in one diff | The gated round trip exits 0 on every CI line, and its leak greps are empty. A tree that ships a `.pc` also passes the pkg-config check | `CMK-INST-01..06/-09` |
 | 7 As-subproject smoke | Configure the tree under a parent that includes `CTest`, then under a parent that also owns each unprefixed option the library declares | Every pass configures with exit 0. The tests grep prints `Total Tests: 0`, the `asub_bsl=[ON]` grep and the target grep are empty for every developer-only name, the second pass's target grep is empty, and the third pass, a compiled consumer through `add_subdirectory`, builds with exit 0 | `CMK-DEP-07`, `CMK-TGT-11`, `CMK-TEST-09` |
 | 8 CI | Wire the gate per leg, `gersemi --check` (never `--diff`), and the round trip as its own job. In a tree with no CI, report the three items to the owner and stop. Do not create a CI system. A first `gersemi` reformat ships as its own diff, never inside a conversion diff. A leg that takes CMake from the runner image has no binary to run the canary through here: spell its gate `-Werror=dev`, record the unpinned CMake as a `CMK-VER-03` finding and the canary run as the owner's | The canary exits 1 through each leg's own binary and preset. `gersemi --check` exits 0 | `CMK-CORE-01/-02/-04/-05`, `CMK-MOD-15`, `CMK-INST-18` |
 | 9 CPS and pkg-config (optional) | `install(PACKAGE_INFO)` behind `if(CMAKE_VERSION VERSION_GREATER_EQUAL 4.3)`, once the namespace equals the package name, the schema is `simple` and the genexes are configuration-only | The round trip on 4.3 or later ends in `/cps/<pkg>`, on 3.31 in `/cmake/<pkg>`, and both exit 0 | `CMK-INST-12..17` |
@@ -109,7 +119,10 @@ result decides "done". The full commands with their readings are in
 
 The floor diff touches only `cmake_minimum_required` lines, plus any vendored
 floor fix the re-scan exposes. It never rides with a content change, because a
-gate failure after a combined diff cannot be bisected. A `cmake_minimum_required`
+gate failure after a combined diff cannot be bisected. A file `configure_file()`
+writes that changes under the new range (the configured-file check in
+[references/inventory.md](references/inventory.md#the-configured-file-check))
+is repaired in a second diff before step 2, never by lowering `<max>`. A `cmake_minimum_required`
 below the top-level `project()` moves above it in the same diff: in place, the
 gated configure fails with
 `cmake_minimum_required() should be called prior to this top-level project()`
@@ -122,13 +135,16 @@ gated configure fails with
 grep -rniE --include='CMakeLists.txt' --exclude-dir='_deps' --exclude-dir='build*' \
   -e 'cmake_minimum_required[[:space:]]*\([[:space:]]*VERSION[[:space:]]+[0-9]+(\.[0-9]+)*[[:space:]]*(FATAL_ERROR)?[[:space:]]*\)' \
   -e 'cmake_minimum_required[[:space:]]*\([[:space:]]*VERSION[[:space:]]+[0-9]+(\.[0-9]+)*\.\.[0-9]' .
-# F1b: floors spelled through a variable, and own-code policy pins. A list to read, never a pass.
+# F1b: floors through a variable, own-code policy pins, and every existing range. A list to read, never a pass.
 grep -rniE --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_deps' --exclude-dir='build*' \
   -e 'cmake_minimum_required[[:space:]]*\([[:space:]]*VERSION[[:space:]]+[$]' \
-  -e 'cmake_policy[[:space:]]*\([[:space:]]*VERSION' .
+  -e 'cmake_policy[[:space:]]*\([[:space:]]*VERSION' \
+  -e 'cmake_minimum_required[[:space:]]*\([[:space:]]*VERSION[[:space:]]+[0-9.]+\.\.\.[0-9]' .
 ```
 
-Empty `F1b` output = nothing more to check. A floor through a variable gets its
+Empty `F1b` output = nothing more to check. An existing range whose max is
+below the plan's `<max>` gets the plan's `<max>`: `F1` never lists
+openjpeg's `3.10...3.31.5` or zlib's `2.4.4...3.15.0`. A floor through a variable gets its
 `...<max>` like any other. An own-code `cmake_policy(VERSION <v>)` after the
 floor resets the policy version that `...<max>` set, so the floor diff gives it
 the same `...<max>`, or raises the variable that caps it. Confirm by printing
@@ -182,13 +198,19 @@ A compile definition takes its keyword from its readers, not from step 3's
 `PRIVATE` default. List the readers in the installed include directory:
 
 ```sh
-# NAME = the definition, the operand = the directory the library installs headers from.
+# NAME = the definition, the operand = the directory the library installs headers from, when it
+# holds only installed headers. Otherwise name each installed header file, generated ones from the build tree.
 NAME=JSONCPP_USE_SECURE_MEMORY
 grep -rn -e "$NAME" include
 ```
 
 Empty output = `PRIVATE`. Any line = `PUBLIC`, or a configured header that
-bakes the value in. Then configure, build and test once more with each option
+bakes the value in, with one exception: a header that only asks whether the
+consumer wants an API (zlib's `zlib.h` reading `_LARGEFILE64_SOURCE`) is no
+reader, and `PUBLIC` there puts `-D_LARGEFILE64_SOURCE=1` on every installed
+consumer (both lines). openjpeg installs `openjpeg.h` from
+`src/lib/openjp2`, which also holds every source, so a grep of that directory
+reads all three of its private definitions as `PUBLIC`. Then configure, build and test once more with each option
 that adds such a definition switched on: the plan options alone never set it.
 On open-source-parsers/jsoncpp at `3347a4b8`, the `PRIVATE` form passed every
 step 2 check and failed with `undefined symbol: Json::Value::operator[]` under
@@ -210,9 +232,34 @@ only under this guard, on a declare that carries `FIND_PACKAGE_ARGS`, or as the
 fallback of a `find_package` that ran first (`CMK-DEP-07`). Mark each guard in
 the plan file as new structure, not a conversion: legacy trees rarely carry one.
 
-Keep the value the legacy tree defaulted to. `RelWithDebInfo` is for a tree
-that had none. The smoke compares no flags, so re-run the flag-set check after
-this edit: the verbatim snippet turned jsoncpp's `-O3` into `-O2 -g` (4.4.2).
+Keep the value the legacy tree defaulted to, for the build type and for every
+option. `RelWithDebInfo` is for a tree that had none. The smoke compares no
+flags, so re-run the flag-set check after this edit: the verbatim snippet turned
+jsoncpp's `-O3` into `-O2 -g` (4.4.2).
+
+A renamed option takes its old spelling as its default at top level only, and
+is declared before the first `add_subdirectory` that reads it:
+
+```cmake
+if(PROJECT_IS_TOP_LEVEL AND DEFINED BUILD_TESTING)
+    set(_opj_testing_default ${BUILD_TESTING})
+else()
+    set(_opj_testing_default OFF)
+endif()
+option(OPENJPEG_BUILD_TESTING "Build the tests" ${_opj_testing_default})
+```
+
+It reads `OFF` at top level, `ON` with `-DBUILD_TESTING=ON`, and `OFF` under a
+parent that includes `CTest` (3.31.12 and 4.4.2). A plain rename drops `-DBUILD_TESTING=ON` with only a "not used" warning, and
+openjpeg's CI script seeds that cache entry, so it would run 0 tests green
+(both lines). A file that still reads an old name, vendored glue included, gets
+it back as a directory-scoped normal variable set from the new option before
+the `add_subdirectory` that reads it. A toggle declared as
+`set(<name> ... CACHE BOOL ...)` is an option for this step too. A library's
+cache write of a variable CMake reads (`EXECUTABLE_OUTPUT_PATH`,
+`LIBRARY_OUTPUT_PATH`, `CMAKE_<KIND>_OUTPUT_DIRECTORY`) moves under
+`PROJECT_IS_TOP_LEVEL`, or every executable the parent adds later lands in
+`lib-build/bin/` (openjpeg, both lines).
 
 ### Step 6: one coherent diff
 
@@ -229,8 +276,10 @@ a compiled consumer's Generate step (`CMK-INST-01`). The script is in
 
 When the tree already exports targets without a namespace, adding `NAMESPACE`
 renames every imported target consumers link today. Ship the old names in the
-Config package as an `ALIAS` of each namespaced imported target (a consumer
-on CMake 3.18 or later, the version that allows it). Keep every
+Config package as an `ALIAS` of each namespaced imported target, each under
+`if(NOT TARGET <old>)` (a consumer on CMake 3.18 or later, the version that
+allows it). Without the guard, a second `find_package` in one directory fails
+with `add_library cannot create ALIAS target` (openjpeg, both lines). Keep every
 name a hand-written targets file defined. Run the round trip once per old
 spelling as well as the new one. Dropping an old name instead is the owner's
 call, written into the plan file as a changelog item. On jsoncpp the `NAMESPACE` edit alone passed for
@@ -239,62 +288,41 @@ bare `jsoncpp_static` into a `-l` flag (`'json/json.h' file not found`), while
 the tree's own `abi-compatibility.yml` links `JsonCpp::JsonCpp` (3.31.12 and
 4.4.2). With the old names shipped, all five spellings exit 0.
 
-A `project()` without `VERSION` gives `write_basic_package_version_file`
-nothing to write: the configure stops with `No VERSION specified` (tinyformat,
-3.31.12 and 4.4.2). The version is the owner's. Ask, record the answer in the
-plan file, and never derive it from a git tag on your own.
+A package whose name CMake ships a Find module for (`ZLIB`, `PNG`, `CURL`) is
+consumed today through that module's imported target and result variables. The
+Config package defines them too (`ZLIB::ZLIB`, `ZLIB_INCLUDE_DIRS`,
+`ZLIB_LIBRARIES`), and the round trip runs once more on the module's target
+name. On madler/zlib at `v1.3.1` the round trip passed without them, plain
+`find_package(ZLIB)` never read the Config, and a consumer with
+`-DCMAKE_FIND_PACKAGE_PREFER_CONFIG=ON` failed at configure on `ZLIB::ZLIB`
+and at compile on the variables (both lines).
 
-### Step 8: what CI carries
+A hand-written `.pc` template reads the variables step 6 replaces. zlib's
+`zlib.pc.cmakein` reads `@INSTALL_LIB_DIR@`, so after the switch to
+`CMAKE_INSTALL_*` pkg-config printed `-I -L -lz` with exit 0 while the round
+trip passed (both lines). Run the pkg-config check in
+[references/proofs.md](references/proofs.md#the-pkg-config-check). An install
+knob the tree documents (`-DINSTALL_LIB_DIR`) keeps working, or goes into the
+plan file as a changelog item: after the switch it is dropped with only a
+"not used" warning.
 
-- Every configure leg under its own gate spelling, checked by the canary
-  through that leg's binary and preset.
-- No preset that switches the gate off:
-  `grep -rn --include='CMakePresets.json' --include='CMakeUserPresets.json' -e '"dev"[[:space:]]*:[[:space:]]*false' -e '"deprecated"[[:space:]]*:[[:space:]]*false' .`
-  Empty output = pass. Any hit = finding (a preset's `"deprecated": false` beat
-  a command-line `-Werror=dev` on 3.31.12).
-- A presets file raised to schema 12 (CMake ≥ 4.4) renames `dev` to `author` in the same edit
-  (`CMK-CORE-02`).
-- `gersemi --check` as the formatting gate, gersemi 0.29.1 (as of 2026-09-26).
-  `--diff` exits 0 even when it would reformat (measured). A module project that
-  runs gersemi commits a `.gersemirc` whose `definitions` lists its own command
-  files (`CMK-MOD-15`). An existing `.cmake-format*` file is migrated, never
-  extended.
-- The round trip as its own job, separate from the test suite (`CMK-INST-18`).
+`write_basic_package_version_file` without `VERSION` reads `PROJECT_VERSION`,
+and a `project()` without one stops the configure with `No VERSION specified`
+(tinyformat, 3.31.12 and 4.4.2). A version the tree already states (zlib's
+`set(VERSION "1.3.1")`) is passed as `VERSION ${VERSION}`. Only a tree that
+states none goes to the owner. Record the answer in the plan file, and never
+derive a version from a git tag on your own.
 
-## Legacy parses
-
-`I4` lists every `cmake_parse_arguments` that forwards `${ARGN}`. Each hit inside
-a `function()` is a `CMK-LANG-04` finding. A hit inside a `macro()` is
-`CMK-LANG-08`'s. Migrating a public command to `PARSE_ARGV` changes what its
-callers get (measured on 3.31.12, 4.3.4 and 4.4.2):
-
-| Call | `${ARGN}` legacy | `PARSE_ARGV` |
-|---|---|---|
-| `MULTI "${L}" z`, with `L` = `x;y` | 3 elements | 2 elements, the first `x;y` |
-| `ONE "a;b"` | `ONE` = `a`, `b` unparsed | `ONE` = `a;b` |
-
-So the fix written into the plan file for each multi-value keyword whose values
-are lists of files, targets or paths carries the flatten line, directly after
-the parse:
-
-```cmake
-function(mylib_add NAME)
-    cmake_parse_arguments(PARSE_ARGV 1 arg "" "DEST" "SOURCES")
-    set(arg_SOURCES ${arg_SOURCES})
-endfunction()
-```
-
-With the flatten line, `SOURCES "${L}" z` gives 3 elements again. The one-value
-change is a fix, because the legacy parse left `b` unparsed. A public command's
-parse is never rewritten without the flatten line, or without a changelog entry
-naming the behaviour change. A private helper is SHOULD. After the parse, read
-`<prefix>_UNPARSED_ARGUMENTS` and stop with `FATAL_ERROR` (`CMK-LANG-06`).
+What step 8's CI carries, item by item, is in
+[references/proofs.md](references/proofs.md#ci-checks). The `I4` parse
+migration and its flatten line are in
+[references/inventory.md](references/inventory.md#migrating-a-parse).
 
 ## Reviewable units
 
 Each of these ships as its own diff:
 
-- The floor change, alone.
+- The floor change, alone, then any configured-file repair it needs.
 - Each target's conversion (steps 2 to 4). Independent leaves may share one.
 - The first install and export (step 6), with no `CMK-TGT` change in it.
 - CPS or pkg-config, only after the round trip is already green without it.
@@ -370,7 +398,7 @@ Agreed decisions, not derivations. Each is a default an adopter overrides once.
     A parent that owns `BUILD_DEMOS=ON` switches the library's demos on too,
     and the parent's configure fails on the demos' dependencies (Chipmunk2D:
     `Could NOT find OpenGL`, both lines). The plain smoke passes, so run its
-    second pass.
+    second pass. A `CACHE BOOL` toggle is an option too (openjpeg's `WITH_ASTYLE`).
 14. **Adding `...<max>` to a floor spelled through a variable, then stopping.**
     `F1` never lists `cmake_minimum_required(VERSION ${VAR})`, and a later
     own-code `cmake_policy(VERSION 3.13.2)` resets what the range set. On
@@ -384,10 +412,12 @@ Agreed decisions, not derivations. Each is a default an adopter overrides once.
     a parent that never set it, the option creates the parent's cache entry,
     and the parent's later libraries build as `SHARED_LIBRARY` while every
     smoke target grep stays empty (jsoncpp, both lines). The `asub_bsl` grep
-    shows it.
+    shows it. A cached `EXECUTABLE_OUTPUT_PATH` sends the parent's later
+    executables into `lib-build/bin/` the same way (openjpeg, both lines).
 17. **Adding `NAMESPACE` to an existing export and trusting the round trip on
     the new name.** Every name consumers already link breaks, one at generate
-    and one at compile (jsoncpp, both lines).
+    and one at compile (jsoncpp, both lines). An old-name `ALIAS` without its
+    `NOT TARGET` guard fails a second `find_package` (openjpeg, both lines).
 18. **Keeping a tree's `${CMAKE_SOURCE_DIR}` in a usage requirement.** It is the
     parent's source root under `add_subdirectory`. The round trip reads only
     `INSTALL_INTERFACE` and the smoke's first two passes compile nothing, so
@@ -395,6 +425,33 @@ Agreed decisions, not derivations. Each is a default an adopter overrides once.
     (tinyformat, both lines). Write `CMAKE_CURRENT_SOURCE_DIR` or
     `PROJECT_SOURCE_DIR`, and the same for `CMAKE_BINARY_DIR` in generated
     files.
+19. **Reading an empty `F1` as done when the floor is a range with an old max.**
+    openjpeg's `3.10...3.31.5` and zlib's `2.4.4...3.15.0` print nothing, and
+    every policy after the old max stays unset. `F1b` lists every range.
+20. **Trusting step 1's checks after raising `<max>`.** On 4.4.2, CMP0219 stopped
+    re-escaping `macro()` arguments and openjpeg's `.pc` macro wrote
+    `libdir=\/lib64`, while the canary, the gated configure and the policy probe
+    passed. The configured-file check shows it.
+21. **Reading the flag-set union of two targets that compile one source.**
+    `openjp2_static` lost `-DMUTEX_pthread` and the union diff exited 0 (both
+    lines). Filter each run on `TGT`.
+22. **Grepping a header directory that also holds sources, or making a consumer
+    opt-in macro `PUBLIC`.** openjpeg's three private definitions read `PUBLIC`,
+    and zlib's `_LARGEFILE64_SOURCE` landed on every installed consumer.
+23. **Closing step 3 on `I1` alone.** The `PRIVATE` default took `m` from
+    openjpeg's in-tree `compare_images`, which failed with
+    `DSO missing from command line` under `-DBUILD_TESTING=ON` (4.4.2).
+24. **Renaming or re-defaulting an option without its legacy behaviour.** A
+    plain rename dropped `-DBUILD_TESTING=ON`, CI's seeded entry included, with
+    exit 0 and 0 tests. A test gate that defaulted `OFF` came on at top level and
+    failed the default build on a host without libtiff (openjpeg, both lines).
+    zlib's documented `-DINSTALL_LIB_DIR` was ignored after step 6.
+25. **Shipping a Config package under a Find-module name with only new targets.**
+    zlib's round trip passed, and a `CMAKE_FIND_PACKAGE_PREFER_CONFIG` consumer
+    lost `ZLIB::ZLIB` and FindZLIB's variables (both lines).
+26. **Leaving a hand-written `.pc` template on the variables step 6 replaced.**
+    zlib's `.pc` shipped empty `libdir` and `includedir`, and pkg-config printed
+    `-I -L -lz` with exit 0 while the round trip passed (both lines).
 
 ## MUST rows this procedure enforces
 
@@ -419,7 +476,7 @@ files, and a disputed row is settled there.
 | 13 | A compile definition that an installed header reads is `PUBLIC` on the library target, or baked into a configured installed header, never `PRIVATE` or directory-scoped (the MUST half) | CMK-TGT-03 |
 | 14 | In a library, never write `BUILD_SHARED_LIBS` with a `FORCE` outside `if(NOT DEFINED BUILD_SHARED_LIBS)`, and never let a non-top-level `option(BUILD_SHARED_LIBS … ON)` create the parent's cache entry (the MUST half) | CMK-TGT-11 |
 | 15 | A library others consume never builds its usage requirements on `CMAKE_SOURCE_DIR` or `CMAKE_BINARY_DIR` (the MUST half) | CMK-TGT-21 |
-| 16 | Give every export a `NAMESPACE`. Adding one to an export that shipped without it keeps every old exported name as an `ALIAS` in the Config package, or ships a changelog entry naming the rename | CMK-INST-06 |
+| 16 | Give every export a `NAMESPACE`. Adding one to an export that shipped without it keeps every old exported name as an `ALIAS` in the Config package, each under `if(NOT TARGET <old>)`, or ships a changelog entry naming the rename | CMK-INST-06 |
 
 ## References
 
@@ -427,8 +484,8 @@ Read one level down, on demand. These files do not link each other.
 
 | File | Read it when |
 |---|---|
-| [references/inventory.md](references/inventory.md) | Running step 0, or re-running an inventory command as the exit check of steps 1 to 4. Holds `I1` to `I12` with the reading of each, and the variable-existence check |
-| [references/proofs.md](references/proofs.md) | Running steps 5 to 9. Holds the gate canary, the gated round trip, the as-subproject smoke, the `CMK-DEP-07` offline probe, the CI greps and the CPS checks |
+| [references/inventory.md](references/inventory.md) | Running step 0, or re-running an inventory command as the exit check of steps 1 to 4. Holds `I1` to `I12` with the reading of each, the parse migration, the flag-set, configured-file and variable-existence checks |
+| [references/proofs.md](references/proofs.md) | Running steps 5 to 9. Holds the gate canary, the gated round trip, the pkg-config check, the as-subproject smoke, the `CMK-DEP-07` offline probe, the CI greps and the CPS checks |
 
 Re-check on each tool bump: the gate spelling split and preset `warnings`
 behaviour (CMake minor releases after 4.4.2), `gersemi --diff` exit code

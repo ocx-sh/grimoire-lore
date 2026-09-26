@@ -18,7 +18,12 @@ and the `pipefail` trap are `CMK-CORE` in the index.
 
 Every command reads a variable with a stated default instead of a placeholder:
 `MODULE_DIR` (the module sources, default `.`), `CI_DIR` (default `.github`),
-`DOC_DIR` (default `.`), `ROOT` (the consuming build, default `.`). Every grep
+`DOC_DIR` (default `.`), `ROOT` (the consuming build, default `.`). The default
+`.` fits the download and process rows (CMK-MOD-01 to -04 and -17 to -19), which bind
+any configure-time file. For every other row, `MODULE_DIR` is the subtree the project
+installs or documents for others to `include()`. A project that ships none, such as
+cpp-best-practices/cmake_template with its own `cmake/*.cmake` helpers, owes none of
+them: its 20 CMK-MOD-05 lines at `.` were all internal (2026-09-26). Every grep
 excludes `build*` directories, because configured test fixtures carry copies of the
 module. **pinned**: rules are written for a CMake 3.25 floor
 (`cmake_minimum_required(VERSION 3.25...4.4)`), which is what makes CMK-MOD-03 and

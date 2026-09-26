@@ -9,14 +9,15 @@ that identifies it. It states no standard: every fix is a rule ID owned by the
 Measured 2026-09-26 on CMake 3.31.12, 4.3.4 and 4.4.2, Conan 2.32.0 with
 cmake-conan `develop2` (`b1593849`, as of 2026-09-26), and vcpkg-tool
 2026-09-26, unless a row says otherwise. Rows that name vcpkg-tool 2026-07-27
-used the tool that registry commit `11ace808` (2026-09-26) bootstraps.
+used the tool that registry commit `11ace808` (2026-09-26) bootstraps. CPM rows
+used CPM.cmake 0.43.2, and cross rows zig cc 0.16.0-dev (2026-09-26).
 
 Contents: [Config mode](#config-mode-find_package) ·
 [Module mode](#module-mode-find_package) ·
 [FetchContent redirects](#fetchcontent-redirects) ·
 [Dependency providers](#dependency-providers) ·
-[Toolchain-injected paths](#toolchain-injected-paths) ·
-[The Conan graph](#the-conan-graph) · [vcpkg](#vcpkg)
+[Toolchain-injected paths](#toolchain-injected-paths) · [Bundled copies](#bundled-copies) ·
+[CPM](#cpm) · [The Conan graph](#the-conan-graph) · [vcpkg](#vcpkg)
 
 ## Config mode `find_package`
 
@@ -74,6 +75,12 @@ nothing for it on both lines. That is not "never looked up".
   `...4.4` range is policy `NEW`. A `QUIET` call is then silent and
   `<X>_FOUND` stays empty (CMK-DEP-19). A bare `find_package(Boost)` instead
   falls through to the `BoostConfig.cmake` that Boost ships from 1.70.
+- A module's copy is its `<X>_LIBRARY*` and `<X>_INCLUDE_DIR` cache lines,
+  printed by `--debug-find-pkg` as `The item was found at`. They can come from
+  two copies, and the module reports the version it parsed, usually the
+  header's: FindEXPAT in a cross build took `expat.h` 2.8.5 from the sysroot
+  and `libexpat.so` 2.7.3 from the host, and `found suitable version` and
+  4.4.2's `found.version` both said 2.8.5 (3.31.12, 4.3.4 and 4.4.2).
 
 ## FetchContent redirects
 
@@ -81,7 +88,7 @@ nothing for it on both lines. That is not "never looked up".
 |---|---|---|
 | `<X>_DIR` = `<build>/CMakeFiles/pkgRedirects` | `OVERRIDE_FIND_PACKAGE`, or a `FIND_PACKAGE_ARGS` declare that fell through to a fetch, satisfied the call. The installed copy was never consulted, whatever `CMAKE_PREFIX_PATH` held | CMK-DEP-07, CMK-DEP-32 |
 | `<declared>_DIR:INTERNAL=<build>/CMakeFiles/pkgRedirects` under the declare's spelling, with the installed copy on the path | A `FIND_PACKAGE_ARGS` try-find searched the declare's name (`cjson`) and missed a package that ships `cJSONConfig.cmake`, then fetched. `FIND_PACKAGE_ARGS NAMES cJSON ...` finds it (3.31.12 and 4.4.2) | CMK-DEP-07, CMK-DEP-09 |
-| No `find_package-v1` event on 4.1 and newer while `<X>_DIR` is under `pkgRedirects` | Expected. A redirect-answered call logs none (4.3.4 and 4.4.2), so a zero count is not a CMK-DEP-17 finding | CMK-DEP-17 |
+| No `find_package-v1` event on 4.1 and newer while `<X>_DIR` is under `pkgRedirects` | Expected without `--debug-find-pkg`, so a zero count is not a CMK-DEP-17 finding. With the flag the call logs one event whose `path` is `pkgRedirects/<x>-config.cmake` and whose found `version` is blank (4.3.4 and 4.4.2, FetchContent and CPM alike) | CMK-DEP-17 |
 | `pkgRedirects/<x>-config-version.cmake` containing `Version not available` | The version-less stub. Every later `find_package(<X> <ver> EXACT)` succeeds with a blank `<X>_VERSION` | CMK-DEP-09 |
 | A `FETCHCONTENT_SOURCE_DIR_<X>` cache entry | Resolution step 1: that directory is added directly. No provider and no `find_package` run, and the declare's `PATCH_COMMAND` is skipped | CMK-DEP-31 |
 | Two `FetchContent_Declare` of one name in different files | The first declare processed wins. A newer pin in a subdirectory is ignored silently | CMK-DEP-10 |
@@ -91,13 +98,38 @@ file name. `--trace-source=CMakeLists.txt` traces only files of that name and
 printed 0 lines for a declare kept in a `.cmake` module (4.4.2).
 
 ```sh
-grep -rn -A2 --include='*.cmake' --include='CMakeLists.txt' -e 'FetchContent_Declare' -e 'CPMAddPackage' .
+grep -rn -A2 --include='*.cmake' --include='CMakeLists.txt' -e 'FetchContent_Declare' -e 'CPMAddPackage' -e 'CPMDeclarePackage' -e 'CPMUsePackageLock' .
 ```
 
 Empty output means the tree declares nothing through FetchContent or CPM, so
 the copy came from elsewhere. Otherwise read the name in each hit (the `-A2`
 lines cover a name split onto the next line). One name declared in more than
-one file is a first-declare-wins question (CMK-DEP-10).
+one file, or a `CPMDeclarePackage` from a lock, is a first-declare-wins
+question (CMK-DEP-10, [CPM](#cpm)).
+
+## Bundled copies
+
+spdlog 1.17.0 with its default `SPDLOG_FMT_EXTERNAL=OFF` carries fmt 12.1.0
+in `include/spdlog/fmt/bundled/`, its Config file reads
+`set(SPDLOG_FMT_EXTERNAL OFF)`, and its targets list no `fmt::fmt`. Beside an
+installed fmt 11.1.4 (guards `FMT_BASE_H_`, `FMT_FORMAT_H_` in both), with
+configure exit 0 on 3.31.12, 4.3.4 and 4.4.2: `<fmt/format.h>` first fails the
+link on `fmt::v11::basic_string_view` with `did you mean` `fmt::v12::`, and
+`<spdlog/spdlog.h>` first runs `FMT_VERSION 120100` with exit 0, 242
+`fmt::v12::` symbols and none from the fmt 11.1.4 on its link line. spdlog
+built with `SPDLOG_FMT_EXTERNAL=ON` gave exit 0 and only `fmt::v11::` symbols
+for either order (4.4.2, CMK-DEP-33). With Ninja, `ninja -C build -t deps
+CMakeFiles/app.dir/main.cpp.o` lists the one header copy that object used.
+
+## CPM
+
+| Output | Meaning |
+|---|---|
+| `CPM_PACKAGE_<name>_VERSION:INTERNAL=` and `_SOURCE_DIR:INTERNAL=` | What CPM added: the version and the source it built |
+| `<name>_DIR` under `pkgRedirects`, no `OVERRIDE_FIND_PACKAGE` in the tree | CPM wrote the redirect for a fetched package. Its version file holds only `set(PACKAGE_VERSION_COMPATIBLE TRUE)` and `set(PACKAGE_VERSION_EXACT TRUE)`, so `find_package(fmt 12.1 CONFIG REQUIRED)` passed against 12.0.0 (CMK-DEP-09) |
+| `CPM: Adding package fmt@12.0.0`, then `Requires a newer version of fmt (12.1.0) than currently included (12.0.0)` | A `CPMDeclarePackage` came first. A lock the `cpm-update-package-lock` target wrote at 12.0.0 beat `CPMAddPackage("gh:fmtlib/fmt#12.1.0")` with exit 0 on 3.31.12, 4.3.4 and 4.4.2, and the gate never promotes the warning. Change the lock (CMK-DEP-10) |
+| `CPM: Using local package fmt@12.1.0`, `CPM_USE_LOCAL_PACKAGES:BOOL=ON` | CPM ran `find_package(fmt 12.0.0 QUIET)`, and fmt's `AnyNewerVersion` file accepted 12.1.0. The option is seeded from the environment and cached: unsetting the variable and `-U fmt_DIR` both kept 12.1.0, `-DCPM_USE_LOCAL_PACKAGES=OFF` fetched 12.0.0 (4.4.2) |
+| `Cache for fmt (<CPM_SOURCE_CACHE>/fmt/061b) is dirty` | The shared checkout was edited. A brand-new tree built the edit with exit 0 (3.31.12 and 4.4.2) |
 
 ## Dependency providers
 
@@ -168,6 +200,7 @@ losing file is never read (CMK-TC-01).
 | Output | Meaning | Rule |
 |---|---|---|
 | `<X>_DIR` under a manager's tree or a sysroot, while `<X>_ROOT` names another prefix, and the same after `--fresh` | A rooted copy won. vcpkg appends its installed triplet to `CMAKE_FIND_ROOT_PATH`, and any rooted candidate beats an unrooted `_ROOT` hint, cross build or not (measured with a one-line toolchain, 3.31.12 and 4.4.2). Pin the copy with `<X>_DIR` | CMK-DEP-21 |
+| `<X>_DIR` or `<X>_LIBRARY` on a host path in a cross build, the same after `--fresh`, and no candidate under `<sysroot>/usr/lib/<triplet>` in `--debug-find-pkg` | The target's copy was never searched. The compiler reported no implicit link directories (zig cc 0.16.0-dev), so `CMakeCCompiler.cmake` holds `CMAKE_C_LIBRARY_ARCHITECTURE ""` and the multiarch directory is skipped, while the unset modes (`BOTH`) let the environment's `CMAKE_PREFIX_PATH` win. `ONLY` alone gives "Could not find". Adding `set(CMAKE_LIBRARY_ARCHITECTURE aarch64-linux-gnu)` found the sysroot copy (3.31.12, 4.3.4 and 4.4.2) | CMK-TC-08, CMK-TC-11 |
 | A Conan cross build finds a sysroot copy over Conan's package | Conan 2.32.0's `CMakeToolchain` rewrites every `CMAKE_FIND_ROOT_PATH_MODE_*` to `BOTH` in cross builds | CMK-TC-10 |
 | A `VCPKG_*` or `CMAKE_TOOLCHAIN_FILE` value printed correctly, the other triplet's package found | The variable was set after the first `project()`. The printed value changed, the loaded file did not, and configure exits 0 | CMK-TC-03, CMK-VCPKG-04 |
 | `vcpkg.cmake` and `conan_toolchain.cmake` both reach one configure leg | Two managers of record. The variable holds one path | CMK-TC-02 |

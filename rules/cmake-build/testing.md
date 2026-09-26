@@ -34,13 +34,16 @@ Contents: [The CI CTest Line](#the-ci-ctest-line) · [Every Negative Test](#ever
 
 Binds every project that runs `ctest` in CI. Read the CI line, not the local
 one: a green step must prove that tests ran and that none of them hung.
+Commands 1 and 2 skip Markdown, because a `CONTRIBUTING.md` under `.github`
+shows a local `ctest` line that no CI job runs (nlohmann/json, 2026-09-26). They
+still read shell scripts, so never narrow them to YAML.
 
 ```sh
 CI_DIR=.github
 # 1. CMK-TEST-06: files that run tests with no zero-test guard. Empty output passes.
-grep -rlw -e 'ctest' -e '--target test' "$CI_DIR" | xargs -r grep -L -e 'no-tests=error' -e 'CTEST_NO_TESTS_ACTION' -e 'CMAKE_CTEST_ARGUMENTS' -e 'noTestsAction'
+grep -rlw --exclude='*.md' -e 'ctest' -e '--target test' "$CI_DIR" | xargs -r grep -L -e 'no-tests=error' -e 'CTEST_NO_TESTS_ACTION' -e 'CMAKE_CTEST_ARGUMENTS' -e 'noTestsAction'
 # 2. CMK-TEST-07: files that run tests with no suite bound. Empty output passes.
-grep -rlw -e 'ctest' -e '--target test' "$CI_DIR" | xargs -r grep -L -e '--timeout' -e '"timeout"'
+grep -rlw --exclude='*.md' -e 'ctest' -e '--target test' "$CI_DIR" | xargs -r grep -L -e '--timeout' -e '"timeout"'
 # 3. CMK-TEST-07 fallback, only for a file command 2 printed. Empty output is the finding.
 grep -rn --include='CMakeLists.txt' --include='*.cmake' -e 'TIMEOUT' -e 'include(CTest)' .
 # 4. CMK-TEST-08: retry-until-green on a gate. Empty output passes.
@@ -109,7 +112,7 @@ grep -e 'Total Tests: 0' "$W/asub-tests.txt"
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| CMK-TEST-09 | Gate the test tree of a library that others consume on a project-prefixed option whose default is `PROJECT_IS_TOP_LEVEL` (or `OFF`). Never gate it on `BUILD_TESTING` alone. Call `include(CTest)` inside the gate. Run the smoke build above as a named CI job. Gate examples, demos and benchmarks the same way, on project-prefixed options. | A consumer's `include(CTest)` turns `BUILD_TESTING` on for the whole tree, so a `BUILD_TESTING`-guarded dependency lands its tests in the consumer's `ctest -N`. The prefixed option keeps them out, and the standalone build still has them (measured 2026-09-26 on 3.31.12, 4.3.4 and 4.4.2). fmt and spdlog gate this way, and curl runs the as-subproject job in CI. Floor: `PROJECT_IS_TOP_LEVEL` 3.21. Below that, compare `CMAKE_SOURCE_DIR` with `PROJECT_SOURCE_DIR`. | Command 1 first. A hit under a `BUILD_TESTING`-only guard, or under an unprefixed option whatever its default, is the finding: `option()` never overrides a parent's entry of the same name, so a parent's `BUILD_EXAMPLES=ON` switches the library's on (measured 2026-09-26 on 3.31.12 and 4.4.2). Then the smoke block on the leg's CMake with that line's gate (3.31.x: `-Werror=dev`, 4.4.x: `-Werror=author`): the final grep printing `Total Tests: 0` passes, and empty output is the finding. | MUST |
+| CMK-TEST-09 | Gate the test tree of a library that others consume on a project-prefixed option whose default is `PROJECT_IS_TOP_LEVEL` (or `OFF`). Never gate it on `BUILD_TESTING` alone. Call `include(CTest)` inside the gate. Run the smoke build above as a named CI job. Gate examples, demos and benchmarks the same way, on project-prefixed options. Renaming an existing unprefixed option keeps the old spelling as the top-level default (`if(PROJECT_IS_TOP_LEVEL AND DEFINED BUILD_TESTING)`), or ships a changelog entry naming the rename. | A consumer's `include(CTest)` turns `BUILD_TESTING` on for the whole tree, so a `BUILD_TESTING`-guarded dependency lands its tests in the consumer's `ctest -N`. The prefixed option keeps them out, and the standalone build still has them (measured 2026-09-26 on 3.31.12, 4.3.4 and 4.4.2). fmt and spdlog gate this way, and curl runs the as-subproject job in CI. Floor: `PROJECT_IS_TOP_LEVEL` 3.21. Below that, compare `CMAKE_SOURCE_DIR` with `PROJECT_SOURCE_DIR`. A plain rename drops `-DBUILD_TESTING=ON` with only a "not used" warning, 0 tests and exit 0, and uclouvain/openjpeg at `8314119b` seeds that entry from its CI script (measured 2026-09-26 on 3.31.12 and 4.4.2). | Command 1 first. A hit under a `BUILD_TESTING`-only guard, or under an unprefixed option whatever its default, is the finding: `option()` never overrides a parent's entry of the same name, so a parent's `BUILD_EXAMPLES=ON` switches the library's on (measured 2026-09-26 on 3.31.12 and 4.4.2). Then the smoke block on the leg's CMake with that line's gate (3.31.x: `-Werror=dev`, 4.4.x: `-Werror=author`): the final grep printing `Total Tests: 0` passes, and empty output is the finding. After a rename, `-D<old>=ON` at top level must change the `ctest -N` count. | MUST |
 
 ```cmake
 # wrong: the consumer's include(CTest) turns BUILD_TESTING on and pulls these in

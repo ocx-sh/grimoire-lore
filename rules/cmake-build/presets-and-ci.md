@@ -59,7 +59,9 @@ The table is `cmake-presets(7)` at v4.4.2, confirmed by 3.31.12 and 4.0.7 to 4.2
 accepting up to 10, 4.3.4 up to 11 and 4.4.2 up to 12 (measured 2026-09-26). The static fallback prints each root
 file's schema and the files it includes. Run the same `jq` on each included
 file, whose path is relative to the file that includes it. Empty output means
-no presets file.
+no presets file. A `jq: parse error` means the file is not JSON as committed,
+such as a Jinja template in a project generator (friendlyanon/cmake-init,
+2026-09-26). CMake never reads it, so the rule binds the generated file instead.
 
 ```sh
 find . -name CMakePresets.json -not -path '*/_deps/*' -print0 | xargs -0 -r -n1 jq -r '(input_filename) + " " + (.version | tostring), (.include[]? | "  includes " + .)'
@@ -79,10 +81,10 @@ second lists the CI steps that call a preset. `condition` needs schema 3 (CMake
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| CMK-CI-03 | Configure each CI leg with `cmake --preset <name>`, and pass the matrix axes as `-D` or `-G` on top of it. Ship no CI-named preset that CI does not call. Compose OS, compiler and configuration from hidden bases with `inherits` and `condition`, never one flat preset per combination. | Presets that CI never calls drift from the matrix CI really runs, and nothing reports it: cpp-best-practices/cmake_template defines `ci-*` presets and then rebuilds the same matrix with raw flags. One preset plus the axes is the cheap conforming shape. Hidden ingredient presets (all of LLVM's are hidden) and developer presets are legal. The cross-product problem is open upstream as CMake issue 22538 (as of 2026-04-27). Floor: CMake 3.21 for `condition`. | Reading heuristic over the two commands below. Every non-hidden preset CI is meant to use must appear in the second command's hits. Presets present and empty second output is the finding: the presets are decorative. No presets file means the rule does not apply. A hidden preset, or a plainly local developer preset, missing from CI is not a finding. | SHOULD |
+| CMK-CI-03 | Configure each CI leg with `cmake --preset <name>`, and pass the matrix axes as `-D` or `-G` on top of it. Ship no CI-named preset that CI does not call. Compose OS, compiler and configuration from hidden bases with `inherits` and `condition`, never one flat preset per combination. | Presets that CI never calls drift from the matrix CI really runs, and nothing reports it: cpp-best-practices/cmake_template defines `ci-*` presets and then rebuilds the same matrix with raw flags. One preset plus the axes is the cheap conforming shape. Hidden ingredient presets (all of LLVM's are hidden) and developer presets are legal. The cross-product problem is open upstream as CMake issue 22538 (as of 2026-04-27). Floor: CMake 3.21 for `condition`. | Reading heuristic over the two commands below. Every non-hidden preset CI is meant to use must appear in the second command's hits. Presets present and empty second output is the finding: the presets are decorative. Empty output from the first command means no root presets file or no visible preset, and the rule does not apply. A hidden preset, or a plainly local developer preset, missing from CI is not a finding. | SHOULD |
 
 ```sh
-jq -r '.configurePresets[] | select(.hidden != true) | .name' CMakePresets.json
+find . -maxdepth 1 -name CMakePresets.json -print0 | xargs -0 -r jq -r '.configurePresets[] | select(.hidden != true) | .name'
 grep -rn -e 'cmake --preset' -e 'ctest --preset' -e '--preset=' "${CI_DIR:-.github}"
 ```
 
@@ -94,7 +96,7 @@ variable 3.17, both below the 3.25 floor.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| CMK-CI-04 | Set a compiler launcher only as the cache entry `CMAKE_<LANG>_COMPILER_LAUNCHER`, from one place: a preset's `cacheVariables`, a `-D`, or the environment variable of that name. Project code that offers a default wraps it in `if(NOT DEFINED CMAKE_<LANG>_COMPILER_LAUNCHER)` and picks one tool with `find_program(NAMES sccache ccache)`. Never use `RULE_LAUNCH_COMPILE`, and never set a chained list. | An unconditional `set()` in project code shadows the caller's `-D` and nothing reports it: `build.ninja` carries the project's launcher (measured on 3.31.12 and 4.4.2). A list that prepends the project's launcher to the caller's overrides their choice the same way. apache/arrow's guard is the reference shape. Floor: CMake 3.4. | `grep -rn --include='CMakeLists.txt' --include='*.cmake' --include='CMakePresets.json' --include='*.yml' --include='*.yaml' -e 'COMPILER_LAUNCHER' -e 'RULE_LAUNCH_COMPILE' .` Every `RULE_LAUNCH_COMPILE` hit is a finding. A `set(CMAKE_<LANG>_COMPILER_LAUNCHER ...)` outside an `if(NOT DEFINED ...)` or `if(NOT CMAKE_<LANG>_COMPILER_LAUNCHER)` guard is a finding. Empty output means no launcher, and the rule does not apply. | SHOULD |
+| CMK-CI-04 | Set a compiler launcher only as the cache entry `CMAKE_<LANG>_COMPILER_LAUNCHER`, from one place: a preset's `cacheVariables`, a `-D`, or the environment variable of that name. Project code that offers a default wraps it in `if(NOT DEFINED CMAKE_<LANG>_COMPILER_LAUNCHER)`, or writes it as `set(... CACHE FILEPATH ...)` without `FORCE`, and picks one tool with `find_program(NAMES sccache ccache)`. Never use `RULE_LAUNCH_COMPILE`, and never set a chained list. | An unconditional `set()` in project code shadows the caller's `-D` and nothing reports it: `build.ninja` carries the project's launcher (measured on 3.31.12 and 4.4.2). A list that prepends the project's launcher to the caller's overrides their choice the same way. apache/arrow's guard is the reference shape. A `CACHE` write without `FORCE` is the same guard: a caller's `-D` and the environment variable both survive it into `CMakeCache.txt` and the build files (measured 2026-09-26 on 3.31.12 and 4.4.2, the shape of cpp-best-practices/cmake_template's `cmake/Cache.cmake`). Floor: CMake 3.4. | `grep -rn --include='CMakeLists.txt' --include='*.cmake' --include='CMakePresets.json' --include='*.yml' --include='*.yaml' -e 'COMPILER_LAUNCHER' -e 'RULE_LAUNCH_COMPILE' .` Every `RULE_LAUNCH_COMPILE` hit is a finding. A `set(CMAKE_<LANG>_COMPILER_LAUNCHER ...)` outside an `if(NOT DEFINED ...)` or `if(NOT CMAKE_<LANG>_COMPILER_LAUNCHER)` guard is a finding, unless it is a `CACHE` write without `FORCE`. A plain `set()` or a `CACHE ... FORCE` write outside the guard stays a finding. Empty output means no launcher, and the rule does not apply. | SHOULD |
 
 ```cmake
 # wrong: shadows the caller's -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
@@ -157,6 +159,10 @@ docker run --rm --network none -v "$PWD:/src" -w /src "$IMAGE" \
 8. **Passing `-DCMAKE_BUILD_TYPE` on a multi-config leg** and believing it
    selects the configuration. The `-C` clause of CMK-TEST-06 in `testing.md`
    catches the mismatch.
+9. **Relaxing the gate for an informational `message(AUTHOR_WARNING)`.** Every
+   `AUTHOR_WARNING` fails the gate, a "Building Tests" note included, and the
+   agent reaches for `-Wno-error` or a preset switch. Downgrade the note to
+   `message(STATUS)`. CMK-CORE-01 owns the measurement.
 
 ## Re-check
 

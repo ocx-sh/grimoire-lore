@@ -14,6 +14,7 @@ Contents: [How to read the output](#how-to-read-the-output) ·
 [Floors and hand-off tokens](#floors-and-hand-off-tokens) ·
 [Standards and warnings-as-errors](#standards-and-warnings-as-errors) ·
 [The flag-set check](#the-flag-set-check) ·
+[The configured-file check](#the-configured-file-check) ·
 [The variable-existence check](#the-variable-existence-check)
 
 ## How to read the output
@@ -83,7 +84,35 @@ grep -rniE --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_deps' 
 Each hit's plan-file row names the command, whether it is public (another
 project calls it) or private, and each multi-value keyword that takes lists of
 files, targets or paths. The fix for a public command carries the flatten line
-from SKILL.md's "Legacy parses", or a changelog entry naming the change.
+below, or a changelog entry naming the change.
+
+### Migrating a parse
+
+Each `I4` hit inside a `function()` is a `CMK-LANG-04` finding. A hit inside a
+`macro()` is `CMK-LANG-08`'s. Migrating a public command to `PARSE_ARGV`
+changes what its callers get (measured on 3.31.12, 4.3.4 and 4.4.2):
+
+| Call | `${ARGN}` legacy | `PARSE_ARGV` |
+|---|---|---|
+| `MULTI "${L}" z`, with `L` = `x;y` | 3 elements | 2 elements, the first `x;y` |
+| `ONE "a;b"` | `ONE` = `a`, `b` unparsed | `ONE` = `a;b` |
+
+So the fix written into the plan file for each multi-value keyword whose values
+are lists of files, targets or paths carries the flatten line, directly after
+the parse:
+
+```cmake
+function(mylib_add NAME)
+    cmake_parse_arguments(PARSE_ARGV 1 arg "" "DEST" "SOURCES")
+    set(arg_SOURCES ${arg_SOURCES})
+endfunction()
+```
+
+With the flatten line, `SOURCES "${L}" z` gives 3 elements again. The one-value
+change is a fix, because the legacy parse left `b` unparsed. A public command's
+parse is never rewritten without the flatten line, or without a changelog entry
+naming the behaviour change. A private helper is SHOULD. After the parse, read
+`<prefix>_UNPARSED_ARGUMENTS` and stop with `FATAL_ERROR` (`CMK-LANG-06`).
 
 `I5`, reserved option names (`CMK-LANG-11`). Empty output = pass. A hit is the
 finding: an `option()` on a built-in name does not override a consumer's `-D`,
@@ -170,8 +199,10 @@ grep -rniE --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_deps' 
 ```
 
 `I12`, literal warnings-as-errors (`CMK-TGT-09`). Empty output = pass. A hit
-outside a developer option that defaults OFF is the finding. Report
-`-Werror=<category>` separately.
+outside a developer option that defaults OFF is the finding. A
+`-Werror=<category>` hit is recorded `flagged-not-converted` with a
+`CMK-TGT-09` note for the owner, and does not hold step 4's exit (openjpeg puts
+three categories on `openjp2`, unconditionally under GCC).
 
 ```sh
 grep -rn --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_deps' --exclude-dir='build*' -e '-Werror' -e '/WX' .
@@ -186,16 +217,21 @@ one source per target at the step-1 commit, then again after each diff. Pass
 the plan file's configure options too.
 
 ```sh
-# SRCFILE = one source of the converted target. Writes flags-before.txt at the
+# SRCFILE = one source of the converted target, TGT = that target. Writes flags-before.txt at the
 # step-1 commit (rename the output), flags-after.txt after the diff.
 SRCFILE=src/core.c
+TGT=core
 cmake -S . -B build-flags --fresh "$GATE" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-jq -r --arg f "$SRCFILE" '[.[] | select(.file | endswith($f)) | .command | split(" ")[] | select(startswith("-"))] | sort | unique | .[]' \
+jq -r --arg f "$SRCFILE" --arg t "$TGT" '[.[] | select(.file | endswith($f)) | select(.output | contains("/" + $t + ".dir/")) | .command | split(" ")[] | select(startswith("-"))] | sort | unique | .[]' \
   build-flags/compile_commands.json > flags-after.txt
 diff flags-before.txt flags-after.txt
 ```
 
-Empty `diff` output = pass. A line starting `<` is a flag the diff lost, the
+Empty `diff` output = pass. Run it once per target when two targets compile
+the same source (a shared and a static library from one list). Without the
+`TGT` filter the union hides a flag one of them lost: openjpeg's
+`openjp2_static` lost `-DMUTEX_pthread`, the union diff exited 0 and the
+per-target diff printed `< -DMUTEX_pthread` (3.31.12 and 4.4.2). A line starting `<` is a flag the diff lost, the
 finding. A line starting `>` is a flag it added, which the plan file must name.
 A `<` and a `>` line for two `-I` spellings of one directory are not a loss:
 compare the two paths with `realpath` first (jsoncpp: `-I.../include` against
@@ -204,6 +240,33 @@ Measured on Chipmunk2D (3.31.12 and 4.4.2, gcc 15.2.1, 2026-09-26): the step-2
 and the corrected step-4 diffs print nothing, and a step 4 that replaced
 `-std=gnu99` with `target_compile_features(... c_std_99)` alone prints
 `< -std=gnu99`.
+
+## The configured-file check
+
+The last part of step 1's exit check. Raising `<max>` sets every newer policy
+to `NEW`, and one of them can change what `configure_file()` writes while every
+other step 1 check passes. Configure the step-0 commit and the floor diff on
+the newest CI line, ungated, into two build directories, then compare every
+configured output. List them first:
+
+```sh
+# The configure_file() calls. A list to read: each output path goes into CONFIGURED.
+grep -rn --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_deps' --exclude-dir='build*' -e 'configure_file' .
+```
+
+```sh
+# CONFIGURED = the configured outputs, relative to the build dir. Empty output = pass.
+CONFIGURED='libopenjp2.pc src/lib/openjp2/opj_config.h'
+for f in $CONFIGURED; do diff "build-step0/$f" "build-step1/$f"; done
+```
+
+A printed line is the finding, repaired in its own diff. Measured on 4.4.2:
+openjpeg's `...3.31.5` raised to `...4.4` turns on CMP0219, which stops
+re-escaping `macro()` arguments, so the `.pc` helper macro wrote
+`libdir=\/lib64` and pkg-config exited 0 with `-I/include/openjpeg-2.5`. Five
+lines of `libopenjp2.pc` differ, and none after the macro became a
+`function()`. 3.31.12 and 4.3.4 write `libdir=${prefix}/lib64` either way.
+zlib's `zlib.pc` and `zconf.h` do not differ.
 
 ## The variable-existence check
 

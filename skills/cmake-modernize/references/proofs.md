@@ -11,6 +11,7 @@ Contents: [The gate canary](#the-gate-canary) ·
 [The as-subproject smoke](#the-as-subproject-smoke) ·
 [The offline subproject probe](#the-offline-subproject-probe) ·
 [The gated round trip](#the-gated-round-trip) ·
+[The pkg-config check](#the-pkg-config-check) ·
 [CI checks](#ci-checks) · [CPS and pkg-config](#cps-and-pkg-config)
 
 ## The gate canary
@@ -63,32 +64,31 @@ NAME=mylib_unit_tests
 grep -r --include='asub-targets.txt' -e "$NAME" "$W"
 ```
 
-The configure must exit 0. After a failed configure, `ctest -N` still prints
-`Total Tests: 0` and every target grep is empty, so a red configure reads as a
-pass (tinyformat, both lines). The `asub_bsl` grep: empty output = pass. A line
-means the library's `option(BUILD_SHARED_LIBS ... ON)` created the parent's
-cache entry, and every `add_library()` the parent adds afterwards builds
-`SHARED` (jsoncpp at `3347a4b8`: `asub_bsl=[ON]` before the step 5 guard, empty
-after it, 3.31.12 and 4.4.2). The tests `grep` must print a line. Empty output
-= tests leaked (finding). Run the last `grep` once per developer-only target name recorded from a top-level
-configure of the same tree. Empty output = pass. Measured on all three lines: a
-library guarded on `PROJECT_IS_TOP_LEVEL` prints `Total Tests: 0` and no
-`mylib_unit_tests`, and the same library unguarded prints `Total Tests: 1` and
-`mylib_unit_tests: phony`. The Ninja help format is `name: phony`. Never use a
-`--directory` flag (it does not exist) or an `|| echo OK` ending, which prints OK
-on any error. Declare the parent's language to match the library's, `C` or
-`CXX`.
+The configure must exit 0: after a failed one, `ctest -N` still prints
+`Total Tests: 0` and every target grep is empty (tinyformat, both lines). The
+`asub_bsl` grep: empty output = pass. A line means the library's
+`option(BUILD_SHARED_LIBS ... ON)` created the parent's cache entry, and every
+later `add_library()` of the parent builds `SHARED` (jsoncpp at `3347a4b8`,
+3.31.12 and 4.4.2). The tests `grep` must print a line, and empty output = tests
+leaked (finding). Run the last `grep` once per developer-only target name from a
+top-level configure of the same tree. Empty output = pass. Measured on all three
+lines: a library guarded on `PROJECT_IS_TOP_LEVEL` prints `Total Tests: 0` and
+no `mylib_unit_tests: phony`, and unguarded prints `Total Tests: 1` and that
+line. Never use a `--directory` flag (it does not exist) or an `|| echo OK`
+ending. Declare the parent's language to match the library's, `C` or `CXX`.
 
 The second pass runs the same smoke under a parent that owns an option name the
 library also declares. List the library's options first:
 
 ```sh
-grep -rnE --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_deps' --exclude-dir='build*' \
-  -e '^[[:space:]]*option[[:space:]]*\(' "$SRC"
+grep -rniE --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_deps' --exclude-dir='build*' \
+  -e '^[[:space:]]*option[[:space:]]*\(' -e '^[[:space:]]*set[[:space:]]*\([[:space:]]*[A-Za-z_]+[[:space:]].*CACHE[[:space:]]+BOOL' "$SRC"
 ```
 
-Empty output = no options, so the second pass is not applicable. Run it once
-per listed name that lacks the project's prefix:
+Empty output = no options, so the second pass is not applicable. The second
+pattern lists a `CACHE BOOL` toggle such as openjpeg's `WITH_ASTYLE`, which a
+parent owning `WITH_ASTYLE=ON` turned into `No CMAKE_CXX_COMPILER could be
+found` (both lines). Run the pass once per listed name lacking the prefix:
 
 ```sh
 # NAME as in the first pass, once per developer-only target name.
@@ -101,13 +101,11 @@ cmake --build "$W/asub2-build" --target help > "$W/asub2-targets.txt"
 grep -r --include='asub2-targets.txt' -e "$NAME" "$W"
 ```
 
-A non-zero configure exit is a finding, and so is any line from the grep. Empty
-output = pass. `option()` never overrides a name the parent already set, so an
-unprefixed `option(BUILD_EXAMPLES ... ${PROJECT_IS_TOP_LEVEL})` takes the
-parent's `ON` (measured 2026-09-26 on 3.31.12 and 4.4.2: the example target
-leaks, while the same library with `mylib_BUILD_EXAMPLES` prints nothing).
-Chipmunk2D's unprefixed `BUILD_DEMOS` failed the parent's configure with
-`Could NOT find OpenGL` on both lines.
+A non-zero configure exit is a finding, and so is any grep line. Empty output =
+pass. `option()` never overrides a name the parent set, so an unprefixed
+`option(BUILD_EXAMPLES ... ${PROJECT_IS_TOP_LEVEL})` takes the parent's `ON`
+(3.31.12 and 4.4.2), and Chipmunk2D's `BUILD_DEMOS` failed the parent's
+configure with `Could NOT find OpenGL`.
 
 The third pass compiles a consumer through `add_subdirectory`. The first pass
 only lists targets, and the round trip reads only `INSTALL_INTERFACE`, so a
@@ -123,11 +121,9 @@ cmake -S "$W/asub3" -B "$W/asub3-build" -G Ninja "$GATE"
 cmake --build "$W/asub3-build"
 ```
 
-For a C++ library, declare `LANGUAGES CXX` and write `main.cpp`, as in the
-round trip. Measured on tinyformat (3.31.12 and 4.4.2): with
-`$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>` the configure exits 0 and the build
-exits 1 with `'tinyformat.h' file not found`, and with
-`${CMAKE_CURRENT_SOURCE_DIR}` both exit 0.
+For a C++ library, declare `LANGUAGES CXX` and write `main.cpp`. On tinyformat
+`$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>` built with exit 1, `'tinyformat.h' file
+not found`, and `${CMAKE_CURRENT_SOURCE_DIR}` with exit 0 (3.31.12 and 4.4.2).
 
 ## The offline subproject probe
 
@@ -146,10 +142,9 @@ cmake -S "$W/dep07" -B "$W/dep07-build" "$GATE" -DCMAKE_PREFIX_PATH="$DEP_PREFIX
 ```
 
 A non-zero exit from a forced fetch is the finding. Keep the CMP0170 default:
-without it, a tree whose range stops below 3.30 configures a forced fetch
-against an empty source directory and still exits 0. Measured on 3.31.12 and
-4.4.2: an unconditional declare exits 1, and the same declare with
-`FIND_PACKAGE_ARGS CONFIG` exits 0 against the installed copy.
+without it, a range below 3.30 fetches into an empty source directory and exits
+0. An unconditional declare exits 1, and with `FIND_PACKAGE_ARGS CONFIG` it
+exits 0 against the installed copy (3.31.12 and 4.4.2).
 
 ## The gated round trip
 
@@ -193,32 +188,55 @@ grep -e "^${PKG}_DIR" "$W/consumer-build/CMakeCache.txt"
 ```
 
 The script stops at the first failure, and any non-zero exit is a finding. The
-last line shows which package file the moved consumer resolved. Measured on
-all three lines: a complete package exits 0 and prints
-`mylib_DIR:PATH=.../moved/lib64/cmake/mylib`, and the same package without
-`write_basic_package_version_file` exits 1 with `version: unknown`
-(`CMK-INST-04`). The consumer calls a function because an empty `main` pulls
-no member out of a static archive: Chipmunk2D's static target, which never
-linked `m`, passed with an empty `main` and exits 1 with
-``undefined reference to `sincos'`` when `SYM_CALL` is `cpBodyNew(1, 1) != 0`
-(both lines, 2026-09-26). One call pulls in only its own object file, so a gap
-in another object stays hidden. The script runs a single-config generator, so multi-config
-defects need `CMK-INST-22`'s leg. For a C++ library, the consumer declares
-`LANGUAGES CXX` and writes `main.cpp` instead. Run it once more with each
-option that adds a `PUBLIC` definition switched on in `CFG_ARGS`: upstream
-jsoncpp's directory-scoped `JSONCPP_USE_SECURE_MEMORY` never reached the
-installed target, and its consumer exits 2 with
-`undefined symbol: Json::Value::operator[]` (3.31.12 and 4.4.2).
+last line shows which package file the moved consumer resolved. Measured on all
+three lines: a complete package exits 0 and prints
+`mylib_DIR:PATH=.../moved/lib64/cmake/mylib`, and without
+`write_basic_package_version_file` it exits 1 with `version: unknown`
+(`CMK-INST-04`). The consumer calls a function because an empty `main` pulls no
+member out of a static archive: Chipmunk2D's static target, which never linked
+`m`, exits 1 with ``undefined reference to `sincos'`` only when `SYM_CALL` is
+`cpBodyNew(1, 1) != 0` (both lines). One call pulls in only its own object, so a
+gap in another stays hidden. Multi-config defects need `CMK-INST-22`'s leg. A C++
+consumer declares `LANGUAGES CXX` and writes `main.cpp`. Run it once more with
+each option that adds a `PUBLIC` definition in `CFG_ARGS` (jsoncpp's
+`JSONCPP_USE_SECURE_MEMORY`: `undefined symbol: Json::Value::operator[]`,
+3.31.12 and 4.4.2).
+
+### The pkg-config check
+
+The round trip neither greps nor consumes a `.pc`. A tree that ships one
+compares pkg-config's output against a step-0 install staged with `DESTDIR` (a
+tree with absolute destinations ignores `--prefix`), from the round trip's dir.
+
+```sh
+# PC = the .pc name, STEP0_DESTDIR = the DESTDIR of a step-0 install with the default prefix,
+# PCDIR = the directory each install wrote the .pc to, under its prefix. Empty output = pass.
+PC=zlib
+PCDIR=share/pkgconfig
+PKG_CONFIG_PATH="$STEP0_DESTDIR/usr/local/$PCDIR" pkg-config --cflags --libs "$PC" > pc-before.txt
+PKG_CONFIG_PATH="$PWD/moved/$PCDIR" pkg-config --cflags --libs "$PC" > pc-after.txt
+diff pc-before.txt pc-after.txt
+```
+
+A printed directory change the plan file names (`lib` to `lib64`) passes. An
+empty `-I` or `-L`, or a path that lost its prefix, is the finding: zlib
+1.3.1's literal step 6 printed `> -I -L -lz` while the round trip exited 0
+(3.31.12 and 4.4.2).
 
 ## CI checks
 
-Step 8. Each command reads the tree from the root.
+Step 8. CI carries each leg under its own gate spelling, checked by the canary
+through that leg's binary and preset, `gersemi --check`, and the round trip as
+its own job (`CMK-INST-18`). A module project that runs gersemi commits a
+`.gersemirc` listing its own command files (`CMK-MOD-15`), and a
+`.cmake-format*` file is migrated, never extended. Commands run from the root.
 
 ```sh
 # CMK-CORE-01: a gate exists in the workflows. Empty output = no gate (finding), unless the leg's preset carries "errors": {"dev": true} and the preset canary exits 1.
 # A Werror=author hit on a leg that can resolve CMake below 4.4 is also a finding.
-grep -rn -e 'Werror=author' -e 'Werror=dev' .github/workflows
-# A preset that switches the gate off. Empty output = pass.
+# CI_SCRIPTS (optional) = a directory holding a script the workflows configure through (openjpeg: tools/ctest_scripts, a ctest -S script).
+grep -rn -e 'Werror=author' -e 'Werror=dev' .github/workflows ${CI_SCRIPTS:+"$CI_SCRIPTS"}
+# A preset that switches the gate off ("deprecated": false beat a command-line -Werror=dev on 3.31.12). Empty output = pass.
 grep -rn --include='CMakePresets.json' --include='CMakeUserPresets.json' -e '"dev"[[:space:]]*:[[:space:]]*false' -e '"deprecated"[[:space:]]*:[[:space:]]*false' .
 # CMK-CORE-05: an early-exiting reader in a script. Empty output = pass. A hit in
 # a file that also sets pipefail is the finding. Name only operands that exist:
@@ -235,10 +253,11 @@ find . -name CMakePresets.json -not -path '*/_deps/*' -print0 \
 All five were run against a planted failing tree and a planted passing one. The
 formatting gate is the index's gate line,
 `git ls-files -z -- '*CMakeLists.txt' '*.cmake' | xargs -0 -r gersemi --check`,
-with gersemi 0.29.1: exit 1 on an unformatted file, exit 0 on a formatted one.
-Never `gersemi --check .`, which descends into build trees and fails on
-generated files, and never `gersemi --diff`, which exited 0 on both (measured
-2026-09-26) (`CMK-CORE-04`).
+gersemi 0.29.1: exit 1 on an unformatted file, exit 0 on a formatted one. Append
+one `':!:thirdparty/**'` pathspec per vendored directory the plan file records
+(openjpeg: 8 of 39 reformat candidates were vendored). Never
+`gersemi --check .`, which descends into build trees, and never
+`gersemi --diff`, which exited 0 on both (2026-09-26, `CMK-CORE-04`).
 
 In a tree with no `.github/workflows` directory, the greps that name it exit 2
 with "No such file or directory". That is neither a pass nor a hit: step 8 is
