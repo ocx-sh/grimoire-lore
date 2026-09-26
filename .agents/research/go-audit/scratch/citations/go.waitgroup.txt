@@ -1,0 +1,200 @@
+aquasecurity__trivy:pkg/rpc/server/listen.go:64: requestWg := &sync.WaitGroup{}
+aquasecurity__trivy:pkg/rpc/server/listen.go:65: dbUpdateWg := &sync.WaitGroup{}
+aquasecurity__trivy:pkg/rpc/server/listen.go:109: func (s Server) NewServeMux(ctx context.Context, serverCache cache.Cache, dbUpdateWg, requestWg *sync.WaitGroup) *http.ServeMux {
+aquasecurity__trivy:pkg/rpc/server/listen.go:176: skipDBUpdate bool, dbUpdateWg, requestWg *sync.WaitGroup, opt types.RegistryOptions) error {
+aquasecurity__trivy:pkg/rpc/server/listen.go:192: func (w dbWorker) hotUpdate(ctx context.Context, dbDir string, dbUpdateWg, requestWg *sync.WaitGroup, opt types.RegistryOptions) error {
+aquasecurity__trivy:pkg/rpc/client/client.go:63: var wg sync.WaitGroup
+bazel-contrib__rules_go:go/tools/builders/nogo_main.go:409: var wg sync.WaitGroup
+bazel-contrib__rules_go:go/tools/bzltestutil/wrap.go:75: wg         sync.WaitGroup
+bazelbuild__bazel-gazelle:v2/walk/dirinfo.go:175: var wg sync.WaitGroup
+caddyserver__caddy:modules/caddytls/tls.go:142: bgWg               *sync.WaitGroup
+caddyserver__caddy:modules/caddytls/tls.go:426: t.bgWg = new(sync.WaitGroup)
+caddyserver__caddy:modules/caddytls/tls.go:961: t.bgWg = new(sync.WaitGroup)
+caddyserver__caddy:modules/caddyhttp/reverseproxy/streaming.go:60: func (h *Handler) handleUpgradeResponse(logger *zap.Logger, wg *sync.WaitGroup, rw http.ResponseWriter, req *http.Request, res *http.Response) {
+caddyserver__caddy:modules/caddyhttp/reverseproxy/streaming.go:671: wg            *sync.WaitGroup
+caddyserver__caddy:modules/caddyhttp/reverseproxy/reverseproxy.go:1248: var wg sync.WaitGroup
+caddyserver__caddy:modules/caddyhttp/app.go:768: var startedShutdown, finishedShutdown sync.WaitGroup
+charmbracelet__bubbletea:tea.go:418: var wg sync.WaitGroup
+charmbracelet__bubbletea:tea.go:936: var wg sync.WaitGroup
+cli__cli:internal/skills/installer/installer.go:97: var wg sync.WaitGroup
+cli__cli:internal/skills/discovery/discovery.go:676: var wg sync.WaitGroup
+cli__cli:pkg/cmd/issue/edit/edit.go:438: g := sync.WaitGroup{}
+cli__cli:pkg/cmd/codespace/ssh.go:578: var wg sync.WaitGroup
+cli__cli:pkg/cmd/extension/manager.go:203: var wg sync.WaitGroup
+cli__cli:pkg/cmd/skills/search/search.go:306: var wg sync.WaitGroup
+cli__cli:pkg/cmd/skills/search/search.go:385: var wg sync.WaitGroup
+cli__cli:pkg/cmd/skills/search/search.go:824: var wg sync.WaitGroup
+cli__cli:pkg/cmd/skills/search/search.go:884: var wg sync.WaitGroup
+cli__cli:api/queries_issue.go:727: var wg sync.WaitGroup
+cockroachdb__pebble:wal/wal.go:400: Done *sync.WaitGroup
+cockroachdb__pebble:wal/failover_manager.go:998: wg       sync.WaitGroup
+cockroachdb__pebble:internal/deletepacer/delete_pacer.go:72: waitGroup sync.WaitGroup
+cockroachdb__pebble:internal/genericcache/shard.go:36: releaseLoopExit sync.WaitGroup
+cockroachdb__pebble:batch.go:408: commit    sync.WaitGroup
+cockroachdb__pebble:batch.go:409: fsyncWait sync.WaitGroup
+cockroachdb__pebble:objstorage/objstorageprovider/sharedcache/shared_cache.go:832: doneWaitGroup sync.WaitGroup
+cockroachdb__pebble:objstorage/objstorageprovider/objiotracing/obj_io_tracing_on.go:45: workerWait   sync.WaitGroup
+cockroachdb__pebble:tool/db_io_bench.go:77: var wg sync.WaitGroup
+cockroachdb__pebble:bench/scan.go:83: Run: func(d DB, wg *sync.WaitGroup) {
+cockroachdb__pebble:bench/fsbench.go:548: Run:  func(wg *sync.WaitGroup) { benchStruct.init(wg, cfg.MaxOps) },
+cockroachdb__pebble:bench/fsbench.go:550: Done: func(wg *sync.WaitGroup, elapsed time.Duration) {
+cockroachdb__pebble:bench/fsbench.go:558: func (bench *fsBench) init(wg *sync.WaitGroup, maxOps int) {
+cockroachdb__pebble:bench/fsbench.go:596: func (bench *fsBench) done(wg *sync.WaitGroup, elapsed time.Duration) {
+cockroachdb__pebble:bench/ycsb.go:315: func (y *ycsb) run(db DB, wg *sync.WaitGroup) {
+cockroachdb__pebble:bench/sync.go:52: Run: func(d DB, wg *sync.WaitGroup) {
+cockroachdb__pebble:bench/write_bench.go:88: writersWg    *sync.WaitGroup
+cockroachdb__pebble:bench/write_bench.go:155: var wg sync.WaitGroup
+cockroachdb__pebble:bench/write_bench.go:194: Run: func(db DB, wg *sync.WaitGroup) {
+cockroachdb__pebble:bench/write_bench.go:333: func (w *pauseWriter) run(ctx context.Context, wg *sync.WaitGroup) {
+cockroachdb__pebble:bench/queue.go:65: Run: func(d DB, wg *sync.WaitGroup) {
+cockroachdb__pebble:bench/bench.go:76: Run  func(db DB, wg *sync.WaitGroup)
+cockroachdb__pebble:bench/bench.go:85: Run  func(wg *sync.WaitGroup)
+cockroachdb__pebble:bench/bench.go:87: Done func(wg *sync.WaitGroup, elapsed time.Duration)
+cockroachdb__pebble:bench/bench.go:103: var wg sync.WaitGroup
+cockroachdb__pebble:bench/bench.go:191: var wg sync.WaitGroup
+cockroachdb__pebble:bench/bench.go:270: var doneWG sync.WaitGroup
+cockroachdb__pebble:bench/tombstone.go:65: Run: func(d DB, wg *sync.WaitGroup) {
+cockroachdb__pebble:record/log_writer.go:53: wg  *sync.WaitGroup
+cockroachdb__pebble:record/log_writer.go:60: // available *sync.WaitGroup elements.
+cockroachdb__pebble:record/log_writer.go:96: func (q *syncQueue) push(wg *sync.WaitGroup, err *error) {
+cockroachdb__pebble:record/log_writer.go:247: wg  *sync.WaitGroup
+cockroachdb__pebble:record/log_writer.go:968: p []byte, wg *sync.WaitGroup, err *error,
+cockroachdb__pebble:db.go:328: compactionSchedulers sync.WaitGroup
+cockroachdb__pebble:db.go:891: func (d *DB) commitWrite(b *Batch, syncWG *sync.WaitGroup, syncErr *error) (*memTable, error) {
+cockroachdb__pebble:sstable/suffix_rewriter.go:158: g := &sync.WaitGroup{}
+cockroachdb__pebble:sstable/colblk_writer.go:101: wg  sync.WaitGroup
+cockroachdb__pebble:sstable/write_queue.go:42: wg     sync.WaitGroup
+cockroachdb__pebble:sstable/tablefilters/internal/filtertestutils/bench.go:106: var wg sync.WaitGroup
+cockroachdb__pebble:sstable/tablefilters/internal/filtersim/fpr.go:21: var wg sync.WaitGroup
+cockroachdb__pebble:sstable/blob/blob.go:158: wg  sync.WaitGroup
+cockroachdb__pebble:commit.go:143: write func(b *Batch, wg *sync.WaitGroup, err *error) (*memTable, error)
+cockroachdb__pebble:commit.go:285: var syncWG sync.WaitGroup
+cockroachdb__pebble:commit.go:435: var syncWG *sync.WaitGroup
+containerd__containerd:plugins/restart/monitor.go:147: var wgNSLoop sync.WaitGroup
+containerd__containerd:plugins/restart/monitor.go:156: var wgChangesLoop sync.WaitGroup
+containerd__containerd:internal/cri/server/service.go:323: var netSyncGroup sync.WaitGroup
+containerd__containerd:internal/cri/server/sandbox_stats_list.go:40: var wg sync.WaitGroup
+containerd__containerd:internal/cri/server/images/check.go:41: var wg sync.WaitGroup
+containerd__containerd:internal/cri/server/sandbox_stats_stream.go:42: var wg sync.WaitGroup
+containerd__containerd:internal/cri/io/exec_io.go:93: var wg sync.WaitGroup
+containerd__containerd:internal/cri/io/helpers_windows.go:34: conWg  sync.WaitGroup
+containerd__containerd:internal/cri/io/container_io.go:164: var wg sync.WaitGroup
+containerd__containerd:internal/cri/io/helpers.go:59: wg     *sync.WaitGroup
+containerd__containerd:internal/cri/io/helpers.go:161: wg:     &sync.WaitGroup{},
+containerd__containerd:core/runtime/v2/shim_windows.go:37: wg   sync.WaitGroup
+containerd__containerd:core/metadata/gc.go:481: func (c *gcContext) finish(ctx context.Context, wg *sync.WaitGroup) {
+containerd__containerd:core/metadata/db.go:438: var wg sync.WaitGroup
+containerd__containerd:core/metadata/db.go:500: wg    sync.WaitGroup
+containerd__containerd:core/remotes/docker/authorizer.go:217: sync.WaitGroup
+containerd__containerd:core/metrics/cgroups/v1/metrics.go:117: wg := &sync.WaitGroup{}
+containerd__containerd:core/metrics/cgroups/v1/metrics.go:136: func (c *Collector) collect(entry entry, ch chan<- prometheus.Metric, block bool, wg *sync.WaitGroup) {
+containerd__containerd:core/metrics/cgroups/v2/metrics.go:110: wg := &sync.WaitGroup{}
+containerd__containerd:core/metrics/cgroups/v2/metrics.go:129: func (c *Collector) collect(entry entry, ch chan<- prometheus.Metric, block bool, wg *sync.WaitGroup) {
+containerd__containerd:pkg/netns/netns_linux.go:96: var wg sync.WaitGroup
+containerd__containerd:pkg/stdio/platform.go:30: wg *sync.WaitGroup) (console.Console, error)
+containerd__containerd:pkg/cio/io_unix.go:74: var wg = &sync.WaitGroup{}
+containerd__containerd:pkg/cio/io.go:193: wg      *sync.WaitGroup
+containerd__containerd:pkg/gc/gc.go:118: wg    sync.WaitGroup
+containerd__containerd:cmd/containerd/server/server.go:268: ready   sync.WaitGroup
+containerd__containerd:cmd/ctr/commands/shim/io_unix.go:38: func prepareStdio(stdin, stdout, stderr string, console bool) (wg *sync.WaitGroup, err error) {
+containerd__containerd:cmd/ctr/commands/shim/io_unix.go:39: wg = &sync.WaitGroup{}
+containerd__containerd:cmd/containerd-stress/cri_worker.go:34: wg       *sync.WaitGroup
+containerd__containerd:cmd/containerd-stress/main.go:295: wg      sync.WaitGroup
+containerd__containerd:cmd/containerd-stress/main.go:375: wg  sync.WaitGroup
+containerd__containerd:cmd/containerd-stress/worker.go:34: wg       *sync.WaitGroup
+containerd__containerd:cmd/containerd-shim-runc-v2/runc/platform.go:63: func (p *linuxPlatform) CopyConsole(ctx context.Context, console console.Console, id, stdin, stdout, stderr string, wg *sync.WaitGroup) (cons console.Console, r
+containerd__containerd:cmd/containerd-shim-runc-v2/runc/platform.go:73: var cwg sync.WaitGroup
+containerd__containerd:cmd/containerd-shim-runc-v2/process/init.go:46: wg        sync.WaitGroup
+containerd__containerd:cmd/containerd-shim-runc-v2/process/io.go:72: func (p *processIO) Copy(ctx context.Context, wg *sync.WaitGroup) error {
+containerd__containerd:cmd/containerd-shim-runc-v2/process/io.go:76: var cwg sync.WaitGroup
+containerd__containerd:cmd/containerd-shim-runc-v2/process/io.go:134: func copyPipes(ctx context.Context, rio runc.IO, stdin, stdout, stderr string, wg, cwg *sync.WaitGroup) error {
+containerd__containerd:cmd/containerd-shim-runc-v2/process/utils.go:156: func waitTimeout(ctx context.Context, wg *sync.WaitGroup, timeout time.Duration) error {
+containerd__containerd:cmd/containerd-shim-runc-v2/process/exec.go:43: wg sync.WaitGroup
+dominikh__go-tools:staticcheck/sa2000/sa2000.go:22: Title: `\'(*sync.WaitGroup).Add\' called inside the goroutine, leading to a race condition`,
+dominikh__go-tools:staticcheck/sa2000/sa2000.go:23: Text: `\'(*sync.WaitGroup).Add\' must be called before starting the goroutine
+dominikh__go-tools:staticcheck/sa2000/sa2000.go:39: call@(CallExpr (Symbol "(*sync.WaitGroup).Add") _):_) _))`)
+dominikh__go-tools:go/ir/builder.go:3447: var wg sync.WaitGroup
+etcd-io__etcd:cache/demux.go:42: func NewDemux(ctx context.Context, wg *sync.WaitGroup, historyWindowSize int, resyncInterval time.Duration) *demux {
+etcd-io__etcd:cache/cache.go:52: waitGroup         sync.WaitGroup
+etcd-io__etcd:tools/local-tester/bridge/bridge.go:158: var wg sync.WaitGroup
+etcd-io__etcd:tools/benchmark/cmd/root.go:45: wg  sync.WaitGroup
+etcd-io__etcd:server/etcdserver/server.go:276: wg sync.WaitGroup
+etcd-io__etcd:server/etcdserver/api/v3rpc/watch.go:160: wg sync.WaitGroup
+etcd-io__etcd:server/etcdserver/api/rafthttp/pipeline.go:60: wg    sync.WaitGroup
+etcd-io__etcd:server/proxy/grpcproxy/watch.go:44: wg sync.WaitGroup
+etcd-io__etcd:server/proxy/grpcproxy/watch.go:195: var wg sync.WaitGroup
+etcd-io__etcd:server/proxy/grpcproxy/lease.go:49: wg sync.WaitGroup
+etcd-io__etcd:server/proxy/grpcproxy/lease.go:237: wg sync.WaitGroup
+etcd-io__etcd:server/embed/serve.go:81: wg sync.WaitGroup
+etcd-io__etcd:server/embed/etcd.go:98: wg sync.WaitGroup
+etcd-io__etcd:server/storage/backend/batch_tx.go:391: go func(tx *bolt.Tx, wg *sync.WaitGroup) {
+etcd-io__etcd:server/storage/backend/backend.go:255: txWg:    new(sync.WaitGroup),
+etcd-io__etcd:server/storage/backend/read_tx.go:51: txWg *sync.WaitGroup
+etcd-io__etcd:server/storage/backend/read_tx.go:137: rt.txWg = new(sync.WaitGroup)
+etcd-io__etcd:server/storage/mvcc/watchable_store.go:75: wg    sync.WaitGroup
+etcd-io__etcd:etcdctl/ctlv3/command/ep_command.go:114: var wg sync.WaitGroup
+etcd-io__etcd:etcdctl/ctlv3/command/check.go:188: var wg sync.WaitGroup
+etcd-io__etcd:etcdctl/ctlv3/command/check.go:359: var wg sync.WaitGroup
+etcd-io__etcd:client/v3/mock/mockserver/mockserver.go:55: wg      sync.WaitGroup
+etcd-io__etcd:client/v3/mock/mockserver/mockserver.go:105: wg:      sync.WaitGroup{},
+etcd-io__etcd:client/v3/naming/resolver/resolver.go:78: wg     sync.WaitGroup
+etcd-io__etcd:client/v3/watch.go:184: wg sync.WaitGroup
+etcd-io__etcd:client/v3/watch.go:975: var wg sync.WaitGroup
+etcd-io__etcd:client/v3/namespace/watch.go:28: wg       sync.WaitGroup
+etcd-io__etcd:client/v3/leasing/kv.go:41: wg     sync.WaitGroup
+etcd-io__etcd:client/v3/client.go:522: var wg sync.WaitGroup
+etcd-io__etcd:client/pkg/transport/listener_tls.go:115: var wg sync.WaitGroup
+etcd-io__etcd:tests/antithesis/test-template/robustness/traffic/main.go:145: var wg sync.WaitGroup
+etcd-io__etcd:tests/framework/integration/cluster.go:1423: var wg sync.WaitGroup
+etcd-io__etcd:tests/framework/integration/bridge.go:47: wg         sync.WaitGroup
+etcd-io__etcd:tests/framework/integration/bridge.go:156: var wg sync.WaitGroup
+etcd-io__etcd:tests/robustness/client/client.go:45: wg              sync.WaitGroup
+etcd-io__etcd:tests/robustness/traffic/traffic.go:103: wg := sync.WaitGroup{}
+etcd-io__etcd:tests/robustness/traffic/traffic.go:185: func SimulateKeyValueTraffic(ctx context.Context, wg *sync.WaitGroup, profile *KeyValue, endpoints []string, clientSet *client.ClientSet, tf Traffic, baseParam 
+etcd-io__etcd:tests/robustness/traffic/traffic.go:215: func SimulateWatchTraffic(ctx context.Context, wg *sync.WaitGroup, profile *Watch, endpoints []string, clientSet *client.ClientSet, tf Traffic, baseParam RunWat
+etcd-io__etcd:tests/robustness/traffic/traffic.go:243: func SimulateCompactionTraffic(ctx context.Context, wg *sync.WaitGroup, profile *Compaction, endpoints []string, clientSet *client.ClientSet, tf Traffic, basePa
+etcd-io__etcd:pkg/proxy/server.go:162: closeWg   sync.WaitGroup
+etcd-io__etcd:pkg/expect/expect.go:49: wg   sync.WaitGroup
+golang__tools:internal/gopathwalk/walk.go:138: walking     sync.WaitGroup
+golang__tools:internal/jsonrpc2_v2/serve.go:104: var activeConns sync.WaitGroup
+golang__tools:internal/imports/fix.go:1780: var wg sync.WaitGroup
+golang__tools:refactor/importgraph/graph.go:75: var wg sync.WaitGroup
+golang__tools:gopls/internal/cache/analysis.go:835: var wg sync.WaitGroup
+golang__tools:gopls/internal/cache/session.go:71: snapshotWG sync.WaitGroup
+golang__tools:gopls/internal/cache/snapshot.go:1114: var wg sync.WaitGroup
+golang__tools:gopls/internal/server/command.go:514: var wg sync.WaitGroup // tracks work done on behalf of this function, incl. diagnostics
+golang__tools:gopls/internal/server/command.go:1739: var wg sync.WaitGroup
+golang__tools:gopls/internal/server/diagnostics.go:129: var wg sync.WaitGroup
+golang__tools:gopls/internal/server/diagnostics.go:419: var wg sync.WaitGroup // for potentially slow operations below
+golang__tools:gopls/internal/server/general.go:411: var ndiagnose sync.WaitGroup // number of unfinished diagnose calls
+golang__tools:gopls/internal/server/general.go:422: var nsnapshots sync.WaitGroup // number of unfinished snapshot initializations
+golang__tools:gopls/internal/server/workspace.go:67: var wg sync.WaitGroup
+golang__tools:gopls/internal/server/text_synchronization.go:232: var wg sync.WaitGroup
+golang__tools:gopls/internal/filewatcher/poll_watcher.go:83: loops sync.WaitGroup // counts the number of active [pollWatcher.loop] goroutine (max 1)
+golang__tools:gopls/internal/filewatcher/fsnotify_watcher.go:64: wg   sync.WaitGroup // counts the number of active run and process goroutines (max 2)
+golang__tools:cmd/gotype/gotype.go:211: var wg sync.WaitGroup
+golang__tools:go/buildutil/allpackages.go:53: var wg sync.WaitGroup
+golang__tools:go/buildutil/allpackages.go:82: var wg sync.WaitGroup
+golang__tools:go/ssa/builder.go:3193: var wg sync.WaitGroup
+golang__tools:go/analysis/unitchecker/unitchecker.go:499: var wg sync.WaitGroup
+golang__tools:go/analysis/checker/checker.go:242: var wg sync.WaitGroup
+golang__tools:go/analysis/passes/waitgroup/waitgroup.go:6: // of sync.WaitGroup.
+golang__tools:go/analysis/passes/waitgroup/doc.go:6: // of sync.WaitGroup.
+golang__tools:go/analysis/passes/waitgroup/doc.go:10: // waitgroup: check for misuses of sync.WaitGroup
+golang__tools:go/analysis/passes/waitgroup/doc.go:12: // This analyzer detects mistaken calls to the (*sync.WaitGroup).Add
+golang__tools:go/analysis/passes/waitgroup/doc.go:16: //	var wg sync.WaitGroup
+golang__tools:go/analysis/passes/waitgroup/doc.go:27: //	var wg sync.WaitGroup
+golang__tools:go/analysis/passes/modernize/waitgroupgo.go:53: // wrong usage of sync.WaitGroup.
+golang__tools:go/analysis/passes/modernize/waitgroupgo.go:81: // the form sync.WaitGroup.Add(&wg, 1).
+golang__tools:go/analysis/passes/modernize/doc.go:686: The waitgroupgo analyzer simplifies goroutine management with `sync.WaitGroup`.
+golang__tools:go/analysis/passes/copylock/copylock.go:28: sync.WaitGroup, may cause both copies to malfunction. Generally such
+golang__tools:go/loader/util.go:34: var wg sync.WaitGroup
+golang__vuln:internal/vulncheck/source.go:44: wg       sync.WaitGroup // guards entries, cg, and buildErr
+golang__vuln:internal/vulncheck/witness.go:49: wg sync.WaitGroup
+golangci__golangci-lint:pkg/goanalysis/runner.go:269: var wg sync.WaitGroup
+golangci__golangci-lint:pkg/goanalysis/runner_loadingpackage.go:47: var wg sync.WaitGroup
+golangci__golangci-lint:pkg/goanalysis/runners_cache.go:32: var wg sync.WaitGroup
+golangci__golangci-lint:pkg/goanalysis/runners_cache.go:94: var wg sync.WaitGroup
+golangci__golangci-lint:pkg/result/processors/filename_unadjuster.go:44: var wg sync.WaitGroup
+grpc__grpc-go:clientconn.go:1227: var wg sync.WaitGroup
+grpc__grpc-go:internal/profiling/buffer/buffer.go:246: var wg sync.WaitGroup

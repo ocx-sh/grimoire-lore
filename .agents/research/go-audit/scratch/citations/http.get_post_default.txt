@@ -1,0 +1,128 @@
+aquasecurity__trivy:pkg/vex/sbomref.go:80: res, err := http.Get(vexUrl.String())
+aquasecurity__trivy:pkg/fanal/analyzer/imgconf/apk/apk.go:111: resp, err := http.Get(url)
+bazel-contrib__rules_go:go/tools/releaser/upgradedep.go:121: httpClient := http.DefaultClient
+bazel-contrib__rules_go:go/tools/releaser/upgradedep.go:455: resp, err := http.Get(ghURL)
+caddyserver__caddy:modules/caddytls/capools.go:673: httpClient := *http.DefaultClient
+caddyserver__caddy:modules/caddytls/certmanagers.go:158: resp, err := http.DefaultClient.Do(req) //nolint:gosec // SSRF false positive... request URI comes from config
+caddyserver__caddy:modules/caddytls/acmeissuer.go:385: resp, err := http.DefaultClient.Do(req) //nolint:gosec // no SSRF since URL is from trusted config
+caddyserver__caddy:caddytest/caddytest.go:145: res, err := http.Get(fmt.Sprintf("http://localhost:%d/config/", tc.config.AdminPort))
+caddyserver__caddy:cmd/packagesfuncs.go:298: resp, err := http.Get(fmt.Sprintf("%s?%s", downloadPath, qs.Encode()))
+charmbracelet__bubbletea:examples/progress-download/main.go:43: resp, err := http.Get(url) // nolint:gosec
+charmbracelet__bubbletea:examples/autocomplete/main.go:43: resp, err := http.DefaultClient.Do(req)
+cli__cli:.github/codeql/tests/unsanitized-response-to-terminal/misses_file_sink.go:11: resp, err := http.Get(url)
+cli__cli:.github/codeql/tests/unsanitized-response-to-terminal/misses_field_after_unmarshal.go:22: resp, err := http.Get(url)
+cli__cli:.github/codeql/tests/unsanitized-response-to-terminal/misses_contentout.go:13: resp, err := http.Get(url)
+cli__cli:.github/codeql/tests/unsanitized-response-to-terminal/misses_contentout.go:27: resp, err := http.Get(url)
+cli__cli:.github/codeql/tests/unsanitized-response-to-terminal/misses_disk_roundtrip.go:18: resp, err := http.Get(url)
+cli__cli:.github/codeql/tests/unsanitized-response-to-terminal/misses_sanitized.go:18: resp, err := http.Get(url)
+cli__cli:.github/codeql/tests/unsanitized-response-to-terminal/misses_sanitized.go:32: resp, err := http.Get(url)
+cli__cli:.github/codeql/tests/unsanitized-response-to-terminal/hits_scanner_crossfunc.go:15: resp, err := http.Get(url)
+cli__cli:.github/codeql/tests/unsanitized-response-to-terminal/misses_decoder_decode.go:18: resp, err := http.Get(url)
+cli__cli:.github/codeql/tests/unsanitized-response-to-terminal/hits_iocopy_crossfunc.go:13: resp, err := http.Get(url)
+cli__cli:pkg/cmd/project/shared/queries/queries.go:44: Client:   api.NewClientFromHTTP(http.DefaultClient),
+containerd__containerd:core/remotes/docker/authorizer.go:108: ao.client = http.DefaultClient
+containerd__containerd:core/remotes/docker/fetcher.go:290: Client:       http.DefaultClient,
+etcd-io__etcd:contrib/lock/client/client.go:63: httpResp, err := http.Post("http://localhost:8080", "application/json", bytes.NewReader(reqBytes))
+etcd-io__etcd:tools/testgrid-analysis/cmd/data.go:133: resp, err := http.Get(url)
+etcd-io__etcd:tools/etcd-dump-metrics/install_darwin.go:35: resp, err := http.Get(ep)
+etcd-io__etcd:tools/etcd-dump-metrics/install_linux.go:35: resp, err := http.Get(ep)
+etcd-io__etcd:etcdctl/ctlv3/command/util.go:116: resp, err := http.Get(url)
+etcd-io__etcd:tests/framework/e2e/etcd_process.go:469: resp, err := http.Get(failpointURL.String())
+golang__tools:gopls/integration/govim/artifacts.go:51: resp, err := http.Get(artifactURL)
+golang__tools:playground/playground.go:71: return http.DefaultClient.Do(req.WithContext(ctx))
+golang__tools:go/analysis/passes/httpresponse/httpresponse.go:26: resp, err := http.Head(url)
+golang__tools:go/analysis/passes/httpresponse/httpresponse.go:74: // Example:  resp, err := checkError(http.Get(url))
+golang__vuln:internal/client/source.go:32: c := http.DefaultClient
+golang__vuln:internal/client/client.go:81: r, err := http.Head(source + "/" + endpoint)
+google__go-github:github/repos_releases.go:329: // example S3), so http.DefaultClient is recommended. The client's own
+google__go-github:github/dependency_graph.go:176: // Use http.DefaultClient or another client that does not add authentication
+goreleaser__goreleaser:internal/pipe/discourse/discourse.go:100: resp, err := http.DefaultClient.Do(req)
+goreleaser__goreleaser:internal/pipe/mcp/mcp.go:171: resp, err := http.DefaultClient.Do(req)
+goreleaser__goreleaser:internal/pipe/telegram/telegram.go:79: resp, err := http.DefaultClient.Do(request)
+goreleaser__goreleaser:internal/pipe/mattermost/mattermost.go:103: r, err := http.DefaultClient.Do(req)
+goreleaser__goreleaser:internal/pipe/iru/iru.go:372: resp, err := http.DefaultClient.Do(req)
+goreleaser__goreleaser:internal/pipe/iru/iru.go:483: resp, err := http.DefaultClient.Do(req)
+goreleaser__goreleaser:internal/pipe/opencollective/opencollective.go:202: resp, err := http.DefaultClient.Do(req)
+goreleaser__goreleaser:internal/pipe/discord/discord.go:104: resp, err := http.DefaultClient.Do(req)
+goreleaser__goreleaser:internal/nodedist/dist.go:25: // may override it; production uses http.DefaultClient.
+goreleaser__goreleaser:internal/nodedist/dist.go:28: var httpClient = http.DefaultClient
+hashicorp__terraform:internal/getmodules/getter.go:81: var getterHTTPClient = cleanhttp.DefaultClient()
+kubernetes-sigs__controller-runtime:tools/setup-envtest/remote/http_client.go:145: resp, err := http.DefaultClient.Do(req)
+kubernetes-sigs__controller-runtime:tools/setup-envtest/remote/http_client.go:206: resp, err := http.DefaultClient.Do(req)
+kubernetes-sigs__controller-runtime:pkg/envtest/binaries.go:269: resp, err := http.DefaultClient.Do(req)
+kubernetes-sigs__controller-runtime:pkg/envtest/binaries.go:339: resp, err := http.DefaultClient.Do(req)
+oras-project__oras-go:registry/remote/signature/lookaside.go:74: // Not http.DefaultClient: it has no timeout, and these requests go to
+oras-project__oras-go:registry/remote/auth/client.go:71: // Its zero value is a usable client that uses http.DefaultClient with no cache.
+oras-project__oras-go:registry/remote/auth/client.go:75: // If nil, http.DefaultClient is used.
+oras-project__oras-go:registry/remote/auth/client.go:165: // http.DefaultClient is return if the client is not configured.
+oras-project__oras-go:registry/remote/auth/client.go:168: return http.DefaultClient
+oras-project__oras-go:registry/remote/auth/client.go:204: client = http.DefaultClient
+oras-project__oras-go:registry/remote/auth/token.go:53: // given client. If client is nil, http.DefaultClient is used.
+oras-project__oras-go:registry/remote/auth/token.go:98: // If nil, http.DefaultClient is used.
+oras-project__oras-go:registry/remote/auth/token.go:140: // If nil, http.DefaultClient is used.
+prometheus__prometheus:documentation/examples/remote_storage/remote_storage_adapter/opentsdb/client.go:112: resp, err := http.DefaultClient.Do(req.WithContext(ctx))
+prometheus__prometheus:documentation/examples/custom-sd/adapter-usage/main.go:165: resp, err := http.Get(fmt.Sprintf("http://%s/v1/catalog/services", d.address))
+prometheus__prometheus:documentation/examples/custom-sd/adapter-usage/main.go:201: resp, err := http.Get(fmt.Sprintf("http://%s/v1/catalog/service/%s", d.address, name))
+prometheus__prometheus:cmd/promtool/debug.go:38: res, err := http.Get(url)
+prometheus__prometheus:notifier/manager.go:84: client = http.DefaultClient
+restic__restic:internal/selfupdate/github.go:78: res, err := http.DefaultClient.Do(req)
+restic__restic:internal/selfupdate/github.go:135: res, err := http.DefaultClient.Do(req)
+sigstore__cosign:pkg/providers/github/github.go:73: client := http.DefaultClient
+sigstore__cosign:pkg/blob/load.go:49: resp, err := http.Get(fileRef)
+sigstore__cosign:test/helpers.go:549: resp, err := http.Get(url) //nolint: gosec
+syncthing__syncthing:script/relnotes.go:114: res, err := http.DefaultClient.Do(req)
+syncthing__syncthing:script/copyrights.go:401: resp, err := http.DefaultClient.Do(req)
+syncthing__syncthing:script/transifexdl.go:130: resp, err := http.DefaultClient.Do(req)
+syncthing__syncthing:script/weblatedl.go:145: resp, err := http.DefaultClient.Do(req)
+syncthing__syncthing:lib/upnp/upnp.go:345: response, err = http.DefaultClient.Do(req)
+syncthing__syncthing:cmd/syncthing/main.go:960: _, err = http.DefaultClient.Do(req) //nolint:bodyclose // we're exiting in a millisecond
+syncthing__syncthing:cmd/infra/stupgrades/main.go:175: resp, err := http.DefaultClient.Do(req)
+syncthing__syncthing:cmd/infra/stupgrades/main.go:319: resp, err := http.DefaultClient.Do(req)
+syncthing__syncthing:cmd/infra/stupgrades/main.go:375: resp, err := http.DefaultClient.Do(req)
+syncthing__syncthing:cmd/dev/stevents/main.go:50: res, err := http.DefaultClient.Do(req)
+tailscale__tailscale:tempfork/acme/http.go:268: return http.DefaultClient
+tailscale__tailscale:tempfork/acme/acme.go:94: // instead of http.DefaultClient.
+tailscale__tailscale:logtail/config.go:33: HTTPC          *http.Client    // if empty defaults to http.DefaultClient
+tailscale__tailscale:logtail/logtail.go:70: cfg.HTTPC = http.DefaultClient
+tailscale__tailscale:logtail/example/logadopt/logadopt.go:38: resp, err := http.DefaultClient.Do(req)
+tailscale__tailscale:logtail/example/logreprocess/logreprocess.go:45: resp, err := http.DefaultClient.Do(req)
+tailscale__tailscale:derp/derpserver/derpserver.go:1800: res, err := http.DefaultClient.Do(req)
+tailscale__tailscale:derp/xdp/headers/update.go:50: resp, err := http.Get(fmt.Sprintf("https://github.com/libbpf/libbpf/archive/refs/tags/v%s.tar.gz", libbpfVersion))
+tailscale__tailscale:kube/metrics/metrics.go:64: proxy(w, r, debugURL, http.DefaultClient.Do)
+tailscale__tailscale:client/systray/systray.go:398: resp, err := http.Get(urlStr)
+tailscale__tailscale:client/tailscale/tailscale.go:54: // If nil, [http.DefaultClient] is used.
+tailscale__tailscale:client/tailscale/tailscale.go:65: return http.DefaultClient
+tailscale__tailscale:client/tailscale/tailscale.go:140: // If httpClient is nil, then [http.DefaultClient] is used.
+tailscale__tailscale:prober/tls.go:240: hresp, err := http.DefaultClient.Do(hreq)
+tailscale__tailscale:util/eventbus/fetch-htmx.go:75: resp, err := http.Get(url)
+tailscale__tailscale:tool/gocross/toolchain.go:177: resp, err := http.Get(url)
+tailscale__tailscale:tool/updateflakes/updateflakes.go:224: resp, err := http.Get(url)
+tailscale__tailscale:ipn/conffile/cloudconf.go:24: res, err := http.DefaultClient.Do(req)
+tailscale__tailscale:ipn/conffile/cloudconf.go:52: res, err := http.DefaultClient.Do(req)
+tailscale__tailscale:ipn/localapi/debugderp.go:102: client *http.Client = http.DefaultClient
+tailscale__tailscale:tstest/integration/service_windows.go:260: res, err := http.DefaultClient.Do(req)
+tailscale__tailscale:tstest/natlab/vmtest/images.go:190: resp, err := http.DefaultClient.Do(req)
+tailscale__tailscale:tstest/natlab/vmtest/version.go:43: resp, err := http.DefaultClient.Do(req)
+tailscale__tailscale:tstest/natlab/vmtest/version.go:123: resp, err := http.DefaultClient.Do(req)
+tailscale__tailscale:tstest/natlab/vmtest/web.go:168: resp, err := http.Get(fmt.Sprintf("http://127.0.0.1:%d/screenshot?full=1", port))
+tailscale__tailscale:cmd/k8s-operator/operator.go:645: httpClient:  http.DefaultClient,
+tailscale__tailscale:cmd/k8s-operator/e2e/setup.go:740: resp, err := http.DefaultClient.Do(req)
+tailscale__tailscale:cmd/gitops-pusher/gitops-pusher.go:263: client = http.DefaultClient
+tailscale__tailscale:cmd/gitops-pusher/gitops-pusher.go:265: client = http.DefaultClient
+tailscale__tailscale:cmd/checkmetrics/checkmetrics.go:107: resp, err := http.DefaultClient.Do(req)
+tailscale__tailscale:cmd/netlogfmt/main.go:359: resp := must.Get(http.DefaultClient.Do(req))
+tailscale__tailscale:cmd/cigocacher/cigocacher.go:182: return http.DefaultClient
+tailscale__tailscale:cmd/connector-gen/aws.go:36: r, err := http.Get("https://ip-ranges.amazonaws.com/ip-ranges.json")
+tailscale__tailscale:cmd/connector-gen/github.go:47: r, err := http.Get("https://api.github.com/meta")
+tailscale__tailscale:cmd/tailscaled/debug.go:222: res, err := http.DefaultClient.Do(req)
+tailscale__tailscale:cmd/stunstamp/stunstamp.go:74: resp, err := http.DefaultClient.Do(req)
+tailscale__tailscale:net/dnsfallback/update-dns-fallbacks.go:19: res, err := http.Get("https://login.tailscale.com/derpmap/default")
+tailscale__tailscale:net/tsdial/dohclient.go:74: hc = http.DefaultClient
+tailscale__tailscale:net/netcheck/netcheck.go:1115: if r, err := http.DefaultClient.Do(req); err != nil || r.StatusCode > 299 {
+tailscale__tailscale:net/netcheck/netcheck.go:1124: if r, err := http.DefaultClient.Do(req); err != nil || r.StatusCode > 299 {
+tailscale__tailscale:clientupdate/distsign/distsign.go:322: resp, err := http.Get(url)
+tailscale__tailscale:clientupdate/clientupdate_gokrazy.go:113: res, err := http.DefaultClient.Do(req)
+tailscale__tailscale:clientupdate/clientupdate.go:1357: res, err := http.Get(url)
+tailscale__tailscale:control/tsp/tsp.go:117: res, err := http.DefaultClient.Do(req)
+tailscale__tailscale:control/controlclient/direct.go:338: httpc = http.DefaultClient
+urfave__cli:scripts/build.go:204: resp, err := http.DefaultClient.Do(req)

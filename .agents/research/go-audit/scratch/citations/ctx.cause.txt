@@ -1,0 +1,11 @@
+caddyserver__caddy:admin.go:764: if cause := context.Cause(ctx); cause != nil && errors.Is(err, context.DeadlineExceeded) {
+caddyserver__caddy:modules/caddyhttp/app.go:781: if cause := context.Cause(ctx); cause != nil && errors.Is(err, context.DeadlineExceeded) {
+caddyserver__caddy:modules/caddyhttp/app.go:807: if cause := context.Cause(ctx); cause != nil && errors.Is(err, context.DeadlineExceeded) {
+golang__tools:gopls/internal/server/prompt.go:369: if cause := context.Cause(ctx); cause == context.DeadlineExceeded || cause == context.Canceled {
+kubernetes-sigs__controller-runtime:pkg/internal/controller/controller.go:230: if timeoutCause != nil && ctx.Err() == context.DeadlineExceeded && errors.Is(context.Cause(ctx), timeoutCause) {
+oras-project__oras-go:internal/syncutil/limit.go:106: return context.Cause(ctx)
+tailscale__tailscale:ssh/tailssh/tailssh.go:870: err := context.Cause(ss.ctx)
+tailscale__tailscale:ssh/tailssh/tailssh.go:1023: cause := context.Cause(ss.ctx)
+tailscale__tailscale:ssh/tailssh/tailssh.go:1462: return nil, context.Cause(ss.ctx)
+tailscale__tailscale:ipn/ipnlocal/node_backend.go:1372: return context.Cause(nb.ctx)
+tailscale__tailscale:net/porttrack/porttrack.go:123: c.err = context.Cause(ctx)

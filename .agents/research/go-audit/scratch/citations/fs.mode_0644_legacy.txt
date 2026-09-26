@@ -1,0 +1,200 @@
+aquasecurity__trivy:magefiles/docs.go:71: if err := os.WriteFile(filename, []byte(flagContent), 0644); err != nil {
+aquasecurity__trivy:magefiles/config_schema.go:63: return os.WriteFile(outputPath, data, 0644)
+bazel-contrib__rules_go:go/tools/builders/protoc.go:197: if err := ioutil.WriteFile(abs(f.path), data, 0644); err != nil {
+bazel-contrib__rules_go:go/tools/builders/protoc.go:234: dst, err := os.OpenFile(abs(dstPath), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+bazel-contrib__rules_go:go/tools/gopackagesdriver/pkgjson/main.go:92: return os.WriteFile(params.output, marshaled, 0644)
+bazelbuild__bazel-gazelle:tools/releaser/main.go:108: workspace, err := os.OpenFile(workspacePath, os.O_RDWR, 0644)
+caddyserver__caddy:modules/logging/filewriter.go:98: //   - "from_file" → derive from the file Mode (with r→x), e.g. 0644 → 0755, 0600 → 0700
+caddyserver__caddy:modules/logging/filewriter.go:352: // 0644 → 0755, 0600 → 0700, etc.
+cli__cli:internal/zip/zip.go:16: fileMode os.FileMode = 0644
+cli__cli:pkg/cmd/release/download/download.go:448: if f, copyErr = os.OpenFile(fp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644); copyErr != nil {
+cli__cli:pkg/cmd/repo/read-file/read_file.go:299: if err := writeFileF(dest, file.Content, 0644); err != nil {
+cli__cli:pkg/cmd/extension/symlink_windows.go:8: f, err := os.OpenFile(newname, os.O_WRONLY|os.O_CREATE, 0644)
+cli__cli:pkg/cmd/extension/manager.go:647: if err := writeFile(filepath.Join(name, ".github", "workflows", "release.yml"), otherBinWorkflow, 0644); err != nil {
+cli__cli:pkg/cmd/extension/manager.go:677: if err := writeFile(filepath.Join(name, ".github", "workflows", "release.yml"), goBinWorkflow, 0644); err != nil {
+cli__cli:pkg/cmd/extension/manager.go:682: if err := writeFile(filepath.Join(name, "main.go"), []byte(mainGo), 0644); err != nil {
+cli__cli:pkg/cmd/extension/manager.go:700: if err := writeFile(filepath.Join(name, ".gitignore"), []byte(ignore), 0644); err != nil {
+cockroachdb__pebble:internal/mkbench/write.go:531: err := os.WriteFile(outputPath, b, 0644)
+cockroachdb__pebble:internal/mkbench/write.go:575: f, err := os.OpenFile(outputPath, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+cockroachdb__pebble:internal/mkbench/ycsb.go:223: if err := os.WriteFile(path, out, 0644); err != nil {
+cockroachdb__pebble:metamorphic/meta.go:207: require.NoError(t, os.WriteFile(opsPath, []byte(formattedOps), 0644))
+cockroachdb__pebble:metamorphic/meta.go:224: require.NoError(t, os.WriteFile(optionsPath, []byte(optionsStr), 0644))
+cockroachdb__pebble:sstable/tablefilters/bloom/simulation_gen.go:69: err := os.WriteFile("simulation.md", []byte(board.String()+"\n"), 0644)
+cockroachdb__pebble:sstable/tablefilters/binaryfuse/simulation_gen.go:47: err := os.WriteFile("simulation.md", []byte(board.String()+"\n"), 0644)
+containerd__containerd:plugins/snapshots/erofs/erofs.go:331: if err := os.WriteFile(filepath.Join(td, ".erofslayer"), []byte{}, 0644); err != nil {
+containerd__containerd:plugins/metadata/plugin.go:184: db, err := bolt.Open(path, 0644, &options)
+containerd__containerd:internal/cri/server/podsandbox/sandbox_run_linux.go:276: if err := c.os.WriteFile(sandboxEtcHostname, []byte(hostname+"\n"), 0644); err != nil {
+containerd__containerd:internal/cri/server/podsandbox/sandbox_run_linux.go:282: if err := c.os.CopyFile(etcHosts, sandboxEtcHosts, 0644); err != nil {
+containerd__containerd:internal/cri/server/podsandbox/sandbox_run_linux.go:294: if err := c.os.WriteFile(resolvPath, []byte(resolvContent), 0644); err != nil {
+containerd__containerd:internal/cri/server/podsandbox/sandbox_run_linux.go:300: if err := c.os.CopyFile(resolvConfPath, resolvPath, 0644); err != nil {
+containerd__containerd:internal/erofsutils/mount.go:115: f, err := os.OpenFile(layerPath, os.O_APPEND|os.O_WRONLY, 0644)
+containerd__containerd:internal/dmverity/dmverity_linux.go:204: f, err := atomicfile.New(metadataPath, 0644)
+containerd__containerd:core/snapshots/testsuite/testsuite.go:842: fstest.CreateFile("/dir1/f1", []byte("Hello"), 0644),
+containerd__containerd:core/snapshots/testsuite/testsuite.go:844: fstest.CreateFile("dir2/f2", []byte("..."), 0644),
+containerd__containerd:core/snapshots/testsuite/testsuite.go:848: fstest.CreateFile("/dir3/f1", []byte("Hello"), 0644),
+containerd__containerd:core/snapshots/testsuite/issues.go:46: fstest.CreateFile("/etc/hosts", []byte("mydomain 10.0.0.1"), 0644),
+containerd__containerd:core/snapshots/testsuite/issues.go:47: fstest.CreateFile("/etc/profile", []byte("PATH=/usr/bin"), 0644),
+containerd__containerd:core/snapshots/testsuite/issues.go:50: fstest.CreateFile("/etc/hosts", []byte("mydomain 10.0.0.2"), 0644),
+containerd__containerd:core/snapshots/testsuite/issues.go:53: fstest.CreateFile("/root/.bashrc", []byte("PATH=/usr/sbin:/usr/bin"), 0644),
+containerd__containerd:core/snapshots/testsuite/issues.go:77: fstest.CreateFile("/lib/hidden", []byte{}, 0644),
+containerd__containerd:core/snapshots/testsuite/issues.go:82: fstest.CreateFile("/lib/not-hidden", []byte{}, 0644),
+containerd__containerd:core/snapshots/testsuite/issues.go:85: fstest.CreateFile("/lib/newfile", []byte{}, 0644),
+containerd__containerd:core/snapshots/testsuite/issues.go:105: fstest.CreateFile("/opt/a/b/file.txt", []byte("hello"), 0644),
+containerd__containerd:core/snapshots/testsuite/issues.go:126: fstest.CreateFile("/somefiles/f1", []byte("was here first!"), 0644),
+containerd__containerd:core/snapshots/testsuite/issues.go:127: fstest.CreateFile("/somefiles/f2", []byte("nothing interesting"), 0644),
+containerd__containerd:core/snapshots/testsuite/issues.go:147: fstest.CreateFile("/somefiles/f1-overwrite", []byte("new content 1"), 0644),
+containerd__containerd:core/snapshots/testsuite/issues.go:170: fstest.CreateFile("/dir4/f1", []byte("..."), 0644),
+containerd__containerd:core/snapshots/testsuite/issues.go:172: fstest.CreateFile("/dir5/f1", []byte("..."), 0644),
+containerd__containerd:core/images/archive/exporter.go:551: Mode:     0644,
+containerd__containerd:core/images/archive/exporter.go:615: Mode:     0644,
+containerd__containerd:cmd/gen-manpages/main.go:64: if err := os.WriteFile(filepath.Join(dir, fmt.Sprintf("%s.%s", name, section)), []byte(data), 0644); err != nil {
+containerd__containerd:cmd/containerd/command/service_windows.go:245: f, err = os.OpenFile(logFileFlag, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+containerd__containerd:cmd/containerd/command/service_windows.go:333: panicFile, err = os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+containerd__containerd:cmd/ctr/commands/images/build_erofs_cache.go:185: if err := os.Chmod(tmpPath, 0644); err != nil {
+containerd__containerd:cmd/containerd-shim-runc-v2/process/io.go:116: f, err = os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+dominikh__go-tools:internal/xtools-internal/typeparams/copytermlist.go:92: if err := os.WriteFile(name, []byte(content), 0644); err != nil {
+dominikh__go-tools:internal/xtools-internal/proxydir/proxydir.go:29: f, err := os.OpenFile(filepath.Join(dir, "list"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+dominikh__go-tools:internal/xtools-internal/proxydir/proxydir.go:44: if err := os.WriteFile(filepath.Join(dir, ver+".mod"), modContents, 0644); err != nil {
+dominikh__go-tools:internal/xtools-internal/proxydir/proxydir.go:50: if err := os.WriteFile(filepath.Join(dir, ver+".info"), infoContents, 0644); err != nil {
+dominikh__go-tools:internal/xtools-internal/proxydir/proxydir.go:55: f, err = os.OpenFile(filepath.Join(dir, ver+".zip"), os.O_CREATE|os.O_WRONLY, 0644)
+dominikh__go-tools:internal/xtools-internal/packagestest/expect.go:208: if err := os.WriteFile(gomod, content, 0644); err != nil {
+dominikh__go-tools:internal/xtools-internal/packagestest/modules.go:96: if err := os.WriteFile(gomod+".temp", contents, 0644); err != nil {
+dominikh__go-tools:internal/xtools-internal/packagestest/modules.go:118: if err := os.WriteFile(filepath.Join(primaryDir, "go.mod"), primaryGomod.Bytes(), 0644); err != nil {
+dominikh__go-tools:internal/xtools-internal/packagestest/modules.go:139: if err := os.WriteFile(modfile, []byte("module "+module+"\n"), 0644); err != nil {
+dominikh__go-tools:internal/xtools-internal/packagestest/export.go:255: if err := os.WriteFile(fullpath, []byte(value), 0644); err != nil {
+dominikh__go-tools:internal/xtools-internal/packagestest/export.go:347: if err := createEmpty(filename, mode|0644); err == nil {
+dominikh__go-tools:internal/xtools-internal/testenv/testenv.go:116: if err := os.WriteFile(mainGo, []byte("package main\nfunc main() {}\n"), 0644); err != nil {
+golang__tools:internal/robustio/copyfiles.go:78: if err := os.WriteFile(name, content, 0644); err != nil {
+golang__tools:internal/typeparams/copytermlist.go:92: if err := os.WriteFile(name, []byte(content), 0644); err != nil {
+golang__tools:internal/proxydir/proxydir.go:29: f, err := os.OpenFile(filepath.Join(dir, "list"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+golang__tools:internal/proxydir/proxydir.go:44: if err := os.WriteFile(filepath.Join(dir, ver+".mod"), modContents, 0644); err != nil {
+golang__tools:internal/proxydir/proxydir.go:50: if err := os.WriteFile(filepath.Join(dir, ver+".info"), infoContents, 0644); err != nil {
+golang__tools:internal/proxydir/proxydir.go:55: f, err = os.OpenFile(filepath.Join(dir, ver+".zip"), os.O_CREATE|os.O_WRONLY, 0644)
+golang__tools:internal/packagestest/expect.go:208: if err := os.WriteFile(gomod, content, 0644); err != nil {
+golang__tools:internal/packagestest/modules.go:96: if err := os.WriteFile(gomod+".temp", contents, 0644); err != nil {
+golang__tools:internal/packagestest/modules.go:118: if err := os.WriteFile(filepath.Join(primaryDir, "go.mod"), primaryGomod.Bytes(), 0644); err != nil {
+golang__tools:internal/packagestest/modules.go:139: if err := os.WriteFile(modfile, []byte("module "+module+"\n"), 0644); err != nil {
+golang__tools:internal/packagestest/export.go:255: if err := os.WriteFile(fullpath, []byte(value), 0644); err != nil {
+golang__tools:internal/packagestest/export.go:347: if err := createEmpty(filename, mode|0644); err == nil {
+golang__tools:internal/imports/mkindex.go:89: err = os.WriteFile("pkgindex.go", src, 0644)
+golang__tools:internal/testenv/testenv.go:116: if err := os.WriteFile(mainGo, []byte("package main\nfunc main() {}\n"), 0644); err != nil {
+golang__tools:refactor/rename/rename.go:584: return os.WriteFile(filename, content, 0644)
+golang__tools:refactor/rename/rename.go:589: if err := os.WriteFile(renamed, content, 0644); err != nil {
+golang__tools:gopls/integration/govim/artifacts.go:63: if err := os.WriteFile(name, data, 0644); err != nil {
+golang__tools:gopls/internal/server/vulncheck_prompt.go:459: return os.WriteFile(path, content, 0644)
+golang__tools:gopls/internal/vulncheck/vulntest/db.go:140: return os.WriteFile(filename, j, 0644)
+golang__tools:gopls/internal/protocol/generate/main.go:285: if err := os.WriteFile(failed, src, 0644); err != nil {
+golang__tools:gopls/internal/protocol/generate/main.go:290: if err := os.WriteFile(filepath.Join(*outputdir, basename), formatted, 0644); err != nil {
+golang__tools:gopls/internal/protocol/command/generate.go:23: if err := os.WriteFile("command_gen.go", content, 0644); err != nil {
+golang__tools:gopls/internal/test/integration/fake/workdir.go:58: err := os.WriteFile(fp, content, 0644)
+golang__tools:gopls/internal/test/integration/fake/sandbox.go:130: if err := os.WriteFile(fname, content, 0644); err != nil {
+golang__tools:cmd/signature-fuzzer/fuzz-runner/runner.go:112: of, err := os.OpenFile(outfile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+golang__tools:cmd/fiximports/main.go:445: return writeFile(filename, buf.Bytes(), 0644)
+golang__tools:cmd/compilebench/main.go:598: if err := os.WriteFile(src, []byte(code), 0644); err != nil {
+golang__tools:go/buildutil/fakecontext.go:102: func (fakeFileInfo) Mode() os.FileMode  { return 0644 }
+golang__tools:go/analysis/unitchecker/unitchecker.go:216: return os.WriteFile(filename, content, 0644)
+golang__tools:go/analysis/internal/checker/checker.go:209: return os.WriteFile(filename, content, 0644)
+golang__vuln:internal/testenv/testenv.go:100: if err := os.WriteFile(mainGo, []byte("package main\nfunc main() {}\n"), 0644); err != nil {
+golang__vuln:cmd/govulncheck/test_utils.go:17: // temporary directory. The created files have 0644
+golang__vuln:cmd/govulncheck/test_utils.go:68: return os.WriteFile(dest, b, 0644)
+golangci__golangci-lint:internal/go/testenv/testenv_notwin.go:35: if err := os.WriteFile(fpath, nil, 0644); err != nil {
+golangci__golangci-lint:pkg/result/processors/fixer.go:33: const filePerm = 0644
+google__go-containerregistry:pkg/v1/tarball/write.go:363: Mode:     0644,
+google__go-containerregistry:pkg/legacy/tarball/write.go:361: Mode:     0644,
+google__go-github:github/gen-stringify-test.go:383: return fmt.Errorf("os.Chmod(%q, 0644): %v", t.filename, err)
+google__go-github:github/gen-accessors.go:261: return fmt.Errorf("os.Chmod(%q, 0644): %v", filename, err)
+grpc__grpc-go:internal/testutils/xds_bootstrap.go:42: if err := os.WriteFile(f.Name(), bootstrapContents, 0644); err != nil {
+hashicorp__terraform:internal/moduletest/states/manifest.go:91: data, err := os.OpenFile(manifest.filePath(), os.O_CREATE|os.O_RDONLY, 0644)
+hashicorp__terraform:internal/moduletest/states/manifest.go:123: return os.WriteFile(manifest.filePath(), data, 0644)
+hashicorp__terraform:internal/cloud/cloudplan/saved_plan.go:69: err := os.WriteFile(filepath, data, 0644)
+hashicorp__terraform:internal/communicator/ssh/communicator.go:691: fmt.Fprintln(w, "C0644", size, dst)
+hashicorp__terraform:internal/command/fmt.go:191: err := os.WriteFile(path, result, 0644)
+hashicorp__terraform:internal/command/workdir/plugin_dirs.go:84: return ioutil.WriteFile(filePath, raw, 0644)
+hashicorp__terraform:internal/command/providers_mirror.go:328: err = ioutil.WriteFile(filepath.Join(indexDir, "index.json"), mainIndexJSON, 0644)
+hashicorp__terraform:internal/command/providers_mirror.go:346: err = ioutil.WriteFile(filepath.Join(indexDir, version.String()+".json"), versionIndexJSON, 0644)
+hashicorp__terraform:internal/command/meta.go:856: err = ioutil.WriteFile(filepath.Join(m.DataDir(), local.DefaultWorkspaceFile), []byte(name), 0644)
+hashicorp__terraform:internal/pluginshared/binary.go:142: err = os.WriteFile(path.Join(targetPath, ".version"), []byte(manifest.Version), 0644)
+hashicorp__terraform:internal/depsfile/locks_file.go:99: err := replacefile.AtomicWriteFile(filename, src, 0644)
+ko-build__ko:pkg/publish/recorder.go:76: f, err := os.OpenFile(r.fileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+ko-build__ko:pkg/build/gobuild.go:556: return os.WriteFile(sbomPath, sbom, 0644) //nolint:gosec
+oras-project__oras:test/e2e/suite/command/restore.go:670: err = os.WriteFile(filepath.Join(backupDir, "invalid-file.txt"), []byte("not a valid layout"), 0644)
+oras-project__oras:test/e2e/suite/command/restore.go:697: err := os.WriteFile(backupTar, []byte{}, 0644)
+oras-project__oras:test/e2e/suite/command/restore.go:713: err := os.WriteFile(backupFile, []byte{}, 0644)
+oras-project__oras-go:registry/remote/signature/lookaside.go:234: return os.WriteFile(path, data, 0644)
+restic__restic:helpers/prepare-release/main.go:82: err = os.WriteFile(filename, buf, 0644)
+restic__restic:helpers/prepare-release/main.go:316: err := os.WriteFile("VERSION", []byte(opts.Version+"\n"), 0644)
+restic__restic:helpers/prepare-release/main.go:331: err := os.WriteFile("VERSION", []byte(opts.Version+"-dev\n"), 0644)
+restic__restic:internal/backend/cache/cache.go:27: const fileMode = 0644
+restic__restic:internal/data/testing.go:101: Mode: 0644,
+restic__restic:internal/archiver/testing.go:95: err := os.WriteFile(targetPath, []byte(it.Content), 0644)
+restic__restic:cmd/restic/cmd_backup.go:616: Mode:    0644,
+sigstore__cosign:cmd/cosign/cli/generate/generate_key_pair.go:117: if err := os.WriteFile(publicKeyFileName, keys.PublicBytes, 0644); err != nil { //nolint: gosec
+sigstore__cosign:cmd/cosign/cli/importkeypair/import_key_pair.go:65: if err := os.WriteFile(publicKeyFileName, keys.PublicBytes, 0644); err != nil {
+spf13__cobra:completions.go:963: os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+syncthing__syncthing:test/util.go:209: err := os.WriteFile(path, d1, 0644)
+tailscale__tailscale:release/dist/synology/pkgs.go:100: memFile("INFO", t.mkInfo(b, inner.uncompressedSz), 0644),
+tailscale__tailscale:release/dist/synology/pkgs.go:101: static("PACKAGE_ICON.PNG", "PACKAGE_ICON.PNG", 0644),
+tailscale__tailscale:release/dist/synology/pkgs.go:102: static("PACKAGE_ICON_256.PNG", "PACKAGE_ICON_256.PNG", 0644),
+tailscale__tailscale:release/dist/synology/pkgs.go:103: static("Tailscale.sc", "Tailscale.sc", 0644),
+tailscale__tailscale:release/dist/synology/pkgs.go:105: static("resource", "conf/resource", 0644),
+tailscale__tailscale:release/dist/synology/pkgs.go:106: static(privFile, "conf/privilege", 0644),
+tailscale__tailscale:release/dist/synology/pkgs.go:107: file(inner.path, "package.tgz", 0644),
+tailscale__tailscale:release/dist/synology/pkgs.go:109: static("scripts/start-stop-status", "scripts/start-stop-status", 0644),
+tailscale__tailscale:release/dist/synology/pkgs.go:110: static("scripts/postupgrade", "scripts/postupgrade", 0644),
+tailscale__tailscale:release/dist/synology/pkgs.go:111: static("scripts/preupgrade", "scripts/preupgrade", 0644),
+tailscale__tailscale:release/dist/synology/pkgs.go:235: static("Tailscale.sc", "conf/Tailscale.sc", 0644),
+tailscale__tailscale:release/dist/synology/pkgs.go:236: static(fmt.Sprintf("logrotate-dsm%d", dsmVersion), "conf/logrotate.conf", 0644),
+tailscale__tailscale:release/dist/synology/pkgs.go:238: static("PACKAGE_ICON_256.PNG", "ui/PACKAGE_ICON_256.PNG", 0644),
+tailscale__tailscale:release/dist/synology/pkgs.go:239: static("config", "ui/config", 0644),
+tailscale__tailscale:release/dist/cli/cli.go:210: if err := os.WriteFile(manifest, []byte(strings.Join(out, "\n")), 0644); err != nil {
+tailscale__tailscale:release/dist/unixpkgs/pkgs.go:138: if err := addFile(filepath.Join(tailscaledDir, "tailscaled.service"), filepath.Join(dir, "tailscaled.service"), 0644); err != nil {
+tailscale__tailscale:release/dist/unixpkgs/pkgs.go:141: if err := addFile(filepath.Join(tailscaledDir, "tailscaled.defaults"), filepath.Join(dir, "tailscaled.defaults"), 0644); err != nil {
+tailscale__tailscale:release/dist/unixpkgs/pkgs.go:144: if err := addFile(filepath.Join(tailscaledDir, "tailscale-online.target"), filepath.Join(dir, "tailscale-online.target"), 0644); err != nil {
+tailscale__tailscale:release/dist/unixpkgs/pkgs.go:147: if err := addFile(filepath.Join(tailscaledDir, "tailscale-wait-online.service"), filepath.Join(dir, "tailscale-wait-online.service"), 0644); err != nil {
+tailscale__tailscale:release/dist/qnap/pkgs.go:203: perm := fs.FileMode(0644)
+tailscale__tailscale:release/dist/dist.go:47: return os.WriteFile(sigPath, sig, 0644)
+tailscale__tailscale:wgengine/router/osrouter/router_linux.go:1410: if err := os.WriteFile(fn, []byte(val), 0644); err != nil {
+tailscale__tailscale:tka/tailchonk.go:625: return atomicfile.WriteFile(filepath.Join(c.base, "last_active_ancestor"), hash[:], 0644)
+tailscale__tailscale:tka/tailchonk.go:742: return atomicfile.WriteFile(filepath.Join(dir, base), buff.Bytes(), 0644)
+tailscale__tailscale:misc/genreadme/genreadme.go:131: return os.WriteFile(readmePath, newContents, 0644)
+tailscale__tailscale:util/codegen/codegen.go:187: ioerr := os.WriteFile(path, out, 0644)
+tailscale__tailscale:tool/gocross/toolchain.go:151: if err := os.WriteFile(stampFile, []byte(wantRev), 0644); err != nil {
+tailscale__tailscale:tool/gocross/gocross.go:77: if err := atomicfile.WriteFile(psFileName, wrapperScriptPowerShell, 0644); err != nil {
+tailscale__tailscale:tool/updateflakes/updateflakes.go:170: return os.WriteFile(hashesFile, b, 0644)
+tailscale__tailscale:tool/updateflakes/updateflakes.go:261: return os.WriteFile(path, bytes.Join(lines, []byte("\n")), 0644)
+tailscale__tailscale:tsnet/tsnet.go:2267: f, err := os.OpenFile(pcapFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+tailscale__tailscale:tstest/integration/gen_deps.go:61: err = os.WriteFile(filename, out.Bytes(), 0644)
+tailscale__tailscale:tstest/mts/mts.go:439: logFile, err := os.OpenFile(logs, os.O_CREATE|os.O_WRONLY|os.O_APPEND|os.O_TRUNC, 0644)
+tailscale__tailscale:tstest/natlab/vnet/conf.go:479: pcf, err := os.OpenFile(c.pcapFile, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+tailscale__tailscale:tstest/natlab/vmtest/openresolv.go:79: mode:      "0644",
+tailscale__tailscale:tstest/natlab/vmtest/openresolv.go:89: mode:      "0644",
+tailscale__tailscale:tstest/natlab/vmtest/cloudinit.go:393: return os.WriteFile(keyPath+".pub", ssh.MarshalAuthorizedKey(signer.PublicKey()), 0644)
+tailscale__tailscale:tstest/natlab/vmtest/cloudinit.go:411: return os.WriteFile(keyPath+".pub", ssh.MarshalAuthorizedKey(sshPub), 0644)
+tailscale__tailscale:tstest/natlab/vmtest/tailmac.go:348: if err := scpFile(sc, []byte(plist), "/tmp/com.tailscale.tta.plist", 0644); err != nil {
+tailscale__tailscale:tstest/natlab/vmtest/tailmac.go:506: if err := os.WriteFile(filepath.Join(cloneDir, "HardwareModel"), hwModel, 0644); err != nil {
+tailscale__tailscale:tstest/natlab/vmtest/tailmac.go:514: if err := os.WriteFile(filepath.Join(cloneDir, "MachineIdentifier"), ecid, 0644); err != nil {
+tailscale__tailscale:tstest/natlab/vmtest/tailmac.go:542: return os.WriteFile(filepath.Join(cloneDir, "config.json"), tmData, 0644)
+tailscale__tailscale:tstest/natlab/vmtest/tailmac.go:588: if err := os.WriteFile(filepath.Join(cloneDir, "config.json"), cfgData, 0644); err != nil {
+tailscale__tailscale:cmd/omitsize/omitsize.go:224: if err := os.WriteFile(cacheFile, fmt.Appendf(nil, "%d", n), 0644); err != nil {
+tailscale__tailscale:cmd/containerboot/forwarding.go:90: if err := os.WriteFile(path, []byte("1"), 0644); err != nil {
+tailscale__tailscale:cmd/k8s-operator/e2e/setup.go:250: if err = os.WriteFile(pebbleMiniCACertPath, pebbleMiniCACert, 0644); err != nil {
+tailscale__tailscale:cmd/tsconnect/build-pkg.go:99: return os.WriteFile(path.Join(*pkgDir, "package.json"), packageJSONBytes, 0644)
+tailscale__tailscale:cmd/tsconnect/build-pkg.go:114: return os.WriteFile(path.Join(*pkgDir, wasmbuild.BuildInfoFile), append(data, '\n'), 0644)
+tailscale__tailscale:cmd/tsconnect/build-pkg.go:122: return os.WriteFile(path.Join(*pkgDir, "README.md"), readmeBytes, 0644)
+tailscale__tailscale:cmd/tsconnect/build-pkg.go:137: return os.WriteFile(dst, data, 0644)
+tailscale__tailscale:cmd/derper/cert.go:240: if err := os.WriteFile(crtPath, certPEM, 0644); err != nil {
+tailscale__tailscale:cmd/derper/ipcert.go:441: if err := atomicfile.WriteFile(crtPath, chainPEM, 0644); err != nil {
+tailscale__tailscale:cmd/tailscale/cli/metrics.go:87: return atomicfile.WriteFile(path, out, 0644)
+tailscale__tailscale:cmd/tailscale/cli/file.go:648: f, err := os.OpenFile(targetFile, os.O_RDWR|os.O_CREATE|os.O_EXCL, 0644)
+tailscale__tailscale:cmd/tailscale/cli/file.go:669: if f, err = os.OpenFile(targetFile, os.O_RDWR|os.O_CREATE|os.O_EXCL, 0644); err != nil {
+tailscale__tailscale:cmd/tailscale/cli/file.go:680: if f, err = os.OpenFile(numberedFileName(dir, base, i), os.O_RDWR|os.O_CREATE|os.O_EXCL, 0644); err == nil {
+tailscale__tailscale:cmd/tailscale/cli/cert.go:140: certChanged, err := writeIfChanged(certArgs.certFile, certPEM, 0644)
+tailscale__tailscale:cmd/tailscale/cli/debug-capture.go:72: f, err := os.OpenFile(captureArgs.outFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+tailscale__tailscale:cmd/tailscale/cli/ssh.go:171: if err := os.WriteFile(knownHostsFile, want, 0644); err != nil {
+tailscale__tailscale:cmd/tta/wgserver_linux.go:140: if err := os.WriteFile(s.file.path, []byte(s.file.data), 0644); err != nil {
+tailscale__tailscale:cmd/tta/tta.go:118: err := atomicfile.WriteFile("/tmp/resolv.conf", []byte("nameserver "+ns+"\n"), 0644)
+tailscale__tailscale:cmd/addlicense/main.go:52: f, err := os.OpenFile(*file, os.O_TRUNC|os.O_WRONLY, 0644)
+tailscale__tailscale:net/dnsfallback/update-dns-fallbacks.go:42: if err := os.WriteFile("dns-fallback-servers.json", out, 0644); err != nil {
+tailscale__tailscale:net/dns/wsl_windows.go:129: if err := m.fs.WriteFile(wslConf, b, 0644); err != nil {
+tailscale__tailscale:net/dns/wsl_windows.go:173: func (fs wslFS) Truncate(name string) error { return fs.WriteFile(name, nil, 0644) }
+tailscale__tailscale:net/dns/manager_plan9.go:133: if err := os.WriteFile("/net/ndb", newBuf, 0644); err != nil {

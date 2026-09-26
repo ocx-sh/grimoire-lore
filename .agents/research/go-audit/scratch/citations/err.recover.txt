@@ -1,0 +1,138 @@
+aquasecurity__trivy:pkg/iac/scanners/ansible/parser/template.go:71: if r := recover(); r != nil {
+aquasecurity__trivy:pkg/iac/scanners/cloudformation/parser/parser.go:88: if e := recover(); e != nil {
+aquasecurity__trivy:pkg/iac/scanners/terraform/parser/funcs/collection.go:523: if r := recover(); r != nil {
+aquasecurity__trivy:pkg/iac/terraform/attribute.go:228: if err := recover(); err != nil {
+aquasecurity__trivy:pkg/iac/terraform/attribute.go:288: if err := recover(); err != nil {
+aquasecurity__trivy:pkg/iac/terraform/attribute.go:346: if err := recover(); err != nil {
+aquasecurity__trivy:pkg/iac/terraform/attribute.go:405: if err := recover(); err != nil {
+aquasecurity__trivy:pkg/iac/terraform/attribute.go:428: if err := recover(); err != nil {
+bazel-contrib__rules_go:go/tools/bazel_testing/bazel_testing.go:122: if r := recover(); r != nil {
+bazel-contrib__rules_go:go/tools/builders/nogo_main.go:491: if r := recover(); r != nil {
+caddyserver__caddy:modules/caddypki/maintain.go:29: if err := recover(); err != nil {
+caddyserver__caddy:modules/caddytls/tls.go:445: if err := recover(); err != nil {
+caddyserver__caddy:modules/caddytls/tls.go:968: if err := recover(); err != nil {
+caddyserver__caddy:modules/caddytls/sessiontickets.go:124: if err := recover(); err != nil {
+caddyserver__caddy:modules/caddytls/distributedstek/distributedstek.go:209: if err := recover(); err != nil {
+caddyserver__caddy:modules/caddytls/standardstek/stek.go:86: if err := recover(); err != nil {
+caddyserver__caddy:modules/caddyhttp/reverseproxy/metrics.go:63: if err := recover(); err != nil {
+caddyserver__caddy:modules/caddyhttp/reverseproxy/healthchecks.go:273: if err := recover(); err != nil {
+caddyserver__caddy:modules/caddyhttp/reverseproxy/healthchecks.go:301: if err := recover(); err != nil {
+caddyserver__caddy:modules/caddyhttp/reverseproxy/healthchecks.go:613: if err := recover(); err != nil {
+caddyserver__caddy:cmd/main.go:253: if err := recover(); err != nil {
+charmbracelet__bubbletea:tea.go:733: if r := recover(); r != nil {
+charmbracelet__bubbletea:tea.go:903: if r := recover(); r != nil {
+charmbracelet__bubbletea:tea.go:929: if r := recover(); r != nil {
+charmbracelet__bubbletea:tea.go:947: if r := recover(); r != nil {
+charmbracelet__bubbletea:tea.go:1036: if r := recover(); r != nil {
+cockroachdb__pebble:internal/iterv2/test_utils.go:117: if p := recover(); p != nil {
+cockroachdb__pebble:internal/iterv2/test_utils.go:210: if r := recover(); r != nil {
+cockroachdb__pebble:internal/base/error.go:83: if r := recover(); r != nil {
+cockroachdb__pebble:internal/manifest/table_metadata.go:934: if r := recover(); r != nil {
+cockroachdb__pebble:internal/manifest/version_edit.go:802: if r := recover(); r != nil {
+cockroachdb__pebble:internal/manifest/blob_metadata.go:229: if r := recover(); r != nil {
+cockroachdb__pebble:internal/manifest/blob_metadata.go:257: if r := recover(); r != nil {
+cockroachdb__pebble:internal/blobtest/handles.go:120: if r := recover(); r != nil {
+cockroachdb__pebble:internal/dsl/dsl.go:63: if r := recover(); r != nil {
+cockroachdb__pebble:record/log_writer.go:788: if r := recover(); r != nil {
+cockroachdb__pebble:open.go:187: if r := recover(); db == nil {
+cockroachdb__pebble:metamorphic/parser.go:218: if r := recover(); r != nil {
+cockroachdb__pebble:metamorphic/parser.go:635: if r := recover(); r != nil {
+cockroachdb__pebble:metamorphic/generator.go:240: if r := recover(); r != nil {
+cockroachdb__pebble:file_cache.go:293: if p := recover(); p != nil {
+cockroachdb__pebble:sstable/colblk/data_block.go:1008: if r := recover(); r != nil {
+cockroachdb__pebble:sstable/colblk/data_block.go:1027: if r := recover(); r != nil {
+cockroachdb__pebble:sstable/colblk/data_block.go:1044: if r := recover(); r != nil {
+cockroachdb__pebble:sstable/rowblk_writer.go:1750: if r := recover(); r != nil {
+cockroachdb__pebble:sstable/test_utils.go:171: if r := recover(); r != nil {
+cockroachdb__pebble:sstable/blob/blocks.go:247: if r := recover(); r != nil {
+cockroachdb__pebble:sstable/blob/blocks.go:363: if r := recover(); r != nil {
+dominikh__go-tools:internal/xtools-internal/gocommand/invoke.go:332: defer func() { recover() }()
+etcd-io__etcd:tools/etcd-dump-db/scan.go:71: if r := recover(); r != nil {
+etcd-io__etcd:server/verify/verify.go:68: } else if r := recover(); r != nil {
+etcd-io__etcd:server/storage/backend/backend.go:667: if rerr := recover(); rerr != nil {
+etcd-io__etcd:server/storage/backend/backend.go:759: if rerr := recover(); rerr != nil {
+etcd-io__etcd:client/v3/internal/resolver/resolver.go:81: if rec := recover(); rec != nil {
+etcd-io__etcd:client/v3/concurrency/stm.go:145: if r := recover(); r != nil {
+etcd-io__etcd:pkg/schedule/schedule.go:201: if err := recover(); err != nil {
+etcd-io__etcd:etcdutl/snapshot/v3_snapshot.go:203: if r := recover(); r != nil {
+golang__tools:internal/gcimporter/ureader.go:70: if x := recover(); x != nil {
+golang__tools:internal/gcimporter/iimport.go:152: if e := recover(); e != nil {
+golang__tools:internal/gcimporter/iexport.go:339: if e := recover(); e != nil {
+golang__tools:internal/gocommand/invoke.go:356: defer func() { recover() }()
+golang__tools:internal/refactor/inline/inline.go:84: if x := recover(); x != nil {
+golang__tools:internal/pprof/pprof.go:18: if x := recover(); x != nil {
+golang__tools:refactor/eg/rewrite.go:144: if x := recover(); x != nil {
+golang__tools:gopls/internal/cache/analysis.go:1035: if r := recover(); r != nil {
+golang__tools:gopls/internal/cache/parsego/file.go:167: if e := recover(); e != nil {
+golang__tools:gopls/internal/golang/inline.go:95: if x := recover(); x != nil {
+golang__tools:cmd/bisect/main.go:312: if e := recover(); e != nil && e != &searchFatal {
+golang__tools:cmd/gotype/gotype.go:295: switch p := recover().(type) {
+golang__tools:cmd/godex/godex.go:154: if recover() != nil {
+golang__tools:go/internal/gccgoimporter/backdoor.go:20: switch x := recover().(type) {
+golang__tools:go/ast/astutil/rewrite.go:45: if r := recover(); r != nil && r != abort {
+golang__tools:go/callgraph/vta/graph.go:246: // recoverReturn models types of all return values of recover().
+golang__tools:go/callgraph/vta/graph.go:629: // When c is r := recover() call register instruction, we add Recover -> r.
+golang__tools:go/ssa/interp/interp.go:75: DisableRecover Mode = 1 << iota // Disable recover() in target programs; show interpreter crash instead.
+golang__tools:go/ssa/interp/interp.go:149: fr.panic = recover()
+golang__tools:go/ssa/interp/interp.go:578: fr.panic = recover()
+golang__tools:go/ssa/interp/interp.go:643: // doRecover implements the recover() built-in.
+golang__tools:go/ssa/interp/interp.go:645: // recover() must be exactly one level beneath the deferred
+golang__tools:go/ssa/interp/interp.go:647: // have any effect.  Thus we ignore both "defer recover()" and
+golang__tools:go/ssa/interp/interp.go:648: // "defer f() -> g() -> recover()".
+golang__tools:go/ssa/interp/interp.go:668: panic(fmt.Sprintf("unexpected panic type %T in target call to recover()", p))
+golang__tools:go/ssa/interp/interp.go:723: switch p := recover().(type) {
+golang__tools:go/analysis/passes/nilness/doc.go:20: //	if r := recover(); r != nil {
+golang__tools:go/cfg/cfg.go:210: //		defer func() { res = recover() }()
+golang__tools:go/cfg/builder.go:43: //    defer func() { recover() }
+golang__vuln:internal/gosym/pclntab.go:207: _ = recover()
+golang__vuln:internal/gosym/pclntab.go:300: _ = recover()
+golang__vuln:internal/gosym/pclntab.go:576: if !disableRecover && recover() != nil {
+golang__vuln:internal/gosym/pclntab.go:593: if !disableRecover && recover() != nil {
+golang__vuln:internal/gosym/pclntab.go:625: if !disableRecover && recover() != nil {
+golang__vuln:internal/gosym/pclntab.go:692: _ = recover()
+golangci__golangci-lint:pkg/goanalysis/runner_action.go:46: if p := recover(); p != nil {
+golangci__golangci-lint:pkg/lint/runner.go:160: if panicData := recover(); panicData != nil {
+google__go-cmp:cmp/compare.go:369: recover() // Ignore panics, let the other call to f panic instead
+google__go-cmp:cmp/report_reflect.go:138: defer func() { recover() }()
+grpc__grpc-go:internal/xds/clients/xdsclient/channel.go:259: if p := recover(); p != nil {
+hashicorp__terraform:internal/moduletest/graph/test_graph_builder.go:112: if r := recover(); r != nil {
+hashicorp__terraform:internal/logging/panic.go:49: recovered := recover()
+hashicorp__terraform:internal/lang/funcs/collection.go:529: if r := recover(); r != nil {
+hashicorp__terraform:internal/terraform/graph.go:50: if r := recover(); r != nil {
+kubernetes-sigs__controller-runtime:tools/setup-envtest/env/env.go:339: cause := recover()
+kubernetes-sigs__controller-runtime:tools/setup-envtest/env/exit.go:63: // to errors.As, except it works on recover() values.
+kubernetes-sigs__controller-runtime:tools/setup-envtest/env/exit.go:84: if cause := recover(); CheckRecover(cause, func(code int, err error) {
+kubernetes-sigs__controller-runtime:pkg/internal/controller/controller.go:198: if r := recover(); r != nil {
+kubernetes-sigs__controller-runtime:pkg/webhook/conversion/conversion.go:99: if r := recover(); r != nil {
+kubernetes-sigs__controller-runtime:pkg/webhook/admission/webhook.go:158: if r := recover(); r != nil {
+oras-project__oras-go:internal/syncutil/once.go:51: if r := recover(); r != nil {
+prometheus__prometheus:promql/parser/parse.go:352: e := recover()
+prometheus__prometheus:promql/engine.go:1246: e := recover()
+prometheus__prometheus:web/web.go:130: if err := recover(); err != nil {
+prometheus__prometheus:template/template.go:330: if r := recover(); r != nil {
+prometheus__prometheus:template/template.go:361: if r := recover(); r != nil {
+regclient__regclient:cmd/regbot/sandbox/sandbox.go:153: if r := recover(); r != nil {
+regclient__regclient:cmd/regbot/internal/go2lua/import.go:31: if r := recover(); r != nil {
+stretchr__testify:mock/mock.go:1018: if r := recover(); r != nil {
+stretchr__testify:internal/spew/common.go:73: if err := recover(); err != nil {
+stretchr__testify:suite/suite.go:86: r := recover()
+stretchr__testify:suite/suite.go:187: r := recover()
+stretchr__testify:assert/assertions.go:825: ok = recover() == nil
+stretchr__testify:assert/assertions.go:926: if e := recover(); e != nil {
+stretchr__testify:assert/assertions.go:1285: message = recover()
+tailscale__tailscale:derp/derpserver/handler.go:119: if e := recover(); e != nil {
+tailscale__tailscale:wgengine/magicsock/magicsock_linux.go:374: // If we didn't have a recover() here and panic'd, we'd take down the
+tailscale__tailscale:wgengine/magicsock/magicsock_linux.go:379: if err := recover(); err != nil {
+tailscale__tailscale:prober/prober.go:366: if r := recover(); r != nil {
+tailscale__tailscale:tsweb/tsweb.go:582: recovered := recover()
+tailscale__tailscale:tsweb/tsweb.go:769: rec := recover()
+tailscale__tailscale:tsweb/tsweb.go:854: if rec := recover(); rec != nil {
+tailscale__tailscale:util/singleflight/singleflight.go:289: if r := recover(); r != nil {
+tailscale__tailscale:util/testenv/testenv.go:71: if r := recover(); r != nil {
+tailscale__tailscale:ipn/ipnlocal/local.go:7330: if p := recover(); p != nil {
+tailscale__tailscale:cmd/tsconnect/wasm/wasm_js.go:266: if r := recover(); r != nil {
+tailscale__tailscale:cmd/nardump/nardump/nardump.go:35: if e := recover(); e != nil {
+tailscale__tailscale:cmd/tailscale/cli/ffcomplete/internal/complete.go:34: if r := recover(); r != nil {
+tailscale__tailscale:net/netmon/netmon_darwin.go:70: msg := recover()
+uber-go__zap:zapcore/error.go:51: if rerr := recover(); rerr != nil {
+uber-go__zap:zapcore/field.go:218: if err := recover(); err != nil {

@@ -1,0 +1,200 @@
+aquasecurity__trivy:pkg/vex/repo/manager.go:109: if !filepath.IsLocal(repo.Name) {
+aquasecurity__trivy:pkg/oci/artifact.go:150: if !filepath.IsLocal(fileName) {
+aquasecurity__trivy:pkg/detector/library/driver.go:181: if !strings.HasPrefix(s, "<=") && strings.HasPrefix(s, "<") {
+aquasecurity__trivy:pkg/iac/detection/detect.go:180: if !strings.HasPrefix(sniff.Schema, "https://schema.management.azure.com/schemas") {
+aquasecurity__trivy:pkg/iac/adapters/arm/database/postgresql.go:55: if !strings.HasPrefix(configuration.Name.AsString(), parent) {
+aquasecurity__trivy:pkg/iac/adapters/arm/database/postgresql.go:90: if !strings.HasPrefix(policy.Name.AsString(), parent) {
+aquasecurity__trivy:pkg/iac/scanners/terraformplan/tfjson/parser/parser.go:226: if !strings.HasPrefix(rAddress, "module.") {
+aquasecurity__trivy:pkg/iac/scanners/azure/value.go:127: if strings.HasPrefix(s, "[") && !strings.HasPrefix(s, "[[") && strings.HasSuffix(s, "]") {
+aquasecurity__trivy:pkg/iac/scanners/terraform/parser/load_vars.go:23: if !strings.HasPrefix(key, "TF_VAR_") {
+aquasecurity__trivy:pkg/iac/scanners/terraform/scanner.go:178: if str, err := filepath.Rel(dirB, dirA); err == nil && !strings.HasPrefix(str, "..") {
+aquasecurity__trivy:pkg/iac/scanners/terraform/options.go:54: if prefix != "" && !strings.HasPrefix(prefix, ".") {
+aquasecurity__trivy:pkg/iac/scan/result.go:122: if rng.GetSourcePrefix() != "" && !strings.HasPrefix(rng.GetSourcePrefix(), ".") {
+aquasecurity__trivy:pkg/iac/scan/result.go:140: if rng.GetSourcePrefix() != "" && !strings.HasPrefix(rng.GetSourcePrefix(), ".") {
+aquasecurity__trivy:pkg/iac/scan/result.go:143: if !strings.HasPrefix(rng.GetLocalFilename(), strings.TrimSuffix(fsRoot, "/")) {
+aquasecurity__trivy:pkg/dependency/parser/frameworks/wordpress/parse.go:46: if !strings.HasPrefix(line, "$wp_version") {
+aquasecurity__trivy:pkg/dependency/parser/nodejs/npm/parse.go:132: if !strings.HasPrefix(pkgPath, "node_modules") {
+aquasecurity__trivy:pkg/dependency/parser/nodejs/npm/parse.go:252: if !strings.HasPrefix(pkgPath, string(link.Resolved)) {
+aquasecurity__trivy:pkg/dependency/parser/gradle/lockfile/parse.go:43: if !strings.HasPrefix(classPath, "test") {
+aquasecurity__trivy:pkg/dependency/parser/java/jar/parse.go:424: if !strings.HasPrefix(fullPath, path.Clean(rootPath)) {
+aquasecurity__trivy:pkg/dependency/id.go:30: if !strings.HasPrefix(version, "v") {
+aquasecurity__trivy:pkg/flag/report_flags.go:298: if compliance != "" && !slices.Contains(types.SupportedCompliances, compliance) && !strings.HasPrefix(compliance, "@") {
+aquasecurity__trivy:pkg/x/os/root.go:42: if !filepath.IsLocal(name) {
+aquasecurity__trivy:pkg/fanal/analyzer/language/python/packaging/packaging.go:122: if !strings.HasPrefix(lic, licensing.LicenseFilePrefix) {
+aquasecurity__trivy:pkg/fanal/analyzer/language/nodejs/pkg/pkg.go:91: return !strings.HasPrefix(name[0], "@")
+aquasecurity__trivy:pkg/fanal/analyzer/language/c/conan/conan.go:140: if !strings.HasPrefix(line, attributeName) {
+aquasecurity__trivy:pkg/fanal/analyzer/imgconf/apk/apk.go:160: if !strings.HasPrefix(cmd, "apk") {
+aquasecurity__trivy:pkg/fanal/walker/fs.go:141: case !filepath.IsAbs(path) && !strings.HasPrefix(rel, ".."):
+aquasecurity__trivy:pkg/fanal/walker/tar.go:111: if !strings.HasPrefix(rel, parentDir) {
+aquasecurity__trivy:pkg/report/sarif.go:122: if !strings.HasPrefix(slashPath, "/") {
+aquasecurity__trivy:pkg/report/sarif.go:365: case strings.HasPrefix(s, "git::https:/") && !strings.HasPrefix(s, "git::https://"):
+aquasecurity__trivy:examples/module/spring4shell/spring4shell.go:85: if !strings.HasPrefix(line, "JAVA_VERSION=") {
+bazel-contrib__rules_go:go/tools/builders/env.go:449: if !strings.HasPrefix(args[i], f) {
+bazel-contrib__rules_go:go/tools/builders/nogo_version.go:33: if !strings.HasPrefix(goVersion, "go") {
+bazel-contrib__rules_go:go/tools/builders/nolint.go:23: if !strings.HasPrefix(text, "nolint") {
+bazel-contrib__rules_go:go/tools/gopackagesdriver/packageregistry.go:128: !strings.HasPrefix(label, "@") {
+bazel-contrib__rules_go:go/tools/gopackagesdriver/bazel_json_builder.go:56: if err == nil && !strings.HasPrefix(relToBin, filepath.FromSlash("../")) {
+bazel-contrib__rules_go:go/tools/bzltestutil/xml.go:152: if len(parts) != 2 || !strings.HasPrefix(parts[1], "(") || !strings.HasSuffix(parts[1], ")") {
+bazel-contrib__rules_go:go/tools/releaser/file.go:215: if !strings.HasPrefix(entryName, stripPrefix) {
+bazel-contrib__rules_go:go/tools/releaser/upgradedep.go:326: if !strings.HasPrefix(name, "v") {
+bazel-contrib__rules_go:go/tools/releaser/upgradedep.go:510: if !strings.HasPrefix(patchLabelValue, "//third_party:") {
+bazelbuild__bazel-gazelle:tools/override-generator/main.go:308: if !strings.HasPrefix(arg, "-p") {
+bazelbuild__bazel-gazelle:language/proto/config.go:325: if !strings.HasPrefix(prefix, "/") {
+bazelbuild__bazel-gazelle:language/go/config.go:522: if !strings.HasPrefix(modulePath, gc.prefix+"/") {
+bazelbuild__bazel-gazelle:language/go/build_constraints.go:300: if len(tag) < 5 || !strings.HasPrefix(tag, "go") {
+bazelbuild__bazel-gazelle:language/go/fileinfo.go:312: if !strings.HasPrefix(c.Text, "//go:embed") {
+bazelbuild__bazel-gazelle:v2/rule/rule.go:469: if !strings.HasPrefix(token, "#") {
+bazelbuild__bazel-gazelle:v2/cmd/gazelle/update/update.go:998: return !strings.HasPrefix(rel, "..")
+caddyserver__caddy:modules/caddyhttp/caddyhttp.go:258: if relPath != "" && !filepath.IsLocal(relPath) {
+caddyserver__caddy:modules/caddyhttp/fileserver/matcher.go:584: if pos != len(path) && !strings.HasPrefix(path[pos:], "/") {
+caddyserver__caddy:modules/caddyhttp/map/map.go:67: if strings.Count(dest, "{") != 1 || !strings.HasPrefix(dest, "{") {
+caddyserver__caddy:modules/caddyhttp/rewrite/rewrite.go:285: if !strings.HasPrefix(prefix, "/") {
+caddyserver__caddy:modules/caddyhttp/rewrite/rewrite.go:613: if !strings.HasPrefix(p, "/") {
+caddyserver__caddy:modules/caddyhttp/rewrite/rewrite.go:621: if !strings.HasPrefix(rawPath, "/") {
+caddyserver__caddy:modules/caddyhttp/rewrite/caddyfile.go:244: if !strings.HasPrefix(path, "/") {
+caddyserver__caddy:modules/caddyhttp/intercept/intercept.go:265: if !strings.HasPrefix(args[0], matcherPrefix) {
+caddyserver__caddy:modules/caddyhttp/intercept/intercept.go:313: if !strings.HasPrefix(args[0], matcherPrefix) {
+caddyserver__caddy:modules/caddyhttp/reverseproxy/fastcgi/fastcgi.go:314: if scriptName != "" && !strings.HasPrefix(scriptName, "/") {
+caddyserver__caddy:modules/caddyhttp/reverseproxy/reverseproxy.go:1257: if !strings.HasPrefix(strings.ToUpper(res.Proto), "HTTP/") {
+caddyserver__caddy:modules/caddyhttp/reverseproxy/caddyfile.go:837: if !strings.HasPrefix(args[0], matcherPrefix) {
+caddyserver__caddy:modules/caddyhttp/reverseproxy/caddyfile.go:933: if !strings.HasPrefix(args[0], matcherPrefix) {
+caddyserver__caddy:modules/caddyhttp/encode/encode.go:179: if etag := r.Header.Get("If-None-Match"); etag != "" && !strings.HasPrefix(etag, "W/") {
+caddyserver__caddy:modules/caddyhttp/encode/encode.go:502: if etag := hdr.Get("Etag"); etag != "" && !strings.HasPrefix(etag, "W/") {
+caddyserver__caddy:replacer.go:355: if !strings.HasPrefix(key, filePrefix) {
+caddyserver__caddy:caddyconfig/caddyfile/importargs.go:32: if !strings.HasPrefix(token.Text, "{args[") {
+caddyserver__caddy:caddyconfig/caddyfile/parse.go:463: if !strings.HasPrefix(seg[len(seg)-1], ".") {
+caddyserver__caddy:caddyconfig/caddyfile/parse.go:745: if !strings.HasPrefix(key.Text, "(") || !strings.HasSuffix(key.Text, ")") {
+charmbracelet__bubbletea:examples/query-term/main.go:57: if !strings.HasPrefix(seq, "\x1b") {
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/screen.go:93: if observation["question"] == nil || !strings.HasPrefix(str(observation["question"]), str(expected)) {
+cli__cli:.github/skills/cli-exercise/tool/internal/preflight/check.go:221: item.name != "node" && !strings.HasPrefix(observed, item.name+" version ") {
+cli__cli:.github/skills/cli-exercise/tool/internal/cliutil/files.go:13: return err == nil && relative != ".." && !strings.HasPrefix(relative, ".."+string(os.PathSeparator)) && !filepath.IsAbs(relative)
+cli__cli:.github/skills/cli-exercise/tool/internal/evidence/main.go:111: return err == nil && relative != ".." && !strings.HasPrefix(relative, ".."+string(os.PathSeparator)) && !filepath.IsAbs(relative)
+cli__cli:internal/safepaths/absolute.go:64: return !strings.HasPrefix(relativePath, ".."), nil
+cli__cli:internal/codespaces/ssh.go:158: if !strings.HasPrefix(arg, "-") {
+cli__cli:internal/skills/discovery/discovery.go:490: if parentDir == "." && skillName != "skills" && skillName != "plugins" && !strings.HasPrefix(skillName, ".") {
+cli__cli:internal/skills/discovery/discovery.go:1093: if strings.Contains(name, "/") || strings.Contains(name, "..") {
+cli__cli:internal/skills/frontmatter/frontmatter.go:33: if !strings.HasPrefix(trimmed, delimiter) {
+cli__cli:git/client.go:621: if !strings.HasPrefix(s, prefix) {
+cli__cli:git/client.go:996: if !strings.HasPrefix(args[0], "-") {
+cli__cli:pkg/cmd/attestation/verify/options.go:81: if opts.UseBundleFromRegistry && !strings.HasPrefix(opts.ArtifactPath, "oci://") {
+cli__cli:pkg/cmd/attestation/artifact/oci/client.go:84: if !strings.HasPrefix(refDesc.ArtifactType, "application/vnd.dev.sigstore.bundle") {
+cli__cli:pkg/cmd/alias/set/set.go:109: if opts.IsShell && !strings.HasPrefix(expansion, "!") {
+cli__cli:pkg/cmd/auth/shared/gitcredentials/helper_config.go:79: if !strings.HasPrefix(h.Cmd, "!") {
+cli__cli:pkg/cmd/project/item-edit/item_edit.go:444: if !strings.HasPrefix(config.opts.itemID, "DI_") {
+cli__cli:pkg/cmd/extension/command.go:225: if !strings.HasPrefix(repo.Name, "gh-") {
+cli__cli:pkg/cmd/extension/command.go:694: if !strings.HasPrefix(extName, "gh-") {
+cli__cli:pkg/cmd/extension/browse/browse.go:343: if !strings.HasPrefix(repo.Name, "gh-") {
+cli__cli:pkg/cmd/extension/manager.go:160: if !strings.HasPrefix(f.Name(), "gh-") {
+cli__cli:pkg/cmd/extension/manager.go:887: if !strings.HasPrefix(name, "gh-") {
+cli__cli:pkg/cmd/gist/list/list.go:192: if !strings.HasPrefix(filename, "gistfile") {
+cli__cli:pkg/cmd/search/code/code.go:128: if extension != "" && !strings.HasPrefix(extension, ".") {
+cli__cli:pkg/cmd/skills/publish/publish.go:905: if !strings.HasPrefix(relPath, ".") {
+cli__cli:pkg/cmd/skills/install/install.go:1128: if rel, err := filepath.Rel(cwd, dir); err == nil && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+cli__cli:pkg/cmd/skills/install/install.go:1136: if rel, err := filepath.Rel(home, dir); err == nil && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+cli__cli:pkg/cmd/skills/install/install.go:1249: if rel, err := filepath.Rel(gitRoot, installDir); err == nil && !strings.HasPrefix(rel, "..") && !filepath.IsAbs(rel) {
+cockroachdb__pebble:vfs/atomicfs/marker.go:80: if !strings.HasPrefix(filename, `marker.`) {
+cockroachdb__pebble:vfs/atomicfs/marker.go:147: if !strings.HasPrefix(s, `marker.`) {
+cockroachdb__pebble:internal/treeprinter/tree_printer.go:292: if (t.style == CompactStyle && !strings.HasPrefix(text, " ")) ||
+cockroachdb__pebble:internal/treeprinter/tree_printer.go:293: (t.style == DefaultStyle && !strings.HasPrefix(text, "   ")) {
+cockroachdb__pebble:internal/strparse/strparse.go:242: if !strings.HasPrefix(tok, "#") {
+cockroachdb__pebble:internal/strparse/strparse.go:264: if !strings.HasPrefix(s, "B") {
+cockroachdb__pebble:internal/mkbench/write.go:418: if !strings.HasPrefix(line, "BenchmarkRaw") {
+cockroachdb__pebble:internal/mkbench/ycsb.go:189: if !strings.HasPrefix(line, "Benchmark") {
+cockroachdb__pebble:sstable/test_utils.go:211: if !strings.HasPrefix(remaining, "cold-blob ") && !strings.HasPrefix(remaining, "cold-blob{") {
+containerd__containerd:integration/failpoint/cmd/containerd-shim-runc-fp-v1/plugin_linux.go:126: if !strings.HasPrefix(k, failpointPrefixKey) {
+containerd__containerd:internal/cri/sputil/securityprofile_linux.go:53: if !strings.HasPrefix(profilePath, profileNamePrefix) {
+containerd__containerd:internal/cri/server/container_checkpoint_linux.go:368: if strings.Contains(header.Name, "..") {
+containerd__containerd:internal/cri/server/container_create.go:490: if platform.OS == "linux" && !strings.HasPrefix(dst, "/") {
+containerd__containerd:core/mount/temp.go:102: return !strings.HasPrefix(opt, "uidmap") && !strings.HasPrefix(opt, "gidmap")
+containerd__containerd:core/snapshots/testsuite/issues.go:206: if !strings.HasPrefix(si.Name, prefix) {
+containerd__containerd:core/remotes/handlers.go:410: if !strings.HasPrefix(k, labels.LabelDistributionSource+".") {
+containerd__containerd:core/remotes/docker/resolver.go:750: if !strings.HasPrefix(cr, fmt.Sprintf("bytes %d-", offset)) {
+containerd__containerd:core/remotes/docker/auth/parse.go:132: if !strings.HasPrefix(s, "=") {
+containerd__containerd:core/remotes/docker/auth/parse.go:140: if !strings.HasPrefix(s, ",") {
+containerd__containerd:core/remotes/docker/auth/parse.go:168: if !strings.HasPrefix(s, "\"") {
+containerd__containerd:core/remotes/docker/config/hosts.go:431: if !strings.HasPrefix(server, "http") {
+containerd__containerd:core/images/usage/calculator.go:127: if !strings.HasPrefix(k, prefix) {
+containerd__containerd:core/images/archive/reference.go:60: if !strings.HasPrefix(s, prefix) {
+containerd__containerd:pkg/archive/tar.go:803: if !strings.HasPrefix(targetPath, root) {
+containerd__containerd:pkg/archive/tar.go:825: if !strings.HasPrefix(originalPath, dir) {
+containerd__containerd:pkg/dialer/dialer_windows.go:42: if !strings.HasPrefix(address, "npipe://") {
+containerd__containerd:pkg/shim/util_unix.go:152: return !strings.HasPrefix(string(s), "unix://")
+containerd__containerd:pkg/shim/shim_windows.go:82: if !strings.HasPrefix(path, `\\.\pipe\`) {
+containerd__containerd:pkg/cio/io.go:307: if !strings.HasPrefix(path, "/") {
+containerd__containerd:cmd/ctr/commands/content/prune.go:121: if !strings.HasPrefix(key, contentPrefix) {
+containerd__containerd:cmd/ctr/commands/run/run_unix.go:269: if !strings.HasPrefix(c, "CAP_") {
+containerd__containerd:cmd/ctr/commands/run/run_unix.go:278: if !strings.HasPrefix(c, "CAP_") {
+dominikh__go-tools:lintcmd/cmd.go:235: if !strings.HasPrefix(s, "go") {
+dominikh__go-tools:internal/xtools-internal/expect/extract.go:201: if !strings.HasPrefix(text, commentStart) {
+dominikh__go-tools:internal/xtools-internal/proxydir/proxydir.go:85: if !strings.HasPrefix(path, "/") {
+dominikh__go-tools:internal/xtools-internal/packagestest/export.go:318: if !strings.HasPrefix(source, ".") {
+dominikh__go-tools:stylecheck/st1000/st1000.go:59: if !strings.HasPrefix(text, prefix) || (len(text) > len(prefix) && !isNonAlpha(text[len(prefix)])) {
+dominikh__go-tools:stylecheck/st1021/st1021.go:101: if !strings.HasPrefix(s, node.Name.Name+" ") {
+dominikh__go-tools:stylecheck/st1022/st1022.go:78: if !strings.HasPrefix(text, prefix) {
+dominikh__go-tools:stylecheck/st1012/st1012.go:60: if !strings.HasPrefix(name.Name, prefix) {
+dominikh__go-tools:stylecheck/st1020/st1020.go:85: if !strings.HasPrefix(text, prefix) {
+dominikh__go-tools:staticcheck/sa5008/jsonv2.go:51: if len(tag) > 0 && !strings.HasPrefix(tag, ",") {
+dominikh__go-tools:staticcheck/sa5008/jsonv2.go:62: if !strings.HasPrefix(tag[n:], ",") && len(name) != len(tag) {
+dominikh__go-tools:staticcheck/sa5008/jsonv2.go:116: if !strings.HasPrefix(tag, ":") {
+dominikh__go-tools:staticcheck/sa5008/jsonv2.go:171: if !strings.HasPrefix(tag, ":") {
+dominikh__go-tools:staticcheck/sa4019/sa4019.go:74: if !strings.HasPrefix(line, "+build ") {
+dominikh__go-tools:staticcheck/sa9009/sa9009.go:36: if !strings.HasPrefix(c.Text, "//") {
+dominikh__go-tools:staticcheck/sa9009/sa9009.go:50: if !strings.HasPrefix(text, "go:") {
+dominikh__go-tools:analysis/facts/deprecated/deprecated.go:41: if !strings.HasPrefix(part, "Deprecated: ") {
+dominikh__go-tools:analysis/lint/lint.go:186: if !strings.HasPrefix(s, "//lint:") {
+dominikh__go-tools:analysis/lint/lint.go:205: if !strings.HasPrefix(c.Text, "//lint:") {
+dominikh__go-tools:go/ir/irutil/util.go:104: if !strings.HasPrefix(fn.Name(), "Example") {
+etcd-io__etcd:tools/testgrid-analysis/cmd/data.go:78: if !strings.HasPrefix(row.Name, "go.etcd.io") {
+etcd-io__etcd:server/etcdserver/api/v3discovery/discovery.go:447: if !strings.HasPrefix(memberKey, membersKeyPrefix) {
+etcd-io__etcd:server/etcdserver/api/etcdhttp/peer.go:131: if !strings.HasPrefix(r.URL.Path, peerMemberPromotePrefix) {
+etcd-io__etcd:server/proxy/grpcproxy/metrics.go:83: if !strings.HasPrefix(target, "http") {
+etcd-io__etcd:etcdctl/ctlv3/command/util.go:100: if !strings.HasPrefix(host, "http://") && !strings.HasPrefix(host, "https://") {
+etcd-io__etcd:client/v3/naming/endpoints/endpoints_impl.go:59: if !strings.HasPrefix(update.Key, m.target+"/") {
+etcd-io__etcd:client/v3/concurrency/mutex.go:139: if !strings.HasPrefix(m.myKey, m.pfx) {
+etcd-io__etcd:client/pkg/transport/tls.go:37: if !strings.HasPrefix(ep, "https://") {
+etcd-io__etcd:tests/framework/integration/cluster.go:1337: if !strings.HasPrefix(l, metricName) {
+etcd-io__etcd:tests/framework/e2e/util.go:170: if !strings.HasPrefix(p[0], "ETCD_") && !strings.HasPrefix(p[0], "ETCDCTL_") && !strings.HasPrefix(p[0], "EXPECT_") && p[0] != "PATH" {
+etcd-io__etcd:tests/framework/e2e/curl.go:105: if !strings.HasPrefix(dt, "{") { // for non-JSON value
+golang__tools:internal/gcimporter/support.go:25: if !strings.HasPrefix(aname, name) {
+golang__tools:internal/gcimporter/exportdata.go:225: if !strings.HasPrefix(objapi, "go object ") {
+golang__tools:internal/expect/extract.go:201: if !strings.HasPrefix(text, commentStart) {
+golang__tools:internal/proxydir/proxydir.go:85: if !strings.HasPrefix(path, "/") {
+golang__tools:internal/astutil/comment.go:43: if doc == nil || len(doc.List) != 1 || !strings.HasPrefix(doc.List[0].Text, "//") {
+golang__tools:internal/packagestest/export.go:318: if !strings.HasPrefix(source, ".") {
+golang__tools:internal/imports/fix.go:909: if !strings.HasPrefix(pkg.packageName, searchPrefix) {
+golang__tools:internal/imports/mod.go:348: if !strings.HasPrefix(importPath, m.Path) {
+golang__tools:internal/imports/mod.go:442: if !strings.HasPrefix(dir, m.Dir) {
+golang__tools:internal/imports/mod.go:458: if !strings.HasPrefix(dir, mod.Dir) {
+golang__tools:internal/imports/mod.go:696: } else if !strings.HasPrefix(importPath, info.moduleName) {
+golang__tools:internal/modindex/gomodindex/cmd.go:107: if !strings.HasPrefix(de.Name(), "index") {
+golang__tools:internal/modindex/gomodindex/cmd.go:126: if info.ModTime().Before(cutoff) && !strings.HasPrefix(de.Name(), "index-name-") {
+golang__tools:gopls/internal/cache/filterer.go:47: if !strings.HasPrefix(path, "/") {
+golang__tools:gopls/internal/server/workspace.go:24: if !strings.HasPrefix(folder.URI, "file://") {
+golang__tools:gopls/internal/vulncheck/semver/semver.go:19: if !strings.HasPrefix(s, "v") && !strings.HasPrefix(s, "go") {
+golang__tools:gopls/internal/work/completion.go:95: if entry.IsDir() && wpath != pathPrefixDir && !strings.HasPrefix(rel, pathPrefixBase) {
+golang__tools:gopls/internal/work/completion.go:104: if !strings.HasPrefix(completionPath, completingFrom) {
+golang__tools:gopls/internal/work/completion.go:114: if completingFrom == "" && !strings.HasPrefix(completion, "./") {
+golang__tools:gopls/internal/golang/rename.go:992: if !strings.HasPrefix(r.New.Path, "/") && !strings.HasPrefix(r.New.Path, "./") && !strings.HasPrefix(r.New.Path, "../") {
+golang__tools:gopls/internal/golang/rename.go:1002: if moveSubpackages && !strings.HasPrefix(filepath.ToSlash(replacedDir)+"/", filepath.ToSlash(oldDir)+"/") ||
+golang__tools:gopls/internal/golang/rename.go:1033: if !strings.HasPrefix(newReplacedPath, "/") && !strings.HasPrefix(newReplacedPath, "../") {
+golang__tools:gopls/internal/golang/code_lens.go:165: if !strings.HasPrefix(l.Text, ggDirective) {
+golang__tools:gopls/internal/golang/rename_check.go:89: if !strings.HasPrefix(format, "\t") {
+golang__tools:gopls/internal/golang/rename_check.go:967: if !strings.HasPrefix(newName+"/", curModPath+"/") {
+golang__tools:gopls/internal/golang/lines.go:80: if !strings.HasPrefix(cg.List[0].Text, "/*") {
+golang__tools:gopls/internal/golang/assembly.go:119: if file, linenum, ok := strings.CutLast(parts[2], ":"); ok && !strings.HasPrefix(file, "<") {
+golang__tools:gopls/internal/golang/embeddirective.go:86: if !strings.HasPrefix(text, "//go:embed") {
+golang__tools:gopls/internal/golang/compileropt.go:40: if !strings.HasPrefix(outDir, "/") {
+golang__tools:gopls/internal/golang/undeclared.go:36: if !strings.HasPrefix(errMsg, prefix) {
+golang__tools:gopls/internal/golang/linkname.go:69: if !strings.HasPrefix(directive, "//go:linkname") {
+golang__tools:gopls/internal/golang/completion/package.go:108: if !strings.HasPrefix(PACKAGE, name.Name) {
+golang__tools:gopls/internal/golang/completion/definition.go:108: if !strings.HasPrefix(name, pat) {
+golang__tools:gopls/internal/golang/completion/completion.go:987: if !strings.HasPrefix(searchImport.Path.Value, `"`) {
+golang__tools:gopls/internal/golang/completion/completion.go:1698: if !strings.HasPrefix(string(mp.Name), prefix) {
+golang__tools:gopls/internal/protocol/generate/output.go:388: if !strings.HasPrefix(nm, "Or") {
+golang__tools:gopls/internal/protocol/generate/output.go:457: if !strings.HasPrefix(nm, "Or") {
+golang__tools:gopls/internal/protocol/uri.go:175: if !strings.HasPrefix(s, "file://") {
+golang__tools:gopls/internal/protocol/uri.go:181: if !strings.HasPrefix(s, "file:///") {
+golang__tools:gopls/internal/test/integration/fake/glob/glob.go:259: if !strings.HasPrefix(input, string(elem)) {
+golang__tools:gopls/internal/test/integration/fake/workdir.go:41: if rel, err := filepath.Rel(root, fp); err == nil && !strings.HasPrefix(rel, "..") {
+golang__tools:gopls/internal/cmd/normalize.go:68: if arg == "-" || !strings.HasPrefix(arg, "-") {
+golang__tools:benchmark/parse/parse.go:48: if !strings.HasPrefix(fields[0], "Benchmark") {

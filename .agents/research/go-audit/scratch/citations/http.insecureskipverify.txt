@@ -1,0 +1,14 @@
+caddyserver__caddy:caddytest/caddytest.go:360: TLSClientConfig:       &tls.Config{InsecureSkipVerify: true}, //nolint:gosec
+containerd__containerd:internal/cri/server/images/image_pull.go:551: InsecureSkipVerify: true,
+google__go-containerregistry:pkg/crane/options.go:70: InsecureSkipVerify: true, //nolint: gosec
+grpc__grpc-go:internal/xds/bootstrap/tlscreds/bundle.go:131: InsecureSkipVerify:    true,
+grpc__grpc-go:internal/credentials/xds/handshake_info.go:219: InsecureSkipVerify: true,
+grpc__grpc-go:security/advancedtls/advancedtls.go:282: InsecureSkipVerify: true,
+kubernetes-sigs__controller-runtime:pkg/internal/testing/process/process.go:221: InsecureSkipVerify: true,
+kubernetes-sigs__controller-runtime:pkg/webhook/server.go:292: InsecureSkipVerify: true,
+syncthing__syncthing:lib/relay/client/methods.go:161: InsecureSkipVerify:     true,
+syncthing__syncthing:cmd/syncthing/cli/client.go:61: InsecureSkipVerify: true,
+syncthing__syncthing:cmd/syncthing/main.go:382: TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+syncthing__syncthing:cmd/strelaysrv/main.go:178: InsecureSkipVerify:     true,
+tailscale__tailscale:client/web/qnap.go:107: TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+tailscale__tailscale:cmd/vnet/vnet-main.go:172: InsecureSkipVerify: true,

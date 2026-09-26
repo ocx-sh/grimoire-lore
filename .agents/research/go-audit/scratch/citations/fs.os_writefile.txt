@@ -1,0 +1,200 @@
+aquasecurity__trivy:internal/testutil/fs.go:90: err := os.WriteFile(filePath, content, 0o600)
+aquasecurity__trivy:magefiles/docs.go:71: if err := os.WriteFile(filename, []byte(flagContent), 0644); err != nil {
+aquasecurity__trivy:magefiles/schema.go:48: if err := os.WriteFile(schemaPath, data, 0o600); err != nil {
+aquasecurity__trivy:magefiles/config_schema.go:63: return os.WriteFile(outputPath, data, 0644)
+bazel-contrib__rules_go:go/tools/bazel_testing/bazel_testing.go:371: if err := os.WriteFile(bazelrcPath, bazelrcBuf.Bytes(), 0666); err != nil {
+bazel-contrib__rules_go:go/tools/bazel_testing/bazel_testing.go:495: if err := os.WriteFile(filepath.Join(dir, f.Name), f.Data, 0666); err != nil {
+bazel-contrib__rules_go:go/tools/builders/nogo_main.go:107: if err := os.WriteFile(abs(*xPath), factsContent, 0o666); err != nil {
+bazel-contrib__rules_go:go/tools/builders/baseline_coverage.go:93: return os.WriteFile(outPath, []byte(lcov), writeFileMode)
+bazel-contrib__rules_go:go/tools/builders/baseline_coverage.go:186: if err := os.WriteFile(pkgcfgPath, cfgData, writeFileMode); err != nil {
+bazel-contrib__rules_go:go/tools/builders/baseline_coverage.go:199: if err := os.WriteFile(outListPath, []byte(outList.String()), writeFileMode); err != nil {
+bazel-contrib__rules_go:go/tools/builders/compilepkg.go:361: if err := os.WriteFile(cgoExportHPath, nil, 0o666); err != nil {
+bazel-contrib__rules_go:go/tools/builders/compilepkg.go:555: return os.WriteFile(path, buf.Bytes(), 0o666)
+bazel-contrib__rules_go:go/tools/builders/cover.go:66: if err := os.WriteFile(pkgcfg, data, writeFileMode); err != nil {
+bazel-contrib__rules_go:go/tools/builders/cover.go:73: if err := os.WriteFile(covoutputs, []byte(sb.String()), writeFileMode); err != nil {
+bazel-contrib__rules_go:go/tools/builders/cover.go:192: if err := os.WriteFile(coverSrcFilename, buf.Bytes(), writeFileMode); err != nil {
+bazel-contrib__rules_go:go/tools/builders/nogo.go:95: err := os.WriteFile(outFactsPath, nil, 0o666)
+bazel-contrib__rules_go:go/tools/builders/embedcfg.go:103: if err := os.WriteFile(embedcfgName, embedcfgData, 0o666); err != nil {
+bazel-contrib__rules_go:go/tools/gopackagesdriver/pkgjson/main.go:92: return os.WriteFile(params.output, marshaled, 0644)
+bazel-contrib__rules_go:go/tools/releaser/upgradedep.go:249: if err := os.WriteFile(f.path, bzl.Format(f.parsed), 0666); err != nil {
+bazel-contrib__rules_go:go/tools/releaser/upgradedep.go:540: if err := os.WriteFile(patchPath, patch, 0666); err != nil {
+bazelbuild__bazel-gazelle:internal/list_repository_tools_srcs.go:103: if err := os.WriteFile(*generate, buf.Bytes(), 0o666); err != nil {
+bazelbuild__bazel-gazelle:tools/convert-go-deps-test-case/dir_to_bzl.go:226: return os.WriteFile(bzlPath, content, 0o644)
+bazelbuild__bazel-gazelle:tools/convert-go-deps-test-case/bzl_to_dir.go:34: if err := os.WriteFile(filepath.Join(dirPath, "comment.txt"), []byte(docstring), 0666); err != nil {
+bazelbuild__bazel-gazelle:tools/convert-go-deps-test-case/bzl_to_dir.go:74: if err := os.WriteFile(filepath.Join(modDir, "MODULE.bazel"), build.Format(file), 0666); err != nil {
+bazelbuild__bazel-gazelle:tools/convert-go-deps-test-case/bzl_to_dir.go:77: if err := os.WriteFile(filepath.Join(modDir, "BUILD"), nil, 0666); err != nil {
+bazelbuild__bazel-gazelle:tools/convert-go-deps-test-case/bzl_to_dir.go:98: return os.WriteFile(filepath.Join(dirPath, "want.json"), data, 0666)
+bazelbuild__bazel-gazelle:tools/convert-go-deps-test-case/bzl_to_dir.go:164: if err := os.WriteFile(path, []byte(content), 0666); err != nil {
+bazelbuild__bazel-gazelle:tools/convert-go-deps-test-case/bzl_to_dir.go:552: if err := os.WriteFile(filepath.Join(workDir, name), []byte(content), 0666); err != nil {
+bazelbuild__bazel-gazelle:tools/convert-go-deps-test-case/bzl_to_dir.go:602: if err := os.WriteFile(fullCopyPath, transformed, 0666); err != nil {
+bazelbuild__bazel-gazelle:tools/convert-go-deps-test-case/bzl_to_dir.go:609: if err := os.WriteFile(sumCopyPath, []byte(sumContent), 0666); err != nil {
+bazelbuild__bazel-gazelle:repo/remote.go:620: rc.tmpErr = os.WriteFile(filepath.Join(rc.tmpDir, "go.mod"), []byte("module gazelle_remote_cache\ngo 1.15\n"), 0o666)
+bazelbuild__bazel-gazelle:language/proto/gen/gen_known_imports.go:140: if err := os.WriteFile(knownImportsPath, knownImportsData, 0o666); err != nil {
+bazelbuild__bazel-gazelle:language/go/platform_info_generator/main.go:59: err := os.WriteFile(os.Args[1], []byte(code), 0600)
+bazelbuild__bazel-gazelle:cmd/generate_gazelle_binary_languages/main.go:120: return os.WriteFile(outPath, content, 0o666)
+bazelbuild__bazel-gazelle:cmd/move_labels/main.go:66: if err := os.WriteFile(file.Path, content, 0o666); err != nil {
+bazelbuild__bazel-gazelle:cmd/generate_repo_config/main.go:129: if err := os.WriteFile(configDest, buf.Bytes(), 0o666); err != nil {
+bazelbuild__bazel-gazelle:cmd/fetch_repo/module.go:48: if err := os.WriteFile("go.sum", []byte(fmt.Sprintf("%s %s %s\n", importpath, version, sum)), 0o666); err != nil {
+bazelbuild__bazel-gazelle:v2/rule/rule.go:427: return os.WriteFile(path, f.Content, 0o666)
+bazelbuild__bazel-gazelle:v2/cmd/gazelle/update/fix.go:37: if err := os.WriteFile(outPath, newContent, 0o666); err != nil {
+bazelbuild__bazel-gazelle:v2/cmd/gazelle/update/update.go:751: if err := os.WriteFile(uc.patchPath, uc.patchBuffer.Bytes(), 0o666); err != nil {
+bazelbuild__bazel-gazelle:v2/testtools/files.go:93: if err := os.WriteFile(path, []byte(f.Content), 0o600); err != nil {
+bazelbuild__bazel-gazelle:v2/testtools/files.go:404: err := os.WriteFile(destFile, []byte(actual), 0o644)
+caddyserver__caddy:admin.go:1467: err := os.WriteFile(filename, pid, 0o600)
+caddyserver__caddy:cmd/commandfuncs.go:716: if err := os.WriteFile(configFile, output, 0o600); err != nil { //nolint:gosec // path traversal is not really a thing here, this is either "Caddyfile" or admin
+caddyserver__caddy:caddy.go:391: err := os.WriteFile(ConfigAutosavePath, cfgJSON, 0o600)
+caddyserver__caddy:caddy.go:933: err = os.WriteFile(uuidFilePath, []byte(uuid.String()), 0o600)
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/contract.go:678: } else if err := os.WriteFile(saved, contract.bytes, 0o400); err != nil {
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/actions.go:461: if err := os.WriteFile(path, raw, 0o600); err != nil {
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/runtime.go:78: if err := os.WriteFile(filepath.Join(capture, "contract.json"), contract.bytes, 0o400); err != nil {
+cli__cli:.github/skills/cli-exercise/tool/internal/preflight/check.go:280: if err := os.WriteFile(raw, make([]byte, 16*16*3*2), 0o600); err != nil {
+cli__cli:.github/skills/cli-exercise/tool/internal/preflight/check.go:288: if err := os.WriteFile(overview, pixels.Bytes(), 0o600); err != nil {
+cli__cli:.github/skills/cli-exercise/tool/internal/evidence/session_media.go:358: if err := os.WriteFile(path, []byte(data), 0o600); err != nil {
+cli__cli:.github/skills/cli-exercise/tool/internal/evidence/session.go:168: if err := os.WriteFile(filepath.Join(output, "session.json"), original, 0o400); err != nil {
+cli__cli:script/api-host-gateway/gateway/main.go:104: if err := os.WriteFile(caOut, caPEM, 0o600); err != nil {
+cli__cli:script/api-host-gateway/gateway/main.go:114: if err := os.WriteFile(readyOut, []byte(listen), 0o600); err != nil {
+cli__cli:internal/attachments/test.go:30: require.NoError(t, os.WriteFile(name, []byte("the bytes"), 0o600))
+cli__cli:internal/update/update.go:176: err = os.WriteFile(stateFilePath, content, 0600)
+cli__cli:internal/skills/installer/installer.go:246: return os.WriteFile(destPath, content, 0o644)
+cli__cli:internal/skills/installer/installer.go:301: if err := os.WriteFile(destPath, []byte(content), 0o644); err != nil {
+cli__cli:pkg/cmd/extension/manager.go:734: return os.WriteFile(p, contents, mode)
+cli__cli:pkg/cmd/skills/publish/publish.go:287: } else if writeErr := os.WriteFile(skillPath, []byte(fixed), 0o644); writeErr != nil {
+cockroachdb__pebble:internal/mkbench/write.go:531: err := os.WriteFile(outputPath, b, 0644)
+cockroachdb__pebble:internal/mkbench/ycsb.go:223: if err := os.WriteFile(path, out, 0644); err != nil {
+cockroachdb__pebble:tool/db_analyze_data.go:188: return os.WriteFile(path, []byte(csv), 0o666)
+cockroachdb__pebble:tool/make_test_remotecat.go:73: if err := os.WriteFile("tool/testdata/REMOTE-OBJ-CATALOG", contents, 0666); err != nil {
+cockroachdb__pebble:metamorphic/meta.go:207: require.NoError(t, os.WriteFile(opsPath, []byte(formattedOps), 0644))
+cockroachdb__pebble:metamorphic/meta.go:224: require.NoError(t, os.WriteFile(optionsPath, []byte(optionsStr), 0644))
+cockroachdb__pebble:sstable/internal/genprops/gen_props.go:272: _ = os.WriteFile(outputFile, buf.Bytes(), 0o644)
+cockroachdb__pebble:sstable/internal/genprops/gen_props.go:276: if err := os.WriteFile(outputFile, src, 0o644); err != nil {
+cockroachdb__pebble:sstable/tablefilters/bloom/simulation_gen.go:69: err := os.WriteFile("simulation.md", []byte(board.String()+"\n"), 0644)
+cockroachdb__pebble:sstable/tablefilters/binaryfuse/simulation_gen.go:47: err := os.WriteFile("simulation.md", []byte(board.String()+"\n"), 0644)
+containerd__containerd:plugins/snapshots/erofs/erofs.go:331: if err := os.WriteFile(filepath.Join(td, ".erofslayer"), []byte{}, 0644); err != nil {
+containerd__containerd:plugins/content/local/store.go:589: if err := os.WriteFile(refp, []byte(ref), 0666); err != nil {
+containerd__containerd:plugins/content/local/store.go:602: if err := os.WriteFile(filepath.Join(path, "total"), fmt.Append(nil, total), 0666); err != nil {
+containerd__containerd:plugins/services/introspection/local.go:177: if err := os.WriteFile(path, []byte(uu), 0666); err != nil {
+containerd__containerd:internal/cri/server/container_checkpoint_linux.go:267: if err := os.WriteFile(filepath.Join(cpPath, crmetadata.ConfigDumpFile), configJSON, 0o600); err != nil {
+containerd__containerd:internal/cri/server/container_checkpoint_linux.go:276: if err := os.WriteFile(filepath.Join(cpPath, crmetadata.StatusDumpFile), containerStatus, 0o600); err != nil {
+containerd__containerd:internal/cri/server/podsandbox/sandbox_run_linux.go:276: if err := c.os.WriteFile(sandboxEtcHostname, []byte(hostname+"\n"), 0644); err != nil {
+containerd__containerd:internal/cri/server/podsandbox/sandbox_run_linux.go:294: if err := c.os.WriteFile(resolvPath, []byte(resolvContent), 0644); err != nil {
+containerd__containerd:core/mount/mount_windows.go:104: if err := os.WriteFile(filepath.Clean(target)+":"+sourceStreamName, []byte(m.Source), 0666); err != nil {
+containerd__containerd:core/mount/manager/manager.go:383: if err := os.WriteFile(filepath.Join(mm.targets.Name(), targetName, fmt.Sprintf(formatType, ci)), []byte(m.Type), 0600); err != nil {
+containerd__containerd:core/snapshots/testsuite/testsuite.go:316: if err = os.WriteFile(filepath.Join(preparing, "foo"), []byte("foo\n"), 0777); err != nil {
+containerd__containerd:core/snapshots/testsuite/testsuite.go:350: if err = os.WriteFile(filepath.Join(preparing, "foo"), []byte("foo\n"), 0777); err != nil {
+containerd__containerd:core/snapshots/testsuite/testsuite.go:397: if err = os.WriteFile(filepath.Join(preparing, "foo"), []byte("foo\n"), 0777); err != nil {
+containerd__containerd:core/snapshots/testsuite/testsuite.go:413: if err = os.WriteFile(filepath.Join(next, "foo"), []byte("foo bar\n"), 0777); err != nil {
+containerd__containerd:core/snapshots/testsuite/testsuite.go:826: err = os.WriteFile(testfile, []byte("testcontent"), 0777)
+containerd__containerd:core/runtime/v2/binary.go:125: if err := os.WriteFile(filepath.Join(b.bundle.Path, "shim-binary-path"), []byte(b.runtime), 0600); err != nil {
+containerd__containerd:core/runtime/v2/bundle.go:126: err = os.WriteFile(specPath, specVal, 0666)
+containerd__containerd:core/runtime/v2/shim_manager.go:277: if err := os.WriteFile(filepath.Join(bundle.Path, "sandbox"), []byte(opts.SandboxID), 0600); err != nil {
+containerd__containerd:pkg/os/os.go:87: return os.WriteFile(filename, data, perm)
+containerd__containerd:cmd/gen-manpages/main.go:64: if err := os.WriteFile(filepath.Join(dir, fmt.Sprintf("%s.%s", name, section)), []byte(data), 0644); err != nil {
+containerd__containerd:cmd/ctr/commands/run/run.go:211: if err := os.WriteFile(filename, specBytes, 0o666); err != nil {
+containerd__containerd:cmd/containerd-shim-runc-v2/runc/container.go:186: return os.WriteFile(filepath.Join(path, optionsFilename), data, 0600)
+containerd__containerd:cmd/containerd-shim-runc-v2/runc/container.go:200: return os.WriteFile(filepath.Join(path, "runtime"), []byte(runtime), 0600)
+dominikh__go-tools:lintcmd/cache/default.go:41: os.WriteFile(filepath.Join(dir, "README"), []byte(cacheREADME), 0666)
+dominikh__go-tools:internal/xtools-internal/gocommand/invoke.go:514: err := os.WriteFile(filename, v, 0o666)
+dominikh__go-tools:internal/xtools-internal/gocommand/invoke.go:538: if err := os.WriteFile(filename, b, 0o666); err != nil {
+dominikh__go-tools:internal/xtools-internal/typeparams/copytermlist.go:92: if err := os.WriteFile(name, []byte(content), 0644); err != nil {
+dominikh__go-tools:internal/xtools-internal/proxydir/proxydir.go:44: if err := os.WriteFile(filepath.Join(dir, ver+".mod"), modContents, 0644); err != nil {
+dominikh__go-tools:internal/xtools-internal/proxydir/proxydir.go:50: if err := os.WriteFile(filepath.Join(dir, ver+".info"), infoContents, 0644); err != nil {
+dominikh__go-tools:internal/xtools-internal/packagestest/expect.go:208: if err := os.WriteFile(gomod, content, 0644); err != nil {
+dominikh__go-tools:internal/xtools-internal/packagestest/modules.go:96: if err := os.WriteFile(gomod+".temp", contents, 0644); err != nil {
+dominikh__go-tools:internal/xtools-internal/packagestest/modules.go:118: if err := os.WriteFile(filepath.Join(primaryDir, "go.mod"), primaryGomod.Bytes(), 0644); err != nil {
+dominikh__go-tools:internal/xtools-internal/packagestest/modules.go:139: if err := os.WriteFile(modfile, []byte("module "+module+"\n"), 0644); err != nil {
+dominikh__go-tools:internal/xtools-internal/packagestest/export.go:255: if err := os.WriteFile(fullpath, []byte(value), 0644); err != nil {
+dominikh__go-tools:internal/xtools-internal/packagestest/export.go:279: return os.WriteFile(filename, []byte(contents), 0755)
+dominikh__go-tools:internal/xtools-internal/testenv/testenv.go:116: if err := os.WriteFile(mainGo, []byte("package main\nfunc main() {}\n"), 0644); err != nil {
+dominikh__go-tools:generate.go:111: if err := os.WriteFile("analysis.go", b, 0666); err != nil {
+dominikh__go-tools:generate.go:130: if err := os.WriteFile(dst, b, 0666); err != nil {
+dominikh__go-tools:add-check.go:139: if err := os.WriteFile(path, data, 0677); err != nil {
+etcd-io__etcd:tools/etcd-dump-metrics/install_darwin.go:47: if err = os.WriteFile(zipPath, d, fileutil.PrivateFileMode); err != nil {
+etcd-io__etcd:tools/etcd-dump-metrics/install_linux.go:47: if err = os.WriteFile(tarPath, d, fileutil.PrivateFileMode); err != nil {
+etcd-io__etcd:client/pkg/fileutil/fileutil.go:41: if err := os.WriteFile(f, []byte(""), PrivateFileMode); err != nil {
+etcd-io__etcd:tests/framework/e2e/lazyfs.go:53: err = os.WriteFile(fs.configPath(), fs.config(), 0o666)
+etcd-io__etcd:tests/framework/e2e/lazyfs.go:106: err := os.WriteFile(fs.socketPath(), []byte("lazyfs::clear-cache\n"), 0o666)
+etcd-io__etcd:tests/robustness/report/report.go:141: return os.WriteFile(filepath.Join(p, trafficDetailFileName), b, 0o644)
+etcd-io__etcd:pkg/report/perfdash.go:83: err = os.WriteFile(destPath, reportB, 0o644)
+golang__tools:internal/stdlib/generate.go:262: if err := os.WriteFile("manifest.go", fmtbuf, 0o666); err != nil {
+golang__tools:internal/stdlib/generate.go:449: if err := os.WriteFile("deps.go", fmtbuf, 0o666); err != nil {
+golang__tools:internal/stdlib/generate.go:466: if err := os.WriteFile(t.filename, stdout.Bytes(), 0666); err != nil {
+golang__tools:internal/gocommand/invoke.go:538: err := os.WriteFile(filename, v, 0666)
+golang__tools:internal/gocommand/invoke.go:562: if err := os.WriteFile(filename, b, 0666); err != nil {
+golang__tools:internal/robustio/copyfiles.go:78: if err := os.WriteFile(name, content, 0644); err != nil {
+golang__tools:internal/typeparams/copytermlist.go:92: if err := os.WriteFile(name, []byte(content), 0644); err != nil {
+golang__tools:internal/proxydir/proxydir.go:44: if err := os.WriteFile(filepath.Join(dir, ver+".mod"), modContents, 0644); err != nil {
+golang__tools:internal/proxydir/proxydir.go:50: if err := os.WriteFile(filepath.Join(dir, ver+".info"), infoContents, 0644); err != nil {
+golang__tools:internal/packagestest/expect.go:208: if err := os.WriteFile(gomod, content, 0644); err != nil {
+golang__tools:internal/packagestest/modules.go:96: if err := os.WriteFile(gomod+".temp", contents, 0644); err != nil {
+golang__tools:internal/packagestest/modules.go:118: if err := os.WriteFile(filepath.Join(primaryDir, "go.mod"), primaryGomod.Bytes(), 0644); err != nil {
+golang__tools:internal/packagestest/modules.go:139: if err := os.WriteFile(modfile, []byte("module "+module+"\n"), 0644); err != nil {
+golang__tools:internal/packagestest/export.go:255: if err := os.WriteFile(fullpath, []byte(value), 0644); err != nil {
+golang__tools:internal/packagestest/export.go:279: return os.WriteFile(filename, []byte(contents), 0755)
+golang__tools:internal/imports/mkindex.go:89: err = os.WriteFile("pkgindex.go", src, 0644)
+golang__tools:internal/modindex/index.go:300: return os.WriteFile(indexDirFile, content, 0666)
+golang__tools:internal/testenv/testenv.go:116: if err := os.WriteFile(mainGo, []byte("package main\nfunc main() {}\n"), 0644); err != nil {
+golang__tools:refactor/rename/rename.go:584: return os.WriteFile(filename, content, 0644)
+golang__tools:refactor/rename/rename.go:589: if err := os.WriteFile(renamed, content, 0644); err != nil {
+golang__tools:gopls/integration/govim/artifacts.go:63: if err := os.WriteFile(name, data, 0644); err != nil {
+golang__tools:gopls/internal/cache/snapshot.go:429: if err := os.WriteFile(filepath.Join(dir, "go.mod"), data, 0666); err != nil {
+golang__tools:gopls/internal/cache/snapshot.go:441: if err := os.WriteFile(filepath.Join(dir, "go.sum"), data, 0666); err != nil {
+golang__tools:gopls/internal/cache/parsego/resolver_gen.go:29: if err := os.WriteFile("resolver.go", data, 0666); err != nil {
+golang__tools:gopls/internal/server/command.go:992: err := os.WriteFile(uri.Path(), newContent, 0666)
+golang__tools:gopls/internal/server/vulncheck_prompt.go:459: return os.WriteFile(path, content, 0644)
+golang__tools:gopls/internal/server/prompt.go:85: return os.WriteFile(fake, []byte(mode), 0666)
+golang__tools:gopls/internal/server/prompt.go:287: if err := os.WriteFile(promptFile, pendingContent, 0666); err != nil {
+golang__tools:gopls/internal/server/prompt.go:344: if err := os.WriteFile(promptFile, resultContent, 0666); err != nil {
+golang__tools:gopls/internal/vulncheck/copier.go:108: if err := os.WriteFile(filepath.Join(dst, fname), data, 0666); err != nil {
+golang__tools:gopls/internal/vulncheck/vulntest/db.go:140: return os.WriteFile(filename, j, 0644)
+golang__tools:gopls/internal/protocol/generate/main.go:285: if err := os.WriteFile(failed, src, 0644); err != nil {
+golang__tools:gopls/internal/protocol/generate/main.go:290: if err := os.WriteFile(filepath.Join(*outputdir, basename), formatted, 0644); err != nil {
+golang__tools:gopls/internal/protocol/command/generate.go:23: if err := os.WriteFile("command_gen.go", content, 0644); err != nil {
+golang__tools:gopls/internal/doc/generate/generate.go:99: if err := os.WriteFile(file, new, 0); err != nil {
+golang__tools:gopls/internal/test/integration/fake/workdir.go:58: err := os.WriteFile(fp, content, 0644)
+golang__tools:gopls/internal/test/integration/fake/sandbox.go:130: if err := os.WriteFile(fname, content, 0644); err != nil {
+golang__tools:gopls/internal/cmd/cmd.go:622: if err := os.WriteFile(filename+".orig", old, 0666); err != nil {
+golang__tools:gopls/internal/cmd/cmd.go:629: if err := os.WriteFile(filename, new, 0666); err != nil {
+golang__tools:cmd/bundle/main.go:151: err := os.WriteFile(*outputFile, code, 0666)
+golang__tools:cmd/goyacc/yacc.go:3224: os.WriteFile(oflag, src, 0666)
+golang__tools:cmd/gonew/main.go:156: if err := os.WriteFile(dst, data, 0666); err != nil {
+golang__tools:cmd/stringer/stringer.go:216: err := os.WriteFile(outputName, src, 0o644)
+golang__tools:cmd/toolstash/main.go:641: if err := os.WriteFile(dst, data, 0777); err != nil {
+golang__tools:cmd/file2fuzz/main.go:53: if err := os.WriteFile(name, b, 0666); err != nil {
+golang__tools:cmd/file2fuzz/main.go:100: return os.WriteFile(outputArg, b, 0666)
+golang__tools:cmd/present2md/main.go:188: return os.WriteFile(file, md.Bytes(), 0666)
+golang__tools:cmd/goimports/goimports.go:164: err = os.WriteFile(filename, res, perms)
+golang__tools:cmd/compilebench/main.go:373: if err := os.WriteFile(asmIncFile, []byte(content), 0666); err != nil {
+golang__tools:cmd/compilebench/main.go:374: return fmt.Errorf("os.WriteFile(%s) failed: %v", asmIncFile, err)
+golang__tools:cmd/compilebench/main.go:550: if err := os.WriteFile(outpath, out, 0666); err != nil {
+golang__tools:cmd/compilebench/main.go:566: if err := os.WriteFile(outpath, out, 0666); err != nil {
+golang__tools:cmd/compilebench/main.go:598: if err := os.WriteFile(src, []byte(code), 0644); err != nil {
+golang__tools:playground/socket/socket.go:378: err = os.WriteFile(filepath.Join(path, f.Name), f.Data, 0666)
+golang__tools:go/analysis/unitchecker/unitchecker.go:216: return os.WriteFile(filename, content, 0644)
+golang__tools:go/analysis/unitchecker/unitchecker.go:615: return os.WriteFile(filename, data, 0666)
+golang__tools:go/analysis/analysistest/analysistest.go:58: if err := os.WriteFile(filename, []byte(content), 0666); err != nil {
+golang__tools:go/analysis/internal/checker/checker.go:209: return os.WriteFile(filename, content, 0644)
+golang__vuln:internal/testenv/testenv.go:100: if err := os.WriteFile(mainGo, []byte("package main\nfunc main() {}\n"), 0644); err != nil {
+golang__vuln:cmd/govulncheck/test_utils.go:68: return os.WriteFile(dest, b, 0644)
+golangci__golangci-lint:internal/go/cache/default.go:47: os.WriteFile(filepath.Join(dir, "README"), []byte(cacheREADME), 0666)
+golangci__golangci-lint:internal/go/testenv/testenv_notwin.go:35: if err := os.WriteFile(fpath, nil, 0644); err != nil {
+golangci__golangci-lint:pkg/result/processors/fixer.go:202: if err := os.WriteFile(path, out, filePerm); err != nil {
+golangci__golangci-lint:pkg/result/processors/fixer.go:221: if err := os.WriteFile(path, out, filePerm); err != nil {
+golangci__golangci-lint:pkg/goformat/runner.go:162: return os.WriteFile(path, output, perms)
+golangci__golangci-lint:pkg/commands/internal/imports.go:37: err = os.WriteFile(filepath.Clean(importsDest), source, info.Mode())
+golangci__golangci-lint:pkg/commands/internal/migrate/cloner/cloner.go:189: err = os.WriteFile(dstPath, formatted, 0o644)
+golangci__golangci-lint:pkg/commands/migrate.go:208: err = os.WriteFile(dstPath, data, stat.Mode())
+google__go-containerregistry:pkg/v1/layout/write.go:194: return os.WriteFile(l.path(name), data, perm)
+google__go-containerregistry:cmd/crane/cmd/push.go:74: if err := os.WriteFile(imageRefs, []byte(digest.String()), 0600); err != nil {
+google__go-github:tools/metadata/metadata.go:442: return os.WriteFile(filename, updatedContent, 0o600)
+google__go-github:tools/check-structfield-settings/main.go:398: return os.WriteFile(configPath, []byte(content), fileMode)
+google__go-github:tools/schemafields/fix.go:133: return os.WriteFile(path, formatted, 0o600)
+google__go-github:tools/schemafields/check.go:485: return os.WriteFile(e.path, []byte(b.String()), 0o600)
+google__go-github:github/gen-stringify-test.go:386: if err := os.WriteFile(t.filename, clean, 0o444); err != nil {
+google__go-github:github/gen-accessors.go:264: if err := os.WriteFile(filename, clean, 0o444); err != nil {
+google__go-github:github/gen-iterators.go:655: return os.WriteFile(filename, clean, 0o644)
+goreleaser__goreleaser:internal/pipe/gomod/gomod_proxy.go:193: if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte(mod), 0o666); err != nil {
+goreleaser__goreleaser:internal/pipe/chocolatey/chocolatey.go:152: if err = os.WriteFile(nuspecFile, nuspec, 0o644); err != nil {
+goreleaser__goreleaser:internal/pipe/chocolatey/chocolatey.go:168: if err = os.WriteFile(scriptFile, script, 0o644); err != nil {
+goreleaser__goreleaser:internal/pipe/krew/krew.go:147: if err := os.WriteFile(yamlPath, []byte("# This file was generated by GoReleaser. DO NOT EDIT.\n"+content), 0o644); err != nil { //nolint:gosec
+goreleaser__goreleaser:internal/pipe/checksums/checksums.go:126: return os.WriteFile(path, []byte(check), 0o644)
+goreleaser__goreleaser:internal/pipe/aur/aur.go:185: if err := os.WriteFile(path, []byte(pkgContent), 0o644); err != nil { //nolint:gosec

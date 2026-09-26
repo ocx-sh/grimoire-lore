@@ -1,0 +1,200 @@
+bazel-contrib__rules_go:go/tools/bazel_benchmark/bazel_benchmark.go:305: b.result = time.Since(start)
+bazel-contrib__rules_go:go/tools/bzltestutil/test2json.go:386: dt := time.Since(c.start).Round(1 * time.Millisecond).Seconds()
+bazelbuild__bazel-gazelle:cmd/autogazelle/client_unix.go:59: elapsedTime := time.Since(startTime)
+caddyserver__caddy:modules/caddytls/tls.go:1004: if !storageClean.IsZero() && time.Since(storageClean) < t.storageCleanInterval()/2 {
+caddyserver__caddy:modules/caddytls/standardstek/stek.go:57: since := time.Since(lastRotation)
+caddyserver__caddy:modules/caddytls/ech.go:245: if time.Since(cfg.meta.Created) >= rotationInterval && cfg.meta.Replaced.IsZero() {
+caddyserver__caddy:modules/caddytls/ech.go:251: zap.Duration("age", time.Since(cfg.meta.Created)),
+caddyserver__caddy:modules/caddytls/ech.go:278: } else if time.Since(cfg.meta.Created) >= deleteAfter && !cfg.meta.Replaced.IsZero() {
+caddyserver__caddy:modules/caddytls/ech.go:291: zap.Duration("age", time.Since(cfg.meta.Created)))
+caddyserver__caddy:modules/caddytls/ech.go:308: if (time.Since(cfg.meta.Created) >= rotationInterval && cfg.meta.Replaced.IsZero()) ||
+caddyserver__caddy:modules/caddytls/ech.go:309: (time.Since(cfg.meta.Created) >= deleteAfter && !cfg.meta.Replaced.IsZero()) {
+caddyserver__caddy:modules/caddyhttp/metrics.go:348: ttfb := time.Since(start).Seconds()
+caddyserver__caddy:modules/caddyhttp/metrics.go:354: dur := time.Since(start).Seconds()
+caddyserver__caddy:modules/caddyhttp/server.go:697: duration = time.Since(start)
+caddyserver__caddy:modules/caddyhttp/server.go:702: duration = time.Since(start)
+caddyserver__caddy:modules/caddyhttp/replacer.go:210: return time.Since(start), true
+caddyserver__caddy:modules/caddyhttp/replacer.go:213: return time.Since(start).Seconds() * 1e3, true // multiply seconds to preserve decimal (see #4666)
+caddyserver__caddy:modules/caddyhttp/reverseproxy/upstreams.go:257: return time.Since(sl.freshness) < time.Duration(sl.srvUpstreams.Refresh)
+caddyserver__caddy:modules/caddyhttp/reverseproxy/upstreams.go:444: return time.Since(al.freshness) < time.Duration(al.aUpstreams.Refresh)
+caddyserver__caddy:modules/caddyhttp/reverseproxy/hosts.go:172: if time.Since(entry.lastSeen) > dynamicHostIdleExpiry {
+caddyserver__caddy:modules/caddyhttp/reverseproxy/streaming.go:163: c.Write(zap.Duration("duration", time.Since(start)))
+caddyserver__caddy:modules/caddyhttp/reverseproxy/reverseproxy.go:553: repl.Set("http.reverse_proxy.duration", time.Since(start))
+caddyserver__caddy:modules/caddyhttp/reverseproxy/reverseproxy.go:554: repl.Set("http.reverse_proxy.duration_ms", time.Since(start).Seconds()*1e3) // multiply seconds to preserve decimal (see #4666)
+caddyserver__caddy:modules/caddyhttp/reverseproxy/reverseproxy.go:1051: duration := time.Since(start)
+caddyserver__caddy:modules/caddyhttp/reverseproxy/reverseproxy.go:1321: repl.Set("http.reverse_proxy.upstream.duration", time.Since(start))
+caddyserver__caddy:modules/caddyhttp/reverseproxy/reverseproxy.go:1322: repl.Set("http.reverse_proxy.upstream.duration_ms", time.Since(start).Seconds()*1e3)
+caddyserver__caddy:modules/caddyhttp/reverseproxy/reverseproxy.go:1357: if lb.TryDuration > 0 && time.Since(start) >= time.Duration(lb.TryDuration) {
+caddyserver__caddy:modules/logging/netwriter.go:195: if time.Since(reconn.lastRedial) > 10*time.Second {
+caddyserver__caddy:caddytest/caddytest.go:112: elapsed := time.Since(start)
+charmbracelet__bubbletea:examples/doom-fire/main.go:76: elapsed := time.Since(m.startTime)
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/actions.go:294: if upper, ok := number(timing["maxDelayBeforeMs"]); err == nil && ok && float64(time.Since(runtime.lastAction))/float64(time.Millisecond) > upper {
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/actions.go:702: for time.Since(start) <= time.Duration(timeout*float64(time.Millisecond)) {
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/actions.go:710: if !pending && view != nil && (hasUntil && matches(condition, view) || hasDuration && float64(time.Since(start))/float64(time.Millisecond) >= duration) {
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/runtime.go:127: func (runtime *Runtime) stamp() float64       { return time.Since(runtime.origin).Seconds() }
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/runtime.go:434: } else if runtime.active && time.Since(runtime.lastActivity).Seconds() >= runtime.contract.idle {
+cli__cli:internal/update/update.go:95: if stateEntry != nil && time.Since(stateEntry.CheckedForUpdateAt).Hours() < 24 {
+cli__cli:internal/ghcmd/cmd.go:330: return !publishedAt.IsZero() && time.Since(publishedAt) < time.Hour*24
+cockroachdb__pebble:replay/sampled_metric.go:32: since: time.Since(m.first),
+cockroachdb__pebble:replay/replay.go:85: return time.Since(startTime)
+cockroachdb__pebble:replay/replay.go:95: return time.Since(startTime)
+cockroachdb__pebble:replay/replay.go:486: r.metrics.quiesceDuration = time.Since(workloadExhaustedAt)
+cockroachdb__pebble:replay/replay.go:676: r.writeStallMetrics.durationByReason[writeStallReason] += time.Since(writeStallBegin)
+cockroachdb__pebble:internal/cache/read_shard.go:338: e.mu.errorDuration += time.Since(e.mu.readStart)
+cockroachdb__pebble:objstorage/objstorageprovider/sharedcache/shared_cache.go:232: c.metrics.getLatency.Observe(float64(time.Since(start)))
+cockroachdb__pebble:objstorage/objstorageprovider/sharedcache/shared_cache.go:287: c.metrics.queuePutLatency.Observe(float64(time.Since(start)))
+cockroachdb__pebble:objstorage/objstorageprovider/sharedcache/shared_cache.go:600: s.cache.metrics.diskReadLatency.Observe(float64(time.Since(start)))
+cockroachdb__pebble:objstorage/objstorageprovider/sharedcache/shared_cache.go:606: s.cache.metrics.diskReadLatency.Observe(float64(time.Since(start)))
+cockroachdb__pebble:objstorage/objstorageprovider/sharedcache/shared_cache.go:709: s.cache.metrics.diskWriteLatency.Observe(float64(time.Since(start)))
+cockroachdb__pebble:objstorage/objstorageprovider/sharedcache/shared_cache.go:870: c.metrics.putLatency.Observe(float64(time.Since(start)))
+cockroachdb__pebble:tool/db_analyze_data.go:127: (d.analyzeData.timeout > 0 && time.Since(startTime) > d.analyzeData.timeout)
+cockroachdb__pebble:tool/db_analyze_data.go:133: if shouldStop || time.Since(lastReportTime) > reportPeriod {
+cockroachdb__pebble:tool/db_analyze_data.go:216: if time.Since(fileInfo.ModTime()) < 15*time.Second {
+cockroachdb__pebble:tool/db_analyze_metadata.go:174: if d.analyzeMetadata.timeout > 0 && time.Since(startTime) > d.analyzeMetadata.timeout {
+cockroachdb__pebble:tool/db_analyze_metadata.go:185: if shouldStop || time.Since(lastReportTime) > reportPeriod {
+cockroachdb__pebble:bench/fsbench.go:262: hist.Record(time.Since(start))
+cockroachdb__pebble:bench/fsbench.go:321: hist.Record(time.Since(start))
+cockroachdb__pebble:bench/fsbench.go:377: hist.Record(time.Since(start))
+cockroachdb__pebble:bench/fsbench.go:441: hist.Record(time.Since(start))
+cockroachdb__pebble:bench/fsbench.go:506: hist.Record(time.Since(start))
+cockroachdb__pebble:bench/ycsb.go:361: latency[op].Record(time.Since(start))
+cockroachdb__pebble:bench/sync.go:89: latency.Record(time.Since(start))
+cockroachdb__pebble:bench/write_bench.go:243: time.Duration(time.Since(clockStart).Seconds()+0.5)*time.Second,
+cockroachdb__pebble:bench/write_bench.go:254: if time.Since(cooloffStart) < cfg.CooloffPeriod {
+cockroachdb__pebble:bench/write_bench.go:282: testElapsed := time.Since(clockStart)
+cockroachdb__pebble:bench/write_bench.go:348: hist.Record(time.Since(start))
+cockroachdb__pebble:bench/bench.go:156: t.Tick(time.Since(start), i)
+cockroachdb__pebble:bench/bench.go:170: t.Done(time.Since(start))
+cockroachdb__pebble:bench/bench.go:180: t.Done(time.Since(start))
+cockroachdb__pebble:bench/bench.go:221: t.Tick(time.Since(start), i)
+cockroachdb__pebble:bench/bench.go:226: t.Done(&wg, time.Since(start))
+cockroachdb__pebble:bench/bench.go:232: t.Done(&wg, time.Since(start))
+cockroachdb__pebble:bench/bench.go:294: path := fmt.Sprintf(fmtStr, int(time.Since(start).Seconds()+0.5))
+cockroachdb__pebble:metamorphic/options.go:352: cumulativeTime.Add(int64(time.Since(now)))
+containerd__containerd:plugins/content/local/writer.go:130: if duration := time.Since(start); duration > 250*time.Millisecond {
+containerd__containerd:plugins/diff/erofs/differ.go:121: "d":      time.Since(t1),
+containerd__containerd:plugins/diff/lcow/lcow.go:103: "d":      time.Since(t1),
+containerd__containerd:plugins/diff/windows/cimfs.go:260: "d":      time.Since(t1),
+containerd__containerd:plugins/diff/windows/windows.go:112: "d":      time.Since(t1),
+containerd__containerd:plugins/diff/windows/windows.go:303: "d":     time.Since(t1),
+containerd__containerd:internal/cri/server/container_start.go:214: tracing.Attribute("container.start.duration", time.Since(start).String()),
+containerd__containerd:internal/cri/server/container_stop.go:250: tracing.Attribute("container.stop.duration", time.Since(start).String()),
+containerd__containerd:internal/cri/server/sandbox_stop.go:98: tracing.Attribute("sandbox.stop.duration", time.Since(stop).String()),
+containerd__containerd:internal/cri/server/sandbox_stop.go:129: tracing.Attribute("network.teardown.duration", time.Since(netStop).String()),
+containerd__containerd:internal/cri/server/images/snapshots.go:68: cost := time.Since(begin)
+containerd__containerd:internal/cri/server/images/image_pull.go:223: elapsed := time.Since(startTime)
+containerd__containerd:internal/cri/server/images/image_pull.go:753: if time.Since(lastSeenTimestamp) > reporter.timeout {
+containerd__containerd:internal/cri/server/images/image_pull.go:1069: if time.Since(lastSeenTimestamp) > reporter.timeout {
+containerd__containerd:internal/cri/server/sandbox_remove.go:127: tracing.Attribute("sandbox.remove.duration", time.Since(start).String()),
+containerd__containerd:internal/cri/server/container_create.go:453: tracing.Attribute("container.create.duration", time.Since(r.start).String()),
+containerd__containerd:internal/cri/server/container_remove.go:140: tracing.Attribute("container.remove.duration", time.Since(start).String()),
+containerd__containerd:core/metadata/content.go:850: d = time.Since(t1)
+containerd__containerd:core/metadata/gc.go:362: return time.Since(t) < d
+containerd__containerd:core/metadata/gc.go:366: return time.Since(t) > d
+containerd__containerd:core/metadata/snapshot.go:876: d = time.Since(t1)
+containerd__containerd:core/metadata/db.go:216: log.G(ctx).WithField("d", time.Since(t0)).Debugf("finished database migration to %s.%d", m.schema, m.version)
+containerd__containerd:core/metadata/db.go:460: stats.SnapshotD[snapshotterName] = time.Since(st1)
+containerd__containerd:core/metadata/db.go:475: stats.ContentD = time.Since(ct1)
+containerd__containerd:core/metadata/db.go:483: stats.MetaD = time.Since(t1)
+containerd__containerd:core/diff/apply/apply.go:67: "d":      time.Since(t1),
+containerd__containerd:core/unpack/unpacker.go:683: "duration": time.Since(s.startAt),
+containerd__containerd:core/unpack/unpacker.go:770: "duration": time.Since(unpackStart),
+containerd__containerd:pkg/imageverifier/bindir/bindir.go:89: runtime := time.Since(start)
+containerd__containerd:cmd/containerd/server/config/config.go:495: log.G(ctx).WithField("t", time.Since(t1)).Warnf("Configuration migrated from version %d, use `containerd config migrate` to avoid migration", currentVersion)
+containerd__containerd:cmd/containerd/command/main.go:275: log.G(ctx).Infof("containerd successfully booted in %fs", time.Since(start).Seconds())
+containerd__containerd:cmd/ctr/commands/content/fetch.go:435: time.Since(start).Seconds(),
+containerd__containerd:cmd/ctr/commands/content/fetch.go:442: progress.NewBytesPerSecond(total, time.Since(start)))
+containerd__containerd:cmd/ctr/commands/content/content.go:174: units.HumanDuration(time.Since(active.StartedAt)))
+containerd__containerd:cmd/ctr/commands/content/content.go:232: units.HumanDuration(time.Since(info.CreatedAt)),
+containerd__containerd:cmd/ctr/commands/images/pull.go:238: fmt.Printf("done: %s\t\n", time.Since(start))
+containerd__containerd:cmd/ctr/commands/images/pull.go:397: time.Since(start).Seconds(),
+containerd__containerd:cmd/ctr/commands/images/pull.go:404: progress.NewBytesPerSecond(total, time.Since(start)))
+containerd__containerd:cmd/ctr/commands/images/pull.go:517: time.Since(start).Seconds(),
+containerd__containerd:cmd/ctr/commands/images/pull.go:524: progress.NewBytesPerSecond(total, time.Since(start)))
+dominikh__go-tools:lintcmd/runner/runner.go:990: ar.stats.measureAnalyzer(a.Analyzer, ar.pkg.PackageSpec, time.Since(t))
+dominikh__go-tools:internal/robustio/robustio_flaky.go:44: } else if d := time.Since(start) + nextSleep; d >= arbitraryTimeout {
+dominikh__go-tools:internal/xtools-internal/gocommand/invoke.go:258: i.logf("%s for %v", time.Since(start), debugStr)
+dominikh__go-tools:internal/xtools-internal/gocommand/invoke.go:450: log.Fatalf("detected hanging go command (golang/go#54461); waited %s\n\tcommand:%s\n\tpid:%d", time.Since(start), cmd, cmd.Process.Pid)
+dominikh__go-tools:simple/s1012/s1012.go:21: Title: `Replace \'time.Now().Sub(x)\' with \'time.Since(x)\'`,
+dominikh__go-tools:simple/s1012/s1012.go:25: After:   `time.Since(x)`,
+dominikh__go-tools:go/loader/loader.go:186: stats.Export[imp] = time.Since(t)
+dominikh__go-tools:go/loader/loader.go:196: stats.Source = time.Since(t)
+etcd-io__etcd:cache/cache.go:292: if time.Since(startTime) >= c.cfg.WaitTimeout {
+etcd-io__etcd:tools/benchmark/cmd/util.go:74: defragDuration = time.Since(st)
+etcd-io__etcd:tools/benchmark/cmd/put.go:186: rs += fmt.Sprintf("\tTime taken to get hashkv: %v\n", time.Since(st))
+etcd-io__etcd:server/etcdserver/server.go:1270: zap.Duration("took", time.Since(now)),
+etcd-io__etcd:server/etcdserver/server.go:1875: lg.Info("sent merged snapshot", append(fields, zap.Duration("took", time.Since(now)))...)
+etcd-io__etcd:server/etcdserver/txn/util.go:30: if time.Since(now) <= warningApplyDuration {
+etcd-io__etcd:server/etcdserver/txn/util.go:45: d := time.Since(now)
+etcd-io__etcd:server/etcdserver/txn/util.go:56: if time.Since(now) <= warningApplyDuration {
+etcd-io__etcd:server/etcdserver/txn/util.go:81: if time.Since(now) <= warningApplyDuration {
+etcd-io__etcd:server/etcdserver/txn/util.go:95: zap.Duration("took", time.Since(now)),
+etcd-io__etcd:server/etcdserver/txn/range.go:51: RangeSecObserve(success, time.Since(start))
+etcd-io__etcd:server/etcdserver/v3_server.go:135: requestDurationSec.WithLabelValues("Range", strconv.FormatBool(success)).Observe(time.Since(start).Seconds())
+etcd-io__etcd:server/etcdserver/v3_server.go:362: requestDurationSec.WithLabelValues("ReadonlyTxn", strconv.FormatBool(success)).Observe(time.Since(start).Seconds())
+etcd-io__etcd:server/etcdserver/v3_server.go:1091: requestDurationSec.WithLabelValues(reqType, strconv.FormatBool(success)).Observe(time.Since(start).Seconds())
+etcd-io__etcd:server/etcdserver/api/v3compactor/revision.go:99: zap.Duration("took", time.Since(now)),
+etcd-io__etcd:server/etcdserver/api/v3rpc/maintenance.go:226: zap.Duration("took", time.Since(start)),
+etcd-io__etcd:server/etcdserver/api/v3rpc/watch.go:510: totalDur := time.Since(start)
+etcd-io__etcd:server/etcdserver/api/v3rpc/watch.go:556: watchSendLoopControlStreamDuration.Observe(time.Since(start).Seconds())
+etcd-io__etcd:server/etcdserver/api/v3rpc/watch.go:569: watchSendLoopProgressDuration.Observe(time.Since(start).Seconds())
+etcd-io__etcd:server/etcdserver/api/v3rpc/interceptor.go:92: duration := time.Since(startTime)
+etcd-io__etcd:server/etcdserver/api/snap/db.go:49: snapDBFsyncSec.Observe(time.Since(fsyncStart).Seconds())
+etcd-io__etcd:server/etcdserver/api/snap/db.go:92: snapDBSaveSec.Observe(time.Since(start).Seconds())
+etcd-io__etcd:server/etcdserver/api/v2stats/server.go:79: stats.LeaderInfo.Uptime = time.Since(stats.LeaderInfo.StartTime).String()
+etcd-io__etcd:server/etcdserver/api/v2stats/queue.go:87: if time.Since(back.SendingTime) > time.Second {
+etcd-io__etcd:server/etcdserver/api/rafthttp/http.go:296: downloadTook := time.Since(start)
+etcd-io__etcd:server/etcdserver/api/rafthttp/http.go:333: snapshotReceiveSeconds.WithLabelValues(from).Observe(time.Since(start).Seconds())
+etcd-io__etcd:server/etcdserver/api/rafthttp/snapshot_sender.go:142: snapshotSendSeconds.WithLabelValues(to).Observe(time.Since(start).Seconds())
+etcd-io__etcd:server/etcdserver/api/rafthttp/msgappv2_codec.go:133: enc.fs.Succ(time.Since(start))
+etcd-io__etcd:server/etcdserver/api/rafthttp/msgappv2_codec.go:152: enc.fs.Succ(time.Since(start))
+etcd-io__etcd:server/etcdserver/apply/uber_applier.go:98: txn.ApplySecObserve("v3", op, success, time.Since(start))
+etcd-io__etcd:server/storage/wal/wal.go:234: walFsyncSec.Observe(time.Since(start).Seconds())
+etcd-io__etcd:server/storage/wal/wal.go:850: walFsyncSec.Observe(time.Since(start).Seconds())
+etcd-io__etcd:server/storage/wal/wal.go:888: took := time.Since(start)
+etcd-io__etcd:server/storage/wal/repair.go:96: walFsyncSec.Observe(time.Since(start).Seconds())
+etcd-io__etcd:server/storage/wal/encoder.go:137: walWriteSec.Observe(time.Since(start).Seconds())
+etcd-io__etcd:server/storage/backend/batch_tx.go:297: commitSec.Observe(time.Since(start).Seconds())
+etcd-io__etcd:server/storage/backend/backend.go:410: zap.Duration("taking", time.Since(start)),
+etcd-io__etcd:server/storage/backend/backend.go:416: snapshotTransferSec.Observe(time.Since(start).Seconds())
+etcd-io__etcd:server/storage/backend/backend.go:608: took := time.Since(now)
+etcd-io__etcd:server/storage/backend/backend.go:733: setupDuration := time.Since(now)
+etcd-io__etcd:server/storage/backend/backend.go:744: bulkCopyDuration := time.Since(now) - setupDuration
+etcd-io__etcd:server/storage/backend/backend.go:783: stopTheWorldDuration := time.Since(now) - setupDuration - bulkCopyDuration
+etcd-io__etcd:server/storage/backend.go:84: cfg.Logger.Info("opened backend db", zap.String("path", fn), zap.Duration("took", time.Since(now)))
+etcd-io__etcd:server/storage/backend.go:95: zap.Duration("took", time.Since(now)),
+etcd-io__etcd:server/storage/mvcc/kvstore.go:163: hashSec.Observe(time.Since(start).Seconds())
+etcd-io__etcd:server/storage/mvcc/kvstore.go:193: hashRevSec.Observe(time.Since(start).Seconds())
+etcd-io__etcd:server/storage/mvcc/watchable_store.go:240: syncDuration := time.Since(st)
+etcd-io__etcd:server/storage/mvcc/kvstore_compaction.go:36: indexCompactionPauseMs.Observe(float64(time.Since(totalStart) / time.Millisecond))
+etcd-io__etcd:server/storage/mvcc/kvstore_compaction.go:39: defer func() { dbCompactionTotalMs.Observe(float64(time.Since(totalStart) / time.Millisecond)) }()
+etcd-io__etcd:server/storage/mvcc/kvstore_compaction.go:72: dbCompactionPauseMs.Observe(float64(time.Since(start) / time.Millisecond))
+etcd-io__etcd:server/storage/mvcc/kvstore_compaction.go:79: zap.Duration("took", time.Since(totalStart)),
+etcd-io__etcd:server/storage/mvcc/kvstore_compaction.go:97: dbCompactionPauseMs.Observe(float64(time.Since(start) / time.Millisecond))
+etcd-io__etcd:etcdctl/ctlv3/command/defrag_command.go:48: d := time.Since(start)
+etcd-io__etcd:etcdctl/ctlv3/command/ep_command.go:132: eh := epHealth{Ep: ep, Health: false, Took: time.Since(st).String()}
+etcd-io__etcd:client/v3/snapshot/v3_snapshot.go:114: zap.Duration("took", time.Since(start)),
+etcd-io__etcd:client/v3/leasing/cache.go:117: return !ok || time.Since(lr) > revokeBackoff
+etcd-io__etcd:client/v3/leasing/cache.go:248: if time.Since(lr.Add(revokeBackoff)) > 0 {
+etcd-io__etcd:client/pkg/testutil/leak.go:88: for time.Since(begin) < d {
+etcd-io__etcd:tests/antithesis/test-template/robustness/traffic/main.go:108: startTime := time.Since(baseTime)
+etcd-io__etcd:tests/antithesis/test-template/robustness/traffic/main.go:131: endTime := time.Since(baseTime)
+etcd-io__etcd:tests/robustness/failpoint/failpoint.go:99: start := time.Since(baseTime)
+etcd-io__etcd:tests/robustness/failpoint/failpoint.go:109: end := time.Since(baseTime)
+etcd-io__etcd:tests/robustness/client/client.go:115: callTime := time.Since(c.baseTime)
+etcd-io__etcd:tests/robustness/client/client.go:117: returnTime := time.Since(c.baseTime)
+etcd-io__etcd:tests/robustness/client/client.go:138: callTime := time.Since(c.baseTime)
+etcd-io__etcd:tests/robustness/client/client.go:144: returnTime := time.Since(c.baseTime)
+etcd-io__etcd:tests/robustness/client/client.go:152: callTime := time.Since(c.baseTime)
+etcd-io__etcd:tests/robustness/client/client.go:154: returnTime := time.Since(c.baseTime)
+etcd-io__etcd:tests/robustness/client/client.go:162: callTime := time.Since(c.baseTime)
+etcd-io__etcd:tests/robustness/client/client.go:164: returnTime := time.Since(c.baseTime)
+etcd-io__etcd:tests/robustness/client/client.go:200: callTime := time.Since(w.c.baseTime)
+etcd-io__etcd:tests/robustness/client/client.go:202: returnTime := time.Since(w.c.baseTime)
+etcd-io__etcd:tests/robustness/client/client.go:214: callTime := time.Since(c.baseTime)
+etcd-io__etcd:tests/robustness/client/client.go:216: returnTime := time.Since(c.baseTime)
+etcd-io__etcd:tests/robustness/client/client.go:224: callTime := time.Since(c.baseTime)
+etcd-io__etcd:tests/robustness/client/client.go:226: returnTime := time.Since(c.baseTime)
+etcd-io__etcd:tests/robustness/client/client.go:235: callTime := time.Since(c.baseTime)
+etcd-io__etcd:tests/robustness/client/client.go:237: returnTime := time.Since(c.baseTime)
+etcd-io__etcd:tests/robustness/client/client.go:245: callTime := time.Since(c.baseTime)

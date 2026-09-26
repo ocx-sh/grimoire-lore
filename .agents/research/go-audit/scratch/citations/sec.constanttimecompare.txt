@@ -1,0 +1,26 @@
+caddyserver__caddy:modules/caddyhttp/caddyauth/argon2id.go:76: return subtle.ConstantTimeCompare(storedKey, computedKey) == 1, nil
+junegunn__fzf:src/server.go:225: if len(server.apiKey) != 0 && subtle.ConstantTimeCompare([]byte(apiKey), server.apiKey) != 1 {
+tailscale__tailscale:tempfork/sshtest/ssh/cipher.go:215: if subtle.ConstantTimeCompare(s.macResult, mac) != 1 {
+tailscale__tailscale:tempfork/sshtest/ssh/cipher.go:574: if subtle.ConstantTimeCompare(c.macResult, mac) != 1 {
+tailscale__tailscale:tempfork/sshtest/ssh/kex.go:501: if subtle.ConstantTimeCompare(secret[:], curve25519Zeros[:]) == 1 {
+tailscale__tailscale:tempfork/sshtest/ssh/kex.go:547: if subtle.ConstantTimeCompare(secret[:], curve25519Zeros[:]) == 1 {
+tailscale__tailscale:types/key/nl.go:42: return subtle.ConstantTimeCompare(k.k[:], empty.k[:]) == 1
+tailscale__tailscale:types/key/nl.go:76: return subtle.ConstantTimeCompare(k.k[:], other.k[:]) == 1
+tailscale__tailscale:types/key/nl.go:172: return subtle.ConstantTimeCompare(k.k[:], other.k[:]) == 1
+tailscale__tailscale:types/key/hardware_attestation.go:78: return subtle.ConstantTimeCompare(k.k[:], o.k[:]) == 1
+tailscale__tailscale:types/key/machine.go:56: return subtle.ConstantTimeCompare(k.k[:], other.k[:]) == 1
+tailscale__tailscale:types/key/disco.go:62: return subtle.ConstantTimeCompare(k.k[:], other.k[:]) == 1
+tailscale__tailscale:types/key/disco.go:209: return subtle.ConstantTimeCompare(k.k[:], other.k[:]) == 1
+tailscale__tailscale:types/key/node.go:101: return subtle.ConstantTimeCompare(k.k[:], other.k[:]) == 1
+tailscale__tailscale:types/key/derp.go:84: return subtle.ConstantTimeCompare(k.k[:], other.k[:]) == 1
+tailscale__tailscale:tka/state.go:136: if subtle.ConstantTimeCompare(derived, candidate) == 1 {
+tailscale__tailscale:docs/webhooks/example.go:98: if subtle.ConstantTimeCompare([]byte(signature), []byte(want)) == 1 {
+tailscale__tailscale:ipn/localapi/localapi.go:266: if subtle.ConstantTimeCompare([]byte(pass), []byte(h.RequiredPassword)) == 0 {
+tailscale__tailscale:drive/driveimpl/fileserver.go:140: if subtle.ConstantTimeCompare(a, b) != 1 {
+tailscale__tailscale:cmd/tsidp/tsidp.go:411: clientIDcmp := subtle.ConstantTimeCompare([]byte(clientID), []byte(ar.funnelRP.ID))
+tailscale__tailscale:cmd/tsidp/tsidp.go:412: clientSecretcmp := subtle.ConstantTimeCompare([]byte(clientSecret), []byte(ar.funnelRP.Secret))
+tailscale__tailscale:cmd/tsidp/tsidp.go:465: clientIDcmp := subtle.ConstantTimeCompare([]byte(clientID), []byte(c.ID))
+tailscale__tailscale:cmd/tsidp/tsidp.go:904: clientIDcmp := subtle.ConstantTimeCompare([]byte(clientID), []byte(ar.funnelRP.ID))
+tailscale__tailscale:cmd/tsidp/tsidp.go:905: clientSecretcmp := subtle.ConstantTimeCompare([]byte(clientSecret), []byte(ar.funnelRP.Secret))
+tailscale__tailscale:net/socks5/socks5.go:193: userMatch := subtle.ConstantTimeCompare([]byte(user), []byte(c.srv.Username))
+tailscale__tailscale:net/socks5/socks5.go:194: pwdMatch := subtle.ConstantTimeCompare([]byte(pwd), []byte(c.srv.Password))

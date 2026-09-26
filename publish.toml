@@ -235,7 +235,7 @@ description = { readme = "docs/docs-essentials.md", logo = "assets/lore-docs.svg
 # which the language sets own. `bazel-adopt` runs once per repository and
 # `bazel-diagnose` runs on a symptom; neither belongs on every edit.
 [rules.bazel-quality]
-version = "0.2.0"
+version = "0.3.0"
 description = { readme = "docs/bazel-quality.md", logo = "assets/lore-bazel.svg" }
 
 [skills.bazel-adopt]
@@ -318,3 +318,36 @@ description = { readme = "docs/cmake-modernize.md", logo = "assets/lore-cmake.sv
 [bundles.cmake-essentials]
 version = "0.1.0"
 description = { readme = "docs/cmake-essentials.md", logo = "assets/lore-cmake.svg" }
+
+# The Go set: two rules split by what the file under edit is. `go-quality`
+# loads on `**/*.go` and routes to ten depth files by task. `go-modules` loads
+# on the files the go command and the Go tools require by name (go.mod, go.sum,
+# go.work, the golangci-lint, goreleaser, ko and staticcheck configs), so a
+# source edit never pays for the gate and release depth, and a config edit
+# never pays for the language depth. The three skills are procedures run once
+# per release, per toolchain bump or per incident. The Bazel-Go depth file
+# ships inside `bazel-quality` (0.3.0), not here, so no two rules glob
+# `BUILD.bazel`.
+[rules.go-quality]
+version = "0.1.0"
+description = { readme = "docs/go-quality.md", logo = "assets/lore-go.svg" }
+
+[rules.go-modules]
+version = "0.1.0"
+description = { readme = "docs/go-modules.md", logo = "assets/lore-go.svg" }
+
+[skills.go-release]
+version = "0.1.0"
+description = { readme = "docs/go-release.md", logo = "assets/lore-go.svg" }
+
+[skills.go-upgrade]
+version = "0.1.0"
+description = { readme = "docs/go-upgrade.md", logo = "assets/lore-go.svg" }
+
+[skills.go-diagnose]
+version = "0.1.0"
+description = { readme = "docs/go-diagnose.md", logo = "assets/lore-go.svg" }
+
+[bundles.go-essentials]
+version = "0.1.0"
+description = { readme = "docs/go-essentials.md", logo = "assets/lore-go.svg" }

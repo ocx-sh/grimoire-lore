@@ -1,0 +1,64 @@
+bazel-contrib__rules_go:tests/core/go_library/gen_embedsrcs_files.go:38: if err := os.MkdirAll(path, 0777); err != nil {
+bazel-contrib__rules_go:go/tools/bazel_testing/bazel_testing.go:356: if err := os.MkdirAll(mainDir, 0777); err != nil {
+bazel-contrib__rules_go:go/tools/builders/cgo2.go:187: if err := os.MkdirAll(cgoGoSrcsPath, 0777); err != nil {
+bazel-contrib__rules_go:go/tools/builders/go_path.go:153: if err := os.MkdirAll(out, 0777); err != nil {
+bazel-contrib__rules_go:go/tools/builders/go_path.go:188: if err := os.MkdirAll(out, 0777); err != nil {
+bazel-contrib__rules_go:go/tools/builders/go_path.go:195: if err := os.MkdirAll(dstDir, 0777); err != nil {
+bazel-contrib__rules_go:go/tools/releaser/file.go:127: return os.MkdirAll(outPath, 0777)
+bazel-contrib__rules_go:go/tools/releaser/file.go:135: if err := os.MkdirAll(parent, 0777); err != nil {
+bazel-contrib__rules_go:go/tools/releaser/file.go:178: return os.MkdirAll(outPath, 0777)
+bazel-contrib__rules_go:go/tools/releaser/file.go:238: if err := os.MkdirAll(toDir, 0777); err != nil {
+bazelbuild__bazel-gazelle:tools/convert-go-deps-test-case/bzl_to_dir.go:71: if err := os.MkdirAll(modDir, 0777); err != nil {
+bazelbuild__bazel-gazelle:tools/convert-go-deps-test-case/bzl_to_dir.go:148: return os.MkdirAll(dir, 0777)
+bazelbuild__bazel-gazelle:tools/convert-go-deps-test-case/bzl_to_dir.go:539: if err := os.MkdirAll(workDir, 0777); err != nil {
+containerd__containerd:plugins/snapshots/windows/common.go:225: if err := os.MkdirAll(vmScratchDir, 0777); err != nil {
+containerd__containerd:core/snapshots/testsuite/testsuite.go:104: if err := os.MkdirAll(root, 0777); err != nil {
+containerd__containerd:core/snapshots/testsuite/testsuite.go:121: if err := os.MkdirAll(work, 0777); err != nil {
+containerd__containerd:core/snapshots/testsuite/testsuite.go:151: if err := os.MkdirAll(preparing, 0777); err != nil {
+containerd__containerd:core/snapshots/testsuite/testsuite.go:194: if err := os.MkdirAll(next, 0777); err != nil {
+containerd__containerd:core/snapshots/testsuite/testsuite.go:264: if err := os.MkdirAll(nextnext, 0777); err != nil {
+containerd__containerd:core/snapshots/testsuite/testsuite.go:298: if err := os.MkdirAll(preparing, 0777); err != nil {
+containerd__containerd:core/snapshots/testsuite/testsuite.go:332: if err := os.MkdirAll(preparing, 0777); err != nil {
+containerd__containerd:core/snapshots/testsuite/testsuite.go:371: if err := os.MkdirAll(preparing, 0777); err != nil {
+containerd__containerd:core/snapshots/testsuite/testsuite.go:461: if err = os.MkdirAll(preparing, 0777); err != nil {
+containerd__containerd:core/snapshots/testsuite/testsuite.go:476: if err = os.MkdirAll(preparing, 0777); err != nil {
+containerd__containerd:core/snapshots/testsuite/testsuite.go:490: if err = os.MkdirAll(preparing, 0777); err != nil {
+containerd__containerd:core/snapshots/testsuite/testsuite.go:816: if err := os.MkdirAll(viewMountPoint, 0777); err != nil {
+containerd__containerd:core/snapshots/testsuite/testsuite.go:922: if err := os.MkdirAll(flat, 0777); err != nil {
+containerd__containerd:core/snapshots/testsuite/testsuite.go:930: if err := os.MkdirAll(preparing, 0777); err != nil {
+containerd__containerd:core/snapshots/testsuite/testsuite.go:975: if err := os.MkdirAll(view, 0777); err != nil {
+dominikh__go-tools:lintcmd/cache/cache.go:84: if err := os.MkdirAll(name, 0777); err != nil {
+dominikh__go-tools:lintcmd/cache/default.go:36: if err := os.MkdirAll(dir, 0777); err != nil {
+dominikh__go-tools:add-check.go:145: if err := os.MkdirAll(path, 0777); err != nil {
+golang__tools:internal/modindex/index.go:120: if err := os.MkdirAll(dir, 0777); err != nil {
+golang__tools:gopls/internal/server/prompt.go:226: if err := os.MkdirAll(promptDir, 0777); err != nil {
+golang__tools:gopls/internal/vulncheck/copier.go:62: if err := os.MkdirAll(dst, 0777); err != nil {
+golang__tools:cmd/gonew/main.go:121: if err := os.MkdirAll(dir, 0777); err != nil {
+golang__tools:cmd/gonew/main.go:137: if err := os.MkdirAll(dst, 0777); err != nil {
+golang__tools:cmd/toolstash/main.go:550: if err := os.MkdirAll(stashDir, 0777); err != nil {
+golang__tools:cmd/file2fuzz/main.go:50: if err := os.MkdirAll(dir, 0777); err != nil {
+golangci__golangci-lint:internal/go/cache/cache.go:109: if err := os.MkdirAll(name, 0o777); err != nil {
+golangci__golangci-lint:internal/go/cache/default.go:42: if err := os.MkdirAll(dir, 0o777); err != nil {
+oras-project__oras-go:content/oci/storage.go:171: return os.MkdirAll(path, 0777)
+oras-project__oras-go:content/file/file.go:743: return os.MkdirAll(path, 0777)
+prometheus__prometheus:tsdb/block.go:712: if err := os.MkdirAll(blockDir, 0o777); err != nil {
+prometheus__prometheus:tsdb/block.go:717: if err := os.MkdirAll(chunksDir, 0o777); err != nil {
+prometheus__prometheus:tsdb/head_wal.go:1511: if err := os.MkdirAll(cpdirtmp, 0o777); err != nil {
+prometheus__prometheus:tsdb/fileutil/fileutil.go:29: if err := os.MkdirAll(dest, 0o777); err != nil {
+prometheus__prometheus:tsdb/fileutil/fileutil.go:48: if err := os.MkdirAll(dp, 0o777); err != nil {
+prometheus__prometheus:tsdb/wlog/wlog.go:304: if err := os.MkdirAll(dir, 0o777); err != nil {
+prometheus__prometheus:tsdb/wlog/checkpoint.go:194: if err := os.MkdirAll(cpdirtmp, 0o777); err != nil {
+prometheus__prometheus:tsdb/db.go:995: if err := os.MkdirAll(dir, 0o777); err != nil {
+prometheus__prometheus:tsdb/compact.go:779: if err = os.MkdirAll(tmp, 0o777); err != nil {
+prometheus__prometheus:tsdb/chunks/chunks.go:339: if err := os.MkdirAll(dir, 0o777); err != nil {
+prometheus__prometheus:tsdb/chunks/head_chunks.go:254: if err := os.MkdirAll(dir, 0o777); err != nil {
+prometheus__prometheus:tsdb/chunks/head_chunks.go:402: if err := os.MkdirAll(dst, 0o777); err != nil {
+prometheus__prometheus:promql/query_logger.go:159: err := os.MkdirAll(localStoragePath, 0o777)
+prometheus__prometheus:cmd/promtool/tsdb.go:85: if err := os.MkdirAll(b.outPath, 0o777); err != nil {
+prometheus__prometheus:cmd/promtool/tsdb.go:871: if err := os.MkdirAll(outputDir, 0o777); err != nil {
+prometheus__prometheus:web/api/v1/api.go:2255: if err := os.MkdirAll(dir, 0o777); err != nil {
+regclient__regclient:cmd/regctl/artifact.go:534: err = os.MkdirAll(dest, 0o777)
+regclient__regclient:scheme/ocidir/ocidir.go:188: err = os.MkdirAll(r.Path, 0o777)
+regclient__regclient:scheme/ocidir/ocidir.go:271: err := os.MkdirAll(r.Path, 0o777)
+regclient__regclient:scheme/ocidir/manifest.go:275: err = os.MkdirAll(dir, 0o777)
+regclient__regclient:scheme/ocidir/blob.go:128: err = os.MkdirAll(dir, 0o777)

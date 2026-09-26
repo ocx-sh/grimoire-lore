@@ -1,0 +1,9 @@
+golang__tools:internal/modindex/index.go:225: changed, err := time.ParseInLocation(time.DateTime, scan.Text(), time.Local)
+restic__restic:cmd/restic/cmd_backup.go:531: timeStamp, err = time.ParseInLocation(global.TimeFormat, opts.TimeStamp, time.Local)
+restic__restic:cmd/restic/cmd_rewrite.go:95: t, err := time.ParseInLocation(global.TimeFormat, sma.Time, time.Local)
+restic__restic:cmd/restic/cmd_find.go:122: if t, err := time.ParseInLocation(fmt, str, time.Local); err == nil {
+syncthing__syncthing:lib/syncthing/time_android.go:25: time.Local = z
+syncthing__syncthing:lib/versioner/util.go:118: versionTime, err := time.ParseInLocation(TimeFormat, tag, time.Local)
+syncthing__syncthing:lib/versioner/util.go:270: tag := versionTime.In(time.Local).Truncate(time.Second).Format(TimeFormat)
+syncthing__syncthing:lib/versioner/staggered.go:75: versionTime, err := time.ParseInLocation(TimeFormat, extractTag(version), time.Local)
+syncthing__syncthing:lib/versioner/simple.go:99: versionTime, err := time.ParseInLocation(TimeFormat, extractTag(version), time.Local)

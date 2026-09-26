@@ -1,0 +1,108 @@
+aquasecurity__trivy:pkg/rpc/client/client.go:64: wg.Go(func() {
+cli__cli:internal/skills/installer/installer.go:102: wg.Go(func() {
+cli__cli:internal/skills/discovery/discovery.go:683: wg.Go(func() {
+cli__cli:pkg/cmd/skills/search/search.go:308: wg.Go(func() {
+cli__cli:pkg/cmd/skills/search/search.go:318: wg.Go(func() {
+cli__cli:pkg/cmd/skills/search/search.go:328: wg.Go(func() {
+cockroachdb__pebble:bench/scan.go:87: wg.Go(func() {
+cockroachdb__pebble:bench/fsbench.go:561: wg.Go(func() { bench.execute(maxOps) })
+cockroachdb__pebble:bench/ycsb.go:323: wg.Go(func() { y.sampleReadAmp(db) })
+cockroachdb__pebble:bench/ycsb.go:327: wg.Go(func() { y.worker(db) })
+cockroachdb__pebble:bench/sync.go:57: wg.Go(func() {
+cockroachdb__pebble:bench/write_bench.go:157: wg.Go(func() { w.pause() })
+cockroachdb__pebble:bench/queue.go:67: wg.Go(func() {
+containerd__containerd:plugins/restart/monitor.go:149: wgNSLoop.Go(func() {
+containerd__containerd:plugins/restart/monitor.go:158: wgChangesLoop.Go(func() {
+containerd__containerd:internal/cri/server/sandbox_stats_list.go:42: wg.Go(func() {
+containerd__containerd:internal/cri/server/images/check.go:43: wg.Go(func() {
+containerd__containerd:internal/cri/server/sandbox_stats_stream.go:44: wg.Go(func() {
+containerd__containerd:internal/cri/io/exec_io.go:97: wg.Go(func() {
+containerd__containerd:internal/cri/io/helpers_windows.go:43: p.conWg.Go(func() {
+containerd__containerd:internal/cri/io/container_io.go:176: wg.Go(func() {
+containerd__containerd:core/runtime/v2/shim_windows.go:74: dpc.wg.Go(func() {
+containerd__containerd:core/metadata/db.go:441: wg.Go(func() {
+containerd__containerd:core/metadata/db.go:503: wg.Go(func() {
+containerd__containerd:pkg/cio/io_unix.go:76: wg.Go(func() {
+containerd__containerd:pkg/cio/io_unix.go:86: wg.Go(func() {
+etcd-io__etcd:tools/benchmark/cmd/watch_latency.go:79: wg.Go(func() {
+etcd-io__etcd:tools/benchmark/cmd/lease.go:68: wg.Go(func() {
+golang__tools:internal/imports/fix.go:1787: wg.Go(func() {
+golang__tools:refactor/importgraph/graph.go:82: wg.Go(func() {
+golang__tools:gopls/internal/cache/analysis.go:837: wg.Go(func() {
+golang__tools:gopls/internal/server/command.go:530: wg.Go(func() {
+golang__tools:gopls/internal/server/command.go:1741: wg.Go(func() {
+golang__tools:gopls/internal/server/diagnostics.go:424: wg.Go(func() {
+golang__tools:gopls/internal/server/diagnostics.go:482: wg.Go(func() {
+golang__tools:gopls/internal/server/diagnostics.go:491: wg.Go(func() {
+golang__tools:gopls/internal/server/diagnostics.go:501: wg.Go(func() {
+golang__tools:gopls/internal/server/general.go:452: ndiagnose.Go(func() {
+golang__tools:gopls/internal/server/workspace.go:139: wg.Go(func() {
+golang__tools:gopls/internal/server/text_synchronization.go:278: wg.Go(func() {
+golang__tools:go/buildutil/allpackages.go:55: wg.Go(func() {
+golang__tools:go/buildutil/allpackages.go:108: wg.Go(func() {
+golang__tools:go/analysis/passes/modernize/doc.go:697: wg.Go(func(){ ... })
+golangci__golangci-lint:pkg/goanalysis/runner.go:273: wg.Go(func() {
+golangci__golangci-lint:pkg/goanalysis/runner_loadingpackage.go:50: wg.Go(func() {
+golangci__golangci-lint:pkg/goanalysis/runners_cache.go:36: wg.Go(func() {
+golangci__golangci-lint:pkg/goanalysis/runners_cache.go:98: wg.Go(func() {
+golangci__golangci-lint:pkg/result/processors/filename_unadjuster.go:47: wg.Go(func() {
+grpc__grpc-go:xds/googledirectpath/googlec2p.go:164: wg.Go(func() { zone = getZone(httpReqTimeout) })
+grpc__grpc-go:xds/googledirectpath/googlec2p.go:165: wg.Go(func() { ipv6Capable = getIPv6Capable(httpReqTimeout) })
+kubernetes-sigs__controller-runtime:pkg/cache/internal/informers.go:257: ip.waitGroup.Go(func() {
+oras-project__oras:cmd/oras/internal/display/status/progress/manager.go:127: m.updating.Go(func() {
+prometheus__prometheus:tsdb/chunks/chunk_write_queue.go:114: c.workerWg.Go(func() {
+prometheus__prometheus:util/treecache/treecache.go:268: tc.wg.Go(func() {
+prometheus__prometheus:cmd/promtool/tsdb.go:162: wg.Go(func() {
+regclient__regclient:cmd/regbot/root.go:165: wg.Go(func() {
+regclient__regclient:cmd/regsync/root.go:228: wg.Go(func() {
+regclient__regclient:cmd/regsync/root.go:308: wg.Go(func() {
+restic__restic:internal/backend/rclone/backend.go:59: wg.Go(func() {
+restic__restic:internal/backend/rclone/backend.go:208: wg.Go(func() {
+restic__restic:internal/ui/termstatus/status.go:83: wg.Go(func() {
+restic__restic:cmd/restic/cmd_check.go:345: wg.Go(func() {
+syncthing__syncthing:lib/syncthing/utils.go:202: wg.Go(func() { //nolint:contextcheck
+syncthing__syncthing:lib/model/folder_sendrecv.go:265: updateWg.Go(func() {
+syncthing__syncthing:lib/model/folder_sendrecv.go:271: copyWg.Go(func() {
+syncthing__syncthing:lib/model/folder_sendrecv.go:277: pullWg.Go(func() {
+syncthing__syncthing:lib/model/folder_sendrecv.go:284: doneWg.Go(func() {
+syncthing__syncthing:lib/model/folder_sendrecv.go:1563: wg.Go(func() {
+syncthing__syncthing:lib/model/folder_sendrecv.go:1845: wg.Go(func() {
+syncthing__syncthing:lib/upnp/upnp.go:129: wg.Go(func() {
+syncthing__syncthing:lib/connections/service.go:615: dialWG.Go(func() {
+syncthing__syncthing:lib/connections/service.go:1123: wg.Go(func() {
+syncthing__syncthing:lib/config/wrapper.go:333: wg.Go(func() {
+syncthing__syncthing:cmd/syncthing/monitor.go:144: wg.Go(func() { copyStderr(stderr, dst) })
+syncthing__syncthing:cmd/syncthing/monitor.go:145: wg.Go(func() { copyStdout(stdout, dst) })
+syncthing__syncthing:cmd/infra/strelaypoolsrv/stats.go:111: wg.Go(func() {
+syncthing__syncthing:cmd/strelaysrv/session.go:163: wg.Go(func() { err0 = s.proxy(s.conns[0], s.conns[1]) })
+syncthing__syncthing:cmd/strelaysrv/session.go:166: wg.Go(func() { err1 = s.proxy(s.conns[1], s.conns[0]) })
+syncthing__syncthing:cmd/dev/stvanity/main.go:55: wg.Go(func() {
+tailscale__tailscale:kube/certs/certs.go:86: cm.tracker.Go(func() { cm.runCertLoop(cancelCtx, domain) })
+tailscale__tailscale:prober/derp.go:455: wg.Go(func() {
+tailscale__tailscale:prober/derp.go:487: wg.Go(func() {
+tailscale__tailscale:ssh/tailssh/tailssh.go:1066: wg.Go(func() {
+tailscale__tailscale:ssh/tailssh/tailssh.go:1075: wg.Go(func() {
+tailscale__tailscale:ipn/ipnlocal/local.go:3904: b.goTracker.Go(func() { b.pollRequestEngineStatus(ctx) })
+tailscale__tailscale:ipn/localapi/debug.go:148: wg.Go(func() {
+tailscale__tailscale:tsnet/tsnet.go:659: wg.Go(func() {
+tailscale__tailscale:tsnet/tsnet.go:668: wg.Go(func() {
+tailscale__tailscale:tstest/natlab/vnet/vnet.go:248: n.s.wg.Go(func() {
+tailscale__tailscale:tstest/natlab/vnet/vnet.go:454: n.s.wg.Go(func() {
+tailscale__tailscale:tstest/natlab/vnet/vnet.go:472: n.s.wg.Go(func() {
+tailscale__tailscale:tstest/natlab/vnet/vnet.go:482: n.s.wg.Go(func() {
+tailscale__tailscale:tstest/natlab/vnet/vnet.go:492: n.s.wg.Go(func() {
+tailscale__tailscale:tstest/natlab/vnet/vnet.go:503: n.s.wg.Go(func() {
+tailscale__tailscale:tstest/natlab/vnet/vnet.go:517: n.s.wg.Go(func() {
+tailscale__tailscale:tstest/natlab/vnet/vnet.go:528: n.s.wg.Go(func() {
+tailscale__tailscale:tstest/natlab/vnet/vnet.go:2186: n.s.wg.Go(func() {
+tailscale__tailscale:cmd/containerboot/egressservices.go:684: wg.Go(func() {
+tailscale__tailscale:cmd/jsonimports/jsonimports.go:81: group.Go(func() {
+tailscale__tailscale:cmd/tailscale/cli/file.go:250: group.Go(func() {
+tailscale__tailscale:net/netcheck/netcheck.go:1014: wg.Go(func() {
+tailscale__tailscale:net/netcheck/netcheck.go:1109: wg.Go(func() {
+tailscale__tailscale:feature/acme/cert.go:144: e.Go(func() {
+tailscale__tailscale:feature/acme/refresh.go:44: e.Go(func() { e.certRefreshLoop(ctx, b) })
+tailscale__tailscale:feature/acme/refresh.go:120: e.Go(func() {
+tailscale__tailscale:feature/taildrop/delete.go:67: d.group.Go(func() {
+tailscale__tailscale:feature/taildrop/delete.go:124: d.group.Go(func() { d.waitAndDelete(deleteDelay) })
+tailscale__tailscale:feature/taildrop/delete.go:179: d.group.Go(func() { d.waitAndDelete(retryAfter) })

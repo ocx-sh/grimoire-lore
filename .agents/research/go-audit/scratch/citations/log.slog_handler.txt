@@ -1,0 +1,18 @@
+bazel-contrib__rules_go:go/tools/gopackagesdriver/main.go:86: slog.SetDefault(slog.New(slog.NewJSONHandler(f, nil)).With("pid", os.Getpid()))
+regclient__regclient:internal/reghttp/http.go:142: slog:       slog.New(slog.NewTextHandler(io.Discard, &slog.HandlerOptions{})),
+regclient__regclient:internal/auth/auth.go:118: slog:       slog.New(slog.NewTextHandler(io.Discard, &slog.HandlerOptions{})),
+regclient__regclient:cmd/regctl/root.go:85: rOpts.log = slog.New(slog.NewTextHandler(cmd.ErrOrStderr(), &slog.HandlerOptions{Level: slog.LevelWarn}))
+regclient__regclient:cmd/regctl/root.go:157: opts.log = slog.New(slog.NewJSONHandler(cmd.ErrOrStderr(), &slog.HandlerOptions{Level: lvl}))
+regclient__regclient:cmd/regctl/root.go:159: opts.log = slog.New(slog.NewTextHandler(cmd.ErrOrStderr(), &slog.HandlerOptions{Level: lvl}))
+regclient__regclient:cmd/regbot/sandbox/sandbox.go:85: s.log = slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelInfo}))
+regclient__regclient:cmd/regbot/root.go:60: log: slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelInfo})),
+regclient__regclient:cmd/regbot/root.go:142: opts.log = slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{Level: lvl}))
+regclient__regclient:cmd/regbot/root.go:144: opts.log = slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: lvl}))
+regclient__regclient:cmd/regsync/root.go:159: opts.log = slog.New(slog.NewTextHandler(cmd.ErrOrStderr(), &slog.HandlerOptions{Level: slog.LevelInfo}))
+regclient__regclient:cmd/regsync/root.go:189: opts.log = slog.New(slog.NewJSONHandler(cmd.ErrOrStderr(), &slog.HandlerOptions{Level: lvl}))
+regclient__regclient:cmd/regsync/root.go:191: opts.log = slog.New(slog.NewTextHandler(cmd.ErrOrStderr(), &slog.HandlerOptions{Level: lvl}))
+regclient__regclient:regclient.go:65: slog:      slog.New(slog.NewTextHandler(io.Discard, &slog.HandlerOptions{})),
+regclient__regclient:config/host.go:283: log = slog.New(slog.NewTextHandler(io.Discard, &slog.HandlerOptions{}))
+regclient__regclient:scheme/ocidir/ocidir.go:83: slog:            slog.New(slog.NewTextHandler(io.Discard, &slog.HandlerOptions{})),
+syncthing__syncthing:cmd/infra/ursrv/main.go:24: slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+syncthing__syncthing:cmd/infra/stupgrades/main.go:47: slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{

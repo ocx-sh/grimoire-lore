@@ -1,0 +1,106 @@
+aquasecurity__trivy:pkg/vex/repo.go:32: logOnce *xsync.Map[string, *sync.Once]
+aquasecurity__trivy:pkg/vex/repo.go:65: logOnce: new(xsync.Map[string, *sync.Once]),
+aquasecurity__trivy:pkg/cache/memory.go:15: artifacts sync.Map // Map to store artifact information
+aquasecurity__trivy:pkg/cache/memory.go:16: blobs     sync.Map // Map to store blob information
+aquasecurity__trivy:pkg/cache/memory.go:89: c.artifacts = sync.Map{}
+aquasecurity__trivy:pkg/cache/memory.go:90: c.blobs = sync.Map{}
+aquasecurity__trivy:pkg/cache/memory.go:96: c.artifacts = sync.Map{}
+aquasecurity__trivy:pkg/cache/memory.go:97: c.blobs = sync.Map{}
+aquasecurity__trivy:pkg/mapfs/file.go:27: files          xsync.Map[string, *file]
+aquasecurity__trivy:pkg/mapfs/file.go:190: files: xsync.Map[string, *file]{},
+aquasecurity__trivy:pkg/mapfs/fs.go:60: files: xsync.Map[string, *file]{},
+aquasecurity__trivy:pkg/x/sync/sync.go:6: m sync.Map
+aquasecurity__trivy:pkg/fanal/analyzer/fs.go:20: files *sync.Map[Type, *mapfs.FS]
+aquasecurity__trivy:pkg/fanal/analyzer/fs.go:31: files: new(sync.Map[Type, *mapfs.FS]),
+bazel-contrib__rules_go:tests/integration/googleapis/color_service.go:28: colors sync.Map
+bazelbuild__bazel-gazelle:v2/walk/cache.go:33: entryMap   sync.Map
+caddyserver__caddy:internal/filesystems/map.go:25: m sync.Map
+caddyserver__caddy:usagepool.go:142: // Range iterates the pool similarly to how sync.Map.Range() does:
+caddyserver__caddy:modules/caddyhttp/logging.go:237: handlers sync.Map
+caddyserver__caddy:modules/caddyhttp/reverseproxy/reverseproxy.go:50: // inFlightRequests uses sync.Map with atomic.Int64 for lock-free updates on the hot path
+caddyserver__caddy:modules/caddyhttp/reverseproxy/reverseproxy.go:51: var inFlightRequests sync.Map
+cockroachdb__pebble:vfs/mem_fs.go:99: lockedFiles sync.Map
+cockroachdb__pebble:sstable/block/category_stats.go:219: statsMap sync.Map
+containerd__containerd:internal/cri/server/podsandbox/store.go:27: m sync.Map
+containerd__containerd:core/runtime/v2/task_mounts_deprecated.go:68: cache sync.Map
+containerd__containerd:core/runtime/v2/shim_manager.go:185: runtimePaths sync.Map
+dominikh__go-tools:staticcheck/fakexml/typeinfo.go:73: var tinfoMap sync.Map // map[reflect.Type]*typeInfo
+etcd-io__etcd:server/storage/backend/batch_tx.go:56: var safeRangeBucketNames sync.Map // map[string]struct{}
+golang__tools:internal/gcimporter/exportdata.go:375: var exportMap sync.Map // package dir → func() (string, error)
+golang__tools:internal/gopathwalk/walk.go:142: added sync.Map // map[string]bool
+golang__tools:internal/modindex/index.go:128: var cache sync.Map // from gomodcache (string) to *cacheEntry
+golangci__golangci-lint:internal/cache/cache.go:39: pkgHashes     sync.Map
+golangci__golangci-lint:pkg/fsutils/filecache.go:12: files sync.Map
+golangci__golangci-lint:pkg/fsutils/linecache.go:12: files     sync.Map
+golangci__golangci-lint:pkg/fsutils/fsutils.go:49: var evalSymlinkCache sync.Map
+google__go-containerregistry:pkg/v1/remote/pusher.go:44: onces sync.Map
+google__go-containerregistry:pkg/v1/remote/pusher.go:47: errors sync.Map
+google__go-containerregistry:pkg/v1/remote/pusher.go:98: writers sync.Map
+google__go-containerregistry:pkg/v1/remote/puller.go:31: readers sync.Map
+goreleaser__goreleaser:internal/pipe/ko/ko.go:47: baseImages     sync.Map
+goreleaser__goreleaser:internal/builders/golang/build.go:652: var ellipsisLog = sync.Map{}
+grpc__grpc-go:internal/xds/clients/lrsclient/load_store.go:138: // TODO(purnesh42h): Use regular maps with mutexes instead of sync.Map here.
+grpc__grpc-go:internal/xds/clients/lrsclient/load_store.go:149: drops            sync.Map // map[string]*uint64
+grpc__grpc-go:internal/xds/clients/lrsclient/load_store.go:150: localityRPCCount sync.Map // map[clients.Locality]*rpcCountData
+grpc__grpc-go:internal/xds/clients/lrsclient/load_store.go:353: serverLoads sync.Map // map[string]*rpcLoadData
+grpc__grpc-go:credentials/oauth/oauth.go:95: // TODO: the returned TokenSource is reusable. Store it in a sync.Map, with
+ko-build__ko:pkg/commands/resolver.go:339: var sm sync.Map
+ko-build__ko:pkg/commands/cache.go:40: cache sync.Map
+ko-build__ko:pkg/resolve/resolve.go:53: var sm sync.Map
+oras-project__oras:cmd/oras/internal/display/status/utils.go:79: func DeduplicatedFilter(committed *sync.Map) func(desc ocispec.Descriptor) bool {
+oras-project__oras:cmd/oras/internal/display/status/tty.go:36: committed *sync.Map
+oras-project__oras:cmd/oras/internal/display/status/tty.go:45: committed: &sync.Map{},
+oras-project__oras:cmd/oras/internal/display/status/tty.go:165: committed sync.Map
+oras-project__oras:cmd/oras/internal/display/status/tty.go:234: committed *sync.Map
+oras-project__oras:cmd/oras/internal/display/status/tty.go:243: committed: &sync.Map{},
+oras-project__oras:cmd/oras/internal/display/status/tty.go:300: committed *sync.Map
+oras-project__oras:cmd/oras/internal/display/status/tty.go:309: committed: &sync.Map{},
+oras-project__oras:cmd/oras/internal/display/status/text.go:36: committed *sync.Map
+oras-project__oras:cmd/oras/internal/display/status/text.go:45: committed: &sync.Map{},
+oras-project__oras:cmd/oras/internal/display/status/text.go:141: committed *sync.Map
+oras-project__oras:cmd/oras/internal/display/status/text.go:150: committed: &sync.Map{},
+oras-project__oras:cmd/oras/internal/display/status/text.go:199: committed *sync.Map
+oras-project__oras:cmd/oras/internal/display/status/text.go:208: committed: &sync.Map{},
+oras-project__oras:cmd/oras/internal/display/status/text.go:251: committed *sync.Map
+oras-project__oras:cmd/oras/internal/display/status/text.go:260: committed: &sync.Map{},
+oras-project__oras:cmd/oras/internal/option/binary_target.go:63: target.From.warned = make(map[string]*sync.Map)
+oras-project__oras:cmd/oras/internal/option/remote.go:110: warned                map[string]*sync.Map
+oras-project__oras:cmd/oras/internal/option/remote.go:510: remo.warned = make(map[string]*sync.Map)
+oras-project__oras:cmd/oras/internal/option/remote.go:514: warned = &sync.Map{}
+oras-project__oras:cmd/oras/root/pull.go:199: var printed sync.Map
+oras-project__oras:cmd/oras/root/pull.go:300: func notifyOnce(notified *sync.Map, s ocispec.Descriptor, notify func(ocispec.Descriptor) error) error {
+oras-project__oras-go:internal/status/tracker.go:27: status sync.Map // map[descriptor.Descriptor]chan struct{}
+oras-project__oras-go:internal/cas/memory.go:33: content sync.Map // map[descriptor.Descriptor][]byte
+oras-project__oras-go:content/file/file.go:128: digestToPath sync.Map // map[digest.Digest]string
+oras-project__oras-go:content/file/file.go:129: nameToStatus sync.Map // map[string]*nameStatus
+oras-project__oras-go:content/file/file.go:130: tmpFiles     sync.Map // map[string]bool
+oras-project__oras-go:registry/remote/warning.go:77: var seen sync.Map
+oras-project__oras-go:registry/remote/auth/cache.go:59: tokens sync.Map // map[string]string
+oras-project__oras-go:registry/remote/auth/cache.go:64: status sync.Map // map[string]*syncutil.Once
+oras-project__oras-go:registry/remote/auth/cache.go:65: cache  sync.Map // map[string]*cacheEntry
+oras-project__oras-go:registry/remote/credentials/memory_store.go:28: store sync.Map
+prometheus__prometheus:scrape/manager.go:421: toDelete sync.Map // Stores the list of names of pools to delete.
+restic__restic:internal/backend/retry/backend_retry.go:25: failedLoads sync.Map
+restic__restic:internal/backend/cache/cache.go:23: forgotten sync.Map
+restic__restic:internal/repository/key.go:52: var testKeyInjection = sync.Map{}
+restic__restic:internal/data/node.go:417: var unknownGenericAttributesHandlingHistory sync.Map
+restic__restic:internal/fs/node_windows.go:25: eaSupportedVolumesMap = sync.Map{}
+syncthing__syncthing:lib/model/model.go:3385: // syncMutexMap is a type safe wrapper for a sync.Map that holds mutexes
+syncthing__syncthing:lib/model/model.go:3387: inner sync.Map
+tailscale__tailscale:wgengine/filter/filter.go:489: var unknownProtoStringCache sync.Map // ipproto.Proto -> string
+tailscale__tailscale:client/web/web.go:89: browserSessions sync.Map
+tailscale__tailscale:tsweb/varz/varz.go:98: var prometheusMetricCache sync.Map // string => *prometheusMetricDetails
+tailscale__tailscale:tsweb/varz/varz.go:398: var structSortedFieldsCache sync.Map // reflect.Type => []sortedStructField
+tailscale__tailscale:tsweb/tsweb.go:663: var responseCodeCache sync.Map
+tailscale__tailscale:util/deephash/deephash.go:193: // *reflect.rtype pointer. A safer approach is to use a global sync.Map
+tailscale__tailscale:util/deephash/deephash.go:380: var typeHasherCache sync.Map // map[reflect.Type]typeHasherFunc
+tailscale__tailscale:util/zstdframe/options.go:119: var encoderPools sync.Map // map[encoderOptions]*sync.Pool -> *zstd.Encoder
+tailscale__tailscale:util/zstdframe/options.go:151: var streamingEncoderPools sync.Map // map[encoderOptions]*sync.Pool -> *zstd.Encoder
+tailscale__tailscale:util/zstdframe/options.go:242: var decoderPools sync.Map // map[decoderOptions]*sync.Pool -> *zstd.Decoder
+tailscale__tailscale:syncs/syncs.go:242: // It is preferred over [sync.Map] for maps with entries that change
+tailscale__tailscale:ipn/ipnlocal/local.go:394: serveProxyHandlers sync.Map                          // string (HTTPHandler.Proxy) => *reverseProxy
+tailscale__tailscale:ipn/ipnlocal/extension_host.go:90: extByType sync.Map // reflect.Type -> ipnext.Extension
+tailscale__tailscale:metrics/multilabelmap.go:28: m sync.Map // map[T]expvar.Var
+tailscale__tailscale:net/tlsdial/tlsdial.go:45: var tlsdialWarningPrinted sync.Map // map[string]bool
+tailscale__tailscale:net/netmon/loghelper.go:24: var formatLastSeen sync.Map // map[string]int64
+tailscale__tailscale:net/udprelay/server.go:101: serverEndpointByVNI   sync.Map // key is uint32 (Geneve VNI), value is [*serverEndpoint]

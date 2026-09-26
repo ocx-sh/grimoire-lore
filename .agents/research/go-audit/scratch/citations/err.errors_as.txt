@@ -1,0 +1,200 @@
+aquasecurity__trivy:pkg/vex/oci/oci.go:371: if !errors.As(err, &terr) {
+aquasecurity__trivy:pkg/vex/oci/oci.go:382: if !errors.As(err, &terr) {
+aquasecurity__trivy:pkg/oci/artifact.go:312: if !errors.As(err, &terr) {
+aquasecurity__trivy:pkg/dependency/parser/python/packaging/parse.go:37: if e := textproto.ProtocolError(""); errors.As(err, &e) {
+aquasecurity__trivy:pkg/dependency/parser/java/pom/parse.go:1071: return errors.As(err, &ue)
+aquasecurity__trivy:pkg/fanal/analyzer/analyzer.go:537: case errors.As(analyzeErr, &userErr):
+bazel-contrib__rules_go:go/tools/gopackagesdriver/bazel.go:110: if exitErr := (*exec.ExitError)(nil); errors.As(err, &exitErr) {
+bazel-contrib__rules_go:go/tools/gopackagesdriver/bazel.go:205: if !errors.As(err, &exitErr) {
+bazelbuild__bazel-gazelle:language/go/utils.go:246: if errors.As(err, &xerr) {
+bazelbuild__bazel-gazelle:v2/cmd/gazelle/update/update.go:1190: return errors.As(err, &pe) && pe.Err == syscall.EISDIR
+bazelbuild__bazel-gazelle:v2/testtools/files.go:333: if !errors.As(err, &e) {
+caddyserver__caddy:modules/caddytls/ech.go:482: if errors.As(err, &publishErrs) {
+caddyserver__caddy:modules/caddyhttp/metrics.go:373: if errors.As(err, &handlerErr) {
+caddyserver__caddy:modules/caddyhttp/fileserver/staticfiles.go:693: if errors.As(originalErr, &pathErr) {
+caddyserver__caddy:modules/caddyhttp/requestbody/requestbody.go:81: if errors.As(err, &mbe) {
+caddyserver__caddy:modules/caddyhttp/templates/templates.go:503: if errors.As(err, &handlerErr) {
+caddyserver__caddy:modules/caddyhttp/templates/tplcontext.go:272: if errors.As(err, &bodyLimit) {
+caddyserver__caddy:modules/caddyhttp/logging.go:208: if errors.As(err, &handlerErr) {
+caddyserver__caddy:modules/caddyhttp/replacer.go:456: if errors.As(err, &handlerErr) && errors.As(handlerErr.Err, &maxBytes) {
+caddyserver__caddy:modules/caddyhttp/errors.go:35: if errors.As(err, &he) {
+caddyserver__caddy:modules/caddyhttp/vars.go:207: if errors.As(vv, &bodyLimit) {
+caddyserver__caddy:modules/caddyhttp/vars.go:354: if errors.As(vv, &bodyLimit) {
+caddyserver__caddy:listen_reuseUnixSocket_windows.go:70: hasNoListeningServerProcess := errors.As(err, &errno) && errno == WSAECONNREFUSED
+caddyserver__caddy:cmd/main.go:74: if errors.As(err, &exitError) {
+caddyserver__caddy:cmd/storagefuncs.go:55: if errors.As(err, &jsonError) {
+cli__cli:script/build.go:190: return errors.As(err, &pe) && strings.Contains(pe.Err.Error(), "Access is denied")
+cli__cli:internal/ghcmd/cmd.go:223: if errors.As(err, &httpErr) && httpErr.StatusCode == 401 {
+cli__cli:internal/ghcmd/cmd.go:288: if errors.As(err, &flagError) || strings.HasPrefix(err.Error(), "unknown command ") {
+cli__cli:internal/skills/discovery/discovery.go:329: return errors.As(err, &httpErr) && httpErr.StatusCode == http.StatusNotFound
+cli__cli:git/client.go:185: if ok := errors.As(configErr, &gitErr); ok && gitErr.ExitCode != 1 {
+cli__cli:git/client.go:232: if ok := errors.As(err, &gitErr); ok && len(gitErr.Stderr) == 0 {
+cli__cli:git/client.go:338: if ok := errors.As(err, &gitErr); ok && gitErr.ExitCode == 1 {
+cli__cli:git/client.go:459: if ok := errors.As(err, &gitError); ok && gitError.ExitCode != 1 {
+cli__cli:git/client.go:548: if ok := errors.As(err, &gitError); ok && gitError.ExitCode == 1 {
+cli__cli:git/client.go:563: if ok := errors.As(err, &gitError); ok && gitError.ExitCode == 1 {
+cli__cli:git/client.go:771: if errors.As(err, &execError) && execError.ExitCode() == 128 {
+cli__cli:git/client.go:806: if errors.As(err, &exitErr) && exitErr.ExitCode() == 1 {
+cli__cli:pkg/cmd/status/status.go:288: if errors.As(err, &httpErr) {
+cli__cli:pkg/cmd/status/status.go:345: if !errors.As(err, &httpErr) || httpErr.StatusCode != 404 {
+cli__cli:pkg/cmd/status/status.go:553: if !errors.As(err, &httpErr) || httpErr.StatusCode != 404 {
+cli__cli:pkg/cmd/secret/shared/base_repo.go:29: if !errors.As(err, &ambiguousBaseRepoErr) {
+cli__cli:pkg/cmd/release/shared/upload.go:135: return errors.As(err, &httpError) && httpError.StatusCode >= 500
+cli__cli:pkg/cmd/release/create/http.go:124: if errors.As(err, &httpErr) && httpErr.StatusCode == http.StatusNotFound {
+cli__cli:pkg/cmd/release/create/http.go:169: if errors.As(err, &httpErr) &&
+cli__cli:pkg/cmd/repo/autolink/delete/http.go:29: if errors.As(err, &httpErr) && httpErr.StatusCode == http.StatusNotFound {
+cli__cli:pkg/cmd/repo/autolink/list/http.go:31: if errors.As(err, &httpErr) && httpErr.StatusCode == http.StatusNotFound {
+cli__cli:pkg/cmd/repo/autolink/view/http.go:31: if errors.As(err, &httpErr) && httpErr.StatusCode == http.StatusNotFound {
+cli__cli:pkg/cmd/repo/autolink/create/http.go:44: if errors.As(err, &httpErr) && httpErr.StatusCode == http.StatusNotFound {
+cli__cli:pkg/cmd/repo/view/http.go:42: if errors.As(err, &httpError) && httpError.StatusCode == 404 {
+cli__cli:pkg/cmd/repo/create/create.go:727: if errors.As(err, &execError) && execError.ExitCode() == 128 {
+cli__cli:pkg/cmd/repo/fork/fork.go:368: if errors.As(err, &execError) && execError.ExitCode() == 128 {
+cli__cli:pkg/cmd/pr/create/create.go:523: if err != nil && !errors.As(err, &notFound) {
+cli__cli:pkg/cmd/pr/merge/merge.go:533: if httpErr := (api.HTTPError{}); errors.As(err, &httpErr) {
+cli__cli:pkg/cmd/variable/get/get.go:121: if errors.As(err, &httpErr) && httpErr.StatusCode == http.StatusNotFound {
+cli__cli:pkg/cmd/variable/set/http.go:53: } else if errors.As(err, &postErr) && postErr.StatusCode == 409 {
+cli__cli:pkg/cmd/variable/set/http.go:67: } else if errors.As(err, &postErr) && postErr.StatusCode == 409 {
+cli__cli:pkg/cmd/variable/set/http.go:75: } else if errors.As(err, &postErr) && postErr.StatusCode == 409 {
+cli__cli:pkg/cmd/codespace/create.go:326: if !errors.As(err, &aerr) || aerr.AllowPermissionsURL == "" {
+cli__cli:pkg/cmd/auth/status/status.go:410: if errors.As(err, &networkError) && networkError.Timeout() {
+cli__cli:pkg/cmd/workflow/shared/shared.go:203: if errors.As(err, &httpErr) && httpErr.StatusCode == 404 {
+cli__cli:pkg/cmd/run/rerun/rerun.go:209: if errors.As(err, &httpError) && httpError.StatusCode == 403 {
+cli__cli:pkg/cmd/run/rerun/rerun.go:231: if errors.As(err, &httpError) && httpError.StatusCode == 403 {
+cli__cli:pkg/cmd/run/shared/shared.go:293: if !errors.As(err, &httpError) {
+cli__cli:pkg/cmd/extension/http.go:58: if errors.As(err, &httpErr) && httpErr.StatusCode == http.StatusNotFound {
+cli__cli:pkg/cmd/extension/http.go:126: if errors.As(err, &httpErr) && httpErr.StatusCode == http.StatusNotFound {
+cli__cli:pkg/cmd/extension/http.go:154: if errors.As(err, &httpErr) && httpErr.StatusCode == http.StatusNotFound {
+cli__cli:pkg/cmd/gist/delete/delete.go:153: if errors.As(err, &httpErr) && httpErr.StatusCode == 404 {
+cli__cli:pkg/cmd/gist/shared/shared.go:75: if errors.As(err, &httpErr) && httpErr.StatusCode == 404 {
+cli__cli:pkg/cmd/skills/search/search.go:697: if !errors.As(err, &httpErr) {
+cockroachdb__pebble:internal/base/error.go:62: if errors.As(err, &e) {
+cockroachdb__pebble:event.go:1494: if errors.As(err, &e) {
+containerd__containerd:internal/fsview/overlay.go:247: if !errors.As(err, &pe) && firstErr == nil {
+containerd__containerd:internal/fsview/overlay.go:326: if !errors.As(err, &pe) && firstErr == nil {
+containerd__containerd:core/remotes/docker/resolver.go:854: if errors.As(err, &netErr) && netErr.Timeout() {
+containerd__containerd:core/remotes/docker/resolver.go:1062: if errors.As(err, &tlsErr) && string(tlsErr.RecordHeader[:]) == "HTTP/" {
+containerd__containerd:pkg/imageverifier/bindir/bindir.go:252: if ee := (&exec.ExitError{}); errors.As(err, &ee) && ee.ProcessState.Exited() {
+dominikh__go-tools:internal/robustio/robustio_flaky.go:35: if errors.As(err, &errno) && (lowestErrno == 0 || errno < lowestErrno) {
+dominikh__go-tools:internal/robustio/robustio_darwin.go:17: if errors.As(err, &errno) {
+dominikh__go-tools:internal/robustio/robustio_windows.go:18: if errors.As(err, &errno) {
+etcd-io__etcd:server/etcdserver/api/membership/errors.go:34: return errors.As(err, &e) && e.ErrorCode == v2error.EcodeKeyNotFound
+etcd-io__etcd:server/etcdserver/api/rafthttp/http.go:151: case errors.As(err, &writerErr):
+etcd-io__etcd:server/etcdserver/api/rafthttp/http.go:312: case errors.As(err, &writerErr):
+etcd-io__etcd:server/embed/config_logging.go:275: case errors.As(err, &syntaxError):
+etcd-io__etcd:server/embed/config_logging.go:277: case errors.As(err, &unmarshalTypeError):
+etcd-io__etcd:server/storage/wal/wal.go:307: if errors.As(err, &linkErr) {
+etcd-io__etcd:server/lease/leasehttp/http.go:68: if errors.As(err, &maxBytesErr) {
+etcd-io__etcd:etcdctl/ctlv3/command/lock_command.go:64: if errors.As(err, &exitErr) {
+etcd-io__etcd:client/v3/leasing/kv.go:291: if errors.As(err, &serverErr) {
+etcd-io__etcd:client/v3/client.go:612: if errors.As(err, &serverErr) {
+etcd-io__etcd:client/v3/retry.go:57: if errors.As(eErr, &serverErr) && serverErr.Code() != codes.Unavailable {
+etcd-io__etcd:client/pkg/fileutil/preallocate_unix.go:32: if errors.As(err, &errno) && (errno == syscall.ENOTSUP || errno == syscall.EINTR) {
+etcd-io__etcd:client/pkg/fileutil/preallocate_unix.go:45: if errors.As(err, &errno) && errno == syscall.ENOTSUP {
+etcd-io__etcd:pkg/netutil/netutil.go:221: return errors.As(err, &nerr) && nerr.Timeout()
+golang__tools:internal/jsonrpc2/messages.go:171: if errors.As(err, &wrapped) {
+golang__tools:internal/jsonrpc2/conn.go:276: case errors.As(err, &wireError) && wireError.Code == -32800: // JSON RPC request canceled
+golang__tools:internal/jsonrpc2_v2/messages.go:131: if errors.As(err, &wrapped) {
+golang__tools:internal/robustio/robustio_darwin.go:17: if errors.As(err, &errno) {
+golang__tools:internal/robustio/robustio_darwin.go:25: if errors.As(err, &errno) {
+golang__tools:internal/robustio/robustio_windows.go:18: if errors.As(err, &errno) {
+golang__tools:internal/robustio/robustio_windows.go:31: if errors.As(err, &errno) {
+golang__tools:gopls/internal/cache/mod.go:303: _ = errors.As(goCmdError, &moduleErrs)
+golang__tools:go/analysis/passes/errorsas/errorsas.go:26: errors.As(err, unwrappedErr) // should use &unwrappedErr, DNSError.Error has a pointer receiver
+golang__tools:go/analysis/passes/errorsas/errorsas.go:53: continue // spread call: errors.As(pair())
+golang__tools:go/analysis/passes/modernize/errorsastype.go:39: //	if errors.As(err, &myerr) { ... }
+golang__tools:go/analysis/passes/modernize/errorsastype.go:53: //	case errors.As(err, &myerr):
+golang__tools:go/analysis/passes/modernize/errorsastype.go:66: // - if myerr := new(E); errors.As(err, myerr); { ... }
+golang__tools:go/analysis/passes/modernize/errorsastype.go:67: // - if errors.As(err, myerr) && othercond { ... }
+golang__tools:go/analysis/passes/modernize/errorsastype.go:77: continue // spread call: errors.As(pair())
+golang__tools:go/analysis/passes/modernize/errorsastype.go:186: if curCond.ParentEdgeKind() == edge.UnaryExpr_X { // if !errors.As(err, &v)
+golang__tools:go/analysis/passes/modernize/errorsastype.go:210: // Have: if errors.As(err, &v) { ... }
+golang__tools:go/analysis/passes/modernize/errorsastype.go:243: //   if errors.As(err, &v) { ... }
+golang__tools:go/analysis/passes/modernize/doc.go:156: if errors.As(err, &myerr) {
+golang__vuln:internal/test/buildtest.go:79: if ee := (*exec.ExitError)(nil); errors.As(err, &ee) && len(ee.Stderr) > 0 {
+golang__vuln:cmd/govulncheck/main.go:29: if errors.As(err, &e) {
+golangci__golangci-lint:internal/go/cache/cache_gcil.go:11: return errors.As(err, &errENF)
+golangci__golangci-lint:pkg/goanalysis/pkgerrors/errors.go:30: if !errors.As(err, &ill) {
+golangci__golangci-lint:pkg/commands/migrate.go:160: if !errors.As(err, &v) {
+golangci__golangci-lint:pkg/commands/config_verify.go:33: if !errors.As(err, &v) {
+google__go-containerregistry:internal/redact/redact.go:47: if ok := errors.As(err, &uerr); !ok {
+google__go-containerregistry:pkg/v1/remote/referrers.go:82: if errors.As(err, &terr) && terr.StatusCode == http.StatusNotFound {
+google__go-containerregistry:pkg/v1/remote/pusher.go:433: if errors.As(err, &terr) {
+google__go-containerregistry:pkg/v1/remote/transport/ping.go:207: if errors.As(err, target) {
+google__go-containerregistry:pkg/v1/remote/transport/bearer.go:384: if errors.As(err, &terr) && terr.StatusCode == http.StatusNotFound {
+google__go-containerregistry:pkg/name/errors.go:34: return errors.As(target, &berr)
+google__go-containerregistry:pkg/name/errors.go:47: return errors.As(err, &berr)
+google__go-containerregistry:pkg/registry/blobs.go:213: if errors.As(err, &rerr) {
+google__go-containerregistry:pkg/registry/blobs.go:225: if errors.As(err, &rerr) {
+google__go-containerregistry:pkg/registry/blobs.go:261: if errors.As(err, &rerr) {
+google__go-containerregistry:pkg/registry/blobs.go:273: if errors.As(err, &rerr) {
+google__go-containerregistry:pkg/registry/blobs.go:290: if errors.As(err, &rerr) {
+google__go-containerregistry:pkg/registry/blobs.go:378: if errors.As(err, &verify.Error{}) {
+google__go-containerregistry:pkg/registry/blobs.go:501: if errors.As(err, &verify.Error{}) {
+google__go-containerregistry:pkg/gcrane/copy.go:272: if errors.As(err, &terr) {
+google__go-containerregistry:pkg/gcrane/copy.go:285: if errors.As(err, &terr) {
+google__go-containerregistry:pkg/crane/copy.go:56: if errors.As(err, &terr) {
+google__go-containerregistry:pkg/crane/copy.go:118: if errors.As(err, &terr) {
+google__go-github:example/basicauth/main.go:51: if errors.As(err, new(*github.TwoFactorAuthError)) {
+google__go-github:github/security_advisories.go:147: if errors.As(err, new(*AcceptedError)) {
+google__go-github:github/github.go:1522: if errors.As(err, &rateLimitError) &&
+google__go-github:github/github.go:1534: if errors.As(err, &rerr) && rerr.RetryAfter != nil {
+google__go-github:github/github.go:1777: if !errors.As(target, &v) {
+google__go-github:github/github.go:1842: if !errors.As(target, &v) {
+google__go-github:github/github.go:1869: if !errors.As(target, &v) {
+google__go-github:github/github.go:1900: if !errors.As(target, &v) {
+google__go-github:github/github.go:1941: if !errors.As(target, &v) {
+google__go-github:github/github.go:2112: if errors.As(err, &rerr) && rerr.Response.StatusCode == http.StatusNotFound {
+google__go-github:github/repos.go:2388: return errors.As(err, &errorResponse) && errorResponse.Message == githubBranchNotProtected
+google__go-github:github/doc.go:128: if errors.As(err, new(*github.RateLimitError)) {
+google__go-github:github/doc.go:131: if errors.As(err, new(*github.AbuseRateLimitError)) {
+google__go-github:github/doc.go:149: if errors.As(err, new(*github.AcceptedError)) {
+google__go-github:github/code_scanning.go:411: if !errors.As(err, &acceptedError) {
+goreleaser__goreleaser:internal/pipe/gomod/gomod_proxy.go:248: return errors.As(err, &e) && strings.Contains(e.details, "404 Not Found")
+goreleaser__goreleaser:internal/pipe/pipe.go:32: return errors.As(err, &ErrSkip{})
+goreleaser__goreleaser:internal/client/github.go:480: if !errors.As(err, &rerr) || rerr.Message != "Reference already exists" {
+goreleaser__goreleaser:internal/client/git.go:219: return errors.As(err, &kerr)
+grpc__grpc-go:status/status.go:113: if errors.As(err, &gs) {
+grpc__grpc-go:clientconn_disconnect_reason_noplan9.go:43: case errors.As(err, &sysErr):
+grpc__grpc-go:internal/xds/xdsclient/xdsresource/errors.go:75: if errors.As(err, &xe) {
+grpc__grpc-go:internal/xds/clients/xdsclient/internal/xdsresource/errors.go:74: if ok := errors.As(e, &xe); ok {
+grpc__grpc-go:internal/transport/http_util.go:395: return errors.As(err, &ioError{})
+hashicorp__terraform:internal/backend/remote-state/oci/client.go:70: if errors.As(headErr, &ociHeadErr) && ociHeadErr.GetHTTPStatusCode() == 404 {
+hashicorp__terraform:internal/backend/remote-state/oci/client.go:96: if errors.As(err, &ociErr) {
+hashicorp__terraform:internal/backend/remote-state/cos/client.go:391: if errors.As(err, &sdkErr) {
+hashicorp__terraform:internal/backend/remote-state/s3/errors.go:16: // As is equivalent to errors.As(), but returns the value in-line
+hashicorp__terraform:internal/backend/remote-state/s3/errors.go:19: ok := errors.As(err, &as)
+hashicorp__terraform:internal/backend/remote-state/s3/validate.go:265: if errors.As(err, &jsonErr) {
+hashicorp__terraform:internal/plans/planfile/reader.go:27: // errors.As() if they need to distinguish between corrupt plan files and more
+hashicorp__terraform:internal/plans/planfile/wrapped.go:91: if errors.As(localErr, &ulp) {
+hashicorp__terraform:internal/cloud/backend.go:283: if errors.As(err, &serviceDiscoErr) {
+hashicorp__terraform:internal/cloud/test.go:328: case errors.As(err, &serviceDiscoErr):
+hashicorp__terraform:internal/states/statefile/read.go:24: // error text). Callers can check against this type with errors.As() if they
+hashicorp__terraform:internal/command/stacks.go:257: if errors.As(err, &serviceDiscoErr) {
+hashicorp__terraform:internal/command/meta_backend.go:140: if errs := providerPluginErrors(nil); errors.As(err, &errs) {
+hashicorp__terraform:internal/command/show.go:220: if errors.As(planErr, &unLocal) {
+hashicorp__terraform:internal/command/show.go:228: } else if errors.As(planErr, &unMisc) {
+hashicorp__terraform:internal/command/show.go:236: } else if errors.As(stateErr, &unState) {
+hashicorp__terraform:internal/command/show.go:244: } else if errors.As(stateErr, &unMisc) {
+hashicorp__terraform:internal/tfdiags/diagnostics.go:155: if errors.As(err, &asErr) {
+hashicorp__terraform:internal/tfdiags/diagnostics.go:163: if errors.As(err, &asErrWithWarnings) {
+hashicorp__terraform:internal/tfdiags/diagnostics.go:170: if errors.As(err, &asHCLDiags) {
+ko-build__ko:pkg/commands/options/build.go:156: if !errors.As(err, &viper.ConfigFileNotFoundError{}) {
+kubernetes-sigs__controller-runtime:tools/setup-envtest/env/exit.go:72: if !errors.As(err, exit) {
+kubernetes-sigs__controller-runtime:pkg/reconcile/reconcile.go:196: return errors.As(target, &tp)
+kubernetes-sigs__controller-runtime:pkg/internal/source/kind.go:92: case errors.As(lastErr, &kindMatchErr):
+kubernetes-sigs__controller-runtime:pkg/webhook/admission/defaulter_custom.go:137: if errors.As(err, &apiStatus) {
+kubernetes-sigs__controller-runtime:pkg/webhook/admission/validator_custom.go:146: if errors.As(err, &apiStatus) {
+oras-project__oras:cmd/oras/internal/option/binary_target.go:74: if !errors.As(err, &copyErr) {
+oras-project__oras:cmd/oras/internal/option/target.go:258: if !errors.As(err, &errResp) {
+oras-project__oras:cmd/oras/internal/option/remote.go:585: if errors.As(err, &errResp) {
+oras-project__oras:cmd/oras/internal/errors/errors.go:126: if errors.As(err, &copyErr) {
+oras-project__oras:cmd/oras/internal/errors/errors.go:140: if errors.As(inner, &unwrapper) {
+oras-project__oras:cmd/oras/internal/errors/errors.go:144: } else if errors.As(inner, &multiUnwrapper) {
+oras-project__oras:cmd/oras/root/file.go:80: if errors.As(err, &pathErr) {
+oras-project__oras:cmd/oras/root/attach.go:118: if errors.As(err, &oerr) && oerr.OperationType == oerrors.OperationTypeParseArtifactReference {
+oras-project__oras:cmd/oras/root/cp.go:252: if errors.As(err, &copyErr) && copyErr.Op == "Mount" {
+oras-project__oras:cmd/oras/root/cp.go:254: if errors.As(copyErr.Err, &errResp) {
+oras-project__oras:cmd/oras/root/tag.go:84: if errors.As(err, &inner) {
+oras-project__oras-go:copy.go:378: if errors.As(err, &ec) && isMissingCode(ec.Code) {
+oras-project__oras-go:copy.go:385: if errors.As(err, &ecs) {
+oras-project__oras-go:registry/remote/internal/errutil/errutil.go:53: return errors.As(err, &ec) && ec.Code == code

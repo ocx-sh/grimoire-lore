@@ -1,0 +1,16 @@
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/actions.go:565: stop := context.AfterFunc(runContext, cancel)
+grpc__grpc-go:internal/grpcsync/callback_serializer.go:111: context.AfterFunc(ctx, cs.callbacks.Close)
+grpc__grpc-go:internal/xds/clients/internal/syncutil/callback_serializer.go:85: context.AfterFunc(ctx, cs.callbacks.Close)
+tailscale__tailscale:ipn/desktop/sessions_windows.go:369: context.AfterFunc(sw.ctx, func() {
+tailscale__tailscale:tstest/natlab/vnet/vnet.go:443: context.AfterFunc(n.s.shutdownCtx, func() { tc.SetDeadline(time.Now()) })
+tailscale__tailscale:tstest/natlab/vnet/vnet.go:469: context.AfterFunc(n.s.shutdownCtx, func() { tc.SetDeadline(time.Now()) })
+tailscale__tailscale:tstest/natlab/vnet/vnet.go:480: context.AfterFunc(n.s.shutdownCtx, func() { tc.SetDeadline(time.Now()) })
+tailscale__tailscale:tstest/natlab/vnet/vnet.go:491: context.AfterFunc(n.s.shutdownCtx, func() { tc.SetDeadline(time.Now()) })
+tailscale__tailscale:tstest/natlab/vnet/vnet.go:501: context.AfterFunc(n.s.shutdownCtx, func() { tc.SetDeadline(time.Now()) })
+tailscale__tailscale:tstest/natlab/vnet/vnet.go:512: context.AfterFunc(n.s.shutdownCtx, func() { tc.SetDeadline(time.Now()) })
+tailscale__tailscale:tstest/natlab/vnet/vnet.go:526: context.AfterFunc(n.s.shutdownCtx, func() { tc.SetDeadline(time.Now()) })
+tailscale__tailscale:tstest/natlab/vnet/vnet.go:1337: context.AfterFunc(s.shutdownCtx, func() {
+tailscale__tailscale:net/ace/ace.go:74: stop := context.AfterFunc(ctx, func() {
+tailscale__tailscale:net/netmon/loghelper.go:33: context.AfterFunc(ctx, sub.Close)
+tailscale__tailscale:net/porttrack/porttrack.go:119: stop := context.AfterFunc(ctx, func() {
+tailscale__tailscale:feature/androiddns/androiddns.go:184: r.stop = context.AfterFunc(ctx, func() { c.Close() })

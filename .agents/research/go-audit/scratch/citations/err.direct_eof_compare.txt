@@ -1,0 +1,200 @@
+aquasecurity__trivy:internal/testutil/gzip.go:55: if err == io.EOF {
+aquasecurity__trivy:internal/testutil/gzip.go:68: if err == io.EOF {
+aquasecurity__trivy:magefiles/vex.go:304: if err := decoder.Decode(&finding); err == io.EOF {
+aquasecurity__trivy:pkg/dependency/parser/java/pom/pom.go:332: if err == io.EOF {
+aquasecurity__trivy:pkg/dependency/parser/java/pom/pom.go:346: if err == io.EOF {
+aquasecurity__trivy:pkg/fanal/analyzer/language/java/gradle/pom.go:57: if err == io.EOF {
+aquasecurity__trivy:pkg/fanal/walker/vm.go:73: if err == io.EOF {
+aquasecurity__trivy:pkg/fanal/walker/tar.go:40: if err == io.EOF {
+aquasecurity__trivy:pkg/fanal/utils/utils.go:117: if n, err := content.Read(current); err == io.EOF {
+bazel-contrib__rules_go:tests/runfiles/testfs/testfs.go:237: if err == io.EOF {
+bazel-contrib__rules_go:go/tools/builders/read.go:73: if err == io.EOF {
+bazel-contrib__rules_go:go/tools/builders/read.go:99: if err == io.EOF {
+bazel-contrib__rules_go:go/tools/builders/ar.go:98: if err := binary.Read(archive, binary.BigEndian, hdr); err == io.EOF {
+bazel-contrib__rules_go:go/tools/builders/ar.go:110: if _, err := archive.Seek(hdr.next(), os.SEEK_CUR); err == io.EOF {
+bazel-contrib__rules_go:go/tools/builders/preprofile.go:74: if _, err := io.ReadFull(f, header); err == io.EOF || err == io.ErrUnexpectedEOF {
+bazel-contrib__rules_go:go/tools/bzltestutil/xml.go:128: if err := dec.Decode(&e); err == io.EOF {
+bazel-contrib__rules_go:go/tools/bzltestutil/wrap.go:101: if err == io.EOF {
+bazel-contrib__rules_go:go/tools/releaser/file.go:199: if err == io.EOF {
+caddyserver__caddy:modules/caddyhttp/reverseproxy/streaming.go:398: if rerr == io.EOF {
+caddyserver__caddy:modules/caddyhttp/reverseproxy/reverseproxy.go:466: if b.read == 0 && n == 0 && err == io.EOF {
+caddyserver__caddy:caddyconfig/caddyfile/lexer.go:133: if err == io.EOF {
+caddyserver__caddy:caddyconfig/caddyfile/formatter.go:112: if err == io.EOF {
+caddyserver__caddy:cmd/storagefuncs.go:114: if err == io.EOF {
+charmbracelet__bubbletea:examples/pipe/main.go:36: if err != nil && err == io.EOF {
+cli__cli:internal/codespaces/connection/tunnels_api_server_mock.go:469: if err == io.EOF {
+cli__cli:pkg/jsoncolor/jsoncolor.go:37: if err == io.EOF {
+cli__cli:pkg/cmd/copilot/copilot.go:428: if err == io.EOF {
+cli__cli:pkg/cmd/api/pagination.go:42: if err == io.EOF {
+cli__cli:pkg/cmd/api/pagination.go:182: if err == io.EOF {
+cockroachdb__pebble:replay/replay.go:821: if err == io.EOF || record.IsInvalidRecord(err) {
+cockroachdb__pebble:replay/replay.go:827: if err = ve.Decode(rec); err == io.EOF || record.IsInvalidRecord(err) {
+cockroachdb__pebble:internal/manifest/version_edit.go:254: if err == io.EOF {
+cockroachdb__pebble:internal/manifest/version_edit.go:1131: if err == io.EOF || err == io.ErrUnexpectedEOF {
+cockroachdb__pebble:objstorage/objstorageprovider/remote_backing.go:144: if err == io.EOF {
+cockroachdb__pebble:objstorage/objstorageprovider/provider.go:468: if readErr == io.EOF {
+cockroachdb__pebble:objstorage/objstorageprovider/remoteobjcat/version_edit.go:124: if err == io.EOF {
+cockroachdb__pebble:objstorage/objstorageprovider/remoteobjcat/version_edit.go:204: if err == io.EOF {
+cockroachdb__pebble:objstorage/objstorageprovider/remoteobjcat/catalog.go:277: if err == io.EOF || record.IsInvalidRecord(err) {
+cockroachdb__pebble:objstorage/remote/localfs.go:71: if err == io.EOF && n == len(p) {
+cockroachdb__pebble:tool/wal.go:227: if err == io.EOF {
+cockroachdb__pebble:tool/manifest.go:256: if err == io.EOF {
+cockroachdb__pebble:tool/manifest.go:511: if err == io.EOF {
+cockroachdb__pebble:tool/remotecat.go:79: if err == io.EOF {
+cockroachdb__pebble:tool/db.go:937: if err == io.EOF {
+cockroachdb__pebble:record/record.go:28: //			if err == io.EOF {
+cockroachdb__pebble:record/record.go:421: if err == io.EOF && !wantFirst {
+cockroachdb__pebble:checkpoint.go:564: if err == io.EOF {
+cockroachdb__pebble:recovery.go:333: if err == io.EOF || record.IsInvalidRecord(err) {
+cockroachdb__pebble:recovery.go:346: if err == io.EOF || record.IsInvalidRecord(err) {
+cockroachdb__pebble:sstable/test_fixtures.go:58: if err == io.EOF {
+containerd__containerd:contrib/apparmor/template.go:194: if err == io.EOF {
+containerd__containerd:plugins/services/containers/service.go:81: if err == io.EOF {
+containerd__containerd:plugins/services/content/contentserver/contentserver.go:437: if err == io.EOF {
+containerd__containerd:internal/cri/io/logger.go:169: if err == io.EOF {
+containerd__containerd:client/containerstore.go:93: if err == io.EOF {
+containerd__containerd:core/mount/proxy/proxy.go:133: if err == io.EOF {
+containerd__containerd:core/snapshots/proxy/proxy.go:168: if err == io.EOF {
+containerd__containerd:core/content/proxy/content_reader.go:61: if err == io.EOF {
+containerd__containerd:core/content/helpers.go:116: if err == io.EOF {
+containerd__containerd:core/remotes/docker/fetcher.go:140: if err == io.EOF && r.rerr == nil && n == 0 {
+containerd__containerd:core/remotes/docker/fetcher.go:146: if err == io.EOF {
+containerd__containerd:core/images/archive/importer.go:88: if err == io.EOF {
+containerd__containerd:core/images/archive/importer.go:410: if err == io.EOF {
+containerd__containerd:pkg/archive/compression/compression.go:120: if err == io.EOF {
+containerd__containerd:pkg/archive/tar.go:238: if err == io.EOF {
+containerd__containerd:pkg/shim/util_unix.go:229: if err == io.EOF {
+containerd__containerd:pkg/filters/parser.go:157: if err == io.EOF {
+containerd__containerd:cmd/ctr/commands/tasks/exec.go:208: if err == io.EOF {
+dominikh__go-tools:lintcmd/config.go:26: if err == io.EOF {
+dominikh__go-tools:lintcmd/cache/cache.go:189: if err == io.EOF {
+dominikh__go-tools:lintcmd/cache/prog.go:148: if err == io.EOF {
+dominikh__go-tools:lintcmd/runner/runner.go:759: if err == io.EOF {
+dominikh__go-tools:lintcmd/cmd.go:300: if err == io.EOF {
+dominikh__go-tools:analysis/facts/generated/generated.go:74: if err == io.EOF {
+dominikh__go-tools:go/buildid/note.go:43: if err == io.EOF {
+dominikh__go-tools:go/buildid/buildid.go:121: if err == io.EOF {
+golang__tools:internal/jsonrpc2_v2/frame.go:133: if err == io.EOF {
+golang__tools:internal/pkgbits/decoder.go:266: if i > 0 && err == io.EOF {
+golang__tools:internal/imports/imports.go:335: if err == io.EOF {
+golang__tools:cmd/fiximports/main.go:495: if err := dec.Decode(&p); err == io.EOF {
+golang__tools:cmd/digraph/digraph.go:186: if err == io.EOF {
+golang__tools:cmd/toolstash/cmp.go:76: if err1 == io.EOF && err2 == io.EOF {
+golang__tools:cmd/toolstash/main.go:419: if err1 == io.EOF && err2 == io.EOF {
+golang__tools:cmd/toolstash/main.go:446: if err1 == io.EOF && err2 == io.EOF {
+golang__tools:cmd/toolstash/main.go:469: if err1 == io.EOF && err2 == io.EOF {
+golang__tools:cmd/toolstash/main.go:494: if err1 == io.EOF {
+golang__tools:cmd/toolstash/main.go:506: if err2 == io.EOF {
+golang__tools:go/buildutil/overlay.go:74: if err == io.EOF {
+golangci__golangci-lint:internal/go/cache/cache.go:218: if err == io.EOF {
+golangci__golangci-lint:internal/go/cache/prog.go:164: if err == io.EOF {
+google__go-containerregistry:internal/verify/verify.go:56: if err == io.EOF {
+google__go-containerregistry:internal/gzip/zip.go:109: if n == 0 && err == io.EOF {
+google__go-containerregistry:internal/zstd/zstd.go:109: if n == 0 && err == io.EOF {
+google__go-containerregistry:internal/compression/compression.go:91: if err == io.EOF {
+goreleaser__goreleaser:internal/testlib/archive.go:116: if h == nil || err == io.EOF {
+goreleaser__goreleaser:internal/testlib/archive.go:136: if h == nil || err == io.EOF {
+goreleaser__goreleaser:pkg/archive/tar/tar.go:34: if err == io.EOF || header == nil {
+grpc__grpc-go:reflection/internal/internal.go:157: if err == io.EOF {
+grpc__grpc-go:internal/testutils/fakegrpclb/server.go:166: if err == io.EOF {
+grpc__grpc-go:internal/testutils/xds/fakeserver/server.go:248: if err == io.EOF {
+grpc__grpc-go:internal/xds/httpfilter/extproc/ext_proc.go:512: if err == io.EOF {
+grpc__grpc-go:internal/xds/clients/internal/testutils/fakeserver/server.go:248: if err == io.EOF {
+grpc__grpc-go:internal/xds/clients/lrsclient/lrs_stream.go:192: if err == io.EOF {
+grpc__grpc-go:internal/xds/clients/lrsclient/lrs_stream.go:322: if err == io.EOF {
+grpc__grpc-go:internal/transport/handler_server.go:494: if err == io.EOF || err == io.ErrUnexpectedEOF {
+grpc__grpc-go:internal/transport/transport.go:478: if bytesRead > 0 && err == io.EOF {
+grpc__grpc-go:internal/transport/transport.go:524: if bytesRead > 0 && err == io.EOF {
+grpc__grpc-go:internal/transport/http2_server.go:162: if err == credentials.ErrConnDispatched || err == io.EOF {
+grpc__grpc-go:internal/transport/http2_server.go:325: if err == io.EOF {
+grpc__grpc-go:internal/transport/http2_server.go:335: if err == io.EOF || err == io.ErrUnexpectedEOF {
+grpc__grpc-go:stream.go:182: if err == io.EOF {
+grpc__grpc-go:stream.go:218: if err == io.EOF {
+grpc__grpc-go:stream.go:957: if err == io.EOF {
+grpc__grpc-go:stream.go:960: if err == nil || (err == io.EOF && a.transportStream.Status().Code() == codes.OK) {
+grpc__grpc-go:stream.go:1180: if err == io.EOF {
+grpc__grpc-go:stream.go:1286: if err == io.EOF {
+grpc__grpc-go:stream.go:1327: if err == io.EOF {
+grpc__grpc-go:stream.go:1628: if err == io.EOF {
+grpc__grpc-go:stream.go:1651: if err == io.EOF {
+grpc__grpc-go:stream.go:1920: if err == io.EOF {
+grpc__grpc-go:stream.go:1963: if err := recv(&ss.p, ss.codec, ss.s, ss.decompressorV0, m, ss.maxReceiveMessageSize, nil, ss.decompressorV1, true); err == io.EOF {
+grpc__grpc-go:mem/buffer_slice.go:278: if err == io.EOF {
+grpc__grpc-go:interop/test_utils.go:792: if err == io.EOF {
+grpc__grpc-go:interop/test_utils.go:819: if err == io.EOF {
+grpc__grpc-go:interop/test_utils.go:864: if err == io.EOF {
+grpc__grpc-go:examples/features/flow_control/server/main.go:56: if err == io.EOF {
+grpc__grpc-go:examples/features/flow_control/client/main.go:96: if err == io.EOF {
+grpc__grpc-go:examples/features/interceptor/server/main.go:68: if err == io.EOF {
+grpc__grpc-go:examples/features/interceptor/client/main.go:137: if err == io.EOF {
+grpc__grpc-go:examples/features/metadata/server/main.go:144: if err == io.EOF {
+grpc__grpc-go:examples/features/metadata/server/main.go:184: if err == io.EOF {
+grpc__grpc-go:examples/features/authz/server/main.go:114: if err == io.EOF {
+grpc__grpc-go:examples/features/authz/client/main.go:60: if err == io.EOF {
+grpc__grpc-go:examples/features/authz/client/main.go:74: if err == io.EOF {
+grpc__grpc-go:examples/features/metadata_interceptor/server/main.go:141: if err == io.EOF {
+grpc__grpc-go:examples/features/metadata_interceptor/client/main.go:72: if err == io.EOF {
+grpc__grpc-go:examples/features/deadline/server/main.go:68: if err == io.EOF {
+grpc__grpc-go:examples/features/cancellation/server/main.go:46: if err == io.EOF {
+grpc__grpc-go:examples/route_guide/server/server.go:96: if err == io.EOF {
+grpc__grpc-go:examples/route_guide/server/server.go:126: if err == io.EOF {
+grpc__grpc-go:examples/route_guide/client/client.go:70: if err == io.EOF {
+grpc__grpc-go:examples/route_guide/client/client.go:128: if err == io.EOF {
+grpc__grpc-go:benchmark/worker/main.go:96: if err == io.EOF {
+grpc__grpc-go:benchmark/worker/main.go:153: if err == io.EOF {
+grpc__grpc-go:benchmark/benchmark.go:120: if err == io.EOF {
+grpc__grpc-go:benchmark/benchmark.go:153: if err == io.EOF {
+grpc__grpc-go:benchmark/benchmark.go:229: if err == io.EOF {
+grpc__grpc-go:benchmark/benchmark.go:312: if err == io.EOF {
+grpc__grpc-go:benchmark/benchmark.go:329: if err == io.EOF {
+grpc__grpc-go:balancer/grpclb/grpclb_remote_balancer.go:292: if err == io.EOF {
+grpc__grpc-go:xds/csds/csds.go:72: if err == io.EOF {
+grpc__grpc-go:rpc_util.go:801: if err == io.EOF {
+grpc__grpc-go:credentials/alts/internal/testutil/testutil.go:159: if err == io.EOF {
+hashicorp__terraform:internal/grpcwrap/provider6.go:1071: if err == io.EOF {
+hashicorp__terraform:internal/rpcapi/stacks_grpc_client.go:132: if err == io.EOF {
+hashicorp__terraform:internal/rpcapi/stacks.go:296: if err == io.EOF {
+hashicorp__terraform:internal/rpcapi/stacks.go:596: if err == io.EOF {
+hashicorp__terraform:internal/command/console_interactive.go:74: } else if err == io.EOF {
+hashicorp__terraform:internal/provider-simple-v6/state_store_fs.go:205: if err == io.EOF {
+hashicorp__terraform:internal/plugin6/grpc_provider.go:1388: if err == io.EOF {
+hashicorp__terraform:internal/plugin6/grpc_provider.go:1584: if err == io.EOF {
+hashicorp__terraform:internal/plugin6/grpc_provider.go:2004: if err == io.EOF {
+hashicorp__terraform:internal/cloudplugin/cloudplugin1/grpc_client.go:41: if err == io.EOF {
+hashicorp__terraform:internal/plugin/grpc_provider.go:1380: if err == io.EOF {
+hashicorp__terraform:internal/plugin/grpc_provider.go:1581: if err == io.EOF {
+junegunn__fzf:src/reader.go:227: if err == io.EOF {
+oras-project__oras:internal/io/io.go:30: if err == io.EOF {
+oras-project__oras-go:content/reader.go:76: if err == io.EOF && vr.base.N > 0 {
+oras-project__oras-go:content/file/utils.go:167: if err == io.EOF {
+oras-project__oras-go:registry/remote/chunked.go:159: if readErr == io.EOF {
+prometheus__prometheus:tsdb/wlog/live_reader.go:133: // and not corrupt, otherwise if Err() == io.EOF you should try again when more
+prometheus__prometheus:tsdb/wlog/watcher.go:669: // NOTE: r.Err == io.EOF is a common case when tailing.
+prometheus__prometheus:tsdb/wlog/watcher.go:702: // NOTE: r.Err == io.EOF is a common case when tailing.
+prometheus__prometheus:web/ui/mantine-ui/src/promql/tools/gen_functions_docs/main.go:106: if err == io.EOF {
+regclient__regclient:types/blob/reader.go:126: if err == io.EOF {
+regclient__regclient:internal/reghttp/http.go:586: if err == io.EOF || err == io.ErrUnexpectedEOF {
+regclient__regclient:internal/retryable/retryable.go:630: if err == io.EOF && lastResp.ContentLength > 0 {
+regclient__regclient:internal/retryable/retryable.go:651: if req.digester != nil && err == io.EOF && req.digest != req.digester.Digest() {
+regclient__regclient:image.go:1758: if err == io.EOF {
+regclient__regclient:mod/mod.go:233: if err == io.EOF {
+regclient__regclient:pkg/archive/tar.go:144: if err == io.EOF {
+regclient__regclient:cmd/regctl/blob.go:633: if err == io.EOF {
+regclient__regclient:scheme/reg/blob.go:486: if err == io.EOF || err == io.ErrUnexpectedEOF {
+restic__restic:internal/restorer/restorer.go:760: if err == io.EOF && !failFast {
+restic__restic:internal/backend/sftp/sftp.go:460: if rderr == io.EOF && rd.(*util.LimitedReadCloser).N != 0 {
+restic__restic:internal/backend/azure/azure.go:296: if err == io.EOF {
+restic__restic:internal/backend/rest/rest.go:214: if err == io.EOF {
+restic__restic:internal/backend/b2/b2.go:196: if rderr == io.EOF && limrd.N != 0 {
+restic__restic:internal/data/testing.go:47: if err == io.EOF {
+restic__restic:internal/archiver/exclude.go:168: if err == io.EOF {
+restic__restic:internal/archiver/file_saver.go:131: if err == io.EOF && !s.closed {
+restic__restic:internal/archiver/file_saver.go:229: if err == io.EOF {
+restic__restic:internal/debug/round_tripper.go:25: if err == io.EOF {
+restic__restic:internal/fs/fs_reader.go:226: if err == io.EOF && !r.AllowEmptyFile && !r.bytesRead {
+syncthing__syncthing:test/util.go:274: if err == io.EOF {
+syncthing__syncthing:cmd/dev/stgenfiles/main.go:111: if err == io.EOF {
+tailscale__tailscale:tempfork/sshtest/ssh/server.go:557: if err == io.EOF {
+tailscale__tailscale:tempfork/sshtest/ssh/channel.go:374: if n > 0 && err == io.EOF {
+tailscale__tailscale:logtail/logtail.go:470: case err == io.EOF:
+tailscale__tailscale:logtail/filch/filch.go:206: if err == io.EOF {

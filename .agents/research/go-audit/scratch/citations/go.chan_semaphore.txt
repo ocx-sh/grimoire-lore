@@ -1,0 +1,111 @@
+bazelbuild__bazel-gazelle:v2/walk/dirinfo.go:174: sem := make(chan struct{}, 6)
+cli__cli:pkg/cmd/skills/search/search.go:823: sem := make(chan struct{}, maxWorkers)
+cli__cli:pkg/cmd/skills/search/search.go:883: sem := make(chan struct{}, maxWorkers)
+cockroachdb__pebble:internal/deletepacer/delete_pacer.go:102: notifyCh:        make(chan struct{}, 1),
+cockroachdb__pebble:internal/cache/read_shard.go:236: e.mu.ch = make(chan struct{}, 1)
+cockroachdb__pebble:compaction_scheduler.go:289: pokePeriodicGranterCh: make(chan struct{}, 1),
+cockroachdb__pebble:sstable/tablefilters/internal/filtersim/fpr.go:22: ch := make(chan struct{}, numRuns)
+cockroachdb__pebble:commit.go:273: ingestSem:      make(chan struct{}, 1),
+containerd__containerd:core/transfer/streaming/writer.go:35: updated: make(chan struct{}, 1),
+containerd__containerd:core/transfer/streaming/reader.go:44: updated: make(chan struct{}, 1),
+containerd__containerd:pkg/sys/reaper/reaper_unix.go:196: done    = make(chan struct{}, 1)
+containerd__containerd:cmd/containerd/command/main_unix.go:38: done := make(chan struct{}, 1)
+dominikh__go-tools:internal/sync/sync.go:9: ch: make(chan struct{}, size),
+dominikh__go-tools:internal/xtools-internal/gocommand/invoke.go:45: runner.inFlight = make(chan struct{}, maxInFlight)
+dominikh__go-tools:internal/xtools-internal/gocommand/invoke.go:46: runner.serialized = make(chan struct{}, 1)
+etcd-io__etcd:tools/benchmark/cmd/range.go:112: requests := make(chan struct{}, totalClients)
+etcd-io__etcd:server/etcdserver/raft.go:219: notifyc := make(chan struct{}, 1)
+etcd-io__etcd:server/etcdserver/raft.go:220: raftAdvancedC := make(chan struct{}, 1)
+etcd-io__etcd:server/etcdserver/server.go:574: s.stopping = make(chan struct{}, 1)
+etcd-io__etcd:server/etcdserver/server.go:870: c := make(chan struct{}, maxPendingRevokes)
+etcd-io__etcd:server/etcdserver/read/read.go:40: waitC:    make(chan struct{}, 1),
+etcd-io__etcd:server/etcdserver/api/rafthttp/pipeline.go:138: done := make(chan struct{}, 1)
+etcd-io__etcd:server/proxy/grpcproxy/watch.go:129: stopc := make(chan struct{}, 3)
+etcd-io__etcd:server/proxy/grpcproxy/lease.go:175: stopc := make(chan struct{}, 3)
+etcd-io__etcd:server/storage/mvcc/watchable_store.go:98: victimc:  make(chan struct{}, 1),
+etcd-io__etcd:client/pkg/transport/limit_listen.go:31: return &limitListener{l, make(chan struct{}, n)}
+etcd-io__etcd:tests/robustness/traffic/limiter.go:19: ch: make(chan struct{}, size),
+etcd-io__etcd:pkg/schedule/schedule.go:95: resume: make(chan struct{}, 1),
+etcd-io__etcd:pkg/schedule/schedule.go:96: donec:  make(chan struct{}, 1),
+golang__tools:internal/gopathwalk/walk.go:111: sem:  make(chan struct{}, concurrency),
+golang__tools:internal/gocommand/invoke.go:49: runner.inFlight = make(chan struct{}, maxInFlight)
+golang__tools:internal/gocommand/invoke.go:50: runner.serialized = make(chan struct{}, 1)
+golang__tools:internal/imports/fix.go:1395: scanSema: make(chan struct{}, 1),
+golang__tools:internal/imports/fix.go:1776: loadExportsSem := make(chan struct{}, maxConcurrentPackageImport)
+golang__tools:internal/imports/mod.go:97: scanSema: make(chan struct{}, 1),
+golang__tools:internal/imports/mod.go:280: scanSema:         make(chan struct{}, 1),
+golang__tools:internal/imports/mod_cache.go:130: sema := make(chan struct{}, maxInFlight)
+golang__tools:gopls/internal/cache/fs_memoized.go:145: var ioLimit = make(chan struct{}, 128)
+golang__tools:gopls/internal/cache/session.go:239: initializationSema:   make(chan struct{}, 1),
+golang__tools:gopls/internal/cache/snapshot.go:1115: iolimit := make(chan struct{}, 20) // I/O concurrency limiting semaphore
+golang__tools:gopls/internal/filewatcher/poll_watcher.go:59: poke:     make(chan struct{}, 1),
+golang__tools:gopls/internal/filewatcher/fsnotify_watcher.go:41: ready:     make(chan struct{}, 1),
+golang__tools:gopls/internal/filecache/filecache.go:297: var active = make(chan struct{}, 1)
+golang__tools:gopls/internal/filecache/filecache.go:322: var iolimit = make(chan struct{}, 128) // counting semaphore to limit I/O concurrency in Set.
+golangci__golangci-lint:pkg/goanalysis/runner.go:262: loadSem := make(chan struct{}, gomaxprocs)
+google__go-containerregistry:pkg/v1/remote/limiter.go:29: tokens: make(chan struct{}, jobs),
+grpc__grpc-go:internal/testutils/balancer.go:54: ConnectCh:     make(chan struct{}, 1),
+grpc__grpc-go:internal/testutils/balancer.go:151: ConnectCh:     make(chan struct{}, 1),
+grpc__grpc-go:internal/testutils/rls/fake_rls_server.go:55: ch := make(chan struct{}, 1)
+grpc__grpc-go:internal/resolver/dns/dns_resolver.go:143: rn:                  make(chan struct{}, 1),
+grpc__grpc-go:internal/xds/testutils/resource_watcher.go:81: ResourceErrorCh: make(chan struct{}, 1),
+grpc__grpc-go:internal/xds/httpfilter/extproc/ext_proc.go:499: downstreamToSidestreamPositiveUpdateCh: make(chan struct{}, 1),
+grpc__grpc-go:internal/xds/httpfilter/extproc/ext_proc.go:500: upstreamToSidestreamPositiveUpdateCh:   make(chan struct{}, 1),
+grpc__grpc-go:internal/xds/clients/lrsclient/lrs_stream.go:88: finalSendRequest: make(chan struct{}, 1),
+grpc__grpc-go:internal/xds/clients/xdsclient/ads_stream.go:147: notifySender:      make(chan struct{}, 1),
+grpc__grpc-go:internal/transport/flowcontrol.go:49: w.ch = make(chan struct{}, 1)
+grpc__grpc-go:internal/transport/http2_client.go:360: streamsQuotaAvailable: make(chan struct{}, 1),
+grpc__grpc-go:internal/transport/http2_client.go:1359: t.streamsQuotaAvailable = make(chan struct{}, 1)
+grpc__grpc-go:internal/transport/controlbuf.go:355: wakeupCh:         make(chan struct{}, 1),
+grpc__grpc-go:server.go:1994: a := &atomicSemaphore{wait: make(chan struct{}, 1)}
+grpc__grpc-go:examples/features/gracefulstop/server/main.go:88: serverStopped := make(chan struct{}, 1)
+hashicorp__terraform:internal/terraform/semaphore.go:17: ch := make(chan struct{}, n)
+junegunn__fzf:src/terminal.go:1178: bgSemaphore:        make(chan struct{}, maxBgProcesses),
+junegunn__fzf:src/terminal.go:5760: semaphore = make(chan struct{}, maxBgProcessesPerAction)
+kubernetes-sigs__controller-runtime:pkg/controller/priorityqueue/priorityqueue.go:106: itemAddedToAddBuffer: make(chan struct{}, 1),
+kubernetes-sigs__controller-runtime:pkg/controller/priorityqueue/priorityqueue.go:115: readyItemOrWaiterAdded:    make(chan struct{}, 1),
+kubernetes-sigs__controller-runtime:pkg/controller/priorityqueue/priorityqueue.go:116: waitingItemAddedOrUpdated: make(chan struct{}, 1),
+kubernetes-sigs__controller-runtime:pkg/client/internal/consistencyhandler/consistencyhandler.go:41: triggerCleanup:            make(chan struct{}, 1),
+prometheus__prometheus:tsdb/wlog/watcher.go:421: gcSem := make(chan struct{}, 1)
+prometheus__prometheus:tsdb/db.go:1037: compactc:       make(chan struct{}, 1),
+prometheus__prometheus:discovery/manager.go:105: triggerSend: make(chan struct{}, 1), // At least one element to ensure we can do a delayed read.
+prometheus__prometheus:util/gate/gate.go:27: ch: make(chan struct{}, length),
+prometheus__prometheus:util/treecache/treecache.go:105: done:     make(chan struct{}, 1),
+prometheus__prometheus:util/treecache/treecache.go:171: done:     make(chan struct{}, 1),
+prometheus__prometheus:util/treecache/treecache.go:251: done:     make(chan struct{}, 1),
+prometheus__prometheus:util/netconnlimit/netconnlimit.go:28: return make(chan struct{}, n)
+prometheus__prometheus:scrape/manager.go:87: triggerReload:          make(chan struct{}, 1),
+prometheus__prometheus:notifier/sendloop.go:70: hasWork:         make(chan struct{}, 1),
+regclient__regclient:internal/pqueue/pqueue.go:72: w := make(chan struct{}, 1)
+regclient__regclient:mod/layer.go:297: doneDecomp := make(chan struct{}, 1)
+restic__restic:internal/backend/sema/semaphore.go:20: ch: make(chan struct{}, n),
+restic__restic:internal/archiver/tree_saver.go:139: ch := make(chan struct{}, 1)
+syncthing__syncthing:lib/model/folder.go:124: scanScheduled:          make(chan struct{}, 1),
+syncthing__syncthing:lib/model/folder.go:128: pullScheduled: make(chan struct{}, 1), // This needs to be 1-buffered so that we queue a pull if we're busy when it comes.
+syncthing__syncthing:lib/model/folder.go:132: forcedRescanRequested: make(chan struct{}, 1),
+syncthing__syncthing:lib/model/folder.go:136: restartWatchChan: make(chan struct{}, 1),
+syncthing__syncthing:lib/ur/usage_report.go:64: forceRun:           make(chan struct{}, 1), // Buffered to prevent locking
+syncthing__syncthing:lib/connections/service.go:209: dialNow:        make(chan struct{}, 1),
+syncthing__syncthing:lib/nat/service.go:41: processScheduled: make(chan struct{}, 1),
+tailscale__tailscale:tempfork/sshtest/ssh/handshake.go:131: requestKex:    make(chan struct{}, 1),
+tailscale__tailscale:logtail/logtail.go:120: drainWake:      make(chan struct{}, 1),
+tailscale__tailscale:k8s-operator/sessionrecording/spdy/conn.go:42: initialCastHeaderSent: make(chan struct{}, 1),
+tailscale__tailscale:k8s-operator/sessionrecording/ws/conn.go:41: initialCastHeaderSent: make(chan struct{}, 1),
+tailscale__tailscale:wgengine/userspace.go:374: reqCh:          make(chan struct{}, 1),
+tailscale__tailscale:wgengine/magicsock/relaymanager.go:386: r.runLoopStoppedCh = make(chan struct{}, 1)
+tailscale__tailscale:wgengine/magicsock/derp.go:543: didCopy := make(chan struct{}, 1)
+tailscale__tailscale:client/systray/systray.go:122: menu.rebuildCh = make(chan struct{}, 1)
+tailscale__tailscale:util/syspolicy/source/policy_reader.go:201: policyChangedCh: make(chan struct{}, 1),
+tailscale__tailscale:syncs/syncs.go:201: return Semaphore{c: make(chan struct{}, n)}
+tailscale__tailscale:ipn/auditlog/auditlog.go:120: flusher:     make(chan struct{}, 1),
+tailscale__tailscale:tsnet/tsnet.go:1159: stateCh := make(chan struct{}, 1)
+tailscale__tailscale:cmd/containerboot/kube.go:189: ch := make(chan struct{}, 1)
+tailscale__tailscale:cmd/k8s-proxy/kube.go:134: notify := make(chan struct{}, 1)
+tailscale__tailscale:cmd/k8s-proxy/k8s-proxy.go:266: reissueCh := make(chan struct{}, 1)
+tailscale__tailscale:cmd/k8s-operator/e2e/setup.go:969: stopChan := make(chan struct{}, 1)
+tailscale__tailscale:cmd/k8s-operator/e2e/setup.go:970: readyChan := make(chan struct{}, 1)
+tailscale__tailscale:net/netx/racedial.go:43: failBoost := make(chan struct{}, 1) // wake the launcher when a dial fails fast
+tailscale__tailscale:net/tstun/wrap.go:314: bufferConsumed: make(chan struct{}, 1),
+tailscale__tailscale:net/netcheck/netcheck.go:873: stopProbeCh: make(chan struct{}, 1),
+tailscale__tailscale:net/routecheck/routecheck.go:153: needsRefresh: make(chan struct{}, 1), // debounce using buffer of 1
+tailscale__tailscale:control/controlclient/auto.go:200: updateCh:   make(chan struct{}, 1),

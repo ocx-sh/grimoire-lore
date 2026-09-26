@@ -1,0 +1,200 @@
+aquasecurity__trivy:internal/gittest/server.go:105: if err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) {
+aquasecurity__trivy:internal/gittest/server.go:176: if errors.Is(err, git.NoErrAlreadyUpToDate) {
+aquasecurity__trivy:magefiles/vex.go:372: if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+aquasecurity__trivy:magefiles/vex.go:382: if errors.Is(err, os.ErrNotExist) {
+aquasecurity__trivy:magefiles/terraformplan.go:84: if err := os.Remove(tfplanFile); err != nil && !errors.Is(err, os.ErrNotExist) {
+aquasecurity__trivy:magefiles/terraformplan.go:133: if err := os.RemoveAll(path); err != nil && !errors.Is(err, os.ErrNotExist) {
+aquasecurity__trivy:pkg/attestation/sbom/rekor.go:52: if errors.Is(err, ErrNoSBOMAttestation) {
+aquasecurity__trivy:pkg/rpc/server/listen.go:102: if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+aquasecurity__trivy:pkg/vex/repo.go:46: if errors.Is(err, os.ErrNotExist) {
+aquasecurity__trivy:pkg/vex/vex.go:106: if errors.Is(err, errNoRepository) {
+aquasecurity__trivy:pkg/vex/oci/oci.go:148: if errors.Is(err, xio.ErrLimitExceeded) {
+aquasecurity__trivy:pkg/vex/repo/repo.go:258: case errors.Is(err, downloader.ErrSkipDownload):
+aquasecurity__trivy:pkg/cache/fs.go:39: if errors.Is(err, bberrors.ErrTimeout) {
+aquasecurity__trivy:pkg/result/ignore.go:224: if _, err := os.Stat(ignoreFile); errors.Is(err, fs.ErrNotExist) {
+aquasecurity__trivy:pkg/downloader/backup.go:21: if err := os.Rename(dst, backup); errors.Is(err, os.ErrNotExist) {
+aquasecurity__trivy:pkg/downloader/download.go:76: cleanup(errors.Is(err, ErrSkipDownload))
+aquasecurity__trivy:pkg/misconf/scanner.go:412: if err := mfs.MkdirAll(filepath.Dir(path), os.ModePerm); err != nil && !errors.Is(err, fs.ErrExist) {
+aquasecurity__trivy:pkg/misconf/scanner.go:428: if errors.Is(err, os.ErrNotExist) {
+aquasecurity__trivy:pkg/misconf/scanner.go:453: if err := mfs.MkdirAll(filepath.Dir(abs), os.ModePerm); err != nil && !errors.Is(err, fs.ErrExist) {
+aquasecurity__trivy:pkg/k8s/commands/run.go:58: if errors.Is(err, cmd.SkipScan) {
+aquasecurity__trivy:pkg/crypto/parser/x509/parser.go:139: if errors.Is(err, errNotCryptographic) {
+aquasecurity__trivy:pkg/crypto/parser/x509/parser.go:408: case errors.Is(err, errUnsupportedCrypto):
+aquasecurity__trivy:pkg/crypto/parser/x509/parser.go:410: case errors.Is(err, errMalformedCrypto):
+aquasecurity__trivy:pkg/crypto/parser/x509/asset.go:94: case errors.Is(err, crypto.ErrNoCanonicalForm):
+aquasecurity__trivy:pkg/crypto/parser/x509/asset.go:125: case errors.Is(err, crypto.ErrNoCanonicalForm):
+aquasecurity__trivy:pkg/iac/detection/peek.go:34: if errors.Is(err, io.EOF) {
+aquasecurity__trivy:pkg/iac/scanners/terraformplan/snapshot/scanner.go:46: if errors.Is(err, errNoTerraformPlan) {
+aquasecurity__trivy:pkg/iac/scanners/terraformplan/snapshot/snapshot.go:200: if err := fsys.MkdirAll(module.dir, fs.ModePerm); err != nil && !errors.Is(err, os.ErrExist) {
+aquasecurity__trivy:pkg/iac/scanners/ansible/parser/config.go:50: if errors.Is(err, fs.ErrNotExist) {
+aquasecurity__trivy:pkg/iac/scanners/ansible/parser/role.go:45: if err != nil && !errors.Is(err, fs.ErrNotExist) {
+aquasecurity__trivy:pkg/iac/scanners/ansible/parser/role.go:154: if errors.Is(err, fs.ErrNotExist) {
+aquasecurity__trivy:pkg/iac/scanners/ansible/parser/parser.go:352: if err != nil && errors.Is(err, fs.ErrNotExist) {
+aquasecurity__trivy:pkg/iac/scanners/ansible/parser/parser.go:392: if err != nil && !errors.Is(err, fs.ErrNotExist) {
+aquasecurity__trivy:pkg/iac/scanners/ansible/parser/parser.go:396: if err != nil && !errors.Is(err, fs.ErrNotExist) {
+aquasecurity__trivy:pkg/iac/scanners/ansible/parser/parser.go:676: if err != nil && !errors.Is(err, fs.ErrNotExist) {
+aquasecurity__trivy:pkg/iac/scanners/ansible/parser/parser.go:680: if err != nil && !errors.Is(err, fs.ErrNotExist) {
+aquasecurity__trivy:pkg/iac/scanners/ansible/parser/task.go:152: if errors.Is(err, ErrModuleNotFound) {
+aquasecurity__trivy:pkg/iac/scanners/ansible/fsutils/fsutils.go:83: if errors.Is(err, fs.ErrNotExist) {
+aquasecurity__trivy:pkg/iac/scanners/terraform/parser/evaluator.go:219: if errors.Is(err, ErrNoFiles) {
+aquasecurity__trivy:pkg/iac/scanners/terraform/parser/funcs/filesystem.go:213: if errors.Is(err, os.ErrNotExist) {
+aquasecurity__trivy:pkg/iac/scanners/terraform/parser/parser.go:294: if err != nil && !errors.Is(err, os.ErrNotExist) {
+aquasecurity__trivy:pkg/iac/scanners/terraform/parser/parser.go:384: if errors.Is(err, ErrNoFiles) {
+aquasecurity__trivy:pkg/policy/policy.go:200: if errors.Is(err, fs.ErrNotExist) {
+aquasecurity__trivy:pkg/db/db.go:107: if _, err := os.Stat(db.Path(c.dbDir)); errors.Is(err, os.ErrNotExist) {
+aquasecurity__trivy:pkg/commands/artifact/run.go:428: if errors.Is(err, SkipScan) {
+aquasecurity__trivy:pkg/commands/run.go:24: if errors.Is(err, context.DeadlineExceeded) {
+aquasecurity__trivy:pkg/commands/run.go:27: if errors.Is(err, bberrors.ErrTimeout) {
+aquasecurity__trivy:pkg/commands/app.go:168: if errors.Is(err, os.ErrNotExist) {
+aquasecurity__trivy:pkg/javadb/client.go:54: if !errors.Is(err, os.ErrNotExist) {
+aquasecurity__trivy:pkg/dependency/parser/nodejs/pnpm/parse.go:42: if errors.Is(err, io.EOF) {
+aquasecurity__trivy:pkg/dependency/parser/java/jar/parse.go:194: } else if !errors.Is(err, ArtifactNotFoundErr) {
+aquasecurity__trivy:pkg/dependency/parser/java/jar/parse.go:212: } else if !errors.Is(err, ArtifactNotFoundErr) {
+aquasecurity__trivy:pkg/dependency/parser/java/pom/parse.go:1067: if errors.Is(err, context.DeadlineExceeded) {
+aquasecurity__trivy:pkg/scan/local/service.go:60: case errors.Is(err, analyzer.ErrUnknownOS):
+aquasecurity__trivy:pkg/scan/local/service.go:82: case errors.Is(err, analyzer.ErrNoPkgsDetected):
+aquasecurity__trivy:pkg/scan/local/service.go:197: case errors.Is(err, ospkgDetector.ErrUnsupportedOS):
+aquasecurity__trivy:pkg/notification/notice.go:94: if !errors.Is(err, context.Canceled) && !errors.Is(err, context.DeadlineExceeded) {
+aquasecurity__trivy:pkg/x/json/jsonc.go:91: if errors.Is(err, io.EOF) {
+aquasecurity__trivy:pkg/x/os/root.go:46: if _, err := r.Stat(name); err != nil && !errors.Is(err, fs.ErrNotExist) {
+aquasecurity__trivy:pkg/sbom/cyclonedx/unmarshal.go:157: if errors.Is(err, ErrUnsupportedType) {
+aquasecurity__trivy:pkg/sbom/io/decode.go:146: if errors.Is(err, ErrUnsupportedType) || errors.Is(err, ErrPURLEmpty) {
+aquasecurity__trivy:pkg/fanal/secret/scanner.go:350: if errors.Is(err, os.ErrNotExist) {
+aquasecurity__trivy:pkg/fanal/secret/scanner.go:612: isEOF := errors.Is(err, io.EOF)
+aquasecurity__trivy:pkg/fanal/analyzer/analyzer.go:505: if errors.Is(err, fs.ErrPermission) {
+aquasecurity__trivy:pkg/fanal/analyzer/analyzer.go:533: case errors.Is(analyzeErr, fos.AnalyzeOSError):
+aquasecurity__trivy:pkg/fanal/analyzer/analyzer.go:535: case errors.Is(analyzeErr, context.DeadlineExceeded):
+aquasecurity__trivy:pkg/fanal/analyzer/pkg/dpkg/dpkg.go:226: if !errors.Is(err, io.EOF) && err != nil {
+aquasecurity__trivy:pkg/fanal/analyzer/pkg/dpkg/dpkg.go:252: if !errors.Is(err, io.EOF) && err != nil {
+aquasecurity__trivy:pkg/fanal/analyzer/language/julia/pkg/pkg.go:121: if errors.Is(err, fs.ErrNotExist) {
+aquasecurity__trivy:pkg/fanal/analyzer/language/python/poetry/poetry.go:99: if errors.Is(err, fs.ErrNotExist) {
+aquasecurity__trivy:pkg/fanal/analyzer/language/python/pylock/pylock.go:116: if errors.Is(err, fs.ErrNotExist) {
+aquasecurity__trivy:pkg/fanal/analyzer/language/python/packaging/packaging.go:89: if errors.Is(err, fs.ErrNotExist) {
+aquasecurity__trivy:pkg/fanal/analyzer/language/nodejs/license/license.go:38: if _, err := fs.Stat(fsys, root); errors.Is(err, fs.ErrNotExist) {
+aquasecurity__trivy:pkg/fanal/analyzer/language/nodejs/license/license.go:105: if errors.Is(err, fs.ErrNotExist) {
+aquasecurity__trivy:pkg/fanal/analyzer/language/nodejs/yarn/yarn.go:168: if errors.Is(err, fs.ErrNotExist) {
+aquasecurity__trivy:pkg/fanal/analyzer/language/nodejs/yarn/yarn.go:443: if _, err := fs.Stat(fsys, "unplugged"); errors.Is(err, fs.ErrNotExist) {
+aquasecurity__trivy:pkg/fanal/analyzer/language/dotnet/nuget/nuget.go:90: if err != nil && !errors.Is(err, fs.ErrNotExist) {
+aquasecurity__trivy:pkg/fanal/analyzer/language/golang/binary/binary.go:28: if errors.Is(err, binary.ErrUnrecognizedExe) || errors.Is(err, binary.ErrNonGoBinary) {
+aquasecurity__trivy:pkg/fanal/analyzer/language/golang/mod/mod.go:110: if err != nil && !errors.Is(err, fs.ErrNotExist) {
+aquasecurity__trivy:pkg/fanal/analyzer/language/golang/mod/mod.go:230: if errors.Is(err, fs.ErrNotExist) {
+aquasecurity__trivy:pkg/fanal/analyzer/language/golang/mod/mod.go:391: case errors.Is(err, os.ErrNotExist):
+aquasecurity__trivy:pkg/fanal/analyzer/language/golang/mod/mod.go:393: case err != nil && !errors.Is(err, io.EOF):
+aquasecurity__trivy:pkg/fanal/analyzer/language/rust/binary/binary.go:27: if errors.Is(err, binary.ErrUnrecognizedExe) || errors.Is(err, binary.ErrNonRustBinary) {
+aquasecurity__trivy:pkg/fanal/analyzer/language/rust/cargo/cargo.go:114: if errors.Is(err, fs.ErrNotExist) {
+aquasecurity__trivy:pkg/fanal/analyzer/language/php/composer/composer.go:110: if errors.Is(err, fs.ErrNotExist) {
+aquasecurity__trivy:pkg/fanal/analyzer/fs.go:78: if err := mfs.MkdirAll(d, os.ModePerm); err != nil && !errors.Is(err, fs.ErrExist) {
+aquasecurity__trivy:pkg/fanal/vm/filesystem/filesystem.go:42: if errors.Is(err, ErrInvalidHeader) {
+aquasecurity__trivy:pkg/fanal/vm/disk/disk.go:28: if errors.Is(err, vm.ErrInvalidSignature) {
+aquasecurity__trivy:pkg/fanal/vm/disk/vmdk.go:30: if errors.Is(err, vmdk.ErrUnSupportedType) {
+aquasecurity__trivy:pkg/fanal/walker/fs.go:85: case errors.Is(err, fs.SkipDir):
+aquasecurity__trivy:pkg/fanal/artifact/local/fs.go:93: } else if !errors.Is(err, git.ErrRepositoryNotExists) {
+aquasecurity__trivy:pkg/fanal/artifact/local/fs.go:310: if err := a.analyzeWithTraversal(ctx, a.rootPath, relativePath, eg, limit, result, composite, opts); errors.Is(err, fs.ErrNotExist) {
+aquasecurity__trivy:pkg/fanal/artifact/vm/file.go:58: if errors.Is(err, vm.ErrUnsupportedType) {
+aquasecurity__trivy:pkg/fanal/artifact/image/remote_sbom.go:44: if errors.Is(err, errNoSBOMFound) {
+aquasecurity__trivy:pkg/fanal/artifact/image/remote_sbom.go:125: if errors.Is(err, sbomatt.ErrNoSBOMAttestation) {
+aquasecurity__trivy:pkg/fanal/artifact/image/image.go:117: } else if !errors.Is(err, errNoSBOMFound) {
+aquasecurity__trivy:pkg/fanal/image/daemon/containerd.go:89: if _, err := os.Stat(addr); errors.Is(err, os.ErrNotExist) {
+aquasecurity__trivy:pkg/fanal/handler/unpackaged/unpackaged.go:52: if errors.Is(err, sbomatt.ErrNoSBOMAttestation) {
+aquasecurity__trivy:pkg/plugin/index.go:60: if errors.Is(err, os.ErrNotExist) {
+aquasecurity__trivy:pkg/plugin/index.go:97: if errors.Is(err, os.ErrNotExist) {
+aquasecurity__trivy:pkg/plugin/manager.go:188: if _, err := m.root.Stat(name); errors.Is(err, fs.ErrNotExist) {
+aquasecurity__trivy:pkg/plugin/manager.go:349: if _, err := m.root.Stat(name); errors.Is(err, fs.ErrNotExist) {
+bazel-contrib__rules_go:go/tools/gopackagesdriver/bazel_json_builder.go:63: for errors.Is(err, os.ErrNotExist) && relToBin != "." {
+bazelbuild__bazel-gazelle:tools/convert-go-deps-test-case/bzl_to_dir.go:26: if err := os.RemoveAll(dirPath); err != nil && !errors.Is(err, fs.ErrNotExist) {
+bazelbuild__bazel-gazelle:tools/override-generator/main.go:73: if err != nil && !errors.Is(err, flag.ErrHelp) {
+bazelbuild__bazel-gazelle:cmd/gazelle/main.go:83: if err := run(wd, os.Args[1:]); err != nil && !errors.Is(err, flag.ErrHelp) {
+bazelbuild__bazel-gazelle:cmd/gazelle/main.go:84: if errors.Is(err, update.ExitError) {
+bazelbuild__bazel-gazelle:v2/walk/config.go:245: if errors.Is(err, fs.ErrNotExist) {
+bazelbuild__bazel-gazelle:v2/walk/config.go:281: if errors.Is(err, fs.ErrNotExist) {
+bazelbuild__bazel-gazelle:v2/walk/walk.go:350: if ctx.Err() != nil && (len(w.errs) == 0 || !errors.Is(w.errs[len(w.errs)-1], ctx.Err())) {
+bazelbuild__bazel-gazelle:v2/cmd/gazelle/main.go:59: if errors.Is(err, update.ExitError) {
+bazelbuild__bazel-gazelle:v2/cmd/gazelle/main.go:63: if !errors.Is(err, flag.ErrHelp) {
+bazelbuild__bazel-gazelle:v2/cmd/gazelle/update/update.go:395: if errors.Is(err, errVersion) {
+bazelbuild__bazel-gazelle:v2/cmd/gazelle/update/update.go:743: if errors.Is(err, ExitError) {
+caddyserver__caddy:listeners.go:646: if fcql.closed.Load() == 1 && errors.Is(err, context.Canceled) {
+caddyserver__caddy:listen_unix.go:86: if err := syscall.Unlink(addr); err != nil && !errors.Is(err, fs.ErrNotExist) {
+caddyserver__caddy:admin.go:443: if err := server.Serve(ln.(net.Listener)); !errors.Is(err, http.ErrServerClosed) {
+caddyserver__caddy:admin.go:614: if err := server.Serve(ln); !errors.Is(err, http.ErrServerClosed) {
+caddyserver__caddy:admin.go:764: if cause := context.Cause(ctx); cause != nil && errors.Is(err, context.DeadlineExceeded) {
+caddyserver__caddy:admin.go:1091: if err != nil && !errors.Is(err, errSameConfig) {
+caddyserver__caddy:modules/caddypki/ca.go:287: if !errors.Is(err, fs.ErrNotExist) {
+caddyserver__caddy:modules/caddypki/ca.go:349: if !errors.Is(err, fs.ErrNotExist) {
+caddyserver__caddy:modules/caddypki/acmeserver/acmeserver.go:295: if errors.Is(err, bolterrors.ErrTimeout) {
+caddyserver__caddy:modules/caddytls/automation.go:340: if errors.Is(err, ErrPermissionDenied) {
+caddyserver__caddy:modules/caddytls/tls.go:452: if !errors.Is(err, context.Canceled) && ctx.Err() == nil {
+caddyserver__caddy:modules/caddytls/tls.go:470: if !errors.Is(err, context.Canceled) && ctx.Err() == nil {
+caddyserver__caddy:modules/caddytls/tls.go:483: if !errors.Is(err, context.Canceled) && ctx.Err() == nil {
+caddyserver__caddy:modules/caddytls/tls.go:1027: if errors.Is(err, context.Canceled) || ctx.Err() != nil {
+caddyserver__caddy:modules/caddytls/tls.go:1045: if errors.Is(err, context.Canceled) || ctx.Err() != nil {
+caddyserver__caddy:modules/caddytls/distributedstek/distributedstek.go:161: if errors.Is(err, fs.ErrNotExist) {
+caddyserver__caddy:modules/caddytls/ech.go:105: if !errors.Is(err, context.Canceled) && ctx.Err() == nil {
+caddyserver__caddy:modules/caddytls/ech.go:161: if err != nil && !errors.Is(err, fs.ErrNotExist) { // OK if dir doesn't exist; it will be created
+caddyserver__caddy:modules/caddytls/ech.go:223: if !errors.Is(err, context.Canceled) && ctx.Err() == nil {
+caddyserver__caddy:modules/caddytls/ech.go:351: if !errors.Is(err, context.Canceled) && ctx.Err() == nil {
+caddyserver__caddy:modules/caddytls/ech.go:606: if errors.Is(err, fs.ErrNotExist) {
+caddyserver__caddy:modules/caddyevents/app.go:305: aborted := errors.Is(err, caddy.ErrEventAborted)
+caddyserver__caddy:modules/caddyhttp/fileserver/staticfiles.go:362: if errors.Is(err, fs.ErrNotExist) {
+caddyserver__caddy:modules/caddyhttp/fileserver/staticfiles.go:364: } else if errors.Is(err, fs.ErrInvalid) {
+caddyserver__caddy:modules/caddyhttp/fileserver/staticfiles.go:366: } else if errors.Is(err, fs.ErrPermission) {
+caddyserver__caddy:modules/caddyhttp/fileserver/staticfiles.go:657: if errors.Is(err, fs.ErrNotExist) {
+caddyserver__caddy:modules/caddyhttp/fileserver/staticfiles.go:662: } else if errors.Is(err, fs.ErrPermission) {
+caddyserver__caddy:modules/caddyhttp/fileserver/staticfiles.go:688: if errors.Is(originalErr, fs.ErrNotExist) || errors.Is(originalErr, fs.ErrPermission) {
+caddyserver__caddy:modules/caddyhttp/fileserver/staticfiles.go:833: if errors.Is(err, fs.ErrNotExist) {
+caddyserver__caddy:modules/caddyhttp/fileserver/browse.go:121: case errors.Is(err, fs.ErrPermission):
+caddyserver__caddy:modules/caddyhttp/fileserver/browse.go:123: case errors.Is(err, fs.ErrNotExist):
+caddyserver__caddy:modules/caddyhttp/server.go:624: if errors.Is(err, http3.ErrNoAltSvcPort) {
+caddyserver__caddy:modules/caddyhttp/server.go:688: !errors.Is(flushErr, http.ErrHijacked) &&
+caddyserver__caddy:modules/caddyhttp/server.go:689: !errors.Is(flushErr, http.ErrNotSupported) {
+caddyserver__caddy:modules/caddyhttp/reverseproxy/metrics.go:39: !errors.Is(err, prometheus.AlreadyRegisteredError{
+caddyserver__caddy:modules/caddyhttp/reverseproxy/streaming.go:131: if errors.Is(hijackErr, http.ErrNotSupported) {
+caddyserver__caddy:modules/caddyhttp/reverseproxy/reverseproxy.go:705: if errors.Is(proxyErr, context.Canceled) {
+caddyserver__caddy:modules/caddyhttp/reverseproxy/reverseproxy.go:1382: if !isDialError && !isRetryableResponse && (!isHandlerError || !errors.Is(herr, errNoUpstream)) {
+caddyserver__caddy:modules/caddyhttp/reverseproxy/reverseproxy.go:1646: if errors.Is(err, context.Canceled) || strings.Contains(err.Error(), "operation was canceled") {
+caddyserver__caddy:modules/caddyhttp/app.go:781: if cause := context.Cause(ctx); cause != nil && errors.Is(err, context.DeadlineExceeded) {
+caddyserver__caddy:modules/caddyhttp/app.go:807: if cause := context.Cause(ctx); cause != nil && errors.Is(err, context.DeadlineExceeded) {
+caddyserver__caddy:modules/caddyhttp/caddyauth/bcrypt.go:53: if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+caddyserver__caddy:listen_reuseUnixSocket_windows.go:82: } else if errors.Is(err, fs.ErrNotExist) {
+caddyserver__caddy:caddytest/caddytest.go:270: if _, err := os.Stat(getIntegrationDir() + certName); errors.Is(err, fs.ErrNotExist) {
+caddyserver__caddy:cmd/main.go:182: if errors.Is(err, fs.ErrNotExist) {
+caddyserver__caddy:cmd/commandfuncs.go:79: if errors.Is(cmd.Err, exec.ErrDot) {
+caddyserver__caddy:cmd/commandfuncs.go:140: if !errors.Is(err, net.ErrClosed) {
+caddyserver__caddy:cmd/commandfuncs.go:229: if errors.Is(err, fs.ErrNotExist) {
+caddyserver__caddy:cmd/commandfuncs.go:921: if !errors.Is(err, fs.ErrNotExist) {
+caddyserver__caddy:cmd/storagefuncs.go:194: if errors.Is(err, fs.ErrNotExist) {
+caddyserver__caddy:cmd/storagefuncs.go:204: if errors.Is(err, fs.ErrNotExist) {
+caddyserver__caddy:caddy.go:137: if errors.Is(err, errSameConfig) {
+caddyserver__caddy:caddy.go:624: if errors.Is(err, errSameConfig) {
+caddyserver__caddy:caddy.go:653: if errors.Is(err, errSameConfig) {
+caddyserver__caddy:caddy.go:924: if errors.Is(err, fs.ErrNotExist) {
+caddyserver__caddy:sigtrap_posix.go:69: if err := reloadCallback(file, adapter); errors.Is(err, errReloadFromSourceUnavailable) {
+charmbracelet__bubbletea:examples/suspend/main.go:52: if errors.Is(err, tea.ErrInterrupted) {
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/actions.go:527: if errors.Is(bounded.Err(), context.DeadlineExceeded) {
+cli__cli:.github/skills/cli-exercise/tool/internal/engine/actions.go:543: if performed == maxActions || errors.Is(bounded.Err(), context.DeadlineExceeded) {
+cli__cli:.github/skills/cli-exercise/tool/internal/preflight/main.go:133: if errors.Is(err, flag.ErrHelp) {
+cli__cli:.github/skills/cli-exercise/tool/internal/cliutil/process_unix.go:41: if errors.Is(err, syscall.ESRCH) {
+cli__cli:.github/skills/cli-exercise/tool/internal/cliutil/process_unix.go:53: if errors.Is(signalErr, syscall.ESRCH) {
+cli__cli:.github/skills/cli-exercise/tool/internal/cliutil/process_unix.go:56: if signalErr != nil && !errors.Is(signalErr, syscall.EPERM) {
+cli__cli:.github/skills/cli-exercise/tool/internal/cliutil/process_unix.go:63: if errors.Is(err, syscall.ESRCH) {
+cli__cli:.github/skills/cli-exercise/tool/internal/cliutil/process_unix.go:66: if err != nil && !errors.Is(err, syscall.EPERM) {
+cli__cli:.github/skills/cli-exercise/tool/internal/execution/cli.go:419: if errors.Is(err, flag.ErrHelp) {
+cli__cli:.github/skills/cli-exercise/tool/internal/execution/cli.go:440: if errors.Is(err, flag.ErrHelp) {
+cli__cli:.github/skills/cli-exercise/tool/internal/evidence/main.go:470: if errors.Is(err, flag.ErrHelp) {
+cli__cli:internal/prompter/huh_prompter.go:31: if errors.Is(err, huh.ErrUserAborted) {
+cli__cli:internal/ghcmd/cmd.go:193: if errors.Is(err, terminal.InterruptErr) {
+cli__cli:internal/codespaces/api/api.go:897: if !errors.Is(err, errProvisioningInProgress) {
+cli__cli:internal/flock/flock_unix.go:23: if errors.Is(err, syscall.EWOULDBLOCK) {
+cli__cli:internal/flock/flock_windows.go:32: if errors.Is(err, windows.ERROR_LOCK_VIOLATION) {
+cli__cli:internal/keyring/keyring.go:52: if errors.Is(res.err, keyring.ErrNotFound) {
+cli__cli:internal/config/migration/multi_account.go:118: if errors.Is(err, noTokenError) {
+cli__cli:internal/config/migration/multi_account.go:155: if err != nil && !errors.Is(err, keyring.ErrNotFound) {
+cli__cli:internal/telemetry/telemetry.go:46: if !errors.Is(err, os.ErrNotExist) {
+cli__cli:internal/skills/lockfile/lockfile.go:169: if !errors.Is(err, flock.ErrLocked) {
+cli__cli:git/client.go:962: if errors.Is(err, exec.ErrNotFound) {
+cli__cli:pkg/iostreams/iostreams.go:622: if err != nil && (errors.Is(err, io.ErrClosedPipe) || isEpipeError(err)) {
+cli__cli:pkg/iostreams/content.go:66: if err != nil && !errors.Is(err, io.EOF) && !errors.Is(err, io.ErrUnexpectedEOF) {
+cli__cli:pkg/iostreams/epipe_other.go:11: return errors.Is(err, syscall.EPIPE)
+cli__cli:pkg/iostreams/epipe_windows.go:10: return errors.Is(err, syscall.Errno(232))
+cli__cli:pkg/cmdutil/errors.go:44: return errors.Is(err, CancelError) || errors.Is(err, terminal.InterruptErr)
+cli__cli:pkg/ssh/ssh_keys.go:74: // Still return keyPair because the caller might be OK with this - they can check the error with errors.Is(err, ErrKeyAlreadyExists)
+cli__cli:pkg/cmd/attestation/verify/verify.go:286: if ok := errors.Is(err, api.ErrNoAttestationsFound); ok {

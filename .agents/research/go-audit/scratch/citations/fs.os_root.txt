@@ -1,0 +1,19 @@
+aquasecurity__trivy:pkg/vex/repo.go:121: f, err := os.OpenInRoot(dir, entry.Location)
+aquasecurity__trivy:pkg/x/os/root.go:12: // Root is a traversal-resistant handle to a directory. It embeds *os.Root
+aquasecurity__trivy:pkg/x/os/root.go:16: *os.Root
+aquasecurity__trivy:pkg/x/os/root.go:35: // existing symlink (the embedded os.Root). A name that does not exist yet is
+aquasecurity__trivy:pkg/x/os/root.go:40: // os.Root methods directly for ordinary I/O.
+aquasecurity__trivy:pkg/plugin/manager.go:57: root *xos.Root
+containerd__containerd:internal/cri/server/container_image_mount.go:266: file, err := os.OpenInRoot(mountPoint, subPath)
+containerd__containerd:core/mount/manager/mkfs.go:35: rootMap map[string]*os.Root
+containerd__containerd:core/mount/manager/mkfs.go:39: var r *os.Root
+containerd__containerd:core/mount/manager/mkdir.go:37: rootMap map[string]*os.Root
+containerd__containerd:core/mount/manager/mkdir.go:89: var r *os.Root
+containerd__containerd:core/mount/manager/manager.go:55: roots    []*os.Root
+containerd__containerd:core/mount/manager/manager.go:95: rootMap := map[string]*os.Root{
+containerd__containerd:core/mount/manager/manager.go:113: targets  *os.Root
+containerd__containerd:core/mount/manager/manager.go:115: rootMap  map[string]*os.Root
+containerd__containerd:pkg/oci/spec_opts.go:1835: // /etc/passwd -> /nix/store/...). os.Root-backed filesystems reject
+tailscale__tailscale:wgengine/router/osrouter/router_linux.go:971: f, err := os.OpenInRoot("/proc/sys/net/ipv6/conf", filepath.Join(tunname, "disable_ipv6"))
+tailscale__tailscale:net/dns/manager_darwin.go:211: // might cause issues when used as a filename; os.Root is a
+tailscale__tailscale:net/netutil/ip_forward.go:209: f, err := os.OpenInRoot("/proc/sys", k)

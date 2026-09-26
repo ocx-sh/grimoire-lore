@@ -1,0 +1,176 @@
+{
+ "rules": [
+  {
+   "rule": "go-quality",
+   "glob_list": [
+    "**/*.go"
+   ],
+   "core_family": "GO-CORE",
+   "index_sources": [
+    "go-gates.md",
+    "go-topic-map.md",
+    "go-frame.md"
+   ],
+   "depth": [
+    {
+     "file": "language.md",
+     "family": "GO-LANG",
+     "sources": [
+      "go-language.md"
+     ],
+     "task_hint": "writing any new Go against the module's go line, choosing an idiom that changed between releases, designing a generic function or an iterator, touching JSON, maps, time, runes or randomness",
+     "extra": "Apply notes N-8 (GO-LANG-04's durable check is the oldstable build leg, and golangci govet and nogo are blind to the json/v2 case) and 'Wave 4 landed' contradiction 7 (fix the inverted nogreenteagc example; use C9's watched grep) and contradiction 1 (x/exp/constraints is the depguard entry GO-LANG-22 adds; cite GO-MOD-08, do not restate the list)."
+    },
+    {
+     "file": "errors.md",
+     "family": "GO-ERR",
+     "sources": [
+      "go-errors.md"
+     ],
+     "task_hint": "returning, wrapping, matching or exposing an error, panicking, exiting, or closing a writable resource"
+    },
+    {
+     "file": "concurrency.md",
+     "family": "GO-CONC",
+     "sources": [
+      "go-concurrency.md"
+     ],
+     "task_hint": "starting a goroutine, fanning out work, passing or storing a context, cancelling, or sharing state across goroutines"
+    },
+    {
+     "file": "api-design.md",
+     "family": "GO-API",
+     "sources": [
+      "go-api.md"
+     ],
+     "task_hint": "adding or changing an exported identifier, laying out packages, choosing options versus a config struct, writing doc comments, or building the SDK surface that wraps a CLI"
+    },
+    {
+     "file": "testing.md",
+     "family": "GO-TEST",
+     "sources": [
+      "go-testing.md"
+     ],
+     "task_hint": "writing or reviewing a test, a fuzz target, a benchmark, a golden file, a helper process, or a coverage gate"
+    },
+    {
+     "file": "cli-contract.md",
+     "family": "GO-CLI",
+     "sources": [
+      "go-cli.md"
+     ],
+     "task_hint": "writing a main package, choosing an exit code, wiring cobra, handling a signal or a broken pipe, or writing to stdout, stderr or a terminal"
+    },
+    {
+     "file": "io.md",
+     "family": "GO-IO",
+     "sources": [
+      "go-io.md"
+     ],
+     "task_hint": "writing or replacing a file on disk, confining paths, extracting an archive, or starting and reaping a subprocess",
+     "extra": "Apply note N-6: GO-IO-18 is retired (duplicate of GO-NET-14); write one line saying so with the pointer to GO-NET-14 in network.md by family name, and never reuse the number."
+    },
+    {
+     "file": "network.md",
+     "family": "GO-NET",
+     "sources": [
+      "go-network.md"
+     ],
+     "task_hint": "making an HTTP request, configuring a client or server, retrying, streaming a body, or talking to an OCI registry",
+     "extra": "Apply note N-7 (GO-NET-06 wiring on go-containerregistry, marked 'wiring by source read, not fixture-watched') and N-6 (GO-IO-18 is retired; blob staging lives here as GO-NET-14)."
+    },
+    {
+     "file": "security.md",
+     "family": "GO-SEC",
+     "sources": [
+      "go-security.md"
+     ],
+     "task_hint": "generating a secret or token, configuring TLS, handling credentials, rendering templates, using unsafe, or bounding untrusted input"
+    },
+    {
+     "file": "observability.md",
+     "family": "GO-OBS",
+     "sources": [
+      "go-observability.md"
+     ],
+     "task_hint": "logging, exposing pprof or metrics, tuning GOMAXPROCS or GOMEMLIMIT, diagnosing a hang or leak, or making or judging a performance claim"
+    }
+   ]
+  },
+  {
+   "rule": "go-modules",
+   "glob_list": "__GO_MODULES_GLOBS__",
+   "core_family": "GO-MOD",
+   "index_sources": [
+    "go-modules.md",
+    "go-gates.md"
+   ],
+   "depth": [
+    {
+     "file": "gates.md",
+     "family": "GO-GATE",
+     "sources": [
+      "go-gates.md"
+     ],
+     "task_hint": "writing or changing the CI gate, a golangci-lint config, a staticcheck config, the go vet or govulncheck step, or adding a linter",
+     "extra": "Apply 'Wave 4 landed' contradiction 1 before copying any config: GO-MOD-08's depguard superseded list is 13 entries (its 11, plus go.uber.org/automaxprocs per GO-OBS-06, plus golang.org/x/exp/constraints per GO-LANG-22). Re-quote it into all three config files, then re-run 'golangci-lint config verify' on each copy under your fixture dir and the GO-GATE-22 superset check, and record the result. Apply contradiction 2: GO-GATE-01 gains conditional step 10 (pinned gopls check for the yield analyzer, only where func(yield func( appears, stable leg only). The three complete config files ship as REAL FILES you also write: rules/go-modules/golangci/baseline.golangci.yml, rules/go-modules/golangci/cli.golangci.yml and rules/go-modules/golangci/lib-sdk.golangci.yml (each a complete v2 file with a header comment naming the GO-GATE IDs it implements and 'measured 2026-09-26, golangci-lint v2.14.0'). gates.md links each file by relative path, explains when to copy which (GO-GATE-18/22/23), and quotes only the few lines a reader must see inline; N-4's 'config YAML appears only in gates.md' is satisfied by these three files being gates.md's own attachments. Before returning, run '/home/mherwig/.cache/research-lang/go-tools/run.sh golangci-lint config verify --config <file>' on each of the three shipped files (from a scratch module dir under your fixture dir) and require exit 0; record the three exit codes in your receipt notes. Keep gates.md under 300 lines."
+    },
+    {
+     "file": "release.md",
+     "family": "GO-REL",
+     "sources": [
+      "go-release.md"
+     ],
+     "task_hint": "building a release binary, stamping a version, writing a goreleaser or ko config, signing or attesting assets, or tagging a module version",
+     "extra": "Apply note N-6: GO-REL-13 is dropped (GO-API-10 wins); keep a one-line citation that says GO-REL-13 is retired in favour of GO-API-10, and never reuse the number."
+    }
+   ],
+   "extra": "The go-modules index OWNS GO-MOD-01..18 (note N-3): its rule tables live in the index itself, not in a depth file, so the index is the GO-MOD definition site. Keep it under 200 lines by keeping GO-MOD rows tight; route the gate config to gates.md and release engineering to release.md."
+  }
+ ],
+ "standalone": [
+  {
+   "kind": "skill",
+   "path": "__ROOT__/skills/go-release/SKILL.md",
+   "sources": [
+    "go-release.md",
+    "go-modules.md",
+    "go-gates.md",
+    "go-topic-map.md"
+   ],
+   "brief": "Write the go-release skill (directory skills/go-release/: SKILL.md plus references/ as needed). It is the procedure the map's Artifact set decision and the authoring notes name for cutting a Go release: tag and version decisions (module tags, /vN, retract on a mistake, gorelease or apidiff for libraries), goreleaser v2 check and snapshot, the double-build reproducibility check, version stamping, raw per-platform assets named for mirror consumers plus checksums, signing and provenance, and verification of the published assets. Frontmatter exactly like skills/jvm-release/SKILL.md (name, description with a Use when clause and a Not for clause, license, metadata summary and keywords). The skill is procedure only; it cites GO-REL and GO-MOD rule IDs and never redefines them; any MUST row it duplicates lives in a | # | Finding | Rule | table with the ID last. Mark pinned defaults (owner decisions in go-frame.md) as pinned. Every command in it follows the verification-command shape rules and names the tool version."
+  },
+  {
+   "kind": "skill",
+   "path": "__ROOT__/skills/go-upgrade/SKILL.md",
+   "sources": [
+    "go-language.md",
+    "go-modules.md",
+    "go-gates.md",
+    "go-topic-map.md"
+   ],
+   "brief": "Write the go-upgrade skill (directory skills/go-upgrade/: SKILL.md plus references/ as needed). It is the procedure for moving a module to a new Go release or triaging a dependency: read the release notes and the GODEBUG diff, bump the go and toolchain lines per the policy, run go fix and review its diff, stdversion, bump the golangci-lint pin and config, audit GOEXPERIMENT pins, govulncheck reachability triage (text-mode exit code), replace superseded modules, and re-run the gate. Frontmatter exactly like skills/jvm-release/SKILL.md. Procedure only; cites GO-LANG, GO-MOD and GO-GATE IDs, never redefines them; duplicated MUST rows go in a | # | Finding | Rule | table with the ID last. Every command follows the verification-command shape rules and names the tool version."
+  },
+  {
+   "kind": "skill",
+   "path": "__ROOT__/skills/go-diagnose/SKILL.md",
+   "sources": [
+    "go-observability.md",
+    "go-concurrency.md",
+    "go-io.md",
+    "go-testing.md"
+   ],
+   "brief": "Write the go-diagnose skill (directory skills/go-diagnose/: SKILL.md plus references/ as needed). It is the symptom-routed runbook for a hung, leaking, racy or slow Go process: goroutine dumps (SIGQUIT, GOTRACEBACK), the goroutine leak profile where the release has it, pprof (CPU, heap, allocs, block, mutex), the execution tracer and flight recorder, -race reproduction, GODEBUG knobs, and benchmark evidence with benchstat before any performance claim. Route by symptom like skills/bazel-diagnose/SKILL.md does. Frontmatter exactly like skills/jvm-release/SKILL.md. Procedure only; cites GO-OBS, GO-CONC, GO-IO and GO-TEST IDs, never redefines them. Every command follows the verification-command shape rules and names the Go version."
+  },
+  {
+   "kind": "bazel",
+   "path": "__ROOT__/rules/bazel-quality/go.md",
+   "sources": [
+    "go-bazel.md",
+    "__ROOT__/rules/bazel-quality.md",
+    "__ROOT__/rules/bazel-quality/java.md"
+   ],
+   "brief": "Write rules/bazel-quality/go.md, the BZL-GO depth file of the published bazel-quality rule, in the exact shape of rules/bazel-quality/java.md (read it and rules/bazel-quality.md in full first): frontmatter, a scope paragraph stating what BZL-GO owns and which BZL families it cites without restating (BZL-MOD, BZL-HERM, BZL-CACHE, BZL-TEST, BZL-FLAG, BZL-ARCH, BZL-LARK, BZL-CI), a measurement disclosure like java.md's, framed 'if you adopt Bazel for Go', rule tables from go-bazel.md with IDs verbatim, and What Agents Get Wrong Here. Under 250 lines. THEN edit rules/bazel-quality.md minimally: add one routing row to its 'Where the Depth Is' table ('Writing a go_* target, running Gazelle for Go, repinning go_deps, or wiring nogo' -> bazel-quality/go.md), add rules_go, gazelle, go_deps and nogo to its keywords, and name go-quality and go-modules in its Siblings section. Change nothing else in bazel-quality.md. Run the checker on rules/bazel-quality.md (which covers its support directory)."
+  }
+ ]
+}
