@@ -1,0 +1,93 @@
+aminya__project_options	aminya__project_options/src/toolchains/aarch64-linux.toolchain.cmake	CMAKE_C_COMPILER,CMAKE_CXX_COMPILER,CMAKE_SYSROOT,CMAKE_SYSTEM_NAME,CMAKE_SYSTEM_PROCESSOR,
+aminya__project_options	aminya__project_options/src/toolchains/arm64-linux.toolchain.cmake	CMAKE_C_COMPILER,CMAKE_CXX_COMPILER,CMAKE_SYSROOT,CMAKE_SYSTEM_NAME,CMAKE_SYSTEM_PROCESSOR,
+aminya__project_options	aminya__project_options/src/toolchains/arm-linux.toolchain.cmake	CMAKE_C_COMPILER,CMAKE_CXX_COMPILER,CMAKE_SYSROOT,CMAKE_SYSTEM_NAME,CMAKE_SYSTEM_PROCESSOR,
+aminya__project_options	aminya__project_options/src/toolchains/arm.toolchain.cmake	CMAKE_C_COMPILER,CMAKE_CXX_COMPILER,CMAKE_SYSROOT,CMAKE_SYSTEM_NAME,CMAKE_SYSTEM_PROCESSOR,
+aminya__project_options	aminya__project_options/src/toolchains/i686-w64-mingw32.toolchain.cmake	CMAKE_C_COMPILER,CMAKE_CXX_COMPILER,CMAKE_SYSROOT,CMAKE_SYSTEM_NAME,CMAKE_SYSTEM_PROCESSOR,
+aminya__project_options	aminya__project_options/src/toolchains/x86_64-w64-mingw32.toolchain.cmake	CMAKE_C_COMPILER,CMAKE_CXX_COMPILER,CMAKE_SYSROOT,CMAKE_SYSTEM_NAME,CMAKE_SYSTEM_PROCESSOR,
+aminya__project_options	aminya__project_options/tests/rpi4/cmake/my-toolchain.cmake	CMAKE_C_COMPILER,CMAKE_CXX_COMPILER,CMAKE_SYSTEM_NAME,CMAKE_SYSTEM_PROCESSOR,
+aminya__project_options	aminya__project_options/tests/rpi4-vcpkg/cmake/my-toolchain.cmake	CMAKE_C_COMPILER,CMAKE_CXX_COMPILER,CMAKE_SYSTEM_NAME,CMAKE_SYSTEM_PROCESSOR,
+ccache__ccache	ccache__ccache/toolchains/aarch64-linux-gnu.cmake	CMAKE_C_COMPILER,CMAKE_CXX_COMPILER,CMAKE_SYSTEM_NAME,CMAKE_SYSTEM_PROCESSOR,
+ccache__ccache	ccache__ccache/toolchains/aarch64-w64-mingw32.cmake	CMAKE_C_COMPILER,CMAKE_CXX_COMPILER,CMAKE_SYSTEM_NAME,
+ccache__ccache	ccache__ccache/toolchains/i686-w64-mingw32-posix.cmake	CMAKE_C_COMPILER,CMAKE_CXX_COMPILER,CMAKE_SYSTEM_NAME,
+ccache__ccache	ccache__ccache/toolchains/riscv64-linux-gnu.cmake	CMAKE_C_COMPILER,CMAKE_CXX_COMPILER,CMAKE_SYSTEM_NAME,CMAKE_SYSTEM_PROCESSOR,
+ccache__ccache	ccache__ccache/toolchains/x86_64-w64-mingw32-posix.cmake	CMAKE_C_COMPILER,CMAKE_CXX_COMPILER,CMAKE_SYSTEM_NAME,
+ClickHouse__ClickHouse	ClickHouse__ClickHouse/cmake/darwin/toolchain-aarch64.cmake	
+ClickHouse__ClickHouse	ClickHouse__ClickHouse/cmake/darwin/toolchain-x86_64.cmake	
+ClickHouse__ClickHouse	ClickHouse__ClickHouse/cmake/freebsd/toolchain-aarch64.cmake	
+ClickHouse__ClickHouse	ClickHouse__ClickHouse/cmake/freebsd/toolchain-ppc64le.cmake	
+ClickHouse__ClickHouse	ClickHouse__ClickHouse/cmake/freebsd/toolchain-x86_64.cmake	
+ClickHouse__ClickHouse	ClickHouse__ClickHouse/cmake/linux/toolchain-aarch64.cmake	
+ClickHouse__ClickHouse	ClickHouse__ClickHouse/cmake/linux/toolchain-aarch64-musl.cmake	
+ClickHouse__ClickHouse	ClickHouse__ClickHouse/cmake/linux/toolchain-e2k.cmake	
+ClickHouse__ClickHouse	ClickHouse__ClickHouse/cmake/linux/toolchain-loongarch64.cmake	
+ClickHouse__ClickHouse	ClickHouse__ClickHouse/cmake/linux/toolchain-ppc64le.cmake	
+ClickHouse__ClickHouse	ClickHouse__ClickHouse/cmake/linux/toolchain-riscv64.cmake	
+ClickHouse__ClickHouse	ClickHouse__ClickHouse/cmake/linux/toolchain-s390x.cmake	
+ClickHouse__ClickHouse	ClickHouse__ClickHouse/cmake/linux/toolchain-x86_64.cmake	
+ClickHouse__ClickHouse	ClickHouse__ClickHouse/cmake/linux/toolchain-x86_64-musl.cmake	
+cpp-pm__hunter	cpp-pm__hunter/cmake/modules/hunter_calculate_toolchain_sha1.cmake	
+cpp-pm__hunter	cpp-pm__hunter/cmake/modules/hunter_check_toolchain_definition.cmake	
+cpp-pm__hunter	cpp-pm__hunter/cmake/modules/hunter_get_toolchain_binaries.cmake	
+google__benchmark	google__benchmark/cmake/llvm-toolchain.cmake	
+KDE__extra-cmake-modules	KDE__extra-cmake-modules/toolchain/Android.cmake	CMAKE_SYSROOT,CMAKE_SYSTEM_NAME,
+KDE__extra-cmake-modules	KDE__extra-cmake-modules/toolchain/ECMAndroidDeployQt5.cmake	
+KDE__extra-cmake-modules	KDE__extra-cmake-modules/toolchain/hasMainSymbol.cmake	
+KDE__extra-cmake-modules	KDE__extra-cmake-modules/toolchain/specifydependencies.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/CommandLine/Toolchain/toolchain.cmake	CMAKE_SYSTEM_NAME,
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainFile/CallEnableLanguage.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainFile/CallEnableLanguage-toolchain.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainFile/CallProject.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainFile/CallProject-toolchain.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainFile/CheckLanguage.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainFile/CheckLanguage-toolchain.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainFile/CMP0126-NEW.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainFile/CMP0126-NEW-toolchain.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainFile/CMP0126-OLD.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainFile/CMP0126-OLD-toolchain.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainFile/CMP0126-toolchain.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainFile/CMP0126-WARN.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainFile/CMP0126-WARN-toolchain.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainFile/FlagsInit.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainFile/FlagsInit-toolchain.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainFile/IncludeDirectories.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainFile/IncludeDirectories-toolchain.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainFile/LangVars.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainFile/LangVars-toolchain.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainFile/LinkFlagsInit.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainFile/LinkFlagsInit-toolchain.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainFile/RunCMakeTest.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainFile/SetCompilerLoaded.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainFile/SetCompilerLoaded-toolchain.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainFile/SetCrossCompiling.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainFile/SetCrossCompiling-toolchain.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainSkipsChecks/C.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainSkipsChecks/check.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainSkipsChecks/C-toolchain.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainSkipsChecks/CXX.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainSkipsChecks/CXX-toolchain.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainSkipsChecks/Fortran.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainSkipsChecks/Fortran-toolchain.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainSkipsChecks/RunCMakeTest.cmake	
+Kitware__CMake	Kitware__CMake/Tests/RunCMake/ToolchainSkipsChecks/write-toolchain.cmake	
+llvm__llvm-project	llvm__llvm-project/clang/cmake/caches/cross-linux-toolchain.cmake	
+llvm__llvm-project	llvm__llvm-project/cmake/Modules/GetToolchainDirs.cmake	
+llvm__llvm-project	llvm__llvm-project/cmake/Modules/SetPlatformToolchainTools.cmake	
+llvm__llvm-project	llvm__llvm-project/third-party/benchmark/cmake/llvm-toolchain.cmake	
+microsoft__vcpkg	microsoft__vcpkg/scripts/toolchains/android.cmake	CMAKE_SYSTEM_NAME,
+microsoft__vcpkg	microsoft__vcpkg/scripts/toolchains/emscripten.cmake	
+microsoft__vcpkg	microsoft__vcpkg/scripts/toolchains/freebsd.cmake	CMAKE_SYSTEM_NAME,CMAKE_SYSTEM_PROCESSOR,
+microsoft__vcpkg	microsoft__vcpkg/scripts/toolchains/ios.cmake	CMAKE_SYSTEM_NAME,CMAKE_SYSTEM_PROCESSOR,
+microsoft__vcpkg	microsoft__vcpkg/scripts/toolchains/linux.cmake	CMAKE_C_COMPILER,CMAKE_CXX_COMPILER,CMAKE_SYSTEM_NAME,CMAKE_SYSTEM_PROCESSOR,
+microsoft__vcpkg	microsoft__vcpkg/scripts/toolchains/mingw.cmake	CMAKE_SYSTEM_NAME,CMAKE_SYSTEM_PROCESSOR,
+microsoft__vcpkg	microsoft__vcpkg/scripts/toolchains/netbsd.cmake	CMAKE_SYSTEM_NAME,CMAKE_SYSTEM_PROCESSOR,
+microsoft__vcpkg	microsoft__vcpkg/scripts/toolchains/ohos.cmake	CMAKE_SYSTEM_NAME,
+microsoft__vcpkg	microsoft__vcpkg/scripts/toolchains/openbsd.cmake	CMAKE_C_COMPILER,CMAKE_CXX_COMPILER,CMAKE_SYSTEM_NAME,CMAKE_SYSTEM_PROCESSOR,
+microsoft__vcpkg	microsoft__vcpkg/scripts/toolchains/osx.cmake	CMAKE_SYSTEM_NAME,CMAKE_SYSTEM_PROCESSOR,
+microsoft__vcpkg	microsoft__vcpkg/scripts/toolchains/solaris.cmake	CMAKE_SYSTEM_NAME,CMAKE_SYSTEM_PROCESSOR,
+microsoft__vcpkg	microsoft__vcpkg/scripts/toolchains/uwp.cmake	CMAKE_SYSTEM_NAME,CMAKE_SYSTEM_PROCESSOR,
+microsoft__vcpkg	microsoft__vcpkg/scripts/toolchains/windows.cmake	CMAKE_SYSTEM_NAME,CMAKE_SYSTEM_PROCESSOR,
+microsoft__vcpkg	microsoft__vcpkg/scripts/toolchains/xbox.cmake	CMAKE_SYSTEM_NAME,CMAKE_SYSTEM_PROCESSOR,
+qt__qtbase	qt__qtbase/cmake/QtOHOSToolchainFixes.cmake	
+qt__qtbase	qt__qtbase/cmake/QtPublicHarmonyOSToolchainHelpers.cmake	
+qt__qtbase	qt__qtbase/cmake/QtPublicWasmToolchainHelpers.cmake	
+qt__qtbase	qt__qtbase/cmake/QtToolchainHelpers.cmake	CMAKE_C_COMPILER,CMAKE_CXX_COMPILER,CMAKE_SYSTEM_NAME,CMAKE_SYSTEM_PROCESSOR,

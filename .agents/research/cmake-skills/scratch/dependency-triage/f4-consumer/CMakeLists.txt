@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.25)
+project(app LANGUAGES NONE)
+find_package(dep2 CONFIG REQUIRED)
+add_library(app INTERFACE)
+target_link_libraries(app INTERFACE dep2::dep2)

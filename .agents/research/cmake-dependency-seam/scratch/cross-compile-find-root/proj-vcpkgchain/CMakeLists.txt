@@ -1,0 +1,4 @@
+cmake_minimum_required(VERSION 3.20)
+project(vcpkgchain_probe LANGUAGES NONE)
+message(STATUS "MY_CHAINLOAD_MARKER=${MY_CHAINLOAD_MARKER}")
+message(STATUS "VCPKG_TOOLCHAIN=${VCPKG_TOOLCHAIN}")

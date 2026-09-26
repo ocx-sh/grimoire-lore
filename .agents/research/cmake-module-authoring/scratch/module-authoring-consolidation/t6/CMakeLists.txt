@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.31)
+project(t6 LANGUAGES NONE)
+include("${CMAKE_CURRENT_SOURCE_DIR}/module.cmake")
+f_in_block()
+f_after_block()
+cmake_policy(GET CMP0140 includer)
+message(STATUS "includer after include: CMP0140=${includer} SET_INSIDE_BLOCK=${SET_INSIDE_BLOCK}")

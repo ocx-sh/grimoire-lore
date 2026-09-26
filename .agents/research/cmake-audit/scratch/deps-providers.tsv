@@ -1,0 +1,10 @@
+metric	count
+SET_DEPENDENCY_PROVIDER_calls	4
+CMAKE_PROJECT_TOP_LEVEL_INCLUDES_files	12
+CMAKE_TOOLCHAIN_FILE_reference_files	97
+toolchain_files_under_cmake_dirs	93
+of_those_cross_compiling_CMAKE_SYSTEM_NAME	29
+pkg_check_modules_calls	322
+files_find_package_PkgConfig	239
+repos_with_vendored_dir	10
+repos_with_gitmodules	9

@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.25...4.4)
+project(consumer LANGUAGES NONE)
+include(CTest)
+add_test(NAME consumer_t COMMAND ${CMAKE_COMMAND} -E true)
+add_subdirectory(../libbt libbt)
+add_subdirectory(../libtop libtop)

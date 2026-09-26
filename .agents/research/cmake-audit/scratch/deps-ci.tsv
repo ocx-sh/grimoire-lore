@@ -1,0 +1,28 @@
+metric	repos_n	repo_list
+lukka/get-cmake	4	conan-io__cmake-conan,google__benchmark,microsoft__vcpkg-tool,nlohmann__json,
+jwlawson/actions-setup-cmake	1	gflags__gflags,
+pip install cmake or pip3 install cmake	2	cpm-cmake__CPMLicenses.cmake,fmtlib__fmt,
+apt-get install cmake or apt install cmake	4	duckdb__duckdb,llvm__llvm-project,mozilla__sccache,ninja-build__ninja,
+cmake --preset(s)	3	catchorg__Catch2,friendlyanon__cmake-init,microsoft__vcpkg-tool,
+-Werror=dev	0
+0	,
+--warn-uninitialized	0
+0	,
+sanitizer -fsanitize	0
+0	,
+ccache-action hendrikmuhs	1	llvm__llvm-project,
+sccache-action mozilla	0
+0	,
+lukka/run-vcpkg	1	duckdb__duckdb,
+actions/cache keyed on vcpkg.json	0
+0	,
+actions/cache keyed on conan.lock	0
+0	,
+conan cache save/restore action	0
+0	,
+generator Ninja Multi-Config	3	cpp-best-practices__cmake_template,curl__curl,ninja-build__ninja,
+generator Visual Studio	6	ccache__ccache,cpp-best-practices__cmake_template,gabime__spdlog,google__benchmark,libuv__libuv,nlohmann__json,
+generator Xcode	0
+0	,
+CMAKE_BUILD_TYPE matrix var	19	apache__arrow,boostorg__boost,catchorg__Catch2,ccache__ccache,conan-io__cmake-conan,cpp-best-practices__cmake_template,curl__curl,fmtlib__fmt,gabime__spdlog,gflags__gflags,google__benchmark,jbeder__yaml-cpp,libuv__libuv,llvm__llvm-project,madler__zlib,ninja-build__ninja,nlohmann__json,ocornut__imgui,TheLartians__ModernCppStarter,
+install-tree consumption (--install flag)	7	apache__arrow,curl__curl,duckdb__duckdb,friendlyanon__cmake-init,jbeder__yaml-cpp,libuv__libuv,madler__zlib,

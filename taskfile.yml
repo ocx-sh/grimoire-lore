@@ -163,6 +163,16 @@ tasks:
           echo "note: no Bazel consumer at {{.BAZEL_CONSUMER}} — glob liveness NOT checked for bazel; run locally against a Bzlmod repository"
           {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid 'bazel-cache.ocx.sh' --forbid '.agents/research' rules/bazel-quality.md skills/bazel-adopt skills/bazel-diagnose
         fi
+      #
+      # The CMake set is checked WITHOUT a root, like the JVM set: the fleet
+      # holds one CMake module and no Conan or vcpkg manifest, so most globs
+      # would read as dead against any fleet repository. The set was grounded
+      # on an exemplar corpus of 46 upstream C and C++ repositories instead
+      # (see `.agents/research/cmake-frame.md`), where every glob but three
+      # (`.gersemirc`, `conan.lock`, `conanws.*`, correct and unadopted)
+      # resolves. `--forbid` keeps workstation paths, the corpus, and the
+      # anonymised fleet module's names out of a shareable artifact.
+      - "{{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' --forbid 'research-lang/exemplars' --forbid 'find_ocx' --forbid 'ocx.sh/' --forbid 'ocx.lock' rules/cmake-build.md rules/cpp-packaging.md skills/cmake-dependency-triage skills/cmake-modernize"
     vars:
       CONSUMER: '{{.CONSUMER | default "../ocx"}}'
       # The fleet root, not a single repo — see the comment above.

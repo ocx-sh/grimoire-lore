@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.25)
+project(t1 C)
+set(CMAKE_LINK_LIBRARIES_ONLY_TARGETS ON)
+add_executable(app ../main.c)
+target_link_libraries(app PRIVATE NoSuchTarget123)

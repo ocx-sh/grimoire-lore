@@ -1,0 +1,11 @@
+[settings]
+os=Linux
+arch=armv8
+compiler=clang
+compiler.version=21
+compiler.libcxx=libstdc++11
+build_type=Release
+
+[buildenv]
+CC=/home/mherwig/.cache/cmake-measure-scratch/cross/toolchains/zig-cc-cross.sh
+CXX=/home/mherwig/.cache/cmake-measure-scratch/cross/toolchains/zig-cxx-cross.sh

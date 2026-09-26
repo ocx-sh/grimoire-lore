@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.27)
+project(cmp0077parent LANGUAGES NONE)
+include(FetchContent)
+set(DEP_TESTS OFF)
+message(STATUS "[parent] set DEP_TESTS=OFF (normal var) before fetching")
+FetchContent_Declare(depopt SOURCE_DIR "/home/mherwig/.cache/cmake-measure-scratch/resolution-order/dep-cmp0077-src")
+FetchContent_MakeAvailable(depopt)

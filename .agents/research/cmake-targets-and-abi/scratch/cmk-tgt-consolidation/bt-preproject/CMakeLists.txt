@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.25...4.4)
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build.")
+endif()
+project(btpre C)
+message(STATUS "AFTER=[${CMAKE_BUILD_TYPE}]")
+add_library(a STATIC a.c)

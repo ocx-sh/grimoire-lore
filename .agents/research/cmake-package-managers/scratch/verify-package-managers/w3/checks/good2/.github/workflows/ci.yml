@@ -1,0 +1,2 @@
+steps:
+  - run: conan install . --lockfile=conan.lock --build=missing

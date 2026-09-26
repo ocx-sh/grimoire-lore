@@ -1,0 +1,3 @@
+set(VCPKG_CRT_LINKAGE dynamic)
+include(${CMAKE_CURRENT_LIST_DIR}/common.cmake)
+set(VCPKG_HASH_ADDITIONAL_FILES ${CMAKE_CURRENT_LIST_DIR}/common.cmake)

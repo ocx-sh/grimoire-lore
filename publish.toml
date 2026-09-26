@@ -289,3 +289,32 @@ description = { readme = "docs/jvm-dependency-triage.md", logo = "assets/lore-ja
 [bundles.jvm-essentials]
 version = "0.1.0"
 description = { readme = "docs/jvm-essentials.md", logo = "assets/lore-java.svg" }
+
+# The CMake and C++ package-management set: two rules, not one, because the
+# glob test separates them. CMake build files and Conan/vcpkg manifests live in
+# near-disjoint repositories (3 of 46 exemplars carry both), so one rule would
+# load the Conan and vcpkg depth on every CMakeLists.txt edit for nothing.
+# `cmake-build` follows the house <tool>-build name (gradle-build, maven-build);
+# `cpp-packaging` follows <lang>-packaging (python-, typescript-packaging) and
+# leaves `cpp-quality` free for a future C++-language set. Two skills carry the
+# procedures: dependency triage (run occasionally) and modernisation (run once
+# per repository).
+[rules.cmake-build]
+version = "0.1.0"
+description = { readme = "docs/cmake-build.md", logo = "assets/lore-cmake.svg" }
+
+[rules.cpp-packaging]
+version = "0.1.0"
+description = { readme = "docs/cpp-packaging.md", logo = "assets/lore-cmake.svg" }
+
+[skills.cmake-dependency-triage]
+version = "0.1.0"
+description = { readme = "docs/cmake-dependency-triage.md", logo = "assets/lore-cmake.svg" }
+
+[skills.cmake-modernize]
+version = "0.1.0"
+description = { readme = "docs/cmake-modernize.md", logo = "assets/lore-cmake.svg" }
+
+[bundles.cmake-essentials]
+version = "0.1.0"
+description = { readme = "docs/cmake-essentials.md", logo = "assets/lore-cmake.svg" }

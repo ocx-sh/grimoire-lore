@@ -1,0 +1,4 @@
+[requires]
+pkgc/1.0
+[generators]
+CMakeConfigDeps

@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.25)
+project(app LANGUAGES CXX)
+find_package(dep2 CONFIG REQUIRED)
+add_executable(app main.cpp)
+target_link_libraries(app PRIVATE dep2::dep2)

@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.25...4.4)
+project(app LANGUAGES NONE)
+if(DEFINED DEP)
+  add_subdirectory(${DEP} dep)
+endif()
+if(OWN)
+  cmake_policy(VERSION 3.7)
+endif()

@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.25...4.4)
+project(n LANGUAGES C)
+get_property(p GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
+find_package(foo CONFIG)
+message(STATUS "PROP=${p} VOIDP=${CMAKE_SIZEOF_VOID_P} WHICH=${FOO_WHICH}")

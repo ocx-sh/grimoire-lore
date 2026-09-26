@@ -1,0 +1,2 @@
+steps:
+  - run: cmake -S . -B b -DFETCHCONTENT_SOURCE_DIR_OLD37=$PWD/ov

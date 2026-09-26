@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.25...4.4)
+project(dep VERSION 1.0 LANGUAGES NONE)
+add_library(dep INTERFACE)
+install(TARGETS dep EXPORT depT)
+install(EXPORT depT FILE depConfig.cmake NAMESPACE dep:: DESTINATION lib/cmake/dep)
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 4.3 AND CPS)
+  install(PACKAGE_INFO dep EXPORT depT)
+endif()

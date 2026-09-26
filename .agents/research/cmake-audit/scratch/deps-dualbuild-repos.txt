@@ -1,0 +1,11 @@
+abseil__abseil-cpp
+catchorg__Catch2
+gflags__gflags
+google__benchmark
+google__googletest
+google__re2
+grpc__grpc
+jbeder__yaml-cpp
+madler__zlib
+nlohmann__json
+protocolbuffers__protobuf

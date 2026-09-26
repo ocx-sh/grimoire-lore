@@ -1,0 +1,10 @@
+vcpkg_from_github(OUT_SOURCE_PATH SOURCE_PATH REPO o/foo REF v1 SHA512 0 HEAD_REF main)
+# z_vcpkg_apply_patches is internal and must not match the -w grep
+if(VCPKG_CRT_LINKAGE STREQUAL "dynamic")
+    set(rt "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded$$<$$<CONFIG:Debug>:Debug>DLL")
+else()
+    set(rt "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded$$<$$<CONFIG:Debug>:Debug>")
+endif()
+vcpkg_cmake_configure(SOURCE_PATH "${SOURCE_PATH}" OPTIONS ${rt})
+vcpkg_cmake_install()
+vcpkg_cmake_config_fixup()

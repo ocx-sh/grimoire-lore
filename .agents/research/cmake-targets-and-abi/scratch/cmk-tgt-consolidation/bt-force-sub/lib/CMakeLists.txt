@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.25...4.4)
+project(sublib C)
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "" FORCE)
+endif()
+add_library(sublib STATIC lib.c)

@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.25...4.4)
+project(bsln C)
+include(FetchContent)
+set(BUILD_SHARED_LIBS ON)
+FetchContent_Declare(dep312 SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../dep312)
+FetchContent_MakeAvailable(dep312)
+get_target_property(_t depA TYPE)
+message(STATUS "DEPA_TYPE=${_t}")

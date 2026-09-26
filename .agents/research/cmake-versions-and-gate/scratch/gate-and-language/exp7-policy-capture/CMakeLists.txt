@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.31)
+project(policy_capture_test LANGUAGES NONE)
+include(${CMAKE_CURRENT_LIST_DIR}/module.cmake)
+f1_inside_push()
+f2_after_pop()

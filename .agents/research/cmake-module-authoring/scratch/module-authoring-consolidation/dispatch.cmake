@@ -1,0 +1,6 @@
+function(dispatch_fn op)
+  if(op STREQUAL "UPDATE")
+    set(args ${ARGN})
+    cmake_parse_arguments(arg "" "INDEX" "PACKAGES" ${args})
+  endif()
+endfunction()

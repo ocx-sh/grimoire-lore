@@ -1,0 +1,8 @@
+env:
+  VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite;x-aws,s3://bucket/,read"
+  X_VCPKG_ASSET_SOURCES: "x-azurl,https://mirror.example/,,read"
+  VCPKG_DEFAULT_TRIPLET: x64-windows-static
+  VCPKG_FEATURE_FLAGS: VCPKG_PREFER_SYSTEM_LIBS
+steps:
+  - run: conan install . --lockfile="" --lockfile-partial
+  - run: echo "commit vcpkg.lock"

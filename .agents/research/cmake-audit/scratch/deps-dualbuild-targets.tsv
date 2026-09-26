@@ -1,0 +1,11 @@
+abseil__abseil-cpp	cc_library=306	cc_binary=82	cc_test=300	add_library=10	add_executable=2	add_test=1	bazel_dep_calls=6
+catchorg__Catch2	cc_library=7	cc_binary=0	cc_test=2	add_library=6	add_executable=48	add_test=143	bazel_dep_calls=3
+gflags__gflags	cc_library=3	cc_binary=6	cc_test=0	add_library=3	add_executable=10	add_test=4	bazel_dep_calls=2
+google__benchmark	cc_library=6	cc_binary=0	cc_test=5	add_library=11	add_executable=4	add_test=3	bazel_dep_calls=7
+google__googletest	cc_library=5	cc_binary=28	cc_test=21	add_library=2	add_executable=1	add_test=2	bazel_dep_calls=5
+google__re2	cc_library=4	cc_binary=4	cc_test=22	add_library=3	add_executable=2	add_test=1	bazel_dep_calls=9
+grpc__grpc	cc_library=120	cc_binary=104	cc_test=77	add_library=74	add_executable=580	add_test=1	bazel_dep_calls=35
+jbeder__yaml-cpp	cc_library=10	cc_binary=25	cc_test=24	add_library=4	add_executable=6	add_test=5	bazel_dep_calls=3
+madler__zlib	cc_library=2	cc_binary=0	cc_test=0	add_library=26	add_executable=23	add_test=86	bazel_dep_calls=3
+nlohmann__json	cc_library=4	cc_binary=1	cc_test=0	add_library=16	add_executable=37	add_test=23	bazel_dep_calls=2
+protocolbuffers__protobuf	cc_library=337	cc_binary=108	cc_test=247	add_library=13	add_executable=16	add_test=6	bazel_dep_calls=27

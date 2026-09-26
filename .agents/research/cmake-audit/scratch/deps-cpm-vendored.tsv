@@ -1,0 +1,4 @@
+cpm-cmake__CPM.cmake	cmake/CPM.cmake	  set(CPM_INDENT
+cpm-cmake__CPMLicenses.cmake	cmake/CPM.cmake	set(CPM_DOWNLOAD_VERSION 0.27.5)
+cpp-best-practices__cmake_template	cmake/CPM.cmake	set(CPM_DOWNLOAD_VERSION 0.42.1)
+TheLartians__ModernCppStarter	cmake/CPM.cmake	set(CPM_DOWNLOAD_VERSION 0.42.3)

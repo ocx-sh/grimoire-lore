@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.20)
+project(proberange LANGUAGES C)
+if(NOT DEFINED PROBE_RANGE)
+  set(PROBE_RANGE "1.2")
+endif()
+find_package(dep ${PROBE_RANGE} REQUIRED)
+message(STATUS "PROBE_RANGE=${PROBE_RANGE} dep_FOUND=${dep_FOUND} dep_VERSION=${dep_VERSION} dep_DIR=${dep_DIR}")

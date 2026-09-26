@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.25)
+project(f3 LANGUAGES CXX)
+find_program(SEQ_PROG NAMES seq)
+message(STATUS "[before deferred find_package] SEQ_PROG=${SEQ_PROG}")
+cmake_language(DEFER CALL find_package Beta REQUIRED)
+message(STATUS "[end of top-level, before DEFER fires] listfile done")

@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.25...4.4)
+project(pa LANGUAGES NONE)
+include(FetchContent)
+file(COPY /home/mherwig/.cache/cmake-measure-scratch/skills-consolidation/patch/dep/CMakeLists.txt DESTINATION ${CMAKE_BINARY_DIR}/srccopy)
+FetchContent_Declare(old37 SOURCE_DIR ${CMAKE_BINARY_DIR}/srccopy
+  PATCH_COMMAND sed -i "s/VERSION 3.7/VERSION 3.10/" CMakeLists.txt)
+FetchContent_MakeAvailable(old37)

@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.25...4.4)
+project(bslforce C)
+set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
+add_subdirectory(dep)
+get_target_property(t dep TYPE)
+message(STATUS "DEP_TYPE=${t}")

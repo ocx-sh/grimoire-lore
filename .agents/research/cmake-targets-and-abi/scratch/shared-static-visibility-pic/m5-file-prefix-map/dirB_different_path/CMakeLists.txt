@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.25)
+project(prefixmap C)
+add_library(mathlib STATIC lib.c)
+target_compile_options(mathlib PRIVATE -g -O0)
+if(USE_PREFIX_MAP)
+  target_compile_options(mathlib PRIVATE -ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}=/canon/src -ffile-prefix-map=${CMAKE_CURRENT_BINARY_DIR}=/canon/build)
+endif()

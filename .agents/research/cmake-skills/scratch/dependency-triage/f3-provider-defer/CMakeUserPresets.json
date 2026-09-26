@@ -1,0 +1,9 @@
+{
+    "version": 4,
+    "vendor": {
+        "conan": {}
+    },
+    "include": [
+        "../f3-run442-defer/conan/CMakePresets.json"
+    ]
+}

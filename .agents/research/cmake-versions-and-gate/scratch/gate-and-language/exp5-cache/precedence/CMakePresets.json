@@ -1,0 +1,10 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "p1",
+      "binaryDir": "${sourceDir}/build-preset",
+      "cacheVariables": { "MYVAR": "from-preset" }
+    }
+  ]
+}

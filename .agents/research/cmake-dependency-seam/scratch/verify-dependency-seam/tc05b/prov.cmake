@@ -1,0 +1,3 @@
+macro(p m)
+endmacro()
+cmake_language(SET_DEPENDENCY_PROVIDER p SUPPORTED_METHODS FIND_LIBRARY)

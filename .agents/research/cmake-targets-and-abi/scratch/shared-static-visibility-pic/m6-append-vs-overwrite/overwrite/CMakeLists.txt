@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.25)
+project(overwritetest C)
+set(CMAKE_C_FLAGS "-Wall")
+add_subdirectory(stat)
+add_library(shared SHARED shared.c)
+target_link_libraries(shared PRIVATE stat)

@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.25...4.4)
+project(snip C)
+get_property(_is_multi GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(PROJECT_IS_TOP_LEVEL AND NOT _is_multi AND NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "Build type" FORCE)
+endif()
+message(STATUS "SNIP=[${CMAKE_BUILD_TYPE}] multi=[${_is_multi}]")

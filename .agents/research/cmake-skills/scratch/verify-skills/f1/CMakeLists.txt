@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.25...4.4)
+project(f1 LANGUAGES NONE)
+include(FetchContent)
+FetchContent_Declare(dep SOURCE_DIR ${FETCHED} OVERRIDE_FIND_PACKAGE)
+find_package(dep REQUIRED)

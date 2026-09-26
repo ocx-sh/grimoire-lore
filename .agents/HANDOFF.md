@@ -1,3 +1,54 @@
+# CMake and C++ package-management program (AUTHORED, ON BRANCH `java`)
+
+Written 2026-09-26, for a cold resume. Runs on the `java` worktree
+(`.agents/worktrees/java`, branch `java`, based on `main` fc26433). The
+worktree names are crossed (the JVM program ran on `.agents/worktrees/cmake`).
+Companion to the Bazel program: this set owns the wrapped CMake project's side
+of the rules_foreign_cc seam, `bazel-quality` owns the wrapper side.
+
+## What shipped (on the branch, unmerged)
+
+- `rules/cmake-build.md` (180 lines, 18 non-negotiables) + 10 depth files,
+  159 rules, 92 MUST. `rules/cpp-packaging.md` (189 lines, 16
+  non-negotiables) + `conan.md`, `vcpkg.md`, 46 rules, 21 MUST.
+- `skills/cmake-dependency-triage/`, `skills/cmake-modernize/`, each with
+  references. Bundle `cmake-essentials` (members untagged).
+- Wiring: `publish.toml` (5 entries, 0.1.0), `bundles/cmake-essentials.toml`,
+  `taskfile.yml` artifacts step, `assets/glyphs/cmake.svg`,
+  `assets/lore-cmake.svg`, 5 `docs/*.md` companions.
+
+## Validation
+
+Phase 8: 4 opus reviewers exercised 88 verifications on planted fixtures
+against CMake 3.31.12, 4.3.4 and 4.4.2 (journal `wf_ed91e1d0-a1f`; receipt
+`cmake-topic-map/scratch/review-receipt.json`): 6 blockers, 47 fixes, 29 nits,
+all applied by 5 fixers (`cmake-fix-a.mjs` from `mkfix.py`), 2 cross-file handbacks applied by hand. Checker
+clean with and without the exemplar root (`--allow-absent` for `.gersemirc`,
+`conan.lock`, `conanws.yml`, `conanws.py`), self-test ok, ruff clean, all 29
+`cmake` fences gersemi 0.29.1 clean, JSON fences valid.
+
+## Corpus
+
+Frame, 4 audits, 5 scouts, map (164 rows), 10 consolidations (205 IDs at
+convergence), verification ledgers per group, era re-check 2026-09-26. Index in
+`.agents/research/README.md` › "CMake and C++ package management". Spend about
+22.5M tokens over wave 1 (2026-09-05) and waves 2-3, authoring and review
+(2026-09-26).
+
+## Open, for the owner
+
+- Proposed one-line pointer in `rules/bazel-quality/cpp.md` › Wrapped Foreign
+  Builds: `cmake-topic-map/handoff/bazel-quality-pointer.md`. Not applied;
+  needs a `bazel-quality` version bump to ship.
+- find_ocx: 11 code fixes, 2 docs fixes, 7 harness fixes, measured, in
+  `cmake-audit/find-ocx-handoff.md`. The wave-1 FORCE defect is refuted. No
+  issue filed (owner default).
+- Dated re-checks D1-D8 and residue R1-R10 in `cmake-topic-map.md` ›
+  "Wave 3 landed". CONAN-04 flips to CMakeConfigDeps when Conan calls it
+  stable. Reserved IDs CONAN-19, VCPKG-19/20, PKG-05..07 are never emitted.
+
+---
+
 # JVM quality artifact program (AUTHORED, ON BRANCH `cmake`)
 
 Started 2026-09-05 22:57 CEST in the `cmake` worktree

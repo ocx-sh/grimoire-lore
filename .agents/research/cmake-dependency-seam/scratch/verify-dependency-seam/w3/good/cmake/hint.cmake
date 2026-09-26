@@ -1,0 +1,6 @@
+function(hint name dir)
+  if(NOT "${${name}_ROOT}" STREQUAL "${dir}")
+    unset(${name}_DIR CACHE)
+  endif()
+  set(${name}_ROOT "${dir}" CACHE PATH "hint" FORCE)
+endfunction()

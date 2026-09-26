@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.25)
+project(picprobe LANGUAGES C)
+set(CMAKE_POSITION_INDEPENDENT_CODE OFF)
+add_library(w STATIC w.c)
+add_library(c SHARED c.c)
+target_link_libraries(c PRIVATE w)

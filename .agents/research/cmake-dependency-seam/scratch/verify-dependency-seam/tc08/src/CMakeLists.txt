@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.25...4.4)
+project(tc08 LANGUAGES NONE)
+message(STATUS "CROSS=${CMAKE_CROSSCOMPILING} MODE_PACKAGE='${CMAKE_FIND_ROOT_PATH_MODE_PACKAGE}' MAKE=${CMAKE_MAKE_PROGRAM}")
+find_package(foo CONFIG)
+message(STATUS "foo_FOUND=${foo_FOUND} which=${FOO_WHICH}")

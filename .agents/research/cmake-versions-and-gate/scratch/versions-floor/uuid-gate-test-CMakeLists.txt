@@ -1,0 +1,24 @@
+# Re-runnable copy of the scratch project used to measure whether a stale
+# CMAKE_EXPERIMENTAL_CXX_IMPORT_STD UUID fails loudly on CMake 4.4.2.
+# Original ran at /home/mherwig/.cache/cmake-measure-scratch/uuid-gate-test/src/
+#
+# To reproduce the "stale" case, replace the UUID below with the v4.3.4 value
+# 451f2fe2-a8a2-47c3-bc32-94786d8fc91b (correct for v4.3.4, stale on 4.4.2)
+# and diff the configure output against this (v4.4.2-correct) version:
+#
+#   ocx package exec kitware/cmake:4.4 -- cmake -S <this-dir> -B <build-dir> \
+#     -DCMAKE_CXX_COMPILER=<zig-cxx-wrapper.sh>
+#
+# where zig-cxx-wrapper.sh is:
+#   #!/bin/sh
+#   exec /opt/zig/zig c++ "$@"
+#
+# Result (2026-09-26): both UUIDs configure cleanly with identical structure;
+# no warning or error distinguishes a stale gate from a correct one. See
+# floors-policies-and-era.md Findings §4.
+
+cmake_minimum_required(VERSION 3.30)
+set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "f35a9ac6-8463-4d38-8eec-5d6008153e7d")
+project(gatetest CXX)
+message(STATUS "gate variable after project(): ${CMAKE_EXPERIMENTAL_CXX_IMPORT_STD}")
+message(STATUS "CXX_MODULE_STD initial value: [${CMAKE_CXX_MODULE_STD}]")

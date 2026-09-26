@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.25...4.4)
+project(btnormal C)
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE RelWithDebInfo)
+endif()
+add_library(l STATIC ../a.c)

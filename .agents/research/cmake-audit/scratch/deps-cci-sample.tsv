@@ -1,0 +1,16 @@
+metric	count_of_40
+N_sampled	40
+requires	19
+tool_requires_or_build_requires	10
+test_requires	0
+generator_CMakeDeps	12
+generator_CMakeToolchain	25
+generator_PkgConfigDeps	2
+def_layout	40
+cmake_layout_call	24
+def_package_id	15
+python_requires	0
+conan2_import	40
+conan1_import	0
+config.yml_present_for_sampled_pkgs	0_repo_total_not_per_sample
+test_package_CMakeLists_present	38

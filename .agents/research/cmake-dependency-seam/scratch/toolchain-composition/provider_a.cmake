@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.24)
+function(provide_a method package_name)
+  message(STATUS "PROVIDER-A-CALLED for ${package_name}")
+endfunction()
+cmake_language(SET_DEPENDENCY_PROVIDER provide_a SUPPORTED_METHODS FIND_PACKAGE)
+message(STATUS "PROVIDER-A-REGISTERED")

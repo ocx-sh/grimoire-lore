@@ -1,0 +1,10 @@
+metric	value
+HunterGate.cmake_files_in_corpus	0
+0
+HunterGate.cmake_paths	none
+cmake/Hunter/config.cmake_files	2
+hunter_add_package_total_calls	659
+cpp-pm__hunter_sha	708cab1c49
+cpp-pm__hunter_packages_under_cmake_projects	548
+cpp-pm__hunter_last_commit	2026-08-23T23:58:40+02:00
+cpp-pm__hunter_version_files	none

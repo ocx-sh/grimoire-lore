@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.25)
+project(bad CXX)
+set(VCPKG_TARGET_TRIPLET x64-windows-static)
+set(CMAKE_CXX_STANDARD 20)
+find_package(ZLIB MODULE REQUIRED)
+find_package(protobuf CONFIG REQUIRED)
+set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES conan_provider.cmake)

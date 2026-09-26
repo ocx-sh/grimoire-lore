@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.25...4.4)
+project(netfetch LANGUAGES NONE)
+include(FetchContent)
+FetchContent_Declare(remote URL https://github.com/madler/zlib/archive/refs/tags/v1.3.1.tar.gz)
+FetchContent_MakeAvailable(remote)

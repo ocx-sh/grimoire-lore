@@ -1,0 +1,128 @@
+######## cmake 3.31
+== C1 bt-noforce
+-- AFTER=[]
+CMAKE_BUILD_TYPE:STRING=
+== C3 bt-force
+-- AFTER=[Release]
+== C2 bt-sub
+-- PARENT_AFTER=[Release]
+C_FLAGS = -O3 -DNDEBUG
+== snippet single
+-- SNIP=[RelWithDebInfo] multi=[0]
+== snippet single -DCMAKE_BUILD_TYPE=Debug
+-- SNIP=[Debug] multi=[0]
+== snippet NMC
+-- SNIP=[] multi=[1]
+== C4 mc-pre NMC
+-- PRE: CONFIGURATION_TYPES=[] IS_MULTI=[1]
+-- POST: CONFIGURATION_TYPES=[Debug;Release;RelWithDebInfo]
+== bsl-normal
+  Policy CMP0077 is not set: option() honors normal variables.  Run "cmake
+-- DEPA_TYPE=STATIC_LIBRARY
+== C5 bsl-scoped
+-- DEPA_TYPE=SHARED_LIBRARY DEPB_TYPE=STATIC_LIBRARY
+== C6 bsl-force -DBUILD_SHARED_LIBS=OFF
+-- DEP_TYPE=SHARED_LIBRARY
+== PIC none
+relocation R_X86_64_32S against symbol `table' can not be used when making a shared object
+build exit (last grep status ignored)
+libshared.so NOT built
+== PIC var
+build exit (last grep status ignored)
+libshared.so BUILT
+== PIC prop
+build exit (last grep status ignored)
+libshared.so BUILT
+== TGT-04 OVERWRITE=OFF
+C_FLAGS = -fPIC -DSEED=1 -Wall
+libshared.so BUILT
+== TGT-04 OVERWRITE=ON
+C_FLAGS = -Wall
+libshared.so NOT built
+== ONLY_TARGETS ITEM=m
+exit=1
+10:-- Configuring done (0.1s)
+16:  which is not a target.  Possible reasons include:
+24:-- Generating done (0.0s)
+== ONLY_TARGETS ITEM=pthread
+exit=1
+10:-- Configuring done (0.1s)
+16:  which is not a target.  Possible reasons include:
+24:-- Generating done (0.0s)
+== ONLY_TARGETS ITEM=mispeled
+exit=1
+10:-- Configuring done (0.1s)
+16:  which is not a target.  Possible reasons include:
+24:-- Generating done (0.0s)
+== ONLY_TARGETS ITEM=/usr/lib/libm.so.6
+exit=0
+10:-- Configuring done (0.2s)
+11:-- Generating done (0.0s)
+== ONLY_TARGETS ITEM=Threads::Threads
+exit=0
+10:-- Configuring done (0.2s)
+11:-- Generating done (0.0s)
+######## cmake 4.4
+== C1 bt-noforce
+-- AFTER=[]
+CMAKE_BUILD_TYPE:STRING=
+== C3 bt-force
+-- AFTER=[Release]
+== C2 bt-sub
+-- PARENT_AFTER=[Release]
+C_FLAGS = -O3 -DNDEBUG
+== snippet single
+-- SNIP=[RelWithDebInfo] multi=[0]
+== snippet single -DCMAKE_BUILD_TYPE=Debug
+-- SNIP=[Debug] multi=[0]
+== snippet NMC
+-- SNIP=[] multi=[1]
+== C4 mc-pre NMC
+-- PRE: CONFIGURATION_TYPES=[] IS_MULTI=[1]
+-- POST: CONFIGURATION_TYPES=[Debug;Release;RelWithDebInfo]
+== bsl-normal
+  Policy CMP0077 is not set: option() honors normal variables.  Run "cmake
+-- DEPA_TYPE=STATIC_LIBRARY
+== C5 bsl-scoped
+-- DEPA_TYPE=SHARED_LIBRARY DEPB_TYPE=STATIC_LIBRARY
+== C6 bsl-force -DBUILD_SHARED_LIBS=OFF
+-- DEP_TYPE=SHARED_LIBRARY
+== PIC none
+relocation R_X86_64_32S against symbol `table' can not be used when making a shared object
+build exit (last grep status ignored)
+libshared.so NOT built
+== PIC var
+build exit (last grep status ignored)
+libshared.so BUILT
+== PIC prop
+build exit (last grep status ignored)
+libshared.so BUILT
+== TGT-04 OVERWRITE=OFF
+C_FLAGS = -fPIC -DSEED=1 -Wall
+libshared.so BUILT
+== TGT-04 OVERWRITE=ON
+C_FLAGS = -Wall
+libshared.so NOT built
+== ONLY_TARGETS ITEM=m
+exit=1
+10:-- Configuring done (0.1s)
+16:  which is not a target.  Possible reasons include:
+24:-- Generating done (0.0s)
+== ONLY_TARGETS ITEM=pthread
+exit=1
+10:-- Configuring done (0.1s)
+16:  which is not a target.  Possible reasons include:
+24:-- Generating done (0.0s)
+== ONLY_TARGETS ITEM=mispeled
+exit=1
+10:-- Configuring done (0.1s)
+16:  which is not a target.  Possible reasons include:
+24:-- Generating done (0.0s)
+== ONLY_TARGETS ITEM=/usr/lib/libm.so.6
+exit=0
+10:-- Configuring done (0.1s)
+11:-- Generating done (0.0s)
+== ONLY_TARGETS ITEM=Threads::Threads
+exit=0
+10:-- Configuring done (0.1s)
+11:-- Generating done (0.0s)

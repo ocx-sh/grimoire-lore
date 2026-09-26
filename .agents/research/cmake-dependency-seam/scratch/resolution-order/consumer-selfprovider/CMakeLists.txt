@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.27)
+project(consumer3 LANGUAGES C)
+function(my_provider4 method package_name)
+  message(STATUS "[provider4] called: method=${method} package_name=${package_name}")
+endfunction()
+cmake_language(SET_DEPENDENCY_PROVIDER my_provider4 SUPPORTED_METHODS FIND_PACKAGE)
+find_package(dep CONFIG REQUIRED)

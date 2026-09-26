@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.25...4.4)
+project(libtop LANGUAGES NONE)
+option(LIBTOP_BUILD_TESTS "Build libtop's tests" ${PROJECT_IS_TOP_LEVEL})
+if(LIBTOP_BUILD_TESTS)
+  include(CTest)
+  add_subdirectory(tests)
+endif()

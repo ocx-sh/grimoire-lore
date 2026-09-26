@@ -1,0 +1,19 @@
+Warning: unknown command 'spdlog_extract_version' used at:
+/home/mherwig/.cache/research-lang/exemplars/cmake/gabime__spdlog/CMakeLists.txt:11:1
+
+Warning: unknown command 'spdlog_message_once' used at:
+/home/mherwig/.cache/research-lang/exemplars/cmake/gabime__spdlog/CMakeLists.txt:14:1
+/home/mherwig/.cache/research-lang/exemplars/cmake/gabime__spdlog/CMakeLists.txt:175:1
+
+Warning: unknown command 'spdlog_enable_warnings' used at:
+/home/mherwig/.cache/research-lang/exemplars/cmake/gabime__spdlog/CMakeLists.txt:218:1
+/home/mherwig/.cache/research-lang/exemplars/cmake/gabime__spdlog/CMakeLists.txt:354:5
+/home/mherwig/.cache/research-lang/exemplars/cmake/gabime__spdlog/CMakeLists.txt:356:9
+
+Warning: unknown command 'spdlog_enable_addr_sanitizer' used at:
+/home/mherwig/.cache/research-lang/exemplars/cmake/gabime__spdlog/CMakeLists.txt:231:5
+
+Warning: unknown command 'spdlog_enable_thread_sanitizer' used at:
+/home/mherwig/.cache/research-lang/exemplars/cmake/gabime__spdlog/CMakeLists.txt:233:5
+
+/home/mherwig/.cache/research-lang/exemplars/cmake/gabime__spdlog/CMakeLists.txt would be reformatted

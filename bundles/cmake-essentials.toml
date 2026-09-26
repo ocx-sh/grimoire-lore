@@ -1,0 +1,32 @@
+summary = "The CMake and C++ package-management set — build-file standards for CMake 3.25 through 4.4, the Conan 2 and vcpkg manifest rules, and the dependency-triage and modernisation procedures"
+keywords = "cmake,cpp,c++,c,build,cmakelists,presets,ctest,cpack,find_package,fetchcontent,cpm,hunter,dependency-provider,cps,common-package-specification,install,export,config-package,pkg-config,toolchain,cross-compile,conan,conan2,vcpkg,portfile,lockfile,baseline,binary-cache,rules_foreign_cc,bazel,gersemi,policies"
+description = "Everything an agent needs to write, consume and ship C and C++ builds with CMake: the cmake-build rule (the configure gate spelled per CMake line, version floors and policies, the CMake language traps, module authoring, targets and linkage, install and export with CPS on 4.3 and later, dependency acquisition across find_package, FetchContent, CPM and providers, toolchain files, CTest, presets and CI, and the wrapped side of a Bazel rules_foreign_cc build), the cpp-packaging rule (one manager of record, Conan 2 recipes, profiles and lockfiles, vcpkg manifests, baselines, ports and binary caching), plus the cmake-dependency-triage skill that answers which copy and version of a dependency was resolved and why, and the cmake-modernize skill that takes a legacy tree to target-based and consumable."
+license = "Apache-2.0"
+repository = "https://github.com/ocx-sh/grimoire-lore"
+
+# Members are same-directory relative: this catalog publishes flat under
+# ghcr.io/ocx-sh/lore/<name>, so `./cmake-build` resolves against wherever
+# the bundle itself was pulled from — a mirror keeps working.
+#
+# MEMBERS CARRY NO TAG. Not a digest, not an exact version, not a floating
+# major, not `latest` — `latest` is a tag like any other and naming it is still
+# a pin. A bundle is a *set*, not a snapshot: its job is to say "these belong
+# together", and the consumer's own `grimoire.lock` is what freezes them.
+#
+# Do not pass --pin when releasing this bundle.
+#
+# Two rules, not one, because the globs genuinely differ: CMake build files and
+# Conan/vcpkg manifests sit in near-disjoint repositories. The one deliberate
+# overlap is `portfile.cmake`, which both `cmake-build` (`**/*.cmake`) and
+# `cpp-packaging` claim: a vcpkg port script is CMake code and a packaging
+# manifest at once, and each index says so in its Siblings section. The Bazel
+# side of the rules_foreign_cc seam is not a member — it belongs to the
+# `bazel-quality` set.
+
+[rules]
+cmake-build = "./cmake-build"
+cpp-packaging = "./cpp-packaging"
+
+[skills]
+cmake-dependency-triage = "./cmake-dependency-triage"
+cmake-modernize = "./cmake-modernize"

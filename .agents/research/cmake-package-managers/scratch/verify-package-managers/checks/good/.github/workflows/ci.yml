@@ -1,0 +1,5 @@
+env:
+  VCPKG_BINARY_SOURCES: "clear;nuget,GitHub,readwrite"
+  X_VCPKG_ASSET_SOURCES: "x-azurl,https://mirror.example/,,read;x-block-origin"
+steps:
+  - run: conan install . -l conan.lock -pr:h host -pr:b default

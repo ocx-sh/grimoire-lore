@@ -1,0 +1,69 @@
+--- /home/mherwig/dev/find_ocx/CMakeLists.txt
++++ /home/mherwig/dev/find_ocx/CMakeLists.txt
+@@ -25,29 +25,32 @@
+ set(OCX_TEST_CMAKE_VERSIONS 3 4)
+ 
+ # Refresh flow: `cmake --build build --target ocx-index-update` (or
+ # `task index:update`), review the diff, commit.
+ ocx_index(UPDATE_COMMAND index_refresh)
+-add_custom_target(ocx-index-update
+-  COMMAND ${index_refresh}
+-  COMMAND ${CMAKE_COMMAND} -E echo
+-    "find_ocx: index snapshot refreshed - review the diff and commit the result"
+-  VERBATIM)
++add_custom_target(
++    ocx-index-update
++    COMMAND ${index_refresh}
++    COMMAND
++        ${CMAKE_COMMAND} -E echo
++        "find_ocx: index snapshot refreshed - review the diff and commit the result"
++    VERBATIM
++)
+ 
+ include(tests/helpers.cmake)
+ 
+ # Test names are <test>/cmake-<full-version> (tree in IDE test explorers);
+ # probe the provisioned cmakes once for their resolved versions.
+ foreach(v IN LISTS OCX_TEST_CMAKE_VERSIONS)
+-  ocx_cmake_test_label(OCX_CMAKE_${v}_TEST_LABEL ${v})
++    ocx_cmake_test_label(OCX_CMAKE_${v}_TEST_LABEL ${v})
+ endforeach()
+ 
+ ocx_add_cmake_version_test(bootstrap VERSIONS ${OCX_TEST_CMAKE_VERSIONS} NO_EXECUTABLE)
+ ocx_add_cmake_version_test(project_run VERSIONS ${OCX_TEST_CMAKE_VERSIONS})
+ ocx_add_cmake_version_test(package VERSIONS ${OCX_TEST_CMAKE_VERSIONS})
+ if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+-  ocx_add_cmake_version_test(foreign_platform VERSIONS ${OCX_TEST_CMAKE_VERSIONS})
++    ocx_add_cmake_version_test(foreign_platform VERSIONS ${OCX_TEST_CMAKE_VERSIONS})
+ endif()
+ ocx_add_stale_lock_test(VERSIONS ${OCX_TEST_CMAKE_VERSIONS})
+ ocx_add_bootstrap_off_test(VERSIONS ${OCX_TEST_CMAKE_VERSIONS})
+ ocx_add_floating_fatal_test(VERSIONS ${OCX_TEST_CMAKE_VERSIONS})
+ ocx_add_memoize_test(VERSIONS ${OCX_TEST_CMAKE_VERSIONS})
+Warning: unknown command 'ocx_cmake_test_label' used at:
+/home/mherwig/dev/find_ocx/CMakeLists.txt:41:3
+
+Warning: unknown command 'ocx_add_cmake_version_test' used at:
+/home/mherwig/dev/find_ocx/CMakeLists.txt:44:1
+/home/mherwig/dev/find_ocx/CMakeLists.txt:45:1
+/home/mherwig/dev/find_ocx/CMakeLists.txt:46:1
+/home/mherwig/dev/find_ocx/CMakeLists.txt:48:3
+
+Warning: unknown command 'ocx_add_stale_lock_test' used at:
+/home/mherwig/dev/find_ocx/CMakeLists.txt:50:1
+
+Warning: unknown command 'ocx_add_bootstrap_off_test' used at:
+/home/mherwig/dev/find_ocx/CMakeLists.txt:51:1
+
+Warning: unknown command 'ocx_add_floating_fatal_test' used at:
+/home/mherwig/dev/find_ocx/CMakeLists.txt:52:1
+
+Warning: unknown command 'ocx_add_memoize_test' used at:
+/home/mherwig/dev/find_ocx/CMakeLists.txt:53:1
+
+Warning: unknown command 'ocx_add_script_mode_test' used at:
+/home/mherwig/dev/find_ocx/CMakeLists.txt:54:1
+
+Warning: unknown command 'ocx_add_self_update_test' used at:
+/home/mherwig/dev/find_ocx/CMakeLists.txt:55:1
+

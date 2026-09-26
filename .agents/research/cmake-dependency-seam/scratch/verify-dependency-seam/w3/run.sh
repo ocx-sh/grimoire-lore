@@ -1,0 +1,32 @@
+#!/bin/sh
+# Run each MUST rule's verification command verbatim in bad/ (planted) and good/ (clean).
+# Usage: sh run.sh ; prints lines of output per command per tree.
+S=$(cd "$(dirname "$0")" && pwd)
+c() { id=$1; shift; for t in bad good; do n=$(cd "$S/$t" && sh -c "$*" 2>/dev/null | wc -l); echo "$id $t lines=$n"; done; }
+c DEP-01a "grep -rnE --include='*.cmake' --include='CMakeLists.txt' -e 'GIT_TAG[[:space:]]+\"?main\b' -e 'GIT_TAG[[:space:]]+\"?master\b' -e 'GIT_TAG[[:space:]]+\"?develop\b' -e 'GIT_TAG[[:space:]]+\"?HEAD\b' -e '#main\"' -e '#master\"' ."
+c DEP-01b "grep -rnE -A1 --include='*.cmake' --include='CMakeLists.txt' -e 'GIT_TAG[[:space:]]*\$' ."
+c DEP-03 "grep -rlE --include='*.cmake' --include='CMakeLists.txt' -e '\bURL[[:space:]]+\"?https?:' -e '\bURL[[:space:]]+\"?\\\$\{' . | xargs -r grep -L -e URL_HASH -e URL_MD5"
+c DEP-08 "NAME=dep; grep -rnE --include='*.cmake' --include='CMakeLists.txt' -e \"target_link_libraries.*[[:space:]]\$NAME[[:space:])]\" -e \"target_link_libraries.*[[:space:]]\$NAME\\\$\" ."
+c DEP-09 "grep -rn -A12 --include='*.cmake' --include='CMakeLists.txt' -e 'OVERRIDE_FIND_PACKAGE' ."
+c DEP-13 "grep -rlE --include='*.cmake' -e '_ROOT[^)]*CACHE' . | xargs -r grep -L -e '_DIR CACHE'"
+c DEP-14 "grep -rn --include='*.cmake' --include='CMakeLists.txt' -e 'find_program(' -e 'find_library(' ."
+c DEP-15 "grep -rn --include='*.cmake' --include='CMakeLists.txt' --include='CMakePresets.json' --include='*.yml' -e 'CMAKE_POLICY_VERSION_MINIMUM' -e 'CMAKE_POLICY_DEFAULT_CMP' ."
+c DEP-16 "grep -rnE --include='*.cmake' --include='CMakeLists.txt' -e 'FetchContent_MakeAvailable' -e 'CPMAddPackage' -e 'HunterGate' -e 'file\(DOWNLOAD' -e 'SET_DEPENDENCY_PROVIDER' ."
+c DEP-19 "grep -rnE --include='*.cmake' --include='CMakeLists.txt' -e 'find_package\([[:space:]]*CUDA[[:space:])]' -e 'find_package\([[:space:]]*PythonInterp' -e 'find_package\([[:space:]]*PythonLibs' -e 'find_package\([[:space:]]*GCCXML' -e 'find_package\([[:space:]]*CABLE' ."
+c DEP-21 "grep -rn --include='*.cmake' --include='CMakeLists.txt' --include='CMakePresets.json' -e 'CMAKE_FIND_ROOT_PATH' -e 'CMAKE_SYSROOT' -e 'vcpkg.cmake' ."
+c DEP-23a "grep -rln --include='*.cmake' --include='CMakeLists.txt' -e 'pkg_check_modules' -e 'pkg_search_module' -e 'cmake_pkg_config' ."
+c DEP-23b "grep -rn --include='*.cmake' --include='CMakePresets.json' --include='*.yml' -e 'PKG_CONFIG_SYSROOT_DIR' ."
+c DEP-23c "grep -rn --include='*.cmake' --include='CMakePresets.json' --include='*.yml' -e 'PKG_CONFIG_LIBDIR' ."
+c TC-01 "grep -rn --include='CMakePresets.json' --include='CMakeUserPresets.json' --include='*.yml' --include='*.yaml' --include='CMakeLists.txt' -e 'CMAKE_TOOLCHAIN_FILE' -e 'toolchainFile' -e '--toolchain' ."
+c TC-02 "grep -rn --include='CMakePresets.json' --include='CMakeUserPresets.json' --include='*.yml' --include='*.yaml' --include='*.cmake' -e 'vcpkg.cmake' -e 'conan_toolchain.cmake' ."
+c TC-03 "grep -rn --include='CMakeLists.txt' -e 'project(' -e 'set(CMAKE_TOOLCHAIN_FILE' -e 'set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES' -e 'set(VCPKG_' ."
+c TC-04 "grep -rn --include='CMakeLists.txt' --include='*.cmake' -e 'SET_DEPENDENCY_PROVIDER' -e 'CMAKE_PROJECT_TOP_LEVEL_INCLUDES' ."
+c TC-05 "grep -rn --include='CMakeLists.txt' -e 'find_package(' -e 'find_program(' -e 'find_library(' ."
+c TC-08L "grep -rlE --include='*.cmake' -e 'set\(CMAKE_SYSROOT' -e 'set\(CMAKE_SYSTEM_NAME' . | xargs -r grep -L -e 'CMAKE_FIND_ROOT_PATH_MODE_LIBRARY'"
+c TC-08I "grep -rlE --include='*.cmake' -e 'set\(CMAKE_SYSROOT' -e 'set\(CMAKE_SYSTEM_NAME' . | xargs -r grep -L -e 'CMAKE_FIND_ROOT_PATH_MODE_INCLUDE'"
+c TC-08P "grep -rlE --include='*.cmake' -e 'set\(CMAKE_SYSROOT' -e 'set\(CMAKE_SYSTEM_NAME' . | xargs -r grep -L -e 'CMAKE_FIND_ROOT_PATH_MODE_PACKAGE'"
+c TC-09 "grep -rnE --include='*.cmake' -e 'CMAKE_FIND_ROOT_PATH_MODE_PROGRAM[[:space:]\"]+ONLY' -e 'CMAKE_FIND_ROOT_PATH_MODE_PROGRAM[[:space:]\"]+BOTH' ."
+c TC-06 "grep -rnE --include='*toolchain*.cmake' -e 'execute_process' -e 'message\(FATAL_ERROR' -e 'project\(' -e 'enable_language' ."
+c TC-09u "grep -rlE --include='*.cmake' -e 'set\(CMAKE_SYSROOT' -e 'set\(CMAKE_SYSTEM_NAME' . | xargs -r grep -L -e 'CMAKE_FIND_ROOT_PATH_MODE_PROGRAM'"
+c DEP-09n "grep -rn -A12 --include='*.cmake' --include='CMakeLists.txt' -e 'OVERRIDE_FIND_PACKAGE' -e 'FIND_PACKAGE_ARGS' ."
+c DEP-13z "grep -rlzE --include='*.cmake' -e '_ROOT[^)]*CACHE' . | xargs -r grep -L -e '_DIR CACHE'"

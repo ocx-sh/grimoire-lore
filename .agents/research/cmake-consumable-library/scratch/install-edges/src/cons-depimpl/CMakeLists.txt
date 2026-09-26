@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.20)
+project(consumer LANGUAGES C)
+find_package(dep 1.2 CONFIG REQUIRED)
+add_executable(consumer main.c)
+target_link_libraries(consumer PRIVATE dep::depimpl)
+install(TARGETS consumer RUNTIME DESTINATION bin)

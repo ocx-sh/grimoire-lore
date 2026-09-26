@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.4)
+project(depold2 VERSION 9.1.0 LANGUAGES C)
+add_library(depold2 STATIC src/dep.c)
+target_include_directories(depold2 PUBLIC include)
+message(STATUS "[depold2] configured OK")

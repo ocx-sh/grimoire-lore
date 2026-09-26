@@ -1,0 +1,4 @@
+set(CMAKE_C_COMPILER gcc)
+if(DEFINED ENV{TC_READ_LOG})
+  file(APPEND "$ENV{TC_READ_LOG}" "read ${CMAKE_BINARY_DIR}\n")
+endif()

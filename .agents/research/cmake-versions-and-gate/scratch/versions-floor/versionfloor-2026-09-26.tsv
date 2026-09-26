@@ -1,0 +1,47 @@
+repo	root_path	raw	form	sha
+abseil__abseil-cpp	CMakeLists.txt	cmake_minimum_required(VERSION 3.16)	single	61d073d
+aminya__project_options	CMakeLists.txt	-	absent	412045e
+apache__arrow	cpp/CMakeLists.txt	cmake_minimum_required(VERSION 3.25)	single	3ad410b
+bazel-contrib__rules_foreign_cc	-	-	no-root-cmakelists	bb2f3e5
+boostorg__boost	CMakeLists.txt	cmake_minimum_required(VERSION 3.8...3.16)	range	a61cfa0
+catchorg__Catch2	CMakeLists.txt	cmake_minimum_required(VERSION 3.16)	single	222e233
+ccache__ccache	CMakeLists.txt	cmake_minimum_required(VERSION 3.18)	single	b471bbd
+ClickHouse__ClickHouse	CMakeLists.txt	cmake_minimum_required(VERSION 3.25)	single	0995a518
+conan-io__cmake-conan	-	-	no-root-cmakelists	b159384
+conan-io__conan	-	-	nocmake	39898af
+conan-io__conan-center-index	-	-	no-root-cmakelists	07389b8f
+cpm-cmake__CPM.cmake	CMakeLists.txt	cmake_minimum_required(VERSION 3.14 FATAL_ERROR)	single	01678cf
+cpm-cmake__CPMLicenses.cmake	CMakeLists.txt	-	absent	ca42334
+cpp-best-practices__cmake_template	CMakeLists.txt	cmake_minimum_required(VERSION 3.29)	single	b86318a
+cpp-pm__hunter	-	-	no-root-cmakelists	997fab1
+curl__curl	CMakeLists.txt	cmake_minimum_required(VERSION 3.18 FATAL_ERROR)	single	98519da
+duckdb__duckdb	CMakeLists.txt	cmake_minimum_required(VERSION 3.14...3.29)	range	d8a1bd4
+filipdutescu__modern-cpp-template	CMakeLists.txt	cmake_minimum_required(VERSION 3.15)	single	0fab2c3
+fmtlib__fmt	CMakeLists.txt	cmake_minimum_required(VERSION 3.8...3.28)	range	522e2c1
+friendlyanon__cmake-init	-	-	no-root-cmakelists	7e0c52f
+gabime__spdlog	CMakeLists.txt	cmake_minimum_required(VERSION 3.10...3.21)	range	5b63780
+gflags__gflags	CMakeLists.txt	cmake_minimum_required (VERSION 3.10 FATAL_ERROR)	single	bdda022
+glfw__glfw	CMakeLists.txt	cmake_minimum_required(VERSION 3.16...3.28 FATAL_ERROR)	range	92dcf4c
+google__benchmark	CMakeLists.txt	cmake_minimum_required (VERSION 3.13...3.22)	range	ac13143
+google__googletest	CMakeLists.txt	cmake_minimum_required(VERSION 3.16)	single	4267679
+google__re2	CMakeLists.txt	cmake_minimum_required(VERSION 3.22)	single	972a15c
+grpc__grpc	CMakeLists.txt	cmake_minimum_required(VERSION 3.22)	single	0f8d72e
+jbeder__yaml-cpp	CMakeLists.txt	cmake_minimum_required(VERSION 3.15..4.3)	single	1e0876c
+KDE__extra-cmake-modules	CMakeLists.txt	cmake_minimum_required(VERSION 3.29)	single	b4c4ec9
+Kitware__CMake	CMakeLists.txt	cmake_minimum_required(VERSION 3.13...4.3 FATAL_ERROR)	range	e8befb9
+libuv__libuv	CMakeLists.txt	cmake_minimum_required(VERSION 3.10)	single	abe835d
+llvm__llvm-project	llvm/CMakeLists.txt	cmake_minimum_required(VERSION 3.20.0)	single	e0316c1b4
+madler__zlib	CMakeLists.txt	cmake_minimum_required(VERSION 3.12...3.31)	range	767c4c9
+microsoft__vcpkg	-	-	no-root-cmakelists	c4ee5a52
+microsoft__vcpkg-tool	CMakeLists.txt	cmake_minimum_required(VERSION 3.15...3.24)	range	51bf87c
+mozilla__sccache	-	-	no-root-cmakelists	8396f02
+ninja-build__ninja	CMakeLists.txt	cmake_minimum_required(VERSION 3.15)	single	4e4df1e
+nlohmann__json	CMakeLists.txt	cmake_minimum_required(VERSION 3.5...4.0)	range	f422b75
+nothings__stb	-	-	nocmake	2c980bb
+ocornut__imgui	-	-	no-root-cmakelists	aa01814
+ocx-sh__find_ocx	CMakeLists.txt	cmake_minimum_required(VERSION 3.19)	single	ac2a759
+openssl__openssl	-	-	nocmake	e13af7e
+protocolbuffers__protobuf	CMakeLists.txt	cmake_minimum_required(VERSION 3.16...3.26)	range	c647439
+qt__qtbase	CMakeLists.txt	cmake_minimum_required(VERSION 3.16)	single	0ef5a8e
+Tencent__rapidjson	CMakeLists.txt	CMAKE_MINIMUM_REQUIRED(VERSION 3.5)	single	24b5e7a
+TheLartians__ModernCppStarter	CMakeLists.txt	cmake_minimum_required(VERSION 3.14...3.22)	range	72b8957

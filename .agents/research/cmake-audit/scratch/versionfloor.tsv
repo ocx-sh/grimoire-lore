@@ -1,0 +1,47 @@
+repo	root_path	raw	form
+abseil__abseil-cpp	CMakeLists.txt	cmake_minimum_required(VERSION 3.16)	single
+aminya__project_options	CMakeLists.txt	-	absent
+apache__arrow	cpp/CMakeLists.txt	cmake_minimum_required(VERSION 3.25)	single
+bazel-contrib__rules_foreign_cc	-	-	no-root-cmakelists
+boostorg__boost	CMakeLists.txt	cmake_minimum_required(VERSION 3.8...3.16)	range
+catchorg__Catch2	CMakeLists.txt	cmake_minimum_required(VERSION 3.16)	single
+ccache__ccache	CMakeLists.txt	cmake_minimum_required(VERSION 3.18)	single
+ClickHouse__ClickHouse	CMakeLists.txt	cmake_minimum_required(VERSION 3.25)	single
+conan-io__cmake-conan	-	-	no-root-cmakelists
+conan-io__conan	-	-	nocmake
+conan-io__conan-center-index	-	-	no-root-cmakelists
+cpm-cmake__CPM.cmake	CMakeLists.txt	cmake_minimum_required(VERSION 3.14 FATAL_ERROR)	single
+cpm-cmake__CPMLicenses.cmake	CMakeLists.txt	-	absent
+cpp-best-practices__cmake_template	CMakeLists.txt	cmake_minimum_required(VERSION 3.29)	single
+cpp-pm__hunter	-	-	no-root-cmakelists
+curl__curl	CMakeLists.txt	cmake_minimum_required(VERSION 3.18 FATAL_ERROR)	single
+duckdb__duckdb	CMakeLists.txt	cmake_minimum_required(VERSION 3.14...3.29)	range
+filipdutescu__modern-cpp-template	CMakeLists.txt	cmake_minimum_required(VERSION 3.15)	single
+fmtlib__fmt	CMakeLists.txt	cmake_minimum_required(VERSION 3.8...3.28)	range
+friendlyanon__cmake-init	-	-	no-root-cmakelists
+gabime__spdlog	CMakeLists.txt	cmake_minimum_required(VERSION 3.10...3.21)	range
+gflags__gflags	CMakeLists.txt	cmake_minimum_required (VERSION 3.10 FATAL_ERROR)	single
+glfw__glfw	CMakeLists.txt	cmake_minimum_required(VERSION 3.16...3.28 FATAL_ERROR)	range
+google__benchmark	CMakeLists.txt	cmake_minimum_required (VERSION 3.13...3.22)	range
+google__googletest	CMakeLists.txt	cmake_minimum_required(VERSION 3.16)	single
+google__re2	CMakeLists.txt	cmake_minimum_required(VERSION 3.22)	single
+grpc__grpc	CMakeLists.txt	cmake_minimum_required(VERSION 3.22)	single
+jbeder__yaml-cpp	CMakeLists.txt	cmake_minimum_required(VERSION 3.15..4.3)	single
+KDE__extra-cmake-modules	CMakeLists.txt	cmake_minimum_required(VERSION 3.29)	single
+Kitware__CMake	CMakeLists.txt	cmake_minimum_required(VERSION 3.13...4.3 FATAL_ERROR)	range
+libuv__libuv	CMakeLists.txt	cmake_minimum_required(VERSION 3.10)	single
+llvm__llvm-project	llvm/CMakeLists.txt	cmake_minimum_required(VERSION 3.20.0)	single
+madler__zlib	CMakeLists.txt	cmake_minimum_required(VERSION 3.12...3.31)	range
+microsoft__vcpkg	-	-	no-root-cmakelists
+microsoft__vcpkg-tool	CMakeLists.txt	cmake_minimum_required(VERSION 3.15...3.24)	range
+mozilla__sccache	-	-	no-root-cmakelists
+ninja-build__ninja	CMakeLists.txt	cmake_minimum_required(VERSION 3.15)	single
+nlohmann__json	CMakeLists.txt	cmake_minimum_required(VERSION 3.5...4.0)	range
+nothings__stb	-	-	nocmake
+ocornut__imgui	-	-	no-root-cmakelists
+ocx-sh__find_ocx	CMakeLists.txt	cmake_minimum_required(VERSION 3.19)	single
+openssl__openssl	-	-	nocmake
+protocolbuffers__protobuf	CMakeLists.txt	cmake_minimum_required(VERSION 3.16...3.26)	range
+qt__qtbase	CMakeLists.txt	cmake_minimum_required(VERSION 3.16)	single
+Tencent__rapidjson	CMakeLists.txt	CMAKE_MINIMUM_REQUIRED(VERSION 3.5)	single
+TheLartians__ModernCppStarter	CMakeLists.txt	cmake_minimum_required(VERSION 3.14...3.22)	range

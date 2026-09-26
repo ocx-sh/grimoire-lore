@@ -1,0 +1,25 @@
+cmake_minimum_required(VERSION 3.20)
+
+if(TEST_LANG_C)
+  project(g21_probe LANGUAGES C)
+else()
+  project(g21_probe LANGUAGES NONE)
+endif()
+
+get_property(_lib64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
+message(STATUS "CMAKE_LIBRARY_ARCHITECTURE=${CMAKE_LIBRARY_ARCHITECTURE}")
+message(STATUS "CMAKE_SIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P}")
+message(STATUS "GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS=${_lib64}")
+
+if(TEST_VIA_ROOT)
+  set(dep_ROOT "/home/mherwig/.cache/cmake-measure-scratch/cross/gsearch" CACHE PATH "" FORCE)
+else()
+  set(CMAKE_PREFIX_PATH "/home/mherwig/.cache/cmake-measure-scratch/cross/gsearch")
+endif()
+
+find_package(dep CONFIG QUIET)
+if(dep_FOUND)
+  message(STATUS "RESULT find_package(dep) -> ${dep_LAYOUT}")
+else()
+  message(STATUS "RESULT find_package(dep) -> NOTFOUND")
+endif()

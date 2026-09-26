@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.25)
+project(bad2 CXX)
+include(FetchContent)
+FetchContent_Declare(fmt GIT_REPOSITORY https://example.invalid/fmt.git GIT_TAG main)
+find_package(ZLIB CONFIG REQUIRED)
