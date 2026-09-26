@@ -195,10 +195,14 @@ def split_frontmatter(text: str) -> tuple[dict, str]:
     body = text[end + 4 :]
     try:
         import yaml  # type: ignore  # noqa: PLC0415 - optional dep, probed at call time
-
-        return yaml.safe_load(raw) or {}, body
-    except Exception:
+    except ImportError:
         return _mini_yaml(raw), body
+    try:
+        return yaml.safe_load(raw) or {}, body
+    except yaml.YAMLError:
+        # Falling back to the mini parser here passed frontmatter that every
+        # real loader rejects (an unquoted ": " in a description).
+        return {}, body
 
 
 def _mini_yaml(raw: str) -> dict:
@@ -537,7 +541,7 @@ def check_skill(
     text = index.read_text(encoding="utf-8")
     front, body = split_frontmatter(text)
     if not front:
-        findings.append(Finding(index, "no YAML frontmatter"))
+        findings.append(Finding(index, "no or invalid YAML frontmatter"))
     name = front.get("name")
     if name != directory.name:
         findings.append(
@@ -632,6 +636,9 @@ def walk(
             walk(child, root, forbid, findings, seen_ids)
         return
     if target.suffix == ".md":
+        index = target.parent.with_suffix(".md")
+        if index.exists():
+            target = index  # a depth file is checked through its rule index, under the depth budget
         check_rule(target, root, forbid, findings, seen_ids)
 
 

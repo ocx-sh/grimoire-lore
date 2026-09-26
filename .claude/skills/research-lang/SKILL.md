@@ -71,9 +71,11 @@ permission:
    thin — that is a new topic. Spawn it. Depth found mid-program is worth
    more than breadth planned up front, because it was discovered rather
    than guessed.
-4. **Loop until convergence, not until the list is done.** The stop
-   condition is a wave that adds no new MUST rule and no new failure
-   mode. A backlog that still has entries is normal and expected; an
+4. **Loop until convergence, not until the list is done.** Real trees
+   never stop yielding failure modes, so converge on failure *classes*:
+   group each wave's failure modes by mechanism, each class with the
+   check that catches it, then run a held-out round on fresh trees. Stop
+   when that round adds no new class and no new MUST rule. A backlog that still has entries is normal and expected; an
    unexplored surprise is not.
 
 The failure this prevents is subtle, because the output looks fine: a
@@ -91,6 +93,9 @@ These are the rules that decide whether the output is worth its tokens.
    the rules before reading a single blog post. Counts, not impressions —
    the requester's diagnosis of their own code is a hypothesis to test,
    not a premise. Report the measurement even when it contradicts them.
+   Clone exemplar corpora to a disk-backed path
+   (`~/.cache/research-lang/exemplars/<program>`), never the tmpfs
+   scratchpad, and delete them when the program lands.
 2. **Discover the topics; do not accept them.** The requester's list is
    the *seed*, never the scope. Phase 2 exists to find what they did not
    name. If a wave's topic list came only from the request, the program
@@ -167,7 +172,9 @@ with a support directory, what becomes a skill, and what becomes a
 script. Budgets are hard limits, not targets.
 
 **Phase 8 — Validate.** Run the machine checks and the trigger evals in
-[references/validation.md](references/validation.md) before publishing.
+[references/validation.md](references/validation.md) before publishing,
+then run each skill literally on a real tree and sweep every verification
+cell over real repositories: planted fixtures pass what real trees break.
 A rule with a dead glob and a skill that never triggers are the same
 failure: content nobody loads.
 

@@ -157,10 +157,12 @@ the return value is a receipt.
 
 ## Convergence
 
-Stop the loop when a full wave produces:
+Group every wave's failure modes into classes by mechanism, each with the
+check that catches it. Then stop the loop when a held-out round on fresh
+trees produces:
 
 - no new MUST-severity rule, and
-- no new agent failure mode, and
+- no new failure class (new instances of a known class do not count), and
 - no open question that a reviewer would call load-bearing.
 
 Do not stop because the backlog is empty — it never is. Do not continue
