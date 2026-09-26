@@ -17,6 +17,8 @@ project's minimum CMake on its own.
 
 This skill assumes the `cmake-build` rule set is installed and cites rules by ID.
 Every command here was run against planted violating and compliant projects on CMake 3.31.12, 4.3.4 and 4.4.2 (2026-09-26).
+The whole procedure was also run end to end on a real legacy C library,
+`slembcke/Chipmunk2D` at commit `f2f3d662`, on 3.31.12 and 4.4.2 (2026-09-26).
 
 Contents: [Stop condition](#stop-condition) · [Before you start](#before-you-start) ·
 [The procedure](#the-procedure) · [Legacy parses](#legacy-parses) ·
@@ -40,9 +42,13 @@ captured in the plan file is not done, whatever the build says.
 
 ## Before you start
 
-**Entry check.** The unmodified tree configures and builds today. If it does
-not, or if it finds the wrong copy of a dependency, stop and run
-`cmake-dependency-triage` first. This procedure assumes a working baseline.
+**Entry check.** The unmodified tree configures and builds today with the
+options its documentation gives for a library-only build (for example
+`-DBUILD_DEMOS=OFF`). Write those options into the plan file once. Every later
+configure, the round trip (`CFG_ARGS`) and the smoke pass them. If the tree
+does not configure even then, stop. A wrong copy of a dependency is
+`cmake-dependency-triage`. An absent host dependency or compiler is the
+owner's to install or switch off, not a triage.
 
 **The gate is on from step 1, not step 8.** Every configure this skill runs
 uses the configure gate spelled for its binary (`CMK-CORE-01`):
@@ -83,13 +89,13 @@ result decides "done". The full commands with their readings are in
 |---|---|---|---|
 | 0 Inventory | Run `I1` to `I12` and `F1` read-only. Write every hit into the plan file | The plan file lists every hit, possibly none. No command in the inventory pipes into an early-exiting reader | `CMK-TGT-01/-03/-04/-17`, `CMK-LANG-04/-11`, `CMK-VER-05`, `CMK-DEP-07/-15`, `CMK-CORE-05` |
 | 1 Floor | Keep the existing minimum. Add `...<max>`, where `<max>` is the newest CMake CI runs. Re-scan fetched and vendored trees | `F1` prints no line outside a vendored directory (a vendored hit is recorded `flagged-not-converted`), the canary exits 1 and the project's gated configure exits 0 on each CI binary | `CMK-VER-01/-02/-05`, `CMK-DEP-15/-30` |
-| 2 Targets | Move directory scope onto `target_*`, one target at a time, leaves of the in-tree graph first | `I2`, scoped to that target's directory, is empty | `CMK-TGT-03` |
+| 2 Targets | Move directory scope onto `target_*`, one target at a time, leaves of the in-tree graph first. A `PUBLIC` or `INTERFACE` include directory under the source or build tree is written `$<BUILD_INTERFACE:...>` from the start, because `install(EXPORT)` rejects a raw source path at generate time | `I2`, scoped to that target's directory, is empty, the gated configure and build exit 0, and the flag-set diff for one source of that target is empty | `CMK-TGT-03` |
 | 3 Keywords | Name `PUBLIC`, `PRIVATE` or `INTERFACE` on that target's links. Default to `PRIVATE` unless the type is in its installed headers. Add the namespaced `ALIAS` | `I1` on that file shows only keyworded calls | `CMK-TGT-01/-02` |
-| 4 Flags and standards | Overwrites become `target_compile_options`, a toolchain file or a preset. Standards become `target_compile_features`. Fix the parses `I4` listed | `I3` shows no overwrite, `I11` hits sit in a `NOT DEFINED` guard, every `I12` hit sits in a developer option that defaults `OFF`, and every new `CMAKE_*` name passes the variable check | `CMK-TGT-04..09`, `CMK-LANG-04/-11` |
-| 5 Top-level gating | Gate the test tree on a project-prefixed option that defaults to `PROJECT_IS_TOP_LEVEL`, with `include(CTest)` inside the gate (`CMK-TEST-09`). Guard examples, dev options, the `CMAKE_BUILD_TYPE` default and any non-test fetch on `PROJECT_IS_TOP_LEVEL` | The step 7 smoke, run here too, and the `CMK-DEP-07` probe when `I7` listed a hit | `CMK-DEP-07`, `CMK-TGT-17`, `CMK-TEST-09` |
+| 4 Flags and standards | Overwrites and appends become `target_compile_options`, a toolchain file or a preset. A `-std=` flag becomes the target property `<LANG>_STANDARD NN` (with `<LANG>_EXTENSIONS ON` for a `gnu` spelling) plus `target_compile_features(<t> PUBLIC <lang>_std_NN)` for consumers. The compile feature alone is a floor: when the compiler's default is newer, CMake adds no flag. Fix the parses `I4` listed | `I3` shows no overwrite, `I11` hits sit in a `NOT DEFINED` guard, every `I12` hit sits in a developer option that defaults `OFF`, every new `CMAKE_*` name passes the variable check, and the flag-set diff for one source per converted target is empty | `CMK-TGT-04..09`, `CMK-LANG-04/-11` |
+| 5 Top-level gating | Gate the test tree on a project-prefixed option that defaults to `PROJECT_IS_TOP_LEVEL`, with `include(CTest)` inside the gate (`CMK-TEST-09`). Gate examples, demos and developer options on project-prefixed options (`<PROJECT>_BUILD_EXAMPLES`) that default to `PROJECT_IS_TOP_LEVEL`. An unprefixed name such as `BUILD_DEMOS` reads the parent's own entry of that name. Guard the `CMAKE_BUILD_TYPE` default and any non-test fetch on `PROJECT_IS_TOP_LEVEL` | The step 7 smoke, run here too, and the `CMK-DEP-07` probe when `I7` listed a hit | `CMK-DEP-07`, `CMK-TGT-17`, `CMK-TEST-09` |
 | 6 Install and export | `GNUInstallDirs` destinations, `configure_package_config_file`, `find_dependency` per public dependency, `write_basic_package_version_file`, `NAMESPACE`, all in one diff | The gated round trip exits 0 on every CI line, and its leak greps are empty | `CMK-INST-01..06/-09` |
-| 7 As-subproject smoke | Configure the tree under a parent that includes `CTest` | The tests grep prints `Total Tests: 0`, and the target grep is empty for every developer-only name | `CMK-DEP-07`, `CMK-TEST-09` |
-| 8 CI | Wire the gate per leg, `gersemi --check` (never `--diff`), and the round trip as its own job | The canary exits 1 through each leg's own binary and preset. `gersemi --check` exits 0 | `CMK-CORE-01/-02/-04/-05`, `CMK-MOD-15`, `CMK-INST-18` |
+| 7 As-subproject smoke | Configure the tree under a parent that includes `CTest`, then under a parent that also owns each unprefixed option the library declares | The tests grep prints `Total Tests: 0`, the target grep is empty for every developer-only name, and the second pass configures with exit 0 and an empty target grep | `CMK-DEP-07`, `CMK-TEST-09` |
+| 8 CI | Wire the gate per leg, `gersemi --check` (never `--diff`), and the round trip as its own job. In a tree with no CI, report the three items to the owner and stop. Do not create a CI system. A first `gersemi` reformat ships as its own diff, never inside a conversion diff | The canary exits 1 through each leg's own binary and preset. `gersemi --check` exits 0 | `CMK-CORE-01/-02/-04/-05`, `CMK-MOD-15`, `CMK-INST-18` |
 | 9 CPS and pkg-config (optional) | `install(PACKAGE_INFO)` behind `if(CMAKE_VERSION VERSION_GREATER_EQUAL 4.3)`, once the namespace equals the package name, the schema is `simple` and the genexes are configuration-only | The round trip on 4.3 or later ends in `/cps/<pkg>`, on 3.31 in `/cmake/<pkg>`, and both exit 0 | `CMK-INST-12..17` |
 
 ### Step 1 in detail
@@ -169,7 +175,10 @@ the plan file as new structure, not a conversion: legacy trees rarely carry one.
 
 The four `CMK-INST` MUSTs the round trip depends on (`-02`, `-04`, `-05`, `-06`,
 plus `-03` for each public dependency and `-09` for the destinations) land
-together, with no `CMK-TGT` change riding along. None of them alone produces a
+together, with no `CMK-TGT` change riding along except the
+`$<BUILD_INTERFACE:>` and `INCLUDES DESTINATION` form of an include directory
+that the round trip rejects. Add a `new:` plan row for each file the step
+creates (the Config template) before the diff. None of them alone produces a
 consumable package, so the round trip runs once, after all of them. A green
 `cmake --install` is not the exit: a missing `find_dependency` stays green until
 a compiled consumer's Generate step (`CMK-INST-01`). The script is in
@@ -229,8 +238,10 @@ Each of these ships as its own diff:
 - Each target's conversion (steps 2 to 4). Independent leaves may share one.
 - The first install and export (step 6), with no `CMK-TGT` change in it.
 - CPS or pkg-config, only after the round trip is already green without it.
+- The first `gersemi` reformat, alone, with no content change.
 
-A diff that touches a file no plan-file row names is out of scope. Vendored and
+A diff that touches a file no plan-file row names is out of scope. Steps 5 and
+6 add `new:` rows for the structure and files they create. Vendored and
 third-party subtrees are recorded as `flagged-not-converted` and never entered.
 
 ## What it refuses
@@ -252,7 +263,8 @@ Agreed decisions, not derivations. Each is a default an adopter overrides once.
 | Decision | Default (pinned) |
 |---|---|
 | The minimum | Kept as found. `...<max>` is added. The program floor `3.25...4.4` applies to new code only |
-| `<max>` | The newest CMake CI runs, never the newest release |
+| `<max>` | The newest CMake CI runs, never the newest release. A tree with no CI takes the program's pinned newest line (4.4) and records it in the plan file |
+| CI lines | The CMake lines CI runs. A tree with no CI takes 3.31 and 4.4 for every "each CI line" check, and step 8 is reported to the owner, not created |
 | Gate spelling | `-Werror=author` on 4.4 and later, `-Werror=dev` on 4.3 and older and on a shared line |
 | Migrating a parse | `PARSE_ARGV` plus the flatten line for list-valued multi-value keywords |
 | Formatting gate | `gersemi --check`, SHOULD, gersemi 0.29.1 |
@@ -280,6 +292,24 @@ Agreed decisions, not derivations. Each is a default an adopter overrides once.
    `BUILD_TESTING` then stays off and a leaked test tree reads clean.
 9. **Citing the CMake Tutorial by its old step titles.** At v4.4.2 it is
     organised as topic pages. Fetch the page at the pinned tag first.
+10. **Replacing `-std=gnu99` with `target_compile_features(<t> PUBLIC c_std_99)`
+    alone.** The feature is a floor. gcc 15.2.1 defaults to C 23, so CMake adds
+    no `-std` and the library silently compiles as gnu23 while every other step 4
+    check passes (Chipmunk2D, 3.31.12 and 4.4.2). The flag-set diff shows the
+    lost `-std=gnu99`. The same holds for `cxx_std_NN` below a newer default.
+11. **Writing a raw `${PROJECT_SOURCE_DIR}/include` into a `PUBLIC` include
+    directory in step 2.** Steps 2 to 5 pass, then step 6's generate fails with
+    `INTERFACE_INCLUDE_DIRECTORIES property contains path` (both lines).
+12. **Trusting the round trip's consumer to catch a static library's missing
+    link dependency.** An empty `main` pulls no archive member. Chipmunk2D's
+    static target never linked `m`, passed with an empty `main` and failed with
+    ``undefined reference to `sincos'`` once `main` called `cpBodyNew` (both
+    lines). `SYM_CALL` exists for this.
+13. **Gating demos on an unprefixed `option(BUILD_DEMOS ... ${PROJECT_IS_TOP_LEVEL})`.**
+    A parent that owns `BUILD_DEMOS=ON` switches the library's demos on too,
+    and the parent's configure fails on the demos' dependencies (Chipmunk2D:
+    `Could NOT find OpenGL`, both lines). The plain smoke passes, so run its
+    second pass.
 
 ## MUST rows this procedure enforces
 

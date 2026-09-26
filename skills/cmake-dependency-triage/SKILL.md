@@ -1,6 +1,6 @@
 ---
 name: cmake-dependency-triage
-description: Symptom-first triage for a CMake dependency that resolved to the wrong copy, version or mechanism, with the exact cache, configure-log, Conan and vcpkg reads and what each output means. Use when find_package picked a different installed copy than expected, a re-pointed _ROOT hint or CMAKE_PREFIX_PATH had no effect, a fetched copy was built although an installed one was on the path, a dependency provider or cmake-conan never supplied a package or find_program cannot see it, a binary links or loads a different copy than the one configured, a consumer fails with "link interface of target ... not found", CMake 4 reports "Compatibility with CMake < 3.5 has been removed" or the configure gate stops on "< 3.10 will be removed", an offline or FETCHCONTENT_SOURCE_DIR configure fails where the online one passed, or someone asks which version Conan or vcpkg picked. Not for choosing a package manager or writing build files (the cmake-build and cpp-packaging rules).
+description: Symptom-first triage for a CMake dependency that resolved to the wrong copy, version or mechanism, with the exact cache, configure-log, Conan and vcpkg reads and what each output means. Use when find_package picked a different installed copy than expected, a re-pointed _ROOT hint or CMAKE_PREFIX_PATH had no effect, a fetched copy was built although an installed one was on the path, a dependency provider or cmake-conan never supplied a package or find_program cannot see it, a binary links or loads a different copy than the one configured, a consumer fails with "link interface of target ... not found", CMake 4 reports "Compatibility with CMake < 3.5 has been removed" or the configure gate stops on "< 3.10 will be removed" or on install-absolute-destination in a dependency, an offline or FETCHCONTENT_SOURCE_DIR configure fails where the online one passed, or someone asks which version Conan or vcpkg picked. Not for choosing a package manager or writing build files (the cmake-build and cpp-packaging rules).
 license: Apache-2.0
 metadata:
   summary: Ordered triage for "which copy, which version and which mechanism resolved this dependency", read from the configure's own records before any debug flag
@@ -17,11 +17,13 @@ This skill assumes the `cmake-build` and `cpp-packaging` rule sets are
 installed. The merge-blocking rows the procedure leans on are repeated at the
 end, on purpose.
 Everything below was run on CMake 3.31.12, 4.3.4 and 4.4.2, Conan 2.32.0 with
-cmake-conan `develop2`, and vcpkg-tool 2026-09-26 (verified 2026-09-26).
+cmake-conan `develop2`, and vcpkg-tool 2026-09-26 (verified 2026-09-26). The
+read order was also run on real `DaveGamble/cJSON` 1.7.15 and 1.7.18 installs
+beside a host `libcjson.so.1`, on 3.31.12, 4.3.4 and 4.4.2 (2026-09-26).
 
 Contents: [Stop condition](#stop-condition) · [The evidence rule](#the-evidence-rule) ·
 [Before you start](#before-you-start) · [The read order](#the-read-order) ·
-[Pick the entry point](#pick-the-entry-point) · [T1 to T10](#t1-wrong-copy-or-a-re-pointed-hint-had-no-effect) ·
+[Pick the entry point](#pick-the-entry-point) · [T1 to T12](#t1-wrong-copy-or-a-re-pointed-hint-had-no-effect) ·
 [Pinned defaults](#pinned-defaults) · [MUST rows this procedure enforces](#must-rows-this-procedure-enforces) ·
 [Failure modes](#failure-modes) · [References](#references)
 
@@ -37,7 +39,9 @@ Stop when the triage names all three. Any one missing and it is a guess.
 - **The rule that fixes it, and its check passing.** Applied at the file and
   line that decided, never at a layer that did not.
 
-If the copy is right and the version is wrong, the cause sits in the manager's
+If the configured copy is right and the binary reports another version at
+run time, the loader picked another copy (T11). If the copy is right and the
+version is wrong at configure time, the cause sits in the manager's
 resolution. Hand it to `conan graph info` (T8) or the vcpkg manifest (T9).
 
 Four moves stay out of scope, each turning a diagnosis into a new defect:
@@ -94,7 +98,7 @@ directory and the name exactly as the `find_package` call spells it.
 
 ```sh
 NAME=dep
-grep -rn --include='CMakeCache.txt' -e "^${NAME}_DIR" -e "^${NAME}_ROOT" -e '^VCPKG_INSTALLED_DIR' -e '^CMAKE_TOOLCHAIN_FILE' -e '^CMAKE_PROJECT_TOP_LEVEL_INCLUDES' build
+grep -rn --include='CMakeCache.txt' -e "^${NAME}_DIR" -e "^${NAME}_ROOT" -e '^CMAKE_PREFIX_PATH' -e '^VCPKG_INSTALLED_DIR' -e '^CMAKE_TOOLCHAIN_FILE' -e '^CMAKE_PROJECT_TOP_LEVEL_INCLUDES' build
 ```
 
 The patterns are a union, so read each line. Non-empty output is expected.
@@ -106,7 +110,7 @@ Save it before step 2, because `--fresh` deletes the cache it came from.
 | `dep_DIR:PATH=<build>/CMakeFiles/pkgRedirects` | A FetchContent redirect answered. An installed copy was never consulted | T2 |
 | No `dep_DIR` line, with `CMAKE_PROJECT_TOP_LEVEL_INCLUDES` naming a provider | Expected under cmake-conan with `CMakeConfigDeps`: the provider sets `dep_DIR` as a normal variable (measured 3.31.12 and 4.4.2) | T3 |
 | No `dep_DIR` line and no provider | A Find module answered, or the call never ran. Step 2 prints which | [references](references/reading-the-answers.md#module-mode-find_package) |
-| `dep_DIR` under the expected prefix | The copy is right. A wrong version is the manager's | T8, T9 |
+| `dep_DIR` under the expected prefix | The configured copy is right. A binary that reports another version at run time is the loader: T11. Otherwise a wrong version is the manager's | T11, T8, T9 |
 
 ### 2. Reconfigure fresh, with the search printed
 
@@ -143,8 +147,9 @@ grep -rn --include='CMakeConfigureLog.yaml' -e '^    name: ' -e '^      path: ' 
 Run both only after the `--fresh` configure of step 2, because the log appends
 on a reused tree (4.4.2 counted 2 events after one reconfigure). A count of 0
 on 3.x is expected. A count of 0 on 4.1 or newer after a `find_package` ran is
-a finding (CMK-DEP-17), except for a provider under `CMakeConfigDeps`, which
-logs no event (4.4.2). The second command pairs each package `name:` with the
+a finding (CMK-DEP-17), except for a provider under `CMakeConfigDeps` and for
+a call answered by a FetchContent redirect (`dep_DIR` under `pkgRedirects`),
+neither of which logs an event (4.3.4 and 4.4.2). The second command pairs each package `name:` with the
 `path:` it resolved and its `mode:` (`config` or `module`). Empty output from
 it means no `find_package` resolved in this configure.
 
@@ -162,6 +167,8 @@ it means no `find_package` resolved in this configure.
 | T8 | "Which version did Conan pick?" | `conan graph info` | The resolved reference and revision | CMK-CONAN-09 |
 | T9 | vcpkg: wrong tree or wrong version | Step 1 | `_DIR` not under the current `VCPKG_INSTALLED_DIR`: T1 through vcpkg | CMK-DEP-13, CMK-VCPKG-01 |
 | T10 | A provider registered, never called | Step 1, then the TC-04 grep | The project set or appended `CMAKE_PROJECT_TOP_LEVEL_INCLUDES` | CMK-TC-04 |
+| T11 | The configured copy is right, but the built or installed binary loads another | `ldd` and `readelf -d` on the binary | No `RUNPATH` on the installed binary while the build-tree binary has one: install stripped it and a same-SONAME copy on the loader path wins | CMK-INST-11 |
+| T12 | 4.4 and newer: the gate stops on `install-absolute-destination` inside a fetched or vendored dependency | The error's file:line | The dependency installs to an absolute `DESTINATION` (`CMAKE_INSTALL_FULL_*`) | CMK-DEP-30, CMK-DEP-31 |
 
 ## T1 Wrong copy, or a re-pointed hint had no effect
 
@@ -208,7 +215,14 @@ grep -rn --include='*.cmake' --include='CMakeLists.txt' -e 'OVERRIDE_FIND_PACKAG
 ```
 
 Empty output means no override declare exists, so look for a
-`FIND_PACKAGE_ARGS` declare whose `find_package` missed. A hit in an installable
+`FIND_PACKAGE_ARGS` declare whose `find_package` missed. The try-find searches
+the declare's name, so `FetchContent_Declare(cjson ... FIND_PACKAGE_ARGS)`
+misses a package that ships `cJSONConfig.cmake` on a case-sensitive file system
+and fetches silently (cJSON 1.7.18 installed, 3.31.12 and 4.4.2). Its record is
+`cjson_DIR:INTERNAL=.../pkgRedirects`, under the declare's spelling, so re-run
+step 1 with `NAME` set to that spelling. The fix is
+`FIND_PACKAGE_ARGS NAMES <Package> <version> CONFIG`, after which both `_DIR`
+lines name the installed prefix. A hit in an installable
 library outside a top-level guard is a CMK-DEP-07 finding. Any later
 `find_package(dep 2.0 ...)` against the redirect passes with a blank version
 (CMK-DEP-09). A CI leg that must test the installed copy asserts the step 1
@@ -371,6 +385,44 @@ grep -rn --include='CMakeLists.txt' --include='*.cmake' -e 'SET_DEPENDENCY_PROVI
 Empty output passes. Any `CMakeLists.txt` hit, or a module that sets or
 appends the variable, is the finding (CMK-TC-04).
 
+## T11 The right copy configured, another one loaded
+
+```sh
+BIN=build/app
+ldd "$BIN"
+readelf -d "$BIN"
+```
+
+Neither prints empty output for a dynamic binary, and `ldd` printing
+`not a dynamic executable` means T11 does not apply. The `ldd` line naming the
+library is the copy that loads. An installed binary with no `RUNPATH` or
+`RPATH` line, whose build-tree twin has one, lost it at install, and a
+same-SONAME copy on the loader's default path wins with exit 0 everywhere
+(3.31.12 and 4.4.2: cJSON 1.7.15 configured, a host 1.7.18 loaded). For a
+dependency in the same prefix the fix is CMK-INST-11 (`$ORIGIN`). For one in
+another prefix, `INSTALL_RPATH_USE_LINK_PATH ON` on the executable bakes that
+library directory in (measured: 1.7.15 loads on both lines). Never
+`LD_LIBRARY_PATH`.
+
+## T12 The 4.4 gate stops inside a dependency's install()
+
+`CMake Error (install-absolute-destination) at <dep>/CMakeLists.txt:<n> (install)`.
+CMK-INST-10 cannot be applied to third-party code. cJSON 1.7.15, 1.7.18 and
+master `6d9f2443ab` all install to `CMAKE_INSTALL_FULL_*`, so no re-pin clears
+it. Neither `-Werror=dev`, a scoped `CMAKE_SKIP_INSTALL_RULES ON`, nor a scoped
+`cmake_diagnostic(SET CMD_INSTALL_ABSOLUTE_DESTINATION WARN)` clears it on
+4.4.2, and 4.3.4 is unaffected (2026-09-26). Patch every absolute destination
+in one `PATCH_COMMAND` (CMK-DEP-30's shape): a patch of the first hit only
+moves the error to the next `install()`. List them:
+
+```sh
+grep -rn --include='CMakeLists.txt' --include='*.cmake' -e 'CMAKE_INSTALL_FULL_' build/_deps
+```
+
+Empty output means the stop comes from a literal absolute path, so read the
+error's file:line instead. An offline or override configure must point at the
+patched source (CMK-DEP-31). Never drop the gate to get past it (CMK-CORE-01).
+
 ## Pinned defaults
 
 Agreed decisions, not derivations. Each is a default an adopter overrides once,
@@ -421,6 +473,17 @@ text, rationale and full verification live in the `cmake-build` and
    debugging the dependency instead of the dropped patch.
 7. **Proving a missing `find_dependency` fixed with a `LANGUAGES NONE` smoke
    consumer.** It stays green either way. Only a compiled consumer fails.
+8. **Stopping at "the configured copy is right"** when the binary reports
+   another version. Configure-time records cannot see the loader (T11).
+9. **Spelling a `FIND_PACKAGE_ARGS` declare's name differently from the
+   package's Config file**, case included. The try-find misses and the fetch
+   runs silently. Grepping step 1 under the `find_package` spelling never shows
+   the declare's own `_DIR:INTERNAL` record.
+10. **Reporting a CMK-DEP-17 finding for a zero event count** when a FetchContent
+    redirect answered. A redirect logs no `find_package-v1` event.
+11. **Clearing 4.4's `install-absolute-destination` stop in a dependency with a
+    scoped `cmake_diagnostic` or `CMAKE_SKIP_INSTALL_RULES`.** Neither beats the
+    command-line gate. Only a patch of every absolute destination does (T12).
 
 ## References
 

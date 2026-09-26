@@ -3,7 +3,7 @@
 Read this when running step 0, or when re-running one command as the exit check
 of steps 1 to 4. Every command runs from the repository root and
 was run against a planted violating tree and a planted compliant tree on CMake
-3.31.12 and 4.4.2 (2026-09-26). Each is a `grep -r` with an explicit directory
+3.31.12 and 4.4.2 (2026-09-26). Each of `I1` to `I12` is a `grep -r` with an explicit directory
 operand and no early-exiting reader (I4 adds a filtering `grep -v`), so it
 cannot zero a count under `set -o pipefail` (`CMK-CORE-05`).
 
@@ -13,6 +13,7 @@ Contents: [How to read the output](#how-to-read-the-output) ·
 [Build type, fetches and policy knobs](#build-type-fetches-and-policy-knobs) ·
 [Floors and hand-off tokens](#floors-and-hand-off-tokens) ·
 [Standards and warnings-as-errors](#standards-and-warnings-as-errors) ·
+[The flag-set check](#the-flag-set-check) ·
 [The variable-existence check](#the-variable-existence-check)
 
 ## How to read the output
@@ -140,6 +141,9 @@ grep -rniE --include='CMakeLists.txt' --include='*.cmake' \
   -e 'cmake_policy[[:space:]]*\([[:space:]]*VERSION[[:space:]]+(2\.|3\.[0-9]([^0-9]|$))' build/_deps third_party
 ```
 
+When neither a fetched nor a vendored CMake tree exists, `I9` is not
+applicable: record it `vacuous` and do not run it.
+
 `I10`, Conan 1 tokens. Empty output = continue. Any hit stops the skill and
 hands off to `cpp-packaging`: the tree needs a manager migration first.
 
@@ -168,6 +172,31 @@ outside a developer option that defaults OFF is the finding. Report
 ```sh
 grep -rn --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_deps' --exclude-dir='build*' -e '-Werror' -e '/WX' .
 ```
+
+## The flag-set check
+
+The second half of the exit check of steps 2 and 4. `I2` and `I3` prove the
+old command is gone, not that the conversion kept the build: a deleted
+`include_directories` with nothing added passes `I2`. Record the flag set of
+one source per target at the step-1 commit, then again after each diff. Pass
+the plan file's configure options too.
+
+```sh
+# SRCFILE = one source of the converted target. Writes flags-before.txt at the
+# step-1 commit (rename the output), flags-after.txt after the diff.
+SRCFILE=src/core.c
+cmake -S . -B build-flags --fresh "$GATE" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+jq -r --arg f "$SRCFILE" '[.[] | select(.file | endswith($f)) | .command | split(" ")[] | select(startswith("-"))] | sort | unique | .[]' \
+  build-flags/compile_commands.json > flags-after.txt
+diff flags-before.txt flags-after.txt
+```
+
+Empty `diff` output = pass. A line starting `<` is a flag the diff lost, the
+finding. A line starting `>` is a flag it added, which the plan file must name.
+Measured on Chipmunk2D (3.31.12 and 4.4.2, gcc 15.2.1, 2026-09-26): the step-2
+and the corrected step-4 diffs print nothing, and a step 4 that replaced
+`-std=gnu99` with `target_compile_features(... c_std_99)` alone prints
+`< -std=gnu99`.
 
 ## The variable-existence check
 

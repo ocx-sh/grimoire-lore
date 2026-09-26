@@ -35,7 +35,9 @@ seeds. The script stands in for it without Bazel, and one run answers five rows.
 Run it from the project root on the wrapper's CMake line (3.31 by default,
 `CMK-BZL-08`), on Linux with unprivileged user namespaces. On a hosted
 `ubuntu-24.04` runner use a `--network none` container instead (`CMK-CI-05`).
-Floor: CMake 3.25. Measured 2026-09-26 on 3.31.12 and 4.4.2.
+Floor: CMake 3.25. Measured 2026-09-26 on 3.31.12 and 4.4.2. A real wrap
+(rules_foreign_cc 0.16.0 on Bazel 9.2.0, 2026-09-26) confirmed rows 01, 02, 05
+and 07 and the dropped seed in row 03.
 
 ```sh
 set -e
@@ -57,15 +59,16 @@ find wrap-prefix -type f -o -type l | sort >wrap-listing.txt
 |---|---|---|---|---|
 | CMK-BZL-01 | Make configure, build and install succeed with no network, given only `-D` cache entries. Give every fetch a cache-entry route to a local copy: `FETCHCONTENT_SOURCE_DIR_<NAME>`, `FETCHCONTENT_TRY_FIND_PACKAGE_MODE` or `FIND_PACKAGE_ARGS` (CMake ≥ 3.24), or an `option()` that turns the fetch off. `FETCHCONTENT_FULLY_DISCONNECTED=ON` counts only when paired with `FETCHCONTENT_SOURCE_DIR_<NAME>`. | A git fetch fails at configure inside the network-blocked action. `FULLY_DISCONNECTED` alone only skips population: below policy version 3.30 it warns and configures with the dependency silently absent, and with CMP0170 NEW it is a hard error (measured 2026-09-26 on 3.31.12 and 4.4.2). The general offline rule, and the grep that lists what needs a switch, are `CMK-DEP-16`. | The simulation exits 0 and `grep -n -e 'Failed to clone' -e 'Could not resolve host' -e 'FETCHCONTENT_FULLY_DISCONNECTED is set to true' wrap-configure.log` prints nothing: the pass. A non-zero exit, or any line, is the finding. | MUST |
 | CMK-BZL-02 | Owned by `CMK-TC-01`. This ID keeps only the wrap probe: the caller's toolchain file must be the one that loads. | Passing `CMAKE_TOOLCHAIN_FILE` suppresses the wrapper's crosstool synthesis, so the caller's file carries the whole compiler setup. A project `set(CMAKE_TOOLCHAIN_FILE …)` before `project()` beats it with no warning (measured on 3.31.12 and 4.4.2). | After the simulation, `grep -c -e 'CALLER_TOOLCHAIN_LOADED' wrap-configure.log`. `0` is the finding. Any higher count is the pass. | MUST |
-| CMK-BZL-03 | Owned by `CMK-TGT-04` (never overwrite the flags variables) and `CMK-TGT-12` (PIC). This ID keeps the wrap probe and one clause: never make PIC depend on `CMAKE_POSITION_INDEPENDENT_CODE`, because the wrapper delivers `-fPIC` as a flag. | Since rules_foreign_cc 0.16.0 PIC arrives inside the `_INIT` seed. `set(CMAKE_C_FLAGS "-O2")` discards the seed, and the shared link fails with `relocation R_X86_64_32 … recompile with -fPIC`. A hard-coded `CMAKE_POSITION_INDEPENDENT_CODE OFF` does not block the flag (both measured on 3.31.12 and 4.4.2). So the fix for a wrapped PIC failure is the flags write, never the variable. | After the simulation, `grep -c -e 'WRAP_SEED' build-wrap/compile_commands.json`. `0` is the finding (the seed was dropped). Any higher count is the pass. Makefile and Ninja generators only. | MUST |
-| CMK-BZL-04 | Owned by `CMK-INST-10` (no absolute install `DESTINATION`). This ID keeps only the wrap consequence. | The wrap installs into a Bazel-managed output tree. A file written outside it is never declared as an output, and no error reports it. | `CMK-INST-10`'s grep, or its CMake 4.4 diagnostic. This ID adds no command. | MUST |
-| CMK-BZL-05 | Install to a fresh prefix and check two things. Every file sits at a stable name under `include/`, `lib/` or `bin/` that the wrapping target's `out_*` attributes can name. No installed `*Config.cmake`, `*Targets*.cmake` or `.pc` file contains the source, build or install path. | A produced file that no attribute names never becomes a Bazel output, and nothing reports it (`BZL-CC-23` owns that side). The sandbox path disappears after the action, so an embedded absolute path breaks every consumer. Relocation in general is `CMK-INST-01` and `CMK-INST-02`. This row adds only the diff against the declared names. | After the simulation, `grep -rn -e "$PWD" wrap-prefix`. Empty output is the pass. Any line is the finding. Then diff `wrap-listing.txt` by hand against the `out_*` names the wrapping `BUILD.bazel` declares or would need to declare. A name in only one list is the finding. | MUST |
-| CMK-BZL-07 | Owned by `CMK-TGT-11` (library type from a cache entry). This ID keeps only the wrap consequence. | `cache_entries` is the only channel the wrapper has into the project, so a hard-coded `STATIC` or `SHARED` turns the choice between `out_static_libs` and `out_shared_libs` into source-reading. | `CMK-TGT-11`'s verification. This ID adds no command. | SHOULD |
+| CMK-BZL-03 | Owned by `CMK-TGT-04` (never overwrite the flags variables) and `CMK-TGT-12` (PIC). This ID keeps the wrap probe and one clause: never make PIC depend on `CMAKE_POSITION_INDEPENDENT_CODE`, because the wrapper delivers `-fPIC` as a flag. | Since rules_foreign_cc 0.16.0 PIC arrives inside the `_INIT` seed. `set(CMAKE_C_FLAGS "-O2")` discards the seed, and the shared link fails with `relocation R_X86_64_32 … recompile with -fPIC`. A hard-coded `CMAKE_POSITION_INDEPENDENT_CODE OFF` does not block the flag (both measured on 3.31.12 and 4.4.2). So the fix for a wrapped PIC failure is the flags write, never the variable. In a real wrap on Bazel 9.2.0 the seed carries `-fPIC`, and the write removes it from the compile line (measured 2026-09-26). | After the simulation, `grep -c -e 'WRAP_SEED' build-wrap/compile_commands.json`. `0` is the finding (the seed was dropped). Any higher count is the pass. Makefile and Ninja generators only. A successful link is not a pass: a compiler that always emits PIC links either way. | MUST |
+| CMK-BZL-04 | Owned by `CMK-INST-10` (no absolute install `DESTINATION`). This ID keeps only the wrap consequence. | The wrap installs into a Bazel-managed output tree. A declared `out_*` file sent elsewhere fails the build with `missing expected installed output`. An undeclared file sent to a path the sandbox can write lands on the host outside every Bazel output, and the build passes (measured 2026-09-26, rules_foreign_cc 0.16.0 on Bazel 9.2.0). | `CMK-INST-10`'s grep, or its CMake 4.4 diagnostic. This ID adds no command. | MUST |
+| CMK-BZL-05 | Install to a fresh prefix and check two things. Every file sits at a stable name under `include/`, `lib/` or `bin/` that the wrapping target's `out_*` attributes can name. No installed file contains the source, build or install path: a `*Config.cmake`, `*Targets*.cmake` or `.pc` file, or a header `configure_file()` wrote. | A produced file that no attribute names never becomes a Bazel output, and nothing reports it (`BZL-CC-23` owns that side). The sandbox path disappears after the action, so an embedded absolute path breaks every consumer. A real wrap on Bazel 9.2.0 wrote the per-action sandbox path into a configured header (measured 2026-09-26). Relocation in general is `CMK-INST-01` and `CMK-INST-02`. This row adds only the diff against the declared names. | After the simulation, `grep -rn -e "$PWD" wrap-prefix`. Empty output is the pass. Any line is the finding. Then diff `wrap-listing.txt` by hand against the `out_*` names the wrapping `BUILD.bazel` declares or would need to declare. A name in only one list is the finding. | MUST |
+| CMK-BZL-07 | Owned by `CMK-TGT-11` (library type from a cache entry). This ID keeps only the wrap consequence. | `cache_entries` is the only channel the wrapper has into the project, so a hard-coded `STATIC` or `SHARED` turns the choice between `out_static_libs` and `out_shared_libs` into source-reading. In a real wrap a hard-coded `STATIC` under `BUILD_SHARED_LIBS=ON` fails with `missing expected installed output: lib/libmylib.so` (measured 2026-09-26 on Bazel 9.2.0). | `CMK-TGT-11`'s verification. This ID adds no command. | SHOULD |
 
 ## The CMake the Wrapper Runs
 
 The CMake inside the wrap is the wrapper's, never the host's. At rules_foreign_cc
-0.16.0 the default is 3.31.12 and the prebuilt table runs 3.19.8 to 4.0.7 (read
+0.16.0 the default is 3.31.12 (measured 2026-09-26: every wrap on Bazel 9.2.0 ran
+`cmake-3.31.12-linux-x86_64`) and the prebuilt table runs 3.19.8 to 4.0.7 (read
 2026-09-26). The first command, run in the consuming Bazel workspace, names the
 line a consumer picked (empty output: the default). Floor: CMake 3.25, 4.3 for CPS.
 
@@ -76,7 +79,7 @@ grep -rn -e 'install(PACKAGE_INFO' -e 'export(PACKAGE_INFO' --include='*.cmake' 
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| CMK-BZL-08 | Keep `cmake_minimum_required`'s lower bound at or below the CMake the wrapper provisions (3.31.12 by default at rules_foreign_cc 0.16.0). Guard every newer feature with `if(CMAKE_VERSION VERSION_GREATER_EQUAL x.y)`, CPS export (`install(PACKAGE_INFO)`, CMake ≥ 4.3) included, and always ship the CMake-script Config package beside CPS. The range spelling is `CMK-VER-02`. | A `VERSION 4.1` floor fails on 3.31.12 with `CMake 4.1 or higher is required`. A guarded `install(PACKAGE_INFO)` is skipped on 3.31.12 and emitted on 4.4.2 (measured 2026-09-26). No CMake in the wrapper's table reaches 4.3, so a CPS-only package is unconsumable through the wrap. | Run the simulation on the line the first grep names. A configure error there is the finding. Then the second grep: empty output is the pass. Each hit must sit inside a `CMAKE_VERSION` guard next to an `install(EXPORT)` Config package, and an unguarded hit is the finding. | MUST |
+| CMK-BZL-08 | Keep `cmake_minimum_required`'s lower bound at or below the CMake the wrapper provisions (3.31.12 by default at rules_foreign_cc 0.16.0). Guard every newer feature with `if(CMAKE_VERSION VERSION_GREATER_EQUAL x.y)`, CPS export (`install(PACKAGE_INFO)`, CMake ≥ 4.3) included, and always ship the CMake-script Config package beside CPS. The range spelling is `CMK-VER-02`. | A `VERSION 4.1` floor fails on 3.31.12 with `CMake 4.1 or higher is required`. A guarded `install(PACKAGE_INFO)` is skipped on 3.31.12 and emitted on 4.4.2 (measured 2026-09-26). The floor error and an unguarded `install(PACKAGE_INFO)` both fail inside a real wrap on Bazel 9.2.0. No CMake in the wrapper's table reaches 4.3, so a CPS-only package is unconsumable through the wrap. | Run the simulation on the line the first grep names. A configure error there is the finding. Then the second grep: empty output is the pass. Each hit must sit inside a `CMAKE_VERSION` guard next to an `install(EXPORT)` Config package, and an unguarded hit is the finding. | MUST |
 
 ```cmake
 # wrong: an unguarded install(PACKAGE_INFO …) is an unknown mode on 3.31.12
@@ -93,7 +96,7 @@ endif()
 
 ## The Symlink Farm
 
-Bazel's sandbox is a tree of symlinks. The farm reproduces it without Bazel. Run
+Bazel's sandbox is a tree of symlinks: real directories, and a link for each file. The farm reproduces it without Bazel. Run
 it from the project root. Floor: CMake 3.19 for `file(REAL_PATH)`. Measured
 2026-09-26 on 3.31.12 and 4.4.2.
 
@@ -108,7 +111,7 @@ find ../wrap-farm-prefix -type l -lname '/*'
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| CMK-BZL-06 | Install real files, never symlinks. Resolve header and data sources through `file(REAL_PATH)` before `install(FILES)` or `install(DIRECTORY)`. | From the farm, the installed header is an absolute link to a path outside the prefix. A `file(REAL_PATH)` source installs a regular file. This matches rules_foreign_cc [#1129](https://github.com/bazel-contrib/rules_foreign_cc/issues/1129) ("invalid symlink" in the tree artifact), open on 2026-09-26. Not yet observed under a real Bazel, hence SHOULD. | The farm block above. Empty `find` output is the pass. Any line is the finding. The relative namelinks `install(TARGETS)` makes for shared libraries stay inside the prefix and are not findings. | SHOULD |
+| CMK-BZL-06 | Install real files, never symlinks. Resolve each header and data file through `file(REAL_PATH)` and install the result with `install(FILES)`. Resolving a directory changes nothing, because `install(DIRECTORY)` copies the links inside it. | From the farm, the installed header is an absolute link to a path outside the prefix. A `file(REAL_PATH)` source installs a regular file. A real wrap on Bazel 9.2.0 installs the same absolute link from a plain `install(DIRECTORY include/ …)`, and from one whose directory went through `file(REAL_PATH)` first (measured 2026-09-26, the directory case also through the farm on 3.31.12 and 4.4.2). This matches rules_foreign_cc [#1129](https://github.com/bazel-contrib/rules_foreign_cc/issues/1129) ("invalid symlink" in the tree artifact), open on 2026-09-26. A local consumer still builds. The break needs a remote cache or remote execution round trip, not reproduced here, hence SHOULD. | The farm block above. Empty `find` output is the pass. Any line is the finding. The relative namelinks `install(TARGETS)` makes for shared libraries stay inside the prefix and are not findings. | SHOULD |
 
 ## CI and Generated Descriptions
 
@@ -158,17 +161,19 @@ grep -rn -e 'module(' --include='MODULE.bazel' .
 
 Binds an application consuming packages that also builds with Bazel. The third
 command runs against a vcpkg checkout. Source read 2026-09-26 at Conan 2.32.0,
-vcpkg 2026.07.29 and vcpkg-tool 2026-07-27. Floor: Conan 2.30.0 and Bazel 7.2.0 for CMK-BZL-14, any vcpkg for CMK-BZL-15.
+vcpkg 2026.07.29 and vcpkg-tool 2026-07-27. CMK-BZL-14 was measured end to end on
+Conan 2.32.0 and Bazel 9.2.0 (2026-09-26). Floor: Conan 2.30.0 and Bazel 7.2.0 for CMK-BZL-14, any vcpkg for CMK-BZL-15.
 
 ```sh
 grep -rn -e 'BazelDeps' --include='conanfile.py' --include='conanfile.txt' .
 grep -rn -e 'conan_deps.MODULE.bazel' --include='MODULE.bazel' .
 grep -rln -i -e 'bazel' "$VCPKG_ROOT/scripts"
+grep -n -e 'bazel_dep(name = "rules_cc"' MODULE.bazel
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| CMK-BZL-14 | Wire Conan into a Bzlmod root module with the generated include: `BazelDeps` plus `include("//<generators-folder>:conan_deps.MODULE.bazel")` in the root `MODULE.bazel`, paired with `BazelToolchain`'s `conan_bzl.rc` passed as `--bazelrc=… --config=conan-config`. Never hand-write a `local_path_override` for Conan output, and never state that Conan's Bazel support is WORKSPACE-only. | Conan 2.30.0 added the include file ([conan-io/conan#20042](https://github.com/conan-io/conan/pull/20042)), unchanged at 2.32.0. Bazel's `include()` (Bazel ≥ 7.2.0) works only in the root module, so a module published to the BCR cannot use this path. The docs landing page shows only WORKSPACE and no adopter was found, hence SHOULD. The generated file wires Conan's rules_cc extension, which Conan labels Bazel 9+. On Bazel 7.1 to 8.x Conan points to `conan_deps_module_extension.bzl` through a hand-written `use_extension`. | The first two greps. A `BazelDeps` hit with an empty include grep is the finding. Both empty means not applicable. | SHOULD |
+| CMK-BZL-14 | Wire Conan into a Bzlmod root module with the generated include: `BazelDeps` plus `include("//<generators-folder>:conan_deps.MODULE.bazel")` in the root `MODULE.bazel`, paired with `BazelToolchain`'s `conan_bzl.rc` passed as `--bazelrc=… --config=conan-config`. When the root module has its own `bazel_dep(name = "rules_cc", …)`, delete that line, because the generated file declares one. Never edit the generated file, never hand-write a `local_path_override` for Conan output, and never state that Conan's Bazel support is WORKSPACE-only. | Conan 2.30.0 added the include file ([conan-io/conan#20042](https://github.com/conan-io/conan/pull/20042)), unchanged at 2.32.0. Bazel's `include()` (Bazel ≥ 7.2.0) works only in the root module, so a module published to the BCR cannot use this path. The docs landing page shows only WORKSPACE and no adopter was found, hence SHOULD. The generated file wires Conan's rules_cc extension, which Conan labels Bazel 9+. On Bazel 7.1 to 8.x Conan points to `conan_deps_module_extension.bzl` through a hand-written `use_extension`. Measured 2026-09-26 on Bazel 9.2.0: the include built and ran a `cc_binary` against Conan's zlib 1.3.1. The generated file declares `bazel_dep(name = "rules_cc", version = "0.2.17")`, so a second one in the root fails with `The repo name 'rules_cc' cannot be defined by a bazel_dep`. Without the root's line, resolution still picked the 0.2.18 that rules_foreign_cc 0.16.0 needs. | The first two greps. A `BazelDeps` hit with an empty include grep is the finding. Both empty means not applicable. With the include present, the fourth grep must print nothing, and any line is the finding. | SHOULD |
 | CMK-BZL-15 | State that vcpkg has no Bazel bridge: no `vcpkg export` Bazel format and no maintained `rules_vcpkg`. Offer hand-written repository rules over the vcpkg installed tree, or move that dependency to a BCR module or a rules_foreign_cc wrap. | The only Bazel paths in microsoft/vcpkg run the other way, acquiring Bazel for Bazel-built ports, and microsoft/vcpkg-tool has none. | A recommendation that names a vcpkg Bazel generator is the finding. Negative re-check, the third grep: it lists exactly two files, ending `scripts/cmake/vcpkg_find_acquire_program(BAZEL).cmake` and `scripts/test_ports/vcpkg-find-acquire-program/portfile.cmake`. Any other file is new: read it before citing this row. | MUST |
 
 ## What Agents Get Wrong Here
@@ -193,11 +198,16 @@ grep -rln -i -e 'bazel' "$VCPKG_ROOT/scripts"
     wrapped install (`CMK-BZL-06`).
 11. **Passing `FETCHCONTENT_FULLY_DISCONNECTED=ON` to the simulation,** which hides a fetch (`CMK-BZL-01`).
 12. **Spelling the gate `-Werror=author` on the wrapper's 3.31 line,** where it is accepted and does nothing (`CMK-CORE-01`).
+13. **Resolving the include directory through `file(REAL_PATH)` and calling the symlink fixed.**
+    `install(DIRECTORY)` still copies each linked file as an absolute link (`CMK-BZL-06`).
+14. **Editing the generated `conan_deps.MODULE.bazel`, or dropping the include,** when it
+    collides with the root's own `rules_cc` pin. Delete the root's line instead (`CMK-BZL-14`).
 
 ## Re-check
 
 - D5: the rules_foreign_cc default CMake and version table (`CMK-BZL-08`) at every release after 0.16.0.
-- D4: Conan and vcpkg-tool tags (`CMK-BZL-14`, `CMK-BZL-15`).
+- D4: Conan and vcpkg-tool tags (`CMK-BZL-14`, `CMK-BZL-15`), and the `rules_cc` pin in Conan's generated include.
 - D1: the simulation's gate spelling on CMake 4.5 (`CMK-CORE-01`).
-- Unmeasured as of 2026-09-26: a real Bazel 9 wrap (rules_foreign_cc#1129, `-fPIC` as a seed),
-  `BazelDeps` end to end under Bzlmod, and the include file on Bazel 7.2 to 8.x.
+- Unmeasured as of 2026-09-26: the "invalid symlink" consumer break of rules_foreign_cc#1129
+  through a remote cache, the wrapped PIC link failure inside a real wrap (the measuring
+  compiler always emitted PIC), and the include file on Bazel 7.2 to 8.x.

@@ -44,9 +44,10 @@ cmake -S "$W/canary" -B "$W/canary-build" --preset "$LEG" --fresh
 ## The as-subproject smoke
 
 Step 7's exit check, and step 5's too. It proves the source tree, dropped in
-with `add_subdirectory`, defines no test and no developer-only target. The
-parent includes `CTest` on purpose: that turns `BUILD_TESTING` on, which is the
-adversarial case.
+with `add_subdirectory` under a parent that defines none of the library's
+option names, defines no test and no developer-only target. The parent includes
+`CTest` on purpose: that turns `BUILD_TESTING` on, which is the adversarial
+case. Pass the plan file's configure options to each `cmake -S`.
 
 ```sh
 # SRC = absolute library source, W = an empty scratch dir, GATE per binary.
@@ -70,6 +71,36 @@ library guarded on `PROJECT_IS_TOP_LEVEL` prints `Total Tests: 0` and no
 `--directory` flag (it does not exist) or an `|| echo OK` ending, which prints OK
 on any error. Declare the parent's language to match the library's, `C` or
 `CXX`.
+
+The second pass runs the same smoke under a parent that owns an option name the
+library also declares. List the library's options first:
+
+```sh
+grep -rnE --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_deps' --exclude-dir='build*' \
+  -e '^[[:space:]]*option[[:space:]]*\(' "$SRC"
+```
+
+Empty output = no options, so the second pass is not applicable. Run it once
+per listed name that lacks the project's prefix:
+
+```sh
+# NAME as in the first pass, once per developer-only target name.
+OPT=BUILD_EXAMPLES
+mkdir -p "$W/asub2"
+printf '%s\n' 'cmake_minimum_required(VERSION 3.25...4.4)' 'project(asub2 LANGUAGES C)' \
+  'include(CTest)' "option($OPT \"parent option\" ON)" "add_subdirectory($SRC lib-build)" > "$W/asub2/CMakeLists.txt"
+cmake -S "$W/asub2" -B "$W/asub2-build" -G Ninja "$GATE"
+cmake --build "$W/asub2-build" --target help > "$W/asub2-targets.txt"
+grep -r --include='asub2-targets.txt' -e "$NAME" "$W"
+```
+
+A non-zero configure exit is a finding, and so is any line from the grep. Empty
+output = pass. `option()` never overrides a name the parent already set, so an
+unprefixed `option(BUILD_EXAMPLES ... ${PROJECT_IS_TOP_LEVEL})` takes the
+parent's `ON` (measured 2026-09-26 on 3.31.12 and 4.4.2: the example target
+leaks, while the same library with `mylib_BUILD_EXAMPLES` prints nothing).
+Chipmunk2D's unprefixed `BUILD_DEMOS` failed the parent's configure with
+`Could NOT find OpenGL` on both lines.
 
 ## The offline subproject probe
 
@@ -104,13 +135,16 @@ stays green for a `LANGUAGES NONE` consumer.
 # Run from an empty scratch dir, once per CMake line CI runs. Export first:
 # PKG (find_package name), VER (a version it satisfies), TARGETS (its imported
 # targets), SRC (absolute source dir), GATE (-Werror=author on 4.4 and later,
-# -Werror=dev on 4.3 and older), for example:
+# -Werror=dev on 4.3 and older), and SYM_DECL and SYM_CALL: an include and a
+# call of one exported function per target in TARGETS, for example:
 #   export PKG=mylib VER=1.0 TARGETS=mylib::mylib SRC=/abs/path/to/project GATE=-Werror=dev
+#   export SYM_DECL='#include <mylib/mylib.h>' SYM_CALL='mylib_version() != 0'
+# CFG_ARGS (optional): the library's own -D options from the plan file, for example -DBUILD_DEMOS=OFF
 # A dependency outside system paths goes in the environment: export CMAKE_PREFIX_PATH=/abs/dep/prefix
 set -eu
-: "${PKG:?}" "${VER:?}" "${TARGETS:?}" "${SRC:?}" "${GATE:?}"
+: "${PKG:?}" "${VER:?}" "${TARGETS:?}" "${SRC:?}" "${GATE:?}" "${SYM_DECL:?}" "${SYM_CALL:?}"
 W="$PWD"
-cmake -S "$SRC" -B "$W/build" "$GATE"
+cmake -S "$SRC" -B "$W/build" "$GATE" ${CFG_ARGS:-}
 cmake --build "$W/build"
 cmake --install "$W/build" --prefix "$W/prefix"
 # (a) Text files in the prefix naming the source, build or install tree. Empty = pass.
@@ -122,7 +156,7 @@ test ! -s "$W/abs-import.txt"
 # (c) Move the prefix, then configure, build and link a separate compiled consumer.
 mv "$W/prefix" "$W/moved"
 mkdir -p "$W/consumer"
-printf 'int main(void) { return 0; }\n' > "$W/consumer/main.c"
+printf '%s\n' "$SYM_DECL" "int main(void) { return $SYM_CALL; }" > "$W/consumer/main.c"
 printf '%s\n' 'cmake_minimum_required(VERSION 3.25...4.4)' 'project(rt LANGUAGES C)' \
   "find_package($PKG $VER CONFIG REQUIRED)" 'add_executable(rt main.c)' \
   "target_link_libraries(rt PRIVATE $TARGETS)" > "$W/consumer/CMakeLists.txt"
@@ -136,7 +170,12 @@ last line shows which package file the moved consumer resolved. Measured on
 all three lines: a complete package exits 0 and prints
 `mylib_DIR:PATH=.../moved/lib64/cmake/mylib`, and the same package without
 `write_basic_package_version_file` exits 1 with `version: unknown`
-(`CMK-INST-04`). The script runs a single-config generator, so multi-config
+(`CMK-INST-04`). The consumer calls a function because an empty `main` pulls
+no member out of a static archive: Chipmunk2D's static target, which never
+linked `m`, passed with an empty `main` and exits 1 with
+``undefined reference to `sincos'`` when `SYM_CALL` is `cpBodyNew(1, 1) != 0`
+(both lines, 2026-09-26). One call pulls in only its own object file, so a gap
+in another object stays hidden. The script runs a single-config generator, so multi-config
 defects need `CMK-INST-22`'s leg. For a C++ library, the consumer declares
 `LANGUAGES CXX` and writes `main.cpp` instead.
 
@@ -168,6 +207,10 @@ with gersemi 0.29.1: exit 1 on an unformatted file, exit 0 on a formatted one.
 Never `gersemi --check .`, which descends into build trees and fails on
 generated files, and never `gersemi --diff`, which exited 0 on both (measured
 2026-09-26) (`CMK-CORE-04`).
+
+In a tree with no `.github/workflows` directory, the greps that name it exit 2
+with "No such file or directory". That is neither a pass nor a hit: step 8 is
+not applicable, and SKILL.md says what to report.
 
 For `CMK-INST-18`, `grep -rn -e 'cmake --install' .github/workflows` lists the
 install steps, and `grep -rn -e 'CMAKE_PREFIX_PATH' .github/workflows` must

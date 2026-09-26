@@ -55,8 +55,8 @@ a version gate.
 | 8 | 3.28 | 12 | 4.4 |
 | 9 | 3.30 | 13 | not released (4.5, as of 2026-09-26) |
 
-The table is `cmake-presets(7)` at v4.4.2, confirmed by 3.31.12 accepting up to
-10, 4.3.4 up to 11 and 4.4.2 up to 12. The static fallback prints each root
+The table is `cmake-presets(7)` at v4.4.2, confirmed by 3.31.12 and 4.0.7 to 4.2.7
+accepting up to 10, 4.3.4 up to 11 and 4.4.2 up to 12 (measured 2026-09-26). The static fallback prints each root
 file's schema and the files it includes. Run the same `jq` on each included
 file, whose path is relative to the file that includes it. Empty output means
 no presets file.

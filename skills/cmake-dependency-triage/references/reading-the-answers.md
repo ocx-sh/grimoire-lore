@@ -67,6 +67,8 @@ nothing for it on both lines. That is not "never looked up".
 | Output | Meaning | Rule |
 |---|---|---|
 | `<X>_DIR` = `<build>/CMakeFiles/pkgRedirects` | `OVERRIDE_FIND_PACKAGE`, or a `FIND_PACKAGE_ARGS` declare that fell through to a fetch, satisfied the call. The installed copy was never consulted, whatever `CMAKE_PREFIX_PATH` held | CMK-DEP-07, CMK-DEP-32 |
+| `<declared>_DIR:INTERNAL=<build>/CMakeFiles/pkgRedirects` under the declare's spelling, with the installed copy on the path | A `FIND_PACKAGE_ARGS` try-find searched the declare's name (`cjson`) and missed a package that ships `cJSONConfig.cmake`, then fetched. `FIND_PACKAGE_ARGS NAMES cJSON ...` finds it (3.31.12 and 4.4.2) | CMK-DEP-07, CMK-DEP-09 |
+| No `find_package-v1` event on 4.1 and newer while `<X>_DIR` is under `pkgRedirects` | Expected. A redirect-answered call logs none (4.3.4 and 4.4.2), so a zero count is not a CMK-DEP-17 finding | CMK-DEP-17 |
 | `pkgRedirects/<x>-config-version.cmake` containing `Version not available` | The version-less stub. Every later `find_package(<X> <ver> EXACT)` succeeds with a blank `<X>_VERSION` | CMK-DEP-09 |
 | A `FETCHCONTENT_SOURCE_DIR_<X>` cache entry | Resolution step 1: that directory is added directly. No provider and no `find_package` run, and the declare's `PATCH_COMMAND` is skipped | CMK-DEP-31 |
 | Two `FetchContent_Declare` of one name in different files | The first declare processed wins. A newer pin in a subdirectory is ignored silently | CMK-DEP-10 |
