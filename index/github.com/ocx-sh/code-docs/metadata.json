@@ -1,0 +1,39 @@
+{
+  "created": "2026-09-27T20:11:48+02:00",
+  "description": "Code comments",
+  "keywords": [
+    "comments",
+    "code-comments",
+    "doc-comments",
+    "docstrings",
+    "rustdoc",
+    "tsdoc",
+    "jsdoc",
+    "godoc",
+    "javadoc",
+    "kdoc",
+    "guards",
+    "comment-density",
+    "ratchet",
+    "decision-records",
+    "adr",
+    "plan-ids",
+    "process-ids",
+    "interface-text",
+    "clap",
+    "json-schema",
+    "mcp",
+    "ai-agents"
+  ],
+  "kind": "rule",
+  "license": "Apache-2.0",
+  "name": "code-docs",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/code-docs",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "The code-comments index, holding the guard floor, where each clause goes, the length caps and ratchet, the gate, and where the depth lives"
+}

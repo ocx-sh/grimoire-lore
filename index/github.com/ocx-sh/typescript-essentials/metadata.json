@@ -1,6 +1,6 @@
 {
-  "created": "2026-08-29T17:58:38+02:00",
-  "description": "Everything an agent needs to write and review TypeScript the way the OCX family does: the type-aware lint gate that most repositories never actually wire, sixteen merge-blocking non-negotiables, twelve depth files covering types, async, errors, the CLI exit-code and stream contract, resources, modules and resolution, security, testing, observability, browser SPAs and the editor extension host — plus the tsconfig strictness floor per project shape, version-gated compiler flags, and the manifest and publish-verification rules for a package that ships a bin.",
+  "created": "2026-09-27T20:11:48+02:00",
+  "description": "Everything an agent needs to write and review TypeScript the way the OCX family does: the type-aware lint gate that most repositories never actually wire, sixteen merge-blocking non-negotiables, twelve depth files covering types, async, errors, the CLI exit-code and stream contract, resources, modules and resolution, security, testing, observability, browser SPAs and the editor extension host — plus the tsconfig strictness floor per project shape, version-gated compiler flags, and the manifest and publish-verification rules for a package that ships a bin. The code-docs rule and the code-docs-cleanup skill cover comments in every language: short blocks that keep every guard.",
   "keywords": [
     "typescript",
     "quality",
