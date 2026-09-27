@@ -1,0 +1,35 @@
+{
+  "created": "2026-09-27T18:13:16+02:00",
+  "description": "Nix Quality",
+  "keywords": [
+    "nix",
+    "nixpkgs",
+    "flake",
+    "flakes",
+    "flake.lock",
+    "follows",
+    "derivation",
+    "package.nix",
+    "overlay",
+    "devshell",
+    "nixfmt",
+    "deadnix",
+    "statix",
+    "flake-checker",
+    "lix",
+    "nixconfig",
+    "generated-flake",
+    "release"
+  ],
+  "kind": "rule",
+  "license": "Apache-2.0",
+  "name": "nix-quality",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/nix-quality",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "The Nix quality index, holding the gate, the non-negotiables, the flake shapes and where the depth lives"
+}

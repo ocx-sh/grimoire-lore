@@ -1,0 +1,38 @@
+{
+  "created": "2026-09-27T18:13:16+02:00",
+  "description": "Ordered procedure for adding a Nix flake to an existing repository or modernizing one, from reading the Nix era and the flake shape through the flake.nix template, a package.nix for a Rust CLI, a Rust workspace with git submodules or a Python library, real hashes, git add, the gate, the nix.yml CI workflow and the README install block. Use when a repository gets its first flake.nix or package.nix, when wiring Nix CI or a Nix install section, or when migrating a flake off flake-utils, per-system import nixpkgs, pkgs.system, rec derivations, file-scope with pkgs, nixfmt-rfc-style, singular outputs or x86_64-darwin. Not for cutting a release or tag (nix-flake-release), triaging an evaluation or build error (nix-diagnose), generating flakes from a package index, or writing a NixOS, home-manager or nix-darwin module.",
+  "keywords": [
+    "nix",
+    "flakes",
+    "flake.nix",
+    "package.nix",
+    "nixpkgs",
+    "buildRustPackage",
+    "buildPythonPackage",
+    "cargo-workspace",
+    "git-submodules",
+    "flake-compat",
+    "nixfmt-tree",
+    "deadnix",
+    "flake-checker",
+    "genAttrs",
+    "flake-utils",
+    "overlays",
+    "pythonPackagesExtensions",
+    "github-actions",
+    "install-nix-action",
+    "lix",
+    "modernize",
+    "adopt"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "nix-flake-adopt",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/nix-flake-adopt",
+  "schema": 1,
+  "summary": "Step-ordered procedure to add or modernize a flake, with every template built and every gate watched red and green on CppNix 2.35.2, nixpkgs 26.11pre and Lix 2.95.2"
+}

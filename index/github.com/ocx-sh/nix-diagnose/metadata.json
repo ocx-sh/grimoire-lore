@@ -1,0 +1,34 @@
+{
+  "created": "2026-09-27T18:13:16+02:00",
+  "description": "Error-keyed diagnosis procedure for a Nix evaluation, flake check or build that already fails, covering infinite recursion, undefined variables, \"is not a derivation\", overlay argument errors, \"path is not valid\" on a cold store, x86_64-darwin throws, follow cycles, hash mismatches, IFD refusals, red --all-systems runs, a Lix leg that disagrees with CppNix, a flake check that looks hung, and an error that did not change after a fix. Use when someone pastes a Nix error, says nix flake check or nix build fails, evaluation is stuck, infinite recursion encountered, --all-systems is red, it works locally but fails in CI, Lix says something different, the Nix upgrade broke the flake, or asks why a Nix error happens. Not for writing flake standards, which the nix-quality rule carries, and not for adding a flake to a repository or cutting a release, which are nix-flake-adopt and nix-flake-release.",
+  "keywords": [
+    "nix",
+    "flake",
+    "diagnose",
+    "debugging",
+    "evaluation",
+    "infinite-recursion",
+    "show-trace",
+    "no-eval-cache",
+    "nix-repl",
+    "flake-check",
+    "all-systems",
+    "lix",
+    "cppnix",
+    "cold-store",
+    "ifd",
+    "follows",
+    "hash-mismatch",
+    "error-catalog"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "nix-diagnose",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/nix-diagnose",
+  "schema": 1,
+  "summary": "Routes a failing Nix evaluation or build from its verbatim error, keyed by era and shape, to the cause and the rule that fixes it, measured on CppNix 2.35.2, 2.31.5 and Lix 2.95.2"
+}
