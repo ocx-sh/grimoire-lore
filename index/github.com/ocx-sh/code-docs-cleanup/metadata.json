@@ -1,0 +1,41 @@
+{
+  "created": "2026-09-27T20:11:48+02:00",
+  "description": "Clause-by-clause procedure for shortening and cleaning up source-code comments without losing a guard, the comment that says why a non-obvious line must stay as it is and what breaks if it changes. Use when someone asks to shorten, trim or clean up comments, says a file has too many or overly verbose comments or is over-commented, cut comment density or comment bloat, split an essay comment or an over-long doc comment or docstring, move design rationale out of code into a decision record, remove plan, work-package, review-round or decision IDs from comments, delete comments that restate the code, bring a file under the code-docs length caps, or prepare a file or package for the code-docs comment ratchet. Not for writing the comment standards, which the code-docs rule carries, not for --help, JSON Schema, MCP tool descriptions or other text that renders to users, and not for user-facing documentation pages, which the docs-quality rules cover.",
+  "keywords": [
+    "comments",
+    "code-comments",
+    "comment-cleanup",
+    "comment-density",
+    "doc-comments",
+    "docstrings",
+    "rustdoc",
+    "jsdoc",
+    "tsdoc",
+    "godoc",
+    "javadoc",
+    "kdoc",
+    "guards",
+    "why-comments",
+    "essay-comments",
+    "decision-records",
+    "adr",
+    "plan-ids",
+    "process-ids",
+    "pointers",
+    "ratchet",
+    "length-caps",
+    "refactor",
+    "code-docs"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "code-docs-cleanup",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/code-docs-cleanup",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "Shortens comments clause by clause, guard first, gated by a structural diff check and a cold reason re-check for every shortened guard"
+}

@@ -1,6 +1,6 @@
 {
-  "created": "2026-09-26T16:18:20+02:00",
-  "description": "Everything an agent needs to write, gate, ship and debug Go the way the OCX family does: the go-quality rule (the gate block, the non-negotiables and ten depth files on language era, errors, concurrency and context, API and SDK design, testing, the CLI contract, files and processes, network and registry clients, security, and observability and performance), the go-modules rule (go and toolchain directive policy, dependency hygiene, the pinned golangci-lint v2 configs and the release engineering rules), plus the go-release skill that cuts a reproducible, signed release, the go-upgrade skill that moves a module to a new Go release or triages a dependency, and the go-diagnose skill for a hung, leaking, racy or slow process.",
+  "created": "2026-09-27T20:11:48+02:00",
+  "description": "Everything an agent needs to write, gate, ship and debug Go the way the OCX family does: the go-quality rule (the gate block, the non-negotiables and ten depth files on language era, errors, concurrency and context, API and SDK design, testing, the CLI contract, files and processes, network and registry clients, security, and observability and performance), the go-modules rule (go and toolchain directive policy, dependency hygiene, the pinned golangci-lint v2 configs and the release engineering rules), plus the go-release skill that cuts a reproducible, signed release, the go-upgrade skill that moves a module to a new Go release or triages a dependency, and the go-diagnose skill for a hung, leaking, racy or slow process. The code-docs rule and the code-docs-cleanup skill cover comments in every language: short blocks that keep every guard.",
   "keywords": [
     "go",
     "golang",
