@@ -14,7 +14,7 @@ grim add ghcr.io/ocx-sh/lore/rust-essentials
 |---|---|---|
 | [`rust-quality`](https://github.com/ocx-sh/grimoire-lore/blob/main/docs/rust-quality.md) | `**/*.rs` | An ~110-line index plus 18 depth files: architecture, errors, async, security, testing, the pinned exit-code contract, diff review, restructuring |
 | [`rust-cargo`](https://github.com/ocx-sh/grimoire-lore/blob/main/docs/rust-cargo.md) | `Cargo.toml` and the tool configs beside it | Lint policy, toolchain pinning, CI job design, release profiles, and the crates-of-record table |
-| [`code-docs`](https://github.com/ocx-sh/grimoire-lore/blob/main/docs/code-docs.md) | Every source extension, `**/*.rs` included | Fifteen non-negotiables and 20 MUST rows across five depth files: the guard floor, where each clause of a comment goes, record pointers and process IDs, doc text that renders into help and schemas, and the length caps with their per-file ratchet. Shared by every language set |
+| [`code-docs`](https://github.com/ocx-sh/grimoire-lore/blob/main/docs/code-docs.md) | Every source extension, `**/*.rs` included | Fifteen non-negotiables and 22 MUST rows across five depth files: the guard floor, where each clause of a comment goes, record pointers and process IDs, doc text that renders into help and schemas, and the length caps with their per-file ratchet. Shared by every language set |
 | [`code-docs-cleanup`](https://github.com/ocx-sh/grimoire-lore/blob/main/docs/code-docs-cleanup.md) | On request (skill) | A ten-step, guard-first procedure for shortening existing comments, gated by a structural diff check and a cold reason re-check per shortened guard |
 
 ## Members carry no tag

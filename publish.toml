@@ -231,13 +231,19 @@ description = { readme = "docs/docs-essentials.md", logo = "assets/lore-docs.svg
 # drift. So it is a member of every essentials bundle whose source it globs,
 # and the language sets point at it instead of carrying comment rules.
 # `code-docs-cleanup` runs once per tree or per file, which is a skill's job.
+# `code-docs-essentials` bundles the pair on its own, for a repository without
+# a language set.
 [rules.code-docs]
 version = "0.1.0"
-description = { readme = "docs/code-docs.md", logo = "assets/lore-docs.svg" }
+description = { readme = "docs/code-docs.md", logo = "assets/lore-code-docs.svg" }
 
 [skills.code-docs-cleanup]
 version = "0.1.0"
-description = { readme = "docs/code-docs-cleanup.md", logo = "assets/lore-docs.svg" }
+description = { readme = "docs/code-docs-cleanup.md", logo = "assets/lore-code-docs.svg" }
+
+[bundles.code-docs-essentials]
+version = "0.1.0"
+description = { readme = "docs/code-docs-essentials.md", logo = "assets/lore-code-docs.svg" }
 
 # The Bazel set: one rule plus two skills. `bazel-quality` is the index rule;
 # its support directory carries the twelve depth files it routes to — eight by

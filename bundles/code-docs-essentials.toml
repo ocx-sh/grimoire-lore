@@ -1,0 +1,27 @@
+summary = "The code-comments set, the code-docs rule and the code-docs-cleanup skill, for any language"
+keywords = "comments,code-comments,doc-comments,docstrings,rustdoc,tsdoc,jsdoc,godoc,javadoc,kdoc,guards,comment-density,ratchet,cleanup,ai-agents"
+description = "Comment standards for code that AI agents mostly write and read, without a language set: the code-docs rule (the guard floor, where each clause of a comment goes, record pointers and process IDs, doc text that renders into help and schemas, the length caps with their per-file ratchet, and the five standard-library check scripts it ships) and the code-docs-cleanup skill that shortens existing comments while proving every guard keeps its reason."
+license = "Apache-2.0"
+repository = "https://github.com/ocx-sh/grimoire-lore"
+
+# Members are same-directory relative: this catalog publishes flat under
+# ghcr.io/ocx-sh/lore/<name>, so `./code-docs` resolves against wherever the
+# bundle itself was pulled from — a mirror keeps working.
+#
+# MEMBERS CARRY NO TAG. Not a digest, not an exact version, not a floating
+# major, not `latest` — `latest` is a tag like any other and naming it is still
+# a pin. A bundle is a *set*, not a snapshot: its job is to say "these belong
+# together", and the consumer's own `grimoire.lock` is what freezes them.
+#
+# Do not pass --pin when releasing this bundle.
+#
+# The language essentials bundles already carry both members. This one is for
+# a repository that wants the comment standards without a language set, or in
+# a language no set's rules load on yet (Swift, C#, Scala, C and C++ are globbed).
+# code-docs-cleanup runs code-docs' own checks, so the two ship together.
+
+[rules]
+code-docs = "./code-docs"
+
+[skills]
+code-docs-cleanup = "./code-docs-cleanup"

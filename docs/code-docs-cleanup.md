@@ -72,4 +72,4 @@ change of their own.
 
 It needs the `code-docs` rule installed, because the checks it runs ship in
 that rule's `checks/` directory. The Rust, Python, TypeScript, Go and JVM
-essentials bundles install both.
+essentials bundles install both, and so does `code-docs-essentials` on its own.

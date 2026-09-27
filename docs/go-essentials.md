@@ -15,7 +15,7 @@ grim add ghcr.io/ocx-sh/lore/go-essentials
 | `go-release` | skill | An eleven-step gate-ordered release runbook for a CLI's per-platform binaries or a library's module tag, built around a proxied module version's permanence |
 | `go-upgrade` | skill | Two order-sensitive runbooks, nine steps to move a module to a new Go release and five to triage a dependency finding, with re-probed linter facts kept dated |
 | `go-diagnose` | skill | Consent-gated, symptom-routed diagnosis across nine failure modes, from a hang to a performance claim, for a Go process or test that is already wrong |
-| `code-docs` | rule | Fifteen non-negotiables and 20 MUST rows across five depth files: the guard floor, where each clause of a comment goes, record pointers and process IDs, doc text that renders into help and schemas, and the length caps with their per-file ratchet. Shared by every language set |
+| `code-docs` | rule | Fifteen non-negotiables and 22 MUST rows across five depth files: the guard floor, where each clause of a comment goes, record pointers and process IDs, doc text that renders into help and schemas, and the length caps with their per-file ratchet. Shared by every language set |
 | `code-docs-cleanup` | skill | A ten-step, guard-first procedure for shortening existing comments, gated by a structural diff check and a cold reason re-check per shortened guard |
 
 ## Why two rules and not one

@@ -12,7 +12,7 @@ grim add ghcr.io/ocx-sh/lore/python-essentials
 |---|---|---|
 | `python-quality` | `**/*.py` | The gate, eighteen non-negotiables, the pinned exit-code contract, and twelve depth files: CLI contract, process control, testing, typing, async, HTTP, security, observability, API surface, data modelling, single-file tools, gate adoption |
 | `python-packaging` | `**/pyproject.toml`, `**/uv.lock` | The version floor that must actually run, dependency declaration, lockfiles, wheel contents, publishing credentials |
-| `code-docs` | Every source extension, `**/*.py` included | Fifteen non-negotiables and 20 MUST rows across five depth files: the guard floor, where each clause of a comment goes, record pointers and process IDs, doc text that renders into help and schemas, and the length caps with their per-file ratchet. Shared by every language set |
+| `code-docs` | Every source extension, `**/*.py` included | Fifteen non-negotiables and 22 MUST rows across five depth files: the guard floor, where each clause of a comment goes, record pointers and process IDs, doc text that renders into help and schemas, and the length caps with their per-file ratchet. Shared by every language set |
 | `code-docs-cleanup` | On request (skill) | A ten-step, guard-first procedure for shortening existing comments, gated by a structural diff check and a cold reason re-check per shortened guard |
 
 ## Why the two are separate

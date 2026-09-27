@@ -116,3 +116,4 @@ sets point here for comment length, placement and cuts. In `rust-quality`,
 DOC-18 to DOC-20 defer to this set.
 
 The Rust, Python, TypeScript, Go and JVM essentials bundles each include it.
+`code-docs-essentials` installs it with `code-docs-cleanup` and nothing else.
