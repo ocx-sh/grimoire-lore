@@ -1,0 +1,39 @@
+{
+  "created": "2026-09-27T18:13:16+02:00",
+  "description": "Ordered runbook for cutting a release of a Nix flake, from the lock and version checks through the full gate with --all-systems and the CppNix, floor and Lix legs, the vX.Y.Z tag, proving the tag with nix run from a clean store, deprecating a renamed output behind a warning, and the nix-update contract for a package.nix with a fetcher src, plus the no-tag branch for a flake generated from a package index. Use when tagging or releasing a flake, bumping a flake project's version, checking that the version a flake builds equals its tag, renaming or removing a published package or output, writing a Nix release workflow, preparing or bumping a nixpkgs copy with nix-update, or landing a data update to a generated flake. Not for adding a flake to a repository, and not for diagnosing a failing evaluation or build.",
+  "keywords": [
+    "nix",
+    "flake",
+    "flakes",
+    "nixpkgs",
+    "release",
+    "tag",
+    "version",
+    "semver",
+    "flake.lock",
+    "nix-run",
+    "nix-flake-check",
+    "all-systems",
+    "lix",
+    "cppnix",
+    "versionCheckHook",
+    "nix-update",
+    "fetchFromGitHub",
+    "deprecation",
+    "lib.warn",
+    "abort-on-warn",
+    "flake-compat",
+    "generated-flake",
+    "github-actions"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "nix-flake-release",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/nix-flake-release",
+  "schema": 1,
+  "summary": "Gate-ordered release procedure for Nix flakes, built around the fact that a flake cannot see its own tag, with its commands watched red and green on CppNix 2.35.2, CppNix 2.31.5 and Lix 2.95.2"
+}
