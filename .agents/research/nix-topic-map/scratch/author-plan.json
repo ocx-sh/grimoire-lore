@@ -1,0 +1,166 @@
+{
+ "rules": [
+  {
+   "rule": "nix-quality",
+   "glob_list": [
+    "**/*.nix",
+    "**/flake.lock",
+    "**/statix.toml"
+   ],
+   "core_family": "NIX-CORE",
+   "index_sources": [
+    "nix-topic-map.md",
+    "nix-gates.md",
+    "nix-flakes.md",
+    "nix-security.md",
+    "nix-frame.md"
+   ],
+   "extra": "Follow Authoring notes items 1, 3, 4, 5, 8 and 13 exactly: NIX-CORE-01..06 as listed in item 3; the gate block is GATE's nine steps with E12, E13, E27 applied plus FLK-16's git ls-files step and one security-grep step (SEC-02, SEC-03, SEC-08, SEC-04 pattern); at most 15 cross-shape non-negotiables from the item-4 list, each ending in its ID; the routing table uses the task-worded phrases from the Authoring notes table verbatim, plus the extra routing rows it names (.envrc, workflow files, treefmt.toml, README install blocks); a Pinned defaults block carrying Q1-Q8 marked pinned; the shape legend A-E in one table. Siblings: rust-cargo, python-packaging, go-modules, bazel-quality, docs-quality.",
+   "depth": [
+    {
+     "file": "flakes.md",
+     "family": "NIX-FLK",
+     "sources": [
+      "nix-flakes.md"
+     ],
+     "task_hint": "writing or restructuring flake.nix outputs, iterating systems, instantiating nixpkgs, adding packages, overlays, apps, devShells, formatter, checks or templates",
+     "extra": "Ship exactly the IDs the Authoring notes item 2 lists for NIX-FLK. Apply these cross-consolidation resolutions from nix-topic-map.md sections 'Wave 2 landed' through 'Wave 4 landed' (contradictions E-numbered) and the Authoring notes: E6, E16, E28, E33, E40. Reshape every verification cell named in Authoring notes item 9 that belongs to your family. Open with the Era line of Authoring notes item 8. State the shape binding (A-E) in each Severity cell (item 13). Re-plant any fixture you need under /home/mherwig/.cache/research-lang/nix-tools/fixtures/nix-authoring/nix-flk/ (the research fixtures were deleted by an external cleanup; the cited fixture paths in the consolidation dangle), git init -q and git add -A each one, and record versions and whether the store was cold or warm. "
+    },
+    {
+     "file": "inputs.md",
+     "family": "NIX-INP",
+     "sources": [
+      "nix-inputs.md"
+     ],
+     "task_hint": "adding, removing or retargeting an input, writing follows, bumping or reviewing flake.lock, using submodules, LFS or sub-flakes",
+     "extra": "Ship exactly the IDs the Authoring notes item 2 lists for NIX-INP. Apply these cross-consolidation resolutions from nix-topic-map.md sections 'Wave 2 landed' through 'Wave 4 landed' (contradictions E-numbered) and the Authoring notes: E13, E31. Reshape every verification cell named in Authoring notes item 9 that belongs to your family. Open with the Era line of Authoring notes item 8. State the shape binding (A-E) in each Severity cell (item 13). Re-plant any fixture you need under /home/mherwig/.cache/research-lang/nix-tools/fixtures/nix-authoring/nix-inp/ (the research fixtures were deleted by an external cleanup; the cited fixture paths in the consolidation dangle), git init -q and git add -A each one, and record versions and whether the store was cold or warm. "
+    },
+    {
+     "file": "packaging.md",
+     "family": "NIX-PKG",
+     "sources": [
+      "nix-packaging.md"
+     ],
+     "task_hint": "writing or editing a derivation or package.nix: fetchers and hashes, src filtering, meta, phases, version checks, Rust or Python builders",
+     "extra": "Ship exactly the IDs the Authoring notes item 2 lists for NIX-PKG. Apply these cross-consolidation resolutions from nix-topic-map.md sections 'Wave 2 landed' through 'Wave 4 landed' (contradictions E-numbered) and the Authoring notes: E14, E19, E36; PKG-20 is retired (never reuse the number). Reshape every verification cell named in Authoring notes item 9 that belongs to your family. Open with the Era line of Authoring notes item 8. State the shape binding (A-E) in each Severity cell (item 13). Re-plant any fixture you need under /home/mherwig/.cache/research-lang/nix-tools/fixtures/nix-authoring/nix-pkg/ (the research fixtures were deleted by an external cleanup; the cited fixture paths in the consolidation dangle), git init -q and git add -A each one, and record versions and whether the store was cold or warm. "
+    },
+    {
+     "file": "generated-flakes.md",
+     "family": "NIX-GEN",
+     "sources": [
+      "nix-generated-flakes.md",
+      "nix-audit/ocx-index-and-fleet.md"
+     ],
+     "task_hint": "packaging a binary you did not build, or generating packages from an external index (committed data, reader, updater)",
+     "extra": "Ship exactly the IDs the Authoring notes item 2 lists for NIX-GEN. Apply these cross-consolidation resolutions from nix-topic-map.md sections 'Wave 2 landed' through 'Wave 4 landed' (contradictions E-numbered) and the Authoring notes: none beyond the notes; ship the portable subset with ocx as the named worked example stripped to mechanism. Reshape every verification cell named in Authoring notes item 9 that belongs to your family. Open with the Era line of Authoring notes item 8. State the shape binding (A-E) in each Severity cell (item 13). Re-plant any fixture you need under /home/mherwig/.cache/research-lang/nix-tools/fixtures/nix-authoring/nix-gen/ (the research fixtures were deleted by an external cleanup; the cited fixture paths in the consolidation dangle), git init -q and git add -A each one, and record versions and whether the store was cold or warm. Include one compact worked example of the fetch (fetchurl from an OCI registry blob with the anonymous bearer placeholder header and the OCI digest verbatim as hash), nixfmt-clean, and watch it build on the rebuilt toolchain against a real public ghcr.io blob (the prototype at /home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-generated-flakes/prototype/ still builds; copy it into your fixture dir before evaluating)."
+    },
+    {
+     "file": "gates.md",
+     "family": "NIX-GATE",
+     "sources": [
+      "nix-gates.md"
+     ],
+     "task_hint": "running or wiring the gate: formatter, deadnix, statix, nix flake check, the CI workflow, installer, cache, implementation legs",
+     "extra": "Ship exactly the IDs the Authoring notes item 2 lists for NIX-GATE. Apply these cross-consolidation resolutions from nix-topic-map.md sections 'Wave 2 landed' through 'Wave 4 landed' (contradictions E-numbered) and the Authoring notes: E11, E12, E13, E27, E32, E38; carry PKG-20's cost fact as a note under GATE-10. Reshape every verification cell named in Authoring notes item 9 that belongs to your family. Open with the Era line of Authoring notes item 8. State the shape binding (A-E) in each Severity cell (item 13). Re-plant any fixture you need under /home/mherwig/.cache/research-lang/nix-tools/fixtures/nix-authoring/nix-gate/ (the research fixtures were deleted by an external cleanup; the cited fixture paths in the consolidation dangle), git init -q and git add -A each one, and record versions and whether the store was cold or warm. "
+    },
+    {
+     "file": "release.md",
+     "family": "NIX-REL",
+     "sources": [
+      "nix-release.md"
+     ],
+     "task_hint": "choosing a version string, tagging or publishing, deprecating an output, writing install instructions, supporting non-flake users, running nix-update, preparing a nixpkgs copy",
+     "extra": "Ship exactly the IDs the Authoring notes item 2 lists for NIX-REL. Apply these cross-consolidation resolutions from nix-topic-map.md sections 'Wave 2 landed' through 'Wave 4 landed' (contradictions E-numbered) and the Authoring notes: E28, E29, E30, E37. Reshape every verification cell named in Authoring notes item 9 that belongs to your family. Open with the Era line of Authoring notes item 8. State the shape binding (A-E) in each Severity cell (item 13). Re-plant any fixture you need under /home/mherwig/.cache/research-lang/nix-tools/fixtures/nix-authoring/nix-rel/ (the research fixtures were deleted by an external cleanup; the cited fixture paths in the consolidation dangle), git init -q and git add -A each one, and record versions and whether the store was cold or warm. "
+    },
+    {
+     "file": "language.md",
+     "family": "NIX-LANG",
+     "sources": [
+      "nix-language.md"
+     ],
+     "task_hint": "writing Nix expressions (rec, let, with, //, paths and string context, impure builtins) or reading an evaluation error",
+     "extra": "Ship exactly the IDs the Authoring notes item 2 lists for NIX-LANG. Apply these cross-consolidation resolutions from nix-topic-map.md sections 'Wave 2 landed' through 'Wave 4 landed' (contradictions E-numbered) and the Authoring notes: E39, E43, E44; LANG-09 is retired into the nix-diagnose skill (never reuse the number). Reshape every verification cell named in Authoring notes item 9 that belongs to your family. Open with the Era line of Authoring notes item 8. State the shape binding (A-E) in each Severity cell (item 13). Re-plant any fixture you need under /home/mherwig/.cache/research-lang/nix-tools/fixtures/nix-authoring/nix-lang/ (the research fixtures were deleted by an external cleanup; the cited fixture paths in the consolidation dangle), git init -q and git add -A each one, and record versions and whether the store was cold or warm. "
+    },
+    {
+     "file": "security.md",
+     "family": "NIX-SEC",
+     "sources": [
+      "nix-security.md"
+     ],
+     "task_hint": "touching nixConfig, tokens, secrets, substituters or trusted keys, the Nix version CI runs, or evaluating a flake you do not own",
+     "extra": "Ship exactly the IDs the Authoring notes item 2 lists for NIX-SEC. Apply these cross-consolidation resolutions from nix-topic-map.md sections 'Wave 2 landed' through 'Wave 4 landed' (contradictions E-numbered) and the Authoring notes: E30, E31, E41, E44; SEC-06 requires 2.35.2 or later on the 2.35 line (item 7). Reshape every verification cell named in Authoring notes item 9 that belongs to your family. Open with the Era line of Authoring notes item 8. State the shape binding (A-E) in each Severity cell (item 13). Re-plant any fixture you need under /home/mherwig/.cache/research-lang/nix-tools/fixtures/nix-authoring/nix-sec/ (the research fixtures were deleted by an external cleanup; the cited fixture paths in the consolidation dangle), git init -q and git add -A each one, and record versions and whether the store was cold or warm. "
+    },
+    {
+     "file": "modules.md",
+     "family": "NIX-MOD",
+     "sources": [
+      "nix-modules.md"
+     ],
+     "task_hint": "writing a NixOS, home-manager, nix-darwin or flake-parts module a flake exports, or the check that evaluates one",
+     "extra": "Ship exactly the IDs the Authoring notes item 2 lists for NIX-MOD. Apply these cross-consolidation resolutions from nix-topic-map.md sections 'Wave 2 landed' through 'Wave 4 landed' (contradictions E-numbered) and the Authoring notes: E33, E35, E42; for MOD-03 and MOD-06 run the pathWith floor probe of Authoring notes item 7 on nixos-26.05 and nixos-25.11 and record the floor. Reshape every verification cell named in Authoring notes item 9 that belongs to your family. Open with the Era line of Authoring notes item 8. State the shape binding (A-E) in each Severity cell (item 13). Re-plant any fixture you need under /home/mherwig/.cache/research-lang/nix-tools/fixtures/nix-authoring/nix-mod/ (the research fixtures were deleted by an external cleanup; the cited fixture paths in the consolidation dangle), git init -q and git add -A each one, and record versions and whether the store was cold or warm. "
+    }
+   ]
+  }
+ ],
+ "standalone": [
+  {
+   "kind": "skill",
+   "path": "__ROOT__/skills/nix-flake-adopt/SKILL.md",
+   "sources": [
+    "nix-topic-map.md",
+    "nix-flakes.md",
+    "nix-packaging.md",
+    "nix-inputs.md",
+    "nix-gates.md",
+    "nix-release.md",
+    "nix-security.md"
+   ],
+   "brief": "Write the nix-flake-adopt skill (directory skills/nix-flake-adopt/: SKILL.md plus references/ as needed): the procedure for adding a flake to an existing repository or modernizing one, exactly as Authoring notes item 11 scopes it \u2014 read the era (NIX-CORE-04), identify the shape, compose the fleet template (E40: nixpkgs plus flake-compat inputs, genAttrs over the three fleet systems, legacyPackages, overlays.default, formatter nixfmt-tree, checks), write package.nix from the templates (a plain Rust CLI, the ocx-style Cargo workspace with submodules, the PKG-21 Python library), obtain real hashes (PKG-03), git add (FLK-16), run the gate, add the nix.yml CI shape (GATE-12..16 with the SEC-03 token handling), write the REL-09 README install block, and a modernize branch for an existing flake (M-K-05: flake-utils, import nixpkgs per system, pkgs.system, rec mkDerivation, with pkgs at file scope, x86_64-darwin). Carry fleet commitments E3 and E21. Frontmatter exactly like skills/go-release/SKILL.md (name, description with a Use when clause and a Not for clause, license, metadata summary and keywords). Procedure only: cite NIX rule IDs, never redefine them; duplicated MUST rows go in a | # | Finding | Rule | table with the ID last. Every Nix snippet nixfmt-clean and every template actually built: plant a real toy Rust crate and a toy Python package under /home/mherwig/.cache/research-lang/nix-tools/fixtures/nix-authoring/adopt/, apply the skill's templates literally, and watch nix flake check and nix build pass (and fail on a planted defect). Mark pinned owner defaults as pinned. Under 500 lines."
+  },
+  {
+   "kind": "skill",
+   "path": "__ROOT__/skills/nix-flake-release/SKILL.md",
+   "sources": [
+    "nix-topic-map.md",
+    "nix-release.md",
+    "nix-gates.md",
+    "nix-packaging.md",
+    "nix-generated-flakes.md",
+    "nix-inputs.md"
+   ],
+   "brief": "Write the nix-flake-release skill (directory skills/nix-flake-release/): the procedure for cutting a release of a flake, exactly as Authoring notes item 11 scopes it \u2014 the gate, --all-systems and the implementation legs (CppNix gate, floor nix_2_31 and Lix advisory), version sync (REL-01/02), the lock policy at release (REL-08), the tag (vX.Y.Z), proving the tag from a clean store with nix run github:OWNER/REPO/vX.Y.Z and the PKG-19 version entry point (REL-16, A shape only per E29), REL-10, the nix-update contract (REL-13, REL-17), deprecating outputs (REL-11 as reworded by E37), and the D-flake branch (no tags; GEN-15 executed examples). Pinned defaults Q1 (no FlakeHub) and Q2 (no public cache) marked pinned. Frontmatter like skills/go-release/SKILL.md. Procedure only; cite IDs; duplicated MUSTs in | # | Finding | Rule |. Watch the release procedure run end to end on a planted toy flake under /home/mherwig/.cache/research-lang/nix-tools/fixtures/nix-authoring/release/ (local tag, nix run of the tag via a git+file URL). Under 500 lines."
+  },
+  {
+   "kind": "skill",
+   "path": "__ROOT__/skills/nix-diagnose/SKILL.md",
+   "sources": [
+    "nix-topic-map.md",
+    "nix-language.md",
+    "nix-language/evaluation-failures.md",
+    "nix-gates.md",
+    "nix-flakes.md",
+    "nix-inputs.md",
+    "nix-packaging.md",
+    "nix-generated-flakes.md",
+    "nix-security.md"
+   ],
+   "brief": "Write the nix-diagnose skill (directory skills/nix-diagnose/: SKILL.md plus references/error-catalog.md and any other reference files): the procedure for an evaluation or build failure, exactly as Authoring notes item 11 scopes it \u2014 key by era and input shape first (NIX-CORE-04, LANG-08), the absorbed LANG-09 localization order (bare error line, then --show-trace, --no-eval-cache, nix repl, the implementation check of FLK-19), the LANG-10 failure classes, the 46-row catalog from nix-language/evaluation-failures.md section 3 moved into references/error-catalog.md with the C20 version/implementation splits (verbatim strings with implementation and version) and a C7 misattributed-diagnostics section, the GATE-09 --all-systems triage table with E11 applied, and an 'explicitly not a defect' section (checker limits such as flake-checker crashes, cold-store --no-build limits). The SKILL.md body stays the procedure; the catalog is reference. Frontmatter like skills/go-diagnose/SKILL.md. Cite IDs; duplicated MUSTs in | # | Finding | Rule |. Re-verify at least 12 catalog rows spanning CppNix 2.35.2, 2.31.5 and Lix 2.95.2 on re-planted fixtures under /home/mherwig/.cache/research-lang/nix-tools/fixtures/nix-authoring/diagnose/, and mark each catalog row re-verified-2026-09-27 or carried-from-research. Under 500 lines for SKILL.md."
+  },
+  {
+   "kind": "adr",
+   "path": "__ROOT__/.agents/research/nix-generated-flakes/adr_nix_flake_generation.md",
+   "sources": [
+    "nix-topic-map.md",
+    "nix-generated-flakes.md",
+    "nix-generated-flakes/oci-fetch-prototype.md",
+    "nix-generated-flakes/index-data-model.md",
+    "nix-generated-flakes/verification-rerun-w2.md",
+    "nix-generated-flakes/verification-rerun-w3.md",
+    "nix-generated-flakes/prototype/README.md",
+    "nix-audit/ocx-index-and-fleet.md",
+    "nix-frame.md"
+   ],
+   "brief": "Write an ADR draft for the ocx repository (ocx-sh/ocx) deciding how ocx generates a Nix flake from its package index. It is NOT a lore artifact and is not checked by check-artifacts.py (report checker_clean true). Match the house ADR shape of /home/mherwig/dev/ocx/.claude/artifacts/ (read two adr_*.md files there first for structure: status, context, decision drivers, options considered, decision, consequences, open questions). Settle every decision Authoring notes item 12(c) lists: generator as an ocx subcommand reusing the platform matcher and registry client (cite ocx source by repo-relative path, e.g. crates/.../platform.rs:416), repo and name ocx-sh/ocx-nix, the fetch (nixpkgs fetchurl with the anonymous bearer placeholder header, the OCI digest verbatim as hash, an Accept header on manifests), the attribute shape, the libc template, meta mapping, env/entrypoint/deps translation with self.env inlined, systems, history and pruning (Q5), the update loop, yanked/deprecated handling, no cache and no nixConfig, executed README examples, the cmake-gui policy; list the asks on ocx-sh/index (required license annotation, upstream.repository_url for ocx/cli and ocx/mirror, the anonymous manifest 404s, signatures M-E-20, a resolved projection M-E-29) and the open Darwin question M-E-10. Include the prototype's status and its seven breaks (item 12(b)) as the migration list. Status: Proposed. Evidence is cited to the research corpus by relative path; no /home paths in the ADR body."
+  }
+ ]
+}

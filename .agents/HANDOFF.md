@@ -1,3 +1,62 @@
+# Nix program (AUTHORED, ON BRANCH `nix`, unpushed)
+
+Started 2026-09-27 in the `nix` worktree (`.agents/worktrees/nix`, branch `nix`,
+based on `main` 49af14e). Brief: author, maintain, version and publish Nix
+flakes at a high bar, great UX, pitfalls; generate flakes from the ocx index.
+Frame `.agents/research/nix-frame.md` (owner Q1-Q8 defaults applied, listed at
+its end); map `.agents/research/nix-topic-map.md` (Authoring notes binding;
+C1-C30 failure classes; "Convergence" section closes the program).
+
+## What shipped (on the branch, unmerged)
+
+- `rules/nix-quality.md` (198 lines, 15 non-negotiables, NIX-CORE-01..06, gate
+  block) + 9 depth files (flakes, inputs, packaging, generated-flakes, gates,
+  release, language, security, modules): 142 rules, 88 MUST.
+- Skills `nix-flake-adopt` (10 steps, 2 references), `nix-flake-release` (9
+  steps, D branch for generated flakes), `nix-diagnose` (46-row error catalog).
+- Bundle `nix-essentials` (untagged members), `publish.toml` entries (all
+  0.1.0), `docs/nix-*.md` (5 pages), `assets/lore-nix.svg`, taskfile Nix step
+  (`NIX_CONSUMER`, default unset).
+- ocx handoff: ADR draft `.agents/research/nix-generated-flakes/adr_nix_flake_generation.md`
+  (Status Proposed, for ocx-sh/ocx) and prototype `.../prototype/` (builds
+  actionlint, ninja, cmake, corretto from index data via anonymous ghcr blob
+  fetch; 7 known breaks listed in its README).
+
+## Validation and convergence
+
+- Review: 5 opus reviewers + 3 opus sweepers over the 38-repo corpus and 8
+  held-out flakes: 184 findings, all fixed or refused with reason (receipts
+  `nix-topic-map/scratch/{review-receipt-result,fix1-receipt,fix2-receipt}.json`).
+  Sweep added classes C26-C30 (all check defects, no new Nix mechanism).
+- Re-sweep: 73 changed cells re-run with an installed copy of the set and every
+  canonical snippet present; 43 watched fixes; 0 new classes, 0 new MUST:
+  converged (`resweep-receipt.json`). Final alignment synced skill copies to
+  the rule files.
+- Gates at e72c096+: checker clean on rule and three skills; `task ci` and
+  `task artifacts` exit 0 (with `NIX_CONSUMER=~/.cache/research-lang/exemplars/nix/nix-community__disko`,
+  and `TS_CONSUMER=/home/mherwig/dev` because the default `..` resolves to
+  `.agents/worktrees` inside a worktree); `ruff format --check .` clean;
+  `grim publish --dry-run`: exactly 5 new nix packages, everything else skipped.
+
+## Open, for the owner
+
+- Review, push the branch, open the PR, merge. Merging to main publishes the
+  5 packages to ghcr.io and opens an announce PR.
+- Carry the ADR draft into ocx-sh/ocx when ready (not filed; it cites research
+  paths in this repo).
+- Q1-Q8 defaults stand unless changed (no FlakeHub, no public cache, generated
+  flake in ocx-sh/ocx-nix, CppNix gated / Lix advisory, floor CppNix 2.31.5).
+
+## Environment and cleanup
+
+- Toolchain: `~/.cache/research-lang/nix-tools/run.sh <cmd>` (direct bwrap,
+  WAL on; never the nix-portable launcher). Rebuild with
+  `.agents/research/nix-audit/scratch/toolchain/setup.sh` if the cache is gone.
+- Delete at landing: `~/.cache/research-lang/nix-tools`,
+  `~/.cache/research-lang/exemplars/nix*`, the worktree and branch `nix`.
+
+---
+
 # CMake and C++ package-management program (AUTHORED, ON BRANCH `java`)
 
 Written 2026-09-26, for a cold resume. Runs on the `java` worktree

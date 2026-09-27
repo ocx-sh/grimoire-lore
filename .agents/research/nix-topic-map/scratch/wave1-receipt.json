@@ -1,0 +1,2579 @@
+{
+  "summary": "Nix research program wave 1: three grounding audits (ocx index and fleet, exemplar flake shape, exemplar tool runs) and six landscape scouts over the Nix corpora",
+  "agentCount": 9,
+  "logs": [
+    "wave 1: 9/9 workers returned"
+  ],
+  "result": {
+    "ground": {
+      "ocx-index-and-fleet": {
+        "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-audit/ocx-index-and-fleet.md",
+        "headline_numbers": [
+          "125 packages / 99 namespaces / 1720 stored image indexes in /home/mherwig/dev/index/p/",
+          "Tags per package: min 4, median 13, mean 23.9, max 135 (bazelbuild/bazel)",
+          "56.7% of all tags (1692/2985) share their content digest with another tag in the same package",
+          "Tag shapes: 41.0% full semver, 30.4% semver+date, 16.1% minor float, 4.9% major float, 4.2% latest, 3.4% other",
+          "status field: 100% active (0 deprecated, 0 yanked, 0 superseded_by) across all 125",
+          "root.schema.json's variants field: populated in 0/125 packages despite 36 variant-prefixed tags existing",
+          "10 distinct platform shapes over 9115 entries; 665 image-index files (31 packages) carry explicit os.features on linux vs 1170 files (104 packages) bare-only, with 12 packages appearing in both sets over time",
+          "artifactType: 100% application/vnd.sh.ocx.package.v1 (1720/1720); annotation coverage: source 98.3%, revision 97.2%, licenses 92.6% (128 indexes with none); no mainProgram-equivalent key anywhere",
+          "H6 CONFIRMED and sharper than hypothesized: ghcr.io manifest fetch is 401 bare / 200 with a free anonymous bearer token, but the blob itself 307-redirects to a SAS-signed, ~10-minute-expiring URL on pkg-containers.githubusercontent.com; nix-prefetch-url with no token fails with the same bare 401",
+          "actionlint's linux/amd64 binary: static Go ELF, no PT_INTERP, matching the doc's 'static binaries carry no os.features' rule",
+          "ocx: 17 -sys crates in Cargo.lock (aws-lc-sys, zstd-sys, liblzma-sys, clang-sys, etc.); grimoire: 10 (no clang-sys/compression sys crates); ocx-sdk-python: 0 native deps (dependencies=[]); setup-ocx: pure TS/bun, reimplements glibc/musl detection independently of ocx's own Rust code"
+        ],
+        "top_smells": [
+          "56.7% tag/digest aliasing means naive tag-walking overcounts distinct builds 2-3x; must dedup by content digest first",
+          "Bare linux/amd64 and linux/amd64+libc.glibc can coexist as two separate manifests at different digests in the same image index (documented intentional scoring behavior, not a bug) — a naive (os,arch)-keyed generator picks the wrong manifest silently",
+          "clang-sys appears in ocx's Cargo.lock with no traced first-party consumer — an untraced native-toolchain surprise waiting for the first nix build attempt",
+          "setup-ocx (TypeScript) reimplements glibc/musl host detection that ocx's own Rust host_capabilities.rs already implements — duplicate knowledge across the fleet",
+          "The index repo's own docs (product-context.md) flag the desc-blob path's frozen-contract status as explicitly unresolved, yet it's the natural source for embedding README/logo content in a generated flake"
+        ],
+        "patterns_worth_encoding": [
+          "Canonicalize on content digest, treat tags as labels applied after — both ocx's own dependency-pinning rule (manifest digest, never index digest) and the tag-aliasing problem point the same direction for a generator's dedup logic",
+          "nixpkgs' dockerTools.pullImage/skopeo-based FOD fetching is the right prior art for the ghcr.io token+redirect dance (H6), not a plain fetchurl — the ocx-specific work is only the metadata.json-to-derivation translation layer on top",
+          "ocx's own docs already draw explicit Nix/Guix comparisons (propagatedBuildInputs for public/interface dependency visibility; content-addressed store analogy) — ready-made citations for an authoring skill rather than something to re-derive",
+          "ocx's platform-string grammar (os/arch[/variant][+feature,...], percent-escaped for round-tripping) is structurally close to an extended Nix system string plus a libc tag — worth a side-by-side mapping in the eventual nix-generated-flakes artifact"
+        ],
+        "contradictions_of_frame": [
+          "H6 is confirmed but underspecified in the frame: the harder blocker isn't the bearer token (a single free anonymous GET) but the blob URL's 307 redirect to a SAS-signed, minutes-expiring URL on a different host — any fixer must run the fetch inside the derivation build, not pre-resolve a constant URL",
+          "H7 remains only half-checked: the live probe (actionlint) turned out to be a static binary with no os.features, confirming the 'nothing needed' half but leaving the dynamic-glibc/autoPatchelfHook half untested despite the probe running to completion",
+          "The frame implicitly treats root.schema.json's variants field as a usable existing signal; measured across the full corpus it is populated in 0/125 packages, so no downstream design can rely on it today"
+        ]
+      },
+      "exemplar-flake-shape": {
+        "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-audit/exemplar-flake-shape.md",
+        "headline_numbers": [
+          "36/37 exemplar repos have a root flake.nix (typst/typst has none — dropped Nix as of 2026-09-23)",
+          "stdenv.lib and cargoSha256: 0 occurrences anywhere in the 37-repo corpus — fully extinct",
+          "nixpkgs 26.11 has dropped x86_64-darwin support — confirmed live via `nix flake show` against nix-community/fenix's own pinned nixpkgs rev, throwing 'Nixpkgs 26.11 has dropped support for x86_64-darwin'; 17/37 exemplars hardcode that system string",
+          "Systems-handling strategy: flake-parts 12/37, nix-systems input 9/37, flake-utils 7/37, blueprint 5/37, hand-rolled genAttrs/forAllSystems 29/37 — no single strategy is a majority",
+          "Zero Nix CI jobs in the whole corpus run on a Windows runner (a naive grep false-positives on 'darwin' containing 'win')",
+          "11/37 (30%) declare nixConfig, all pointing at a Cachix-style cache only",
+          "Median nixpkgs-lock age 65 days, range 0 (llm-agents.nix) to 566 days (numtide/blueprint)",
+          "10/37 repos have zero git tags at all, including widely-depended-on ones (flake-parts, home-manager, nix-darwin)",
+          "flake-compat citations split three ways: edolstra/flake-compat (10, historical/redirected), NixOS/flake-compat (canonical), nix-community/flake-compat (maintained fork)",
+          "3 repos (DeterminateSystems x2, the-nix-way/dev-templates) consume FlakeHub as an input source via semver-range URLs, not only as a publish target"
+        ],
+        "top_smells": [
+          "17/37 exemplars hardcode x86_64-darwin in systems lists against a nixpkgs branch that just dropped the platform (live-eval confirmed)",
+          "flake-compat fork fragmentation: majority still cite the historical edolstra/flake-compat rather than the canonical NixOS org location",
+          "flake.nix-only static scans undercount outputs for flake-parts/blueprint flakes (blueprint, treefmt, zed all show ~0 outputs despite exposing real ones via imported files)",
+          "Version-tag chaos: semver, bare semver, date-stamps, CI-bot timestamps, and zero tags all coexist with no dominant convention",
+          "All DeterminateSystems/determinate-nix-action CI uses pin the floating @main ref, unlike the SHA-pinning majority of cachix/install-nix-action users",
+          "nixConfig cache trust is one-size-fits-all (11 repos, all just a substituter+key pair, no additional trust controls or consumer guidance)"
+        ],
+        "patterns_worth_encoding": [
+          "numtide/llm-agents.nix's declarative passthru.updater schema (kind: github-source/npm/bun-github/platform/manifest/manifest-checksums, validated at nix flake check time) is close to ready-made prior art for ocx-index-to-flake generation",
+          "llm-agents.nix's ast-grep lint rules (no-unpinned-rev, prefer-tag-over-rev, no-legacy-sha256, use-formatelf, no-x86-64-darwin) are a template for a nix-quality rule set's enforceable checks",
+          "rust-overlay's positional hash-array compaction (_0.._N keyed to a shared targets.nix ordering) is a reusable trick for keeping large generated-flake data files small across many platform-repeated entries",
+          "Three distinct generated-flake data architectures exist in the wild (committed per-version generated .nix files; committed single-latest-snapshot JSON; committed raw upstream metadata + lazy per-entry fetch) — the ocx design should pick deliberately among them, not assume one",
+          "nixpkgs's own sanctioned IFD workaround ('commit generated intermediate files to version control', pkgs/README.md:525) is exactly what all three generated-flake architectures already do independently",
+          "stackbuilders/nixpkgs-terraform's builtins.warn-wrapped deprecated-attribute pattern is a low-ceremony way to rename generated attributes without an immediate break"
+        ],
+        "contradictions_of_frame": [
+          "H1 ('agents emit ~1000 instances of nixpkgs / dated idioms everywhere') does not hold at exemplar scale: worst offender for import-nixpkgs re-instantiation is 10 files (not 1000), and stdenv.lib/cargoSha256 are fully extinct (0 hits); surviving dated idioms are with-pkgs, rec{}, and hardcoded version literals, not the channel-era idioms H1 led with",
+          "H3 ('most flakes pass flake check but lack formatter/checks') is only partially true: just 14/37 repos even run nix flake check in CI, so pass/fail is unverified for the rest by this static pass; among the 14 that do, most also expose both formatter and checks, so the 'lacks formatter or checks' half applies to a minority, not a majority",
+          "H4 ('FlakeHub is the only semver-resolving channel') is contradicted on the consumption side — 3 repos consume FlakeHub as an input via its semver-range URL syntax, not only as a publish target; it is strongly supported on the versioning-practice side (10/37 repos have zero tags, and tag styles otherwise vary wildly)",
+          "New finding outside H1-H9: nixpkgs 26.11 has dropped x86_64-darwin support entirely, confirmed both by release-notes citation and by a live nix eval failure against an exemplar's own pinned nixpkgs rev — a dated, version-specific pitfall a static-only audit would have missed, though one exemplar's own lint rules (llm-agents.nix's no-x86-64-darwin.yml) had already anticipated it"
+        ]
+      },
+      "exemplar-tool-runs": {
+        "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-audit/exemplar-tool-runs.md",
+        "headline_numbers": [
+          "27/36 (75%) exemplars declare no `formatter` output at all",
+          "statix 2230 / deadnix 1914 raw findings across 36 repos, but oxalica/nil alone is ~45%/32% of that (its own parser test fixtures, not code) — excluding it: 1111 statix / 1299 deadnix",
+          "flake-checker crashes outright (not \"finds issues\") on 4/36 repos: 3 with no top-level nixpkgs input, 1 with an empty flake.lock",
+          "nix flake check --no-build fails on cabal2nix IFD (cachix/cachix, cachix/devenv) and on the idiomatic self.packages.${system}.<name> default-package alias (confirmed on 2 independent repos)",
+          "nixConfig.extra-substituters is ignored by default on every one of 6/20 repos that declare it — H8 confirmed live",
+          "nixVersions.nix_2_24 is a stub throw in the pinned nixpkgs 26.11 unstable (\"use nix_2_31\") — the brief's own cross-version test plan is already stale",
+          "helix-editor/helix and DeterminateSystems/nix-installer time out at the 300s cap on flake show/check --all-systems; nix-installer hangs with zero output",
+          "Nixpkgs 26.11 unstable has dropped x86_64-darwin support outright (lib.trivial.throwIf at NixOS/nixpkgs@c7def046:lib/trivial.nix:1003), poisoning --all-systems results corpus-wide for reasons unrelated to the audited flake",
+          "Axis 1-3 (real nix flake metadata/show/check by remote ref): 20/36 repos measured — home-system check 14 pass/4 fail/2 timeout (70%), --all-systems check 8 pass/10 fail/2 timeout (40%), only 2/20 of the --all-systems failures are the flake's own authoring bug"
+        ],
+        "top_smells": [
+          "flake-checker's 11% (4/36) crash rate is silent — it throws a Rust Error to stderr and exits non-zero, indistinguishable from 'issues found' unless the caller inspects the message",
+          "oxalica/nil's own parser test fixtures (crates/syntax/test_data/parser/{err,ok}/) inflate the corpus-wide statix/deadnix counts by 30-45%; any blanket lint gate over 'every .nix file' must exclude test-fixture directories",
+          "nix flake check --no-build cannot validate the idiomatic self.packages.${system}.<name> default-package alias when evaluated from a remote github: ref (error: path '...-source' is not valid) — a very common authoring shape, not an edge case",
+          "--all-systems failures span 6 distinct root causes and only 2 of them (numtide/treefmt via blueprint's lib, helix's own pkgsFor helper) are the audited flake's fault; the rest are nixpkgs dropping a platform, IFD, a toolchain platform limit, an unsupported-platform dependency, and infinite recursion inside nixpkgs itself",
+          "nixConfig.extra-substituters in flake.nix is decorative for any consumer who hasn't opted in with --accept-flake-config, yet several exemplars ship it anyway",
+          "helix-editor/helix's ~100+ single-purpose tree-sitter-grammar flake inputs make its own evaluation network-bound, timing out nix flake show/check --all-systems at 300s purely on serial GitHub fetches"
+        ],
+        "patterns_worth_encoding": [
+          "Treat 'no formatter output' as the default finding for a nix-quality rule (75% miss rate), praising the exception rather than flagging the common case",
+          "Flag nixConfig in flake.nix as close to a no-op for first-time consumers in a nix-flake-release skill; tell authors to document substituters in README/CI instead",
+          "Give a nix-diagnose skill the verbatim-matchable crash/failure strings for flake-checker and nix flake check --no-build (no-nixpkgs-input crash, empty-lock crash, IFD 'is not valid', self-referential-src 'is not valid') so an agent recognizes 'known tool limitation' rather than 'something is broken'",
+          "Name the self.packages.${system}.<name> default-package alias explicitly as a known --no-build incompatibility in nix-quality, since it is the idiomatic way to write a default package",
+          "Carry an explicit --all-systems failure taxonomy in nix-quality/nix-diagnose rather than treating a flat pass/fail as ground truth — a flat count trains an agent to either over-trust green or over-react to red",
+          "For the ocx-index-generated-flake case: assume flake-checker will not run cleanly unless the generator emits a conventional top-level nixpkgs input, since ocx's index has no natural nixpkgs concept"
+        ],
+        "contradictions_of_frame": [
+          "H3 ('most exemplar flakes pass nix flake check --no-build on their home system') is directionally true but weaker than implied: 70% pass on the home system (not overwhelming), and only 40% pass under --all-systems — with the corpus's largest flakes (NixOS/nix, nix-darwin, home-manager, rust-overlay, disko) still unmeasured at time of writing",
+          "H9's concrete cross-version test plan (nixVersions.nix_2_24) is already stale: that exact attribute is a stub throw ('use nix_2_31') in the very nixpkgs revision the frame itself pins, so hardcoding a specific old-Nix version for compatibility guidance will rot within normal channel churn",
+          "H1 is not contradicted but is confirmed more concretely than the frame anticipated: import nixpkgs { inherit system; } is directly the cited cause of a live 2026 deprecation warning (56 hits from one repo alone), not just an aesthetic idiom; and H2's 'many nixpkgs instances' concern turned out to have a measured wall-clock cost (a real local build during cachix/devenv's cold eval, 95.6s) rather than only a lock-file-size cost the frame described"
+        ]
+      }
+    },
+    "scout": {
+      "canonical": {
+        "candidates": [
+          {
+            "slug": "when-is-a-bare-unquoted-url-in-nix-sourc",
+            "why": "A silent-parses-differently gotcha; easy grep-based check for a rule.",
+            "source": "https://nix.dev/guides/best-practices",
+            "covered": "no",
+            "surface": "lang",
+            "priority": "P2"
+          },
+          {
+            "slug": "what-does-with-pkgs-hide-from-static-ana",
+            "why": "H1 names `with pkgs;` blocks explicitly as a dated idiom; directly checkable via `statix`.",
+            "source": "https://nix.dev/guides/best-practices",
+            "covered": "no",
+            "surface": "lang, formatter-lint",
+            "priority": "P0"
+          },
+          {
+            "slug": "when-does-nixpkgs-nix-path-make-an-expre",
+            "why": "Root cause of \"works on my machine\" bug reports; feeds directly into pinning guidance.",
+            "source": "https://nix.dev/guides/best-practices",
+            "covered": "no",
+            "surface": "lang, inputs-lock",
+            "priority": "P1"
+          },
+          {
+            "slug": "what-is-string-context-and-when-does-int",
+            "why": "Underlies \"why did my derivation not rebuild\" and manual store-path string-building bugs.",
+            "source": "https://nix.dev/manual/nix/2.35/language/string-context",
+            "covered": "no",
+            "surface": "lang",
+            "priority": "P1"
+          },
+          {
+            "slug": "what-is-import-from-derivation-why-does",
+            "why": "Confirms/refutes a common assumption (that IFD is off by default) with a measured setting default; feeds a `nix-diagnose` check.",
+            "source": "https://nix.dev/manual/nix/2.35/language/import-from-derivation",
+            "covered": "no",
+            "surface": "lang, security",
+            "priority": "P0"
+          },
+          {
+            "slug": "when-must-src-be-replaced-by-lib-fileset",
+            "why": "Named explicitly in the brief as a \"boring but bites\" topic; nix.dev now teaches this as the default pattern.",
+            "source": "https://nix.dev/tutorials/working-with-local-files",
+            "covered": "no",
+            "surface": "fetchers, packaging",
+            "priority": "P0"
+          },
+          {
+            "slug": "why-are-untracked-not-git-add-ed-files-s",
+            "why": "The single most reported first-flake failure; a `nix-diagnose` topic with a one-line fix (`git add`).",
+            "source": "https://nix.dev/tutorials/working-with-local-files",
+            "covered": "no",
+            "surface": "flake-schema",
+            "priority": "P0"
+          },
+          {
+            "slug": "what-do-inputs-self-submodules-true-and",
+            "why": "A newer flake-schema feature many existing rules/agents won't know exists; directly answers \"why doesn't my submodule show up.\"",
+            "source": "https://nix.dev/manual/nix/2.35/command-ref/new-cli/nix3-flake",
+            "covered": "no",
+            "surface": "flake-schema, inputs-lock",
+            "priority": "P1"
+          },
+          {
+            "slug": "when-must-a-flake-input-declare-inputs-x",
+            "why": "H2's named largest-UX-surface hypothesis; directly testable via `flake.lock` diffing.",
+            "source": "https://nix.dev/manual/nix/2.35/command-ref/new-cli/nix3-flake",
+            "covered": "no",
+            "surface": "inputs-lock",
+            "priority": "P0"
+          },
+          {
+            "slug": "what-are-the-4-fields-in-each-flake-lock",
+            "why": "Underpins any tool (including a future ocx-generated flake) that reads or writes lock files correctly.",
+            "source": "https://nix.dev/manual/nix/2.35/command-ref/new-cli/nix3-flake",
+            "covered": "no",
+            "surface": "inputs-lock",
+            "priority": "P0"
+          },
+          {
+            "slug": "what-does-determinatesystems-flake-check",
+            "why": "Directly maps to a `nix-flake-release` skill's CI gate; exact flags and defaults are cite-able.",
+            "source": "https://github.com/DeterminateSystems/flake-checker",
+            "covered": "no",
+            "surface": "inputs-lock, checks-ci, release-versioning",
+            "priority": "P0"
+          },
+          {
+            "slug": "why-does-nix-flake-lock-never-update-an",
+            "why": "A release-versioning correctness question with a concrete wrong-answer failure mode (accidental mass-upgrade).",
+            "source": "https://nix.dev/manual/nix/2.35/command-ref/new-cli/nix3-flake-update",
+            "covered": "no",
+            "surface": "inputs-lock, release-versioning",
+            "priority": "P1"
+          },
+          {
+            "slug": "exactly-which-flake-output-attributes-mu",
+            "why": "This is the literal contract a `nix-quality` checker script must encode; H3 (checks fail) is directly testable against it.",
+            "source": "https://nix.dev/manual/nix/2.35/command-ref/new-cli/nix3-flake-check",
+            "covered": "no",
+            "surface": "checks-ci, flake-schema",
+            "priority": "P0"
+          },
+          {
+            "slug": "why-does-nix-flake-check-no-build-catch",
+            "why": "Governs the exact CI recipe a release skill should recommend; ties to H3 (\"passes on home system, fails elsewhere\").",
+            "source": "https://nix.dev/manual/nix/2.35/command-ref/new-cli/nix3-flake-check",
+            "covered": "no",
+            "surface": "checks-ci, systems",
+            "priority": "P0"
+          },
+          {
+            "slug": "which-five-settings-may-nixconfig-in-fla",
+            "why": "Directly tests/refutes H8; the exact allowlist is quotable from the manual and matters for a security-review checklist.",
+            "source": "https://nix.dev/manual/nix/2.35/command-ref/new-cli/nix3-flake",
+            "covered": "no",
+            "surface": "security, flake-schema",
+            "priority": "P0"
+          },
+          {
+            "slug": "what-does-access-tokens-in-nix-conf-cont",
+            "why": "A hard security boundary a `nix-quality` rule should assert; concrete secret-leak vector for CI templates.",
+            "source": "https://nix.dev/manual/nix/2.35/command-ref/conf-file",
+            "covered": "no",
+            "surface": "security",
+            "priority": "P0"
+          },
+          {
+            "slug": "what-is-the-1000-instances-of-nixpkgs-pa",
+            "why": "Directly tests H1's dated-idiom claim and H2's largest-UX-surface claim against the primary flake schema docs.",
+            "source": "https://wiki.nixos.org/wiki/Flakes",
+            "covered": "no",
+            "surface": "systems, consumer-ux",
+            "priority": "P0"
+          },
+          {
+            "slug": "what-s-the-difference-between-devshells",
+            "why": "Concrete, checkable rename most agent-authored flakes still get wrong per H1.",
+            "source": "https://nix.dev/manual/nix/2.35/command-ref/new-cli/nix3-flake-check",
+            "covered": "no",
+            "surface": "devshell, flake-schema",
+            "priority": "P0"
+          },
+          {
+            "slug": "how-does-nix-direnv-s-automatic-environm",
+            "why": "A common consumer-UX complaint that a `nix-diagnose` skill should have a canned fix for.",
+            "source": "https://nix.dev/guides/recipes/direnv",
+            "covered": "no",
+            "surface": "devshell, consumer-ux",
+            "priority": "P2"
+          },
+          {
+            "slug": "what-are-the-9-stdenv-build-phases-in-fi",
+            "why": "Foundational packaging knowledge that both hand-written and generated (ocx) flakes' derivations rely on.",
+            "source": "https://nixos.org/manual/nixpkgs/unstable/#chap-stdenv",
+            "covered": "no",
+            "surface": "packaging",
+            "priority": "P1"
+          },
+          {
+            "slug": "what-must-meta-license-meta-mainprogram",
+            "why": "Directly checkable metadata completeness rule for any generated or hand-written package.",
+            "source": "https://nixos.org/manual/nixpkgs/unstable/#chap-meta",
+            "covered": "no",
+            "surface": "packaging, consumer-ux",
+            "priority": "P0"
+          },
+          {
+            "slug": "what-do-passthru-tests-and-passthru-upda",
+            "why": "Directly informs the maintenance (\"how do I keep this flake's version current\") half of the brief.",
+            "source": "https://nixos.org/manual/nixpkgs/unstable/#chap-meta",
+            "covered": "no",
+            "surface": "packaging, release-versioning",
+            "priority": "P1"
+          },
+          {
+            "slug": "what-s-the-difference-between-a-builtin",
+            "why": "Directly feeds the ocx-generated-flake design question (H5/H6) — this is the mechanism choice.",
+            "source": "https://nixos.org/manual/nixpkgs/unstable/#chap-pkgs",
+            "covered": "no",
+            "surface": "fetchers, generated-flakes, ocx",
+            "priority": "P0"
+          },
+          {
+            "slug": "when-does-a-fixed-output-derivation-hash",
+            "why": "Named explicitly in the brief; a canned `nix-diagnose` failure mode with an exact error-string match.",
+            "source": "https://nixos.org/manual/nixpkgs/unstable/",
+            "covered": "no",
+            "surface": "fetchers",
+            "priority": "P1"
+          },
+          {
+            "slug": "what-is-the-pkgs-by-name-xx-name-package",
+            "why": "Directly relevant if fleet flakes ever propose upstreaming into nixpkgs, and to any generated per-package file layout (ocx).",
+            "source": "https://github.com/NixOS/rfcs/pull/140",
+            "covered": "no",
+            "surface": "packaging, generated-flakes",
+            "priority": "P2"
+          },
+          {
+            "slug": "what-does-buildgomodule-s-vendor-hash-at",
+            "why": "Fleet flakes will wrap the Rust/Go/Python CLIs named in the frame; this is Nix-specific packaging knowledge not owned by go-modules.",
+            "source": "https://nixos.org/manual/nixpkgs/unstable/",
+            "covered": "no",
+            "surface": "packaging",
+            "priority": "P1"
+          },
+          {
+            "slug": "what-does-buildrustpackage-s-cargo-lock",
+            "why": "Same rationale as above, for the fleet's Rust CLIs (`ocx`, `grim`).",
+            "source": "https://nixos.org/manual/nixpkgs/unstable/",
+            "covered": "no",
+            "surface": "packaging",
+            "priority": "P1"
+          },
+          {
+            "slug": "when-does-a-prebuilt-linux-binary-need-a",
+            "why": "Directly tests H7 and feeds the ocx-generated-flake handoff, since ocx mirrors prebuilt upstream release binaries.",
+            "source": "https://nix.dev/guides/faq",
+            "covered": "no",
+            "surface": "prebuilt-binaries, ocx",
+            "priority": "P0"
+          },
+          {
+            "slug": "what-does-rfc-0166-merged-establish-as-c",
+            "why": "Directly tests H1's \"nixfmt/nixpkgs-fmt naming\" dated-idiom claim against an accepted RFC and current FAQ wording.",
+            "source": "https://github.com/NixOS/rfcs/pull/166",
+            "covered": "no",
+            "surface": "formatter-lint",
+            "priority": "P0"
+          },
+          {
+            "slug": "given-flakes-have-no-first-class-version",
+            "why": "Directly tests H4; central to the `nix-flake-release` skill's versioning story.",
+            "source": "https://nix.dev/manual/nix/2.35/command-ref/new-cli/nix3-flake",
+            "covered": "no",
+            "surface": "release-versioning, publishing",
+            "priority": "P0"
+          },
+          {
+            "slug": "what-does-flakehub-add-over-a-bare-git-h",
+            "why": "Names a concrete publishing-channel choice the release skill must make a recommendation about.",
+            "source": "https://docs.determinate.systems/",
+            "covered": "no",
+            "surface": "publishing, release-versioning",
+            "priority": "P1"
+          },
+          {
+            "slug": "why-must-extra-substituters-extra-truste",
+            "why": "Directly tests H8 with the exact settings semantics; a security-review checklist item.",
+            "source": "https://wiki.nixos.org/wiki/Flakes",
+            "covered": "no",
+            "surface": "cache, security",
+            "priority": "P0"
+          },
+          {
+            "slug": "what-s-the-actual-tradeoff-between-flake",
+            "why": "Directly informs which helper library a `nix-quality` rule should recommend for new fleet flakes.",
+            "source": "https://wiki.nixos.org/wiki/Flakes",
+            "covered": "no",
+            "surface": "systems, consumer-ux",
+            "priority": "P0"
+          },
+          {
+            "slug": "what-is-the-dendritic-pattern-all-nix-co",
+            "why": "Directly relevant to how \"generated\" flakes (ocx) should be structured for non-flake consumers too.",
+            "source": "https://nix.dev/concepts/flakes",
+            "covered": "no",
+            "surface": "consumer-ux, generated-flakes",
+            "priority": "P2"
+          },
+          {
+            "slug": "in-which-concrete-documented-ways-do-ups",
+            "why": "Directly tests H9 with primary-source citations from all three parties' own docs, not inference.",
+            "source": "https://nix.dev/concepts/flakes",
+            "covered": "no",
+            "surface": "impls",
+            "priority": "P0"
+          },
+          {
+            "slug": "what-specifically-are-determinate-nix-s",
+            "why": "A concrete, named performance/behavior divergence a published flake's test matrix should account for.",
+            "source": "https://docs.determinate.systems/",
+            "covered": "no",
+            "surface": "impls",
+            "priority": "P2"
+          },
+          {
+            "slug": "what-merge-semantics-do-mkif-mkmerge-mkd",
+            "why": "Foundational for any NixOS-module-authoring guidance the fleet eventually needs (nix-generated-flakes' nixosModules output, for instance).",
+            "source": "https://nixos.org/manual/nixos/unstable/",
+            "covered": "no",
+            "surface": "module-system",
+            "priority": "P1"
+          },
+          {
+            "slug": "what-s-an-extensible-option-type-the-enu",
+            "why": "A specific, checkable module-authoring pattern named directly in the manual with a worked example.",
+            "source": "https://nixos.org/manual/nixos/unstable/",
+            "covered": "no",
+            "surface": "module-system",
+            "priority": "P2"
+          },
+          {
+            "slug": "what-do-types-package-types-path-types-p",
+            "why": "A security-adjacent, exact-type-choice question with a citable manual warning about `externalPath`'s limits.",
+            "source": "https://nixos.org/manual/nixos/unstable/",
+            "covered": "no",
+            "surface": "module-system, security",
+            "priority": "P1"
+          },
+          {
+            "slug": "which-pattern-do-generated-index-driven",
+            "why": "Directly names H5 and the core ocx-index-to-flake design question; this corpus only names the hypothesis, the generated-flakes corpus must verify it against the actual repos.",
+            "source": "frame (H5); cross-reference only, not verified in this corpus",
+            "covered": "partial",
+            "surface": "generated-flakes, ocx",
+            "priority": "P0"
+          },
+          {
+            "slug": "because-ghcr-io-blob-pulls-require-a-bea",
+            "why": "Directly names H6, a concrete blocker/non-blocker for the ocx-generated-flake design; unverified in this corpus, flagged for the toolchain-confirmation or generated-flakes wave.",
+            "source": "frame (H6); not verified against ghcr.io in this corpus",
+            "covered": "partial",
+            "surface": "ocx, fetchers, security",
+            "priority": "P0"
+          },
+          {
+            "slug": "what-exact-config-attributes-allowunfree",
+            "why": "A real tension between two pieces of official guidance (reproducibility vs a user's existing global config) worth naming for a UX-pitfalls rule.",
+            "source": "https://nixos.org/manual/nixpkgs/unstable/",
+            "covered": "no",
+            "surface": "consumer-ux, security",
+            "priority": "P1"
+          },
+          {
+            "slug": "what-s-the-pkgscross-target-stdenv-hostp",
+            "why": "Named explicitly in the brief's boring-but-bites list; matters if ocx/fleet flakes ever need to cross-build for aarch64.",
+            "source": "https://nixos.org/manual/nixpkgs/unstable/#chap-cross",
+            "covered": "no",
+            "surface": "packaging",
+            "priority": "P2"
+          },
+          {
+            "slug": "which-nixpkgs-flake-conventions-diverge",
+            "why": "Named explicitly in the brief; a concrete \"why did the mac user's `nix flake check` fail\" support question.",
+            "source": "https://nixos.org/manual/nixpkgs/unstable/",
+            "covered": "no",
+            "surface": "systems, packaging",
+            "priority": "P1"
+          },
+          {
+            "slug": "which-flake-output-attribute-names-are-s",
+            "why": "A directly enumerable, exact-string check a `nix-quality` linter or `hex-review` pass can encode verbatim.",
+            "source": "https://nix.dev/manual/nix/2.35/command-ref/new-cli/nix3-flake-check",
+            "covered": "no",
+            "surface": "checks-ci, flake-schema",
+            "priority": "P0"
+          },
+          {
+            "slug": "what-must-a-flake-s-templates-name-outpu",
+            "why": "Relevant if the fleet ever ships a flake template for new fleet-flake authoring (a meta-deliverable of this program).",
+            "source": "https://nix.dev/manual/nix/2.35/command-ref/new-cli/nix3-flake",
+            "covered": "no",
+            "surface": "flake-schema, publishing",
+            "priority": "P2"
+          },
+          {
+            "slug": "since-nixos-26-05-s-system-nix-entrypoin",
+            "why": "Directly relevant to scoping the rule correctly — nix.dev itself frames flakes as one option among several, not the only path.",
+            "source": "https://nix.dev/concepts/flakes",
+            "covered": "no",
+            "surface": "consumer-ux, flake-schema",
+            "priority": "P1"
+          }
+        ],
+        "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-topic-map/canonical.md",
+        "primary_sources_count": 20,
+        "recent_shifts": [
+          "`lib.fileset` is now nix.dev's taught default for source filtering, superseding `builtins.path`/`lib.sources.cleanSourceWith` filter-callback idioms most existing flakes still use.",
+          "`inputs.self.submodules`/`inputs.self.lfs` flake self-attributes (dated to Nix 2.27 by the NixOS wiki) remove the need for consumer-side `?submodules=1` URL params — a materially newer flake-schema feature.",
+          "RFC 0140 (pkgs/by-name, merged) and RFC 0166 (nixfmt as canonical formatter, merged) are both accepted changes that postdate a large fraction of existing community flakes/blog posts citing all-packages.nix placement or nixpkgs-fmt.",
+          "NixOS 26.05 introduced a `system.nix` entrypoint that loads NixOS configuration without a flake at all, explicitly positioned by nix.dev as equal-footing with flakes, not a lesser option.",
+          "Determinate Nix (Determinate Nix 3.0) unilaterally declared flakes 'stable' and shipped lazy trees/parallel evaluation/WASM support with no upstream equivalent, while Lix separately consolidated its own de-facto 'v1' flake feature set — confirms H9 directly from all three parties' current docs rather than by inference.",
+          "flake-checker's supported-branches list (0.2.15, measured) is itself a moving target (nixos-25.11/26.05 (+small) + unstable (+small) + darwin variants) that a CI policy must track release-over-release."
+        ],
+        "sources_count": 25
+      },
+      "codified": {
+        "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-topic-map/codified.md",
+        "sources_count": 21,
+        "primary_sources_count": 16,
+        "candidates": [
+          {
+            "slug": "sema-extra-rec-with",
+            "why": "grounds H1's 'with pkgs;' / rec dated-idiom claim in a real nixf diagnostic",
+            "source": "https://raw.githubusercontent.com/nix-community/nixd/main/libnixf/src/Basic/diagnostic.py",
+            "covered": "no",
+            "surface": "lang",
+            "priority": "P0"
+          },
+          {
+            "slug": "repeated-attrname-shadowing",
+            "why": "silent shadowing in a generated attrset is the exact ocx-generator failure mode to guard against",
+            "source": "https://github.com/oppiliappan/statix/blob/master/lib/src/lints/repeated_keys.rs",
+            "covered": "no",
+            "surface": "lang, generated-flakes",
+            "priority": "P0"
+          },
+          {
+            "slug": "by-name-shard-rules",
+            "why": "directly reusable layout for a generated package set; wrong shard rule breaks nixpkgs-vet-style validation",
+            "source": "https://raw.githubusercontent.com/NixOS/nixpkgs-vet/main/README.md",
+            "covered": "no",
+            "surface": "packaging, generated-flakes",
+            "priority": "P0"
+          },
+          {
+            "slug": "vet-ratchets-day-one",
+            "why": "decides an ocx-generator design default; ratchets never allow regression once opted in",
+            "source": "https://raw.githubusercontent.com/NixOS/nixpkgs-vet/main/README.md",
+            "covered": "no",
+            "surface": "packaging, generated-flakes, ocx",
+            "priority": "P0"
+          },
+          {
+            "slug": "meta-source-provenance-binary",
+            "why": "the exact gate a binary-mirroring generator (ocx) must not forget",
+            "source": "file:///home/mherwig/.cache/research-lang/exemplars/nix/NixOS__nixpkgs/pkgs/README.md",
+            "covered": "no",
+            "surface": "packaging, ocx, prebuilt-binaries",
+            "priority": "P0"
+          },
+          {
+            "slug": "version-string-convention-rolling",
+            "why": "ocx packages include rolling-release upstreams; nixpkgs digit-first convention must map onto ocx tags",
+            "source": "file:///home/mherwig/.cache/research-lang/exemplars/nix/NixOS__nixpkgs/pkgs/README.md",
+            "covered": "partial",
+            "surface": "packaging, release-versioning, ocx",
+            "priority": "P0"
+          },
+          {
+            "slug": "full-commit-hash-fetchers",
+            "why": "documented real incident (short-hash ambiguity, fork DoS); constrains an ocx-index-driven fetcher",
+            "source": "file:///home/mherwig/.cache/research-lang/exemplars/nix/NixOS__nixpkgs/pkgs/README.md",
+            "covered": "no",
+            "surface": "fetchers, security, ocx",
+            "priority": "P0"
+          },
+          {
+            "slug": "ifd-vs-json-index-read",
+            "why": "answers a live ocx-generator design question directly: plain JSON read is not IFD",
+            "source": "file:///home/mherwig/.cache/research-lang/exemplars/nix/NixOS__nixpkgs/pkgs/README.md",
+            "covered": "no",
+            "surface": "lang, generated-flakes, ocx",
+            "priority": "P0"
+          },
+          {
+            "slug": "nixfmt-rfc-style-rename",
+            "why": "a live, dated naming migration (1.3.0, 2026-05-26) an agent's training data likely predates",
+            "source": "https://raw.githubusercontent.com/NixOS/nixfmt/master/CHANGELOG.md",
+            "covered": "no",
+            "surface": "formatter-lint, packaging",
+            "priority": "P0"
+          },
+          {
+            "slug": "flake-check-output-schema",
+            "why": "the single most load-bearing schema fact for whether a flake passes CI, verified live",
+            "source": "https://nix.dev/manual/nix/2.35/command-ref/new-cli/nix3-flake-check",
+            "covered": "no",
+            "surface": "flake-schema, checks-ci",
+            "priority": "P0"
+          },
+          {
+            "slug": "flake-check-hard-vs-soft",
+            "why": "fixture-verified: non-derivation output is a hard error, unknown top-level attr only a warning, falsifying 'passes check' as a strong signal",
+            "source": "fixture run at /home/mherwig/.cache/research-lang/nix-tools/fixtures/nix-topic-map-check/flake.nix, Nix 2.35.2",
+            "covered": "no",
+            "surface": "flake-schema, checks-ci",
+            "priority": "P0"
+          },
+          {
+            "slug": "follows-duplicate-nixpkgs",
+            "why": "frame H2's central claim; the most consumer-visible flake-UX defect class",
+            "source": "frame H2 + https://wiki.lix.systems/books/development/page/flake-stabilisation-proposal",
+            "covered": "no",
+            "surface": "inputs-lock, consumer-ux",
+            "priority": "P0"
+          },
+          {
+            "slug": "thousand-nixpkgs-instances",
+            "why": "named directly in H1; determines the default systems-handling idiom a rule should recommend",
+            "source": "frame H1 + exemplar corpus (flake-parts, flake-utils, blueprint)",
+            "covered": "no",
+            "surface": "systems, consumer-ux",
+            "priority": "P0"
+          },
+          {
+            "slug": "nixconfig-trust-trap",
+            "why": "named directly in H8; a security-adjacent UX trap worth its own verification command",
+            "source": "frame H8, to verify against nix flake --help / nix show-config",
+            "covered": "no",
+            "surface": "security, flake-schema, consumer-ux",
+            "priority": "P0"
+          },
+          {
+            "slug": "generated-flake-data-shape",
+            "why": "directly decides the ocx-generator's data representation",
+            "source": "exemplar corpus: zig-overlay, rust-overlay, fenix, nix-index-database, nixpkgs-terraform, nixpkgs-python, llm-agents.nix",
+            "covered": "no",
+            "surface": "generated-flakes, ocx",
+            "priority": "P0"
+          },
+          {
+            "slug": "ghcr-bearer-token-fetcher",
+            "why": "named directly in H6; the single hardest unresolved mechanism for the ocx artifact",
+            "source": "frame H6/H7, pending verification against nix-tools toolchain",
+            "covered": "no",
+            "surface": "fetchers, ocx, security",
+            "priority": "P0"
+          },
+          {
+            "slug": "path-string-coercion-store-copy",
+            "why": "the single most-cited 'looks harmless, copies your whole repo' Nix footgun",
+            "source": "nixpkgs CONTRIBUTING.md string-conversion note; general Nix-language behavior, needs fixture verification",
+            "covered": "no",
+            "surface": "lang, fetchers",
+            "priority": "P0"
+          },
+          {
+            "slug": "untracked-files-invisible-to-flakes",
+            "why": "the single most common 'works on my machine, fails in CI/fresh clone' flake pitfall",
+            "source": "environment convention (git add -A required for fixture visibility), needs dedicated fixture",
+            "covered": "no",
+            "surface": "flake-schema, consumer-ux",
+            "priority": "P0"
+          },
+          {
+            "slug": "fod-hash-drift",
+            "why": "directly relevant to ocx mirroring upstream binaries under a fixed hash",
+            "source": "file:///home/mherwig/.cache/research-lang/exemplars/nix/NixOS__nixpkgs/pkgs/README.md",
+            "covered": "no",
+            "surface": "fetchers, ocx, release-versioning",
+            "priority": "P0"
+          },
+          {
+            "slug": "removal-deprecation-contract",
+            "why": "directly reusable pattern for the ocx-generator's own removal/rename contract between published index versions",
+            "source": "file:///home/mherwig/.cache/research-lang/exemplars/nix/NixOS__nixpkgs/lib/modules.nix + pkgs/README.md",
+            "covered": "no",
+            "surface": "release-versioning, generated-flakes, ocx",
+            "priority": "P0"
+          },
+          {
+            "slug": "bool-comparison-vs-simplification",
+            "why": "cheapest, highest-frequency lint; distinguishing W01 from W18/W19 avoids over-fixing",
+            "source": "https://github.com/oppiliappan/statix/blob/master/lib/src/lints/bool_comparison.rs",
+            "covered": "no",
+            "surface": "lang",
+            "priority": "P1"
+          },
+          {
+            "slug": "let-in-collapse-shadowing",
+            "why": "auto-fixable but shadowing makes blind auto-fix unsafe",
+            "source": "statix list (W02/W06)",
+            "covered": "no",
+            "surface": "lang",
+            "priority": "P1"
+          },
+          {
+            "slug": "manual-inherit-idiom",
+            "why": "most common looks-fine-but-verbose case in agent-generated Nix",
+            "source": "https://github.com/oppiliappan/statix/blob/master/lib/src/lints/manual_inherit.rs",
+            "covered": "no",
+            "surface": "lang",
+            "priority": "P1"
+          },
+          {
+            "slug": "eta-reduction-callpackage-risk",
+            "why": "silent behavior-change risk if a rule fixes this near a callPackage boundary",
+            "source": "statix eta_reduction.rs + deadnix --no-lambda-pattern-names",
+            "covered": "no",
+            "surface": "lang",
+            "priority": "P1"
+          },
+          {
+            "slug": "unused-binding-four-kinds",
+            "why": "determines whether a rule can rely on deadnix alone or needs nixd's finer-grained diagnostics",
+            "source": "https://raw.githubusercontent.com/nix-community/nixd/main/libnixf/src/Basic/diagnostic.py",
+            "covered": "no",
+            "surface": "lang",
+            "priority": "P1"
+          },
+          {
+            "slug": "static-vs-lazy-undefined-var",
+            "why": "explains why code that type-checks under nixd can still fail much later mid-build",
+            "source": "https://raw.githubusercontent.com/nix-community/nixd/main/libnixf/src/Basic/diagnostic.py",
+            "covered": "no",
+            "surface": "lang",
+            "priority": "P1"
+          },
+          {
+            "slug": "overrideattrs-in-tree-vs-downstream",
+            "why": "agents trained on nixpkgs source risk over-applying an in-tree-only ban to unrelated downstream code",
+            "source": "file:///home/mherwig/.cache/research-lang/exemplars/nix/NixOS__nixpkgs/CONTRIBUTING.md",
+            "covered": "no",
+            "surface": "packaging",
+            "priority": "P1"
+          },
+          {
+            "slug": "flags-array-bash-footgun",
+            "why": "concrete, demonstrable list-to-bash-array silent mis-splitting bug worth a verification command",
+            "source": "https://github.com/jtojnar/nixpkgs-hammering/tree/main/explanations",
+            "covered": "no",
+            "surface": "packaging",
+            "priority": "P1"
+          },
+          {
+            "slug": "nixfmt-standard-vs-discretion",
+            "why": "needed to write a rule that doesn't fight nixfmt, and to document the one sanctioned escape hatch",
+            "source": "https://raw.githubusercontent.com/NixOS/nixfmt/master/standard.md",
+            "covered": "no",
+            "surface": "formatter-lint",
+            "priority": "P1"
+          },
+          {
+            "slug": "treefmt-nix-formatter-roster",
+            "why": "directly informs devshell/CI wiring for any published flake",
+            "source": "https://raw.githubusercontent.com/numtide/treefmt-nix/main/README.md",
+            "covered": "partial",
+            "surface": "formatter-lint, devshell",
+            "priority": "P1"
+          },
+          {
+            "slug": "git-hooks-nix-family-naming",
+            "why": "prevents a generated pre-commit config from wiring up a dead/renamed hook",
+            "source": "https://raw.githubusercontent.com/cachix/git-hooks.nix/master/modules/hooks.nix",
+            "covered": "no",
+            "surface": "formatter-lint",
+            "priority": "P1"
+          },
+          {
+            "slug": "flake-checker-cel-policy",
+            "why": "the only widely-used automated flake.lock health tool; its default bar is a plausible rule threshold",
+            "source": "https://raw.githubusercontent.com/DeterminateSystems/flake-checker/main/README.md",
+            "covered": "no",
+            "surface": "checks-ci, inputs-lock",
+            "priority": "P1"
+          },
+          {
+            "slug": "nixpkgs-ci-job-list",
+            "why": "a concrete, working reference CI shape (treefmt + parse + vet + commit-lint + eval-diff + build-matrix)",
+            "source": "file:///home/mherwig/.cache/research-lang/exemplars/nix/NixOS__nixpkgs/.github/workflows/",
+            "covered": "partial",
+            "surface": "checks-ci",
+            "priority": "P1"
+          },
+          {
+            "slug": "darwin-ci-undertesting",
+            "why": "codified example that 'supports systems X/Y/Z' often means much less on the less-common system",
+            "source": "file:///home/mherwig/.cache/research-lang/exemplars/nix/NixOS__nixpkgs/.github/workflows/build.yml",
+            "covered": "no",
+            "surface": "systems, checks-ci, impls",
+            "priority": "P1"
+          },
+          {
+            "slug": "flakehub-vs-git-tag-versioning",
+            "why": "central open design question for the artifact set's release story",
+            "source": "frame hypotheses + flake-checker supported-branch model",
+            "covered": "no",
+            "surface": "release-versioning, publishing, ocx",
+            "priority": "P1"
+          },
+          {
+            "slug": "lock-freshness-sla",
+            "why": "sets a concrete, externally-legible SLA a published flake should meet or explicitly decline",
+            "source": "https://raw.githubusercontent.com/DeterminateSystems/flake-checker/main/README.md",
+            "covered": "no",
+            "surface": "release-versioning, checks-ci, ocx",
+            "priority": "P1"
+          },
+          {
+            "slug": "lix-follows-removal-risk",
+            "why": "a documented, primary-sourced future-compatibility risk on the single most standard flake-hygiene idiom",
+            "source": "https://wiki.lix.systems/books/development/page/flake-stabilisation-proposal",
+            "covered": "no",
+            "surface": "inputs-lock, impls",
+            "priority": "P1"
+          },
+          {
+            "slug": "lock-churn-minimization",
+            "why": "directly actionable, ties into flake-checker's 30-day freshness bar",
+            "source": "flake-checker README + frame H2",
+            "covered": "no",
+            "surface": "inputs-lock, release-versioning",
+            "priority": "P1"
+          },
+          {
+            "slug": "cross-impl-lock-resolution-rates",
+            "why": "informs how conservatively a published flake should be written to be portable across implementations (H9)",
+            "source": "https://goldstein.lol/posts/great-nix-flake-check/",
+            "covered": "no",
+            "surface": "impls, consumer-ux",
+            "priority": "P1"
+          },
+          {
+            "slug": "lazy-store-copy-impl-divergence",
+            "why": "sharpens H9 with dated, versioned specifics instead of a vague implementations-differ claim",
+            "source": "https://nix.dev/manual/nix/2.35/release-notes/rl-2.35 + https://docs.determinate.systems/determinate-nix/lazy-trees/",
+            "covered": "no",
+            "surface": "impls",
+            "priority": "P1"
+          },
+          {
+            "slug": "flake-utils-maintenance-status",
+            "why": "a dated, measurable maintenance-status claim that should gate which systems-handling idiom a rule recommends by default",
+            "source": "exemplar fetch log (flake-utils last commit 2024-11-13 vs flake-parts 2026-09-03)",
+            "covered": "no",
+            "surface": "systems, consumer-ux",
+            "priority": "P1"
+          },
+          {
+            "slug": "string-context-semantics",
+            "why": "underlies several lints/diagnostics above and is rarely explained in agent-facing material",
+            "source": "Nix language semantics; nixf unquoted_splice/or-identifier diagnostics as adjacent symptoms",
+            "covered": "no",
+            "surface": "lang",
+            "priority": "P1"
+          },
+          {
+            "slug": "unfree-insecure-gates",
+            "why": "security/consent gate an ocx-generator must replicate if it packages the same upstreams nixpkgs gates",
+            "source": "file:///home/mherwig/.cache/research-lang/exemplars/nix/NixOS__nixpkgs/pkgs/README.md",
+            "covered": "no",
+            "surface": "packaging, security, ocx",
+            "priority": "P1"
+          },
+          {
+            "slug": "legacy-let-syntax",
+            "why": "both statix and nixf independently flag it; agents trained on old snippets reproduce it",
+            "source": "statix legacy_let_syntax.rs + nixf diagnostic.py",
+            "covered": "no",
+            "surface": "lang",
+            "priority": "P2"
+          },
+          {
+            "slug": "redundant-parens-idempotency",
+            "why": "two independent tools flag it; nixfmt's own idempotency bugs show this is genuinely tricky",
+            "source": "statix useless_parens.rs + nixfmt CHANGELOG",
+            "covered": "no",
+            "surface": "lang, formatter-lint",
+            "priority": "P2"
+          },
+          {
+            "slug": "unquoted-splice-disabled-lint",
+            "why": "a lint present in source but shipped disabled is a trap for a rule that claims coverage from the README alone",
+            "source": "statix unquoted_splice.rs, verified via statix list",
+            "covered": "no",
+            "surface": "lang",
+            "priority": "P2"
+          },
+          {
+            "slug": "commit-message-ci-scoping",
+            "why": "explains why the commit-message format matters operationally, not just stylistically",
+            "source": "file:///home/mherwig/.cache/research-lang/exemplars/nix/NixOS__nixpkgs/CONTRIBUTING.md",
+            "covered": "partial",
+            "surface": "release-versioning",
+            "priority": "P2"
+          },
+          {
+            "slug": "cross-compilation-derivation-attrs",
+            "why": "determines whether the ocx-generator needs to think about cross-compilation at all or can assume native-only",
+            "source": "frame H7 + exemplar corpus (rust-overlay, zig-overlay)",
+            "covered": "partial",
+            "surface": "packaging, systems, ocx",
+            "priority": "P2"
+          },
+          {
+            "slug": "submodules-lfs-flake-visibility",
+            "why": "an explicitly-named boring-but-bites topic; ocx's fetched upstreams may use either",
+            "source": "general Nix/Git fetcher behavior, needs dedicated fixture",
+            "covered": "no",
+            "surface": "fetchers, generated-flakes",
+            "priority": "P2"
+          },
+          {
+            "slug": "rfc42-settings-style-modules",
+            "why": "current, documented, non-deprecated pattern; relevant if the artifact set grows a module surface later",
+            "source": "https://raw.githubusercontent.com/NixOS/rfcs/master/rfcs/0042-config-option.md",
+            "covered": "no",
+            "surface": "module-system, ocx",
+            "priority": "P2"
+          }
+        ],
+        "recent_shifts": [
+          "nixfmt 1.3.0 (2026-05-26): the nixfmt-rfc-style package/attribute name was folded back into plain nixfmt; git-hooks.nix still exposes nixfmt-rfc-style as a separate legacy hook alias",
+          "nixfmt 1.4.0 (2026-07-07): introduced /*nixfmt:disable*/ /*nixfmt:enable*/ region-exclusion directive, the first sanctioned formatter escape hatch",
+          "nixfmt 1.5.0 (2026-09-10): fixed an exponential-parse-time bug on nested set-parameter defaults, present until 11 days before this survey",
+          "Nix 2.35 (2026-06-22): builtins.getFlake gained direct path support (builtins.getFlake ./subflake); source-to-store copying became lazier via hash-before-copy; nix flake check gained --print-out-paths",
+          "Determinate Nix 3.5.2 (stable/default by 2026-09-25): 'lazy trees' virtual-filesystem mechanism, not present in CppNix 2.35 or Lix, claimed 3x+ wall-time / 20x+ disk-usage wins",
+          "nixpkgs-vet ratchets (ongoing, RFC 140-era): strictDeps=true and __structuredAttrs=true are now enforced one-way for any new top-level package, closing off the old unset/false idiom for new code",
+          "Lix flake-stabilisation proposal (undated, living document): explicit intent to replace flake.lock with flake.lick/flake.lix and reconsider or drop the follows mechanism entirely",
+          "statix repository migration (as of 2026-09-27): canonical repo moved to a Tangled forge; nixpkgs' own statix package now builds from a Molybdenum Software fork, not oppiliappan/statix directly"
+        ]
+      },
+      "practitioner": {
+        "candidates": [
+          {
+            "slug": "nixpkgs-follows-instance-dedup",
+            "why": "Every flake input that instantiates its own nixpkgs costs ~100MiB/~1s eval; the single most-cited flake-UX failure mode in the corpus.",
+            "source": "https://zimbatm.com/notes/1000-instances-of-nixpkgs",
+            "covered": "no",
+            "surface": "inputs-lock",
+            "priority": "P0"
+          },
+          {
+            "slug": "follows-safety-revision-age",
+            "why": "follows silently time-travels a flake onto an untested nixpkgs revision; safety tracks revision-age delta, not follows' mere presence.",
+            "source": "https://fzakaria.com/2026/08/31/how-safe-is-follows",
+            "covered": "no",
+            "surface": "inputs-lock",
+            "priority": "P0"
+          },
+          {
+            "slug": "flake-utils-vs-flake-parts-vs-hand-rolled",
+            "why": "flake-utils obscures supported systems and causes lock-file dependency bloat via missed follows; governs the shape of every authored/generated flake.",
+            "source": "https://ayats.org/blog/no-flake-utils",
+            "covered": "no",
+            "surface": "flake-schema",
+            "priority": "P0"
+          },
+          {
+            "slug": "ifd-triggers-and-anti-pattern-boundary",
+            "why": "IFD serializes evaluation and is banned from search.nixos.org-indexed flakes, but real tools (crane, poetry2nix) depend on it; determines whether a generated flake may use it.",
+            "source": "https://nix.dev/manual/nix/2.35/language/import-from-derivation",
+            "covered": "no",
+            "surface": "fetchers",
+            "priority": "P0"
+          },
+          {
+            "slug": "git-untracked-files-invisible-to-flakes",
+            "why": "Most-reported first-contact bug: an un-added flake.nix is silently invisible to evaluation.",
+            "source": "https://jvns.ca/blog/2023/11/11/notes-on-nix-flakes/",
+            "covered": "no",
+            "surface": "consumer-ux",
+            "priority": "P0"
+          },
+          {
+            "slug": "nixconfig-trust-prompt-then-ignored",
+            "why": "nixConfig prompts an untrusted user for trust then silently ignores the answer, per multiple open NixOS/nix issues.",
+            "source": "https://github.com/NixOS/nix/issues/6752",
+            "covered": "no",
+            "surface": "security",
+            "priority": "P0"
+          },
+          {
+            "slug": "flake-versioning-tags-vs-flakehub-semver",
+            "why": "No upstream flake versioning scheme exists; FlakeHub is the only real SemVer-range resolver in the ecosystem.",
+            "source": "https://docs.determinate.systems/flakehub/concepts/semver/",
+            "covered": "no",
+            "surface": "release-versioning",
+            "priority": "P0"
+          },
+          {
+            "slug": "pkgs-by-name-convention-for-generated-flakes",
+            "why": "nixpkgs' canonical new-package directory structure is a direct template candidate for an ocx-index-generated flake's internal layout.",
+            "source": "https://github.com/NixOS/nixpkgs/blob/master/pkgs/by-name/README.md",
+            "covered": "partial",
+            "surface": "generated-flakes",
+            "priority": "P0"
+          },
+          {
+            "slug": "flake-behavior-across-cppnix-lix-determinate",
+            "why": "Lazy trees and Lix's feature freeze are concrete, current, dated behavioral divergences between the three implementations (H9).",
+            "source": "https://determinate.systems/blog/changelog-determinate-nix-352/",
+            "covered": "no",
+            "surface": "impls",
+            "priority": "P0"
+          },
+          {
+            "slug": "source-filtering-fileset-vs-cleansourcewith",
+            "why": "Names the exact 'boring but bites' pitfall of accidental whole-repo store copies from naive source references.",
+            "source": "https://www.tweag.io/blog/2023-11-28-file-sets/",
+            "covered": "no",
+            "surface": "lang",
+            "priority": "P0"
+          },
+          {
+            "slug": "should-library-flake-pin-nixpkgs",
+            "why": "Directly named in the brief as a contested argued position with no resolution in this corpus.",
+            "source": "https://jade.fyi/blog/flakes-arent-real/",
+            "covered": "no",
+            "surface": "flake-schema",
+            "priority": "P0"
+          },
+          {
+            "slug": "should-project-have-a-flake-decision-test",
+            "why": "Governs whether fleet tools and ocx should default to shipping a flake at all.",
+            "source": "https://discourse.nixos.org/t/should-i-use-flake-or-not/29964",
+            "covered": "no",
+            "surface": "consumer-ux",
+            "priority": "P0"
+          },
+          {
+            "slug": "flakes-experimental-vs-vendor-stability-claims",
+            "why": "Upstream nix.dev still calls flakes experimental while Determinate Nix 3.0 issues a unilateral production-ready guarantee; directly resolves/contradicts H9.",
+            "source": "https://determinate.systems/blog/determinate-nix-30/",
+            "covered": "no",
+            "surface": "flake-schema",
+            "priority": "P0"
+          },
+          {
+            "slug": "flake-check-no-build-coverage-gaps",
+            "why": "H3 directly: what nix flake check --no-build does and does not catch (non-derivation packages, missing formatter/checks, other-system failures).",
+            "source": "https://nix.dev/concepts/flakes.html",
+            "covered": "partial",
+            "surface": "checks-ci",
+            "priority": "P0"
+          },
+          {
+            "slug": "flake-lock-input-naming-quadratic-bug",
+            "why": "A real, recently-fixed quadratic-time bug in flake.lock's input-naming collision search, directly relevant to a many-input ocx-index-generated flake.",
+            "source": "https://fzakaria.com/2026/08/28/one-flake-to-rule-them-all",
+            "covered": "no",
+            "surface": "generated-flakes",
+            "priority": "P0"
+          },
+          {
+            "slug": "generated-flake-commit-vs-regenerate-ifd",
+            "why": "Whether a generated/index-driven flake should commit its generated Nix or regenerate at eval-time via IFD is the central design fork for the ocx-index flake.",
+            "source": "https://nixcademy.com/posts/what-is-ifd-ups-and-downs/",
+            "covered": "no",
+            "surface": "generated-flakes",
+            "priority": "P0"
+          },
+          {
+            "slug": "flake-schemas-output-adoption-status",
+            "why": "Emerging schemas output mechanism for nix flake show/check, vendor-pushed and not yet upstream — adoption status needs a clear answer.",
+            "source": "https://determinate.systems/blog/flake-schemas/",
+            "covered": "no",
+            "surface": "flake-schema",
+            "priority": "P1"
+          },
+          {
+            "slug": "git-submodule-inputs-lock-interaction",
+            "why": "A path:-typed submodule input silently bypasses flake.lock versioning entirely; named directly in the brief's boring-but-bites list.",
+            "source": "https://github.com/NixOS/nix/pull/12421",
+            "covered": "no",
+            "surface": "inputs-lock",
+            "priority": "P1"
+          },
+          {
+            "slug": "git-lfs-flake-input-version-gate",
+            "why": "LFS support in flake git inputs only landed ~Nix 2.27; older Nix silently gets pointer files instead of content.",
+            "source": "https://nix.dev/manual/nix/2.28/release-notes/rl-2.27",
+            "covered": "no",
+            "surface": "inputs-lock",
+            "priority": "P1"
+          },
+          {
+            "slug": "nixpkgs-vet-by-name-cross-dir-restriction",
+            "why": "by-name packages cannot reference files outside their own directory, a direct constraint on a generated multi-package flake's shape.",
+            "source": "https://github.com/NixOS/nixpkgs/blob/master/pkgs/by-name/README.md",
+            "covered": "no",
+            "surface": "generated-flakes",
+            "priority": "P1"
+          },
+          {
+            "slug": "flake-parts-vs-blueprint-for-generated-flake",
+            "why": "Module-system (flake-parts) vs convention-only folder mapping (blueprint) is a direct design fork for the ocx-generated-flake artifact.",
+            "source": "https://github.com/numtide/blueprint",
+            "covered": "no",
+            "surface": "generated-flakes",
+            "priority": "P1"
+          },
+          {
+            "slug": "flakehub-rolling-release-commit-count-versioning",
+            "why": "An unusual, actively-iterated versioning convention (commit-count-as-patch) worth knowing before recommending semver for flakes.",
+            "source": "https://docs.determinate.systems/flakehub/concepts/semver/",
+            "covered": "no",
+            "surface": "release-versioning",
+            "priority": "P1"
+          },
+          {
+            "slug": "ci-cache-durability-after-magic-nix-cache-eol",
+            "why": "Magic Nix Cache's free-tier death shows CI-cache vendor dependency has a documented recent failure history.",
+            "source": "https://determinate.systems/blog/magic-nix-cache-free-tier-eol/",
+            "covered": "no",
+            "surface": "cache",
+            "priority": "P1"
+          },
+          {
+            "slug": "devshells-vs-direnv-vs-devenv-tradeoff",
+            "why": "Named directly by the brief; devenv's own docs argue plain devShells+direnv underperform a dedicated tool for dev-loop UX.",
+            "source": "https://devenv.sh/blog/",
+            "covered": "no",
+            "surface": "devshell",
+            "priority": "P1"
+          },
+          {
+            "slug": "lib-fileset-api-surface",
+            "why": "Fills in the source-filtering P0 topic with the concrete union/intersection/difference API a flake author needs.",
+            "source": "https://www.tweag.io/blog/2023-11-28-file-sets/",
+            "covered": "no",
+            "surface": "lang",
+            "priority": "P1"
+          },
+          {
+            "slug": "lazy-trees-cross-impl-behavior-divergence",
+            "why": "Concrete measured performance divergence (3x+ eval speed, 20x+ disk) between Determinate Nix and CppNix today.",
+            "source": "https://determinate.systems/blog/changelog-determinate-nix-352/",
+            "covered": "no",
+            "surface": "impls",
+            "priority": "P1"
+          },
+          {
+            "slug": "rfc-0049-unresolved-gaps",
+            "why": "Grounds 'flakes are experimental' folklore in the actual unresolved gap list from the original, never-accepted RFC.",
+            "source": "https://github.com/tweag/rfcs/blob/flakes/rfcs/0049-flakes.md",
+            "covered": "no",
+            "surface": "flake-schema",
+            "priority": "P1"
+          },
+          {
+            "slug": "monorepo-flake-layout-and-lock-churn",
+            "why": "Named by the brief; unresolved even in the community's own highest-relevance forum thread.",
+            "source": "https://discourse.nixos.org/t/best-practices-for-managing-nix-flakes-in-a-team-monorepo/78428",
+            "covered": "no",
+            "surface": "flake-schema",
+            "priority": "P1"
+          },
+          {
+            "slug": "dated-comparison-cppnix-determinate-lix-stability",
+            "why": "Three dated, contradicting primary positions on flake stability that a published flake's docs should be able to cite correctly.",
+            "source": "https://wiki.lix.systems/books/lix-contributors/page/flakes-feature-freeze",
+            "covered": "no",
+            "surface": "impls",
+            "priority": "P1"
+          },
+          {
+            "slug": "nix-systems-overridable-vs-flake-utils-baked-in",
+            "why": "A concrete mechanism a generated flake could adopt for cross-architecture extensibility that flake-utils lacks.",
+            "source": "https://github.com/nix-systems/nix-systems",
+            "covered": "no",
+            "surface": "systems",
+            "priority": "P1"
+          },
+          {
+            "slug": "dated-idiom-deprecation-churn-h1",
+            "why": "H1 directly: which dated idioms (stdenv.lib, nixpkgs-fmt naming, etc.) still appear and need a grounding-corpus cross-check.",
+            "source": "grounding wave (not this corpus)",
+            "covered": "partial",
+            "surface": "lang",
+            "priority": "P1"
+          },
+          {
+            "slug": "flake-check-cross-system-coverage-h3",
+            "why": "H3's other half: whether nix flake check catches a devShell/package that only builds on the author's home system.",
+            "source": "toolchain confirmation needed",
+            "covered": "partial",
+            "surface": "checks-ci",
+            "priority": "P1"
+          },
+          {
+            "slug": "flakehub-url-syntax-pin-vs-range",
+            "why": "Consumer-facing mechanics of the one working semver channel: what a plain flake.nix pin vs range looks like.",
+            "source": "https://docs.determinate.systems/flakehub/concepts/semver/",
+            "covered": "no",
+            "surface": "consumer-ux",
+            "priority": "P2"
+          },
+          {
+            "slug": "flake-checker-cli-flags-in-ci",
+            "why": "Toolchain-confirmed CLI flags (--check-outdated, --check-owner, --check-supported) need a worked CI example.",
+            "source": "toolchain: flake-checker --help (confirmed live 2026-09-27)",
+            "covered": "no",
+            "surface": "checks-ci",
+            "priority": "P2"
+          },
+          {
+            "slug": "statix-lint-ids-for-dated-idioms",
+            "why": "Toolchain-confirmed lint catalog (W01-W23) needs mapping to the H1 dated-idiom list for a quality rule to gate on.",
+            "source": "toolchain: statix list (confirmed live 2026-09-27)",
+            "covered": "partial",
+            "surface": "formatter-lint",
+            "priority": "P2"
+          },
+          {
+            "slug": "update-flake-lock-cadence-vs-cron",
+            "why": "Named directly by the brief ('lock update cadence'); FlakeHub best practices recommends the update-flake-lock Action.",
+            "source": "https://docs.determinate.systems/flakehub/best-practices/",
+            "covered": "partial",
+            "surface": "inputs-lock",
+            "priority": "P2"
+          },
+          {
+            "slug": "source-date-epoch-pinned-to-1-local-src",
+            "why": "Named directly ('timestamp and version reproducibility'); local src pins SOURCE_DATE_EPOCH to 1 even as content changes.",
+            "source": "https://github.com/NixOS/nixpkgs/issues/112595",
+            "covered": "no",
+            "surface": "packaging",
+            "priority": "P2"
+          },
+          {
+            "slug": "fixed-output-hash-drift-over-time",
+            "why": "Named directly ('fixed-output hash drift'); GitHub-generated patch/tarball content has been observed to change over time.",
+            "source": "search-corroborated GitHub patch short-hash drift reports",
+            "covered": "no",
+            "surface": "fetchers",
+            "priority": "P2"
+          },
+          {
+            "slug": "unfree-insecure-gates-in-flake-nix",
+            "why": "Named directly ('unfree and insecure package gates'); flakes have no default user config.nix to carry allowUnfree.",
+            "source": "grounding-corpus cross-check needed",
+            "covered": "no",
+            "surface": "packaging",
+            "priority": "P2"
+          },
+          {
+            "slug": "darwin-vs-linux-flake-breakage",
+            "why": "Named directly ('darwin versus linux differences'); path assumptions and autoPatchelfHook not applying on Darwin.",
+            "source": "nix-darwin ecosystem (needs its own fetch)",
+            "covered": "no",
+            "surface": "systems",
+            "priority": "P2"
+          },
+          {
+            "slug": "flakes-cross-compilation-claim-verification",
+            "why": "Tests a specific, contested practitioner claim ('flakes don't support cross compilation') against current Nix 2.35 behavior.",
+            "source": "https://jade.fyi/blog/flakes-arent-real/",
+            "covered": "no",
+            "surface": "packaging",
+            "priority": "P2"
+          },
+          {
+            "slug": "flake-show-trustworthiness-for-discovery",
+            "why": "Ties flake schemas' stated problem to a concrete consumer-facing check of what nix flake show can and cannot reveal.",
+            "source": "https://determinate.systems/blog/flake-schemas/",
+            "covered": "no",
+            "surface": "consumer-ux",
+            "priority": "P2"
+          },
+          {
+            "slug": "overlays-vs-packages-exposure-choice",
+            "why": "Named directly by the brief; needs the generated-flake-specific corpus (zig-overlay etc.) for a full answer.",
+            "source": "this corpus (light) + generated-flakes corpus (primary)",
+            "covered": "partial",
+            "surface": "flake-schema",
+            "priority": "P2"
+          },
+          {
+            "slug": "default-nix-flake-compat-still-needed",
+            "why": "Named directly by the brief ('supporting non-flake users'); needs a dedicated check on flake-compat's current maintenance status.",
+            "source": "https://jade.fyi/blog/flakes-arent-real/",
+            "covered": "no",
+            "surface": "consumer-ux",
+            "priority": "P2"
+          },
+          {
+            "slug": "eval-determinism-across-systems",
+            "why": "Named directly ('evaluation determinism across systems'); needs a dedicated primary-source check beyond 'the lock file pins inputs'.",
+            "source": "needs dedicated primary-source check",
+            "covered": "no",
+            "surface": "lang",
+            "priority": "P2"
+          },
+          {
+            "slug": "determinate-stability-guarantee-mechanism",
+            "why": "Interrogates whether Determinate's 'formal stability guarantee' has an enforceable mechanism or is purely marketing.",
+            "source": "https://determinate.systems/blog/determinate-nix-30/",
+            "covered": "no",
+            "surface": "impls",
+            "priority": "P2"
+          },
+          {
+            "slug": "lix-flake-freeze-forward-risk",
+            "why": "Whether extracting flakes into a separate Lix plugin risks losing functionality for a flake published today.",
+            "source": "https://wiki.lix.systems/books/lix-contributors/page/flakes-feature-freeze",
+            "covered": "no",
+            "surface": "impls",
+            "priority": "P2"
+          },
+          {
+            "slug": "nix-run-vs-flakehub-pin-resolution-ux",
+            "why": "Consumer-UX-critical: what silently gets re-resolved on each nix run invocation vs a pinned FlakeHub URL.",
+            "source": "https://docs.determinate.systems/flakehub/concepts/semver/",
+            "covered": "no",
+            "surface": "consumer-ux",
+            "priority": "P2"
+          },
+          {
+            "slug": "string-context-footgun-in-flake-authoring",
+            "why": "Named directly ('string context'); this corpus only lightly touches it, needs a dedicated language-corpus check.",
+            "source": "needs dedicated language-corpus check",
+            "covered": "no",
+            "surface": "lang",
+            "priority": "P3"
+          },
+          {
+            "slug": "path-string-coercion-store-copy-cost",
+            "why": "Named directly ('path vs string coercion and store copying'); partially covered via the file-sets survey.",
+            "source": "https://www.tweag.io/blog/2023-11-28-file-sets/",
+            "covered": "partial",
+            "surface": "lang",
+            "priority": "P3"
+          },
+          {
+            "slug": "nixpkgs-upstream-vs-standalone-flake-distribution",
+            "why": "Whether ocx packages should ever aim at nixpkgs proper vs stay a generated flake; not directly covered in this corpus.",
+            "source": "not directly covered in this corpus",
+            "covered": "no",
+            "surface": "publishing",
+            "priority": "P3"
+          }
+        ],
+        "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-topic-map/practitioner.md",
+        "primary_sources_count": 17,
+        "recent_shifts": [
+          "Determinate Nix 3.0 (2025-03-05) issued a unilateral 'formal stability guarantee for flakes' while upstream nix.dev still calls flakes experimental — the two positions are now openly contradicting, not merely unsettled.",
+          "Lazy trees (Determinate Nix 3.5.2+, upstream PR NixOS/nix#13225 still open) cut measured nixpkgs eval time 3x+ and disk use 20x+ but are not yet in CppNix — a live, dated CppNix/Determinate divergence.",
+          "Lix froze the flake feature set at Lix 2.94-2.95 (through 2026-03-25) and plans to extract flakes into a separate plugin, explicitly declining to ever stabilize them — a third, distinct position from both CppNix and Determinate.",
+          "lib.fileset (landed nixpkgs 23.11, argued for by Tweag 2023-11-28) supersedes lib.cleanSourceWith/builtins.filterSource as the recommended source-filtering mechanism.",
+          "Git LFS support in the flake git fetcher only landed around Nix 2.27 (2025-03-03); pre-2.27 consumers silently get LFS pointer files instead of content.",
+          "pkgs/by-name plus the nixpkgs-vet CI check is now nixpkgs' default new-top-level-package convention, superseding all-packages.nix-only guidance.",
+          "Magic Nix Cache's free CI-cache tier died 2025-02-01 when GitHub deprecated its underlying API (later partially restored by a community PR) — a documented, recent durability failure for vendor-dependent CI caching.",
+          "FlakeHub's rolling-release commit-count versioning and SemVer wildcard resolver were actively iterated through 2026 (flake-schemas interface changes dated March and June 2026) — the only flake versioning mechanism with real recent change; plain git-tag versioning has not changed.",
+          "A quadratic-time bug in flake.lock's input-naming collision search was discovered and fixed in 2026 (NixOS/nix#16387, ~21x speedup at 4,000 inputs) — directly relevant to any many-input generated flake and unknown to pre-2026 advice."
+        ],
+        "sources_count": 32
+      },
+      "failure": {
+        "candidates": [
+          {
+            "slug": "untracked-files-invisible-to-flake",
+            "why": "A flake's self is the git index, not the working tree, so an unstaged new file is silently absent with no error — the #1 confusion source for new flake users.",
+            "source": "https://github.com/NixOS/nix/issues/7107",
+            "covered": "no",
+            "surface": "flake-schema",
+            "priority": "P0"
+          },
+          {
+            "slug": "accept-flake-config-root-exec",
+            "why": "accept-flake-config = true is maintainer-confirmed to grant a flake root-equivalent command execution via nix.conf settings like post-build-hook, not merely relaxed cache trust.",
+            "source": "https://github.com/NixOS/nix/issues/9649",
+            "covered": "no",
+            "surface": "security",
+            "priority": "P0"
+          },
+          {
+            "slug": "follows-required-vs-duplicate-nixpkgs",
+            "why": "Missing nixpkgs.follows across sibling inputs makes nix flake lock append _2, _3... name-collision suffixes (one real project reached ~1000), bloating lock files and splitting overlay reach.",
+            "source": "https://discourse.nixos.org/t/1000-instances-of-nixpkgs/17347",
+            "covered": "no",
+            "surface": "inputs-lock",
+            "priority": "P0"
+          },
+          {
+            "slug": "github-fetcher-hash-and-full-commit-rule",
+            "why": "nixpkgs review requires the hash= attribute (not sha256=), fetchFromGitHub over fetchgit over git://, and always a full commit hash since GitHub 404s on ambiguous short hashes and short-hash spam is a documented DoS vector.",
+            "source": "https://raw.githubusercontent.com/NixOS/nixpkgs/master/pkgs/README.md",
+            "covered": "no",
+            "surface": "packaging",
+            "priority": "P0"
+          },
+          {
+            "slug": "nixpkgs-review-checklist-verbatim",
+            "why": "nixpkgs's own new-package review template names the exact attributes reviewers check (meta.mainProgram, meta.license, meta.platforms, nativeBuildInputs, phase-hook wrapping, patch comments) — the codified form of recurring reviewer objections.",
+            "source": "https://raw.githubusercontent.com/NixOS/nixpkgs/master/pkgs/README.md",
+            "covered": "no",
+            "surface": "packaging",
+            "priority": "P0"
+          },
+          {
+            "slug": "flake-check-ifd-foreign-system-break",
+            "why": "nix flake check evaluates every system's outputs even ones it cannot build locally, and IFD there can trigger a real foreign build attempt, producing a confusing wrong-platform error instead of a clean skip — open since 2020, still current on 2.35.",
+            "source": "https://github.com/NixOS/nix/issues/4265",
+            "covered": "no",
+            "surface": "checks-ci",
+            "priority": "P0"
+          },
+          {
+            "slug": "sandbox-fod-cve-fix-was-broken",
+            "why": "CVE-2026-39860 (critical) is a bypass of the earlier fix for CVE-2024-27297: a symlink at the FOD .tmp copy destination let any daemon user overwrite root-owned files for roughly two years before the follow-up advisory.",
+            "source": "https://github.com/NixOS/nix/security/advisories/GHSA-g3g9-5vj6-r3gj",
+            "covered": "no",
+            "surface": "security",
+            "priority": "P0"
+          },
+          {
+            "slug": "nixfmt-current-stable-name",
+            "why": "As of the 25.11/26.11 era pkgs.nixfmt is the stable RFC-166 formatter, pkgs.nixfmt-rfc-style is now the deprecated transitional name, pkgs.nixfmt-classic is pre-RFC-166, and nixpkgs-fmt is archived (2024-07-24) — most existing tutorials still say the reverse.",
+            "source": "https://raw.githubusercontent.com/NixOS/nixfmt/master/README.md",
+            "covered": "no",
+            "surface": "formatter-lint",
+            "priority": "P0"
+          },
+          {
+            "slug": "passthru-updatescript-forms",
+            "why": "passthru.updateScript accepts a path, a derivation, or an attrset with command/attrPath, or simply nix-update-script {} — the mechanism that determines whether a package can be bumped by bot automation at all.",
+            "source": "https://raw.githubusercontent.com/NixOS/nixpkgs/master/pkgs/README.md",
+            "covered": "no",
+            "surface": "packaging",
+            "priority": "P1"
+          },
+          {
+            "slug": "relative-path-inputs-still-broken",
+            "why": "Relative path: and git+file:relative/path flake inputs still misbehave in nested subflake setups and regressed in nix flake archive on 2.26 — not a solved monorepo pattern despite being commonly recommended.",
+            "source": "https://github.com/NixOS/nix/issues/10089",
+            "covered": "no",
+            "surface": "inputs-lock",
+            "priority": "P1"
+          },
+          {
+            "slug": "lazy-trees-implementation-divergence",
+            "why": "Lazy Trees (372 reactions, the highest in this corpus) changes what copying a flake input to the store means, is shipped in Determinate Nix 3.5, explicitly not adopted by Lix, and not yet in upstream CppNix 2.35.2.",
+            "source": "https://github.com/NixOS/nix/issues/6530",
+            "covered": "no",
+            "surface": "impls",
+            "priority": "P0"
+          },
+          {
+            "slug": "detect-duplicate-nixpkgs-in-lockfile",
+            "why": "A grep-able signature (nixpkgs_2, _3, ...) in flake.lock detects the duplicate-instance pathology before it reaches the scale seen in the 1000-instances case.",
+            "source": "https://discourse.nixos.org/t/1000-instances-of-nixpkgs/17347",
+            "covered": "no",
+            "surface": "inputs-lock",
+            "priority": "P1"
+          },
+          {
+            "slug": "submodule-visibility-in-flake-self",
+            "why": "There is no first-class equivalent of fetchGit { submodules = true; } for a flake's own self — submodule content is invisible the same way untracked files are.",
+            "source": "https://github.com/NixOS/nix/issues/7862",
+            "covered": "no",
+            "surface": "flake-schema",
+            "priority": "P1"
+          },
+          {
+            "slug": "warn-dirty-nixconfig-not-honored",
+            "why": "warn-dirty = false set in nixConfig is confirmed not always honored, so a published flake cannot reliably suppress the dirty-tree warning for its consumers via that mechanism.",
+            "source": "https://github.com/NixOS/nix/issues/9885",
+            "covered": "no",
+            "surface": "flake-schema",
+            "priority": "P2"
+          },
+          {
+            "slug": "ci-shallow-clone-false-dirty",
+            "why": "A shallow-cloned CI checkout (e.g. GitHub Actions PR builds) makes Nix think a flake's own tree is dirty with no local changes at all — a CI-specific footgun with no upstream fix, only a checkout-configuration workaround.",
+            "source": "https://github.com/NixOS/nix/issues/5302",
+            "covered": "no",
+            "surface": "checks-ci",
+            "priority": "P1"
+          },
+          {
+            "slug": "should-flake-ship-nixconfig",
+            "why": "Given accept-flake-config's confirmed root-equivalent-execution risk, whether a published flake should ever set nixConfig (even just extra-substituters) is a real publishing decision, not a style question.",
+            "source": "https://github.com/NixOS/nix/issues/9649",
+            "covered": "no",
+            "surface": "security",
+            "priority": "P0"
+          },
+          {
+            "slug": "cargohash-divergence-vs-nondeterminism",
+            "why": "Linux/Darwin and Python-version cargoHash divergence are documented, narrow, expected cases; true per-build nondeterminism is a distinct and rarer bug whose real fix is switching to cargoLock, not re-fetching the hash.",
+            "source": "https://github.com/NixOS/nixpkgs/issues/308089",
+            "covered": "partial",
+            "surface": "packaging",
+            "priority": "P1"
+          },
+          {
+            "slug": "xz-backdoor-nixpkgs-response-pattern",
+            "why": "The only recorded real nixpkgs supply-chain incident (CVE-2024-3094) was handled by an immediate human revert PR same-day, not by any automated lock-file-level known-bad-version gate.",
+            "source": "https://github.com/NixOS/nixpkgs/pull/300028",
+            "covered": "no",
+            "surface": "security",
+            "priority": "P1"
+          },
+          {
+            "slug": "flake-checker-silent-exit-zero",
+            "why": "flake-checker's default check-outdated/check-owner/check-supported triad is real, but its own GitHub Action always exits 0 by design, so teams adopting it as a CI gate get a summary, not enforcement, unless they add their own gate.",
+            "source": "https://raw.githubusercontent.com/DeterminateSystems/flake-checker/main/README.md",
+            "covered": "no",
+            "surface": "checks-ci",
+            "priority": "P1"
+          },
+          {
+            "slug": "mainprogram-decision-rule",
+            "why": "meta.mainProgram has a mechanically checkable rule (set only when exactly one executable exists under bin/) with worked positive (ripgrep) and negative (e2fsprogs, polkit_gnome) examples straight from the nixpkgs README.",
+            "source": "https://raw.githubusercontent.com/NixOS/nixpkgs/master/pkgs/README.md",
+            "covered": "no",
+            "surface": "packaging",
+            "priority": "P1"
+          },
+          {
+            "slug": "finalattrs-replaces-rec-self-reference",
+            "why": "nixpkgs's own current idiom for a package needing to reference its own final derivation is finalAttrs.finalPackage inside stdenv.mkDerivation (finalAttrs: {...}), not a self-referential rec — sharper than H1's blanket avoid-rec framing.",
+            "source": "https://raw.githubusercontent.com/NixOS/nixpkgs/master/pkgs/by-name/README.md",
+            "covered": "no",
+            "surface": "lang",
+            "priority": "P1"
+          },
+          {
+            "slug": "darwin-sdk-churn-ongoing",
+            "why": "Darwin SDK breakage (146 reactions) is its own recurring, maintainer-acknowledged, ongoing category driven by Apple's SDK distribution changes, distinct from ordinary hash-mismatch bugs.",
+            "source": "https://github.com/NixOS/nixpkgs/issues/346043",
+            "covered": "no",
+            "surface": "packaging",
+            "priority": "P2"
+          },
+          {
+            "slug": "infinite-recursion-is-module-system-not-rec",
+            "why": "Recent infinite-recursion cases are overwhelmingly module-system/overlay self-reference problems, not plain rec misuse, and nixpkgs is actively adding module-system error contexts specifically because the existing error is not actionable — directly refines H1.",
+            "source": "https://github.com/NixOS/nixpkgs/pull/370967",
+            "covered": "no",
+            "surface": "module-system",
+            "priority": "P0"
+          },
+          {
+            "slug": "flakehub-semver-tag-format",
+            "why": "FlakeHub is the only documented SemVer-resolving flake distribution channel in this corpus, requiring the literal git tag format v+SemVer for tagged releases versus a distinct rolling-release mode — directly tests H4.",
+            "source": "https://docs.determinate.systems/flakehub/concepts/semver/",
+            "covered": "no",
+            "surface": "release-versioning",
+            "priority": "P1"
+          },
+          {
+            "slug": "one-flake-per-versioned-thing",
+            "why": "FlakeHub's explicit publishing guidance is one flake per versioned artifact, not a monolithic flake bundling unrelated versioned things — directly informs the ocx-generated-flake artifact shape.",
+            "source": "https://docs.determinate.systems/flakehub/best-practices/",
+            "covered": "no",
+            "surface": "publishing",
+            "priority": "P1"
+          },
+          {
+            "slug": "packages-system-cross-compilation-critique",
+            "why": "A named, credible contrarian source argues packages.${system} cannot express cross-compilation targets at all — worth verifying directly against nixpkgs's own cross docs rather than accepting either claim on faith.",
+            "source": "https://jade.fyi/blog/flakes-arent-real/",
+            "covered": "no",
+            "surface": "systems",
+            "priority": "P2"
+          },
+          {
+            "slug": "impl-divergence-eval-devshells-checks",
+            "why": "An empirical cross-implementation study found real evaluation-level breakage differences across CppNix, Lix, and an alternative resolver for devShells/packages/checks outputs — a concrete way to falsify H9's severity.",
+            "source": "https://goldstein.lol/posts/great-nix-flake-check/",
+            "covered": "no",
+            "surface": "impls",
+            "priority": "P1"
+          },
+          {
+            "slug": "flake-check-green-not-sufficient",
+            "why": "Neither #4265's IFD-on-foreign-system failure nor the goldstein.lol implementation study support treating a green nix flake check as sufficient evidence a flake is publishable — directly tests H3.",
+            "source": "https://github.com/NixOS/nix/issues/4265",
+            "covered": "no",
+            "surface": "checks-ci",
+            "priority": "P0"
+          },
+          {
+            "slug": "statix-deadnix-dont-catch-review-objections",
+            "why": "statix's 17 confirmed lints (W01-W23) are Nix-language-level only; none check meta.* fields, nativeBuildInputs placement, or versionCheckHook — a real gap between lints-pass and review-ready that a rule must not conflate.",
+            "source": "statix list (toolchain run, confirmed 2026-09-27)",
+            "covered": "no",
+            "surface": "formatter-lint",
+            "priority": "P1"
+          },
+          {
+            "slug": "statix-lint-catalog-exact-ids",
+            "why": "Confirmed exact statix lint IDs and names (W01 bool_comparison through W23 empty_list_concat) via direct toolchain run, needed for any rule that cites specific lint IDs.",
+            "source": "statix list (toolchain run, confirmed 2026-09-27)",
+            "covered": "no",
+            "surface": "formatter-lint",
+            "priority": "P2"
+          },
+          {
+            "slug": "deadnix-lambda-pattern-names-callpackage-trap",
+            "why": "deadnix's default behavior on lambda attrset pattern names would flag callPackage-style unused args unless --no-lambda-pattern-names is passed — a linter default that breaks the exact idiom nixpkgs packaging relies on.",
+            "source": "deadnix --help (toolchain run, confirmed 2026-09-27)",
+            "covered": "no",
+            "surface": "formatter-lint",
+            "priority": "P2"
+          },
+          {
+            "slug": "home-manager-file-management-assumptions",
+            "why": "home-manager's top-reaction issues are almost entirely feature gaps in the file-linking model (copy vs symlink, outOfStoreSymlink), signaling that a downstream module or generated config must never assume home.file targets are safely overwritable.",
+            "source": "https://github.com/nix-community/home-manager/issues/3090",
+            "covered": "partial",
+            "surface": "module-system",
+            "priority": "P3"
+          },
+          {
+            "slug": "unfree-insecure-gate-pure-eval",
+            "why": "Whether config.allowUnfree/permittedInsecurePackages silently blocks flake evaluation in pure/--no-write-lock-file mode is named in the brief's exhaustive list but not yet confirmed with a planted fixture this wave.",
+            "source": "needs grounding/dive-wave fixture confirmation",
+            "covered": "no",
+            "surface": "flake-schema",
+            "priority": "P2"
+          },
+          {
+            "slug": "non-derivation-packages-output-detection",
+            "why": "Whether nix flake show/check catch a non-derivation value under packages.<system>.foo before a consumer's nix build fails at runtime is H3's core claim and remains unconfirmed by fixture this wave.",
+            "source": "needs grounding/dive-wave fixture confirmation",
+            "covered": "no",
+            "surface": "checks-ci",
+            "priority": "P1"
+          },
+          {
+            "slug": "generated-flake-digest-deletion-rewrite-risk",
+            "why": "A generated flake pinning a content digest from an external index (the ocx case) faces the same integrity-risk class documented for GitHub's short-hash 404/rewrite precedent, plus ghcr.io's own token-gated blob trust boundary distinct from fetchFromGitHub.",
+            "source": "https://raw.githubusercontent.com/NixOS/nixpkgs/master/pkgs/README.md",
+            "covered": "no",
+            "surface": "generated-flakes",
+            "priority": "P1"
+          },
+          {
+            "slug": "follows-correctness-bugs-pre-trust-check",
+            "why": "follows has multiple still-open correctness bugs (segfault on self-follow, transitive-follows not resolved absolute, follows-removal ignoring the dependency's own lock) that argue for a minimal nix flake metadata check before trusting a lock file's follows graph.",
+            "source": "https://github.com/NixOS/nix/issues/6036",
+            "covered": "no",
+            "surface": "inputs-lock",
+            "priority": "P1"
+          },
+          {
+            "slug": "nixfmt-stable-vs-transitional-diff",
+            "why": "Whether the now-stable pkgs.nixfmt reformats files identically to the transitional nixfmt-rfc-style, or produces a breaking diff on real code, is untested this wave and directly checkable with the available toolchain.",
+            "source": "needs grounding/dive-wave fixture confirmation",
+            "covered": "no",
+            "surface": "formatter-lint",
+            "priority": "P2"
+          },
+          {
+            "slug": "updatescript-fit-for-ocx-generated-flake",
+            "why": "Whether the simple nix-update-script {} form suffices for the ocx-index-generated-flake use case, or the attrset command/attrPath form is required for a non-standard version source, directly informs the nix-generated-flakes artifact's update mechanism.",
+            "source": "https://raw.githubusercontent.com/NixOS/nixpkgs/master/pkgs/README.md",
+            "covered": "no",
+            "surface": "generated-flakes",
+            "priority": "P1"
+          }
+        ],
+        "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-topic-map/failure.md",
+        "primary_sources_count": 18,
+        "recent_shifts": [
+          "Lazy trees (#6530, 372 reactions) redefines how flake inputs are copied to the store; shipped in Determinate Nix 3.5, explicitly not adopted by Lix, not yet in upstream CppNix 2.35.2 — invalidates any blanket 'flakes always fully copy inputs to the store' claim.",
+          "nixfmt reached stable RFC-166 status in the 25.11/26.11 era: pkgs.nixfmt is now what pkgs.nixfmt-rfc-style used to name; nixfmt-classic is the pre-RFC-166 tool; nixpkgs-fmt (a different, nix-community tool) was archived 2024-07-24 and is now purely historical.",
+          "CVE-2026-39860 (critical, published 2026-04-07) is a bypass of the 2024 fix for CVE-2024-27297 — a sandbox-escape class of bug believed closed for two years was not; patched again in 2.34.5/2.33.4/2.32.7/2.31.4/2.30.4/2.29.3/2.28.6.",
+          "nixpkgs is actively adding module-system error contexts specifically to diagnose infinite-recursion in imports/module arguments (#370967), an implicit admission the plain 'infinite recursion encountered' message was insufficient.",
+          "finalAttrs.finalPackage is now nixpkgs's own documented canonical idiom for self-referential derivations (pkgs/by-name/README.md's worked example), sharpening H1's 'agents avoid rec' finding into a specific recommended replacement rather than just an avoidance."
+        ],
+        "sources_count": 23
+      },
+      "shifts": {
+        "candidates": [
+          {
+            "slug": "flakes-still-experimental-rfc136",
+            "why": "Nix 2.35's own experimental-features page still lists flakes as experimental; RFC 136 stabilises the non-flake CLI first and defers flake stabilisation behind another future RFC — no date exists. Directly falsifies any 'flakes are stable now' claim.",
+            "source": "https://github.com/NixOS/rfcs/blob/master/rfcs/0136-stabilize-incrementally.md",
+            "covered": "no",
+            "surface": "flake-schema",
+            "priority": "P0"
+          },
+          {
+            "slug": "flake-update-replaces-lock-update-input",
+            "why": "nix flake lock --update-input <name> was replaced by nix flake update [<name>...] in Nix 2.19 (2023-11-17); nix flake lock became add-only. Classic stale-training-data command agents still emit.",
+            "source": "https://nix.dev/manual/nix/2.19/release-notes/rl-2.19",
+            "covered": "no",
+            "surface": "inputs-lock",
+            "priority": "P1"
+          },
+          {
+            "slug": "profile-install-renamed-add",
+            "why": "nix profile install was renamed nix profile add in Nix 2.30 (2025-07-07); old name kept only as alias.",
+            "source": "https://nix.dev/manual/nix/2.30/release-notes/rl-2.30",
+            "covered": "no",
+            "surface": "consumer-ux",
+            "priority": "P2"
+          },
+          {
+            "slug": "relative-path-inputs-lock-break",
+            "why": "Nix 2.26 (2025-01-22) added relative path: flake inputs, which is a lock-file-format-breaking change — pre-2.26 Nix cannot read a lock containing such a lock.",
+            "source": "https://nix.dev/manual/nix/2.26/release-notes/rl-2.26",
+            "covered": "no",
+            "surface": "inputs-lock",
+            "priority": "P1"
+          },
+          {
+            "slug": "self-submodules-lfs-declared",
+            "why": "Nix 2.27 (2025-03-03) lets a flake declare inputs.self.submodules/inputs.self.lfs itself instead of forcing every consumer to pass submodules=true by hand — a real consumer-UX win most existing flakes don't use yet.",
+            "source": "https://nix.dev/manual/nix/2.27/release-notes/rl-2.27",
+            "covered": "no",
+            "surface": "consumer-ux",
+            "priority": "P1"
+          },
+          {
+            "slug": "flake-check-skips-substitutable",
+            "why": "Nix 2.32 (2025-10-06) made nix flake check skip derivations that can be substituted instead of always building them, changing what a green CI check actually verifies.",
+            "source": "https://nix.dev/manual/nix/2.32/release-notes/rl-2.32",
+            "covered": "no",
+            "surface": "checks-ci",
+            "priority": "P1"
+          },
+          {
+            "slug": "determinate-upstreamed-features-233",
+            "why": "Nix 2.33 (2025-12-09) explicitly labels nix registry resolve, full-input-type nix flake clone, and multithreaded git revCount as 'upstreamed from Determinate Nix' — shows Determinate Nix routinely runs ahead of CppNix.",
+            "source": "https://nix.dev/manual/nix/2.33/release-notes/rl-2.33",
+            "covered": "no",
+            "surface": "impls",
+            "priority": "P2"
+          },
+          {
+            "slug": "lazy-store-copies-235",
+            "why": "Nix 2.35 (2026-06-22) makes flake/tarball source copies to the store lazy (~2x faster nixpkgs fetch/unpack), converging on the effect Determinate Nix's 'lazy trees' (3.6.7) delivered over a year earlier.",
+            "source": "https://nix.dev/manual/nix/2.35/release-notes/rl-2.35",
+            "covered": "no",
+            "surface": "fetchers",
+            "priority": "P1"
+          },
+          {
+            "slug": "nix-installer-action-installs-determinate",
+            "why": "DeterminateSystems/nix-installer-action's own README says it installs Determinate Nix by default, not upstream CppNix — surprising given the generic action name; a CI pipeline expecting vanilla Nix is silently on a fork.",
+            "source": "https://github.com/DeterminateSystems/nix-installer-action",
+            "covered": "no",
+            "surface": "impls",
+            "priority": "P1"
+          },
+          {
+            "slug": "determinate-vs-installer-action-choice",
+            "why": "determinate-nix-action is version-pinned to exact Determinate Nix releases and required for FlakeHub private-flake/cache access, while nix-installer-action always tracks 'most recent' even when the Action itself is pinned — a reproducibility gap a maintainer must know about.",
+            "source": "https://github.com/DeterminateSystems/nix-installer-action",
+            "covered": "no",
+            "surface": "release-versioning",
+            "priority": "P1"
+          },
+          {
+            "slug": "magic-nix-cache-api-break-revival",
+            "why": "GitHub replaced the Actions cache backend with an undocumented Twirp/Protobuf API on 2025-02-01, killing magic-nix-cache's free tier; a community fork revived magic-nix-cache-action (now v15, 2026-09-09) against the new API — pre-2025-02 advice needs re-verification, not blind trust.",
+            "source": "https://github.com/DeterminateSystems/magic-nix-cache-action",
+            "covered": "no",
+            "surface": "cache",
+            "priority": "P1"
+          },
+          {
+            "slug": "flake-utils-maintenance-mode",
+            "why": "flake-utils' last commit is 2024-11-13 and its own tracker carries an open, unresolved 'Potential feature-freeze or deprecation in favor of flake-parts' issue — yet eachDefaultSystem remains the most common idiom in the wild (H1 confirmed), so authoring guidance must actively steer people away, not wait for visible breakage.",
+            "source": "https://github.com/numtide/flake-utils/issues/86",
+            "covered": "no",
+            "surface": "flake-schema",
+            "priority": "P0"
+          },
+          {
+            "slug": "nixfmt-stabilized-2511",
+            "why": "nixfmt reached stable and became pkgs.nixfmt in nixpkgs 25.11 (2025-11), retiring the placeholder pkgs.nixfmt-rfc-style name; the pre-RFC-166 tool survives only as pkgs.nixfmt-classic. Any flake.nix still writing formatter.${system} = pkgs.nixfmt-rfc-style needs updating.",
+            "source": "https://github.com/NixOS/nixpkgs/blob/master/doc/release-notes/rl-2511.section.md",
+            "covered": "no",
+            "surface": "formatter-lint",
+            "priority": "P0"
+          },
+          {
+            "slug": "nixpkgs-fmt-archived-dead",
+            "why": "nix-community/nixpkgs-fmt is archived (confirmed via GitHub API), last commit 2024-07-24 — dead, still referenced in old tutorials, should not be recommended.",
+            "source": "https://github.com/nix-community/nixpkgs-fmt",
+            "covered": "no",
+            "surface": "formatter-lint",
+            "priority": "P1"
+          },
+          {
+            "slug": "nixd-vs-nil-maintenance",
+            "why": "nix-community/nixd's last commit (2026-09-21) is materially fresher than oxalica/nil's (2026-07-26) — both alive, but nixd is the more actively maintained language server to default new devShell/editor config to.",
+            "source": "https://github.com/nix-community/nixd",
+            "covered": "no",
+            "surface": "devshell",
+            "priority": "P2"
+          },
+          {
+            "slug": "statix-deadnix-still-alive",
+            "why": "Both statix (pushed 2026-07-26) and deadnix (last commit 2026-09-05) are actively maintained, contradicting an assumed-abandoned prior — safe to gate CI on either.",
+            "source": "https://github.com/astro/deadnix",
+            "covered": "no",
+            "surface": "formatter-lint",
+            "priority": "P2"
+          },
+          {
+            "slug": "cargo-vendor-default-2505",
+            "why": "rustPlatform.buildRustPackage switched its default to fetchCargoVendor in nixpkgs 25.05, changing every cargoHash even without a version bump; cargoSha256 now hard-errors instead of merely warning.",
+            "source": "https://github.com/NixOS/nixpkgs/blob/master/doc/release-notes/rl-2505.section.md",
+            "covered": "partial",
+            "surface": "packaging",
+            "priority": "P1"
+          },
+          {
+            "slug": "gomodule-cgo-enabled-env",
+            "why": "buildGoModule requires env.CGO_ENABLED instead of direct CGO_ENABLED — warning in nixpkgs 25.05, hard error in 25.11; buildGoPackage was removed outright in 25.05.",
+            "source": "https://github.com/NixOS/nixpkgs/blob/master/doc/release-notes/rl-2511.section.md",
+            "covered": "partial",
+            "surface": "packaging",
+            "priority": "P2"
+          },
+          {
+            "slug": "substituteinplace-replace-fail",
+            "why": "substituteInPlace's --replace is deprecated in favour of --replace-fail/--replace-warn/--replace-quiet (tracking issue open since 2024-11-14, ~7000 in-tree holdouts) but NOT yet removed — a 'watch this' shift, not a completed one.",
+            "source": "https://github.com/NixOS/nixpkgs/issues/356002",
+            "covered": "no",
+            "surface": "packaging",
+            "priority": "P2"
+          },
+          {
+            "slug": "python-updatescript-nix-update-default",
+            "why": "buildPythonPackage/buildPythonApplication switched their default updateScript to nix-update-script in nixpkgs 25.11 — an explicit nixpkgs statement that nix-update is the maintained update path, relevant to a flake's own release automation.",
+            "source": "https://github.com/NixOS/nixpkgs/blob/master/doc/release-notes/rl-2511.section.md",
+            "covered": "partial",
+            "surface": "release-versioning",
+            "priority": "P2"
+          },
+          {
+            "slug": "requirefile-unfree-default-2611",
+            "why": "requireFile-derived packages default meta.license = unfree starting nixpkgs 26.11-unstable; a flake evaluating such packages now needs explicit unfree allowance where it previously didn't.",
+            "source": "https://github.com/NixOS/nixpkgs/blob/master/doc/release-notes/rl-2611.section.md",
+            "covered": "no",
+            "surface": "packaging",
+            "priority": "P2"
+          },
+          {
+            "slug": "darwin-sonoma-minimum-x86-64-drop",
+            "why": "nixpkgs 25.11 raises the macOS minimum to Sonoma 14.0 and explicitly telegraphs an x86_64-darwin drop by 26.11 given Apple ending Intel-Mac OS updates — a systems-targeting decision a flake must make now.",
+            "source": "https://github.com/NixOS/nixpkgs/blob/master/doc/release-notes/rl-2511.section.md",
+            "covered": "no",
+            "surface": "systems",
+            "priority": "P2"
+          },
+          {
+            "slug": "lix-language-strictness-divergence",
+            "why": "Lix 2.95 (2026-03-25) forbids rec-set merges/dynamic attrs, requires a leading zero on floats, and removes builtins.fetchClosure entirely — CppNix still accepts all of these, so code only ever tested on CppNix can silently fail on Lix.",
+            "source": "https://lix.systems/blog/2026-03-25-lix-2.95-release/",
+            "covered": "no",
+            "surface": "lang",
+            "priority": "P1"
+          },
+          {
+            "slug": "lix-flakes-plugin-extraction",
+            "why": "Lix has begun extracting Flakes out of its core into a plugin as of 2.95 — an in-progress structural divergence from CppNix's monolithic flakes implementation.",
+            "source": "https://lix.systems/blog/2026-03-25-lix-2.95-release/",
+            "covered": "no",
+            "surface": "impls",
+            "priority": "P3"
+          },
+          {
+            "slug": "determinate-flake-schemas-portability",
+            "why": "Determinate Nix's flake-schemas (3.17.0, a custom `schemas` output improving nix flake show) is Determinate-only and not confirmed to degrade gracefully on plain CppNix, which doesn't understand the attribute.",
+            "source": "https://determinate.systems/blog/introducing-flake-schemas/",
+            "covered": "no",
+            "surface": "flake-schema",
+            "priority": "P2"
+          },
+          {
+            "slug": "duplicate-nixpkgs-detection-command",
+            "why": "H2's core UX gap: community discussion confirms duplicate nixpkgs instances in flake.lock are a real, reported pain point, but no canonical detection command (vs. reading flake.lock by eye) is established — a rule needs a verification command here.",
+            "source": "https://discourse.nixos.org/t/flake-lock-duplicates-and-transitive-dependencies-why/71174",
+            "covered": "no",
+            "surface": "inputs-lock",
+            "priority": "P0"
+          },
+          {
+            "slug": "follows-edit-stale-lock",
+            "why": "Adding a follows edit to flake.nix without re-running nix flake update leaves flake.lock showing the old input as a separate node — a confirmed, reported failure mode with no widely known one-line fix.",
+            "source": "https://discourse.nixos.org/t/flake-lock-duplicates-and-transitive-dependencies-why/71174",
+            "covered": "no",
+            "surface": "inputs-lock",
+            "priority": "P1"
+          },
+          {
+            "slug": "gha-cache-break-blast-radius",
+            "why": "GitHub's Feb-2025 Actions-cache API replacement broke magic-nix-cache specifically; whether other Nix caching actions (e.g. cache-nix-action) share the same backend risk is unconfirmed in this wave and needs checking before recommending any GHA-cache-backed action.",
+            "source": "https://github.com/DeterminateSystems/magic-nix-cache-action",
+            "covered": "no",
+            "surface": "cache",
+            "priority": "P2"
+          },
+          {
+            "slug": "flake-check-noop-scope",
+            "why": "Whether nix flake check --no-build actually validates devShells/checks outputs or only packages is a directly testable claim this survey's own toolchain could verify but did not fully — a concrete verification-command gap for a future rule.",
+            "source": "https://nix.dev/manual/nix/2.35/release-notes/rl-2.35",
+            "covered": "no",
+            "surface": "checks-ci",
+            "priority": "P1"
+          },
+          {
+            "slug": "nixconfig-trust-trap",
+            "why": "H8: nixConfig in flake.nix (extra substituters/trusted keys) is ignored for untrusted users and prompts on accept-flake-config, a security/UX trap flagged but not independently re-verified this wave — high-value for the flake-authoring corpus.",
+            "source": "nix-frame.md H8 (orchestrator hypothesis, unverified this wave)",
+            "covered": "partial",
+            "surface": "security",
+            "priority": "P0"
+          },
+          {
+            "slug": "flake-lock-compat-promise",
+            "why": "Given flakes remain experimental (RFC 136) and lock-format has already broken once mid-window (2.26 relative paths), what compatibility promise a published flake can make about flake.lock schema stability across a Nix upgrade is an open, unanswered design question a release skill needs.",
+            "source": "https://github.com/NixOS/rfcs/blob/master/rfcs/0136-stabilize-incrementally.md",
+            "covered": "no",
+            "surface": "release-versioning",
+            "priority": "P0"
+          },
+          {
+            "slug": "nixexprs-xz-discontinuation",
+            "why": "The nixexprs.tar.xz tarball is scheduled for discontinuation after nixpkgs 27.05 (2027-12-31) in favour of .tar.zst — anyone pulling nixpkgs via channels.nixos.org needs to plan the swap.",
+            "source": "https://github.com/NixOS/nixpkgs/blob/master/doc/release-notes/rl-2611.section.md",
+            "covered": "no",
+            "surface": "fetchers",
+            "priority": "P3"
+          },
+          {
+            "slug": "cachix-install-nix-action-vs-determinate",
+            "why": "cachix/install-nix-action (latest v31.11.1, 2026-08-13) installs upstream CppNix while both DeterminateSystems actions install Determinate Nix — a real fork in what implementation a CI runner ends up on depending purely on which action a workflow picked.",
+            "source": "https://github.com/DeterminateSystems/nix-installer-action",
+            "covered": "no",
+            "surface": "ci",
+            "priority": "P1"
+          },
+          {
+            "slug": "revcount-lastmodified-versioning-collision",
+            "why": "The git-fetcher's 2.33 libgit2/threading rewrite and 2.35's lazy source copies both touch when revCount/lastModified metadata becomes available during evaluation — directly relevant to H4's ad hoc self.shortRev-based flake versioning, and untested this wave.",
+            "source": "https://nix.dev/manual/nix/2.33/release-notes/rl-2.33",
+            "covered": "no",
+            "surface": "release-versioning",
+            "priority": "P1"
+          }
+        ],
+        "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-topic-map/shifts.md",
+        "primary_sources_count": 21,
+        "sources_count": 23,
+        "recent_shifts": [
+          "nix flake update replaces nix flake lock --update-input (Nix 2.19, 2023-11-17) — outside the 18-24mo window but still live muscle-memory trap",
+          "nix profile install renamed to nix profile add (Nix 2.30, 2025-07-07)",
+          "Relative path: flake inputs added, breaking flake.lock backward compat for readers <2.26 (Nix 2.26, 2025-01-22)",
+          "inputs.self.submodules / inputs.self.lfs let a flake self-declare instead of pushing the burden onto consumers (Nix 2.27, 2025-03-03)",
+          "nix flake check now skips substitutable derivations instead of always building them, changing what a green CI check proves (Nix 2.32, 2025-10-06)",
+          "Lazy store copies for flake/tarball sources land in CppNix (Nix 2.35, 2026-06-22), converging on Determinate Nix's 'lazy trees' (3.6.7) over a year later",
+          "nixfmt reaches stable, becomes pkgs.nixfmt, retiring pkgs.nixfmt-rfc-style (nixpkgs 25.11); nixpkgs-fmt is archived/dead",
+          "rustPlatform.buildRustPackage defaults to fetchCargoVendor, regenerating every cargoHash; cargoSha256 support fully removed, hard error not warning (nixpkgs 25.05)",
+          "buildGoModule requires env.CGO_ENABLED (hard error in 25.11, warn in 25.05); buildGoPackage removed (25.05)",
+          "substituteInPlace --replace deprecated in favor of --replace-fail/-warn/-quiet, but not yet removed (tracking since 2024-11-14)",
+          "GitHub Actions cache API replaced 2025-02-01, killing magic-nix-cache's free tier; community-revived magic-nix-cache-action now active again through v15 (2026-09-09)",
+          "DeterminateSystems/nix-installer-action installs Determinate Nix by default, not upstream CppNix, unlike cachix/install-nix-action",
+          "flake-utils stalled since 2024-11-13 with an open, unresolved deprecation-in-favor-of-flake-parts issue",
+          "macOS minimum raised to Sonoma 14.0 (nixpkgs 25.11); x86_64-darwin drop explicitly planned by 26.11",
+          "Lix 2.95 (2026-03-25) forbids several Nix-language constructs CppNix still accepts (rec-set merges/dynamic attrs, floats without leading zero) and removes builtins.fetchClosure",
+          "Determinate Nix upstreamed nix registry resolve, full-input-type nix flake clone, and multithreaded revCount into CppNix 2.33 (2025-12-09), evidencing an active but partial upstreaming pipeline"
+        ]
+      },
+      "generated-flakes": {
+        "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-topic-map/generated-flakes.md",
+        "sources_count": 22,
+        "primary_sources_count": 18,
+        "recent_shifts": [
+          "FlakeHub rolling-vs-tagged semver visibility bug, documented July 2026 (package mist, imTHAI/nix-packages): once a real tag ≥0.2.0 exists, every subsequent 0.1.<commit-count> rolling release becomes permanently invisible to unpinned latest consumers — invalidates 'rolling releases are simpler, just use them'.",
+          "nixpkgs 26.11 dropped x86_64-darwin support (per its own release notes, cited in nix-vscode-extensions' README) — any generator advice for 'all Darwin systems' written pre-26.11 now over-promises.",
+          "Terraform's BSL relicense forced nixpkgs-terraform to flip its default allowUnfree starting at its own v4.0.0, threaded per underlying-Terraform-version rather than repo-wide — a generator's unfree/license posture is not a one-time decision.",
+          "rust-overlay tightened its own retention window to 'not earlier than {current_year-1}-01-01' to control repo size — invalidates 'never delete, keep every historical entry forever' as a universal policy at zig-overlay's scale.",
+          "CI installer actions across the corpus are uniformly pinned (cachix/install-nix-action@v31, nixbuild/nix-quick-install-action@v34) with explicit nix_version pins — none of the eight generators rely on an unpinned 'latest Nix' install action, consistent with H9.",
+          "flake-checker 0.2.15 (confirmed by running it against the pinned toolchain) exposes --check-outdated/--check-owner/--check-supported specifically to lint a flake's own nixpkgs-input drift — a fairly recent (post-2024) practice none of the eight exemplars' own CI actually runs yet."
+        ],
+        "candidates": [
+          {
+            "slug": "data-model-shape-one-big-json",
+            "why": "Determines every other design decision downstream; all 8 exemplars converge on \"one committed JSON + small reader\" but at wildly different sizes (zig-overlay's sources.json vs rust-overlay's compressed tables).",
+            "source": "https://github.com/mitchellh/zig-overlay/blob/main/sources.json",
+            "covered": "no",
+            "surface": "generated-flakes",
+            "priority": "P0"
+          },
+          {
+            "slug": "declarative-passthru-updater-schema-kind-enum",
+            "why": "Directly the closest existing template to \"one shape drives ocx's whole index.\"",
+            "source": "https://github.com/numtide/llm-agents.nix/blob/main/lib/mk-updater.nix",
+            "covered": "no",
+            "surface": "generated-flakes / ocx",
+            "priority": "P0"
+          },
+          {
+            "slug": "nix-update-flake-require-inline-version",
+            "why": "Sets the ceiling on whether the community-standard updater tool is even usable for an ocx-shaped generator.",
+            "source": "https://github.com/Mic92/nix-update/blob/main/README.md",
+            "covered": "no",
+            "surface": "generated-flakes / fetchers",
+            "priority": "P0"
+          },
+          {
+            "slug": "generator-map-upstream-index-platform-vocab",
+            "why": "A silent mis-mapping produces a package that evaluates but is unreachable on its real system, or worse, wrong-arch.",
+            "source": "https://github.com/mitchellh/zig-overlay/blob/main/flake.nix",
+            "covered": "no",
+            "surface": "generated-flakes / systems",
+            "priority": "P0"
+          },
+          {
+            "slug": "fixed-output-derivation-url-addressed-binary",
+            "why": "This is the base primitive every binary fetch in the corpus builds on.",
+            "source": "https://github.com/NixOS/nixpkgs/blob/master/lib/fetchers.nix",
+            "covered": "no",
+            "surface": "fetchers / prebuilt-binaries",
+            "priority": "P0"
+          },
+          {
+            "slug": "dockertools-pullimage-skopeo-fetch",
+            "why": "Directly tests H6; the only real OCI-fetch template in the whole corpus.",
+            "source": "https://github.com/NixOS/nixpkgs/blob/master/pkgs/build-support/docker/default.nix",
+            "covered": "no",
+            "surface": "ocx / fetchers",
+            "priority": "P0"
+          },
+          {
+            "slug": "minimal-way-pull-one-oci-blob-layer",
+            "why": "ocx packages are single binaries, not container images; pullImage assumes you want a whole image.",
+            "source": "https://github.com/NixOS/nixpkgs/blob/master/pkgs/build-support/docker/default.nix",
+            "covered": "no",
+            "surface": "ocx / fetchers",
+            "priority": "P0"
+          },
+          {
+            "slug": "fetchurl-need-registry-v2-bearer-auth",
+            "why": "Determines whether ocx's generator needs its own auth code at all.",
+            "source": "https://github.com/NixOS/nixpkgs/blob/master/pkgs/build-support/docker/default.nix",
+            "covered": "no",
+            "surface": "ocx / fetchers / security",
+            "priority": "P0"
+          },
+          {
+            "slug": "autopatchelfhook-runtimedependencies-ignoremissingdeps",
+            "why": "The default Linux prebuilt-binary fixup; ocx's Linux packages will need this or its equivalent.",
+            "source": "https://github.com/NixOS/nixpkgs/blob/master/doc/hooks/autopatchelf.section.md",
+            "covered": "no",
+            "surface": "prebuilt-binaries",
+            "priority": "P0"
+          },
+          {
+            "slug": "macos-prebuilt-binary-codesign-installnametool",
+            "why": "Directly tests H7; only source in the corpus with a full macOS binary-patching pipeline.",
+            "source": "https://github.com/mitchellh/zig-overlay/blob/main/default.nix",
+            "covered": "no",
+            "surface": "prebuilt-binaries",
+            "priority": "P0"
+          },
+          {
+            "slug": "oci-blob-signature-verification-vs-digest-only",
+            "why": "The corpus's only signature-verifying updater (zig-overlay) sets a bar ocx should measure itself against.",
+            "source": "https://github.com/mitchellh/zig-overlay/blob/main/update",
+            "covered": "no",
+            "surface": "security / ocx",
+            "priority": "P0"
+          },
+          {
+            "slug": "upstream-artifact-deleted-or-re-tagged",
+            "why": "Directly the \"failure handling when upstream deletes or re-tags\" question the brief asks for; two different real answers exist in this corpus.",
+            "source": "https://github.com/mitchellh/zig-overlay/blob/main/README.md",
+            "covered": "no",
+            "surface": "generated-flakes / fetchers",
+            "priority": "P0"
+          },
+          {
+            "slug": "override-nixpkgs-input-breaks-cache",
+            "why": "Directly tests/contradicts H2; nixpkgs-python is an explicit counter-example in this corpus.",
+            "source": "https://github.com/cachix/nixpkgs-python/blob/main/README.md",
+            "covered": "partial",
+            "surface": "consumer-ux / inputs-lock / cache",
+            "priority": "P0"
+          },
+          {
+            "slug": "flakehub-rolling-vs-tagged-semver-choice",
+            "why": "Directly tests H4; a dated, reproduced real incident (July 2026) exists.",
+            "source": "https://docs.determinate.systems/flakehub/concepts/semver/",
+            "covered": "no",
+            "surface": "release-versioning / publishing",
+            "priority": "P0"
+          },
+          {
+            "slug": "update-script-handle-renamed-deleted-entries",
+            "why": "The direct, general form of the \"upstream churn\" question, beyond the OCI-specific framing.",
+            "source": "https://github.com/nix-community/nix-vscode-extensions/blob/main/nix/mkExtension.nix",
+            "covered": "no",
+            "surface": "generated-flakes / fetchers",
+            "priority": "P0"
+          },
+          {
+            "slug": "flake-check-no-build-coverage-gaps",
+            "why": "Sets the correct expectation for what a generator's CI gate proves vs doesn't.",
+            "source": "https://github.com/nix-community/nix-index-database/blob/main/.github/workflows/update.yml",
+            "covered": "partial",
+            "surface": "checks-ci / flake-schema",
+            "priority": "P0"
+          },
+          {
+            "slug": "meta-sourceprovenance-binarynativecode-semantics",
+            "why": "Tests a narrower form of H7/H8; a common point of confusion in prebuilt-binary packaging.",
+            "source": "https://github.com/NixOS/nixpkgs/blob/master/doc/stdenv/meta.chapter.md",
+            "covered": "no",
+            "surface": "prebuilt-binaries / security",
+            "priority": "P1"
+          },
+          {
+            "slug": "fetchfromgithub-tag-vs-rev-pinning",
+            "why": "A specific, mechanical, CI-checkable bug source that's easy to get wrong at scale.",
+            "source": "https://github.com/numtide/llm-agents.nix/blob/main/rules/prefer-tag-over-rev.yml",
+            "covered": "no",
+            "surface": "fetchers / checks-ci",
+            "priority": "P1"
+          },
+          {
+            "slug": "no-branch-name-pins-for-rev-ref",
+            "why": "Same family as tag-vs-rev; branch-name pins are a classic silent-break source.",
+            "source": "https://github.com/numtide/llm-agents.nix/blob/main/rules/no-unpinned-rev.yml",
+            "covered": "no",
+            "surface": "fetchers / checks-ci",
+            "priority": "P1"
+          },
+          {
+            "slug": "legacy-sha256-vs-sri-hash-attribute",
+            "why": "Cheap to get right, easy to regress via copy-pasted old examples.",
+            "source": "https://github.com/numtide/llm-agents.nix/blob/main/rules/no-legacy-sha256.yml",
+            "covered": "no",
+            "surface": "fetchers / lang",
+            "priority": "P2"
+          },
+          {
+            "slug": "autopatchelfhook-vs-custom-in-repo-hook",
+            "why": "Contested — a minority project choice an ocx generator shouldn't copy uncritically.",
+            "source": "https://github.com/numtide/llm-agents.nix/blob/main/rules/use-formatelf.yml",
+            "covered": "no",
+            "surface": "prebuilt-binaries / generated-flakes",
+            "priority": "P1"
+          },
+          {
+            "slug": "per-platform-hash-vs-shared-hash",
+            "why": "A common bootstrapping mistake once a generator moves from single-platform to multi-platform artifacts.",
+            "source": "https://github.com/mitchellh/zig-overlay/blob/main/sources.json",
+            "covered": "no",
+            "surface": "fetchers / generated-flakes",
+            "priority": "P1"
+          },
+          {
+            "slug": "prune-history-vs-never-delete",
+            "why": "Direct, dated, real-world tradeoff already made two different ways in this corpus.",
+            "source": "https://github.com/oxalica/rust-overlay/blob/master/README.md",
+            "covered": "no",
+            "surface": "generated-flakes / release-versioning",
+            "priority": "P1"
+          },
+          {
+            "slug": "github-app-token-vs-default-token",
+            "why": "Three of eight exemplars deliberately add this; two don't — a real tradeoff, not universal practice.",
+            "source": "https://github.com/cachix/nixpkgs-python/blob/main/.github/workflows/update.yml",
+            "covered": "no",
+            "surface": "publishing / security / checks-ci",
+            "priority": "P1"
+          },
+          {
+            "slug": "reviewed-pr-vs-direct-bot-commit",
+            "why": "nixpkgs-terraform (review) vs zig-overlay/fenix (direct push) make opposite choices for defensible reasons.",
+            "source": "https://github.com/stackbuilders/nixpkgs-terraform/blob/main/.github/workflows/update.yml",
+            "covered": "no",
+            "surface": "publishing / checks-ci",
+            "priority": "P1"
+          },
+          {
+            "slug": "ci-matrix-override-nixpkgs-input",
+            "why": "Cheap insurance against the most common generated-flake regression class.",
+            "source": "https://github.com/nix-community/fenix/blob/main/.github/workflows/ci.yml",
+            "covered": "no",
+            "surface": "checks-ci / generated-flakes",
+            "priority": "P1"
+          },
+          {
+            "slug": "does-generator-need-own-binary-cache",
+            "why": "Cache setup has real cost (secrets, storage, egress); worth knowing when it's actually load-bearing.",
+            "source": "https://github.com/cachix/nixpkgs-python/blob/main/README.md",
+            "covered": "no",
+            "surface": "cache / consumer-ux",
+            "priority": "P1"
+          },
+          {
+            "slug": "nixconfig-substituters-in-flake-nix",
+            "why": "Directly tests H8; contested in this corpus.",
+            "source": "https://github.com/stackbuilders/nixpkgs-terraform/blob/main/flake.nix",
+            "covered": "partial",
+            "surface": "security / consumer-ux / flake-schema",
+            "priority": "P1"
+          },
+          {
+            "slug": "licensing-change-conditional-allowunfree",
+            "why": "A real, dated precedent for a decision an ocx generator will eventually face for some package.",
+            "source": "https://github.com/stackbuilders/nixpkgs-terraform/blob/main/lib/default.nix",
+            "covered": "no",
+            "surface": "packaging / consumer-ux / security",
+            "priority": "P1"
+          },
+          {
+            "slug": "flake-compat-shim-for-non-flake-consumers",
+            "why": "Broadens the consumer base for near-zero maintenance cost; a repeated pattern in this corpus.",
+            "source": "https://github.com/cachix/nixpkgs-python/blob/main/default.nix",
+            "covered": "no",
+            "surface": "generated-flakes / consumer-ux / inputs-lock",
+            "priority": "P1"
+          },
+          {
+            "slug": "crawler-rate-limiting-against-upstream-tos",
+            "why": "Any future upstream-crawling generator inherits this obligation.",
+            "source": "https://github.com/nix-community/nix-vscode-extensions/blob/main/README.md",
+            "covered": "no",
+            "surface": "generated-flakes / security",
+            "priority": "P1"
+          },
+          {
+            "slug": "github-release-blob-hash-via-prefetch-file",
+            "why": "Directly useful if ocx ever mirrors via GitHub Releases instead of (or alongside) OCI.",
+            "source": "https://github.com/nix-community/nix-index-database/blob/main/.github/workflows/update.yml",
+            "covered": "no",
+            "surface": "generated-flakes / release-versioning",
+            "priority": "P1"
+          },
+          {
+            "slug": "r-ryantm-update-discovery-outside-nixpkgs",
+            "why": "Names exactly what \"living outside nixpkgs\" costs a generator in free tooling.",
+            "source": "https://wiki.nixos.org/wiki/Nixpkgs/Automatic_Updates",
+            "covered": "no",
+            "surface": "ocx / generated-flakes / release-versioning",
+            "priority": "P1"
+          },
+          {
+            "slug": "version-range-alias-resolution",
+            "why": "A recurring consumer-UX feature none of the generic pinning tools provide out of the box.",
+            "source": "https://github.com/stackbuilders/nixpkgs-terraform/blob/main/README.md",
+            "covered": "no",
+            "surface": "generated-flakes / consumer-ux",
+            "priority": "P1"
+          },
+          {
+            "slug": "quoted-numeric-attribute-name-ux-papercut",
+            "why": "A first-run UX papercut every one of these version-numbered generators inflicts on new users.",
+            "source": "https://github.com/stackbuilders/nixpkgs-terraform/blob/main/README.md",
+            "covered": "no",
+            "surface": "consumer-ux / lang",
+            "priority": "P1"
+          },
+          {
+            "slug": "pullimage-insecure-policy-vs-hash-pinning",
+            "why": "Security-relevant default worth verifying rather than assuming.",
+            "source": "https://github.com/NixOS/nixpkgs/blob/master/pkgs/build-support/docker/default.nix",
+            "covered": "no",
+            "surface": "security / ocx",
+            "priority": "P1"
+          },
+          {
+            "slug": "nixhub-flox-catalogs-covered-elsewhere",
+            "why": "Prevents the program from spending future waves re-deriving an already-settled scoping call.",
+            "source": "https://www.jetify.com/blog/introducing-nixhub",
+            "covered": "yes",
+            "surface": "ocx / generated-flakes",
+            "priority": "P1"
+          },
+          {
+            "slug": "nix2container-snapshotter-covered-elsewhere",
+            "why": "Both tools sound OCI-relevant by name alone but solve the reverse direction.",
+            "source": "https://github.com/nlewo/nix2container/blob/master/README.md",
+            "covered": "yes",
+            "surface": "ocx",
+            "priority": "P1"
+          },
+          {
+            "slug": "lock-update-ordering-vs-generated-data-commit",
+            "why": "A subtle ordering bug that only shows up under concurrent or retried CI runs.",
+            "source": "https://github.com/nix-community/fenix/blob/main/.github/workflows/update.yml",
+            "covered": "no",
+            "surface": "generated-flakes / inputs-lock",
+            "priority": "P2"
+          },
+          {
+            "slug": "unsafediscardreferences-min-nix-version",
+            "why": "A narrow but concrete minimum-Nix-version requirement with a stated technical reason.",
+            "source": "https://github.com/nix-community/nix-index-database/blob/main/README.md",
+            "covered": "no",
+            "surface": "generated-flakes / impls",
+            "priority": "P2"
+          },
+          {
+            "slug": "passthru-merge-coupling-nixpkgs-internals",
+            "why": "A real coupling-to-nixpkgs-internals risk worth flagging even if not immediately actionable for ocx.",
+            "source": "https://github.com/mitchellh/zig-overlay/blob/main/default.nix",
+            "covered": "no",
+            "surface": "generated-flakes / lang",
+            "priority": "P2"
+          },
+          {
+            "slug": "small-vs-full-build-variant-split",
+            "why": "A concrete, already-proven consumer-UX pattern worth considering for a large index.",
+            "source": "https://github.com/nix-community/nix-index-database/blob/main/README.md",
+            "covered": "no",
+            "surface": "generated-flakes / consumer-ux",
+            "priority": "P2"
+          },
+          {
+            "slug": "flake-checker-gate-on-own-nixpkgs-pin",
+            "why": "Confirmed via running flake-checker --help against the pinned toolchain; a cheap, off-the-shelf gate.",
+            "source": "measured: nix-tools/run.sh flake-checker --help (flake-checker 0.2.15)",
+            "covered": "no",
+            "surface": "checks-ci / generated-flakes",
+            "priority": "P2"
+          },
+          {
+            "slug": "formatter-lint-scoping-generated-files",
+            "why": "Generated .nix/JSON at scale needs deliberate lint-scoping, not default coverage.",
+            "source": "https://github.com/numtide/llm-agents.nix/blob/main/scripts/treefmt-nu-check.nu",
+            "covered": "no",
+            "surface": "formatter-lint / generated-flakes",
+            "priority": "P2"
+          },
+          {
+            "slug": "three-workflow-relay-vs-single-job",
+            "why": "A real architecture choice with documented rationale but its own race-condition surface.",
+            "source": "https://github.com/nix-community/fenix/blob/main/.github/workflows/update.yml",
+            "covered": "no",
+            "surface": "checks-ci / publishing",
+            "priority": "P2"
+          },
+          {
+            "slug": "per-item-non-fatal-build-failure-reporting",
+            "why": "Generalizes directly to \"one ocx package's blob 404s shouldn't red the whole pipeline.\"",
+            "source": "https://github.com/cachix/nixpkgs-python/blob/main/.github/workflows/build.yml",
+            "covered": "no",
+            "surface": "checks-ci / generated-flakes",
+            "priority": "P2"
+          },
+          {
+            "slug": "build-and-updater-share-one-source-of-truth",
+            "why": "Names an anti-pattern (build path and update path disagreeing about the source of truth) worth codifying directly.",
+            "source": "https://github.com/numtide/llm-agents.nix/blob/main/lib/platform-source.nix",
+            "covered": "no",
+            "surface": "generated-flakes",
+            "priority": "P1"
+          },
+          {
+            "slug": "sandboxed-update-script-execution",
+            "why": "Update scripts run arbitrary fetched code paths; sandboxing bounds the blast radius.",
+            "source": "https://github.com/numtide/llm-agents.nix/blob/main/.github/ci/update.py",
+            "covered": "no",
+            "surface": "security / generated-flakes / checks-ci",
+            "priority": "P1"
+          }
+        ]
+      }
+    }
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Ground"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 2,
+      "title": "Scout"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "ground:ocx-index-and-fleet",
+      "phaseIndex": 1,
+      "phaseTitle": "Ground",
+      "agentId": "a88cadeb743d97da5",
+      "model": "claude-sonnet-5",
+      "state": "done",
+      "startedAt": 1790495455343,
+      "queuedAt": 1790495455284,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agen…",
+      "promptPreview": "Model rationale: sonnet — measuring the ocx index wire contract, the ocx package format and the fleet repos that could ship a flake; counting and probing, no rule decisions\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is the research program that makes an AI-agent fleet expert in Nix: the Nix language, nixpkgs packaging, and above all AUTHORING, MAINTAINING, VERSIONING and …",
+      "promptFramed": true,
+      "lastProgressAt": 1790495970942,
+      "tokens": 194053,
+      "toolCalls": 66,
+      "durationMs": 515573,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-audit/ocx-index-and-fleet.md\",\"headline_numbers\":[\"125 packages / 99 namespaces / 1720 stored image indexes in /home/mherwig/dev/index/p/\",\"Tags per package: min 4, median 13, mean 23.9, max 135 (bazelbuild/bazel)\",\"56.7% of all tags (1692/2985) share their content digest with another tag in the same package\",\"Tag …"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "ground:exemplar-flake-shape",
+      "phaseIndex": 1,
+      "phaseTitle": "Ground",
+      "agentId": "a7dc1b5a87bd77e0f",
+      "model": "claude-sonnet-5",
+      "state": "done",
+      "startedAt": 1790495455347,
+      "queuedAt": 1790495455284,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agen…",
+      "promptPreview": "Model rationale: sonnet — static measurement of flake shape across 37 exemplar flakes and nixpkgs conventions; volume work with commands, no rule decisions\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is the research program that makes an AI-agent fleet expert in Nix: the Nix language, nixpkgs packaging, and above all AUTHORING, MAINTAINING, VERSIONING and PUBLISHING FLAKES…",
+      "promptFramed": true,
+      "lastProgressAt": 1790497061198,
+      "tokens": 259852,
+      "toolCalls": 111,
+      "durationMs": 1604627,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-audit/exemplar-flake-shape.md\",\"headline_numbers\":[\"36/37 exemplar repos have a root flake.nix (typst/typst has none — dropped Nix as of 2026-09-23)\",\"stdenv.lib and cargoSha256: 0 occurrences anywhere in the 37-repo corpus — fully extinct\",\"nixpkgs 26.11 has dropped x86_64-darwin support — confirmed live via `nix …"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 3,
+      "label": "ground:exemplar-tool-runs",
+      "phaseIndex": 1,
+      "phaseTitle": "Ground",
+      "agentId": "a532b8c006a488755",
+      "model": "claude-sonnet-5",
+      "state": "done",
+      "startedAt": 1790495455350,
+      "queuedAt": 1790495455284,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agen…",
+      "promptPreview": "Model rationale: sonnet — running the real Nix toolchain against 37 exemplar flakes at their recorded SHAs; measurement with verbatim output, no rule decisions\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is the research program that makes an AI-agent fleet expert in Nix: the Nix language, nixpkgs packaging, and above all AUTHORING, MAINTAINING, VERSIONING and PUBLISHING FL…",
+      "promptFramed": true,
+      "lastProgressAt": 1790498083451,
+      "tokens": 392212,
+      "toolCalls": 266,
+      "durationMs": 2626886,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-audit/exemplar-tool-runs.md\",\"headline_numbers\":[\"27/36 (75%) exemplars declare no `formatter` output at all\",\"statix 2230 / deadnix 1914 raw findings across 36 repos, but oxalica/nil alone is ~45%/32% of that (its own parser test fixtures, not code) — excluding it: 1111 statix / 1299 deadnix\",\"flake-checker crashe…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 4,
+      "label": "scout:canonical",
+      "phaseIndex": 2,
+      "phaseTitle": "Scout",
+      "agentId": "ad21af57c4f1009b1",
+      "model": "claude-sonnet-5",
+      "state": "done",
+      "startedAt": 1790495455352,
+      "queuedAt": 1790495455284,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agen…",
+      "promptPreview": "Model rationale: sonnet — corpus survey and web reading; discovery, not decisions\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is the research program that makes an AI-agent fleet expert in Nix: the Nix language, nixpkgs packaging, and above all AUTHORING, MAINTAINING, VERSIONING and PUBLISHING FLAKES at a high quality bar with great consumer UX, plus the pitfalls. A second…",
+      "promptFramed": true,
+      "lastProgressAt": 1790496344277,
+      "tokens": 265576,
+      "toolCalls": 71,
+      "durationMs": 888907,
+      "resultPreview": "{\"candidates\":[{\"slug\":\"when-is-a-bare-unquoted-url-in-nix-sourc\",\"why\":\"A silent-parses-differently gotcha; easy grep-based check for a rule.\",\"source\":\"https://nix.dev/guides/best-practices\",\"covered\":\"no\",\"surface\":\"lang\",\"priority\":\"P2\"},{\"slug\":\"what-does-with-pkgs-hide-from-static-ana\",\"why\":\"H1 names `with pkgs;` blocks explicitly as a dated idiom; directly checkable via `statix`.\",\"source\"…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 5,
+      "label": "scout:codified",
+      "phaseIndex": 2,
+      "phaseTitle": "Scout",
+      "agentId": "ac86e6da6b57d2350",
+      "model": "claude-sonnet-5",
+      "state": "done",
+      "startedAt": 1790495455355,
+      "queuedAt": 1790495455284,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agen…",
+      "promptPreview": "Model rationale: sonnet — corpus survey and web reading; discovery, not decisions\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is the research program that makes an AI-agent fleet expert in Nix: the Nix language, nixpkgs packaging, and above all AUTHORING, MAINTAINING, VERSIONING and PUBLISHING FLAKES at a high quality bar with great consumer UX, plus the pitfalls. A second…",
+      "promptFramed": true,
+      "lastProgressAt": 1790496351516,
+      "tokens": 228849,
+      "toolCalls": 90,
+      "durationMs": 894996,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-topic-map/codified.md\",\"sources_count\":21,\"primary_sources_count\":16,\"candidates\":[{\"slug\":\"sema-extra-rec-with\",\"why\":\"grounds H1's 'with pkgs;' / rec dated-idiom claim in a real nixf diagnostic\",\"source\":\"https://raw.githubusercontent.com/nix-community/nixd/main/libnixf/src/Basic/diagnostic.py\",\"covered\":\"no\",\"su…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 6,
+      "label": "scout:practitioner",
+      "phaseIndex": 2,
+      "phaseTitle": "Scout",
+      "agentId": "a3d3a11505a6ea425",
+      "model": "claude-sonnet-5",
+      "state": "done",
+      "startedAt": 1790495455358,
+      "queuedAt": 1790495455285,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agen…",
+      "promptPreview": "Model rationale: sonnet — corpus survey and web reading; discovery, not decisions\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is the research program that makes an AI-agent fleet expert in Nix: the Nix language, nixpkgs packaging, and above all AUTHORING, MAINTAINING, VERSIONING and PUBLISHING FLAKES at a high quality bar with great consumer UX, plus the pitfalls. A second…",
+      "promptFramed": true,
+      "lastProgressAt": 1790496025223,
+      "tokens": 143697,
+      "toolCalls": 66,
+      "durationMs": 568702,
+      "resultPreview": "{\"candidates\":[{\"slug\":\"nixpkgs-follows-instance-dedup\",\"why\":\"Every flake input that instantiates its own nixpkgs costs ~100MiB/~1s eval; the single most-cited flake-UX failure mode in the corpus.\",\"source\":\"https://zimbatm.com/notes/1000-instances-of-nixpkgs\",\"covered\":\"no\",\"surface\":\"inputs-lock\",\"priority\":\"P0\"},{\"slug\":\"follows-safety-revision-age\",\"why\":\"follows silently time-travels a flake…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 7,
+      "label": "scout:failure",
+      "phaseIndex": 2,
+      "phaseTitle": "Scout",
+      "agentId": "a42e3f9fb7ff89bdb",
+      "model": "claude-sonnet-5",
+      "state": "done",
+      "startedAt": 1790495455361,
+      "queuedAt": 1790495455285,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agen…",
+      "promptPreview": "Model rationale: sonnet — corpus survey and web reading; discovery, not decisions\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is the research program that makes an AI-agent fleet expert in Nix: the Nix language, nixpkgs packaging, and above all AUTHORING, MAINTAINING, VERSIONING and PUBLISHING FLAKES at a high quality bar with great consumer UX, plus the pitfalls. A second…",
+      "promptFramed": true,
+      "lastProgressAt": 1790496152683,
+      "tokens": 148602,
+      "toolCalls": 51,
+      "durationMs": 696162,
+      "resultPreview": "{\"candidates\":[{\"slug\":\"untracked-files-invisible-to-flake\",\"why\":\"A flake's self is the git index, not the working tree, so an unstaged new file is silently absent with no error — the #1 confusion source for new flake users.\",\"source\":\"https://github.com/NixOS/nix/issues/7107\",\"covered\":\"no\",\"surface\":\"flake-schema\",\"priority\":\"P0\"},{\"slug\":\"accept-flake-config-root-exec\",\"why\":\"accept-flake-conf…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 8,
+      "label": "scout:shifts",
+      "phaseIndex": 2,
+      "phaseTitle": "Scout",
+      "agentId": "adc2e0e94d50af5de",
+      "model": "claude-sonnet-5",
+      "state": "done",
+      "startedAt": 1790495455364,
+      "queuedAt": 1790495455285,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agen…",
+      "promptPreview": "Model rationale: sonnet — corpus survey and web reading; discovery, not decisions\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is the research program that makes an AI-agent fleet expert in Nix: the Nix language, nixpkgs packaging, and above all AUTHORING, MAINTAINING, VERSIONING and PUBLISHING FLAKES at a high quality bar with great consumer UX, plus the pitfalls. A second…",
+      "promptFramed": true,
+      "lastProgressAt": 1790496181436,
+      "tokens": 175847,
+      "toolCalls": 72,
+      "durationMs": 724914,
+      "resultPreview": "{\"candidates\":[{\"slug\":\"flakes-still-experimental-rfc136\",\"why\":\"Nix 2.35's own experimental-features page still lists flakes as experimental; RFC 136 stabilises the non-flake CLI first and defers flake stabilisation behind another future RFC — no date exists. Directly falsifies any 'flakes are stable now' claim.\",\"source\":\"https://github.com/NixOS/rfcs/blob/master/rfcs/0136-stabilize-incrementall…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 9,
+      "label": "scout:generated-flakes",
+      "phaseIndex": 2,
+      "phaseTitle": "Scout",
+      "agentId": "a2e27f57ad5de3b9f",
+      "model": "claude-sonnet-5",
+      "state": "done",
+      "startedAt": 1790495455366,
+      "queuedAt": 1790495455285,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agen…",
+      "promptPreview": "Model rationale: sonnet — corpus survey and web reading; discovery, not decisions\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is the research program that makes an AI-agent fleet expert in Nix: the Nix language, nixpkgs packaging, and above all AUTHORING, MAINTAINING, VERSIONING and PUBLISHING FLAKES at a high quality bar with great consumer UX, plus the pitfalls. A second…",
+      "promptFramed": true,
+      "lastProgressAt": 1790496242644,
+      "tokens": 220291,
+      "toolCalls": 83,
+      "durationMs": 786122,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-topic-map/generated-flakes.md\",\"sources_count\":22,\"primary_sources_count\":18,\"recent_shifts\":[\"FlakeHub rolling-vs-tagged semver visibility bug, documented July 2026 (package mist, imTHAI/nix-packages): once a real tag ≥0.2.0 exists, every subsequent 0.1.<commit-count> rolling release becomes permanently invisible …"
+    }
+  ],
+  "totalTokens": 2028979,
+  "totalToolCalls": 876
+}

@@ -144,6 +144,19 @@ tasks:
           {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' rules/go-quality.md rules/go-modules.md skills/go-release skills/go-upgrade skills/go-diagnose
         fi
       #
+      # The Nix set follows the Go reasoning: the fleet holds no Nix, so glob
+      # liveness needs an outside tree. It was grounded on an upstream exemplar
+      # corpus (see `.agents/research/nix-frame.md`); nix-community/disko
+      # carries all three globbed names (`*.nix`, `flake.lock`, `statix.toml`).
+      # Set NIX_CONSUMER to a flake checkout to also check glob liveness.
+      - |
+        if [ -n "{{.NIX_CONSUMER}}" ] && [ -f "{{.NIX_CONSUMER}}/flake.nix" ]; then
+          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --root {{.NIX_CONSUMER}} --forbid '/home/mherwig' --forbid '.agents/research' rules/nix-quality.md skills/nix-flake-adopt skills/nix-flake-release skills/nix-diagnose
+        else
+          echo "note: NIX_CONSUMER unset — glob liveness NOT checked for nix; set it to a flake checkout to include it"
+          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' rules/nix-quality.md skills/nix-flake-adopt skills/nix-flake-release skills/nix-diagnose
+        fi
+      #
       # Every checks/*.py script carries its own fixtures and its own
       # --self-test mode. Run all eight here, so a broken check is caught next
       # to the artifact validation above, not only the first time a real page
@@ -197,6 +210,8 @@ tasks:
       BAZEL_CONSUMER: '{{.BAZEL_CONSUMER | default "../rules_ocx"}}'
       # No default: the fleet has no Go module to point at.
       GO_CONSUMER: '{{.GO_CONSUMER | default ""}}'
+      # No default: the fleet has no flake to point at.
+      NIX_CONSUMER: '{{.NIX_CONSUMER | default ""}}'
 
   build:
     desc: Build every publishable artifact without pushing anything

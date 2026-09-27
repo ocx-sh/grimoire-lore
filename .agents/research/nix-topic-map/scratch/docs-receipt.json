@@ -1,0 +1,214 @@
+{
+  "summary": "Nix research program wiring: write the catalog description companions (docs/nix-*.md) for the five Nix packages, every count measured by command",
+  "agentCount": 5,
+  "logs": [
+    "Docs done: 5/5"
+  ],
+  "result": {
+    "results": [
+      {
+        "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/docs/nix-quality.md",
+        "lines": 103,
+        "numbers": [
+          "index lines 198 — `wc -l rules/nix-quality.md`",
+          "depth file count 9 — `find rules/nix-quality -maxdepth 1 -type f -name '*.md' | wc -l`",
+          "non-negotiables rows 15 — `awk '/^## Non-Negotiables/,/^## Rules This File Owns/' rules/nix-quality.md | grep -c -e '^| [0-9]'`",
+          "rules this file owns rows 6 — `grep -c -e '^| NIX-CORE-' rules/nix-quality.md`",
+          "shapes 5 — `grep -c -e '^| [A-E] ' rules/nix-quality.md`",
+          "gate steps 9 distinct — `grep -oE '# [0-9]+[a]? NIX-' rules/nix-quality.md | sed -E 's/# ([0-9]+).*/\\1/' | sort -un`",
+          "depth rule rows per file: flakes.md 19, gates.md 16, generated-flakes.md 22, inputs.md 14, language.md 10, modules.md 8, packaging.md 21, release.md 17, security.md 9 — `grep -c -E '^\\| NIX-[A-Z]+-[0-9]+ \\|' <file>` for each",
+          "total depth rule rows 136 — sum of the per-file grep -c above",
+          "total rules 142 — 136 depth + 6 index-owned",
+          "index MUST rows 5 — `grep -F -c '| MUST' rules/nix-quality.md`",
+          "depth MUST rows per file: flakes.md 12, gates.md 10, generated-flakes.md 19, inputs.md 4, language.md 6, modules.md 5, packaging.md 13, release.md 7, security.md 7 — `grep -F -c '| MUST' <file>` for each",
+          "total MUST 88 — 83 depth (sum above) + 5 index",
+          "corpus size 38 repositories plus 8 held-out flakes — stated in .agents/research/nix-frame.md and confirmed in .agents/research/nix-topic-map.md (`grep -n -F 'held-out' .agents/research/nix-topic-map.md`, line 2646: '5 opus reviewers, 3 opus sweepers over the 38-repo corpus and 8 held-out flakes'), not separately measured by me"
+        ]
+      },
+      {
+        "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/docs/nix-flake-adopt.md",
+        "lines": 89,
+        "numbers": [
+          "SKILL.md line count 428: wc -l skills/nix-flake-adopt/SKILL.md",
+          "ci-and-readme.md line count 221: wc -l skills/nix-flake-adopt/references/ci-and-readme.md",
+          "package-templates.md line count 299: wc -l skills/nix-flake-adopt/references/package-templates.md",
+          "MUST/merge-blocking rows count 21: grep -c -E '^\\| [0-9]+ \\|' skills/nix-flake-adopt/SKILL.md (the '## The MUST rows this procedure enforces' table)",
+          "Procedure step count 10: grep -c -E '^### [0-9]+\\.' skills/nix-flake-adopt/SKILL.md",
+          "'What agents get wrong' item count 12: sed -n '/## What agents get wrong here/,$p' skills/nix-flake-adopt/SKILL.md | grep -c -E '^[0-9]+\\. \\*\\*'",
+          "Distinct NIX-* rule IDs referenced in SKILL.md 66: grep -oE 'NIX-[A-Z]+-[0-9]+' skills/nix-flake-adopt/SKILL.md | sort -u | wc -l",
+          "Distinct NIX-* rule IDs referenced across the whole skill dir 72: grep -rohE 'NIX-[A-Z]+-[0-9]+' skills/nix-flake-adopt | sort -u | wc -l",
+          "Pinned-defaults table rows 12: sed -n '/## Pinned defaults/,/## The procedure/p' skills/nix-flake-adopt/SKILL.md | grep -c -E '^\\| [A-Za-z]'",
+          "Scope table rows 4: sed -n '/## Scope/,/Measured 2026/p' skills/nix-flake-adopt/SKILL.md | grep -c -E '^\\| (No flake|A flake)'",
+          "CI workflow yaml block length 85 lines: sed -n '/^```yaml/,/^```/p' skills/nix-flake-adopt/references/ci-and-readme.md | wc -l",
+          "Package-template nix code blocks 6: grep -c '^```nix' skills/nix-flake-adopt/references/package-templates.md",
+          "House model (docs/go-upgrade.md) line count 82: wc -l docs/go-upgrade.md, used for the 20% length match (89 vs 82 = 8.5% over)"
+        ]
+      },
+      {
+        "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/docs/nix-flake-release.md",
+        "lines": 101,
+        "numbers": [
+          "9 runbook steps: grep -c -E '^### [0-9]+\\.' skills/nix-flake-release/SKILL.md → 9",
+          "16 MUST-row findings restated: grep -c -E '^\\| [0-9]+ \\|' skills/nix-flake-release/SKILL.md → 16",
+          "7 pinned-decision rows: awk range over '## Pinned defaults' table, grep -c '^| [A-Z]' → 7",
+          "7-item D-branch list: awk range '## The D branch'..'## The MUST rows', grep -c -E '^[0-9]+\\. \\*\\*' → 7",
+          "12-item 'what agents get wrong' list: awk range from that heading, grep -c -E '^[0-9]+\\. \\*\\*' → 12",
+          "4 flake shapes (A-E table): awk range over shapes table, grep -c '^| [A-E]' → 4",
+          "9 nix-quality depth files: ls rules/nix-quality/*.md | wc -l → 9",
+          "507 lines in SKILL.md: wc -l skills/nix-flake-release/SKILL.md → 507",
+          "116 lines in house model go-release.md vs 101 lines in the new page: wc -l on both files"
+        ]
+      },
+      {
+        "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/docs/nix-diagnose.md",
+        "lines": 67,
+        "numbers": [
+          "46 catalog rows: grep -oE '^\\| [0-9]+ \\|' skills/nix-diagnose/references/error-catalog.md | wc -l → 46",
+          "10 same-fault-different-text rows (\"Ten rows are one fault\"): sed -n '/^## Same fault, different text/,/^## A\\. Language/p' error-catalog.md | grep -c '^| ' → 12 lines incl. header+separator = 10 data rows",
+          "5 infinite-recursion classes: sed -n '/^## Infinite recursion/,/^```nix/p' SKILL.md | grep -cE '^\\| \\([a-e]\\) \\|' → 5",
+          "9-row --all-systems triage table: sed -n '/^## A red --all-systems run/,/^Run the gate/p' SKILL.md | grep -c '^| `' → 9",
+          "10 never-weaken-the-check rows: sed -n '/^## Never weaken the check/,/^## Step 0/p' SKILL.md | grep -c '^| ' → 12 lines incl. header+separator = 10 data rows",
+          "SKILL.md line count: wc -l skills/nix-diagnose/SKILL.md → 428",
+          "error-catalog.md line count: wc -l skills/nix-diagnose/references/error-catalog.md → 154",
+          "house model go-diagnose.md line count: wc -l docs/go-diagnose.md → 56",
+          "new page line count: wc -l docs/nix-diagnose.md → 67 (67/56 = 1.196, within 20%)"
+        ]
+      },
+      {
+        "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/docs/nix-essentials.md",
+        "lines": 93,
+        "numbers": [
+          "15 non-negotiables: awk row-count over the '| # | Rule | ID |' table in rules/nix-quality.md",
+          "83 MUST rows across 9 depth files: grep -c -e '| MUST' rules/nix-quality/*.md summed (12+10+19+4+6+5+13+7+7=83)",
+          "9 depth files: ls rules/nix-quality/*.md | wc -l",
+          "3 glob patterns (**/*.nix, **/flake.lock, **/statix.toml): sed -n '1,10p' rules/nix-quality.md (paths: frontmatter)",
+          "10 steps in nix-flake-adopt: grep -n '^### [0-9]' skills/nix-flake-adopt/SKILL.md | wc -l",
+          "9 steps in nix-flake-release: grep -n '^### [0-9]' skills/nix-flake-release/SKILL.md | wc -l",
+          "46-row error catalog across 5 categories: grep -cE '^\\| [0-9]+ \\|' skills/nix-diagnose/references/error-catalog.md and grep -c '^## [A-Z]\\.' same file",
+          "38-repository exemplar corpus + 8 held-out flakes: stated verbatim in .agents/research/nix-topic-map.md line 2647 and .agents/research/nix-frame.md",
+          "Tool/version floor (CppNix 2.35.2, nixpkgs 26.11pre, Lix 2.95.2, CppNix 2.31.5 floor, measured 2026-09-27): stated in rules/nix-quality.md gate block and skills/nix-diagnose/SKILL.md header",
+          "8 pinned-decision rows: awk row-count over the 'Pinned default | Owner' table in rules/nix-quality.md"
+        ]
+      }
+    ]
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Docs"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "docs:docs/nix-quality.md",
+      "phaseIndex": 1,
+      "phaseTitle": "Docs",
+      "agentId": "aa549ccfb0155e525",
+      "model": "claude-sonnet-5",
+      "state": "done",
+      "startedAt": 1790522317079,
+      "queuedAt": 1790522317025,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/docs/…",
+      "promptPreview": "Model rationale: sonnet — a catalog description page written against a fixed house model from files already on disk; every number measured, no rule decisions.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- You write one catalog description page for the lore catalog at /home/mherwig/dev/grimoire-lore/.agents/worktrees/nix (a git worktree; treat it as the repository root). The page …",
+      "promptFramed": true,
+      "lastProgressAt": 1790522431460,
+      "tokens": 79647,
+      "toolCalls": 24,
+      "durationMs": 114372,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/docs/nix-quality.md\",\"lines\":103,\"numbers\":[\"index lines 198 — `wc -l rules/nix-quality.md`\",\"depth file count 9 — `find rules/nix-quality -maxdepth 1 -type f -name '*.md' | wc -l`\",\"non-negotiables rows 15 — `awk '/^## Non-Negotiables/,/^## Rules This File Owns/' rules/nix-quality.md | grep -c -e '^| [0-9]'`\",\"rules this file owns row…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "docs:docs/nix-flake-adopt.md",
+      "phaseIndex": 1,
+      "phaseTitle": "Docs",
+      "agentId": "af2d84589986cb66f",
+      "model": "claude-sonnet-5",
+      "state": "done",
+      "startedAt": 1790522317082,
+      "queuedAt": 1790522317026,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/docs/…",
+      "promptPreview": "Model rationale: sonnet — a catalog description page written against a fixed house model from files already on disk; every number measured, no rule decisions.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- You write one catalog description page for the lore catalog at /home/mherwig/dev/grimoire-lore/.agents/worktrees/nix (a git worktree; treat it as the repository root). The page …",
+      "promptFramed": true,
+      "lastProgressAt": 1790522400342,
+      "tokens": 83217,
+      "toolCalls": 17,
+      "durationMs": 81970,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/docs/nix-flake-adopt.md\",\"lines\":89,\"numbers\":[\"SKILL.md line count 428: wc -l skills/nix-flake-adopt/SKILL.md\",\"ci-and-readme.md line count 221: wc -l skills/nix-flake-adopt/references/ci-and-readme.md\",\"package-templates.md line count 299: wc -l skills/nix-flake-adopt/references/package-templates.md\",\"MUST/merge-blocking rows count 2…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 3,
+      "label": "docs:docs/nix-flake-release.md",
+      "phaseIndex": 1,
+      "phaseTitle": "Docs",
+      "agentId": "a95fcc9a2bb73d4c5",
+      "model": "claude-sonnet-5",
+      "state": "done",
+      "startedAt": 1790522317083,
+      "queuedAt": 1790522317026,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/docs/…",
+      "promptPreview": "Model rationale: sonnet — a catalog description page written against a fixed house model from files already on disk; every number measured, no rule decisions.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- You write one catalog description page for the lore catalog at /home/mherwig/dev/grimoire-lore/.agents/worktrees/nix (a git worktree; treat it as the repository root). The page …",
+      "promptFramed": true,
+      "lastProgressAt": 1790522409505,
+      "tokens": 84351,
+      "toolCalls": 22,
+      "durationMs": 91133,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/docs/nix-flake-release.md\",\"lines\":101,\"numbers\":[\"9 runbook steps: grep -c -E '^### [0-9]+\\\\.' skills/nix-flake-release/SKILL.md → 9\",\"16 MUST-row findings restated: grep -c -E '^\\\\| [0-9]+ \\\\|' skills/nix-flake-release/SKILL.md → 16\",\"7 pinned-decision rows: awk range over '## Pinned defaults' table, grep -c '^| [A-Z]' → 7\",\"7-item D…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 4,
+      "label": "docs:docs/nix-diagnose.md",
+      "phaseIndex": 1,
+      "phaseTitle": "Docs",
+      "agentId": "a31022f40670417ce",
+      "model": "claude-sonnet-5",
+      "state": "done",
+      "startedAt": 1790522317084,
+      "queuedAt": 1790522317026,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/docs/…",
+      "promptPreview": "Model rationale: sonnet — a catalog description page written against a fixed house model from files already on disk; every number measured, no rule decisions.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- You write one catalog description page for the lore catalog at /home/mherwig/dev/grimoire-lore/.agents/worktrees/nix (a git worktree; treat it as the repository root). The page …",
+      "promptFramed": true,
+      "lastProgressAt": 1790522471998,
+      "tokens": 98377,
+      "toolCalls": 34,
+      "durationMs": 153625,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/docs/nix-diagnose.md\",\"lines\":67,\"numbers\":[\"46 catalog rows: grep -oE '^\\\\| [0-9]+ \\\\|' skills/nix-diagnose/references/error-catalog.md | wc -l → 46\",\"10 same-fault-different-text rows (\\\"Ten rows are one fault\\\"): sed -n '/^## Same fault, different text/,/^## A\\\\. Language/p' error-catalog.md | grep -c '^| ' → 12 lines incl. header+s…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 5,
+      "label": "docs:docs/nix-essentials.md",
+      "phaseIndex": 1,
+      "phaseTitle": "Docs",
+      "agentId": "a08d9d4d112360a6a",
+      "model": "claude-sonnet-5",
+      "state": "done",
+      "startedAt": 1790522317085,
+      "queuedAt": 1790522317026,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/docs/…",
+      "promptPreview": "Model rationale: sonnet — a catalog description page written against a fixed house model from files already on disk; every number measured, no rule decisions.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- You write one catalog description page for the lore catalog at /home/mherwig/dev/grimoire-lore/.agents/worktrees/nix (a git worktree; treat it as the repository root). The page …",
+      "promptFramed": true,
+      "lastProgressAt": 1790522510226,
+      "tokens": 95183,
+      "toolCalls": 41,
+      "durationMs": 191853,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/docs/nix-essentials.md\",\"lines\":93,\"numbers\":[\"15 non-negotiables: awk row-count over the '| # | Rule | ID |' table in rules/nix-quality.md\",\"83 MUST rows across 9 depth files: grep -c -e '| MUST' rules/nix-quality/*.md summed (12+10+19+4+6+5+13+7+7=83)\",\"9 depth files: ls rules/nix-quality/*.md | wc -l\",\"3 glob patterns (**/*.nix, **/…"
+    }
+  ],
+  "totalTokens": 440775,
+  "totalToolCalls": 138
+}

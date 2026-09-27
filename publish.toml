@@ -351,3 +351,30 @@ description = { readme = "docs/go-diagnose.md", logo = "assets/lore-go.svg" }
 [bundles.go-essentials]
 version = "0.1.0"
 description = { readme = "docs/go-essentials.md", logo = "assets/lore-go.svg" }
+
+# The Nix set: one rule, because every Nix file shares one glob family.
+# `nix-quality` loads on `**/*.nix`, `**/flake.lock` and `**/statix.toml` (the
+# only names Nix or statix read by name) and routes to nine depth files by task:
+# flakes, inputs, packaging, generated flakes, gates, release, language,
+# security and modules. `.envrc`, CI workflows and README install blocks are
+# routed by task from the index, never globbed. The three skills are procedures
+# run once per adoption, per release or per incident.
+[rules.nix-quality]
+version = "0.1.0"
+description = { readme = "docs/nix-quality.md", logo = "assets/lore-nix.svg" }
+
+[skills.nix-flake-adopt]
+version = "0.1.0"
+description = { readme = "docs/nix-flake-adopt.md", logo = "assets/lore-nix.svg" }
+
+[skills.nix-flake-release]
+version = "0.1.0"
+description = { readme = "docs/nix-flake-release.md", logo = "assets/lore-nix.svg" }
+
+[skills.nix-diagnose]
+version = "0.1.0"
+description = { readme = "docs/nix-diagnose.md", logo = "assets/lore-nix.svg" }
+
+[bundles.nix-essentials]
+version = "0.1.0"
+description = { readme = "docs/nix-essentials.md", logo = "assets/lore-nix.svg" }

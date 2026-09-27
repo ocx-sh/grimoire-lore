@@ -1,0 +1,3 @@
+# nix build out-links point into a store that exists only inside the research bwrap namespace
+result
+result-*
