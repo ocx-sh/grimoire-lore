@@ -1,0 +1,24 @@
+summary = "The OCX Nix set: Nix and flake standards, and the adopt, release and diagnosis procedures"
+keywords = "nix,nixos,nixpkgs,flake,flakes,flake.lock,follows,derivation,package.nix,mkDerivation,finalAttrs,buildRustPackage,nixfmt,deadnix,statix,flake-checker,nix-flake-check,lix,overlay,devshell,nixos-module,home-manager,nixconfig,substituters,binary-cache,fetchurl,oci,ghcr,generated-flake,autopatchelf,release,versioning,nix-update,diagnose"
+description = "Everything an agent needs to author, gate, publish and debug Nix flakes the way the OCX family does: the nix-quality rule (the gate block, the non-negotiables and nine depth files on flake outputs and systems, inputs and the lock, packaging, flakes generated from an external package index, the formatter, lint and CI gates, release and consumer install UX, the language traps, trust boundaries, and exported modules), plus the nix-flake-adopt skill that adds or modernizes a flake, the nix-flake-release skill that cuts and proves a release, and the nix-diagnose skill for an evaluation or build failure."
+license = "Apache-2.0"
+repository = "https://github.com/ocx-sh/grimoire-lore"
+
+# Members are same-directory relative: this catalog publishes flat under
+# ghcr.io/ocx-sh/lore/<name>, so `./nix-quality` resolves against wherever the
+# bundle itself was pulled from — a mirror keeps working.
+#
+# MEMBERS CARRY NO TAG. Not a digest, not an exact version, not a floating
+# major, not `latest` — `latest` is a tag like any other and naming it is still
+# a pin. A bundle is a *set*, not a snapshot: its job is to say "these belong
+# together", and the consumer's own `grimoire.lock` is what freezes them.
+#
+# Do not pass --pin when releasing this bundle.
+
+[rules]
+nix-quality = "./nix-quality"
+
+[skills]
+nix-flake-adopt = "./nix-flake-adopt"
+nix-flake-release = "./nix-flake-release"
+nix-diagnose = "./nix-diagnose"

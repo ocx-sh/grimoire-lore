@@ -1,0 +1,538 @@
+{
+  "summary": "Nix research program phases 4+5 for one wave: sonnet deep dives per commissioned subtopic, pipelined into one opus consolidation (or revision) per group",
+  "agentCount": 8,
+  "logs": [
+    "Wave 3: 4 dives across 4 groups (inputsx1, packagingx1, releasex1, generated-flakesx1); revising: inputs, packaging, release, generated-flakes",
+    "Wave 3 done: 4/4 groups consolidated · 43 MUST rules · 24 surprises · 19 follow-ups"
+  ],
+  "result": {
+    "wave": 3,
+    "groups": [
+      {
+        "group": "inputs",
+        "dives": [
+          {
+            "slug": "verification-rerun-w3",
+            "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-inputs/verification-rerun-w3.md",
+            "sources_count": 17,
+            "verifications_run": 10,
+            "top_rules": [
+              "CI must run `nix flake check`/`show` with `-v` and enforce both a wall-clock timeout AND a 60s-max-gap between stage lines — never wall-clock alone, never without -v (nix-installer looked silent without -v, wasn't)",
+              "NIX-INP-02 upgrades SHOULD→MUST: on CppNix 2.35.2 (no lazy-trees), an unused root input still gets fetched and store-realized at lock time, unconditionally — confirmed via `nix path-info` on a never-touched input",
+              "Lix 2.95.2 supports `inputs.self.submodules` (behind flake-self-attrs) but has NO `self.lfs` at all (\"attribute 'lfs' is not supported\") — not the same gate, don't assume parity",
+              "`?submodules=1`/`?lfs=1` only work on git+https:/git+ssh: — the github: fetcher rejects both params outright with a scheme-mismatch error easy to misread as a rev typo",
+              "Before wrapping any third-party repo with submodules/lfs flags, grep its .gitattributes for unrelated filter=lfs content — grimoire's real repo broke Lix's clone via an unrelated LFS-tracked logo.png",
+              "nix-packaging.md's grimoire citation is wrong: the real remote is grimoire-rs/grimoire (public, verified via git ls-remote), not ocx-sh/grimoire (404) — and it has no flake.nix yet, so self.submodules can only be tested input-side today",
+              "#14339's floating-ref drift is now mechanically reproduced (not read from the issue): a dependency's own floating nixpkgs ref re-resolves to the branch's current drifted tip after follows removal; NIX-INP-08's --override-input restore is exact (rev+narHash match)",
+              "Same-tree path:.. from a test/ subdir to its parent is legal on both 2.31.5 and 2.35.2, and NIX-INP-04's exact grep (requiring a trailing slash) correctly does not false-positive on it"
+            ],
+            "surprises": [
+              "nix-installer's default-systems `nix flake check` is NOT silent when run with `-v`: it prints continuous hydraJobs matrix progress (max gap 34s over 300s) — the earlier 'silent hang' finding likely came from a run without -v, not from an actual hang",
+              "Grimoire's real repo (grimoire-rs/grimoire) has NO flake.nix at all as of 2026-09-27 — the self-submodules-remote open question's premise (a flake.nix declaring inputs.self.submodules) doesn't exist yet upstream",
+              "Grimoire's real repo independently uses Git LFS for assets/logo.png (unrelated to its two forked submodules), which broke Lix's plain git clone outright — a real-world LFS/submodule interaction no synthetic fixture had surfaced",
+              "The real HTTPS-LFS-remote test against microsoft/vscode-docs genuinely engaged Nix's LFS batch API (a real, non-mocked 429 from github.com) but was blocked by the sandbox's shared-egress GitHub rate limit, not by any protocol or Nix defect",
+              "The `github:` fetcher type outright rejects `submodules`/`lfs` URL parameters (parse error), forcing `git+https:` for any input needing either flag — this wasn't documented anywhere in the prior NIX-INP consolidation",
+              "Same-tree, never-referenced flake inputs are NOT lazily skipped on stock CppNix 2.35.2: `nix flake lock` alone fetches and store-realizes an input zero outputs ever touch, settling NIX-INP-02 as MUST rather than SHOULD"
+            ],
+            "ok": true
+          }
+        ],
+        "consolidation": {
+          "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-inputs.md",
+          "rule_ids": [
+            "NIX-INP-01 — Decide nixpkgs follows by how each input is consumed; comment every deliberate non-follow",
+            "NIX-INP-02 — Keep library/module flake roots at zero inputs or nixpkgs-lib only; put test inputs in a sub-flake (SHOULD, MUST upgrade rejected)",
+            "NIX-INP-03 — Name a branch in url and let flake.lock carry the rev; freeze a rev only on purpose with a comment",
+            "NIX-INP-04 — Commit no local input; allow only relative path: that stays inside the flake's own git tree, floor 2.26 (MUST)",
+            "NIX-INP-05 — Give every input an explicit scheme; no indirect names, no nixexprs.tar.xz; FlakeHub deferred to NIX-REL-06 (MUST)",
+            "NIX-INP-06 — Track a flake-checker-supported nixpkgs branch under 30 days old, advisory CEL check",
+            "NIX-INP-07 — Move entries with nix flake update <input>; never --update-input or --recreate-lock-file (MUST)",
+            "NIX-INP-08 — Re-lock and read the diff after any follows edit; restore a drifted dependency nixpkgs rev with --override-input",
+            "NIX-INP-09 — Declare inputs.self.submodules/lfs when the build reads them; Lix leg adds flake-self-attrs and marks self.lfs expected-fail (MUST)",
+            "NIX-INP-10 — Keep builtin fetchers unreachable from outputs; use inputs or FOD fetchers",
+            "NIX-INP-11 — Refresh the lock weekly via a scheduled, SHA-pinned workflow that opens a PR",
+            "NIX-INP-12 — Consider an --override-input nixpkgs-unstable CI leg for widely consumed flakes; never commit it",
+            "NIX-INP-13 — Run CI eval with -v and timestamps; treat a >60 s line gap as an alarm naming the stalled step, never a kill (new, SHOULD advisory)",
+            "NIX-INP-14 — Wrap a non-flake repo needing submodules/LFS as a git+https: flake=false input with rev and submodules=1/lfs=1, never github: (new, SHOULD)"
+          ],
+          "conflicts_resolved": [
+            "w3 'NIX-INP-02 -> MUST' rejected: its lazy-fetch fixture measured the declaring flake's own root inputs and an eval-forced path, not a consumer inheriting a lock node; INP-02 stays SHOULD, M-B-17 re-commissioned",
+            "nix-installer 'silent hang' (input-types dive, runs Axis 2) vs w3 -v trace (max gap 34 s): large hydraJobs workload, not a hang",
+            "w3 'CI MUST pass -v and fail on 60 s gap' vs its own evidence (red twin = one never-ending fetch, indistinguishable from one long legit step): INP-13 is SHOULD advisory alarm",
+            "Map E12 + w3 Lix result: GATE-16 Lix leg adds flake-self-attrs; Lix 2.95.2 lacks self.lfs entirely, so self.lfs flakes mark the Lix leg expected-fail (INP-09 parity overclaim fixed in place)",
+            "Map E23: INP-04 generalized to 'relative path: inside the flake's own git tree' after w3 measured path:.. from test/ on 2.31.5 and 2.35.2 with the grep silent",
+            "Map E17/E18/E20/E22 applied: untested-nixpkgs wording per REL-09, FlakeHub clause to REL-06, INP-07 grep narrowed to --update-input/--recreate-lock-file, fleet skeleton = nixpkgs + flake-compat",
+            "w3 github: rejection string ('path URL ... unsupported parameter') treated as suspect; INP-14 keys on input shape not the string",
+            "#14339 'read from issue' vs w3 reproduction: now watched red (drift) and green (exact restore) for INP-08",
+            "grimoire remote corrected to grimoire-rs/grimoire (no flake.nix at 55f839ce31fb) in Applied; nix-packaging.md's own citation left to its owner"
+          ],
+          "needs_another_round": [
+            "inputs-lock: M-B-17 — does a consumer fetch a dependency's never-accessed inherited lock node? Fixture: hand-written dep lock entry at http://127.0.0.1:9 with fake narHash; consumer lock+eval must succeed, accessing twin must fail; CppNix 2.35.2, 2.31.5, Lix. Decides INP-02 severity and REL-05 flake-compat cost",
+            "checks-ci: M-F-18 — does one legitimate >60 s fetch or IFD build red INP-13's gap check (local server sleeping 90 s serving a correct FOD)?",
+            "inputs-lock: self.lfs against a real HTTPS LFS remote — w3 hit GitHub HTTP 429 on shared egress; retry or use an owner-provided repo with flake.nix + LFS",
+            "impls: Lix tracking — self.lfs absence, follow-cycle stack overflow, follows-removal proposal (M-B-13), re-check each Lix release",
+            "environment: nix-tools/.nix-portable store and fixtures/ are missing (run.sh exits 1 in bwrap); every re-run is blocked until restored"
+          ],
+          "must_count": 4
+        }
+      },
+      {
+        "group": "packaging",
+        "dives": [
+          {
+            "slug": "verification-rerun-w3",
+            "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-packaging/verification-rerun-w3.md",
+            "sources_count": 14,
+            "verifications_run": 3,
+            "top_rules": [
+              "ocx builds end to end under buildRustPackage (cargoBuildFlags = [\"-p\" \"ocx\" \"-p\" \"ocx_shim\"], pkg-config only) — both binaries installed and stripped, watched green.",
+              "Correction to nix-packaging.md's V-fb #11: ocx's Cargo.lock has 10 git-sourced packages (astral-sh/uv x9, pubgrub x1), not 0 — needs exactly 2 outputHashes entries, keyed by commit SHA not per-package.",
+              "ocx has no -V/--version flag (no #[command(version)] on its clap Cli); versionCheckHook needs versionCheckProgramArg = \"version\" (the subcommand), watched red on \"--version\" and green on \"version\".",
+              "GATE-10's real per-PR cost is rustc compilation (~6-7 min), not crate vendoring; a metadata-only package.nix edit still forces a full rebuild because buildRustPackage is one non-incremental derivation.",
+              "aws-lc-sys's cmake wrapper crate compiles unconditionally regardless of whether a real cmake binary runs; get_builder() picks CcBuilder (no cmake invoked) whenever bindgen isn't required and no FIPS/sanitizer/override applies, so NIX-PKG-17's pkg-config-only recipe is target-conditional, not target-independent.",
+              "M-D-27 answered and watched red/green: ship both a pythonPackagesExtensions overlay (reaches every interpreter's pythonN.pkgs) and a top-level packages.<system>.<name> bound to python3; top-level-only fails eval (attribute missing) for any other interpreter.",
+              "M-D-24 (build.rs determinism) reads deterministic-by-construction (CI unset, no .git in the fileset src) but was never empirically confirmed via nix build --rebuild before an environment fault ended the dive — stays open, not promoted to MUST.",
+              "NIX-PKG-16 as a checks derivation was drafted (ok/bad fixtures, builtins.compareVersions) but never built — flagged NOT RUN rather than fabricated, along with closure size and the --rebuild determinism check."
+            ],
+            "surprises": [
+              "nix-packaging.md's own prior verification claim (\"0 git dependencies in ocx's Cargo.lock\") was wrong: re-running the identical grep on the live repo returns 10, from astral-sh/uv and astral-sh/pubgrub git deps pulled in via ocx_python.",
+              "ocx's CLI has no --version flag at all — it only reports its version through a custom `version` subcommand, which silently broke the standard versionCheckHook default (\"unexpected argument '--version' found\", not an obviously-packaging-related error).",
+              "A single non-source attribute change (just versionCheckProgramArg) forced a full ~6-7 minute recompile of all ~300 crates, because buildRustPackage is one non-incremental derivation — warming the cargo-vendor-dir derivation saved the fetch step but not the dominant compile cost.",
+              "The Rust `cmake` wrapper crate compiles in every aws-lc-sys build regardless of whether a real `cmake` binary is ever invoked; the actual cc-vs-cmake choice is gated by is_bindgen_required()/FIPS/sanitizer/override deep in aws-lc-sys's own builder/main.rs, not by cmake's mere presence in Cargo.lock.",
+              "The shared research-lang Nix toolchain (run.sh, .nix-portable, conf, all fixtures) was progressively deleted mid-dive by an apparently concurrent sibling wave-3 process, cutting three verifications short (closure size, --rebuild determinism, the PKG-16 checks-derivation build) as a genuine, externally-caused environment fault rather than anything this session did.",
+              "GitHub's REST API returned schema-shaped type stubs instead of real JSON values for directory-listing calls in this sandbox's curl (api.github.com), while raw.githubusercontent.com file fetches and codeload.github.com tarballs worked normally — a sandbox quirk worth knowing before assuming a GitHub API 'empty' result means the path doesn't exist."
+            ],
+            "ok": true
+          }
+        ],
+        "consolidation": {
+          "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-packaging.md",
+          "rule_ids": [
+            "NIX-PKG-01 — Fetch src with a nixpkgs fetcher and SRI hash = \"sha256-…\"; never builtins, sha256 =, cargoSha256 or vendorSha256 (SHOULD)",
+            "NIX-PKG-02 — Pin git sources with a full 40-hex rev or a real tag; never short hex, a branch, or tag = \"<hex>\" (MUST)",
+            "NIX-PKG-03 — Never hand-write a hash; use nurl/nix-prefetch or lib.fakeHash and copy the got: value (MUST)",
+            "NIX-PKG-04 — On any fetcher-argument change, reset hash and verify with nix build --rebuild .#<pkg>.src (MUST)",
+            "NIX-PKG-05 — Filter src with lib.fileset.toSource over an explicit list; never src = ./. or self unfiltered (MUST)",
+            "NIX-PKG-06 — Keep package.nix at the root as a plain by-name-ready callPackage function with no ../ references (SHOULD)",
+            "NIX-PKG-07 — Set meta.description (nixpkgs grammar), license, platforms and homepage on every package (MUST presence, SHOULD grammar)",
+            "NIX-PKG-08 — Give meta.license as lib.licenses.<attr> or a single SPDX id, never a compound expression; eval with abort-on-warn (MUST; rationale corrected: the fleet is Apache-2.0)",
+            "NIX-PKG-09 — Put build tools in nativeBuildInputs and libraries in buildInputs, with strictDeps = true (MUST)",
+            "NIX-PKG-10 — Set __structuredAttrs = true, keep env.* scalar, and put lists at the top level (SHOULD)",
+            "NIX-PKG-11 — Wrap every overridden phase in runHook pre/post and never set phases (MUST)",
+            "NIX-PKG-12 — Use --replace-fail/--replace-warn, never bare --replace (MUST)",
+            "NIX-PKG-13 — Give every A CLI versionCheckHook with doInstallCheck, pointed at its real version entry point; put behaviour tests in passthru.tests (MUST; scope revised)",
+            "NIX-PKG-14 — Use mkDerivation (finalAttrs: …) only when self-referencing, otherwise a plain attrset; never rec for finalPackage (SHOULD)",
+            "NIX-PKG-15 — Build in-repo Rust with buildRustPackage and cargoLock.lockFile = ./Cargo.lock; never read the lock through ${src} or builtins.path self (MUST)",
+            "NIX-PKG-16 — Build with pinned nixpkgs rustPlatform plus a rustc-floor check against rust-toolchain.toml as a CI step, with no rust-overlay in package.nix (SHOULD; the checks form is unwatched)",
+            "NIX-PKG-17 — Start native inputs at pkg-config and add tools only when an error names them; the aws-lc-sys recipe holds only on the cc-builder path (SHOULD; scope revised)",
+            "NIX-PKG-18 — Package Python with buildPythonPackage { pyproject = true; build-system = [ <backend> ]; } and use uv2nix only for compiled runtime deps (SHOULD)",
+            "NIX-PKG-19 — Confirm versionCheckHook's entry point, set versionCheckProgramArg when the CLI lacks --version, and never disable the check (MUST, new)",
+            "NIX-PKG-20 — Budget GATE-10's Rust build as a full recompile for any package edit, and do not count vendor caching as a saving (CONSIDER, new)",
+            "NIX-PKG-21 — Export a Python library through a pythonPackagesExtensions overlay plus a top-level package, never top-level only (MUST, new)",
+            "NIX-PKG-22 — Set cargoLock.outputHashes with one fake-hash-derived entry per git revision when Cargo.lock has git sources, and no allowBuiltinFetchGit (SHOULD, new)"
+          ],
+          "conflicts_resolved": [
+            "12: V-fb #11 said ocx has 0 git deps; w3 found 10 from 2 revisions. I re-measured it (P16): ocx 10, grimoire 0, and the git crates entered ocx on 2026-09-23, before V-fb's run, so V-fb was wrong when taken → PKG-22, and Applied is corrected",
+            "13: w3's 'verified' ocx package.nix has an unused (finalAttrs: …) wrapper, which fails deadnix under PKG-14/GATE-05 → the workspace template drops it (unbuilt edit that leaves the drv unchanged)",
+            "14: PKG-13 claimed versionCheckHook runs --version and was scoped to CLIs with --version, which exempted ocx → PKG-13 scope changed in place, PKG-19 added (w3 R2/R3 red/green; hook.sh read)",
+            "15: PKG-17's pkg-config-only read as target-independent; the aws-lc-sys get_builder() trace makes it conditional → scope clause changed in place, still SHOULD with no red/green pair",
+            "16: PKG-08 rationale said the fleet CLIs are dual-licensed; all three are Apache-2.0 (P16) → rationale corrected, rule unchanged",
+            "17: NIX-FLK-13's top-level overlay form does not reach pythonNNN.pkgs for a Python library (w3 R6 red) → PKG-21 specializes it for Python libraries; FLK-13 is untouched",
+            "18: Applied put the PKG-16 check in checks, but map E25 requires a watched checks form; w3 R7 was not run and my re-run was blocked (P15) → ships as a CI step",
+            "19: only grimoire was flagged for inputs.self.submodules, but ocx has three [patch.crates-io] submodules (P17) → ocx declares it too; the owner question now covers both CLIs"
+          ],
+          "needs_another_round": [
+            "packaging/ocx-determinism-and-closure — Does nix build --rebuild reproduce ocx's output hash (M-D-24, w3 R8), and what is its closure size (R9)? Blocked: the shared toolchain, fixtures and exemplar corpus are gone (run.sh fails with bwrap emptyroot missing, P15)",
+            "packaging/pkg16-checks-form — Does w3 §7's rust-toolchain-floor runCommand go red on channel 99.0.0 and green on 1.95.0 (E25, R7), and should it read the channel from rust-toolchain.toml or from workspace.package.rust-version?",
+            "packaging/rust-build-cost — Does crane's buildDepsOnly split bring ocx's metadata-only rebuild below PKG-20's 7m12s, and is the extra input worth it under NIX-INP?",
+            "packaging/darwin-and-aarch64 — Do aws-lc-sys and the Darwin -sys crates build with pkg-config only on aarch64-darwin and aarch64-linux (M-D-23)? Needs a native runner; this host cannot",
+            "inputs/self-submodules-remote — Does inputs.self.submodules work for github:ocx-sh/{grimoire,ocx}/<rev> under the 2.31 floor, under Lix with flake-self-attrs, and under Determinate Nix?"
+          ],
+          "must_count": 13
+        }
+      },
+      {
+        "group": "release",
+        "dives": [
+          {
+            "slug": "verification-rerun-w3",
+            "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-release/verification-rerun-w3.md",
+            "sources_count": 14,
+            "verifications_run": 7,
+            "top_rules": [
+              "MUST (escalated from SHOULD): rev/tag in a version-tracking package.nix must be interpolated (rev = \"v${finalAttrs.version}\") — a literal ref lets nix-update bump version and rewrite hash to match stale, unrelated content, undetectable by diff",
+              "Never trust 'the hash also changed' as proof a nix-update version bump was correct — the hash always matches whatever was actually fetched, correct or stale",
+              "Grep for leftover lib.fakeHash/lib.fakeSha256 after any nix-update -F run — nix-update text-matches the OLD evaluated hash VALUE, not the symbol, so a symbolic placeholder silently never gets replaced (exit 0, no warning)",
+              "When priming a hash for nix-update to auto-discover, write the literal SRI placeholder text, not the lib.fakeHash symbol, if write-back must happen automatically",
+              "The nested-bwrap 'cannot rename: Permission denied' during hash discovery is real but harmless — Nix prints it as error (ignored) and still emits the got: hash line nix-update needs; it is not what blocked the write-back",
+              "Prefer nixpkgs's tag= over rev= for a real tag (nixpkgs's own fetchers docs state this preference); nix-update treats tag and rev identically given interpolation, so REL-13's example moves to tag with no write-back cost",
+              "REL-09's README block (nix profile add + install fallback) needs no per-implementation variant: confirmed identical exit-code behavior on CppNix 2.31.5, 2.35.2, and Lix 2.95.2",
+              "REL-16's smoke test generalizes cleanly from git+file: to a real pushed github: tag (Mic92/nixpkgs-review/4.0.0) — run it against the real ref whenever the tag is already pushed, not just a local twin"
+            ],
+            "surprises": [
+              "The wave-1 'cannot rename: Permission denied' report was a red herring: it's a real, reproducible nested-bwrap-sandbox artifact (same class as NixOS/nix#4295) that Nix itself labels 'error (ignored)', and it never blocked hash discovery — the true cause of the missing write-back is nix-update's replace_hash doing a verbatim text match against the OLD evaluated hash VALUE, which never equals the literal source text 'lib.fakeHash'",
+              "REL-13's existing verification method ('confirm rev or the hash changed too') is provably insufficient: a literal, non-interpolated rev/tag causes nix-update to bump version AND rewrite hash to match the stale, un-bumped content — both attributes change, git diff looks like a normal correct update, and nix build succeeds, silently shipping the wrong source under a new version number",
+              "This silent-corruption failure mode argues REL-13 should be escalated from SHOULD to MUST, since the defect is undetectable by the diff-based check the consolidation currently relies on",
+              "tag= and rev= are fully interchangeable from nix-update's perspective (both the correct-write-back and the silent-stale-content failure reproduce identically on both), settling map conflict E24 cleanly",
+              "Determinate Nix 3.22.5 cannot be measured from this corpus at all: the pinned nixpkgs 26.11pre packages only 'fh' (the FlakeHub CLi), no determinate-nix attribute exists anywhere in nixVersions or top-level — it is installer-distributed, not a nixpkgs derivation",
+              "The flake-compat bridge and README profile-add/install lines showed zero new implementation divergence beyond what C3 already found — Lix 2.95.2 and CppNix 2.31.5 are otherwise drop-in equivalent for every command tested"
+            ],
+            "ok": true
+          }
+        ],
+        "consolidation": {
+          "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-release.md",
+          "rule_ids": [
+            "NIX-REL-01 — Read version from the project's own manifest through a source-tree path (./Cargo.toml, ./pyproject.toml); never a literal, never via ${src}",
+            "NIX-REL-02 — Emit the manifest version verbatim; never append a pre<date>_<rev>, +rev, -dirty or -unstable suffix, not even conditionally",
+            "NIX-REL-03 — Do not read self.rev/shortRev/dirtyShortRev/lastModified/revCount in an exported derivation; accept drvPath churn only as a knowing opt-in",
+            "NIX-REL-04 — Where self metadata is read, use self.shortRev or self.dirtyShortRev or \"unknown\"; never expect rev under path: or revCount under github:",
+            "NIX-REL-05 — Ship default.nix/shell.nix through github:NixOS/flake-compat (flake = false) only; never edolstra or nix-community flake-compat",
+            "NIX-REL-06 — Take no FlakeHub input and run no flakehub-push in fleet flakes; FlakeHub publishers publish tagged releases only",
+            "NIX-REL-07 — Release by the project's existing vX.Y.Z tags; invent no flake-only version; document github:<owner>/<repo>/vX.Y.Z; D flakes version by lock revision",
+            "NIX-REL-08 — Refresh flake.lock in its own commit before the tag; the tag commit never modifies flake.lock",
+            "NIX-REL-09 — Give A/D READMEs nix run, nix profile add with an install fallback comment, and an input snippet; never nix-env -i or --accept-flake-config",
+            "NIX-REL-10 — Rename or remove outputs over two releases behind the warning mechanism that fits (lib.warn, warnOnInstantiate, tree map, mkRenamedOptionModule)",
+            "NIX-REL-11 — Never pass abort-on-warn to nix flake check or a whole-flake build; scope it to named current attributes",
+            "NIX-REL-12 — State compatibility as pinned CppNix + NIX-GATE-16 floor + Lix advisory + Determinate untested + flakes experimental (RFC 136)",
+            "NIX-REL-13 — Interpolate a forge fetcher's ref from finalAttrs.version (tag = \"v${finalAttrs.version}\"); never a literal version-shaped rev/tag; verify the fetched URL contains the version",
+            "NIX-REL-14 — Keep fleet CLIs nixpkgs-ready without submitting: by-name package.nix (NIX-PKG-06), three-attribute swap, updateScript or opt-out comment",
+            "NIX-REL-15 — Stand up no public substituter; if one exists, document the nix.conf pair as explicit opt-in and never call nixConfig automatic",
+            "NIX-REL-16 — Before announcing, nix run the pushed github:<owner>/<repo>/<tag> from a clean store and require --version to print the version",
+            "NIX-REL-17 — Leave a literal SRI hash for nix-update, never the lib.fakeHash symbol, and grep for leftover fake-hash symbols after every run"
+          ],
+          "conflicts_resolved": [
+            "[vt] run 7 (literal ref: only version changed) vs [w3] R3 (version and stale hash changed): both right; vt's twin carried the lib.fakeHash symbol, which replace_hash never matches",
+            "REL-13 severity: SHOULD raised to MUST; failure ships old bytes under the new version with exit 0 and a green build; C10 replacement check watched red/green; the old environment-fault basis was a misdiagnosis",
+            "REL-13 verification: 'git diff shows the hash changed too' went green on the violation, so it was replaced by C10 (src.url contains version, authoritative) plus a C11 grep pre-screen",
+            "Map E24: REL-13 example switched from rev to tag = \"v${finalAttrs.version}\" (measured identical); NIX-PKG-02 keeps the tag-vs-rev choice",
+            "[w3] grep 'rev = \"v[0-9]' misses bare-semver tags (nixpkgs-review 4.0.0): widened to '(rev|tag) = \"v?[0-9]+\\.[0-9]', watched red on ref-grep/bad-bare, green on a 40-hex rev; demoted to a pre-screen (zed flake-compat pin false positive)",
+            "Map E10: PKG-01 citations corrected to PKG-06 in REL-01, REL-14, Verdict 8, Dropped and conflict 7; REL-14 owns updateScript and no longer cites PKG-13",
+            "REL-17 vs NIX-PKG-04 (reset to lib.fakeHash): a seam, not a contradiction; PKG-04 governs hand edits, REL-17 governs nix-update runs",
+            "[w3] exemplar claim that sxyazi/yazi uses rev = \"v${finalAttrs.version}\" is false (grep empty; src is local), corrected in Applied"
+          ],
+          "needs_another_round": [
+            "release/nix-update-cargohash — does nix-update -F without --src-only write back a cargoHash primed with lib.fakeHash, and a literal old cargoHash? Code reading says fail/succeed via the same replace_hash; only the src hash was run",
+            "packaging/fleet-provenance — does ocx's vergen build timestamp honour SOURCE_DATE_EPOCH in the Nix sandbox, so REL-03's no-churn also holds for output hashes? (NIX-PKG rerun)",
+            "release/flakehub-rolling — only if owner Q1 flips: prototype a tagged-only flakehub-push and confirm on a live project that a tag >=0.2.0 shadows rolling releases"
+          ],
+          "must_count": 7
+        }
+      },
+      {
+        "group": "generated-flakes",
+        "dives": [
+          {
+            "slug": "verification-rerun-w3",
+            "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-generated-flakes/verification-rerun-w3.md",
+            "sources_count": 16,
+            "verifications_run": 12,
+            "top_rules": [
+              "autoPatchelfHook goes on every *-linux package unconditionally (gate on stdenv.hostPlatform.system, never on a libc tag) — libc tagging drifts and the hook is a no-op on static ELFs",
+              "A bare-only first-match platform selector silently drops amazon/corretto (glibc+musl, no bare offer) and misroutes astral-sh/ruff to the wrong manifest — measured on real index data, not hypothetical",
+              "Never write '$${var}' expecting one literal $ plus interpolation: Nix's indented and double-quoted strings both treat bare $$ before { as an escape for literal ${, silently killing the interpolation — build the splice by string concatenation instead",
+              "A translator implements only the interpolation-token forms a live census confirms are used (121/122 real values use bare ${installPath}; every other documented form is 0/122) — untested forms stay a throw, not speculative plumbing",
+              "An entrypoint launcher must wrap the package's own already-env-composed binary, never the raw pre-wrapper payload, or every declared env var silently vanishes for that one entry point",
+              "A generated package's meta.description/meta.homepage come from the ocx package index's own desc.description/upstream.repository_url fields, never from OCI annotations — 0/1720 image indexes carry description or url at all",
+              "org.opencontainers.image.source is not a homepage: it names the ocx-contrib mirror repository, present on 98.3% of packages, and mapping it to meta.homepage would misdirect every consumer to the wrong repo",
+              "nix run on a multi-binary package with no mainProgram does not 'resolve' — it fails loudly looking for $out/bin/<pname> — so no rule or doc example may claim nix run <flake>#<multi-bin-pkg> works without having actually run it"
+            ],
+            "surprises": [
+              "NIX-GEN-16's own specified verification grep (checking for 'contents: write'/'git push'/'create-pull-request') is not admissible: it matches both a direct-push twin and a PR-based twin, since a PR action legitimately needs contents: write too — the rule needs a two-stage check (git-push files that never also mention a PR-creation action)",
+              "Fixing NIX-GEN-20's shell-injection bug introduced a second, unrelated Nix escaping bug: writing the corrected splice as one indented-string literal ($${var}) silently disabled interpolation entirely, because Nix treats bare $$ before { as an escape for literal ${ — this is undocumented-feeling behavior that produces no error, just wrong output",
+              "ghcr.io's manifest endpoint (not the blob endpoint) 404s without an explicit Accept: application/vnd.oci.image.manifest.v1+json header even with a valid bearer token — indistinguishable from a genuinely missing digest unless you know to add it",
+              "amazon/corretto has glibc and musl linux/amd64 offers but literally no bare manifest at all, so any generator that assumes every package has a bare fallback silently drops a real, currently-shipping package",
+              "0/1720 OCI image indexes in the ocx index carry org.opencontainers.image.description or .url — the D-shape description/homepage requirement can only ever be satisfied from the ocx package index's own metadata file, never from the OCI layer NIX-GEN-14 already reads for license",
+              "kitware/cmake's real per-platform config blobs genuinely differ (PATH=${installPath}/bin on linux vs ${installPath}/CMake.app/Contents/bin on darwin), confirming the 'two registry hops per platform, never copy one platform's blob onto another' rule with live data rather than an assumption"
+            ],
+            "ok": true
+          }
+        ],
+        "consolidation": {
+          "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-generated-flakes.md",
+          "rule_ids": [
+            "NIX-GEN-01 — Commit data.json and read it with fromJSON/readFile; never fetch registry or index data at eval time",
+            "NIX-GEN-02 — Generate via an ocx subcommand reusing platform.rs; keep no platform logic in the flake repo (now watched red/green, gen02/)",
+            "NIX-GEN-03 — Emit one version per unique image-index digest with a canonical-tag order; expose other tags as aliases",
+            "NIX-GEN-04 — Select offers through ocx's relation with a {libc.glibc} host; never first-match on (os, arch) (now watched: ruff misrouted, corretto dropped)",
+            "NIX-GEN-05 — Resolve manifest and config blob per (package, platform); never copy env/binaries across platforms; send the OCI Accept header on manifest GETs (now watched, gen05/)",
+            "NIX-GEN-06 — Put latest only in flat packages.<sys>.<ns>-<pkg>; put all versions in legacyPackages.<sys>.<ns>.<pkg>.\"<ver>\"",
+            "NIX-GEN-07 — Make the overlay add exactly one attribute, ocx",
+            "NIX-GEN-08 — Fetch layers with fetchurl plus curlOptsList Authorization: Bearer QQ==",
+            "NIX-GEN-09 — Set hash to the OCI digest verbatim, stored once; never convertHash",
+            "NIX-GEN-10 — Never commit resolved SAS blob URLs, --location-trusted or lib.fakeHash",
+            "NIX-GEN-11 — Give every *-linux package autoPatchelfHook plus stdenv.cc.cc.lib regardless of libc tag",
+            "NIX-GEN-12 — Always set meta.sourceProvenance = binaryNativeCode and meta.platforms",
+            "NIX-GEN-13 — Set mainProgram only with exactly one binary; never show nix run on a multi-binary package",
+            "NIX-GEN-14 — Split SPDX expressions into ids, map with getLicenseFromSpdxIdOr, omit license when absent (packages-only abort-on-warn check)",
+            "NIX-GEN-15 — Gate every update on a sandboxed smoke run plus --rebuild of changed FODs, not just flake check --no-build",
+            "NIX-GEN-16 — Land updates as reviewed PRs under an App token; never push directly (verification replaced by a two-stage grep)",
+            "NIX-GEN-17 — Keep every digest; emit data.json canonically (jq -S)",
+            "NIX-GEN-18 — Once status is populated, keep yanked versions in legacyPackages only and lib.warn deprecated ones; invent no signal until then",
+            "NIX-GEN-19 — Ignore only named sonames of non-primary binaries in autoPatchelfIgnoreMissingDeps; never [\"*\"]",
+            "NIX-GEN-20 — Translate env to makeWrapper flags in array order with segment escaping; splice only $installPath; generator inlines self.env textually (never a $KEY splice); throw on every other token, checking every segment",
+            "NIX-GEN-21 — (new) Source meta.description/homepage from the package index's desc.description/upstream.repository_url; never from OCI annotations, never .source",
+            "NIX-GEN-22 — (new) Wrap entrypoints around the env-wrapped bin/<command> with per-element --add-flags; throw on a non-empty entrypoints array the reader does not implement"
+          ],
+          "conflicts_resolved": [
+            "NIX-GEN-20 vs w3 token table: w3's '${self.env.KEY} -> spliced \"$KEY\"' overruled. The splice expands in the builder at build time, not at wrapper run time. Rule rewritten: the generator inlines textually and the reader throws. Shell-level twin red (SDK_TOOL=/bin/tool, exit 1) and green (exit 0) in nix-generated-flakes-rev3/gen20-selfenv/",
+            "NIX-GEN-20 vs prototype renderChunk: splitting on the first token only lets a second token (ocx's own ${deps...} example) pass through as literal text. Rule now requires a residual-${ check on every segment. Found by reading only",
+            "NIX-GEN-16: old grep watched failing to go green (it matched contents: write on the compliant twin). Replaced by the two-stage git-push-without-create-pull-request grep, watched red/green in w3; gh pr create workflows are flagged for manual reading",
+            "Map E26: Verdict 3's claim that 'nix run #kitware.cmake.\"4.4.2\"' resolves was wrong; it fails with 'unable to execute …/bin/kitware-cmake'. The example is now measured actionlint; GEN-13 text is kept",
+            "Map E15 / M-E-31: D description and homepage come from the package index (125/125 desc.description, 123/125 repository_url; 0/1720 OCI description or url; .source names the mirror), re-measured at index@9eba2cc3929b. New GEN-21. GEN-14 still overrides PKG-07's license clause for D",
+            "w3 inconsistency: its summary gives 'exit 0' for the nix run failure, but w2 measured exit 1 for the same error. No w3 exit code is claimed",
+            "w3 proposed a jq presence check for M-E-31 that was never watched red. Not adopted; replaced by a grep watched red/green in rev3/gen21/",
+            "Verdict 10: the prototype's three breaks (GEN-11, 17, escaping part of 20) are now recorded as fixed (w3 checklist, plus cmp and hook gate re-checked by hand). Four latent breaks remain: self.env splice, mixed-token pass-through, entrypoints/dependencies silently dropped, synthesized description/no homepage"
+          ],
+          "needs_another_round": [
+            "environment — The toolchain is gone: ~/.cache/research-lang/nix-tools has only run.sh (no .nix-portable store), and the fixtures and exemplars trees are missing. run.sh fails with 'bwrap: Can't find source path …/emptyroot', exit 1. Restore the toolchain and fixture trees before any Nix re-run; every cited fixture path except nix-generated-flakes-rev3/ dangles",
+            "NIX-GEN-20 — Run a Nix-level twin of self.env inlining through the real mk-ocx-env.nix, and of the mixed-token throw (${self.installPath}/bin:${deps.cmake.installPath}/bin must throw)",
+            "NIX-GEN-21 — Add a flake-level check that evaluated meta.description and meta.homepage equal the index fields, watched red and green",
+            "NIX-GEN-22 — Watch the reader throw on a non-empty entrypoints or dependencies array, and wire entrypoints into the prototype",
+            "M-E-10 — Prebuilt Darwin binaries: are install_name_tool or codesign needed? This needs an aarch64-darwin builder",
+            "Applied/README — The nix shell #kitware.cmake.\"4.4.2\" example for multi-binary packages was never run"
+          ],
+          "must_count": 19
+        }
+      }
+    ],
+    "surprises": [
+      "inputs/verification-rerun-w3: nix-installer's default-systems `nix flake check` is NOT silent when run with `-v`: it prints continuous hydraJobs matrix progress (max gap 34s over 300s) — the earlier 'silent hang' finding likely came from a run without -v, not from an actual hang",
+      "inputs/verification-rerun-w3: Grimoire's real repo (grimoire-rs/grimoire) has NO flake.nix at all as of 2026-09-27 — the self-submodules-remote open question's premise (a flake.nix declaring inputs.self.submodules) doesn't exist yet upstream",
+      "inputs/verification-rerun-w3: Grimoire's real repo independently uses Git LFS for assets/logo.png (unrelated to its two forked submodules), which broke Lix's plain git clone outright — a real-world LFS/submodule interaction no synthetic fixture had surfaced",
+      "inputs/verification-rerun-w3: The real HTTPS-LFS-remote test against microsoft/vscode-docs genuinely engaged Nix's LFS batch API (a real, non-mocked 429 from github.com) but was blocked by the sandbox's shared-egress GitHub rate limit, not by any protocol or Nix defect",
+      "inputs/verification-rerun-w3: The `github:` fetcher type outright rejects `submodules`/`lfs` URL parameters (parse error), forcing `git+https:` for any input needing either flag — this wasn't documented anywhere in the prior NIX-INP consolidation",
+      "inputs/verification-rerun-w3: Same-tree, never-referenced flake inputs are NOT lazily skipped on stock CppNix 2.35.2: `nix flake lock` alone fetches and store-realizes an input zero outputs ever touch, settling NIX-INP-02 as MUST rather than SHOULD",
+      "packaging/verification-rerun-w3: nix-packaging.md's own prior verification claim (\"0 git dependencies in ocx's Cargo.lock\") was wrong: re-running the identical grep on the live repo returns 10, from astral-sh/uv and astral-sh/pubgrub git deps pulled in via ocx_python.",
+      "packaging/verification-rerun-w3: ocx's CLI has no --version flag at all — it only reports its version through a custom `version` subcommand, which silently broke the standard versionCheckHook default (\"unexpected argument '--version' found\", not an obviously-packaging-related error).",
+      "packaging/verification-rerun-w3: A single non-source attribute change (just versionCheckProgramArg) forced a full ~6-7 minute recompile of all ~300 crates, because buildRustPackage is one non-incremental derivation — warming the cargo-vendor-dir derivation saved the fetch step but not the dominant compile cost.",
+      "packaging/verification-rerun-w3: The Rust `cmake` wrapper crate compiles in every aws-lc-sys build regardless of whether a real `cmake` binary is ever invoked; the actual cc-vs-cmake choice is gated by is_bindgen_required()/FIPS/sanitizer/override deep in aws-lc-sys's own builder/main.rs, not by cmake's mere presence in Cargo.lock.",
+      "packaging/verification-rerun-w3: The shared research-lang Nix toolchain (run.sh, .nix-portable, conf, all fixtures) was progressively deleted mid-dive by an apparently concurrent sibling wave-3 process, cutting three verifications short (closure size, --rebuild determinism, the PKG-16 checks-derivation build) as a genuine, externally-caused environment fault rather than anything this session did.",
+      "packaging/verification-rerun-w3: GitHub's REST API returned schema-shaped type stubs instead of real JSON values for directory-listing calls in this sandbox's curl (api.github.com), while raw.githubusercontent.com file fetches and codeload.github.com tarballs worked normally — a sandbox quirk worth knowing before assuming a GitHub API 'empty' result means the path doesn't exist.",
+      "release/verification-rerun-w3: The wave-1 'cannot rename: Permission denied' report was a red herring: it's a real, reproducible nested-bwrap-sandbox artifact (same class as NixOS/nix#4295) that Nix itself labels 'error (ignored)', and it never blocked hash discovery — the true cause of the missing write-back is nix-update's replace_hash doing a verbatim text match against the OLD evaluated hash VALUE, which never equals the literal source text 'lib.fakeHash'",
+      "release/verification-rerun-w3: REL-13's existing verification method ('confirm rev or the hash changed too') is provably insufficient: a literal, non-interpolated rev/tag causes nix-update to bump version AND rewrite hash to match the stale, un-bumped content — both attributes change, git diff looks like a normal correct update, and nix build succeeds, silently shipping the wrong source under a new version number",
+      "release/verification-rerun-w3: This silent-corruption failure mode argues REL-13 should be escalated from SHOULD to MUST, since the defect is undetectable by the diff-based check the consolidation currently relies on",
+      "release/verification-rerun-w3: tag= and rev= are fully interchangeable from nix-update's perspective (both the correct-write-back and the silent-stale-content failure reproduce identically on both), settling map conflict E24 cleanly",
+      "release/verification-rerun-w3: Determinate Nix 3.22.5 cannot be measured from this corpus at all: the pinned nixpkgs 26.11pre packages only 'fh' (the FlakeHub CLi), no determinate-nix attribute exists anywhere in nixVersions or top-level — it is installer-distributed, not a nixpkgs derivation",
+      "release/verification-rerun-w3: The flake-compat bridge and README profile-add/install lines showed zero new implementation divergence beyond what C3 already found — Lix 2.95.2 and CppNix 2.31.5 are otherwise drop-in equivalent for every command tested",
+      "generated-flakes/verification-rerun-w3: NIX-GEN-16's own specified verification grep (checking for 'contents: write'/'git push'/'create-pull-request') is not admissible: it matches both a direct-push twin and a PR-based twin, since a PR action legitimately needs contents: write too — the rule needs a two-stage check (git-push files that never also mention a PR-creation action)",
+      "generated-flakes/verification-rerun-w3: Fixing NIX-GEN-20's shell-injection bug introduced a second, unrelated Nix escaping bug: writing the corrected splice as one indented-string literal ($${var}) silently disabled interpolation entirely, because Nix treats bare $$ before { as an escape for literal ${ — this is undocumented-feeling behavior that produces no error, just wrong output",
+      "generated-flakes/verification-rerun-w3: ghcr.io's manifest endpoint (not the blob endpoint) 404s without an explicit Accept: application/vnd.oci.image.manifest.v1+json header even with a valid bearer token — indistinguishable from a genuinely missing digest unless you know to add it",
+      "generated-flakes/verification-rerun-w3: amazon/corretto has glibc and musl linux/amd64 offers but literally no bare manifest at all, so any generator that assumes every package has a bare fallback silently drops a real, currently-shipping package",
+      "generated-flakes/verification-rerun-w3: 0/1720 OCI image indexes in the ocx index carry org.opencontainers.image.description or .url — the D-shape description/homepage requirement can only ever be satisfied from the ocx package index's own metadata file, never from the OCI layer NIX-GEN-14 already reads for license",
+      "generated-flakes/verification-rerun-w3: kitware/cmake's real per-platform config blobs genuinely differ (PATH=${installPath}/bin on linux vs ${installPath}/CMake.app/Contents/bin on darwin), confirming the 'two registry hops per platform, never copy one platform's blob onto another' rule with live data rather than an assumption"
+    ],
+    "needs_another_round": [
+      "inputs: inputs-lock: M-B-17 — does a consumer fetch a dependency's never-accessed inherited lock node? Fixture: hand-written dep lock entry at http://127.0.0.1:9 with fake narHash; consumer lock+eval must succeed, accessing twin must fail; CppNix 2.35.2, 2.31.5, Lix. Decides INP-02 severity and REL-05 flake-compat cost",
+      "inputs: checks-ci: M-F-18 — does one legitimate >60 s fetch or IFD build red INP-13's gap check (local server sleeping 90 s serving a correct FOD)?",
+      "inputs: inputs-lock: self.lfs against a real HTTPS LFS remote — w3 hit GitHub HTTP 429 on shared egress; retry or use an owner-provided repo with flake.nix + LFS",
+      "inputs: impls: Lix tracking — self.lfs absence, follow-cycle stack overflow, follows-removal proposal (M-B-13), re-check each Lix release",
+      "inputs: environment: nix-tools/.nix-portable store and fixtures/ are missing (run.sh exits 1 in bwrap); every re-run is blocked until restored",
+      "packaging: packaging/ocx-determinism-and-closure — Does nix build --rebuild reproduce ocx's output hash (M-D-24, w3 R8), and what is its closure size (R9)? Blocked: the shared toolchain, fixtures and exemplar corpus are gone (run.sh fails with bwrap emptyroot missing, P15)",
+      "packaging: packaging/pkg16-checks-form — Does w3 §7's rust-toolchain-floor runCommand go red on channel 99.0.0 and green on 1.95.0 (E25, R7), and should it read the channel from rust-toolchain.toml or from workspace.package.rust-version?",
+      "packaging: packaging/rust-build-cost — Does crane's buildDepsOnly split bring ocx's metadata-only rebuild below PKG-20's 7m12s, and is the extra input worth it under NIX-INP?",
+      "packaging: packaging/darwin-and-aarch64 — Do aws-lc-sys and the Darwin -sys crates build with pkg-config only on aarch64-darwin and aarch64-linux (M-D-23)? Needs a native runner; this host cannot",
+      "packaging: inputs/self-submodules-remote — Does inputs.self.submodules work for github:ocx-sh/{grimoire,ocx}/<rev> under the 2.31 floor, under Lix with flake-self-attrs, and under Determinate Nix?",
+      "release: release/nix-update-cargohash — does nix-update -F without --src-only write back a cargoHash primed with lib.fakeHash, and a literal old cargoHash? Code reading says fail/succeed via the same replace_hash; only the src hash was run",
+      "release: packaging/fleet-provenance — does ocx's vergen build timestamp honour SOURCE_DATE_EPOCH in the Nix sandbox, so REL-03's no-churn also holds for output hashes? (NIX-PKG rerun)",
+      "release: release/flakehub-rolling — only if owner Q1 flips: prototype a tagged-only flakehub-push and confirm on a live project that a tag >=0.2.0 shadows rolling releases",
+      "generated-flakes: environment — The toolchain is gone: ~/.cache/research-lang/nix-tools has only run.sh (no .nix-portable store), and the fixtures and exemplars trees are missing. run.sh fails with 'bwrap: Can't find source path …/emptyroot', exit 1. Restore the toolchain and fixture trees before any Nix re-run; every cited fixture path except nix-generated-flakes-rev3/ dangles",
+      "generated-flakes: NIX-GEN-20 — Run a Nix-level twin of self.env inlining through the real mk-ocx-env.nix, and of the mixed-token throw (${self.installPath}/bin:${deps.cmake.installPath}/bin must throw)",
+      "generated-flakes: NIX-GEN-21 — Add a flake-level check that evaluated meta.description and meta.homepage equal the index fields, watched red and green",
+      "generated-flakes: NIX-GEN-22 — Watch the reader throw on a non-empty entrypoints or dependencies array, and wire entrypoints into the prototype",
+      "generated-flakes: M-E-10 — Prebuilt Darwin binaries: are install_name_tool or codesign needed? This needs an aarch64-darwin builder",
+      "generated-flakes: Applied/README — The nix shell #kitware.cmake.\"4.4.2\" example for multi-binary packages was never run"
+    ],
+    "must_count": 43
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Dive"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 2,
+      "title": "Consolidate"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "dive:inputs/verification-rerun-w3",
+      "phaseIndex": 1,
+      "phaseTitle": "Dive",
+      "agentId": "ad6ea0597aa4fddee",
+      "model": "claude-sonnet-5",
+      "state": "done",
+      "startedAt": 1790508565457,
+      "queuedAt": 1790508565442,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agen…",
+      "promptPreview": "Model rationale: sonnet — online research, source digestion and fixture runs; volume work whose cost is in pages read and commands run, not in judgment.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is wave 3 of the research program that makes an AI-agent fleet expert in Nix: the language, nixpkgs packaging, and above all authoring, maintaining, versioning and publishing fla…",
+      "promptFramed": true,
+      "lastProgressAt": 1790510399989,
+      "tokens": 258890,
+      "toolCalls": 83,
+      "durationMs": 1834532,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-inputs/verification-rerun-w3.md\",\"sources_count\":17,\"verifications_run\":10,\"top_rules\":[\"CI must run `nix flake check`/`show` with `-v` and enforce both a wall-clock timeout AND a 60s-max-gap between stage lines — never wall-clock alone, never without -v (nix-installer looked silent without -v, wasn't)\",\"NIX-INP-02…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "dive:packaging/verification-rerun-w3",
+      "phaseIndex": 1,
+      "phaseTitle": "Dive",
+      "agentId": "a36008ca0caf2ec34",
+      "model": "claude-sonnet-5",
+      "state": "done",
+      "startedAt": 1790508565461,
+      "queuedAt": 1790508565460,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agen…",
+      "promptPreview": "Model rationale: sonnet — online research, source digestion and fixture runs; volume work whose cost is in pages read and commands run, not in judgment.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is wave 3 of the research program that makes an AI-agent fleet expert in Nix: the language, nixpkgs packaging, and above all authoring, maintaining, versioning and publishing fla…",
+      "promptFramed": true,
+      "lastProgressAt": 1790510928858,
+      "tokens": 281391,
+      "toolCalls": 136,
+      "durationMs": 2362221,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-packaging/verification-rerun-w3.md\",\"sources_count\":14,\"verifications_run\":3,\"top_rules\":[\"ocx builds end to end under buildRustPackage (cargoBuildFlags = [\\\"-p\\\" \\\"ocx\\\" \\\"-p\\\" \\\"ocx_shim\\\"], pkg-config only) — both binaries installed and stripped, watched green.\",\"Correction to nix-packaging.md's V-fb #11: ocx's …"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 3,
+      "label": "dive:release/verification-rerun-w3",
+      "phaseIndex": 1,
+      "phaseTitle": "Dive",
+      "agentId": "aca6aacdab92201cc",
+      "model": "claude-sonnet-5",
+      "state": "done",
+      "startedAt": 1790508565463,
+      "queuedAt": 1790508565462,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agen…",
+      "promptPreview": "Model rationale: sonnet — online research, source digestion and fixture runs; volume work whose cost is in pages read and commands run, not in judgment.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is wave 3 of the research program that makes an AI-agent fleet expert in Nix: the language, nixpkgs packaging, and above all authoring, maintaining, versioning and publishing fla…",
+      "promptFramed": true,
+      "lastProgressAt": 1790509603468,
+      "tokens": 209981,
+      "toolCalls": 73,
+      "durationMs": 1036830,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-release/verification-rerun-w3.md\",\"sources_count\":14,\"verifications_run\":7,\"top_rules\":[\"MUST (escalated from SHOULD): rev/tag in a version-tracking package.nix must be interpolated (rev = \\\"v${finalAttrs.version}\\\") — a literal ref lets nix-update bump version and rewrite hash to match stale, unrelated content, un…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 4,
+      "label": "dive:generated-flakes/verification-rerun-w3",
+      "phaseIndex": 1,
+      "phaseTitle": "Dive",
+      "agentId": "afab53b58d3f064c3",
+      "model": "claude-sonnet-5",
+      "state": "done",
+      "startedAt": 1790508565464,
+      "queuedAt": 1790508565463,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agen…",
+      "promptPreview": "Model rationale: sonnet — online research, source digestion and fixture runs; volume work whose cost is in pages read and commands run, not in judgment.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is wave 3 of the research program that makes an AI-agent fleet expert in Nix: the language, nixpkgs packaging, and above all authoring, maintaining, versioning and publishing fla…",
+      "promptFramed": true,
+      "lastProgressAt": 1790510397266,
+      "tokens": 357959,
+      "toolCalls": 128,
+      "durationMs": 1830628,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-generated-flakes/verification-rerun-w3.md\",\"sources_count\":16,\"verifications_run\":12,\"top_rules\":[\"autoPatchelfHook goes on every *-linux package unconditionally (gate on stdenv.hostPlatform.system, never on a libc tag) — libc tagging drifts and the hook is a no-op on static ELFs\",\"A bare-only first-match platform …"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 5,
+      "label": "revise:release",
+      "phaseIndex": 2,
+      "phaseTitle": "Consolidate",
+      "agentId": "a1f0a054accdc7b68",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790509603498,
+      "queuedAt": 1790509603474,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agen…",
+      "promptPreview": "Model rationale: opus — synthesis across conflicting sources plus normative decisions that later become enforced rules.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is wave 3 of the research program that makes an AI-agent fleet expert in Nix: the language, nixpkgs packaging, and above all authoring, maintaining, versioning and publishing flakes at a high quality bar with gr…",
+      "promptFramed": true,
+      "lastProgressAt": 1790509939131,
+      "tokens": 193723,
+      "toolCalls": 43,
+      "durationMs": 335632,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-release.md\",\"rule_ids\":[\"NIX-REL-01 — Read version from the project's own manifest through a source-tree path (./Cargo.toml, ./pyproject.toml); never a literal, never via ${src}\",\"NIX-REL-02 — Emit the manifest version verbatim; never append a pre<date>_<rev>, +rev, -dirty or -unstable suffix, not even conditionall…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 6,
+      "label": "revise:generated-flakes",
+      "phaseIndex": 2,
+      "phaseTitle": "Consolidate",
+      "agentId": "a35c04d67e29f4f0e",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790510397282,
+      "queuedAt": 1790510397280,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agen…",
+      "promptPreview": "Model rationale: opus — synthesis across conflicting sources plus normative decisions that later become enforced rules.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is wave 3 of the research program that makes an AI-agent fleet expert in Nix: the language, nixpkgs packaging, and above all authoring, maintaining, versioning and publishing flakes at a high quality bar with gr…",
+      "promptFramed": true,
+      "lastProgressAt": 1790510892015,
+      "tokens": 164033,
+      "toolCalls": 24,
+      "durationMs": 494733,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-generated-flakes.md\",\"rule_ids\":[\"NIX-GEN-01 — Commit data.json and read it with fromJSON/readFile; never fetch registry or index data at eval time\",\"NIX-GEN-02 — Generate via an ocx subcommand reusing platform.rs; keep no platform logic in the flake repo (now watched red/green, gen02/)\",\"NIX-GEN-03 — Emit one vers…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 7,
+      "label": "revise:inputs",
+      "phaseIndex": 2,
+      "phaseTitle": "Consolidate",
+      "agentId": "a49840816ac1ece3d",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790510399992,
+      "queuedAt": 1790510399990,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agen…",
+      "promptPreview": "Model rationale: opus — synthesis across conflicting sources plus normative decisions that later become enforced rules.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is wave 3 of the research program that makes an AI-agent fleet expert in Nix: the language, nixpkgs packaging, and above all authoring, maintaining, versioning and publishing flakes at a high quality bar with gr…",
+      "promptFramed": true,
+      "lastProgressAt": 1790510822373,
+      "tokens": 192625,
+      "toolCalls": 19,
+      "durationMs": 420256,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-inputs.md\",\"rule_ids\":[\"NIX-INP-01 — Decide nixpkgs follows by how each input is consumed; comment every deliberate non-follow\",\"NIX-INP-02 — Keep library/module flake roots at zero inputs or nixpkgs-lib only; put test inputs in a sub-flake (SHOULD, MUST upgrade rejected)\",\"NIX-INP-03 — Name a branch in url and let…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 8,
+      "label": "revise:packaging",
+      "phaseIndex": 2,
+      "phaseTitle": "Consolidate",
+      "agentId": "a3bdd7e9582dafd7c",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790510928862,
+      "queuedAt": 1790510928860,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agen…",
+      "promptPreview": "Model rationale: opus — synthesis across conflicting sources plus normative decisions that later become enforced rules.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is wave 3 of the research program that makes an AI-agent fleet expert in Nix: the language, nixpkgs packaging, and above all authoring, maintaining, versioning and publishing flakes at a high quality bar with gr…",
+      "promptFramed": true,
+      "lastProgressAt": 1790511299708,
+      "tokens": 169260,
+      "toolCalls": 40,
+      "durationMs": 370846,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-packaging.md\",\"rule_ids\":[\"NIX-PKG-01 — Fetch src with a nixpkgs fetcher and SRI hash = \\\"sha256-…\\\"; never builtins, sha256 =, cargoSha256 or vendorSha256 (SHOULD)\",\"NIX-PKG-02 — Pin git sources with a full 40-hex rev or a real tag; never short hex, a branch, or tag = \\\"<hex>\\\" (MUST)\",\"NIX-PKG-03 — Never hand-wri…"
+    }
+  ],
+  "totalTokens": 1827862,
+  "totalToolCalls": 546
+}

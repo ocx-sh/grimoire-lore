@@ -1,0 +1,151 @@
+{
+  "actionlint": {
+    "actionlint": {
+      "aliases": {
+        "1": "1.7.12",
+        "1.7": "1.7.12",
+        "latest": "1.7.12"
+      },
+      "latest": "1.7.12",
+      "versions": {
+        "1.7.12": {
+          "binaries": [
+            "actionlint"
+          ],
+          "licenses": [
+            "MIT"
+          ],
+          "platforms": {
+            "aarch64-darwin": {
+              "layerDigest": "sha256:cb23fd4332b273dc990babcd69671acf4e72c6df0198b19acfad2d788a07a5a6",
+              "libc": null,
+              "stripComponents": 0
+            },
+            "x86_64-linux": {
+              "layerDigest": "sha256:26716a01d50c9492fa993d189f3aec1ea938bcd1985db4c8445bea67070c45cd",
+              "libc": null,
+              "stripComponents": 0
+            }
+          }
+        }
+      }
+    }
+  },
+  "amazon": {
+    "corretto": {
+      "aliases": {
+        "21": "21.0.9",
+        "latest": "21.0.9"
+      },
+      "latest": "21.0.9",
+      "versions": {
+        "21.0.9": {
+          "_comment": "real config blob fetched live 2026-09-27 (ghcr.io/v2/ocx-contrib/amazon/corretto, manifest sha256:8da2721dd70c89739227f5159d098fa609340a18afc2ec7c09e2b6b1b0f80741, config sha256:769dd0d019ddd0c2600502e386e689a3ea71e9234c192c21e36057d7da11d420); env/binaries copied verbatim; layer is synthetic (real layer is 209MB, out of scope for this fetch-mechanism-agnostic env test — see README)",
+          "binaries": [
+            "java",
+            "javac"
+          ],
+          "env": [
+            {
+              "key": "PATH",
+              "required": true,
+              "type": "path",
+              "value": "${installPath}/bin",
+              "visibility": "public"
+            },
+            {
+              "key": "JAVA_HOME",
+              "type": "constant",
+              "value": "${installPath}",
+              "visibility": "public"
+            }
+          ],
+          "licenses": [
+            "GPL-2.0-only WITH Classpath-exception-2.0"
+          ],
+          "platforms": {
+            "x86_64-linux": {
+              "layerDigest": null,
+              "libc": "glibc",
+              "stripComponents": 0,
+              "synthetic": true
+            }
+          }
+        }
+      }
+    }
+  },
+  "kitware": {
+    "cmake": {
+      "aliases": {
+        "4": "4.4.2",
+        "4.4": "4.4.2",
+        "latest": "4.4.2"
+      },
+      "latest": "4.4.2",
+      "versions": {
+        "4.4.2": {
+          "autoPatchelfIgnoreMissingDeps": [
+            "libxcb.so.1",
+            "libfontconfig.so.1",
+            "libfreetype.so.6"
+          ],
+          "binaries": [
+            "ccmake",
+            "cmake",
+            "cmake-gui",
+            "cpack",
+            "ctest"
+          ],
+          "licenses": [
+            "BSD-3-Clause"
+          ],
+          "platforms": {
+            "aarch64-darwin": {
+              "layerDigest": "sha256:0b438ea6a2dd0b2586d1028102594a643d604557cdcec3e007a5bf928e2905d2",
+              "libc": null,
+              "stripComponents": 0
+            },
+            "x86_64-linux": {
+              "layerDigest": "sha256:5d475a1c16523b4dff8ee44b0b8b281a094d6da64d80cc22f1178e9225cb2a50",
+              "libc": "glibc",
+              "stripComponents": 0
+            }
+          }
+        }
+      }
+    }
+  },
+  "ninja-build": {
+    "ninja": {
+      "aliases": {
+        "1": "1.13.2",
+        "1.13": "1.13.2",
+        "latest": "1.13.2"
+      },
+      "latest": "1.13.2",
+      "versions": {
+        "1.13.2": {
+          "binaries": [
+            "ninja"
+          ],
+          "licenses": [
+            "Apache-2.0"
+          ],
+          "platforms": {
+            "aarch64-darwin": {
+              "layerDigest": "sha256:9b76df0cd7bdbec5b59008ebf37bb8a0533bc583775d5c68aba8a6f9a1a88991",
+              "libc": null,
+              "stripComponents": 0
+            },
+            "x86_64-linux": {
+              "layerDigest": "sha256:a6a29ca649b7d1c415fcba1dd786684348709ec5c9323a35369e91bc14517580",
+              "libc": "glibc",
+              "stripComponents": 0
+            }
+          }
+        }
+      }
+    }
+  }
+}

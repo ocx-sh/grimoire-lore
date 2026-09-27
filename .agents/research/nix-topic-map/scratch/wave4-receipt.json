@@ -1,0 +1,438 @@
+{
+  "summary": "Nix research program phases 4+5 for one wave: sonnet deep dives per commissioned subtopic, pipelined into one opus consolidation (or revision) per group",
+  "agentCount": 7,
+  "logs": [
+    "Wave 4: 4 dives across 3 groups (languagex2, securityx1, modulesx1); revising: none",
+    "Wave 4 done: 3/3 groups consolidated · 17 MUST rules · 24 surprises · 13 follow-ups"
+  ],
+  "result": {
+    "wave": 4,
+    "groups": [
+      {
+        "group": "language",
+        "dives": [
+          {
+            "slug": "evaluation-failures",
+            "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-language/evaluation-failures.md",
+            "sources_count": 16,
+            "verifications_run": 13,
+            "top_rules": [
+              "Read the bare error: line before adding --show-trace; several common rows need no trace at all",
+              "Never string-match a diagnostic without checking nix --version first — the same fault's text differs by implementation and version (class C20, six measured triples)",
+              "Escalate to --show-trace only when the bare error names no rule; nixpkgs 26.11pre already hints at imports/config recursion without it",
+              "Reach for --no-eval-cache whenever a message looks stale after a fix and an identical re-run (NixOS/nix#3872), even though this rig could not force it outside the NixOS module chain",
+              "Never call nix eval --json on anything carrying outPath and expect a structured object back — it silently collapses to the bare path string",
+              "Diagnose \"undefined variable\" by checking for an enclosing `with` first — without one it is a static whole-file error, with one it is genuinely lazy",
+              "Use nixf-diagnose as the first static localization step for undefined-variable/duplicated-attrname, but never as a CI gate (NIX-GATE-07)",
+              "Re-run a recorded implementation-leniency gap before citing it as complete — Lix 2.95.2's schema gap turned out wider than recorded"
+            ],
+            "surprises": [
+              "Lix 2.95.2 accepts an `apps` entry with an unsupported attribute (exit 0) while CppNix 2.31.5/2.35.2 reject it — a third Lix leniency gap beyond the two the prior consolidation recorded (formatter, overlay arity); templates stayed enforced on both",
+              "\"undefined variable\" is not always a lazy runtime error: without an enclosing `with` it is a static, whole-file, parse-time check that fires regardless of which attribute you evaluate; it is genuinely lazy only when an enclosing `with` defers resolution to a runtime lookup",
+              "nix eval --json collapses ANY attrset carrying outPath to that bare string, silently discarding every other requested field — confirmed and promoted to catalog row M-C-16",
+              "nixpkgs 26.11pre already ships a targeted addErrorContext hint for the imports-computed-from-config recursion (lib/modules.nix:268) even though the richer per-attribute trace PR (#370967) is still open and unmerged",
+              "NixOS/nix#8013 (flake reached through a symlink) is still open upstream but did not reproduce at all on CppNix 2.35.2 in this environment — likely silently fixed, issue gone stale",
+              "NixOS/nix#3872's eval-cache staleness could not be forced on a bare flake attribute or nix flake show in this rig; it appears specific to the deep NixOS module-evaluation chain the issue actually reports, not a general flake-eval trap"
+            ],
+            "ok": true
+          },
+          {
+            "slug": "idioms-and-scope",
+            "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-language/idioms-and-scope.md",
+            "sources_count": 14,
+            "verifications_run": 6,
+            "top_rules": [
+              "Never let a rec{} attribute shadow an outer binding of the same name — verified infinite-recursion crash (exit 1) vs a renamed twin (exit 0); nixf's sema-extra-rec catches the opposite, harmless case, not this one.",
+              "Flag `with lib;`/`with pkgs;`/`with builtins;` only when standing alone on its own line at file/module scope — list-scoped `with pkgs; [...]` and single-expression `with types; ...` inside one mkOption are idiomatic and must not be flagged.",
+              "Use lib.recursiveUpdate instead of // whenever a nested key exists non-identically on both sides; the general case has no mechanical check (reading heuristic), only the rec-vs-non-rec subset is catchable via nixf's merge-diff-rec.",
+              "Never interpolate a bare path into a string (\"${./dir}\") just to get it as text — verified it copies the whole directory (272K for a 56-byte payload); toString ./dir is the fix, verified to produce a plain filesystem path with no store copy at all.",
+              "Never call unsafeDiscardStringContext on a value later spliced into a build command — verified nix build then builds only the consumer (the producer's .drv is silently absent) and fails in-sandbox with 'No such file or directory'.",
+              "No silent <nixpkgs>/currentSystem/getEnv reachable from flake outputs — narrowing the corpus grep to actual flake.nix files (not prose or devenv's own impure module system) finds zero silent violations out of 6,975 files.",
+              "Never write an implicit attrpath merge with mixed rec-ness (a = rec {...}; a.b = ...;) — verified CppNix 2.35.2 and 2.31.5 accept it silently, Lix 2.95.2 rejects it at parse time; a real portability break distinct from the (portable, if surprising) // value-drift case.",
+              "Scope `--option abort-on-warn true` to named attributes only (NIX-REL-11, cited not re-derived) — verified a scoped eval aborts correctly while `nix flake show` silently swallows the abort even with the flag set."
+            ],
+            "surprises": [
+              "The `//`-operator rec-merge value drift (stale '1.0' vs expected '1.9') is identical across CppNix 2.35.2, CppNix 2.31.5, and Lix 2.95.2 — it is a portable, universal semantic surprise, not the implementation split the brief expected; the actual Lix divergence only shows up on a different construct (implicit attrpath merge with mixed rec-ness).",
+              "Naive per-1,000-line measurement over 'the exemplars' is dominated 20-to-1 by NixOS/nixpkgs's own 4.5M-line pkgs/ tree (not a 'narrower' clone as the frame claimed); every rate in this dive had to explicitly exclude NixOS/nixpkgs and state that exclusion to be meaningful.",
+              "`with types;`/`with lib.types;` standing alone on their own line account for 149 of 363 'file/module-scope' with-hits — these are actually narrow, single-expression, idiomatic mkOption type declarations, not the nix.dev antipattern; a naive standalone-line grep would over-flag them.",
+              "toString on a path does NOT merely reduce store-copy cost, it eliminates it entirely and produces a plain filesystem-path string with zero /nix/store/ involvement outside a flake context — a categorical difference from string interpolation, not a matter of degree.",
+              "Narrowing the impure-builtins grep from 'every .nix file' (431/344 hits) to just flake.nix files collapses the corpus-wide violation count to exactly 2, both defensible (an explicit --impure escape hatch, and NixOS/nix's own sandbox test fixture) — the map's checkable claim holds far more cleanly than the raw grep suggests.",
+              "nixf's sema-extra-rec and sema-extra-with diagnostics both catch the OPPOSITE end of the risk spectrum from what this dive's danger cases are (unnecessary/unused, not self-shadowing/scope-pollution-while-used) — a clean nixf-diagnose pass gives false confidence on exactly these two rules."
+            ],
+            "ok": true
+          }
+        ],
+        "consolidation": {
+          "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-language.md",
+          "rule_ids": [
+            "NIX-LANG-01 — Never name a rec/let attribute after an outer binding it means to read (MUST; deadnix -L catches let/positional shapes, forced eval catches pattern formals)",
+            "NIX-LANG-02 — Reference files/derivations in builders only via interpolation or lib.fileset.toSource, never toString <path> or unsafeDiscardStringContext (MUST; sandboxed build + builtins.hasContext)",
+            "NIX-LANG-03 — Do not interpolate a whole directory just to get a string or a few files; filter with lib.fileset (SHOULD)",
+            "NIX-LANG-04 — Keep getEnv, nixPath, currentSystem and <lookup> paths out of anything reachable from outputs; shims and --impure script strings only (MUST; getEnv returns \"\" and nixPath [ ] silently)",
+            "NIX-LANG-05 — Never define one attrpath as both rec and non-rec in the same set (MUST; Lix 2.95 eval leg, not nixf)",
+            "NIX-LANG-06 — Treat // as shallow: recursiveUpdate for nested merges, merge-then-derive for rec-computed fields (SHOULD; value check)",
+            "NIX-LANG-07 — No standalone with lib;/with pkgs;/with builtins; at file or module scope; list-scoped and single-expression with lib.types tolerated (SHOULD; grep)",
+            "NIX-LANG-08 — Record nix --version and the input shape before matching any error string; re-test old issues at the pinned version (MUST; reading heuristic, C20)",
+            "NIX-LANG-09 — Localize: bare error line, then --show-trace, then isolate by removal, then --no-eval-cache (SHOULD)",
+            "NIX-LANG-10 — Classify infinite recursion by shape (overlay final/prev, imports-from-config, self-indexing per-system helper, nixpkgs-internal, rec shadow) before fixing; never apply a generic fix (MUST)",
+            "NIX-LANG-11 — Never read nix eval --json of an outPath-carrying value as the whole value; project with --apply or select fields (SHOULD)"
+          ],
+          "conflicts_resolved": [
+            "lint-url-literals floor: NIX-GATE-06 said >=2.35, idioms said 2.34. Measured: 2.34.8 exits 1, while 2.31.5 prints 'unknown setting' and exits 0. The floor is 2.34, and the flag is a silent no-op below it.",
+            "toString ./dir as the fix (idioms LANG-04) is overturned. Inside a flake it has hasContext=false, and the sandboxed build fails with 'No such file or directory' (exit 1). Interpolation is correct for build references.",
+            "'No static tool catches self-shadowing' (idioms) is overturned. deadnix -L flags the let and positional-argument shapes. The pattern-formal shape is a real gap, caught only by forcing the value.",
+            "nixf merge-diff-rec as the check for // over rec (idioms) is overturned. nixf exits 0 on the // fixture and misses the Lix release-note shape m1. The Lix eval leg is the check for mixed-rec merges.",
+            "'No corpus unsafeDiscardStringContext' (idioms) is overturned. There are 20+ instances (crane, home-manager, sops-nix, devenv), all legitimate name/key/prefix uses. The rule scope is confirmed and the grep is a reading prompt only.",
+            "Map M-C-12 premise (undefined variable is lazy) is overturned by evaluation-failures. It is static unless an enclosing `with` defers it, and this became LANG-07's rationale.",
+            "M-C-13 split into two constructs. // over rec gives a portable stale value ('1.0' on 3 implementations): LANG-06 SHOULD. The implicit mixed-rec attrpath merge is rejected only by Lix: LANG-05 MUST.",
+            "idioms LANG-08 (abort-on-warn) duplicated NIX-REL-11 and was dropped.",
+            "with lib; flagged vs exempt (idioms' internal contradiction): flag it. Measured nixpkgs pkgs/ at 38 of 40,298 files vs nixos/modules at 401 of 2,490; only the single-expression with lib.types/licenses/maintainers forms are exempt.",
+            "Impure builtins 'measured absence, no plant' (idioms) promoted to MUST after a planted run: getEnv returns \"\" and nixPath returns [ ] with exit 0.",
+            "helix citation corrected: flake.nix:19 is `eachSystem = lib.genAttrs lib.systems.flakeExposed;`, not flake-utils.",
+            "NIX-FLK-19 amended: Lix 2.95.2 also accepts unknown attributes in apps (third leniency gap)."
+          ],
+          "needs_another_round": [
+            "language/evaluation-failures — does eval-cache staleness (NixOS/nix#3872) reproduce on 2.35.2 through a nixosConfigurations/deep module-evaluation chain?",
+            "language/idioms-and-scope — is there a static detector (nixf rule, tree-sitter or --parse query) for pattern-formal rec self-shadowing and nested // key drops?",
+            "language/string-context — does a context-free store path embedded in a build output (home-manager HOME_MANAGER_PATH pattern) dangle after nix copy / substitution (nix path-info -r, fresh store)?",
+            "implementations — run every NIX-FLK/NIX-LANG fixture under Lix 2.95.x to enumerate leniency gaps and language rejections (.5 floats, or-as-identifier, token whitespace unmeasured)",
+            "language (M-C-15) — is cross-system evaluation deterministic when one host evaluates all systems' outputs (matters for D flakes)?"
+          ],
+          "must_count": 5
+        }
+      },
+      {
+        "group": "security",
+        "dives": [
+          {
+            "slug": "trust-boundaries",
+            "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-security/trust-boundaries.md",
+            "sources_count": 16,
+            "verifications_run": 6,
+            "top_rules": [
+              "nixConfig SHOULD NOT exist; if present, MUST be only extra-substituters + extra-trusted-public-keys (Q12 allowlist watched red/green)",
+              "--accept-flake-config is root-equivalent execution (NixOS/nix#9649) and MUST NOT appear in any flake, README, CI, or agent instructions — yet crane's CI, cachix's README and llm-agents.nix's AGENTS.md already violate this live",
+              "access-tokens MUST live only in local nix.conf or CI NIX_CONFIG, never committed — watched red/green via grep",
+              "builtins.readFile/getEnv on secret-shaped data is forbidden: the store is world-readable (verified mode 444 on a realized output)",
+              "CI/self-hosted daemons MUST run at/above the CVE-2026-39860 fix line per release (2.31.4 etc.); NIX-GATE-16's computed floor (2.31.5) already clears it and self-updates on nixpkgs bumps",
+              "An FOD's __impureEnvVars network access never weakens its guarantee — outputHash still catches any content mismatch (watched via a deliberately wrong hash)",
+              "flake-checker --check-owner only guards the root nixpkgs input; every other input's owner needs manual review at add-time (no tool covers it)",
+              "Evaluate any untrusted flake with --no-write-lock-file --option allow-import-from-derivation false pinned to a full 40-hex SHA, never --accept-flake-config — IFD defaults to true on Nix 2.35, contrary to common assumption"
+            ],
+            "surprises": [
+              "numtide/llm-agents.nix's own AGENTS.md instructs coding agents to pass --accept-flake-config, directly contradicting the MUST-NOT rule from a project literally about Nix+AI-agent integration",
+              "A post-build-hook from an untrusted flake's nixConfig actually executed the moment --accept-flake-config was passed, mechanically reproducing NixOS/nix#9649's root-equivalent-execution claim rather than just citing the issue",
+              "nixConfig.warn-dirty=false is a documented no-op (NixOS/nix#9885) independent of the allowlist — an agent 'fixing' a dirty-tree warning this way produces dead config, not a security hole",
+              "flake-checker's --check-owner default-on check covers only the root nixpkgs input's GitHub owner; every other input (library, devshell helper) has zero automated fork/typosquat detection",
+              "The tamper-propagation sub-probe on the FOD fixture (changing HTTP_PROXY at rebuild time) returned exit 0 inconclusively in the single-user sandbox — the store reused an already-registered output rather than re-executing the builder, so that specific sub-claim was NOT cleanly watched red",
+              "nix-vscode-extensions, cited in the brief only as an example of nixConfig usage, is itself a live partial violation of the allowlist candidate: it names hydra.iohk.io, a substituter it doesn't operate"
+            ],
+            "ok": true
+          }
+        ],
+        "consolidation": {
+          "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-security.md",
+          "rule_ids": [
+            "NIX-SEC-01 — Declare no nixConfig in a published flake; if a project runs its own cache, carry only that cache's extra-substituters and extra-trusted-public-keys (MUST allowlist)",
+            "NIX-SEC-02 — Never set, pass, script, recommend or permanently answer accept-flake-config anywhere in the repository or in agent files (MUST)",
+            "NIX-SEC-03 — Supply credentials only as access-tokens in a user nix.conf outside the repository or from CI secrets; never as a tracked literal and never via nix.settings.access-tokens (MUST)",
+            "NIX-SEC-04 — Never let a secret reach evaluation: no tracked secret file, no readFile or getEnv of a secret, no credential in a derivation attribute or fetcher header; read secrets at run time (MUST)",
+            "NIX-SEC-05 — Evaluate a flake you do not own only at a full 40-hex rev, with --no-write-lock-file --option allow-import-from-derivation false, using only metadata/show/check --no-build/sandboxed build; never develop/shell/run/direnv allow/--impure (MUST)",
+            "NIX-SEC-06 — Run CI and self-hosted builders on CppNix at or above the CVE-2026-39860 fix for its line, pinned via install_url and re-checked on every bump (MUST)",
+            "NIX-SEC-07 — Diff input owner/repo sets on every lock-bump or input-add PR, have a human approve changes, never auto-merge, and treat flake-checker as covering nixpkgs keys only (SHOULD)",
+            "NIX-SEC-08 — Never tell users or agents to add themselves to trusted-users; document the admin-side substituter and key lines instead (MUST)",
+            "NIX-SEC-09 — Enable no experimental feature beyond nix-command flakes; never ca-derivations or recursive-nix (SHOULD)"
+          ],
+          "conflicts_resolved": [
+            "nixConfig census: the shape audit said 0 of 11 declarers go beyond the pair and the dive said 1, but the generated-flakes consolidation said 2. Re-measured with the SEC-01 eval over all 11 declarers: 9 pass and 2 fail. nix-vscode-extensions uses extra-trusted-substituters plus the third-party hydra.iohk.io, and llm-agents.nix sets allow-import-from-derivation. The generated-flakes count was right.",
+            "accept-flake-config prevalence: the dive counted 3 of 37 repositories. A corpus grep found 8 of 36, excluding NixOS/nix and nixpkgs: cachix, devenv, crane, zed, treefmt, llm-agents, nixpkgs-python and nixpkgs-terraform. The added repositories include a worst class, CI accepting a third-party flake on a floating ref.",
+            "Map Q13 and the dive said a grep hit passes if it warns against the flag. That classification is a reading heuristic, so it is retired: in a fleet repository, empty output passes, and the warning lives in the lore rule, not in the repository.",
+            "Map Q12 uses --impure --expr, which the program forbids against third-party code. It is replaced by nix eval --json --file ./flake.nix --apply ..., which needs no --impure flag and gave the same answers on 16 subjects. --file is incompatible with --pure-eval, so for a third-party flake the agent reads the literal instead.",
+            "The dive credited the safe-eval flags and full-SHA pin to NIX-INP-12, which is actually the override-input CI leg (CONSIDER). NIX-SEC-05 owns the untrusted-evaluation procedure, per map E8 and M-H-09.",
+            "The dive made the full-SHA pin for untrusted evaluation a SHOULD. It is raised to MUST: pinning is free, and a branch or tag can move between review and evaluation.",
+            "The dive's secret check was a readFile grep. It is replaced by git ls-files plus a token scan plus a .drv grep, because a tracked, never-read secret lands at mode 444 once self is interpolated, and a fetcher-header token is in the 444 .drv after eval alone (both measured).",
+            "Token grep: the dive's version (*.conf and *.nix only) missed workflows, and the map's M-H-03 grep flagged the compliant ${{ secrets.* }} lines (devenv). A two-leg grep with a secrets and docs exemption was watched red and green on fixtures, devenv and nix-darwin.",
+            "The dive called accept-flake-config universally root-equivalent. The MUST is kept for every fleet surface, but own-CI hits on hosted runners are classed as lower impact. The escalation needs a trusted user on a multi-user daemon or a persistent runner, while third-party floating-ref acceptance is the worst class.",
+            "The dive's FOD __impureEnvVars candidate (6) is dropped as a rule: NIX-PKG and NIX-GEN-08/09 own the fetch, and the hash mismatch is their guarantee. ca-derivations was reading-only in the dive; it is merged into NIX-SEC-09 with a grep watched red."
+          ],
+          "needs_another_round": [
+            "security/implementation-advisories — which Lix and Determinate Nix versions carry CVE-2026-39860-equivalent fixes, and do they publish their own advisory feeds? (NIX-SEC-06 is CppNix-only)",
+            "security/darwin-boundary — the macOS sandbox defaults to false per the manual; does sandboxed evaluation or building of untrusted flakes on the macos-14 CI leg need sandbox=true or relaxed, and do the fleet -sys crates still build that way? (unmeasured: no Darwin builder)",
+            "security/floor-parity — do NIX-SEC-01, 02 and 05 behave the same on CppNix 2.31.5 (the NIX-GATE-16 floor)? Do any 2.35.0 or 2.35.1 releases predate the 2026-04-07 advisory?",
+            "security/trusted-settings-reuse — trusted-settings.json is keyed by (setting, value), not by flake. Is cross-flake trust reuse practical, and does Lix consult the file?",
+            "security/fod-tamper — rerun the dive's inconclusive V6 tamper-propagation sub-probe with --check or a cold store (low priority)"
+          ],
+          "must_count": 7
+        }
+      },
+      {
+        "group": "modules",
+        "dives": [
+          {
+            "slug": "module-authoring",
+            "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-modules/module-authoring.md",
+            "sources_count": 14,
+            "verifications_run": 5,
+            "top_rules": [
+              "modules.md does not ship; NIX-MOD prefix never used — only 3 of 8 rows survive rule-distillation's four tests, each folding into an existing file",
+              "nix flake check never evaluates a module's contents (NIX-FLK-06); a flake needs a checks entry that forces lib.evalModules over nixosModules.default — measured 1.76s warm, catches both a non-module (42) and an option-type error",
+              "the 42 twin fails with a misleading error ('cannot coerce an integer to a string: 42' from lib/modules.nix:404), not 'not a module' — a reviewer can chase the wrong lead",
+              "a secret path option must use lib.types.pathWith { inStore = false; }, never bare types.path or a hand-rolled predicate — folds into NIX-SEC",
+              "sops-nix@2bd00bd9 hand-rolls a pathNotInStore predicate 3x (sops/home-manager/nix-darwin modules) instead of using nixpkgs's built-in pathWith, which home-manager@7b4c5ec already uses for the identical secret-path case (syncthing.nix:664-668)",
+              "self.packages indexed by pkgs.system inside a module's config fires the same aliases.nix:2498 rename warning as a top-level read (1 vs 0, value still correct) — folds as an addendum to NIX-FLK-12, not a new rule",
+              "all three test targets (sops-nix, disko, home-manager) already take pkgs/config purely from module arguments, never their own nixpkgs input — NIX-INP-02 needs no module-specific addendum",
+              "a consumable flake-parts module declares options.flake.<name> (never a bare top-level attribute) and is exported as self.flakeModules.default by the same singular/plural convention as nixosModules"
+            ],
+            "surprises": [
+              "sops-nix — the most security-sensitive of the three test targets — hand-rolls the same pathNotInStore predicate 3 separate times instead of using nixpkgs's built-in pathWith, which home-manager has already adopted for the identical use case",
+              "the '42' twin's error message is misleading: it fails on 'cannot coerce an integer to a string' deep in lib/modules.nix, never saying 'not a module', so the check is reliable but a reviewer reading only the error text could misdiagnose it",
+              "none of the three named test targets (sops-nix, disko, home-manager) indexes self.packages by pkgs.system from inside a module body at all — the only self.packages.${system} reads are in each flake's own top-level flake.nix using a genAttrs-bound system string, so M-I-06's module-specific half had no real violation in the wild and needed a planted fixture to demonstrate",
+              "pkgs.types.pathWith throws at type-construction time (not option-merge time) for the one impossible argument combination (inStore=true, absolute=false) — an easy place for a hand-rolled reimplementation to get the guard backwards",
+              "flake-parts modules fail silently (not with an error) if their options are declared at the file's own top level instead of under options.flake.<name> — a worse failure mode than a crash, and one this dive found no cheap mechanical check for",
+              "the smallest module-evaluating check is cheap (1.76s warm) precisely because it should avoid lib.nixosSystem entirely and use bare lib.evalModules with a hand-picked specialArgs — the more 'realistic' full NixOS eval was never needed"
+            ],
+            "ok": true
+          }
+        ],
+        "consolidation": {
+          "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-modules.md",
+          "rule_ids": [
+            "NIX-MOD-01 — Export every module as a path (or a keyed {key,_file,imports} wrapper when it must close over self); never an inline closure or bare importApply (MUST, C/E)",
+            "NIX-MOD-02 — Name module outputs nixosModules/darwinModules/homeModules/flakeModules with a default; keep homeManagerModules/hmModules only as deprecated aliases (SHOULD, C)",
+            "NIX-MOD-03 — Set _class (nixos/darwin/homeManager/flake) in every exported module file (SHOULD when several host classes are exported, CONSIDER otherwise)",
+            "NIX-MOD-04 — Ship one checks entry per exported module that evaluates it in its real host with enable = true and forces everything via writeText + builtins.toJSON; bare evalModules only for modules that define nothing outside their own options (MUST, C/E)",
+            "NIX-MOD-05 — Never set nixpkgs.overlays/config/pkgs in an exported module; expose a package option via mkPackageOption or pkgs.callPackage ./package.nix {} with defaultText (MUST, C/E)",
+            "NIX-MOD-06 — Type every secret-path option lib.types.pathWith { inStore = false; } (or nullOr/listOf of it), never types.path, types.str or a hand-rolled mkOptionType (MUST, C)",
+            "NIX-MOD-07 — Expose structured program config as RFC 42 settings (pkgs.formats + freeformType), not an extraConfig of types.lines, except for formats nixpkgs cannot generate (SHOULD, C)",
+            "NIX-MOD-08 — Declare flake-parts options under options.flake.<name> or perSystem, export them at flakeModules.default, dogfood the module, and nix eval one output it produces in CI (MUST, B exporting flakeModules)"
+          ],
+          "conflicts_resolved": [
+            "Ships or folds: the dive said fold the rows into NIX-FLK and NIX-SEC and never mint NIX-MOD. Resolved: ship modules.md. The map's binding condition (rows pass the four selection tests) is met, the dive's extra 'fleet does not ship modules' criterion is not in the map and is already handled by routing, and both fold targets defer back to NIX-MOD (nix-flakes FLK-06; trust-boundaries.md:53,154).",
+            "The smallest evaluating check: the dive used bare lib.evalModules and read one option. Measured false negatives: bare evalModules rejects a correct service module ('option systemd does not exist'), reading one option misses a sibling's type error (readone-bad exit 0), and enable = false hides errors behind mkIf. Resolved: evaluate in the real host (nixosSystem, enable = true) and force with writeText + toJSON.",
+            "Who owns the secret-path rule: the dive sent it to NIX-SEC, and the NIX-SEC dive calls it NIX-MOD territory. Resolved: NIX-MOD-06 owns it, per the map's row M-I-04 family; security.md cites it.",
+            "RFC 42 settings: the dive dropped it as generic nixpkgs practice. Resolved: kept as SHOULD, because home-manager teaches extraConfig by volume (98 files against 56 with freeformType) and module-exporting flakes are exactly where the rule applies.",
+            "flake-parts module shape: the dive left it as a reading heuristic and judged a check not worth planting. Resolved: planted a cheap dogfood nix eval that catches the silent failure (nix flake check exits 0 on the violation) and made it MUST for B flakes that export flakeModules.",
+            "Package source inside a module: the dive framed it as indexing self.packages by hostPlatform.system (a FLK-12 addendum). Resolved: default through the consumer's pkgs.callPackage (as sops-nix and nix-index-database do), which removes the self dependency and makes the path export free; the pkgs.system spelling stays a citation of FLK-12.",
+            "Presumed importApply dedup: nixpkgs and flake-parts present importApply as location-preserving. Measured: it sets only _file and does not deduplicate a module imported twice. Resolved: an explicit key or a path export is required."
+          ],
+          "needs_another_round": [
+            "modules/other-hosts: what is the cheapest eval-only host for the NIX-MOD-04 check on homeModules (homeManagerConfiguration) and darwinModules (darwinSystem on an x86_64-linux evaluator)? Is a stub host acceptable?",
+            "modules/version-floors: which nixpkgs release introduced evalModules' class/_class check and types.pathWith? Do consumers on older stable branches need a fallback (externalPath, untagged), and how does this reconcile with NIX-SEC's externalPath caveat?",
+            "modules/held-out: run Checks 1-5 verbatim on module flakes outside the corpus (agenix, impermanence, nixos-hardware, stylix), and rerun M1 and M4 on CppNix 2.31.5 and Lix 2.95.2"
+          ],
+          "must_count": 5
+        }
+      }
+    ],
+    "surprises": [
+      "language/evaluation-failures: Lix 2.95.2 accepts an `apps` entry with an unsupported attribute (exit 0) while CppNix 2.31.5/2.35.2 reject it — a third Lix leniency gap beyond the two the prior consolidation recorded (formatter, overlay arity); templates stayed enforced on both",
+      "language/evaluation-failures: \"undefined variable\" is not always a lazy runtime error: without an enclosing `with` it is a static, whole-file, parse-time check that fires regardless of which attribute you evaluate; it is genuinely lazy only when an enclosing `with` defers resolution to a runtime lookup",
+      "language/evaluation-failures: nix eval --json collapses ANY attrset carrying outPath to that bare string, silently discarding every other requested field — confirmed and promoted to catalog row M-C-16",
+      "language/evaluation-failures: nixpkgs 26.11pre already ships a targeted addErrorContext hint for the imports-computed-from-config recursion (lib/modules.nix:268) even though the richer per-attribute trace PR (#370967) is still open and unmerged",
+      "language/evaluation-failures: NixOS/nix#8013 (flake reached through a symlink) is still open upstream but did not reproduce at all on CppNix 2.35.2 in this environment — likely silently fixed, issue gone stale",
+      "language/evaluation-failures: NixOS/nix#3872's eval-cache staleness could not be forced on a bare flake attribute or nix flake show in this rig; it appears specific to the deep NixOS module-evaluation chain the issue actually reports, not a general flake-eval trap",
+      "language/idioms-and-scope: The `//`-operator rec-merge value drift (stale '1.0' vs expected '1.9') is identical across CppNix 2.35.2, CppNix 2.31.5, and Lix 2.95.2 — it is a portable, universal semantic surprise, not the implementation split the brief expected; the actual Lix divergence only shows up on a different construct (implicit attrpath merge with mixed rec-ness).",
+      "language/idioms-and-scope: Naive per-1,000-line measurement over 'the exemplars' is dominated 20-to-1 by NixOS/nixpkgs's own 4.5M-line pkgs/ tree (not a 'narrower' clone as the frame claimed); every rate in this dive had to explicitly exclude NixOS/nixpkgs and state that exclusion to be meaningful.",
+      "language/idioms-and-scope: `with types;`/`with lib.types;` standing alone on their own line account for 149 of 363 'file/module-scope' with-hits — these are actually narrow, single-expression, idiomatic mkOption type declarations, not the nix.dev antipattern; a naive standalone-line grep would over-flag them.",
+      "language/idioms-and-scope: toString on a path does NOT merely reduce store-copy cost, it eliminates it entirely and produces a plain filesystem-path string with zero /nix/store/ involvement outside a flake context — a categorical difference from string interpolation, not a matter of degree.",
+      "language/idioms-and-scope: Narrowing the impure-builtins grep from 'every .nix file' (431/344 hits) to just flake.nix files collapses the corpus-wide violation count to exactly 2, both defensible (an explicit --impure escape hatch, and NixOS/nix's own sandbox test fixture) — the map's checkable claim holds far more cleanly than the raw grep suggests.",
+      "language/idioms-and-scope: nixf's sema-extra-rec and sema-extra-with diagnostics both catch the OPPOSITE end of the risk spectrum from what this dive's danger cases are (unnecessary/unused, not self-shadowing/scope-pollution-while-used) — a clean nixf-diagnose pass gives false confidence on exactly these two rules.",
+      "security/trust-boundaries: numtide/llm-agents.nix's own AGENTS.md instructs coding agents to pass --accept-flake-config, directly contradicting the MUST-NOT rule from a project literally about Nix+AI-agent integration",
+      "security/trust-boundaries: A post-build-hook from an untrusted flake's nixConfig actually executed the moment --accept-flake-config was passed, mechanically reproducing NixOS/nix#9649's root-equivalent-execution claim rather than just citing the issue",
+      "security/trust-boundaries: nixConfig.warn-dirty=false is a documented no-op (NixOS/nix#9885) independent of the allowlist — an agent 'fixing' a dirty-tree warning this way produces dead config, not a security hole",
+      "security/trust-boundaries: flake-checker's --check-owner default-on check covers only the root nixpkgs input's GitHub owner; every other input (library, devshell helper) has zero automated fork/typosquat detection",
+      "security/trust-boundaries: The tamper-propagation sub-probe on the FOD fixture (changing HTTP_PROXY at rebuild time) returned exit 0 inconclusively in the single-user sandbox — the store reused an already-registered output rather than re-executing the builder, so that specific sub-claim was NOT cleanly watched red",
+      "security/trust-boundaries: nix-vscode-extensions, cited in the brief only as an example of nixConfig usage, is itself a live partial violation of the allowlist candidate: it names hydra.iohk.io, a substituter it doesn't operate",
+      "modules/module-authoring: sops-nix — the most security-sensitive of the three test targets — hand-rolls the same pathNotInStore predicate 3 separate times instead of using nixpkgs's built-in pathWith, which home-manager has already adopted for the identical use case",
+      "modules/module-authoring: the '42' twin's error message is misleading: it fails on 'cannot coerce an integer to a string' deep in lib/modules.nix, never saying 'not a module', so the check is reliable but a reviewer reading only the error text could misdiagnose it",
+      "modules/module-authoring: none of the three named test targets (sops-nix, disko, home-manager) indexes self.packages by pkgs.system from inside a module body at all — the only self.packages.${system} reads are in each flake's own top-level flake.nix using a genAttrs-bound system string, so M-I-06's module-specific half had no real violation in the wild and needed a planted fixture to demonstrate",
+      "modules/module-authoring: pkgs.types.pathWith throws at type-construction time (not option-merge time) for the one impossible argument combination (inStore=true, absolute=false) — an easy place for a hand-rolled reimplementation to get the guard backwards",
+      "modules/module-authoring: flake-parts modules fail silently (not with an error) if their options are declared at the file's own top level instead of under options.flake.<name> — a worse failure mode than a crash, and one this dive found no cheap mechanical check for",
+      "modules/module-authoring: the smallest module-evaluating check is cheap (1.76s warm) precisely because it should avoid lib.nixosSystem entirely and use bare lib.evalModules with a hand-picked specialArgs — the more 'realistic' full NixOS eval was never needed"
+    ],
+    "needs_another_round": [
+      "language: language/evaluation-failures — does eval-cache staleness (NixOS/nix#3872) reproduce on 2.35.2 through a nixosConfigurations/deep module-evaluation chain?",
+      "language: language/idioms-and-scope — is there a static detector (nixf rule, tree-sitter or --parse query) for pattern-formal rec self-shadowing and nested // key drops?",
+      "language: language/string-context — does a context-free store path embedded in a build output (home-manager HOME_MANAGER_PATH pattern) dangle after nix copy / substitution (nix path-info -r, fresh store)?",
+      "language: implementations — run every NIX-FLK/NIX-LANG fixture under Lix 2.95.x to enumerate leniency gaps and language rejections (.5 floats, or-as-identifier, token whitespace unmeasured)",
+      "language: language (M-C-15) — is cross-system evaluation deterministic when one host evaluates all systems' outputs (matters for D flakes)?",
+      "security: security/implementation-advisories — which Lix and Determinate Nix versions carry CVE-2026-39860-equivalent fixes, and do they publish their own advisory feeds? (NIX-SEC-06 is CppNix-only)",
+      "security: security/darwin-boundary — the macOS sandbox defaults to false per the manual; does sandboxed evaluation or building of untrusted flakes on the macos-14 CI leg need sandbox=true or relaxed, and do the fleet -sys crates still build that way? (unmeasured: no Darwin builder)",
+      "security: security/floor-parity — do NIX-SEC-01, 02 and 05 behave the same on CppNix 2.31.5 (the NIX-GATE-16 floor)? Do any 2.35.0 or 2.35.1 releases predate the 2026-04-07 advisory?",
+      "security: security/trusted-settings-reuse — trusted-settings.json is keyed by (setting, value), not by flake. Is cross-flake trust reuse practical, and does Lix consult the file?",
+      "security: security/fod-tamper — rerun the dive's inconclusive V6 tamper-propagation sub-probe with --check or a cold store (low priority)",
+      "modules: modules/other-hosts: what is the cheapest eval-only host for the NIX-MOD-04 check on homeModules (homeManagerConfiguration) and darwinModules (darwinSystem on an x86_64-linux evaluator)? Is a stub host acceptable?",
+      "modules: modules/version-floors: which nixpkgs release introduced evalModules' class/_class check and types.pathWith? Do consumers on older stable branches need a fallback (externalPath, untagged), and how does this reconcile with NIX-SEC's externalPath caveat?",
+      "modules: modules/held-out: run Checks 1-5 verbatim on module flakes outside the corpus (agenix, impermanence, nixos-hardware, stylix), and rerun M1 and M4 on CppNix 2.31.5 and Lix 2.95.2"
+    ],
+    "must_count": 17
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Dive"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 2,
+      "title": "Consolidate"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "dive:language/evaluation-failures",
+      "phaseIndex": 1,
+      "phaseTitle": "Dive",
+      "agentId": "a1ba6e3ba666a087a",
+      "model": "claude-sonnet-5",
+      "state": "done",
+      "startedAt": 1790508565739,
+      "queuedAt": 1790508565729,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agen…",
+      "promptPreview": "Model rationale: sonnet — online research, source digestion and fixture runs; volume work whose cost is in pages read and commands run, not in judgment.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is wave 4 of the research program that makes an AI-agent fleet expert in Nix: the language, nixpkgs packaging, and above all authoring, maintaining, versioning and publishing fla…",
+      "promptFramed": true,
+      "lastProgressAt": 1790509388732,
+      "tokens": 326041,
+      "toolCalls": 72,
+      "durationMs": 822092,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-language/evaluation-failures.md\",\"sources_count\":16,\"verifications_run\":13,\"top_rules\":[\"Read the bare error: line before adding --show-trace; several common rows need no trace at all\",\"Never string-match a diagnostic without checking nix --version first — the same fault's text differs by implementation and version…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "dive:language/idioms-and-scope",
+      "phaseIndex": 1,
+      "phaseTitle": "Dive",
+      "agentId": "a4df4aa9b016e1039",
+      "model": "claude-sonnet-5",
+      "state": "done",
+      "startedAt": 1790508565739,
+      "queuedAt": 1790508565729,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agen…",
+      "promptPreview": "Model rationale: sonnet — online research, source digestion and fixture runs; volume work whose cost is in pages read and commands run, not in judgment.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is wave 4 of the research program that makes an AI-agent fleet expert in Nix: the language, nixpkgs packaging, and above all authoring, maintaining, versioning and publishing fla…",
+      "promptFramed": true,
+      "lastProgressAt": 1790509626383,
+      "tokens": 213679,
+      "toolCalls": 99,
+      "durationMs": 1059744,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-language/idioms-and-scope.md\",\"sources_count\":14,\"verifications_run\":6,\"top_rules\":[\"Never let a rec{} attribute shadow an outer binding of the same name — verified infinite-recursion crash (exit 1) vs a renamed twin (exit 0); nixf's sema-extra-rec catches the opposite, harmless case, not this one.\",\"Flag `with lib…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 3,
+      "label": "dive:security/trust-boundaries",
+      "phaseIndex": 1,
+      "phaseTitle": "Dive",
+      "agentId": "a90700d48118718f1",
+      "model": "claude-sonnet-5",
+      "state": "done",
+      "startedAt": 1790508565741,
+      "queuedAt": 1790508565740,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agen…",
+      "promptPreview": "Model rationale: sonnet — online research, source digestion and fixture runs; volume work whose cost is in pages read and commands run, not in judgment.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is wave 4 of the research program that makes an AI-agent fleet expert in Nix: the language, nixpkgs packaging, and above all authoring, maintaining, versioning and publishing fla…",
+      "promptFramed": true,
+      "lastProgressAt": 1790509146739,
+      "tokens": 198914,
+      "toolCalls": 56,
+      "durationMs": 580100,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-security/trust-boundaries.md\",\"sources_count\":16,\"verifications_run\":6,\"top_rules\":[\"nixConfig SHOULD NOT exist; if present, MUST be only extra-substituters + extra-trusted-public-keys (Q12 allowlist watched red/green)\",\"--accept-flake-config is root-equivalent execution (NixOS/nix#9649) and MUST NOT appear in any …"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 4,
+      "label": "dive:modules/module-authoring",
+      "phaseIndex": 1,
+      "phaseTitle": "Dive",
+      "agentId": "a54ffd8d960841155",
+      "model": "claude-sonnet-5",
+      "state": "done",
+      "startedAt": 1790508565742,
+      "queuedAt": 1790508565741,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agen…",
+      "promptPreview": "Model rationale: sonnet — online research, source digestion and fixture runs; volume work whose cost is in pages read and commands run, not in judgment.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is wave 4 of the research program that makes an AI-agent fleet expert in Nix: the language, nixpkgs packaging, and above all authoring, maintaining, versioning and publishing fla…",
+      "promptFramed": true,
+      "lastProgressAt": 1790509179128,
+      "tokens": 158037,
+      "toolCalls": 59,
+      "durationMs": 612489,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-modules/module-authoring.md\",\"sources_count\":14,\"verifications_run\":5,\"top_rules\":[\"modules.md does not ship; NIX-MOD prefix never used — only 3 of 8 rows survive rule-distillation's four tests, each folding into an existing file\",\"nix flake check never evaluates a module's contents (NIX-FLK-06); a flake needs a ch…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 5,
+      "label": "consolidate:security",
+      "phaseIndex": 2,
+      "phaseTitle": "Consolidate",
+      "agentId": "a79fb566fbb4f9b9c",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790509146764,
+      "queuedAt": 1790509146743,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agen…",
+      "promptPreview": "Model rationale: opus — synthesis across conflicting sources plus normative decisions that later become enforced rules.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is wave 4 of the research program that makes an AI-agent fleet expert in Nix: the language, nixpkgs packaging, and above all authoring, maintaining, versioning and publishing flakes at a high quality bar with gr…",
+      "promptFramed": true,
+      "lastProgressAt": 1790509841116,
+      "tokens": 206058,
+      "toolCalls": 56,
+      "durationMs": 694351,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-security.md\",\"rule_ids\":[\"NIX-SEC-01 — Declare no nixConfig in a published flake; if a project runs its own cache, carry only that cache's extra-substituters and extra-trusted-public-keys (MUST allowlist)\",\"NIX-SEC-02 — Never set, pass, script, recommend or permanently answer accept-flake-config anywhere in the rep…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 6,
+      "label": "consolidate:modules",
+      "phaseIndex": 2,
+      "phaseTitle": "Consolidate",
+      "agentId": "acc51d6379c2c840a",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790509179134,
+      "queuedAt": 1790509179130,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agen…",
+      "promptPreview": "Model rationale: opus — synthesis across conflicting sources plus normative decisions that later become enforced rules.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is wave 4 of the research program that makes an AI-agent fleet expert in Nix: the language, nixpkgs packaging, and above all authoring, maintaining, versioning and publishing flakes at a high quality bar with gr…",
+      "promptFramed": true,
+      "lastProgressAt": 1790510091637,
+      "tokens": 177838,
+      "toolCalls": 44,
+      "durationMs": 912502,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-modules.md\",\"rule_ids\":[\"NIX-MOD-01 — Export every module as a path (or a keyed {key,_file,imports} wrapper when it must close over self); never an inline closure or bare importApply (MUST, C/E)\",\"NIX-MOD-02 — Name module outputs nixosModules/darwinModules/homeModules/flakeModules with a default; keep homeManagerMo…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 7,
+      "label": "consolidate:language",
+      "phaseIndex": 2,
+      "phaseTitle": "Consolidate",
+      "agentId": "a08e65481f47de121",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790509626387,
+      "queuedAt": 1790509626385,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agen…",
+      "promptPreview": "Model rationale: opus — synthesis across conflicting sources plus normative decisions that later become enforced rules.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is wave 4 of the research program that makes an AI-agent fleet expert in Nix: the language, nixpkgs packaging, and above all authoring, maintaining, versioning and publishing flakes at a high quality bar with gr…",
+      "promptFramed": true,
+      "lastProgressAt": 1790510084505,
+      "tokens": 191825,
+      "toolCalls": 32,
+      "durationMs": 458117,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-language.md\",\"rule_ids\":[\"NIX-LANG-01 — Never name a rec/let attribute after an outer binding it means to read (MUST; deadnix -L catches let/positional shapes, forced eval catches pattern formals)\",\"NIX-LANG-02 — Reference files/derivations in builders only via interpolation or lib.fileset.toSource, never toString …"
+    }
+  ],
+  "totalTokens": 1472392,
+  "totalToolCalls": 418
+}

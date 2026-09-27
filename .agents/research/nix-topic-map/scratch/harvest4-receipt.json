@@ -1,0 +1,100 @@
+{
+  "summary": "Nix research program phase 6 after a dive wave: one opus agent harvests the new consolidations, appends the landing report to the topic map, applies the stop condition, and commissions the next wave (revised staged briefs plus follow-ups) or declares ready-to-draft with binding authoring notes",
+  "agentCount": 1,
+  "logs": [
+    "Verdict: ready-to-draft · rerun 0 · next wave 0 · IDs 138 · MUST 83 · families 9 · contradictions 18"
+  ],
+  "result": {
+    "harvest": {
+      "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-topic-map.md",
+      "verdict": "ready-to-draft",
+      "verdict_reason": "Not converged by the strict stop condition: wave 4 plus the wave-3 reruns added 23 MUSTs (LANG 6, SEC 7, MOD 5, plus PKG-19, PKG-21, REL-13 raised, GEN-21, GEN-22) and one new failure class (C25, composition-only failure), and no held-out round has run. The tail is still closed. Every remaining open question falls into one of four kinds: a dated re-check, a measurement this rig cannot supply (Darwin/aarch64, real CI runners, Determinate, HTTPS LFS), an owner decision with a default applied, or an answerable refinement that cannot overturn a MUST. The refinements include M-B-17, the watchdog false positive, #3872, Lix enumeration, SEC floor parity, module hosts and floors, ocx determinism, and the GEN Nix-level twins. None is both load-bearing and answerable. Three kinds of work move to phases 7 and 8 as binding obligations: the unrun or lost verifications (every fixture except nix-generated-flakes-rev3/ is gone), three scope edits (E28, E29, E42), and the held-out sweep.",
+      "next_wave": [],
+      "rerun_wave": [],
+      "frame_corrections": [
+        "H8 corrected in scale: 2 of 11 nixConfig declarers exceed the allowlist (nix-vscode-extensions extra-trusted-substituters with hydra.iohk.io; llm-agents.nix allow-import-from-derivation). 8 of 36 non-implementation repos pass --accept-flake-config, including an AGENTS.md and CI accepting a third-party flake on a floating ref. A post-build-hook executes once the flag is accepted (reproduced). Trust is stored per (setting, value), not per flake [sec].",
+        "H9 sharpened: Lix 2.95.2 accepts unknown apps attributes (third leniency gap after formatter and overlay arity). It rejects all four mixed-rec attrpath shapes that CppNix accepts, and it defaults IFD to true like CppNix. lint-url-literals works from CppNix 2.34 and is a silent unknown-setting no-op on 2.31.5 [lang conflicts 1, 12].",
+        "New: a secret reaches the mode-444 store without ever being read. A tracked, never-read file is copied once self is interpolated, and a fetcher header is in the .drv after nix eval alone [sec Verdict 4].",
+        "New: inspecting a flake you do not own is unsafe beyond IFD. nix develop runs the shellHook as the user, and show and check --no-build build IFD by default [sec Verdict 5].",
+        "New failure class C25: an exported module or Python library fails only when a consumer composes it (duplicate import, readOnlyPkgs, wrong _class, top-level flake-parts option, top-level-only Python export).",
+        "Frame corpus description wrong: the nixpkgs clone is the full ~4.5M-line pkgs/ tree and dominates per-line rates 20:1, so every corpus rate must say whether it excludes NixOS__nixpkgs.",
+        "Q7 stands, but modules.md ships anyway for adopters and templates. NixOS/templates is the worst module violator.",
+        "Fleet data: grimoire-rs/grimoire@55f839ce31fb has no flake.nix and carries LFS files its build never reads. ocx has three submodules, 10 git-sourced crates from 2 revs, no --version flag (it has a version subcommand) and a 7m12s per-PR build. All three fleet packages are Apache-2.0.",
+        "Tooling: nix-update's missing write-back comes from replace_hash text-matching the evaluated hash, not from nested bwrap. Determinate Nix is not in nixpkgs, so this rig cannot run it.",
+        "Environment: an external cleanup deleted ~/.cache/research-lang. The toolchain is rebuilt (run.sh prints 2.35.2, re-checked) and the 38 exemplars are back at their cited SHAs. All fixture trees except nix-generated-flakes-rev3/ are gone, so the cited fixture paths dangle. GitHub's REST API returns schema stubs in this sandbox. The receipt's NIX-LANG must_count 5 is wrong; the file carries 6."
+      ],
+      "rule_totals": {
+        "ids": 138,
+        "must": 83,
+        "families": 9
+      },
+      "contradictions_across_consolidations": [
+        "E28 NIX-FLK-15 and NIX-REL-16 prove the release with -- --version, but ocx has no --version (NIX-PKG-19). PKG-19 keeps its text. FLK-15 and REL-16 run the version entry point PKG-19 names; for ocx that is -- version.",
+        "E29 NIX-REL-09 and REL-16 bind A and D, but a D flake has no packages.default and no tags (GEN-13, REL-07). REL-16 now binds A only, and D uses GEN-15 plus executed nix run examples. REL-09 keeps the A block. A D README names a single-binary attribute and uses nix shell for multi-binary packages.",
+        "E30 NIX-SEC-02 (repo-wide grep, empty output passes) vs REL-09's README-only grep and REL failure mode 9, which still uses Q13's 'warning against it' wording. SEC-02 keeps the rule, and the Q13 wording is struck.",
+        "E31 NIX-SEC-05 vs INP-12's last sentence, a weaker duplicate of the untrusted-evaluation rule. SEC-05 keeps it, and INP-12 drops the sentence and cites SEC-05.",
+        "E32 GATE-06's floor note (lint-url-literals needs 2.35) vs the measured floor of 2.34, below which the flag is a silent no-op. GATE-06 keeps the rule, and its floor note becomes 2.34.",
+        "E33 FLK-06, FLK Verdict 9 and the map treat NIX-MOD as conditional, but NIX-MOD ships. MOD-04 owns the module-evaluating check, FLK-06 cites it, and every 'conditional' qualifier is removed.",
+        "E34 GEN Verdict 10 lists four prototype breaks. The other families' rules add three: PKG-11 (no runHook, mk-package.nix:67,80), GATE-01 (bare nixfmt formatter) and INP-03 (rev in url without a comment). Each rule keeps its text, and the handoff and ADR list seven breaks.",
+        "E35 MOD's fleet commitment says the module sits 'next to package.nix' yet references ../package.nix, while PKG-06 bans ../ in package.nix. PKG-06 keeps its text, and the module wording becomes nix/module.nix with a ../package.nix default.",
+        "E36 PKG-07's MUST presence names homepage, but its jq does not check it; GEN-21 omits homepage when the index lacks it. The MUST set becomes description, license and platforms, homepage becomes SHOULD, and GEN-21 keeps the D text.",
+        "E37 REL-11's 'single attribute' heuristic vs GEN-14's check over the whole packages set. REL-11 is reworded to allow a packages set that carries no deprecation shims, and GEN-14 keeps its check.",
+        "E38 LANG-05 is a MUST whose only check is GATE-16's advisory Lix leg. Both keep their text. A Lix red on a mixed-rec merge is a MUST finding, and GATE-16 says so.",
+        "E39 LANG-02 ('reference files through interpolation') vs FLK-07 and PKG-15 (a ${src} read is forbidden). These govern different phases: build-time references vs eval-time reads. LANG-02 adds a pointer to FLK-07.",
+        "E40 FLK skeleton A (nixpkgs only) vs INP/E22 (nixpkgs plus flake-compat) and INP-09/PKG (ocx and grim declare self.submodules). FLK keeps skeleton A as the portable example. The adopt skill composes the fleet template and re-verifies it.",
+        "E41 SEC Applied adds SEC greps to the gate, but the canonical index gate block has none. The index gate block gains one security step, and security.md keeps the rules.",
+        "E42 MOD-04 is a MUST for every host, but its only watched recipe is NixOS. It becomes MUST for nixosModules and SHOULD for home and darwin hosts until M-I-09 is watched.",
+        "E43 LANG-08 overlaps index NIX-CORE-04 (read the era first). CORE-04 keeps the general rule, and LANG-08 keeps the diagnosis keying and cites CORE-04.",
+        "E44 LANG-04 vs SEC-04 on getEnv. LANG-04 keeps the purity half and SEC-04 the secret half, with cross-citations and one grep.",
+        "Carried and still unapplied in the consolidation text: E11 (GATE-09 triage row names an author defect via FLK-07), E12 (Lix leg adds flake-self-attrs), E13 (gate step 7 is INP-06's command), E14 (PKG-08 scoped per REL-11), E16 (FLK-07 example becomes ./Cargo.toml), E19 (PKG-01 builtin half cites INP-10), E27 (gate step 6 builds every own package)."
+      ],
+      "authoring_notes": [
+        "1 Rule and globs: ship one rule, rules/nix-quality.md, with paths [\"**/*.nix\", \"**/flake.lock\", \"**/statix.toml\"] exactly. Never glob .envrc, workflows, treefmt.toml or data files; route to them by task. Keep the index under 200 lines. Put depth files in rules/nix-quality/ and do not chain them. Run the checker with --root ~/.cache/research-lang/exemplars/nix/nix-community__disko behind an if [ -d ] guard.",
+        "2 Depth files, by family. flakes.md NIX-FLK-01..19 draws on nix-flakes.md and applies E6, E16, E28, E33, E40. inputs.md NIX-INP-01..14 applies E13, E31. packaging.md NIX-PKG-01..19, 21, 22 applies E14, E19, E36; PKG-20 is retired. generated-flakes.md NIX-GEN-01..22 is the portable subset, with ocx as the worked example. gates.md NIX-GATE-01..16 applies E11, E12, E13, E27, E32, E38 and carries the PKG-20 cost note. release.md NIX-REL-01..17 applies E28, E29, E30, E37. language.md NIX-LANG-01..08, 10, 11 applies E39, E43, E44; LANG-09 is retired. security.md NIX-SEC-01..09 applies E30, E31, E41, E44. modules.md NIX-MOD-01..08 applies E33, E35, E42. The routing phrases are task-worded, and the full table is in the map.",
+        "3 Index-owned rules are NIX-CORE-01..06: never weaken a check; watch red first; state what empty output and each exit code mean; read the era first (nix --version plus the locked nixpkgs ref); identify the shape (A to E); treat generated files as marked, excluded, deterministic and never hand-edited. The index also holds the gate block, the non-negotiables, the routing table and the siblings. The gate block is GATE's nine steps with E12, E13 and E27 applied, plus FLK-16's git ls-files and one security-grep step (SEC-02, 03, 08, and SEC-04's pattern check). Every other rule is depth-owned.",
+        "4 Bounded duplication: the index non-negotiables list at most 15 one-line MUSTs, each ending in its ID (FLK-16, FLK-07 with PKG-15, FLK-08/09, FLK-12, FLK-19, PKG-03/04, PKG-05, REL-01/02, LANG-02, LANG-04, LANG-10, SEC-02, SEC-04, SEC-05, REL-11). Skills repeat a MUST only in a | # | Finding | Rule | table, never as a row that leads with the rule ID.",
+        "5 Pinned defaults. Q1: no FlakeHub. Q2: no public cache and no fleet nixConfig. Q3: by-name-ready now, nixpkgs later. Q4: ocx-sh/ocx-nix, with the generator as an ocx subcommand. Q5: keep every digest until 20 MB. Q6: CppNix gated, Lix and the floor advisory, Determinate untested. Q7: no fleet modules, but modules.md ships. Q8: the computed floor (nix_2_31 = 2.31.5). Carried defaults: the fleet systems x86_64-linux, aarch64-linux, aarch64-darwin on nixos-unstable; overlays.default; nixfmt-tree as a fleet MUST (in the adopt skill); nixpkgs plus flake-compat inputs; self.submodules for ocx and grim; stock rustPlatform plus the PKG-16 CI step; no crane or rust-overlay in fleet flakes; weekly lock PRs under the App token, merged by a human; no git SHA in ocx version; Q-LANG-1 and Q-LANG-2.",
+        "6 Drops, with IDs retired and never reused. NIX-LANG-09 becomes procedure steps in nix-diagnose. NIX-PKG-20 becomes a cost note under GATE-10, because it has no red/green check and changes no diff. Sentences dropped: INP-12's untrusted-eval sentence (E31), PKG-01's builtin half (E19), PKG-08's unscoped 'in CI' (E14), REL failure mode 9's Q13 wording (E30), FLK-07's ../Cargo.toml example (E16), and every 'conditional NIX-MOD' qualifier (E33).",
+        "7 Scope edits, each watched red and green before it ships: E28 (the version entry point in FLK-15 and REL-16); E29 (REL-16 binds A only, and REL-09 gets the D README form); E36 (PKG-07's presence set); E37 (REL-11's wording); E42 (MOD-04 is MUST for nixosModules, SHOULD elsewhere); E32 (GATE-06's floor is 2.34). SEC-06 requires 2.35.2 or later on the 2.35 line until a source read clears 2.35.0 and 2.35.1. For MOD-03 and MOD-06, run nix eval --json github:NixOS/nixpkgs/nixos-26.05#lib.types --apply 't: t ? pathWith', repeat it on nixos-25.11, and record the floor.",
+        "8 Version dating: each depth file opens with an Era line ('Measured 2026-09-27 on CppNix 2.35.2, nixpkgs 26.11pre 8d5d2709; floor nix_2_31 = 2.31.5; Lix 2.95.2; nixfmt 1.5.0, deadnix 1.3.2, flake-checker 0.2.15'). Every rule keeps a Floor/impl cell. Volatile facts carry a date or version and a re-check trigger in parentheses. Never write 'recently' or 'now'. Every corpus rate says whether it excludes NixOS__nixpkgs.",
+        "9 Verification-command shape: pass an explicit directory operand (.); use one -e per alternative, with no | or \\| alternation; quote --include globs and never leave ** unquoted; no $(...) and no process substitution, so a comparison becomes two commands whose outputs must match, or a checked-in fixture script; no angle-bracket placeholders anywhere, so use a concrete example attribute; always xargs -r; POSIX classes, not \\s or \\b, in grep -E; no unescaped pipe inside a markdown table cell, so move pipelines into a fenced sh block after the table; state what empty output and each exit code mean. These cells must be reshaped: PKG-05, PKG-11, PKG-16, REL-01, REL-02, REL-13, REL-16, SEC-06, SEC-07, INP-09, INP-11, INP-13, LANG-07, MOD-03, GEN-21, FLK-13 (self form). The fixtures are gone, so re-plant them under ~/.cache/research-lang/nix-tools/fixtures/nix-authoring/<family>/, git init and add each one, and record the versions and whether the store was cold or warm.",
+        "10 Fences: tag Nix snippets nix and keep them nixfmt-clean (extract each to a file and run nixfmt --check). Tag shell snippets sh. Never tag Nix as python, because the repo runs ruff format over markdown.",
+        "11 Skills are procedures only. nix-flake-adopt covers the era, the shape, the composed fleet template (E40), the package.nix templates (Rust, the ocx workspace, the PKG-21 Python library), PKG-03 hashes, FLK-16, the gate, the nix.yml shape (GATE-12..16, the SEC-03 token), the REL-09 README and a modernize branch (M-K-05); it also carries the fleet commitments E3 and E21. nix-flake-release covers the gate, --all-systems and the legs, REL-01/02, REL-08, the tag, REL-16 with the PKG-19 entry point, REL-10, the nix-update contract (REL-13, REL-17), and D flakes (no tags; GEN-15). nix-diagnose covers CORE-04 and LANG-08 keying, the absorbed LANG-09 order, the LANG-10 classes, the 46-row evaluation-failures §3 catalog with C20 splits and a C7 section, GATE-09 triage with E11 applied, and 'explicitly not a defect'. No review skill and no generator skill. Bundle nix-essentials holds nix-quality, nix-flake-adopt, nix-flake-release and nix-diagnose, all untagged.",
+        "12 The ocx handoff has three parts. (a) The generated-flakes depth file. (b) The prototype at .agents/research/nix-generated-flakes/prototype/. It builds and smoke-runs actionlint, ninja, cmake and a synthetic corretto, and passes GEN-07, 11, 13, 17, 19 and the escaping half of GEN-20. It has seven breaks for ocx to fix before adoption: the GEN-20 self.env splice, GEN-20's first-token renderChunk, GEN-21's synthesised description with no homepage, GEN-22 silently ignoring entrypoints and dependencies, PKG-11 with no runHook (mk-package.nix:67,80), GATE-01's bare nixfmt, and INP-03's rev in url. (c) The ADR draft adr_nix_flake_generation.md for ocx-sh/ocx. It settles: the generator as an ocx subcommand reusing platform.rs:416 and the registry client; the repo and name ocx-sh/ocx-nix; the fetch (fetchurl with Bearer QQ==, the digest verbatim as the hash, and an Accept header on manifests); the attribute shape (flat latest packages, legacyPackages quoted versions, an overlay adding only ocx); the libc template (autoPatchelfHook everywhere, soname ignore lists); meta (provenance, split SPDX licenses omitted when missing, index description and homepage, mainProgram only for one binary); env, entrypoint and deps translation with self.env inlined; systems (aarch64-darwin eval-only, no x86_64-darwin, musl and Windows dropped); history; the update loop (App token, reviewed PR, per-item failure); yanked and deprecated handling; no cache and no nixConfig; executed README examples; the cmake-gui policy. It also asks the index for a required license annotation, upstream.repository_url for ocx/cli and ocx/mirror, a fix for the anonymous manifest 404s, signatures (M-E-20) and a resolved projection (M-E-29). M-E-10 (Darwin install_name and codesign) stays open.",
+        "13 MUST presentation: 83 MUSTs, most scoped to a shape (19 bind only D). Group rows by the check that catches them, state the shape binding in the Severity cell, and list only cross-shape MUSTs in the index. Rules checked by a reading heuristic say so (LANG-08, GATE-09 triage, SEC-01's own-cache judgement, SEC-07's auto-merge half).",
+        "14 The held-out round is binding in phase 8. Run every Verification cell verbatim over the 38-repo corpus and over five to eight fresh flakes at recorded SHAs (for example ryantm/agenix, nix-community/impermanence, NixOS/nixos-hardware, danth/stylix, nix-community/nh, numtide/devshell), plus the ocx prototype. Group each break by class C1-C25. A new instance becomes an Applied row. A new class or a new MUST revises the depth file with a revision-log line and does not reopen research."
+      ]
+    }
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Harvest"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "harvest:wave4",
+      "phaseIndex": 1,
+      "phaseTitle": "Harvest",
+      "agentId": "a693eae61e2b29352",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1790512843619,
+      "queuedAt": 1790512843592,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agen…",
+      "promptPreview": "Model rationale: opus — harvesting a wave, the convergence verdict, revising the next wave's commissions and the cross-consolidation contradiction sweep are decisions with a blast radius over every artifact the program ships.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- You are phase 6 (Iterate) of the research-lang program for Nix (language, packaging, flake authoring/maintenan…",
+      "promptFramed": true,
+      "lastProgressAt": 1790513696539,
+      "tokens": 503420,
+      "toolCalls": 54,
+      "durationMs": 852920,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/nix/.agents/research/nix-topic-map.md\",\"verdict\":\"ready-to-draft\",\"verdict_reason\":\"Not converged by the strict stop condition: wave 4 plus the wave-3 reruns added 23 MUSTs (LANG 6, SEC 7, MOD 5, plus PKG-19, PKG-21, REL-13 raised, GEN-21, GEN-22) and one new failure class (C25, composition-only failure), and no held-out round has run. The…"
+    }
+  ],
+  "totalTokens": 503420,
+  "totalToolCalls": 54
+}
