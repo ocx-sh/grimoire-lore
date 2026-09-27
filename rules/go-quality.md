@@ -177,3 +177,6 @@ where everything blocks teaches the reader to negotiate with all of it.
 - **`go-release`, `go-upgrade` and `go-diagnose`**: procedures that cite these
   IDs by number and never restate them. The `go-essentials` bundle ships all
   five artifacts together.
+- **`code-docs`**: comments, doc comments, decision-record pointers and test
+  names as documentation, in every language: what a comment keeps, where each
+  clause goes and how long a block runs. Loads on every source file.

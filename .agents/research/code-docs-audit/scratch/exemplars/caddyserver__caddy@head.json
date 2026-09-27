@@ -1,0 +1,101 @@
+{
+ "go|prod": {
+  "files": 221,
+  "code": 46532,
+  "doc": 9330,
+  "line": 4674,
+  "interface": 0,
+  "license": 2379,
+  "directive": 61,
+  "blank": 8425,
+  "trailing": 404,
+  "code_chars": 1231843,
+  "comment_chars": 732806,
+  "ratio": 0.301,
+  "ratio_chars": 0.595,
+  "doc_blocks": {
+   "count": 2795,
+   "p50": 2,
+   "p90": 7,
+   "p99": 24,
+   "max": 337,
+   "gt3": 692,
+   "gt5": 381,
+   "gt10": 123,
+   "gt20": 35,
+   "lines_in_gt5": 4702
+  },
+  "line_blocks": {
+   "count": 2405,
+   "p50": 1,
+   "p90": 4,
+   "p99": 10,
+   "max": 31,
+   "gt3": 286,
+   "gt5": 102,
+   "gt10": 21,
+   "gt20": 2,
+   "lines_in_gt5": 892
+  }
+ },
+ "go|test": {
+  "files": 136,
+  "code": 32162,
+  "doc": 827,
+  "line": 870,
+  "interface": 0,
+  "license": 884,
+  "directive": 2,
+  "blank": 3519,
+  "trailing": 140,
+  "code_chars": 793087,
+  "comment_chars": 99101,
+  "ratio": 0.053,
+  "ratio_chars": 0.125,
+  "doc_blocks": {
+   "count": 269,
+   "p50": 3,
+   "p90": 6,
+   "p99": 11,
+   "max": 27,
+   "gt3": 68,
+   "gt5": 27,
+   "gt10": 5,
+   "gt20": 1,
+   "lines_in_gt5": 230
+  },
+  "line_blocks": {
+   "count": 582,
+   "p50": 1,
+   "p90": 3,
+   "p99": 5,
+   "max": 27,
+   "gt3": 23,
+   "gt5": 4,
+   "gt10": 1,
+   "gt20": 1,
+   "lines_in_gt5": 49
+  }
+ },
+ "js|test": {
+  "files": 1,
+  "code": 1,
+  "doc": 0,
+  "line": 0,
+  "interface": 0,
+  "license": 0,
+  "directive": 0,
+  "blank": 1,
+  "trailing": 0,
+  "code_chars": 157787,
+  "comment_chars": 0,
+  "ratio": 0.0,
+  "ratio_chars": 0.0,
+  "doc_blocks": {
+   "count": 0
+  },
+  "line_blocks": {
+   "count": 0
+  }
+ }
+}

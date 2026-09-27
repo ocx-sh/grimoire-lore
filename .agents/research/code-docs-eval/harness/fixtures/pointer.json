@@ -1,0 +1,266 @@
+{
+ "OCX-02": {
+  "pointer": {
+   "kind": "record",
+   "lines": [
+    "// Why: see .claude/artifacts/adr_is_ocx_trampoline_trampoline_signal.md."
+   ],
+   "record": {
+    "path": ".claude/artifacts/adr_is_ocx_trampoline_trampoline_signal.md",
+    "text": "# is_ocx_trampoline / trampoline_signal: design constraint\n\n## Status\n\nAccepted\n\n## Context and decision\n\nWhether `path` \u2014 an already-**resolved** command answer \u2014 is an\nocx-generated launcher trampoline (C-069).\n\nFires **after** C-010's `PATH` exclusion, never instead of it, so a test can\nassert which of the two guards caught a given input and each keeps its own\nreachable red state. It identifies the *file*, not a directory list, which\nis what makes it independent of how many toolchain trees exist \u2014 the defect\nD-V1 records is two project homes on one `PATH`, where any exclusion set can\nonly ever name this invocation's own two.\n\n# POSIX signal\n\n[`TRAMPOLINE_MARKER`] as **exactly the second line**, read out of a\n**bounded prefix** of [`TRAMPOLINE_PROBE_BYTES`] \u2014 never `contains()`, and\nnever \"anywhere in the prefix\". Two mechanisms doing two different jobs:\n\n- The **line-2 anchor** is the discriminator. It is what refuses a file, and\nequally what stops any *non*-line-2 occurrence from counting \u2014 an ordinary\ntool that merely embeds the string somewhere in its data\n(`a_file_that_merely_contains_the_marker_later_in_its_body_is_not_refused`),\nand a *baked* occurrence (E-21). The second case is the reachable one: WP-6\ninterpolates an operator-controlled absolute path into every generated\nbody, so a `$OCX_HOME` spelling the marker would otherwise put it inside\nthe probed head of an ordinary package launcher and refuse it \u2014 breaking\n`ocx launcher exec` for that install, which is the exact class D-V12\nexcluded when it rejected keying on the shared header\n(`a_launcher_whose_baked_path_spells_the_marker_is_not_refused`).\n- The **bound** is a read cap, not a discriminator, and owns exactly two\neffects the anchor does not. It makes the probe one `read(2)` rather than\nan allocation of whatever binary `PATH` resolved \u2014 this runs before every\n`exec`, including `/bin/sh`. And it decides that a marker which *is* the\nwhole of line two but **begins past** [`TRAMPOLINE_PROBE_BYTES`] does not\ncount, which is the one property that stops the bound being widened away:\n`a_marker_beyond_the_probe_window_is_not_refused` pins it, and reds when it\nis.\n\nNothing interpolated can reach line one (the shebang) or line two, so the\nanchor is discriminating by position as well as by spelling.\n\n# Not `ocx_util::fs::read_bounded`\n\nThe catalog advertises that helper as \"read a whole file under a byte\nceiling, refusing anything that is not a regular file\", which reads like an\nexact match for the paragraph above and is the first thing a\nsearch-before-writing reflex finds. It is the **wrong** helper here: it\n*errors* when the file exceeds the cap, and a C-028 trampoline body passes\n256 bytes as soon as the project root is roughly 146 characters deep.\nFolded into the fail-open arm below, that error becomes \"not a trampoline\"\n\u2014 C-069 silently disarmed for exactly the deep-checkout case, with every\ntest rooted at a shallow `tmp_path` still green. This is a prefix read\n(`File::open` + [`std::io::Read::take`]), where passing the cap is the\nnormal case and carries no verdict.\n\n# Windows signal\n\nA sibling `.exec` sidecar beside the resolved `<stem>.exe`, plus a refusal\nof a resolved path whose *own* extension is `.exec`. C-069's original\nblob-content clause is **struck** (D-V15): every trampoline `.exe` and every\nlazy-shim-slot `.exe` is a hardlink of the one committed blob, so content\ncannot discriminate them and a content match would refuse shim slots \u2014\nexactly the class D-V12 excluded on POSIX. The second half is not\nbelt-and-braces: `which` treats any file carrying an extension as executable\non Windows, so a `PATHEXT` containing `.EXEC` makes the sidecar *text file*\nitself a resolution answer.\n\n# Regular files only, and the order is load-bearing\n\n`std::fs::metadata` decides `is_file()` **before** anything is opened.\nOpening a FIFO for reading blocks until a writer appears \u2014 forever, on a\nresolution path that runs before every `exec`. A non-regular file is\ntherefore \"not a trampoline\" without ever being opened.\n\n# Fails open\n\nAny I/O error answers *not a trampoline*. This is deliberately the opposite\nposture from `ocx launcher shim`'s `resolves_inside`, and correctly so:\nthat predicate runs once, over one directory ocx itself created, where the\nunresolvable case is genuinely suspicious. This one runs on **every**\nresolution, including `/bin/sh`, so a fail-closed I/O arm would turn a\ntransient `EACCES` on an unrelated binary into a refusal to run an ordinary\ncommand. The guard it backstops (C-010's exclusion) is still in force, and\nan attacker who can make the file unreadable can equally make it absent.\n\n# Why this has a body while its sibling C-010 exclusion does not\n\nIt sits on `Env::resolve_command`'s success arm, which every bare-name\nresolution in the workspace reaches \u2014 including `/bin/sh`. A stub here is\nnot a deferral, it is a panic on the hot path.\n\n# Which validation row measures this\n\nItem **37** (trampoline re-entry) is the only gate that ever observes this\npredicate's cost, because it is the only one that resolves a command.\nWP-12e's `bin`-mode reconcile row does **not**: the reconciler puts a\ndirectory on `PATH` and resolves nothing, so it measures the cheap half.\nReporting the reconcile number as \"the cost of C-069\" answers a question\nnobody asked.\n"
+   }
+  }
+ },
+ "OCX-06": {
+  "pointer": {
+   "kind": "record",
+   "lines": [
+    "// Why: see .claude/artifacts/adr_published_at.md."
+   ],
+   "record": {
+    "path": ".claude/artifacts/adr_published_at.md",
+    "text": "# published_at: design constraint\n\n## Status\n\nAccepted\n\n## Context and decision\n\nWhether the file occupying `target` *is* the file `tmp` holds \u2014 the one\nanswer that makes a `Published` outcome name a path this call wrote.\n\nMeaningful only on the `link` + `unlink` fallback, which is the NFS path; see\n[`persist_temp_file_noclobber`]. `symlink_metadata` deliberately does not\nfollow: a symlink standing at `target` is never the hardlink we just made.\n"
+   }
+  }
+ },
+ "OCX-07": {
+  "pointer": {
+   "kind": "record",
+   "lines": [
+    "                // Why: see .claude/artifacts/adr_attempt_noclobber.md."
+   ],
+   "record": {
+    "path": ".claude/artifacts/adr_attempt_noclobber.md",
+    "text": "# attempt_noclobber: design constraint\n\n## Status\n\nAccepted\n\n## Context and decision\n\nOur own link landed under this name and only the reply was\nlost. Returning WITHOUT `keep()` drops the temp path here,\nleaving just the published name behind.\n"
+   }
+  }
+ },
+ "OCX-09": {
+  "pointer": {
+   "kind": "test",
+   "lines": [
+    "        // Guarded by the test `two_renders_against_one_home_are_serialized_by_the_render_lock`."
+   ]
+  }
+ },
+ "OCX-13": {
+  "pointer": {
+   "kind": "test",
+   "lines": [
+    "    // Guarded by the test `hard_link_target_outside_the_root_is_rejected`."
+   ]
+  }
+ },
+ "OCX-14": {
+  "pointer": {
+   "kind": "record",
+   "lines": [
+    "// Why: see .claude/artifacts/adr_publish_by_rename.md."
+   ],
+   "record": {
+    "path": ".claude/artifacts/adr_publish_by_rename.md",
+    "text": "# publish_by_rename: design constraint\n\n## Status\n\nAccepted\n\n## Context and decision\n\n**A failed parent fsync is an error, not a shrug.** The manifest writer used\nto discard it; a publish reported as landed but not durable is the one\noutcome a crash-safety contract cannot tolerate.\n"
+   }
+  }
+ },
+ "OCX-17": {
+  "pointer": {
+   "kind": "record",
+   "lines": [
+    "            // Why: see .claude/artifacts/adr_from_ssrferror_for_urlrejection.md."
+   ],
+   "record": {
+    "path": ".claude/artifacts/adr_from_ssrferror_for_urlrejection.md",
+    "text": "# From<SsrfError> for UrlRejection: design constraint\n\n## Status\n\nAccepted\n\n## Context and decision\n\nSpelled out rather than wildcarded: `SsrfError` is\n`#[non_exhaustive]` only to other crates, so within this one an\nadded variant lands here as a compile error instead of a silent\n64.\n"
+   }
+  }
+ },
+ "OCX-19": {
+  "pointer": {
+   "kind": "test",
+   "lines": [
+    "                // Guarded by the test `write_dispatch_object_propagates_a_failed_self_heal_persist`."
+   ]
+  }
+ },
+ "OCX-20": {
+  "pointer": {
+   "kind": "test",
+   "lines": [
+    "// Guarded by the test `a_system_locked_false_subtracts_the_host_from_the_environment`."
+   ]
+  }
+ },
+ "OCX-21": {
+  "pointer": {
+   "kind": "record",
+   "lines": [
+    "        // Why: see .claude/artifacts/adr_read_root.md."
+   ],
+   "record": {
+    "path": ".claude/artifacts/adr_read_root.md",
+    "text": "# read_root: design constraint\n\n## Status\n\nAccepted\n\n## Context and decision\n\nponytail: each published resolve re-parses the whole `c/index.json`\nhere to look up one entry \u2014 O(catalog) per resolve. Deferred, NOT\nmemoized: a process-lifetime per-source catalog cache cannot be cleanly\ninvalidated (a concurrent `ocx index update` process rewrites this file\nout-of-band, and `CatalogTransaction::commit` lives on `IndexStore`, not\nthe `LocalIndex` that would hold the cache), and a stale catalog is a\ncorrectness bug (spurious recovery / missed staleness). This single read\nis already required for the F1 cross-check; the recovery re-read below is\ndeliberately post-lock. Revisit only if profiling shows this dominates.\n"
+   }
+  }
+ },
+ "OCX-23": {
+  "pointer": {
+   "kind": "record",
+   "lines": [
+    "// Why: see .claude/artifacts/adr_remove_segment.md."
+   ],
+   "record": {
+    "path": ".claude/artifacts/adr_remove_segment.md",
+    "text": "# remove_segment: design constraint\n\n## Status\n\nAccepted\n\n## Context and decision\n\nDrops every occurrence of `value` from a `PATH`-style value.\n\nThe inverse of [`move_to_front`] minus the prepend, and it shares that\nfunction's splitting, empty-segment dropping and exact-segment comparison \u2014\nso a directory added by one is removed by the other.\n\nThe caller is a security guard, not a convenience: `ocx launcher shim` must\nresolve the invoked name on a `PATH` that no longer contains the shim\ndirectory it was itself invoked from. Leaving it there makes a name the\npackage claimed but does not ship resolve back to the shim launcher, and\nthe following `execvp` re-enters the same process forever.\n\nOne surrounding pair of `\"` is stripped from `value` before comparing, as\n`Shell::remove_list_element`\ndoes on its path-kind arm: the caller enumerates the operand from the live\nenvironment, which spells a space-bearing Windows segment either way.\n\n**Precondition** (same as [`move_to_front`]): `value` is a single directory\ncontaining no `PATH_SEPARATOR`. Comparison is segment-exact \u2014 deliberately,\nso that it matches the emitted shell snippets \u2014 which means a segment naming\nthe same directory by a different string survives untouched: a trailing\nslash, a symlink alias, a root spelled one way by the composing process and\nanother way by the invoked one. This function is therefore not a containment\ncheck and must not be read as one. Callers that must fail closed re-check the\n*resolved* answer against the resolved directory, which is the only\ncomparison those spellings collapse under.\n"
+   }
+  }
+ },
+ "GRM-01": {
+  "pointer": {
+   "kind": "test",
+   "lines": [
+    "    // Guarded by the test `dangling_symlink_candidate_is_io_error`."
+   ]
+  }
+ },
+ "GRM-03": {
+  "pointer": {
+   "kind": "record",
+   "lines": [
+    "        // Why: see .agents/adr/adr_resolve.md."
+   ],
+   "record": {
+    "path": ".agents/adr/adr_resolve.md",
+    "text": "# AnchoredPath::resolve: design constraint\n\n## Status\n\nAccepted\n\n## Context and decision\n\nLayer 2 (when the candidate exists OR is a symlink): a symlink in\nthe tree could still route a Normal-only path outside the root.\n`exists()` is `false` for a DANGLING symlink (target absent), so we\nalso test `is_symlink()` \u2014 otherwise the guard would be skipped and\n`Ok(root.join(symlink))` returned unvalidated. For a dangling\nsymlink the canonicalize below fails, yielding a safe `Io` error.\nCanonicalize both sides (`dunce` avoids `\\\\?\\` UNC false-negatives\non Windows) and assert containment component-by-component via\n`Path::starts_with` \u2014 never a string prefix. Return the\ncanonicalized path so callers act on the validated, resolved path.\n\nThe leaf stat happens ONCE, here, and is reused by both the branch\ncondition and the carve-out below. `Path::is_symlink()` is itself a\n`symlink_metadata` call, and stat'ing *after* the canonicalize would\nwiden the TOCTOU window in the exploitable direction.\n"
+   }
+  }
+ },
+ "GRM-04": {
+  "pointer": {
+   "kind": "record",
+   "lines": [
+    "    // Why: see .agents/adr/adr_atomic_write.md."
+   ],
+   "record": {
+    "path": ".agents/adr/adr_atomic_write.md",
+    "text": "# atomic_write: design constraint\n\n## Status\n\nAccepted\n\n## Context and decision\n\nfsync the containing directory so the rename is durable across a\ncrash. Opening a directory as a File is Unix-only.\n"
+   }
+  }
+ },
+ "GRM-05": {
+  "pointer": {
+   "kind": "test",
+   "lines": [
+    "// Guarded by the test `through_symlink_writes_the_target_and_keeps_the_link`."
+   ]
+  }
+ },
+ "GRM-06": {
+  "pointer": {
+   "kind": "record",
+   "lines": [
+    "        // Why: see .agents/adr/adr_impl_drop_for_advisoryfilelock.md."
+   ],
+   "record": {
+    "path": ".agents/adr/adr_impl_drop_for_advisoryfilelock.md",
+    "text": "# impl Drop for AdvisoryFileLock: design constraint\n\n## Status\n\nAccepted\n\n## Context and decision\n\nUnlink the sidecar BEFORE the handle closes, i.e. while the lock is\nstill held \u2014 a waiter can then never lock the doomed inode without\n`try_acquire`'s identity re-check catching it.\n\n- Unix: unlinking an open, locked file is plain; the fd (and the\nlock) lives until the close below.\n- Windows: Rust's std opens with FILE_SHARE_DELETE, so the remove\nmarks the name delete-pending; the name disappears when our\nhandle (the last one) closes right after. Concurrent opens during\nthe pending window fail with a permission error, which\n`try_acquire` maps to a bounded retry.\n\nBest-effort: a failure leaves the sidecar behind, which is the\npre-cleanup status quo and never breaks correctness.\n"
+   }
+  }
+ },
+ "PY-01": {
+  "pointer": {
+   "kind": "record",
+   "lines": [
+    "    # Why: see docs/adr/adr_hash_fd.md."
+   ],
+   "record": {
+    "path": "docs/adr/adr_hash_fd.md",
+    "text": "# _hash_fd: design constraint\n\n## Status\n\nAccepted\n\n## Context and decision\n\nReturn the sha256 of everything an open descriptor holds.\n\nHashing through the descriptor rather than re-opening the path is what\nmakes the digest cover the exact bytes being installed: no second lookup\nmeans no window for a swap between verification and use.\n\nArgs:\nfd: The descriptor; it is rewound first and left at end of file.\n\nReturns:\nLowercase hex digest.\n\n"
+   }
+  }
+ },
+ "TS-03": {
+  "pointer": {
+   "kind": "record",
+   "lines": [
+    "    // Why: see .claude/artifacts/adr_detailscache_save.md."
+   ],
+   "record": {
+    "path": ".claude/artifacts/adr_detailscache_save.md",
+    "text": "# DetailsCache.save: design constraint\n\n## Status\n\nAccepted\n\n## Context and decision\n\nWrite-then-rename so a concurrent load never parses a half-written file and\ndeletes the good entry (rename is atomic within a dir). The .tmp suffix\nkeeps it out of prune's `.json` filter. The name is unique PER WRITE, not\nper repo: two saves for one repo overlap routinely (a panel open racing\nthe prefetch of the same card), and a shared tmp path let both write into\nONE file \u2014 interleaved, so the rename published a torn document. Racing\nsaves still last-write-win at the rename; each writes a whole entry now.\n"
+   }
+  }
+ },
+ "TS-04": {
+  "pointer": {
+   "kind": "record",
+   "lines": [
+    "        // Why: see .claude/artifacts/adr_whichgrim.md."
+   ],
+   "record": {
+    "path": ".claude/artifacts/adr_whichgrim.md",
+    "text": "# whichGrim: design constraint\n\n## Status\n\nAccepted\n\n## Context and decision\n\nRESOLVED, not merely joined: a relative PATH entry (`.`, `bin`,\n`./tools` \u2014 all legal) would otherwise yield a relative executable\npath, which run() then resolves against ITS cwd, the workspace\nfolder. That is the same threat as handing the OS a bare `grim`: a\nrepository shipping its own grim would win. Resolving before the\naccess check also keeps the file we probed and the file we return the\nsame one.\n"
+   }
+  }
+ },
+ "PY-05": {
+  "pointer": {
+   "kind": "test",
+   "lines": [
+    "    # Guarded by the test `test_which_excludes_the_working_directory_on_windows`."
+   ]
+  }
+ },
+ "PY-06": {
+  "pointer": {
+   "kind": "test",
+   "lines": [
+    "    # Guarded by the test `test_sha256_required_off_canonical`."
+   ]
+  }
+ },
+ "PY-07": {
+  "pointer": {
+   "kind": "test",
+   "lines": [
+    "    # Guarded by the test `test_compose_argv_puts_global_flags_before_the_command`."
+   ]
+  }
+ },
+ "TS-05": {
+  "pointer": {
+   "kind": "record",
+   "lines": [
+    "// Why: see .claude/artifacts/adr_root_alias_basename_packagerootaliaspath.md."
+   ],
+   "record": {
+    "path": ".claude/artifacts/adr_root_alias_basename_packagerootaliaspath.md",
+    "text": "# ROOT_ALIAS_BASENAME / packageRootAliasPath: design constraint\n\n## Status\n\nAccepted\n\n## Context and decision\n\nBasename of the ad-blocker-safe ALIAS copy of a package root, written\nbeside the package's own CAS directory: `p/<ns>/<pkg>/_root.json`.\n\nWhy an alias exists at all: the wire root's own URL ends in\n`<pkg>.json`, so a package whose name matches one of the ~800 unanchored\n`/<word>.js` rules in EasyList/EasyPrivacy has its root fetch BLOCKED in\nany browser running those lists \u2014 the rule's substring matches\n`/<word>.js` inside `/<word>.json`. Observed 2026-08-27 on\n`ocx.sh/hawkeye/hawkeye`: EasyPrivacy's `/hawkeye.js` killed\n`/p/hawkeye/hawkeye.json` and the detail page rendered \"Failed to load:\nNetworkError\". The alias moves the package name out of the final\nsegment, which no such rule can match.\n\n`_root` is collision-proof by construction: `PACKAGE_RE`\n(`viewmodel/catalog.ts`) requires a package segment to START with\n`[a-z0-9]`, so no package \u2014 at any depth \u2014 can ever own this filename.\nIt sits INSIDE `p/`, so the `_headers` sandbox block for `/p/*` covers it\nwith no second rule. The canonical `p/<ns>/<pkg>.json` is still written:\nthis is an ADDITIONAL copy for the site's own fetch, never a wire-format\nchange.\n"
+   }
+  }
+ },
+ "TS-06": {
+  "pointer": {
+   "kind": "record",
+   "lines": [
+    " // Why: see .claude/artifacts/adr_wireprefix.md."
+   ],
+   "record": {
+    "path": ".claude/artifacts/adr_wireprefix.md",
+    "text": "# wirePrefix: design constraint\n\n## Status\n\nAccepted\n\n## Context and decision\n\nMount prefix for one source's mirrored wire tree \u2014 `\"\"` for the\n`root: true` source (mirrored at the site root) and `/index/<label>` for\nevery other configured source (`sources/mirror.ts`'s placement).\n\nEvery wire URL this module emits into `/data/catalog/catalog.json` goes\nthrough it. Without it a non-root source's `logoUrl`/`readmeUrl` pointed\nat `/p/...`, which only ever holds the ROOT source's copy: the mirror had\nwritten those exact bytes to `/index/<label>/p/...` and every request\n404'd, silently \u2014 `LogoTile`/`IdentityBlock` walk the svg->png candidate\nchain and leave the monogram standing, so a wholly logo-less, README-less\nmulti-source catalog looked like a catalog whose packages publish no\n`__ocx.desc` at all.\n\nExported for the browser side too: `src/theme/utils/cas.ts` re-exports it\nand builds its own CAS URLs through it, so both halves of a build agree by\nconstruction rather than by two copies staying in step. A live import is\nsafe here where `WIRE_ASSET_EXTENSIONS`'s could not be \u2014 the dependency\nruns theme -> viewmodel, and `useImageIndex.ts` already pulls this module\ninto the browser bundle for `readImageIndexAnnotations`.\n\n"
+   }
+  }
+ },
+ "TS-07": {
+  "pointer": {
+   "kind": "record",
+   "lines": [
+    " // Why: see .claude/artifacts/adr_usepackageroot.md."
+   ],
+   "record": {
+    "path": ".claude/artifacts/adr_usepackageroot.md",
+    "text": "# usePackageRoot: design constraint\n\n## Status\n\nAccepted\n\n## Context and decision\n\nFetches the wire package root \u2014 `<wireBase>/p/<ns>/<pkg>/_root.json`, the\nad-blocker-safe alias `sources/mirror.ts` writes beside the canonical\n`<wireBase>/p/<ns>/<pkg>.json`, which is used as the 404 fallback (schema:\n`root.schema.json` either way; the two are byte-identical). `wireBase` is the mount prefix of the source this\npackage came from \u2014 `''` (the site root) for the `root: true` source,\n`index/<label>` for every other; the detail page reads it off its own\nfrontmatter. See `utils/cas.ts`'s `wirePrefix`.\n\nCAS gotcha: build any CAS asset URL (`casUrl()` from `utils/cas.ts`) from\nthe bare `<ns>/<pkg>` route params passed in here \u2014 NEVER from\n`root.name`, which carries the `ocx.sh/` prefix and 404s every CAS\nrequest built from it.\n\n`ns`/`pkg` accept refs/getters and are re-fetched on change (post-mount\nonly, per the SSR-safety constraint) \u2014 a dynamic-route detail page's\ncomponent instance can be reused by VitePress's client router across a\nnavigation between two different packages, so a plain one-shot\n`onMounted` fetch would leave stale data on screen after such a nav.\n\n"
+   }
+  }
+ }
+}

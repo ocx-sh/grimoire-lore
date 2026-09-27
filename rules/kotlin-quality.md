@@ -154,3 +154,6 @@ where everything blocks teaches the reader to negotiate with all of it.
   with this set deliberately, because a build script is Kotlin source, so a
   build-script edit loads both indexes and a `.kt` source edit loads only this
   one.
+- **`code-docs`**: comments, KDoc, decision-record pointers and test names as
+  documentation, in every language: what a comment keeps, where each clause
+  goes and how long a block runs. Loads on every source file, `.kts` included.

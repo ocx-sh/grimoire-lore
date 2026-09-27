@@ -1,0 +1,202 @@
+[
+ {
+  "file": "packages/vite/src/node/build.ts",
+  "line": 137,
+  "len": 2,
+  "kind": "doc",
+  "text": "   * @deprecated Vite now uses esbuild for CSS minification.\n   */",
+  "next": "cleanCssOptions?: any"
+ },
+ {
+  "file": "packages/vite/src/node/plugins/resolve.ts",
+  "line": 632,
+  "len": 1,
+  "kind": "line",
+  "text": "  // further check if id is imported by nested dependency",
+  "next": "let resolvedSrc: string | undefined"
+ },
+ {
+  "file": "packages/playground/legacy/main.js",
+  "line": 30,
+  "len": 1,
+  "kind": "line",
+  "text": "// dynamic chunk names",
+  "next": "import('./immutable-chunk.js')"
+ },
+ {
+  "file": "packages/vite/src/node/server/middlewares/static.ts",
+  "line": 42,
+  "len": 1,
+  "kind": "line",
+  "text": "    // skip import request and internal requests `/@fs/ /@vite-client` etc...",
+  "next": "if (isImportRequest(req.url!) || isInternalRequest(req.url!)) {"
+ },
+ {
+  "file": "packages/vite/src/node/server/index.ts",
+  "line": 69,
+  "len": 2,
+  "kind": "doc",
+  "text": "   * Force dep pre-optimization regardless of whether deps have changed.\n   */",
+  "next": "force?: boolean"
+ },
+ {
+  "file": "packages/vite/src/node/server/middlewares/indexHtml.ts",
+  "line": 178,
+  "len": 1,
+  "kind": "line",
+  "text": "  // Keep the named function. The name is visible in debug logs via `DEBUG=connect:dispatcher ...`",
+  "next": "return async function viteIndexHtmlMiddleware(req, res, next) {"
+ },
+ {
+  "file": "packages/vite/src/node/utils.ts",
+  "line": 486,
+  "len": 1,
+  "kind": "line",
+  "text": "    // resolve file to normalized system path",
+  "next": "watcher.add(path.resolve(file))"
+ },
+ {
+  "file": "packages/vite/src/node/plugins/resolve.ts",
+  "line": 819,
+  "len": 1,
+  "kind": "line",
+  "text": "      // not exposed",
+  "next": "relativeId = undefined"
+ },
+ {
+  "file": "packages/vite/src/node/server/openBrowser.ts",
+  "line": 80,
+  "len": 1,
+  "kind": "line",
+  "text": "      // Ignore errors",
+  "next": "}"
+ },
+ {
+  "file": "packages/vite/src/node/ssr/ssrModuleLoader.ts",
+  "line": 275,
+  "len": 1,
+  "kind": "line",
+  "text": "  // This is the only sensible option when the exports object is a primitve",
+  "next": "if (isPrimitive(mod)) return { default: mod }"
+ },
+ {
+  "file": "packages/vite/src/node/plugin.ts",
+  "line": 118,
+  "len": 2,
+  "kind": "doc",
+  "text": "   * extend hooks with ssr flag\n   */",
+  "next": "resolveId?("
+ },
+ {
+  "file": "packages/vite/src/node/plugins/importAnalysisBuild.ts",
+  "line": 275,
+  "len": 1,
+  "kind": "line",
+  "text": "                // literal import - trace direct imports and add to deps",
+  "next": "const analyzed: Set<string> = new Set<string>()"
+ },
+ {
+  "file": "packages/vite/src/node/plugins/asset.ts",
+  "line": 96,
+  "len": 2,
+  "kind": "line",
+  "text": "        // some internal plugins may still need to emit chunks (e.g. worker) so\n        // fallback to this.getFileName for that.",
+  "next": "const file = getAssetFilename(hash, config) || this.getFileName(hash)"
+ },
+ {
+  "file": "packages/vite/src/node/plugins/css.ts",
+  "line": 237,
+  "len": 2,
+  "kind": "line",
+  "text": "              // The root CSS proxy module is self-accepting and should not\n              // have an explicit accept list",
+  "next": "new Set(),"
+ },
+ {
+  "file": "packages/vite/src/node/plugins/preAlias.ts",
+  "line": 7,
+  "len": 2,
+  "kind": "doc",
+  "text": " * A plugin to avoid an aliased AND optimized dep from being aliased in src\n */",
+  "next": "export function preAliasPlugin(): Plugin {"
+ },
+ {
+  "file": "packages/vite/src/node/server/openBrowser.ts",
+  "line": 30,
+  "len": 2,
+  "kind": "line",
+  "text": "  // The browser executable to open.\n  // See https://github.com/sindresorhus/open#app for documentation.",
+  "next": "const browser = typeof opt === 'string' ? opt : process.env.BROWSER || ''"
+ },
+ {
+  "file": "packages/plugin-legacy/index.js",
+  "line": 336,
+  "len": 2,
+  "kind": "line",
+  "text": "        // The legacy bundle is built first, and its index.html isn't actually\n        // emitted. Here we simply record its corresponding legacy chunk.",
+  "next": "facadeToLegacyChunkMap.set(chunk.facadeModuleId, chunk.fileName)"
+ },
+ {
+  "file": "packages/vite/src/node/plugins/css.ts",
+  "line": 1151,
+  "len": 1,
+  "kind": "line",
+  "text": "// .less",
+  "next": "const less: StylePreprocessor = async (source, root, options, resolvers) => {"
+ },
+ {
+  "file": "packages/plugin-vue/src/script.ts",
+  "line": 24,
+  "len": 3,
+  "kind": "line",
+  "text": "// Check if we can use compile template as inlined render function\n// inside <script setup>. This can only be done for build because\n// inlined template cannot be individually hot updated.",
+  "next": "export function isUseInlineTemplate("
+ },
+ {
+  "file": "packages/vite/src/node/build.ts",
+  "line": 578,
+  "len": 1,
+  "kind": "line",
+  "text": "      // stop watching",
+  "next": "watcher.close()"
+ },
+ {
+  "file": "packages/vite/src/node/plugins/css.ts",
+  "line": 1111,
+  "len": 3,
+  "kind": "doc",
+  "text": " * relative url() inside \\@imported sass and less files must be rebased to use\n * root file as base.\n */",
+  "next": "async function rebaseUrls("
+ },
+ {
+  "file": "packages/vite/src/node/plugins/importAnalysis.ts",
+  "line": 258,
+  "len": 3,
+  "kind": "line",
+  "text": "          // check if the dep has been hmr updated. If yes, we need to attach\n          // its last updated timestamp to force the browser to fetch the most\n          // up-to-date version of this module.",
+  "next": "try {"
+ },
+ {
+  "file": "packages/vite/src/node/server/pluginContainer.ts",
+  "line": 350,
+  "len": 1,
+  "kind": "line",
+  "text": "        // css preprocessors may report errors in an included file",
+  "next": "if (!err.frame) {"
+ },
+ {
+  "file": "packages/playground/ssr-vue/src/entry-server.js",
+  "line": 18,
+  "len": 3,
+  "kind": "line",
+  "text": "  // the SSR manifest generated by Vite contains module -> chunk/asset mapping\n  // which we can then use to determine what files need to be preloaded for this\n  // request.",
+  "next": "const preloadLinks = renderPreloadLinks(ctx.modules, manifest)"
+ },
+ {
+  "file": "packages/playground/ssr-react/src/forked-deadlock/middle-module.js",
+  "line": 4,
+  "len": 2,
+  "kind": "doc",
+  "text": " * module Y\n */",
+  "next": "export function middleModuleExport() {"
+ }
+]

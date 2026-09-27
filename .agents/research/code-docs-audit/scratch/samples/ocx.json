@@ -1,0 +1,1202 @@
+[
+ {
+  "file": "crates/ocx_cli/src/exit/ocx_announce.rs",
+  "line": 116,
+  "len": 4,
+  "kind": "line",
+  "text": "            // `git` is missing or too old. Nothing about the invocation is\n            // wrong and no credential is involved: the host lacks a tool the\n            // run needs, which is exactly what `EX_UNAVAILABLE` means. Raised\n            // before any network call.",
+  "next": "Self::GitUnavailable { .. } => Some(ExitCode::Unavailable),"
+ },
+ {
+  "file": "crates/ocx_oci/src/media_type.rs",
+  "line": 26,
+  "len": 1,
+  "kind": "doc",
+  "text": "/// PNG image media type.",
+  "next": "pub const MEDIA_TYPE_PNG: &str = \"image/png\";"
+ },
+ {
+  "file": "crates/ocx_python/src/compose.rs",
+  "line": 536,
+  "len": 2,
+  "kind": "doc",
+  "text": "    /// An [`EntrypointSelection::Explicit`] name matched no admitted wheel's\n    /// console script.",
+  "next": "#[error(\"entrypoint '{name}' was requested but not found in any wheel\")]"
+ },
+ {
+  "file": "crates/ocx_cli/src/app/context.rs",
+  "line": 1085,
+  "len": 3,
+  "kind": "line",
+  "text": "            // The base URL and its transport are one decision, taken inside\n            // `resolve_base_url` \u2014 picking a transport here would re-derive the\n            // scheme the gate there already settled.",
+  "next": "let base ="
+ },
+ {
+  "file": ".claude/hooks/hook_utils.py",
+  "line": 263,
+  "len": 1,
+  "kind": "line",
+  "text": "    # --- Subagent log ---",
+  "next": "def log_subagent_completion(self) -> None:"
+ },
+ {
+  "file": "crates/ocx_shell/src/shell/reconcile/plan.rs",
+  "line": 543,
+  "len": 2,
+  "kind": "doc",
+  "text": "/// Segment-wise [`element_eq`] under [`ModifierKind::Path`], over both values\n/// split by the platform's own `PATH` splitter.",
+  "next": "fn path_segments_eq(left: &OsStr, right: &OsStr) -> bool {"
+ },
+ {
+  "file": "crates/ocx_util/src/fs/symlink_walk.rs",
+  "line": 100,
+  "len": 9,
+  "kind": "doc",
+  "text": "/// Synchronous sibling of [`refuse_if_symlink_in_path`] for blocking contexts.\n///\n/// The archive extractor runs inside `spawn_blocking` and cannot `.await`, so it\n/// uses this variant to refuse \u2014 *before* it creates anything \u2014 any entry whose\n/// destination resolves through a symlink an earlier entry planted. Identical\n/// policy and error type to the async version; walks with\n/// [`std::fs::symlink_metadata`]. `boundary` scopes the walk to the untrusted\n/// portion strictly below a trusted root (pass `Some(canonical_root)` so a\n/// symlinked `$OCX_HOME` above the extraction root is not itself refused).",
+  "next": "pub(crate) fn refuse_if_symlink_in_path_sync(path: &Path, boundary: Option<&Path>) -> Result<(), SymlinkWalkError> {"
+ },
+ {
+  "file": "crates/ocx_package_manager/src/tasks/pull.rs",
+  "line": 509,
+  "len": 5,
+  "kind": "line",
+  "text": "    // Assemble package content/ by hardlinking files from all layers.\n    // The walker mirrors each layer's directory tree into a single content/\n    // directory \u2014 regular files become hardlinks; intra-layer symlinks are\n    // preserved verbatim. Layers must not overlap (same file in two layers\n    // is an error).",
+  "next": "let layer_contents: Vec<std::path::PathBuf> = layer_digests"
+ },
+ {
+  "file": "crates/ocx_setup/src/session_path/linux.rs",
+  "line": 87,
+  "len": 16,
+  "kind": "doc",
+  "text": "/// Characters an `environment.d` value cannot carry **as its first character**,\n/// checked in this order after [`REFUSED`] finds nothing.\n///\n/// Same derivation as [`REFUSED`]: systemd's `PRE_VALUE` state skips over\n/// `WHITESPACE` before the value begins, and a quote in the first position\n/// opens a quoted string that runs past the line ending. Confirmed against the\n/// generator, which strips a leading space and a leading tab, and consumes a\n/// leading `'` or `\"` while pulling the newline into the value. Vertical tab\n/// and form feed survive the same position untouched \u2014 they are not in\n/// systemd's `WHITESPACE` \u2014 and so are not refused.\n///\n/// Refused for **every** directory, not only the one that happens to be\n/// written first. Only the leading directory sits at the value's front, but\n/// which directory leads is [`render_conf`]'s business; making [`encode`]'s\n/// answer depend on a caller's ordering would be a contract that silently\n/// changes when the order does.",
+  "next": "pub const REFUSED_LEADING: &[(char, &str)] = &["
+ },
+ {
+  "file": "crates/ocx_project/src/mutate.rs",
+  "line": 168,
+  "len": 1,
+  "kind": "line",
+  "text": "// \u2500\u2500 read-modify-write helpers \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+  "next": "/// Derive the binding key (TOML map key) from an identifier."
+ },
+ {
+  "file": "crates/ocx_announce/src/forge/github.rs",
+  "line": 43,
+  "len": 1,
+  "kind": "doc",
+  "text": "/// Raw media type \u2014 returns file bytes directly from the contents API.",
+  "next": "const ACCEPT_RAW: &str = \"application/vnd.github.raw+json\";"
+ },
+ {
+  "file": "crates/ocx_cli/src/command/self_group/activate.rs",
+  "line": 1155,
+  "len": 15,
+  "kind": "doc",
+  "text": "/// Generate the shell-completion script to emit inline into the activation\n/// stream, or `None` when the shell has no completion backend.\n///\n/// Emitted directly into the eval'd activation stream rather than written to a\n/// file: the stream is already `eval`/`Invoke-Expression`'d by the shim, so a\n/// `complete -F` / `compdef` / `Register-ArgumentCompleter` block installs\n/// completions with no file to manage, version-stamp, or read.\n///\n/// Delegates to [`crate::command::shell_completion::render_completion_script`]\n/// \u2014 the single generator shared with `ocx shell completion`, which adds the\n/// zsh `compinit` guard so the script registers wherever it is sourced. The one\n/// activation-specific concern is order: PowerShell's `using namespace` must be\n/// the first statement of the stream, which [`emit_activation`] guarantees by\n/// emitting this block before the PATH prepend (verified on Windows PowerShell\n/// 5.1 and PowerShell 7).",
+  "next": "fn generate_completion_inline(shell: Shell) -> Option<String> {"
+ },
+ {
+  "file": "crates/ocx_oci/src/client/test_transport.rs",
+  "line": 402,
+  "len": 2,
+  "kind": "line",
+  "text": "            // Listed as present but with no seeded content: still a HEAD hit, and\n            // the size is all a caller gets from it.",
+  "next": "(true, None) => Ok(0),"
+ },
+ {
+  "file": "crates/ocx_sign/src/verify.rs",
+  "line": 55,
+  "len": 5,
+  "kind": "line",
+  "text": "// The instant certificate validity is judged against, tagged with its\n// provenance so no caller can substitute the wall clock for a signing-time\n// proof. Private to this subtree \u2014 `SigningInstant` appears only in\n// `tlog::verify_integrated_time_within_certificate`'s signature and at the\n// pipeline call site, both inside `oci::verify`.",
+  "next": "mod signing_instant;"
+ },
+ {
+  "file": "crates/ocx_project/src/lock.rs",
+  "line": 213,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Parse a [`ProjectLock`] from a TOML string.",
+  "next": "pub fn from_toml_str(s: &str) -> Result<Self, super::Error> {"
+ },
+ {
+  "file": "crates/ocx_sign/src/sign/bundle.rs",
+  "line": 60,
+  "len": 3,
+  "kind": "doc",
+  "text": "    /// Which key model produced this signature. Reported so a consumer can tell\n    /// a `file`-backed signature from a keyless one \u2014 and from a future KMS one\n    /// \u2014 without parsing the bundle.",
+  "next": "pub key_backend: KeyBackendKind,"
+ },
+ {
+  "file": "crates/ocx_package_manager/src/patch/descriptor.rs",
+  "line": 47,
+  "len": 1,
+  "kind": "line",
+  "text": "// \u2500\u2500 Structural limits \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+  "next": "/// Maximum number of rules allowed in a single [`PatchDescriptor`]."
+ },
+ {
+  "file": "crates/ocx_index/src/local_index.rs",
+  "line": 1181,
+  "len": 8,
+  "kind": "doc",
+  "text": "    /// Stage already-fetched dispatch-object bytes into the wire-grammar object\n    /// CAS under the object's own digest \u2014 the no-double-fetch self-heal write\n    /// (`adr_index_indirection.md` A3). When [`ChainedIndex`](super::chained_index::ChainedIndex)\n    /// already holds the bytes of a [`DispatchResolution::AbsentDispatch`] recovery\n    /// that decoded as an image index (an incomplete snapshot), it heals `o/`\n    /// here instead of re-fetching through [`Self::persist_dispatch`]. The store\n    /// recompute-and-verifies the digest before the write commits (A4);\n    /// re-staging the same digest is idempotent.",
+  "next": "pub async fn stage_dispatch_bytes("
+ },
+ {
+  "file": ".claude/hooks/hook_utils.py",
+  "line": 58,
+  "len": 1,
+  "kind": "doc",
+  "text": "    \"\"\"Build a PreToolUse ask response.\"\"\"",
+  "next": "return {"
+ },
+ {
+  "file": "crates/ocx_cli/src/command/toolchain_exec.rs",
+  "line": 411,
+  "len": 2,
+  "kind": "line",
+  "text": "        // clap enforces `last = true, num_args = 1.., required = true` on the\n        // `argv` field \u2014 `self.argv` is always non-empty at this point.",
+  "next": "let (command, _) = self"
+ },
+ {
+  "file": "crates/ocx_package_manager/src/tasks/garbage_collection/reachability_graph.rs",
+  "line": 42,
+  "len": 8,
+  "kind": "doc",
+  "text": "/// Pre-computed dependency graph with BFS reachability queries.\n///\n/// Covers all four store tiers (packages, layers, blobs, shims) in a single\n/// graph. Packages and shims carry outgoing edges; layers and blobs are passive,\n/// reachable exclusively through a package's or shim's `refs/layers/` and\n/// `refs/blobs/` edges. A shim is rooted only by a lock pin \u2014 it has no incoming\n/// edge, because a shim exists precisely when the package it stands in for does\n/// not (plan contract C-014).",
+  "next": "pub struct ReachabilityGraph {"
+ },
+ {
+  "file": "crates/ocx_python/src/collide.rs",
+  "line": 4,
+  "len": 8,
+  "kind": "doc",
+  "text": "//! Publish-time collision pre-check across a selected wheel set.\n//!\n//! A valid resolved lock is collision-free by construction, so OCX's\n//! overlap-free prefix-layer union composes a correct `site-packages`. This\n//! check is the guard that proves the invariant holds for a concrete wheel set\n//! *before* anything is pushed: if two repacked wheels claim the same installed\n//! path (post-relocation), the union would be ambiguous \u2014 a hard\n//! [`CollisionError`], failing before push rather than corrupting the registry.",
+  "next": "use std::collections::HashMap;"
+ },
+ {
+  "file": "crates/ocx_package/src/bin_scan.rs",
+  "line": 370,
+  "len": 2,
+  "kind": "doc",
+  "text": "    /// `--bin-scan`: scan; verify a declared claim one-directionally against\n    /// the scan result, or fill an absent one exactly like `Auto`.",
+  "next": "Verify,"
+ },
+ {
+  "file": "crates/ocx_package_manager/src/tasks/attest.rs",
+  "line": 190,
+  "len": 2,
+  "kind": "line",
+  "text": "        // Subject digest -> the tag whose run attested it, exactly as in\n        // `sign_tags`: see [`SweptOutcome::CoveredBy`].",
+  "next": "let mut attested: HashMap<ocx_oci::Digest, String> = HashMap::new();"
+ },
+ {
+  "file": "crates/ocx_oci/src/client.rs",
+  "line": 588,
+  "len": 1,
+  "kind": "line",
+  "text": "    // \u2500\u2500 Authentication \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+  "next": "/// Pre-authenticate against the registry for `identifier` with the"
+ },
+ {
+  "file": "crates/ocx_oci/src/ssrf.rs",
+  "line": 545,
+  "len": 31,
+  "kind": "doc",
+  "text": "/// The SSRF floor, route-aware \u2014 the production replacement for\n/// [`resolve_and_validate`] once every guard site threads a [`ProxyRules`]\n/// through.\n///\n/// On [`Route::Direct`] this is [`resolve_and_validate`] verbatim: resolve,\n/// validate, fail closed on both an unresolvable host and a forbidden address.\n///\n/// On [`Route::Proxied`] the proxy resolves and dials the destination, so the\n/// process performs **no DNS** \u2014 a lookup here would fail on a proxy-only-DNS\n/// network (ocx#407) and would judge addresses nothing ever connects to. A\n/// trusted host is admitted first; a forbidden IP **literal** is then refused\n/// textually, judged after `normalised_destination` has folded it into the\n/// address reqwest will actually dial.\n///\n/// A loopback **name** (`is_loopback_name`) is refused there too, reported as\n/// `127.0.0.1` because RFC 6761 \u00a76.3 says that is what it names. An IP literal\n/// is refused on either route, in every spelling `url` parses \u2014 including the\n/// IPv4-mapped, IPv4-compatible and NAT64-embedded IPv6 forms.\n///\n/// Residual, deliberate and now narrower: a host whose **name** does not say it\n/// is loopback but which resolves to an internal address through the proxy\n/// (`intranet.corp`, a rebinding name) is still admitted. Only the proxy's own\n/// egress policy can refuse that one \u2014 from here the destination is literal\n/// text in a `CONNECT` line, and ocx has no address to judge.\n///\n/// # Errors\n///\n/// [`SsrfError::ForbiddenTarget`] for a forbidden address (resolved on a direct\n/// route, textual on a proxied one \u2014 the `ip` field carries the normalised\n/// address, `host` the spelling the caller passed); [`SsrfError::Resolution`]\n/// when a direct route's host cannot be resolved.",
+  "next": "pub async fn guard_destination("
+ },
+ {
+  "file": "crates/ocx_sign/src/verify/trust_cache.rs",
+  "line": 47,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Rekor URL authority (host[:port]) this material belongs to.",
+  "next": "pub rekor_authority: String,"
+ },
+ {
+  "file": "crates/ocx_cli/src/command/toolchain_exec.rs",
+  "line": 171,
+  "len": 8,
+  "kind": "line",
+  "text": "        // Reject a malformed `--env` before any filesystem or network work,\n        // for the same reason as the group check above. Bound here; the\n        // composition stage that appends these as the highest-precedence\n        // entries consumes them alongside the project/group env.\n        //\n        // A relative `:path` value anchors to the invocation directory \u2014 the\n        // one base a calling script can compute \u2014 not the project root the\n        // `ocx.toml` form uses.",
+  "next": "let cwd = std::env::current_dir()"
+ },
+ {
+  "file": "crates/ocx_python/src/repack.rs",
+  "line": 307,
+  "len": 1,
+  "kind": "doc",
+  "text": "/// Splits a sanitized zip-relative path into its forward-slash components.",
+  "next": "fn path_components(path: &Path) -> Vec<String> {"
+ },
+ {
+  "file": "crates/ocx_store/src/file_structure/state_store.rs",
+  "line": 12,
+  "len": 3,
+  "kind": "doc",
+  "text": "/// [`Result`](std::result::Result) over the one failure this store's file\n/// operations can raise. `From<FileError>` for the crate-wide error yields\n/// exactly `InternalFile(path, cause)`, one conversion later than it was.",
+  "next": "type Result<T> = std::result::Result<T, ocx_util::error::FileError>;"
+ },
+ {
+  "file": "crates/ocx_sign/src/attest/pipeline.rs",
+  "line": 160,
+  "len": 2,
+  "kind": "doc",
+  "text": "    /// The RESOLVED predicateType URI (D-c) \u2014 echoed in the report so alias\n    /// resolution is visible rather than surprising.",
+  "next": "pub predicate_type: String,"
+ },
+ {
+  "file": "crates/ocx_config/src/lib.rs",
+  "line": 1277,
+  "len": 18,
+  "kind": "doc",
+  "text": "/// C-018's system locations matched as **subtrees** \u2014 a candidate at or under\n/// any of these is refused.\n///\n/// A constant rather than an inline literal so the specification test asserts\n/// parity against it instead of transcribing the same list a second time\n/// (RUL-31): a prefix deleted here then reds a row rather than silently running\n/// one iteration fewer.\n///\n/// `/` and `/var` are **not** here; they are matched by identity, in\n/// [`SYSTEM_LOCATIONS_MATCHED_EXACTLY`]. `/var` because an ostree-composed\n/// Fedora \u2014 Silverblue, Kinoite, CoreOS, Bazzite \u2014 puts every user's home at\n/// `/var/home/<user>`: `/home` is a symlink to `var/home` and the passwd entry\n/// canonicalises there. A bare `/var` subtree prefix therefore refuses *every*\n/// `toolchain_dir` on those hosts, `~/.cache/ocx/toolchain` included \u2014 the\n/// ADR's own worked example, on a shipping desktop distribution. The\n/// directories C-018 is actually defending are listed one by one below; there\n/// is no exemption mechanism and no configuration key that opts out of any of\n/// them.",
+  "next": "const SYSTEM_PREFIXES: [&str; 23] = ["
+ },
+ {
+  "file": "crates/ocx_announce/src/forge/api.rs",
+  "line": 552,
+  "len": 18,
+  "kind": "doc",
+  "text": "    /// Look up an existing fork of `upstream` at `fork`, **without creating\n    /// one**. `None` when nothing is there, or when what is there is not a\n    /// verified fork of `upstream` (a same-named stranger repository).\n    ///\n    /// Read-only by contract: the caller resolves the fork's real identity before\n    /// deciding whether any write is needed at all, so a pure no-op run never\n    /// provokes a fork create (design register C6).\n    ///\n    /// Under the `git` transport this returns\n    /// [`ForgeError::TransportOperationUnsupported`]: the credential that\n    /// transport exists for cannot reach the fork API at all, so a fork is\n    /// refused up front rather than failing opaquely at the first call.\n    ///\n    /// # Errors\n    ///\n    /// Returns a [`ForgeError`] on transport failure, a non-success status other\n    /// than \"absent\", or a verified fork living under an unexpected owner;\n    /// [`ForgeError::TransportOperationUnsupported`] under the `git` transport.",
+  "next": "async fn find_fork("
+ },
+ {
+  "file": "crates/ocx_oci/src/layer_layout.rs",
+  "line": 76,
+  "len": 1,
+  "kind": "doc",
+  "text": "/// Maximum length of an untrusted annotation value echoed into an error message.",
+  "next": "const MAX_ECHOED_ANNOTATION_CHARS: usize = 32;"
+ },
+ {
+  "file": "crates/ocx_store/src/codesign.rs",
+  "line": 61,
+  "len": 1,
+  "kind": "line",
+  "text": "// -- Mach-O detection ---------------------------------------------------------",
+  "next": "/// Mach-O magic bytes (native and byte-swapped variants)."
+ },
+ {
+  "file": "crates/ocx_announce/src/forge.rs",
+  "line": 303,
+  "len": 2,
+  "kind": "doc",
+  "text": "    /// True when an existing open pull request was reused, false when freshly\n    /// opened.",
+  "next": "pub updated: bool,"
+ },
+ {
+  "file": "crates/ocx_package_manager/src/tasks/common.rs",
+  "line": 837,
+  "len": 14,
+  "kind": "doc",
+  "text": "/// Stages `pinned`'s raw manifest bytes into the machine-global blob store\n/// when not already local \u2014 mirrors [`stage_and_link_chain_blobs`]'s\n/// `ChainRole::Manifest` step (`adr_index_indirection.md` A3/B2: the local\n/// index never caches a leaf, only dispatch objects; `$OCX_HOME/blobs` is the\n/// sanctioned content-cache home). No ref-link: the walker has no installed\n/// package directory to link into, so the staged blob is an unreferenced\n/// cache entry \u2014 `ocx clean` may reclaim it, same as any other cache-warming\n/// write. Shared by the root's own fetch and each dep's fetch\n/// ([`fetch_closure_node`]).\n///\n/// # Errors\n///\n/// Returns an error if the manifest cannot be fetched, fails its digest\n/// re-verification, or cannot be written to the blob store.",
+  "next": "pub async fn stage_leaf_manifest("
+ },
+ {
+  "file": "crates/ocx_setup/src/error.rs",
+  "line": 69,
+  "len": 5,
+  "kind": "doc",
+  "text": "    /// The `--managed-config` ref could not be re-parsed as a valid OCI\n    /// identifier at write time (defensive re-validation, CWE-74 guard \u2014\n    /// the fence body is real TOML serialization, never `format!`\n    /// interpolation of the raw ref, but the ref itself must still be a\n    /// well-formed identifier before it is adopted at all).",
+  "next": "#[error(\"managed config source '{value}' is not a valid OCI identifier\")]"
+ },
+ {
+  "file": "crates/ocx_config/src/lib.rs",
+  "line": 1591,
+  "len": 2,
+  "kind": "line",
+  "text": "    // SAFETY: `geteuid` reads the calling process's own credentials. It takes no\n    // arguments, touches no memory, and is documented as always succeeding.",
+  "next": "let effective_user = unsafe { libc::geteuid() };"
+ },
+ {
+  "file": "crates/ocx_setup/src/session_path/windows.rs",
+  "line": 356,
+  "len": 3,
+  "kind": "line",
+  "text": "    // SAFETY: `key` is open for the whole call; `name` and `data` are\n    // NUL-terminated UTF-16 buffers that outlive it; `size` is `data`'s length\n    // in bytes.",
+  "next": "let written = unsafe { RegSetValueExW(key, name.as_ptr(), 0, kind, data.as_ptr().cast(), size) };"
+ },
+ {
+  "file": "crates/ocx_package/src/metadata/binary.rs",
+  "line": 4,
+  "len": 3,
+  "kind": "doc",
+  "text": "//! Publisher-declared, unverified claim of interface-surface executable\n//! names a package exposes on `PATH`. See\n//! `adr_declared_binaries_metadata.md`.",
+  "next": "use std::collections::{BTreeMap, BTreeSet};"
+ },
+ {
+  "file": "crates/ocx_package_manager/src/tasks/common.rs",
+  "line": 666,
+  "len": 2,
+  "kind": "line",
+  "text": "    // Commit the `current` symlink. Failure here triggers rollback of the\n    // prior symlink target before the error is surfaced.",
+  "next": "log::debug!(\"Creating current symlink at '{}'.\", current_path.display());"
+ },
+ {
+  "file": "crates/ocx_util/src/fs/same_dir.rs",
+  "line": 40,
+  "len": 1,
+  "kind": "line",
+  "text": "    // `FILE_FLAG_BACKUP_SEMANTICS` (0x02000000) \u2014 see module doc above.",
+  "next": "const FILE_FLAG_BACKUP_SEMANTICS: u32 = 0x02000000;"
+ },
+ {
+  "file": "crates/ocx_sign/src/verify/error.rs",
+  "line": 496,
+  "len": 1,
+  "kind": "doc",
+  "text": "        /// The configured candidate ceiling.",
+  "next": "limit: usize,"
+ },
+ {
+  "file": "crates/ocx_project/src/consent.rs",
+  "line": 507,
+  "len": 42,
+  "kind": "doc",
+  "text": "/// Record consent for `project_dir` over `sources` (C-024).\n///\n/// # The write seam is a closed allowlist, stated as a negative contract\n///\n/// A-29 \u2014 the **only** writers are the seven explicit project-scoped\n/// commands: `add`, `remove`, `lock`, `update`, `pull`, `exec`, and `init`,\n/// which consents to the project it creates. Every other command \u2014\n/// explicitly including `ocx env`, `ocx inspect`, `ocx shell state`,\n/// `ocx self activate` (with and without `--reconcile`), `ocx list`,\n/// `ocx direnv export` and `ocx completions` \u2014 MUST NOT create or modify\n/// `state/projects/<key>/`. Enforcement is the acceptance test, not\n/// visibility: the seven callers live in `ocx_cli`, so this cannot be\n/// `pub(crate)` as A-29 words it and still compile.\n///\n/// The seam is **per-caller opt-in**, never a hook in the shared loader:\n/// `load_project_with_lock` has four further callers (`inspect`,\n/// `patch freeze`, `ocx env`, and `ocx lock --check`), so a blanket stamp\n/// there would auto-grant consent on read-only commands \u2014 silently widening a\n/// security control beyond its stated set.\n///\n/// Membership is **suppressible, not conditional** (ocx-sh/ocx#400). Those\n/// seven resolve a flag/`OCX_NO_CONSENT` ladder in\n/// `app::project_context::record_activation_consent_over` and may reach an\n/// invocation where they write nothing. That narrows the allowlist's effect,\n/// never widens it, so A-29 is unchanged: it constrains which commands *may*\n/// write, and no eighth one gained the ability. The gate deliberately does\n/// **not** live in this function \u2014 `ocx shell allow` calls it directly, and it\n/// is the explicit human gesture the variable exists to distinguish machine\n/// invocation *from*.\n///\n/// A-26 \u2014 **grants do not stamp.** Nothing on the activation path writes here.\n///\n/// `project_dir` must be the canonical directory [`canonical_project_dir`]\n/// derives.\n///\n/// Returns [`Recorded::OcxHomeNeedsNoStamp`] when `project_dir` is the ocx\n/// home, which A-44 keeps permanently outside this control.\n///\n/// # Errors\n///\n/// Propagates the atomic write's I/O failure, and the failure to resolve an\n/// OCX home to write under.",
+  "next": "pub fn record(project_dir: &Path, sources: &BTreeSet<String>) -> crate::Result<Recorded> {"
+ },
+ {
+  "file": "crates/ocx_sign/src/sign/bundle.rs",
+  "line": 294,
+  "len": 11,
+  "kind": "doc",
+  "text": "/// Assemble a Sigstore bundle v0.3 carrying a DSSE envelope.\n///\n/// The one bundle builder. `KindVersion` is `dsse:0.0.1` and the content oneof\n/// is `dsseEnvelope`; the `messageSignature` form OCX used to write for image\n/// signatures is gone (spec D2) \u2014 cosign v3 wraps an image signature in a DSSE\n/// Statement too, so a second shape bought nothing but a third arm in the\n/// discovery merge.\n///\n/// `signed` carries the envelope and the exact byte string uploaded to Rekor\n/// as one value \u2014 see [`SignedEnvelope`] for why they may not be passed\n/// separately.",
+  "next": "pub(super) fn build_dsse_bundle("
+ },
+ {
+  "file": "crates/ocx_announce/src/forge/git_stderr.rs",
+  "line": 94,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Anywhere in the body, as a case-sensitive substring.",
+  "next": "Body,"
+ },
+ {
+  "file": "crates/ocx_oci/src/client/transport.rs",
+  "line": 72,
+  "len": 1,
+  "kind": "doc",
+  "text": "/// Outcome of appending a descriptor to a fallback referrers index.",
+  "next": "#[derive(Debug, Clone, Copy, PartialEq, Eq)]"
+ },
+ {
+  "file": "crates/ocx_config/src/env.rs",
+  "line": 303,
+  "len": 14,
+  "kind": "doc",
+  "text": "    /// Operator-supplied extra CA root material \u2014 a path, or inline PEM text\n    /// (a value containing `-----BEGIN`), for the registry, index, forge and\n    /// Sigstore TLS clients (ocx#448). `OCX_EXTRA_CA_CERTS=\"\"` is treated as\n    /// unset, matching [`OCX_CONFIG`].\n    ///\n    /// **Not** forwarded to child processes \u2014 deliberately absent from\n    /// [`OcxConfigView`](crate::env::OcxConfigView) and [`Env::apply_ocx_config`](crate::env::Env::apply_ocx_config): an env-only CA does not\n    /// survive `ocx exec --clean` or reach the launcher it spawns, though the\n    /// `config.toml` form of the same setting does, because the child re-reads\n    /// disk for itself. Forwarding an inline PEM would also exceed Windows'\n    /// 32,767-character per-variable limit and land in every launched tool's\n    /// environment; a CA is public material, so scrubbing it like a credential\n    /// would be the wrong posture too. See `ocx_util::tls::ExtraRoots`\n    /// for the validated value this resolves to.",
+  "next": "pub const OCX_EXTRA_CA_CERTS: &str = \"OCX_EXTRA_CA_CERTS\";"
+ },
+ {
+  "file": "crates/ocx_cli/src/command/self_group/setup.rs",
+  "line": 363,
+  "len": 6,
+  "kind": "doc",
+  "text": "/// Collapse one `--X` / `--no-X` pair into the value it requests, or `None`\n/// when neither flag was given.\n///\n/// `overrides_with` already makes clap last-wins, so both-set is unreachable\n/// from a command line; the off-wins tie-break is pinned anyway because the\n/// struct is constructible, and it matches `options::Hook`'s.",
+  "next": "fn requested(on: bool, off: bool) -> Option<bool> {"
+ },
+ {
+  "file": "crates/ocx_cli/src/command/pull.rs",
+  "line": 424,
+  "len": 2,
+  "kind": "line",
+  "text": "    // Place successes by index; collect failures with their index so the\n    // input-order-first error is the one surfaced (deterministic exit code).",
+  "next": "let mut slots: Vec<Option<DryRunProbe>> = (0..pinned.len()).map(|_| None).collect();"
+ },
+ {
+  "file": "crates/ocx_cli/src/command/shell_state.rs",
+  "line": 238,
+  "len": 25,
+  "kind": "doc",
+  "text": "/// Resolve the home and the two effective toolchain settings (C-056).\n///\n/// # The two tiers\n///\n/// With a project in effect the home is\n/// [`resolve_toolchain_home`](ocx_project::resolve_toolchain_home) over its\n/// canonical directory and the validated `toolchain_dir` root. With no project\n/// the home is the global `$OCX_HOME/toolchain`, which ignores `toolchain_dir`\n/// (C-016). Either way the `file` tier is **that scope's own `ocx.toml`** \u2014\n/// [`scope_and_config_path`] mints the two together for the reason its own doc\n/// gives.\n///\n/// The **effective** values, never a tier's raw value: a report that echoed\n/// `ocx.toml` would answer a different question from the one a user asking why\n/// their shell does nothing is asking.\n///\n/// Read-only, like everything else here: one `ocx.toml` read and one\n/// canonicalisation, no write.\n///\n/// # Errors\n///\n/// The home's own canonicalisation failure, with the offending path attached \u2014\n/// the same class as [`read_ocx_home`]'s unreadable `$OCX_HOME` (exit 74). A\n/// refused `toolchain_dir` cannot surface here: it was refused at config load\n/// (RUL-51).",
+  "next": "async fn toolchain_state("
+ },
+ {
+  "file": "crates/ocx_store/src/file_structure/state_store.rs",
+  "line": 443,
+  "len": 15,
+  "kind": "doc",
+  "text": "/// Manages persistent runtime state files under `$OCX_HOME/state/`.\n///\n/// `StateStore` is the typed home for state files whose existence or mtime IS\n/// the data.  Unlike `cache/` (regenerable bulk), files here are persistent\n/// across sessions.\n///\n/// Layout:\n/// ```text\n/// {root}/\n///   update-check/\n///     {slug}          \u2014 zero-byte file; mtime = time of last registry probe\n///   projects/\n///     {key}/\n///       consent.json  \u2014 per-project shell-activation consent stamp\n/// ```",
+  "next": "#[derive(Debug, Clone)]"
+ },
+ {
+  "file": "crates/ocx_oci/src/host_capabilities.rs",
+  "line": 644,
+  "len": 1,
+  "kind": "doc",
+  "text": "/// Blocking body of [`glob_loader_paths`].",
+  "next": "#[cfg(target_os = \"linux\")]"
+ },
+ {
+  "file": "crates/ocx_sign/src/verify/error.rs",
+  "line": 439,
+  "len": 1,
+  "kind": "doc",
+  "text": "        /// Leaf certificate `notBefore`.",
+  "next": "not_before: String,"
+ },
+ {
+  "file": "crates/ocx_announce/src/forge/api.rs",
+  "line": 167,
+  "len": 10,
+  "kind": "doc",
+  "text": "/// The account behind a forge credential or a login.\n///\n/// `bot` is the **forge's own** assertion \u2014 GitLab's `bot` field, GitHub's\n/// `type == \"Bot\"` \u2014 never a guess from the login string. A heuristic over\n/// names (\"does it end in `-bot`\") would both miss real service accounts and\n/// libel human ones, and the value gates whether a claim may be authored at\n/// all, so it carries only what the forge said.\n///\n/// Deliberately no `Default`: a defaulted identity is `bot: false` for an\n/// account nobody looked up, which is the one wrong answer that fails open.",
+  "next": "#[derive(Clone, Debug, PartialEq, Eq)]"
+ },
+ {
+  "file": "crates/ocx_sign/src/verify/pipeline.rs",
+  "line": 1383,
+  "len": 34,
+  "kind": "line",
+  "text": "        // 1. Resolve the reference's manifest **through the index chain**, not\n        //    through the registry transport. The transport path would bypass\n        //    `guard_local_physical` and the mirror map, and would break\n        //    `--offline` \u2014 an installed package resolves from the local index\n        //    with no network at all.\n        //\n        //    One fetch answers three questions at once: which digest the\n        //    reference names, whether that object is an index, and \u2014 when it is\n        //    \u2014 which children it lists. The children are what C-008's\n        //    membership test reads; before this they were fetched inside\n        //    `Index::select` and thrown away, which is why an index signature\n        //    could not be attributed to a pinned platform manifest at all.\n        //    Every digest the index lists comes back with it \u2014 attestation and\n        //    referrer entries included, not only the platform candidates: the\n        //    index digest binds each descriptor it carries, so a signature over\n        //    the index covers each of them, and narrowing that list to\n        //    `--platform` candidates would refuse membership for a child the\n        //    index demonstrably lists.\n        //\n        // 2. C-010's `--platform` optionality rule runs inside the resolution,\n        //    from the one module that owns it \u2014 shared with sign and attest so\n        //    the three cannot diverge. It *selects* a child and reports the\n        //    index it was reached through; it makes no validity decision and\n        //    tests no membership. That test is below, and is this pipeline's.\n        //\n        //    Index indirection travels with it: a logical name\n        //    (`ocx.sh/<ns>/<pkg>`) may point at a different physical registry,\n        //    so every transport-facing call below \u2014 capability probe, referrer\n        //    listing, referrer manifest + bundle blob pulls \u2014 targets the\n        //    physical address. Trust policy scope matching stays on the LOGICAL\n        //    identifier (`ctx.policies` are resolved from it by the caller):\n        //    only registry traffic moves. The SSRF floor on the returned host is\n        //    enforced upstream in the shared index choke point\n        //    (`ChainedIndex::guard_local_physical`).",
+  "next": "let ResolvedSubject {"
+ },
+ {
+  "file": "crates/ocx_package_manager/src/patch/error.rs",
+  "line": 119,
+  "len": 1,
+  "kind": "doc",
+  "text": "        /// The digest declared in the manifest descriptor.",
+  "next": "declared: String,"
+ },
+ {
+  "file": "crates/ocx_package_manager/src/tasks/update_check.rs",
+  "line": 533,
+  "len": 1,
+  "kind": "line",
+  "text": "// \u2500\u2500 Private helpers \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+  "next": "/// Maximum wall-clock time the subprocess `ocx --format json version` query"
+ },
+ {
+  "file": "crates/ocx_sign/src/verify/trust_resolve.rs",
+  "line": 91,
+  "len": 1,
+  "kind": "line",
+  "text": "    // 1+2. `--sigstore-trusted-root` / `OCX_SIGSTORE_TRUSTED_ROOT`, already collapsed.",
+  "next": "if let Some(path) = explicit_override {"
+ },
+ {
+  "file": "crates/ocx_package/src/cascade/gather.rs",
+  "line": 4,
+  "len": 24,
+  "kind": "doc",
+  "text": "//! The read half of `ocx package cascade check|repair`.\n//!\n//! One pass per package: list the registry's tags, classify them, fetch every\n//! version-ish one concurrently, and \u2014 for a logical package \u2014 read the live\n//! public index root as well. The result is a [`TagGraphObservation`], the\n//! only input the pure core in [`super::graph`] ever sees.\n//!\n//! Two rules make the observation trustworthy enough to compute verdicts from:\n//!\n//! - **Any read failure aborts the run.** This is the deliberate inverse of\n//!   the push path, which stops a cascade conservatively on a transient error.\n//!   A push that skips a level under-delivers; a check that skips one invents\n//!   a finding, and a repair acting on it would write the wrong graph.\n//! - **Absence is derived, never observed.** Only listed tags are fetched, so\n//!   an alias that was never created is simply absent from the map. A listed\n//!   tag that 404s mid-run is a race, not an absence, and aborts.\n//!\n//! Reads authenticate for pull only \u2014 `check` never probes push access.\n//!\n//! Every read here addresses the **canonical** registry\n//! ([`ReadAddressing::Canonical`]), not a configured mirror. The audit exists to\n//! judge the repository a publisher writes to, and `repair` writes there; a\n//! graph read from a mirror would be a verdict about a different, possibly\n//! stale, possibly hostile copy.",
+  "next": "use std::collections::BTreeMap;"
+ },
+ {
+  "file": "crates/ocx_cli/src/command/deps.rs",
+  "line": 244,
+  "len": 6,
+  "kind": "doc",
+  "text": "/// Builds a lookup from `(registry, repo)` to the platform-resolved\n/// [`ocx_oci::PinnedPackageRef`] using the pre-computed resolve.json data.\n///\n/// This replaces the previous `read_deps_symlinks` approach \u2014 resolve.json\n/// is the canonical source written at pull time, and digest-pinned metadata\n/// cannot form cycles by construction.",
+  "next": "fn resolved_dep_map(resolved: &ResolvedPackage) -> HashMap<ocx_oci::Repository, &ocx_oci::PinnedPackageRef> {"
+ },
+ {
+  "file": "crates/ocx_cli/src/exit/ocx_project.rs",
+  "line": 25,
+  "len": 2,
+  "kind": "line",
+  "text": "            // Defer to the wrapped library error's own classification, which\n            // the chain walk reaches through `source()`.",
+  "next": "Self::Library(_) | Self::ListSeparator(_) => None,"
+ },
+ {
+  "file": "crates/ocx_package_manager/src/record/execution_record.rs",
+  "line": 817,
+  "len": 1,
+  "kind": "doc",
+  "text": "/// Project the frame's scope into its serialized block.",
+  "next": "fn scope_block(inputs: &RecordInputs<'_>) -> ScopeBlock {"
+ },
+ {
+  "file": "crates/ocx_store/src/file_structure/toolchain_store.rs",
+  "line": 430,
+  "len": 20,
+  "kind": "doc",
+  "text": "    /// Whether `<root>/active` is a link at exactly its derived target\n    /// (C-080).\n    ///\n    /// The **one** validity predicate, shared by the render path's heal and\n    /// the prompt path's gate so the two cannot answer differently. Read-only:\n    /// a prompt must never write, so a `false` here is a withhold at the\n    /// prompt and a heal at the render.\n    ///\n    /// [`ocx_util::fs::symlink::is_link`], never `Path::is_symlink`, because Windows\n    /// writes a junction and `is_symlink` reports `false` for one. Raw\n    /// `read_link`, never a canonicalising probe, because\n    /// `shells/../shells/default` is contained and resolves correctly and is\n    /// still not the value this tree writes. A `read_link` that errors is\n    /// **invalid**, never \"unchanged\": on Windows `is_link` is true for any\n    /// reparse point, including ones `read_link` cannot read.\n    ///\n    /// `active/bin` goes on `PATH`, so a link that escapes the home is an\n    /// arbitrary-directory-on-PATH primitive (CWE-426). That is closed here,\n    /// by equality with a derived value, rather than by a containment test\n    /// bolted on afterwards.",
+  "next": "pub fn active_is_valid(&self, shell: &str) -> bool {"
+ },
+ {
+  "file": "crates/ocx_package_manager/src/managed_config/publish.rs",
+  "line": 226,
+  "len": 1,
+  "kind": "doc",
+  "text": "        /// Where the decode stopped.",
+  "next": "#[source]"
+ },
+ {
+  "file": ".claude/hooks/hook_utils.py",
+  "line": 514,
+  "len": 1,
+  "kind": "line",
+  "text": "            # Lock may already be released by a stale-reclaim path; not fatal.",
+  "next": "pass"
+ },
+ {
+  "file": "crates/ocx_util/src/path.rs",
+  "line": 4,
+  "len": 2,
+  "kind": "doc",
+  "text": "//! Move-to-front deduplication and segment removal for `PATH`-style\n//! environment values.",
+  "next": "use std::ffi::{OsStr, OsString};"
+ },
+ {
+  "file": "crates/ocx_sign/src/sign/bundle.rs",
+  "line": 45,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Canonical JSON bytes of the bundle v0.3 document.",
+  "next": "pub bytes: Vec<u8>,"
+ },
+ {
+  "file": "crates/ocx_cli/src/command/package_verify.rs",
+  "line": 4,
+  "len": 34,
+  "kind": "doc",
+  "text": "//! `ocx package verify` \u2014 keyless Sigstore verification of a target manifest's\n//! signature via OCI Referrers.\n//!\n//! Fetches the Sigstore bundle v0.3 referrer for the target, verifies the\n//! Fulcio cert chain against the resolved trust root, verifies the Rekor\n//! SET, verifies the signature over the subject digest, and checks the cert\n//! identity + issuer against the accepted identity. See\n//! [`adr_oci_referrers_signing_v1.md`](../../../../../.claude/artifacts/adr_oci_referrers_signing_v1.md)\n//! for the full state machine.\n//!\n//! There are **no default** `--certificate-identity` / `--certificate-oidc-issuer`\n//! values \u2014 keyless verification is meaningless without knowing whose\n//! signature you trust. The pair may come from the flags or from a\n//! `[[trust.policy]]` entry whose scope covers the target; the flags are\n//! optional only when such a policy matches, and are required otherwise.\n//!\n//! This command resolves the identifier, validates `--rekor-url` (SSRF guard),\n//! resolves the trust root in precedence order \u2014 `--sigstore-trusted-root` /\n//! `OCX_SIGSTORE_TRUSTED_ROOT`, then `[trust.sigstore]` from `config.toml`,\n//! then `$OCX_HOME/sigstore/trusted-root.json`, then the fresh trust-root\n//! cache, then the Sigstore TUF root fetched over the network \u2014 and drives the verify\n//! pipeline through the [`PackageManager`](ocx_package_manager) facade\n//! (`verify_one`), which runs the full state machine and returns a\n//! [`VerificationReport`].\n//!\n//! Verify reads the artifact and its signature referrer from the registry in\n//! every mode. `--offline` / `OCX_OFFLINE` scopes to the Sigstore trust services\n//! (the Rekor-key fetch and TUF), not the artifact registry: offline verify\n//! reuses cached or supplied trust material (which must carry a pinned Rekor\n//! key) and never contacts Sigstore; with no such material it fails with an\n//! actionable error rather than skipping verification. A successful online\n//! verify caches its trust material for later offline runs. The positive path is\n//! exercised end-to-end against a real Sigstore deployment \u2014 Fulcio, Rekor,\n//! TesseraCT and dex under the `sigstore` Docker Compose profile.",
+  "next": "use std::process::ExitCode;"
+ },
+ {
+  "file": "crates/ocx_sign/src/sign/oidc_ambient_inline.rs",
+  "line": 97,
+  "len": 32,
+  "kind": "doc",
+  "text": "/// Append the audience and apply both endpoint gates before anything dials.\n///\n/// The same two, in the same order, as every `--fulcio-url` / `--rekor-url`\n/// endpoint \u2014 and they belong here most: this request carries a bearer\n/// credential, and its target comes from the process environment rather than\n/// from a flag, so it is the dial most easily pointed somewhere else and the\n/// least likely to be noticed.\n///\n/// 1. [`validate_sigstore_url`](ocx_oci::endpoint::validate_sigstore_url) is\n///    the scheme rule \u2014 HTTPS anywhere, HTTP only on a literal loopback host \u2014\n///    and it parses, so it stands in for the bare `Url::parse` this used to do.\n///    Without it a runner exporting a plaintext `ACTIONS_ID_TOKEN_REQUEST_URL`\n///    for a non-loopback host sent the bearer token in the clear: the SSRF\n///    guard below judges the *address*, never the scheme, so nothing else on\n///    this path ever looked.\n/// 2. [`resolve_sigstore_url`](ocx_oci::endpoint::resolve_sigstore_url) is\n///    the SSRF floor (CWE-918). `trusted_hosts` is the escape hatch a\n///    self-hosted runner uses, identical to Fulcio and Rekor \u2014 and it buys a\n///    private *address*, never cleartext, because gate 1 has already run.\n///\n/// One [`SignErrorKind::OidcPreCheckFailed`] with a reason per gate, because\n/// the two remedies are different and only the reason distinguishes them:\n/// `..._forbidden` is fixed by adding the host to `trusted_hosts`, and\n/// `..._insecure_scheme` cannot be \u2014 an operator handed the `forbidden` wording\n/// for a plaintext URL would add the host, get a byte-identical refusal, and\n/// have no way to tell the scheme was the problem. An unparseable URL keeps the\n/// scheme reason: it fails the same gate, and neither is fixed by a config\n/// entry.\n///\n/// Split out from [`InlineAmbientProvider::acquire`] so it is reachable from a\n/// test without mutating the process environment, which is a data race across\n/// parallel tests.",
+  "next": "async fn guarded_request_url(url: &str, audience: &str, trusted_hosts: &[String]) -> Result<String, SignErrorKind> {"
+ },
+ {
+  "file": "crates/ocx_python/src/select.rs",
+  "line": 113,
+  "len": 1,
+  "kind": "line",
+  "text": "    // Step 5: fail closed if any selected binary wheel's ABI contradicts the pin.",
+  "next": "validate_abi_consistency(&selected, &interpreter_abi, free_threaded)?;"
+ },
+ {
+  "file": ".claude/hooks/pre_tool_use_validator.py",
+  "line": 4,
+  "len": 5,
+  "kind": "doc",
+  "text": "\"\"\"PreToolUse hook (Write|Edit|MultiEdit): validate file operations for swarm consistency.\n\nChecks file locks, protected paths, and potential secrets before allowing writes.\nAcquires a lock on success so other agents can detect concurrent edits.\n\"\"\"",
+  "next": "import sys"
+ },
+ {
+  "file": "crates/ocx_shell/src/shell/reconcile/fingerprint.rs",
+  "line": 211,
+  "len": 7,
+  "kind": "line",
+  "text": "    // Member 8 \u2014 the config tiers (A-13, A-33).\n    //\n    // The **recorded** list wins whenever there is one: it came from\n    // `LoadedConfig::config_tier_paths`, which honours `OCX_NO_CONFIG` and\n    // includes the `--config` overlay that a per-prompt process cannot see for\n    // itself. Re-deriving is the fallback for the one run that has no record\n    // yet, and it is deliberately the *same* arithmetic the loader uses.",
+  "next": "match recorded_tiers {"
+ },
+ {
+  "file": "crates/ocx_index/src/regenerate.rs",
+  "line": 133,
+  "len": 2,
+  "kind": "line",
+  "text": "    // The source directory, derived from the one public path accessor that\n    // exposes it \u2014 `source_config_path` is `<source dir>/config.json`.",
+  "next": "let config_path = store.source_config_path(source);"
+ },
+ {
+  "file": "crates/ocx_announce/src/claim/owners.rs",
+  "line": 174,
+  "len": 2,
+  "kind": "line",
+  "text": "            // The reused seed IS `authenticated_identity`'s answer, so it\n            // carries the rung that answer belongs to.",
+  "next": "OwnerIdentitySource::Resolved,"
+ },
+ {
+  "file": "crates/ocx_util/src/tls.rs",
+  "line": 22,
+  "len": 7,
+  "kind": "doc",
+  "text": "/// Ceiling on the combined size of an operator-supplied extra-CA-roots PEM\n/// bundle, from any source (environment variable, file path, or inline\n/// `config.toml` text) \u2014 D-10.\n///\n/// Sits under `config::loader::MAX_CONFIG_SIZE` (64 KiB) so an inline\n/// `extra_ca_certs_pem` value can never make `config.toml` itself unloadable,\n/// and under the ~32 767-character Windows environment-variable limit.",
+  "next": "pub const MAX_EXTRA_CA_CERTS_BYTES: usize = 32 * 1024;"
+ },
+ {
+  "file": "crates/ocx_package_manager/src/tasks/pull_local.rs",
+  "line": 182,
+  "len": 4,
+  "kind": "line",
+  "text": "            // Local materialization: every layer was staged above (a `Digest`\n            // layer fetched from its routed location), so there is nothing to\n            // download and no transport. The name is author-supplied and never\n            // resolved; it is not a place to read from (ocx#504).",
+  "next": "transport_pinned: Err(NoTransport::LocalMaterialization),"
+ },
+ {
+  "file": "crates/ocx_package_manager/src/tasks/garbage_collection/reachability_graph.rs",
+  "line": 147,
+  "len": 5,
+  "kind": "line",
+  "text": "        // Register shims with the PACKAGE shape \u2014 entry *and* edges \u2014 never the\n        // passive shape above. A shim directory's `refs/blobs/` links are the\n        // only thing holding a deferred tool's closure config blobs, and they\n        // are where a deferred consumer reads its env carriers from (C-014's\n        // F-1 correction; C-020).",
+  "next": "for (shim_dir, blob_refs) in shim_entries(&shim_dirs, blobs_root.as_path()).await {"
+ },
+ {
+  "file": "crates/ocx_sign/src/sign/simplesigning_write.rs",
+  "line": 386,
+  "len": 1,
+  "kind": "doc",
+  "text": "/// The manifest a sidecar tag starts from when nothing is published there.",
+  "next": "fn empty_sidecar() -> ImageManifest {"
+ },
+ {
+  "file": "crates/ocx_package_manager/src/tasks/patch_discovery.rs",
+  "line": 579,
+  "len": 14,
+  "kind": "line",
+  "text": "        // Collect companions from all resolved descriptors (global first, then\n        // package-specific). Dedup by identifier \u2014 PACKAGE-SPECIFIC wins over\n        // global when the same companion identifier appears in both descriptors.\n        //\n        // Algorithm: use an ordered map (IndexMap-style via Vec+HashMap) to\n        // preserve first-seen insertion order while allowing a later\n        // package-specific entry to override a global entry's `required` flag\n        // for the same identifier. The map is keyed by identifier; the value\n        // is overwritten whenever a later (more-specific) entry appears,\n        // matching the spec: \"package-specific rule wins for the `required`\n        // flag and is installed once.\"\n        //\n        // Insertion order is preserved in `companion_order` (Vec of identifiers\n        // in first-seen order); `companion_map` holds the current winning entry.",
+  "next": "let mut companion_order: Vec<ocx_oci::PackageRef> = Vec::new();"
+ },
+ {
+  "file": "crates/ocx_package_manager/src/tasks/inspect.rs",
+  "line": 398,
+  "len": 5,
+  "kind": "line",
+  "text": "    // The root itself is a leaf platform manifest inspect already fetched\n    // (`fetch_top_manifest`/`resolve`) but never staged (A3) \u2014 stage it too,\n    // so a `--deps` walk warms the *whole* closure including its own root,\n    // not just the deps `walk_closure` reaches (goals 4+5,\n    // `adr_inspect_metadata_closure.md`).",
+  "next": "super::common::stage_leaf_manifest(fs, index, pinned).await?;"
+ },
+ {
+  "file": "crates/ocx_package_manager/src/patch/error.rs",
+  "line": 109,
+  "len": 1,
+  "kind": "doc",
+  "text": "        /// The size declared in the manifest layer descriptor.",
+  "next": "declared: i64,"
+ },
+ {
+  "file": "crates/ocx_index/src/local_index.rs",
+  "line": 112,
+  "len": 19,
+  "kind": "doc",
+  "text": "    /// Every configured namespace's `[registries.\"<ns>\"].trusted_hosts` SSRF\n    /// exemption (ocx#218), keyed by namespace \u2014 the operator's answer to\n    /// \"where may this namespace's traffic go\", read from config in\n    /// `context.rs` exactly as `allow_yanked` above is.\n    ///\n    /// Held here because this type MINTS the physical pointer that needs\n    /// judging: [`Self::physical_reference`] returns the committed root's\n    /// `repository`, which is remote-controlled data (a copied index tree is a\n    /// supported distribution mechanism, `adr_index_indirection.md` A2), and\n    /// [`ChainedIndex::guard_local_physical`](super::chained_index) applies the\n    /// SSRF floor to it against this set. Riding along with the local index\n    /// rather than each chained construction is what makes every chain that\n    /// reads this copy \u2014 the default one, the lock-scoped update index, `ocx\n    /// patch test`'s scratch chain, `PackageManager::offline_view` \u2014 judge a\n    /// local answer against the same exemption without a construction site\n    /// being able to forget it.\n    ///\n    /// Empty for constructions that thread no config (tests, `IndexSync`),\n    /// which then guard every rewritten host.",
+  "next": "trusted_hosts: std::collections::HashMap<String, Vec<String>>,"
+ },
+ {
+  "file": "crates/ocx_announce/src/forge/credentials.rs",
+  "line": 431,
+  "len": 6,
+  "kind": "doc",
+  "text": "/// Whether this process is a GitLab CI job.\n///\n/// One spelling for the two readers \u2014 the API ladder's second rung and\n/// [`ForgeCredentials::in_gitlab_ci`] \u2014 so the flag a caller branches on and the\n/// flag that opened the job-token rung can never disagree about what \"in CI\"\n/// means. Empty counts as unset for the reason [`non_empty`] gives.",
+  "next": "fn in_gitlab_ci() -> bool {"
+ },
+ {
+  "file": "crates/ocx_announce/src/forge/github.rs",
+  "line": 791,
+  "len": 39,
+  "kind": "doc",
+  "text": "    /// Verify the credential may push a branch to `repo`, before anything is\n    /// written there.\n    ///\n    /// The fork-free announce path commits onto the index repository itself, so\n    /// a credential without push permission fails partway through the git-data\n    /// sequence \u2014 and GitHub reports an unauthorised write as 404 at least as\n    /// often as 403, which [`Self::commit_files`] would then mistake for the\n    /// fresh-fork provisioning race, sleep 3s, replay the whole sequence, and\n    /// finally surface a bare status code naming a URL. One read of the\n    /// repository's own `permissions.push` collapses all of that into a named\n    /// error before any write is attempted.\n    ///\n    /// A readable `permissions.push == false` is an ordinary denial and needs\n    /// no exception. The **exception** is the pair where the field cannot be\n    /// read at all: a repository the credential cannot see answers 404 rather\n    /// than 403, and an unauthenticated read omits `permissions` entirely.\n    /// C-011 says an unreadable field reports [`super::CheckStatus::Unknown`]\n    /// without failing the call; this probe predates that vocabulary and\n    /// refuses instead, because refusing before any write is the point of it,\n    /// and because neither shape can be told from \"you may not push here\".\n    ///\n    /// So GitHub's `push-access` row has two outcomes only \u2014 `Passed`, or a\n    /// raised error \u2014 and a caller that must report `skipped` (the\n    /// credential-free `--out` run) does so by not calling this at all and\n    /// seeding [`PushAccess::skipped_all`] itself.\n    ///\n    /// Only `push-access` is upgraded, and only from the read above. GitHub has\n    /// no job-token capability to report and this client carries no `git`\n    /// binary \u2014 the git write transport is refused for GitHub before a client\n    /// is built \u2014 so the other three rows stay\n    /// [`super::CheckStatus::Skipped`]. A row is `Passed` only where a probe\n    /// genuinely observed the capability; anything else would put a claim in\n    /// the report that nothing checked.\n    ///\n    /// # Errors\n    ///\n    /// Returns [`ForgeError::PushAccessDenied`] when the repository is invisible\n    /// to the credential or reports no push permission, or any other\n    /// [`ForgeError`] on transport, status, or decode failure.",
+  "next": "async fn ensure_push_access(&self, repo: &RepoCoordinate) -> Result<PushAccess, ForgeError> {"
+ },
+ {
+  "file": "crates/ocx_store/src/shim.rs",
+  "line": 165,
+  "len": 32,
+  "kind": "doc",
+  "text": "/// Whether an already-published shim blob of `published_len` bytes may be\n/// served as-is, or must be republished because it cannot be `embedded`.\n///\n/// # Why a length check at all\n///\n/// `ShimBinStore::ensure` publishes \"only when absent\" and decides absence by\n/// **existence**, so a present-but-truncated blob is never repaired \u2014 it is\n/// hardlinked by every subsequent launcher instead. On Windows that blob is an\n/// *executed binary*, so one torn write from a crashed earlier run silently\n/// breaks every lazy launcher with no recovery path, and existence cannot tell\n/// that state from a healthy one. The store's own precedent is stricter:\n/// `BlobStore::persist_bytes` re-checks by byte comparison precisely so a\n/// corrupt entry can heal.\n///\n/// Length, not a full digest, because truncation is the realistic corruption\n/// and comparing one `u64` costs nothing on a path taken by every launcher\n/// generation. A `SHIM_SHA256` verify is the thorough form and would mean\n/// hashing 200-300 KiB per call.\n///\n/// # The empty-`embedded` clause\n///\n/// An empty `embedded` admits every length. Off Windows no blob is embedded,\n/// so a length carries no information there and the pre-check stays\n/// existence-only \u2014 which is also what keeps the store's existing\n/// specification tests (`ensure_does_not_rewrite_a_blob_that_is_already_published`\n/// and the lost-race test, both of which park a short sentinel at the\n/// published path and require it to survive) meaningful rather than\n/// self-defeating. On Windows, where the blob is what actually runs, the\n/// comparison is live.\n///\n/// `embedded` is a parameter rather than [`SHIM_BYTES`] read directly, so both\n/// outcomes are reachable in a host test.",
+  "next": "pub fn published_blob_is_intact(published_len: u64, embedded: &[u8]) -> bool {"
+ },
+ {
+  "file": "crates/ocx_oci/src/host_capabilities.rs",
+  "line": 328,
+  "len": 14,
+  "kind": "doc",
+  "text": "    /// Map the detected libc set to `os.features` tag values for OCI platform\n    /// matching.\n    ///\n    /// Return values:\n    /// - `[]` \u2014 no libc detected; `Platform::current()` will leave\n    ///   `os_features` empty, causing subset matching to accept only entries\n    ///   with empty `os_features` (legacy un-tagged packages).\n    /// - `[\"libc.glibc\"]` \u2014 only GNU libc detected.\n    /// - `[\"libc.musl\"]` \u2014 only musl libc detected.\n    /// - `[\"libc.glibc\", \"libc.musl\"]` \u2014 a genuine dual-libc host.\n    ///\n    /// The returned `Vec` is sorted (the `BTreeSet` iterates in order), so a\n    /// dual-libc host advertises every family it provides and matches both a\n    /// `libc.glibc`- and a `libc.musl`-tagged index entry.",
+  "next": "pub fn os_features(&self) -> Vec<String> {"
+ },
+ {
+  "file": ".claude/hooks/hook_utils.py",
+  "line": 266,
+  "len": 1,
+  "kind": "doc",
+  "text": "        \"\"\"Append a subagent completion entry.\"\"\"",
+  "next": "self.ensure_dirs()"
+ },
+ {
+  "file": "crates/ocx_oci/src/host_capabilities.rs",
+  "line": 1133,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Wall-clock time of the detection this record captures (UTC).",
+  "next": "detected_at: std::time::SystemTime,"
+ },
+ {
+  "file": "crates/ocx_oci/src/client/test_transport.rs",
+  "line": 155,
+  "len": 5,
+  "kind": "doc",
+  "text": "/// Keys [`StubTransportInner::blob_locations`].\n///\n/// Registry *and* repository: a promotion routinely copies `team/demo` on one\n/// host to `team/demo` on another, so a repository-only key would report the\n/// target as already holding every blob the source holds.",
+  "next": "pub fn blob_location_key(image: &crate::native::Reference) -> String {"
+ },
+ {
+  "file": "crates/ocx_package_manager/src/record/execution_record.rs",
+  "line": 582,
+  "len": 4,
+  "kind": "doc",
+  "text": "/// Everything a launching frame hands the record builder.\n///\n/// Eight fields are uniform across frames; only [`Self::scope`] diverges, which\n/// is what lets [`Frame`] be derived here rather than passed in by each caller.",
+  "next": "#[derive(Debug)]"
+ },
+ {
+  "file": "crates/ocx_oci/src/oci_identifier.rs",
+  "line": 129,
+  "len": 3,
+  "kind": "doc",
+  "text": "    /// This location at `pinned`'s version \u2014 [`at_version_of`](Self::at_version_of)\n    /// for a pinned package identifier, whose digest makes the result pinned\n    /// too.",
+  "next": "#[must_use]"
+ },
+ {
+  "file": "crates/ocx_project/src/resolve.rs",
+  "line": 772,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Terminal authentication failure \u2014 no retry, maps to AuthError (80).",
+  "next": "Auth,"
+ },
+ {
+  "file": "crates/ocx_project/src/config.rs",
+  "line": 472,
+  "len": 12,
+  "kind": "doc",
+  "text": "    /// The `[package.\"<id>\"]` settings for `identifier`, or `None` when no\n    /// entry names its repository.\n    ///\n    /// Matched on `registry/repository` with tag and digest EXCLUDED, the same\n    /// version-independent rule [`Self::no_patches_repositories`] follows \u2014 and\n    /// the only rule the wire permits for a shim: the invoked shim carries one\n    /// pinned identifier and the config author cannot know its digest.\n    ///\n    /// Consumed by `ocx launcher shim` for the `lazy-report` ladder's package\n    /// tier. A key that fails to re-parse is skipped; keys were validated as\n    /// fully-qualified [`PackageRef`]s at parse time, and one that somehow\n    /// fails here could not match a package anyway.",
+  "next": "pub fn package_settings(&self, identifier: &PackageRef) -> Option<&PackageSettings> {"
+ },
+ {
+  "file": "crates/ocx_cli/src/options/completion.rs",
+  "line": 37,
+  "len": 4,
+  "kind": "line",
+  "text": "    //\n    // `interactive` is the caller's signal: the shim decides it and passes an\n    // explicit flag, so the gate never depends on probing a stderr the shim may\n    // have redirected. The auto arm serves a direct in-terminal invocation.",
+  "next": "pub fn enabled(&self, interactive: bool, configured: Option<bool>) -> bool {"
+ },
+ {
+  "file": "crates/ocx_util/src/fs/path.rs",
+  "line": 139,
+  "len": 1,
+  "kind": "line",
+  "text": "    // 4. Any residual leading `..` escapes the root.",
+  "next": "if escapes_root(&normalized) {"
+ },
+ {
+  "file": "crates/ocx_shim/src/main.rs",
+  "line": 808,
+  "len": 3,
+  "kind": "line",
+  "text": "    // \u2500\u2500 Step 11: wait + GetExitCodeProcess \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n    // SAFETY: `child_process` is a valid process handle; INFINITE blocks until\n    // the child exits.",
+  "next": "let wait = unsafe { WaitForSingleObject(child_process, INFINITE) };"
+ },
+ {
+  "file": "crates/ocx_console/src/theme.rs",
+  "line": 100,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Tree connectors, table rule, and column separators.",
+  "next": "chrome: Style,"
+ },
+ {
+  "file": "crates/ocx_store/src/file_structure/toolchain_store.rs",
+  "line": 105,
+  "len": 5,
+  "kind": "doc",
+  "text": "/// The VCS-ignore file C-004 keeps present in every rendered home.\n///\n/// One of the tree's own depth-1 names (C-071), beside [`ACTIVE_LINK`],\n/// [`LINKS_DIR`] and [`SHELLS_DIR`] \u2014 not a reserved group or tool name:\n/// `<root>/links/.gitignore` and `<root>/.gitignore` are different paths.",
+  "next": "const GITIGNORE_FILE: &str = \".gitignore\";"
+ },
+ {
+  "file": "crates/ocx_sign/src/verify/pipeline.rs",
+  "line": 3386,
+  "len": 6,
+  "kind": "doc",
+  "text": "/// Cache the trust material of a successful online verify, skipping the write\n/// when a fresh entry already holds identical bytes.\n///\n/// The content-equal skip avoids sliding the 24h TTL on every use and stops N\n/// concurrent batch verifies from each rewriting the same file. Best-effort: a\n/// cache-write failure never fails a valid verify.",
+  "next": "async fn cache_trust_material(ctx: &VerifyContext<'_>, rekor_key_pem: String) {"
+ },
+ {
+  "file": "crates/ocx_package_manager/src/tasks/sbom.rs",
+  "line": 4,
+  "len": 15,
+  "kind": "doc",
+  "text": "//! `sbom_one` \u2014 list every verified attestation a package carries.\n//!\n//! The attestation twin of [`super::verify`]: same pipeline, same trust\n//! material, different arity. [`ocx_sign::verify::VerifyPipeline::run`] is\n//! ANY-of because *is this artifact signed* has one answer;\n//! [`ocx_sign::verify::VerifyPipeline::run_attestations`] is collect-all\n//! because *which SBOMs does this carry* does not \u2014 letting the registry's\n//! listing order pick one of several verified documents would be the defect\n//! (`adr_sbom_attestations.md` D-e).\n//!\n//! Verification is unconditional and there is no `--no-verify`: an unverified\n//! listing is registry-controlled text presented as fact (SEC-32).\n//!\n//! Per [`subsystem-package-manager.md`](../../../../../.claude/rules/subsystem-package-manager.md)\n//! and Spec A10 \u2014 the aggregator is `package_manager/tasks.rs`.",
+  "next": "use std::collections::BTreeSet;"
+ },
+ {
+  "file": "crates/ocx_cli/src/command/self_group/setup.rs",
+  "line": 311,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Borrow this value as the [`ShellValue`] [`shell_config::set`] takes.",
+  "next": "fn as_shell_value(&self) -> ShellValue<'_> {"
+ },
+ {
+  "file": ".claude/rules/docs-quality/checks/doc_examples.py",
+  "line": 192,
+  "len": 1,
+  "kind": "doc",
+  "text": "    \"\"\"Declared binding keys in the test tree, read from each file's header.\"\"\"",
+  "next": "keys: dict[str, Path] = {}"
+ },
+ {
+  "file": "crates/ocx_project/src/config.rs",
+  "line": 874,
+  "len": 20,
+  "kind": "doc",
+  "text": "/// Parse one `[tools]` value into the [`PackageRef`] the schema boundary\n/// promises.\n///\n/// Bare identifiers \u2014 registry + repository, no tag and no digest\n/// (e.g. `\"ocx.sh/cmake\"`) \u2014 get `:latest` injected here so resolution always\n/// has an advisory tag to look up. The default is applied at this boundary,\n/// not on [`PackageRef`] itself, so CLI args without a tag still surface as\n/// `tag = None`. Digest-pinned entries (`@sha256:...`) keep `tag = None`; the\n/// digest is the canonical pin.\n///\n/// Named rather than inlined into [`parse_tool_map`] because it is the only\n/// definition of \"what this text means\": the format-preserving renderer\n/// ([`super::document`]) asks it whether a line on disk already says what the\n/// candidate says, and a text comparison would call the injected `:latest` a\n/// change and rewrite a line the mutation never targeted.\n///\n/// # Errors\n///\n/// Propagates [`PackageRef::parse`] verbatim \u2014 callers map the kinds onto\n/// their own diagnostics.",
+  "next": "pub(super) fn parse_tool_value(value: &str) -> Result<PackageRef, IdentifierError> {"
+ },
+ {
+  "file": "crates/ocx_cli/src/command/package_sign_common.rs",
+  "line": 416,
+  "len": 21,
+  "kind": "doc",
+  "text": "/// Build the ANY-of identity constraints the signing certificate must\n/// satisfy.\n///\n/// Flag mode (`--certificate-identity` + `--certificate-oidc-issuer`, kept\n/// both-or-neither by clap): a single exact pair that overrides any policy\n/// \u2014 this preserves the original flag-only verify behaviour unchanged.\n/// Policy mode (neither flag): the scope-matched `[[trust.policy]]` set\n/// under cross-tier precedence \u2014 the operator `config.toml` tiers are\n/// authoritative; the project `ocx.toml` only adds trust where the operator\n/// has not governed the scope (see [`ocx_trust::resolve_tiered`]). A malformed\n/// matched policy \u2192 [`VerifyErrorKind::TrustPolicyInvalid`] (exit 78); no\n/// matching policy \u2192 [`VerifyErrorKind::NoIdentityProvided`] (exit 64). The\n/// one carve-out is a signer whose `key` names a file that cannot be read: that is a\n/// filesystem failure on an operator-supplied path, so it exits 74 `io_error`\n/// like the `--key` sign door, not 78.\n///\n/// Key mode (`key`) short-circuits both: a `--key` reference names the one\n/// public key that may have signed, so no keyless matcher is consulted. The\n/// parameter is inert here \u2014 every caller passes `None`, and loop D supplies\n/// it from [`KeyOpt::reference`](crate::options::key::KeyOpt::reference) in\n/// its own command files, so this shared leaf is not edited again.",
+  "next": "pub(super) async fn resolve_policies("
+ },
+ {
+  "file": "crates/ocx_shim/src/core.rs",
+  "line": 178,
+  "len": 15,
+  "kind": "doc",
+  "text": "/// Whether dispatching `sidecar` must clear `OCX_GLOBAL` and `OCX_PROJECT`\n/// from the child's environment (C-033, S-009) \u2014 the Windows counterpart of the\n/// POSIX trampoline body's `unset OCX_GLOBAL OCX_PROJECT`.\n///\n/// True for `.exec` and **only** for `.exec` (RUL-14 / D-V20). A trampoline's\n/// baked selector is the only selector, so one exported `OCX_GLOBAL` would\n/// otherwise make every trampoline on that `PATH` exit 64 from\n/// `check_global_project_exclusivity`, for a flag nobody typed. The two\n/// positional grammars bake no tier selector at all, so they have nothing to\n/// shadow \u2014 and stripping there would change what `launcher exec` /\n/// `launcher shim` resolve for a caller who deliberately exported a tier.\n///\n/// Extracted rather than written inline at the spawn site because that site is\n/// `#[cfg(windows)]`: the scope decision is the whole of RUL-14, and inside the\n/// Win32 arm no test on this host can observe it (RUL-39).",
+  "next": "pub(super) fn strips_tier_selectors(sidecar: &Sidecar) -> bool {"
+ },
+ {
+  "file": "crates/ocx_sign/src/sign/pipeline.rs",
+  "line": 565,
+  "len": 6,
+  "kind": "line",
+  "text": "        // Push the referrer's blobs: the OCI empty-config blob (the manifest's\n        // `config` descriptor points at it) and the Sigstore bundle blob (the\n        // `layers[0]` payload). A spec-strict registry (zot) rejects the\n        // manifest with MANIFEST_INVALID if either referenced blob is absent,\n        // so both must land before the manifest PUT. `push_blob` HEADs first,\n        // so re-pushing the shared empty-config blob is a no-op after the first.",
+  "next": "let no_progress: std::sync::Arc<dyn Fn(u64) + Send + Sync> = std::sync::Arc::new(|_| ());"
+ },
+ {
+  "file": "crates/ocx_setup/src/session_path/windows.rs",
+  "line": 458,
+  "len": 3,
+  "kind": "line",
+  "text": "    // A `REG_SZ` value whose text already merges to itself still has to be\n    // rewritten: the type is the half rustup got wrong, and leaving it breaks\n    // `%VAR%` expansion for every *other* entry on the PATH.",
+  "next": "let type_is_current = existing.as_ref().is_none_or(|(_, kind)| *kind == REG_EXPAND_SZ);"
+ },
+ {
+  "file": "crates/ocx_oci/src/layer_ref.rs",
+  "line": 127,
+  "len": 6,
+  "kind": "doc",
+  "text": "    /// An archive file to upload as a new layer. Media type is\n    /// inferred from the file extension at push time. `layout` carries\n    /// optional per-layer strip + output prefix (default: none).\n    /// `mount_from` carries an optional source repository to attempt a\n    /// cross-repository blob mount from before falling back to upload\n    /// (default: none).",
+  "next": "File {"
+ },
+ {
+  "file": "crates/ocx_shell/src/shell/reconcile/plan.rs",
+  "line": 65,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Restore a constant: `(key, prior)`, where `None` means unset it.",
+  "next": "pub restores: Vec<(String, Option<String>)>,"
+ },
+ {
+  "file": "crates/ocx_shell/src/shell/reconcile/fingerprint.rs",
+  "line": 168,
+  "len": 16,
+  "kind": "line",
+  "text": "    // Members 1-2 \u2014 the project tier. `[env]` applies on its own authority\n    // independently of the lock, so watching locks alone would miss an\n    // `[env]`-only edit.\n    //\n    // The **resolved** file, never `<dir>/ocx.toml`: `--project` and\n    // `OCX_PROJECT` name the project file outright, and `OCX_PROJECT` is the\n    // only one of the two that reaches a per-prompt process (it is spawned with\n    // no argv of its own). A hardcoded `ocx.toml` there watches a path the\n    // project does not have and never the file that decides, so an `[env]` edit\n    // is invisible at every prompt.\n    //\n    // The lock is `config.parent()` and not the project's canonical directory,\n    // because that is the spelling `lock_path_for` uses \u2014\n    // the file the loader actually reads. `shell/` may not import\n    // `ocx_project` (A-45, now a Cargo error), so the two derivations are held together by\n    // `package_manager::activation::identity_tests::the_watch_set_lock_member_is_the_lock_the_loader_reads`.",
+  "next": "if let Some(config) = project_config {"
+ },
+ {
+  "file": ".claude/rules/docs-quality/checks/prose.py",
+  "line": 101,
+  "len": 6,
+  "kind": "line",
+  "text": "# DOC-PLAIN-10. Single-word tells from Wikipedia's \"Signs of AI writing\"\n# essay. \"underscore\" and \"unlock\" are deliberately absent: wave-2 read all\n# 18 fleet hits and 12 of them were those two words used as ordinary\n# technical nouns. \"paradigm\" is out for the same reason, 3 hits, 3 false.\n# \"realm\" is out on the same evidence: it is the OCI auth field name, and it\n# alone produced every hit on one 2,253-word fleet page.",
+  "next": "TELLS = ("
+ },
+ {
+  "file": "crates/ocx_setup/src/error.rs",
+  "line": 16,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Self-install bootstrap failed; the CAS could not be populated.",
+  "next": "#[error(\"bootstrap failed\")]"
+ },
+ {
+  "file": "crates/ocx_project/src/consent.rs",
+  "line": 751,
+  "len": 1,
+  "kind": "doc",
+  "text": "/// [`load`] against an explicit store.",
+  "next": "fn load_from(store: &StateStore, key: &str) -> Option<ConsentStamp> {"
+ },
+ {
+  "file": "crates/ocx_setup/src/session_path/linux.rs",
+  "line": 320,
+  "len": 28,
+  "kind": "doc",
+  "text": "/// Subtract `directories` from `ocx.conf`, and delete the file when nothing of\n/// ours survives them.\n///\n/// **Subtractive, not a deletion** \u2014 contract (3) of\n/// [`super`], and the reason is a caller rather than a principle: `ocx self\n/// setup` calls this on *every* run with C-084's retired `<root>/bin` and then\n/// registers the current directories. A writer that deleted the store because\n/// it existed would take the current entries with it, make the following\n/// registration a write on a machine that was already correct, and report\n/// `written` where C-036 promises `unchanged` \u2014 and would predict `unchanged`\n/// under `--dry-run` for the same tree, because the file the prediction reads\n/// is still there.\n///\n/// So the store is read, the named segments are taken out of it, and it is\n/// touched at all only when it carried one. Removing the last of them removes\n/// the file: the conf exists to prepend, and `PATH=$PATH` is a drop-in that\n/// does nothing. A store that cannot be read carries no segment this function\n/// can name, so it is [`SessionPathOutcome::Unchanged`] and left where it is \u2014\n/// the register path replaces it wholesale on the same run.\n///\n/// Nothing else is touched: not a sibling drop-in, and not `~/.profile`, whose\n/// managed block belongs to [`crate::rc_block`].\n///\n/// # Errors\n///\n/// [`SessionPathError`] from [`encode`] \u2014 the directories are still validated,\n/// so a value that could never have been written is diagnosed as such rather\n/// than reported as a successful removal.",
+  "next": "#[cfg(target_os = \"linux\")]"
+ },
+ {
+  "file": "crates/ocx_package_manager/src/tasks/find_or_install.rs",
+  "line": 85,
+  "len": 11,
+  "kind": "doc",
+  "text": "    /// Finds each package locally and, when a package is absent and the manager\n    /// is online, installs it automatically.\n    ///\n    /// `concurrency` caps the outer dispatch in the multi-package case (matches\n    /// [`pull_all`](PackageManager::pull_all) semantics). Single-package fast\n    /// path is naturally serial and ignores the cap.\n    ///\n    /// Results are in input order, so a caller needing to know *which*\n    /// identifiers were pulled can zip this against the slice it passed in \u2014\n    /// which is why the input is borrowed rather than consumed: every such\n    /// caller previously cloned the whole vector just to keep it alive.",
+  "next": "pub async fn find_or_install_all("
+ },
+ {
+  "file": "crates/ocx_package_manager/src/tasks/inspect.rs",
+  "line": 124,
+  "len": 5,
+  "kind": "doc",
+  "text": "/// One projected surface of a closure \u2014 the aggregate of binaries, entrypoints,\n/// env keys and integration namespaces admitted on a single visibility axis.\n/// Built by [`project_surface`] for both the interface (consumer) and private\n/// (internal) axes; the two differ only in the admission + carrier-crossing\n/// predicates.",
+  "next": "#[derive(Debug, Default)]"
+ },
+ {
+  "file": "crates/ocx_shell/src/shell/reconcile/plan.rs",
+  "line": 628,
+  "len": 9,
+  "kind": "doc",
+  "text": "/// C-016's structural half, and the whole of the lost-ledger repair (C-006).\n///\n/// **Subtractive, and the wording is load-bearing**: remove every prefix-owned\n/// segment of C that D does not want, rather than merely ensuring D's segments\n/// are in front. The additive reading leaves both `\u2026/packages/<old>/bin` and\n/// `\u2026/packages/<new>/bin` on PATH after a digest bump \u2014 different strings, so\n/// move-to-front reorders rather than dedupes. Segments are enumerated as they\n/// appear in C and named verbatim in the removal, so selection and removal\n/// share one byte-exact operand (A-09).",
+  "next": "fn repair_owned_segments("
+ },
+ {
+  "file": "crates/ocx_oci/src/copy.rs",
+  "line": 547,
+  "len": 3,
+  "kind": "line",
+  "text": "        // One byte past the declaration: an over-long body then reaches the\n        // digest check as a genuine mismatch instead of being silently truncated\n        // to the cap and hashed as if it were the whole blob.",
+  "next": "let mut hashing = HashingAsyncReader::new(stream.take(declared.saturating_add(1)), blob.digest.algorithm());"
+ },
+ {
+  "file": "crates/ocx_announce/src/forge/git_workspace.rs",
+  "line": 309,
+  "len": 7,
+  "kind": "doc",
+  "text": "/// A temporary blobless clone of the index repository.\n///\n/// The working directory is a temporary directory owned by this value, so it is\n/// removed when the workspace is dropped \u2014 including on the paths that unwind.\n/// No `Drop` body of its own: the temporary-directory guard already does the\n/// removal, and a hand-written `Drop` here would be a place for a panic to\n/// happen during unwinding, which aborts.",
+  "next": "pub struct GitWorkspace {"
+ },
+ {
+  "file": "crates/ocx_cli/src/command/self_group/activate.rs",
+  "line": 523,
+  "len": 14,
+  "kind": "doc",
+  "text": "/// Render the `Plan` as shell code.\n///\n/// **`restores` precedes `removes`, and the order is load-bearing.** The three\n/// sets are key-disjoint only pairwise from `sets`; `removes` and `restores` can\n/// name the **same key** whenever the two scopes disagreed about its kind \u2014 a\n/// global path-kind entry and a project constant sharing a key, both retiring in\n/// one prompt. The project's prior was captured *after* global applied (C-018),\n/// so it still contains global's element. Emitting the removal first runs it\n/// against the constant's live value, where the element is not present, and the\n/// restore then writes the retired element straight back. Restoring first puts\n/// the prior in place and lets the removal do its job on it.\n///\n/// `sets` still leads: it shares no key with either of the other two, because\n/// `plan` only retires an element or a constant `desired` no longer declares.",
+  "next": "fn plan_lines(shell: Shell, plan: &Plan) -> Vec<String> {"
+ },
+ {
+  "file": "crates/ocx_package/src/publisher.rs",
+  "line": 70,
+  "len": 15,
+  "kind": "doc",
+  "text": "    /// The platform manifest digest each pushed platform landed on, in push\n    /// order. **Independent of keep tagging** \u2014 this is `push --sign`'s inline\n    /// signing input, so it is populated under `--no-keep-tag` exactly as it\n    /// is with the keep tag on.\n    ///\n    /// Never the index digest: [`manifest_digest`](Self::manifest_digest)\n    /// names the tag's image index, which is rewritten on every platform\n    /// merge, while a signature has to name the immutable object it covers.\n    ///\n    /// Two platforms built from identical metadata over identical layers share\n    /// one manifest and therefore one digest; the list keys on platform, so\n    /// both rows appear carrying the same value. A platform whose entry the\n    /// merged index did not carry is **omitted**, never faked \u2014 the same rule\n    /// [`keep_tags`](Self::keep_tags) already follows, and from the same\n    /// descriptor lookup.",
+  "next": "pub platform_digests: Vec<(ocx_oci::Platform, ocx_oci::Digest)>,"
+ },
+ {
+  "file": "crates/ocx_script/src/lib.rs",
+  "line": 70,
+  "len": 8,
+  "kind": "doc",
+  "text": "/// Identity of the `expect.*` assertion (or `fail()`) that terminated a run.\n///\n/// This is a STABLE v1 contract (plan C5): the failing assertion's kind is\n/// surfaced verbatim in the JSON report so tooling can branch on *which*\n/// assertion failed without parsing the (non-stable) prose message. `Fail`\n/// covers the builtin `fail()` / `expect.fail`; `Other` covers a host-side\n/// runtime/sandbox failure that is not an assertion (e.g. a guard rejection).\n/// `#[non_exhaustive]` so adding a kind is not a breaking change.",
+  "next": "#[derive(Debug, Clone, Copy, PartialEq, Eq)]"
+ },
+ {
+  "file": "crates/ocx_oci/src/auth/registry_url.rs",
+  "line": 33,
+  "len": 1,
+  "kind": "line",
+  "text": "    // 4. Special-case the docker.io aliases for round-trip with `docker login`.",
+  "next": "if trimmed == \"docker.io\" || trimmed == \"index.docker.io\" {"
+ },
+ {
+  "file": "crates/ocx_cli/src/api/data/verification.rs",
+  "line": 4,
+  "len": 9,
+  "kind": "doc",
+  "text": "//! Report type for `ocx package verify` output.\n//!\n//! Renders the verified subject + referrer digests and the certificate identity\n//! and issuer that the signature attests. The flat shape is the slice-1\n//! acceptance contract (`test/tests/test_verify.py`): a single verified\n//! signature per invocation, and those top-level fields stay exactly as they\n//! are. The multi-signature slice arrives beside them as [`SignatureEntry`]\n//! rows under `signatures`, which is **absent** until a discovery pipeline\n//! populates it \u2014 an array that always rendered `[]` would claim we looked.",
+  "next": "use ocx_console::Cell;"
+ },
+ {
+  "file": "crates/ocx_project/src/mutation.rs",
+  "line": 476,
+  "len": 6,
+  "kind": "line",
+  "text": "// \u2500\u2500 Fault injection (test-only hook) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n//\n// Production paths cost zero: `read_fault_hook` runs once at the entry of\n// `commit` and reads `OCX_TEST_FAULT` via `var_os` (single allocation-free\n// probe). When the env var is unset, every subsequent `maybe_inject_fault`\n// call is a non-allocating Option::is_none short-circuit.",
+  "next": "/// Stages at which a fault may be injected. Each variant maps to a"
+ },
+ {
+  "file": "crates/ocx_cli/src/api/data/signature.rs",
+  "line": 4,
+  "len": 6,
+  "kind": "doc",
+  "text": "//! Report type for `ocx package sign` output.\n//!\n//! Renders the subject + referrer descriptors the sign pipeline produced,\n//! plus the cert identity/issuer embedded in the signing cert. This lets\n//! downstream tools (CI verification, human review) confirm exactly what\n//! was signed and by whom without re-fetching the bundle.",
+  "next": "// Consumed by `command/package_sign.rs` in Phase 5."
+ },
+ {
+  "file": "crates/ocx_cli/src/exit/ocx_sign.rs",
+  "line": 133,
+  "len": 2,
+  "kind": "line",
+  "text": "        // Frozen contract C-S1-1: snake_case parallel of the variant name.\n        // Exhaustive match \u2014 no wildcard, so adding a variant forces a new arm.",
+  "next": "match self {"
+ },
+ {
+  "file": "crates/ocx_index/src/ocx_index.rs",
+  "line": 1566,
+  "len": 2,
+  "kind": "line",
+  "text": "        // Layers are physical \u2014 dereference the root's repository pointer and\n        // pull through the mirror-aware client.",
+  "next": "let Some(physical) = self.physical_identifier(blob_ref.as_identifier()).await? else {"
+ },
+ {
+  "file": "crates/ocx_oci/src/copy.rs",
+  "line": 83,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Mounted from another repository in the same registry.",
+  "next": "pub mounted: usize,"
+ },
+ {
+  "file": "crates/ocx_package_manager/src/tasks/render_toolchain.rs",
+  "line": 1988,
+  "len": 12,
+  "kind": "doc",
+  "text": "/// One `bin_fingerprint` entry per on-disk file that landed (RUL-22, RUL-26).\n///\n/// Keyed by the full on-disk file name, so a Windows name's `<name>.exe` and\n/// `<name>.exec` are two entries \u2014 which is what C-061's `readdir` gate\n/// compares against.\n///\n/// The stat and the hash both go through\n/// [`BinEntryStamp::of_file`](ocx_store::file_structure::BinEntryStamp::of_file) \u2014\n/// the one derivation this producer shares with the prompt gate that checks its\n/// output (`crate::activation::bin_stamp_matches`, RUL-89). Spelling the read and the\n/// digest here as well would put the same contract in two files, and the two\n/// only ever meet through the persisted stamp.",
+  "next": "fn fingerprint_bin(bin: &Path, landed: &BTreeSet<String>) -> BTreeMap<String, BinEntryStamp> {"
+ },
+ {
+  "file": "crates/ocx_cli/src/command/update.rs",
+  "line": 105,
+  "len": 4,
+  "kind": "line",
+  "text": "            // Scoped mode carries untouched pins forward, so it needs a\n            // predecessor `ocx.lock` \u2014 there is nothing to freeze without one.\n            // Checked before any resolve so a missing lock is deterministic\n            // (exit 78) and never masked by a registry failure.",
+  "next": "let Some(previous) = previous.as_ref() else {"
+ },
+ {
+  "file": "crates/ocx_script/src/lib.rs",
+  "line": 145,
+  "len": 1,
+  "kind": "doc",
+  "text": "        /// Human-readable usage detail.",
+  "next": "message: String,"
+ },
+ {
+  "file": "crates/ocx_index/src/store.rs",
+  "line": 510,
+  "len": 8,
+  "kind": "line",
+  "text": "        // Absent or stale \u2192 self-heal under the source's transaction lock, but\n        // BEST-EFFORT: the re-derived `derived_entry` is already authoritative\n        // for THIS read; persisting it only spares the next read the same\n        // recovery. A read-only or otherwise unwritable index home \u2014 a shipped\n        // `.ocx/` copy or a `--index`/`OCX_INDEX` redirect resolved online \u2014\n        // cannot land that write, so a lock/re-read/commit failure is logged at\n        // debug and swallowed rather than failing the resolve. A read-only home\n        // must still resolve a version choice (`adr_index_indirection.md` B1/B2).",
+  "next": "match self"
+ },
+ {
+  "file": "crates/ocx_project/src/env.rs",
+  "line": 408,
+  "len": 12,
+  "kind": "line",
+  "text": "        // Hand-written because schemars reads the field's Rust TYPE and so\n        // cannot see the string-or-table union the hand-rolled Deserialize\n        // accepts. A derive would publish the table arm only \u2014 and the\n        // string arm is the common case (`CI = \"1\"`), so nearly every\n        // correct `[env]` block would be red-underlined in any taplo-enabled\n        // editor. `taplo.toml` binds this schema live to every `ocx.toml`.\n        //\n        // The `type` vocabulary is NOT hand-spelled: it `$ref`s\n        // `ModifierKind`'s own derive, so adding a modifier updates the\n        // published `ocx.toml` schema without anyone remembering this file.\n        // Draft 2020-12 permits keywords beside `$ref`, so the description\n        // stays local to the field.",
+  "next": "let mut modifier_kind = generator.subschema_for::<ModifierKind>();"
+ },
+ {
+  "file": "crates/ocx_project/src/compose.rs",
+  "line": 392,
+  "len": 2,
+  "kind": "line",
+  "text": "        // `group_a` is the first-seen group, matching the order the group walk\n        // visited them in.",
+  "next": "let (Origin::Group(group_a), Origin::Group(group_b)) = (&selected[first].origin, &tool.origin) else {"
+ },
+ {
+  "file": "crates/ocx_package/src/metadata/entrypoint.rs",
+  "line": 22,
+  "len": 8,
+  "kind": "doc",
+  "text": "    /// Maximum byte length of an entrypoint name.\n    ///\n    /// Caps publisher-supplied names so generated launcher filenames stay\n    /// well under platform path limits (Windows `MAX_PATH = 260`, including\n    /// the `.exe`/`.shim` suffix and the surrounding install directory). 64\n    /// chars is generous for human-readable command names while leaving headroom.\n    ///\n    /// Mirrors [`slug::SLUG_MAX_LEN`] \u2014 both newtypes share the same upper bound.",
+  "next": "pub const MAX_LEN: usize = SLUG_MAX_LEN;"
+ },
+ {
+  "file": "crates/ocx_oci/src/transport_policy.rs",
+  "line": 229,
+  "len": 2,
+  "kind": "doc",
+  "text": "    /// oras-go's field-tested defaults (250 ms base, 3 s cap) at the Google SRE\n    /// Book's per-request attempt floor, with D-010's 30 s `Retry-After` clamp.",
+  "next": "fn default() -> Self {"
+ },
+ {
+  "file": "crates/ocx_config/src/env.rs",
+  "line": 13,
+  "len": 4,
+  "kind": "doc",
+  "text": "/// Canonical names for `OCX_*` environment variables read or written by ocx.\n///\n/// Single source of truth so spawn helpers, config loaders, docs, and tests\n/// reference the same string in one place.",
+  "next": "pub mod keys {"
+ },
+ {
+  "file": "crates/ocx_cli/src/api/data/self_update.rs",
+  "line": 198,
+  "len": 2,
+  "kind": "line",
+  "text": "        // Key/value layout: only fields with payload appear. Suppresses the empty\n        // rows the old 4-column `Status|From|To|Reason` layout produced.",
+  "next": "let mut fields: Vec<Cell> = vec![\"Status\".into()];"
+ },
+ {
+  "file": "crates/ocx_cli/src/options/identifier.rs",
+  "line": 19,
+  "len": 3,
+  "kind": "doc",
+  "text": "    /// This argument as a **write target**: the registry location a publish\n    /// writes to, exactly as named. A write is never routed through an index \u2014\n    /// only a read of a package name is (ocx#504).",
+  "next": "pub fn as_target(&self, domain: impl AsRef<str>) -> Result<ocx_oci::OciIdentifier> {"
+ },
+ {
+  "file": "crates/ocx_python/src/naming.rs",
+  "line": 54,
+  "len": 9,
+  "kind": "doc",
+  "text": "/// A rendered, repo-relative wheel reference.\n///\n/// Splits the conventional string into its repository path and tag so the\n/// consumer can attach a registry host and digest without re-parsing.\n/// [`Display`](std::fmt::Display) renders `<repository>:<tag>`.\n///\n/// Assumes the wheel has a URL \u2014 `<index-host>` derives from the URL host.\n/// URL-less / path-only wheels are not mirrorable and must be rejected upstream\n/// in `select` (W1.4), so `wheel_reference` can stay infallible.",
+  "next": "#[derive(Debug, Clone, PartialEq, Eq)]"
+ },
+ {
+  "file": "crates/ocx_cli/src/exit.rs",
+  "line": 79,
+  "len": 12,
+  "kind": "doc",
+  "text": "/// Classify a [`std::error::Error`] chain against the library ladder alone.\n///\n/// The second of [`classify_error`]'s two passes, kept callable on its own for\n/// the aggregating commands that fold a per-package library failure into one\n/// exit code: those chains carry no CLI-local cause, and reaching them through\n/// the full [`classify_error`] would put a precedence rung in front of them\n/// that they never had.\n///\n/// Walks the error chain via [`std::error::Error::source`] and downcasts each\n/// cause to each known classifiable type. The first cause with a non-`None`\n/// `ClassifyExitCode::classify` result wins; otherwise the function falls back\n/// to [`ExitCode::Failure`].",
+  "next": "pub fn classify_library_error(err: &(dyn std::error::Error + 'static)) -> ExitCode {"
+ },
+ {
+  "file": "crates/ocx_package_manager/src/tasks/common.rs",
+  "line": 802,
+  "len": 3,
+  "kind": "doc",
+  "text": "    /// The DECLARED edge visibility (goal #2 \u2014 \"dependencies state their\n    /// linkage visibility\"), as distinct from [`ClosureNode::effective_visibility`]\n    /// (the composed-from-root visibility).",
+  "next": "pub visibility: metadata::visibility::Visibility,"
+ },
+ {
+  "file": "crates/ocx_util/src/env.rs",
+  "line": 245,
+  "len": 4,
+  "kind": "doc",
+  "text": "/// Returns `true` when running in a CI environment.\n///\n/// Checks the `CI` environment variable, which is set by GitHub Actions, GitLab CI,\n/// CircleCI, Travis CI, Jenkins, and most other CI providers.",
+  "next": "pub fn is_ci() -> bool {"
+ },
+ {
+  "file": "crates/ocx_announce/src/forge/poll.rs",
+  "line": 22,
+  "len": 1,
+  "kind": "doc",
+  "text": "/// Per-request timeout so one hung request cannot eat the deadline.",
+  "next": "pub const DEFAULT_REQUEST_TIMEOUT: Duration = Duration::from_secs(8);"
+ },
+ {
+  "file": "crates/ocx_index/src/chained_index.rs",
+  "line": 216,
+  "len": 5,
+  "kind": "doc",
+  "text": "    /// How much this index may write into the local index on a resolve \u2014 see\n    /// [`LocalWritePolicy`]. `Full` for a normal resolve, `NoTag` for the\n    /// update-verb family ([`Self::new_lock_scoped`]), `ReadOnly` for a\n    /// read-only view ([`Self::read_only`]). Content-addressed blob writes are\n    /// never gated by this.",
+  "next": "write_policy: LocalWritePolicy,"
+ },
+ {
+  "file": "crates/ocx_config/src/insecure.rs",
+  "line": 4,
+  "len": 14,
+  "kind": "doc",
+  "text": "//! The one answer to \"may this registry be contacted over plain HTTP?\".\n//!\n//! Two sources declare it \u2014 an `insecure = true` entry under\n//! `[registries.\"<name>\"]`, and the `OCX_INSECURE_REGISTRIES` env list \u2014 and\n//! they are a **union** in the permissive direction: a host named by either is\n//! plaintext-eligible, so \"config says secure, env says insecure\" is not a\n//! conflict anyone has to resolve and the answer never depends on which source\n//! was consulted last.\n//!\n//! There is exactly one subtraction, and only the system scope can make it \u2014\n//! see [`insecure_hosts`]. The union is computed once and handed to every gate\n//! that needs it (the OCI client's protocol choice, the mirror-role gate, the\n//! index base URL, and `ocx login`'s ping), because a host that is insecure for\n//! one of them and secure for another is a bug, not a feature.",
+  "next": "use crate::Config;"
+ },
+ {
+  "file": "crates/ocx_sign/src/sign/simplesigning_write.rs",
+  "line": 459,
+  "len": 1,
+  "kind": "doc",
+  "text": "/// cosign's offline Rekor bundle, as it appears in the annotation.",
+  "next": "#[derive(Serialize)]"
+ }
+]

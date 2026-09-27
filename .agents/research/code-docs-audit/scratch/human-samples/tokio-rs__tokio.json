@@ -1,0 +1,202 @@
+[
+ {
+  "file": "tokio/src/time/interval.rs",
+  "line": 517,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Returns the [`MissedTickBehavior`] strategy currently being used.",
+  "next": "pub fn missed_tick_behavior(&self) -> MissedTickBehavior {"
+ },
+ {
+  "file": "tokio/src/runtime/queue.rs",
+  "line": 405,
+  "len": 1,
+  "kind": "line",
+  "text": "            // Map to slots",
+  "next": "let src_idx = src_pos as usize & MASK;"
+ },
+ {
+  "file": "tokio/src/runtime/queue.rs",
+  "line": 414,
+  "len": 4,
+  "kind": "line",
+  "text": "            // Write the task to the new slot\n            //\n            // safety: `dst` queue is empty and we are the only producer to\n            // this queue.",
+  "next": "dst.inner.buffer[dst_idx]"
+ },
+ {
+  "file": "tokio/src/time/timeout.rs",
+  "line": 132,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Future returned by [`timeout`](timeout) and [`timeout_at`](timeout_at).",
+  "next": "#[must_use = \"futures do nothing unless you `.await` or poll them\"]"
+ },
+ {
+  "file": "tokio-macros/src/lib.rs",
+  "line": 15,
+  "len": 2,
+  "kind": "line",
+  "text": "// This `extern` is required for older `rustc` versions but newer `rustc`\n// versions warn about the unused `extern crate`.",
+  "next": "#[allow(unused_extern_crates)]"
+ },
+ {
+  "file": "tokio/src/signal/unix/driver.rs",
+  "line": 42,
+  "len": 1,
+  "kind": "line",
+  "text": "// ===== impl Driver =====",
+  "next": "impl Driver {"
+ },
+ {
+  "file": "tokio/src/runtime/task/state.rs",
+  "line": 108,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Loads the current state, establishes `Acquire` ordering.",
+  "next": "pub(super) fn load(&self) -> Snapshot {"
+ },
+ {
+  "file": "tokio-test/src/task.rs",
+  "line": 1,
+  "len": 1,
+  "kind": "doc",
+  "text": "//! Futures task based helpers",
+  "next": "#![allow(clippy::mutex_atomic)]"
+ },
+ {
+  "file": "tokio/src/net/windows/named_pipe.rs",
+  "line": 2204,
+  "len": 1,
+  "kind": "doc",
+  "text": "/// Encodes an address so that it is a null-terminated wide string.",
+  "next": "fn encode_addr(addr: impl AsRef<OsStr>) -> Box<[u16]> {"
+ },
+ {
+  "file": "tokio-util/src/time/delay_queue.rs",
+  "line": 143,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Wheel polling state",
+  "next": "wheel_now: u64,"
+ },
+ {
+  "file": "tokio/src/sync/mpsc/unbounded.rs",
+  "line": 278,
+  "len": 2,
+  "kind": "line",
+  "text": "                // Overflowed the ref count. There is no safe way to recover, so\n                // abort the process. In practice, this should never happen.",
+  "next": "process::abort()"
+ },
+ {
+  "file": "tokio/src/process/mod.rs",
+  "line": 568,
+  "len": 3,
+  "kind": "doc",
+  "text": "    /// Sets the child process's user ID. This translates to a\n    /// `setuid` call in the child process. Failure in the `setuid`\n    /// call will cause the spawn to fail.",
+  "next": "#[cfg(unix)]"
+ },
+ {
+  "file": "tokio-util/src/time/mod.rs",
+  "line": 1,
+  "len": 9,
+  "kind": "doc",
+  "text": "//! Additional utilities for tracking time.\n//!\n//! This module provides additional utilities for executing code after a set period\n//! of time. Currently there is only one:\n//!\n//! * `DelayQueue`: A queue where items are returned once the requested delay\n//!   has expired.\n//!\n//! This type must be used from within the context of the `Runtime`.",
+  "next": "use std::time::Duration;"
+ },
+ {
+  "file": "tokio-util/src/time/delay_queue.rs",
+  "line": 203,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Next entry in the stack",
+  "next": "next: Option<usize>,"
+ },
+ {
+  "file": "tokio-util/src/time/wheel/stack.rs",
+  "line": 17,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Push an item onto the stack",
+  "next": "fn push(&mut self, item: Self::Owned, store: &mut Self::Store);"
+ },
+ {
+  "file": "tokio/src/io/mod.rs",
+  "line": 272,
+  "len": 1,
+  "kind": "line",
+  "text": "        // TODO: don't rename",
+  "next": "pub(crate) use crate::blocking::spawn_blocking as run;"
+ },
+ {
+  "file": "tokio-stream/src/stream_ext/try_next.rs",
+  "line": 17,
+  "len": 1,
+  "kind": "line",
+  "text": "        // Make this future `!Unpin` for compatibility with async trait methods.",
+  "next": "#[pin]"
+ },
+ {
+  "file": "tokio-util/src/time/delay_queue.rs",
+  "line": 316,
+  "len": 1,
+  "kind": "line",
+  "text": "        // Normalize the deadline. Values cannot be set to expire in the past.",
+  "next": "let when = self.normalize_deadline(when);"
+ },
+ {
+  "file": "tokio-util/src/codec/any_delimiter_codec.rs",
+  "line": 66,
+  "len": 9,
+  "kind": "doc",
+  "text": "    /// Returns a `AnyDelimiterCodec` for splitting up data into chunks.\n    ///\n    /// # Note\n    ///\n    /// The returned `AnyDelimiterCodec` will not have an upper bound on the length\n    /// of a buffered chunk. See the documentation for [`new_with_max_length`]\n    /// for information on why this could be a potential security risk.\n    ///\n    /// [`new_with_max_length`]: crate::codec::AnyDelimiterCodec::new_with_max_length()",
+  "next": "pub fn new(seek_delimiters: Vec<u8>, sequence_writer: Vec<u8>) -> AnyDelimiterCodec {"
+ },
+ {
+  "file": "tokio/src/runtime/queue.rs",
+  "line": 305,
+  "len": 2,
+  "kind": "line",
+  "text": "        // Safety: the caller is the only thread that mutates `dst.tail` and\n        // holds a mutable reference.",
+  "next": "let dst_tail = unsafe { dst.inner.tail.unsync_load() };"
+ },
+ {
+  "file": "tokio/src/io/driver/scheduled_io.rs",
+  "line": 473,
+  "len": 4,
+  "kind": "line",
+  "text": "                        // Currently in the \"Waiting\" state, implying the caller has\n                        // a waiter stored in the waiter list (guarded by\n                        // `notify.waiters`). In order to access the waker fields,\n                        // we must hold the lock.",
+  "next": "let waiters = scheduled_io.waiters.lock();"
+ },
+ {
+  "file": "tokio/src/net/tcp/socket.rs",
+  "line": 362,
+  "len": 8,
+  "kind": "doc",
+  "text": "    /// Sets the linger duration of this socket by setting the SO_LINGER option.\n    ///\n    /// This option controls the action taken when a stream has unsent messages and the stream is\n    /// closed. If SO_LINGER is set, the system shall block the process until it can transmit the\n    /// data or until the time expires.\n    ///\n    /// If SO_LINGER is not specified, and the socket is closed, the system handles the call in a\n    /// way that allows the process to continue as quickly as possible.",
+  "next": "pub fn set_linger(&self, dur: Option<Duration>) -> io::Result<()> {"
+ },
+ {
+  "file": "tokio/src/util/slab.rs",
+  "line": 131,
+  "len": 1,
+  "kind": "doc",
+  "text": "/// Page state.",
+  "next": "struct Slots<T> {"
+ },
+ {
+  "file": "tokio/src/time/timeout.rs",
+  "line": 153,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Gets a mutable reference to the underlying value in this timeout.",
+  "next": "pub fn get_mut(&mut self) -> &mut T {"
+ },
+ {
+  "file": "tokio/src/signal/unix.rs",
+  "line": 87,
+  "len": 4,
+  "kind": "doc",
+  "text": "    /// Represents the SIGALRM signal.\n    ///\n    /// On Unix systems this signal is sent when a real-time timer has expired.\n    /// By default, the process is terminated by this signal.",
+  "next": "pub fn alarm() -> Self {"
+ }
+]

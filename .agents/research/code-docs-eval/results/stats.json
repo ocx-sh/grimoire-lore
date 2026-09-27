@@ -1,0 +1,371 @@
+{
+ "delta": 0.1,
+ "boot": 10000,
+ "arms": {
+  "deleted": {
+   "survival_pooled": {
+    "n": 25,
+    "mean_diff": 0.013,
+    "lower": 0.0
+   },
+   "survival_tier_a": {
+    "n": 12,
+    "mean_diff": 0.0,
+    "lower": 0.0
+   },
+   "survival_tier_b": {
+    "n": 24,
+    "mean_diff": 0.014,
+    "lower": 0.0
+   },
+   "recovery_pooled": {
+    "n": 25,
+    "mean_diff": -0.16,
+    "lower": -0.24
+   },
+   "recovery_tier_a": {
+    "n": 12,
+    "mean_diff": -0.306,
+    "lower": -0.417
+   },
+   "recovery_tier_b": {
+    "n": 24,
+    "mean_diff": -0.097,
+    "lower": -0.194
+   },
+   "recovery_full_pooled": {
+    "n": 25,
+    "mean_diff": -0.28,
+    "lower": -0.387
+   },
+   "recovery_full_tier_a": {
+    "n": 12,
+    "mean_diff": -0.389,
+    "lower": -0.528
+   },
+   "recovery_full_tier_b": {
+    "n": 24,
+    "mean_diff": -0.201,
+    "lower": -0.312
+   },
+   "gates": {
+    "survival": "no_assay",
+    "recovery": false
+   },
+   "recovery_gate_by_tier": {
+    "a": false,
+    "b": false
+   },
+   "passes": false
+  },
+  "history": {
+   "survival_pooled": {
+    "n": 12,
+    "mean_diff": 0.0,
+    "lower": 0.0
+   },
+   "survival_tier_a": {
+    "n": 12,
+    "mean_diff": 0.0,
+    "lower": 0.0
+   },
+   "recovery_pooled": {
+    "n": 12,
+    "mean_diff": -0.375,
+    "lower": -0.542
+   },
+   "recovery_tier_a": {
+    "n": 12,
+    "mean_diff": -0.375,
+    "lower": -0.542
+   },
+   "recovery_full_pooled": {
+    "n": 12,
+    "mean_diff": -0.431,
+    "lower": -0.611
+   },
+   "recovery_full_tier_a": {
+    "n": 12,
+    "mean_diff": -0.431,
+    "lower": -0.611
+   },
+   "gates": {
+    "survival": "no_assay",
+    "recovery": false
+   },
+   "recovery_gate_by_tier": {
+    "a": false
+   },
+   "passes": false
+  },
+  "oneline": {
+   "survival_pooled": {
+    "n": 13,
+    "mean_diff": 0.0,
+    "lower": 0.0
+   },
+   "survival_tier_a": {
+    "n": 5,
+    "mean_diff": 0.0,
+    "lower": 0.0
+   },
+   "survival_tier_b": {
+    "n": 8,
+    "mean_diff": 0.0,
+    "lower": 0.0
+   },
+   "recovery_pooled": {
+    "n": 13,
+    "mean_diff": -0.154,
+    "lower": -0.321
+   },
+   "recovery_tier_a": {
+    "n": 5,
+    "mean_diff": -0.3,
+    "lower": -0.6
+   },
+   "recovery_tier_b": {
+    "n": 8,
+    "mean_diff": -0.062,
+    "lower": -0.229
+   },
+   "recovery_full_pooled": {
+    "n": 13,
+    "mean_diff": -0.205,
+    "lower": -0.359
+   },
+   "recovery_full_tier_a": {
+    "n": 5,
+    "mean_diff": -0.333,
+    "lower": -0.6
+   },
+   "recovery_full_tier_b": {
+    "n": 8,
+    "mean_diff": -0.125,
+    "lower": -0.25
+   },
+   "gates": {
+    "survival": "no_assay",
+    "recovery": false
+   },
+   "recovery_gate_by_tier": {
+    "a": false,
+    "b": false
+   },
+   "passes": false
+  },
+  "pointer": {
+   "survival_pooled": {
+    "n": 25,
+    "mean_diff": 0.04,
+    "lower": 0.0
+   },
+   "survival_tier_a": {
+    "n": 12,
+    "mean_diff": 0.0,
+    "lower": 0.0
+   },
+   "survival_tier_b": {
+    "n": 13,
+    "mean_diff": 0.077,
+    "lower": 0.0
+   },
+   "recovery_pooled": {
+    "n": 25,
+    "mean_diff": 0.02,
+    "lower": -0.1
+   },
+   "recovery_tier_a": {
+    "n": 12,
+    "mean_diff": -0.125,
+    "lower": -0.25
+   },
+   "recovery_tier_b": {
+    "n": 13,
+    "mean_diff": 0.154,
+    "lower": -0.038
+   },
+   "recovery_full_pooled": {
+    "n": 25,
+    "mean_diff": -0.107,
+    "lower": -0.213
+   },
+   "recovery_full_tier_a": {
+    "n": 12,
+    "mean_diff": -0.181,
+    "lower": -0.306
+   },
+   "recovery_full_tier_b": {
+    "n": 13,
+    "mean_diff": -0.038,
+    "lower": -0.218
+   },
+   "gates": {
+    "survival": "no_assay",
+    "recovery": true
+   },
+   "recovery_gate_by_tier": {
+    "a": false,
+    "b": true
+   },
+   "passes": true
+  },
+  "rules": {
+   "survival_pooled": {
+    "n": 25,
+    "mean_diff": 0.027,
+    "lower": 0.0
+   },
+   "survival_tier_a": {
+    "n": 12,
+    "mean_diff": 0.0,
+    "lower": 0.0
+   },
+   "survival_tier_b": {
+    "n": 13,
+    "mean_diff": 0.051,
+    "lower": 0.0
+   },
+   "recovery_pooled": {
+    "n": 25,
+    "mean_diff": 0.067,
+    "lower": -0.0
+   },
+   "recovery_tier_a": {
+    "n": 12,
+    "mean_diff": 0.028,
+    "lower": -0.056
+   },
+   "recovery_tier_b": {
+    "n": 13,
+    "mean_diff": 0.103,
+    "lower": -0.0
+   },
+   "recovery_full_pooled": {
+    "n": 25,
+    "mean_diff": 0.08,
+    "lower": 0.027
+   },
+   "recovery_full_tier_a": {
+    "n": 12,
+    "mean_diff": 0.111,
+    "lower": 0.028
+   },
+   "recovery_full_tier_b": {
+    "n": 13,
+    "mean_diff": 0.051,
+    "lower": -0.026
+   },
+   "gates": {
+    "survival": "no_assay",
+    "recovery": true
+   },
+   "recovery_gate_by_tier": {
+    "a": true,
+    "b": true
+   },
+   "passes": true
+  }
+ },
+ "controls": {
+  "deleted": {
+   "n": 8,
+   "invented_guard_rate": 0.0
+  },
+  "original": {
+   "n": 8,
+   "invented_guard_rate": 0.0
+  }
+ },
+ "flags": [],
+ "where_found": {
+  "deleted": {
+   "probes": 113,
+   "record": 1,
+   "test": 13,
+   "git": 3,
+   "agent-config": 9,
+   "doc": 3
+  },
+  "original": {
+   "probes": 113,
+   "record": 0,
+   "test": 3,
+   "git": 0,
+   "agent-config": 2,
+   "doc": 0
+  },
+  "rules": {
+   "probes": 75,
+   "record": 1,
+   "test": 2,
+   "git": 2,
+   "agent-config": 1,
+   "doc": 0
+  },
+  "pointer": {
+   "probes": 50,
+   "record": 17,
+   "test": 4,
+   "git": 0,
+   "agent-config": 0,
+   "doc": 0
+  },
+  "history": {
+   "probes": 24,
+   "record": 0,
+   "test": 1,
+   "git": 0,
+   "agent-config": 0,
+   "doc": 0
+  },
+  "oneline": {
+   "probes": 26,
+   "record": 0,
+   "test": 4,
+   "git": 0,
+   "agent-config": 1,
+   "doc": 0
+  }
+ },
+ "assay_sensitivity": {
+  "survival": {
+   "n": 12,
+   "mean_gap": 0.0,
+   "lower": 0.0,
+   "met": false
+  },
+  "recovery": {
+   "n": 12,
+   "mean_gap": 0.306,
+   "lower": 0.194,
+   "met": true
+  }
+ },
+ "per_arm_rates": {
+  "deleted": {
+   "survival": 0.985,
+   "recovery": 0.58
+  },
+  "history": {
+   "survival": 1.0,
+   "recovery": 0.208
+  },
+  "oneline": {
+   "survival": 1.0,
+   "recovery": 0.231
+  },
+  "original": {
+   "survival": 0.977,
+   "recovery": 0.716
+  },
+  "pointer": {
+   "survival": 1.0,
+   "recovery": 0.62
+  },
+  "rules": {
+   "survival": 0.987,
+   "recovery": 0.667
+  }
+ }
+}

@@ -1,0 +1,41 @@
+{
+ "python|other": {
+  "files": 2,
+  "code": 72,
+  "doc": 8,
+  "line": 4,
+  "interface": 0,
+  "license": 2,
+  "directive": 1,
+  "blank": 22,
+  "trailing": 1,
+  "code_chars": 2724,
+  "comment_chars": 619,
+  "ratio": 0.167,
+  "ratio_chars": 0.227,
+  "doc_blocks": {
+   "count": 2,
+   "p50": 7,
+   "p90": 7,
+   "p99": 7,
+   "max": 7,
+   "gt3": 1,
+   "gt5": 1,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 7
+  },
+  "line_blocks": {
+   "count": 2,
+   "p50": 2,
+   "p90": 2,
+   "p99": 2,
+   "max": 2,
+   "gt3": 0,
+   "gt5": 0,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 0
+  }
+ }
+}

@@ -1,0 +1,140 @@
+{
+ "js|prod": {
+  "files": 1,
+  "code": 49,
+  "doc": 0,
+  "line": 3,
+  "interface": 0,
+  "license": 0,
+  "directive": 1,
+  "blank": 2,
+  "trailing": 0,
+  "code_chars": 1236,
+  "comment_chars": 200,
+  "ratio": 0.061,
+  "ratio_chars": 0.162,
+  "doc_blocks": {
+   "count": 0
+  },
+  "line_blocks": {
+   "count": 3,
+   "p50": 1,
+   "p90": 1,
+   "p99": 1,
+   "max": 1,
+   "gt3": 0,
+   "gt5": 0,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 0
+  }
+ },
+ "ts|other": {
+  "files": 1,
+  "code": 40,
+  "doc": 0,
+  "line": 3,
+  "interface": 0,
+  "license": 0,
+  "directive": 0,
+  "blank": 8,
+  "trailing": 1,
+  "code_chars": 1295,
+  "comment_chars": 197,
+  "ratio": 0.075,
+  "ratio_chars": 0.152,
+  "doc_blocks": {
+   "count": 0
+  },
+  "line_blocks": {
+   "count": 2,
+   "p50": 2,
+   "p90": 2,
+   "p99": 2,
+   "max": 2,
+   "gt3": 0,
+   "gt5": 0,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 0
+  }
+ },
+ "ts|prod": {
+  "files": 10,
+  "code": 725,
+  "doc": 165,
+  "line": 47,
+  "interface": 0,
+  "license": 0,
+  "directive": 0,
+  "blank": 155,
+  "trailing": 6,
+  "code_chars": 23594,
+  "comment_chars": 11427,
+  "ratio": 0.292,
+  "ratio_chars": 0.484,
+  "doc_blocks": {
+   "count": 30,
+   "p50": 3,
+   "p90": 13,
+   "p99": 33,
+   "max": 33,
+   "gt3": 12,
+   "gt5": 8,
+   "gt10": 4,
+   "gt20": 2,
+   "lines_in_gt5": 108
+  },
+  "line_blocks": {
+   "count": 21,
+   "p50": 1,
+   "p90": 4,
+   "p99": 15,
+   "max": 15,
+   "gt3": 4,
+   "gt5": 1,
+   "gt10": 1,
+   "gt20": 0,
+   "lines_in_gt5": 15
+  }
+ },
+ "ts|test": {
+  "files": 11,
+  "code": 2176,
+  "doc": 23,
+  "line": 25,
+  "interface": 0,
+  "license": 0,
+  "directive": 1,
+  "blank": 254,
+  "trailing": 1,
+  "code_chars": 72718,
+  "comment_chars": 2687,
+  "ratio": 0.022,
+  "ratio_chars": 0.037,
+  "doc_blocks": {
+   "count": 4,
+   "p50": 8,
+   "p90": 9,
+   "p99": 9,
+   "max": 9,
+   "gt3": 3,
+   "gt5": 2,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 17
+  },
+  "line_blocks": {
+   "count": 22,
+   "p50": 1,
+   "p90": 1,
+   "p99": 3,
+   "max": 3,
+   "gt3": 0,
+   "gt5": 0,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 0
+  }
+ }
+}

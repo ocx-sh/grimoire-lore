@@ -144,3 +144,6 @@ where everything blocks teaches the reader to negotiate with all of it.
   distribution and publishing. They load on build scripts, manifests, catalogs
   and lockfiles, globs this set deliberately does not cover, so a Java source
   edit never pays for them and a build-file edit always does.
+- **`code-docs`** — comments, Javadoc, decision-record pointers and test names
+  as documentation, in every language: what a comment keeps, where each clause
+  goes and how long a block runs. Loads on every source file.

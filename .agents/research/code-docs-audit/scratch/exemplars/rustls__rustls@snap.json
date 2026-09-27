@@ -1,0 +1,140 @@
+{
+ "python|prod": {
+  "files": 1,
+  "code": 40,
+  "doc": 0,
+  "line": 0,
+  "interface": 0,
+  "license": 0,
+  "directive": 0,
+  "blank": 8,
+  "trailing": 0,
+  "code_chars": 1155,
+  "comment_chars": 0,
+  "ratio": 0.0,
+  "ratio_chars": 0.0,
+  "doc_blocks": {
+   "count": 0
+  },
+  "line_blocks": {
+   "count": 0
+  }
+ },
+ "rust|other": {
+  "files": 15,
+  "code": 3022,
+  "doc": 58,
+  "line": 60,
+  "interface": 0,
+  "license": 0,
+  "directive": 0,
+  "blank": 428,
+  "trailing": 3,
+  "code_chars": 75521,
+  "comment_chars": 5307,
+  "ratio": 0.039,
+  "ratio_chars": 0.07,
+  "doc_blocks": {
+   "count": 31,
+   "p50": 1,
+   "p90": 3,
+   "p99": 9,
+   "max": 9,
+   "gt3": 3,
+   "gt5": 2,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 15
+  },
+  "line_blocks": {
+   "count": 31,
+   "p50": 1,
+   "p90": 4,
+   "p99": 5,
+   "max": 5,
+   "gt3": 4,
+   "gt5": 0,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 0
+  }
+ },
+ "rust|prod": {
+  "files": 63,
+  "code": 15195,
+  "doc": 2458,
+  "line": 532,
+  "interface": 0,
+  "license": 0,
+  "directive": 0,
+  "blank": 2507,
+  "trailing": 16,
+  "code_chars": 397827,
+  "comment_chars": 146248,
+  "ratio": 0.197,
+  "ratio_chars": 0.368,
+  "doc_blocks": {
+   "count": 724,
+   "p50": 2,
+   "p90": 7,
+   "p99": 21,
+   "max": 256,
+   "gt3": 160,
+   "gt5": 80,
+   "gt10": 33,
+   "gt20": 8,
+   "lines_in_gt5": 1210
+  },
+  "line_blocks": {
+   "count": 292,
+   "p50": 1,
+   "p90": 3,
+   "p99": 12,
+   "max": 27,
+   "gt3": 24,
+   "gt5": 12,
+   "gt10": 4,
+   "gt20": 1,
+   "lines_in_gt5": 117
+  }
+ },
+ "rust|test": {
+  "files": 38,
+  "code": 8368,
+  "doc": 6,
+  "line": 145,
+  "interface": 0,
+  "license": 0,
+  "directive": 0,
+  "blank": 1287,
+  "trailing": 24,
+  "code_chars": 230781,
+  "comment_chars": 6149,
+  "ratio": 0.018,
+  "ratio_chars": 0.027,
+  "doc_blocks": {
+   "count": 4,
+   "p50": 2,
+   "p90": 2,
+   "p99": 2,
+   "max": 2,
+   "gt3": 0,
+   "gt5": 0,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 0
+  },
+  "line_blocks": {
+   "count": 122,
+   "p50": 1,
+   "p90": 2,
+   "p99": 4,
+   "max": 7,
+   "gt3": 2,
+   "gt5": 1,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 7
+  }
+ }
+}

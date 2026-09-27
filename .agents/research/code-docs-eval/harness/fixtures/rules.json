@@ -1,0 +1,337 @@
+{
+ "OCX-02": {
+  "rules": [
+   "/// Whether `path`, an already-resolved command answer, is an ocx-generated launcher",
+   "/// trampoline. POSIX: [`TRAMPOLINE_MARKER`] is the whole second line of the first",
+   "/// [`TRAMPOLINE_PROBE_BYTES`] of a regular file. Windows: a `.exec` sidecar sits beside the",
+   "/// resolved `<stem>.exe`, or the resolved path's own extension is `.exec`.",
+   "///",
+   "/// It runs after the `PATH` exclusion of [`Env::resolve_command_excluding`], never in its",
+   "/// place, so each guard keeps its own reachable red state and a test can tell which one",
+   "/// caught an input. Matching the file rather than a directory list is what catches a",
+   "/// trampoline from a second project home on the same `PATH`.",
+   "///",
+   "/// A non-regular file answers false without being opened, and any I/O error answers false.",
+   "/// Failing closed, as `resolves_inside` in `ocx launcher shim` does, would turn a transient",
+   "/// `EACCES` on an unrelated binary into a refusal to run an ordinary command, since this runs",
+   "/// on every resolution including `/bin/sh`; the `PATH` exclusion still backstops it, and an",
+   "/// unreadable file is no worse than an absent one.",
+   "//",
+   "// Line 2 is matched whole, never by `contains()` or anywhere in the prefix: a looser match",
+   "// refuses an ordinary tool that embeds the string, and a package launcher whose baked",
+   "// `$OCX_HOME` spells the marker, breaking `ocx launcher exec`; nothing interpolated reaches",
+   "// lines 1 or 2. The prefix bound keeps the probe to one `read(2)` before every `exec`;",
+   "// `a_marker_beyond_the_probe_window_is_not_refused` fails if the bound is widened.",
+   "// `ocx_util::fs::read_bounded` does not fit: it errors past the cap, a trampoline body passes",
+   "// 256 bytes once the project root is about 146 characters deep, and the fail-open arm turns",
+   "// that error into \"not a trampoline\" for deep checkouts while shallow-root tests stay green.",
+   "// `is_file()` is checked before the open, or a FIFO on `PATH` blocks the `exec` forever.",
+   "// Windows has no content check: trampoline and lazy-shim-slot `.exe`s hardlink one blob, so",
+   "// a content match refuses shim slots. The own-`.exec` refusal is required because `which`",
+   "// treats any extension as executable, so a `PATHEXT` with `.EXEC` resolves the sidecar itself."
+  ],
+  "tags": "contract: what it answers, POSIX/Windows signals, non-regular and I/O-error answer false; guards: runs after (not instead of) the PATH exclusion, fail-open vs sibling resolves_inside, whole-line-2 anchor (not contains), prefix bound (test a_marker_beyond_the_probe_window_is_not_refused replaces the widening guard), not read_bounded, is_file before open (FIFO), no Windows content match, own-.exec refusal; why: file-not-directory matching, nothing interpolated reaches lines 1-2, unreadable==absent; implementation hazards moved to a plain // comment at the same position; dropped: process IDs C-069/C-010/C-028/D-V1/D-V12/D-V15/E-21/WP-6, stale 'why this has a body' stub provenance, validation-row argument (Item 37/WP-12e), design-story prose"
+ },
+ "OCX-06": {
+  "rules": [
+   "/// Whether the file occupying `target` *is* the file `tmp` holds, which is what lets a",
+   "/// `Published` outcome name a path this call wrote. Meaningful only on the NFS `link` +",
+   "/// `unlink` fallback; see [`persist_temp_file_noclobber`].",
+   "///",
+   "/// `target` is read with `symlink_metadata`, not `metadata`: a symlink there is never our",
+   "/// hardlink, and following one that points at the temp file would report `Published`."
+  ],
+  "tags": "contract: identity answer that makes Published name a written path, NFS-fallback-only scope; pointer: persist_temp_file_noclobber (resolves); guard: symlink_metadata must not follow, with consequence; dropped: nothing substantive, 'deliberately' rewritten as fact+consequence"
+ },
+ "OCX-07": {
+  "rules": [
+   "                // Our own link landed under this name and only the reply was lost. The temp",
+   "                // file drops here without `keep()`, leaving only the published name; keeping",
+   "                // it strands a `.tmp*` in the caller's directory on every spurious `EEXIST`."
+  ],
+  "tags": "why: own link landed, reply lost; guard: no keep() here, consequence (stranded .tmp*) made explicit; dropped: shouting emphasis only"
+ },
+ "OCX-09": {
+  "rules": [
+   "        // Step 4 (module docs): `_render_lock` stays bound until this call returns, or a",
+   "        // concurrent render of the same home interleaves its writes and races the stamp."
+  ],
+  "tags": "pointer: module-doc step 4 (resolves); guard: lock held until return, consequence from the module doc added; dropped: nothing"
+ },
+ "OCX-13": {
+  "rules": [
+   "    // `join_under_root` is lexical and the extraction root need not be empty, so an",
+   "    // intermediate symlink component can map an in-root path onto an out-of-root file;",
+   "    // without the canonical re-check that host file is hardlinked into the tree.",
+   "    // The source must already exist for `hard_link`, so canonicalizing rejects nothing",
+   "    // valid; tar's `validate_inside_dst` makes the same check for `unpack_in`."
+  ],
+  "tags": "guard: lexical join is insufficient, canonical re-check required (consequence: out-of-root host file pulled in); why: source already exists so canonicalize is safe; pointer: tar validate_inside_dst; dropped: nothing"
+ },
+ "OCX-14": {
+  "rules": [
+   "/// **A failed parent fsync is an error.** Discarding it would report a publish as landed",
+   "/// that a crash can still undo."
+  ],
+  "tags": "contract+guard: parent-fsync failure is returned, consequence of discarding kept; dropped: provenance 'the manifest writer used to discard it' (rewritten as present-tense guard)"
+ },
+ "OCX-17": {
+  "rules": [
+   "            // Every variant is spelled out rather than wildcarded, so a new `SsrfError`",
+   "            // variant is a compile error here instead of a silent exit 64."
+  ],
+  "tags": "guard: no wildcard arm, consequence (silent 64) kept; dropped: stale claim that SsrfError is #[non_exhaustive] (the enum carries no such attribute)"
+ },
+ "OCX-19": {
+  "rules": [
+   "                // A failed persist counts as success only when the bytes now at the target hash",
+   "                // to `claimed`, as a concurrent CAS writer's would. An `exists()` check is not",
+   "                // enough: on a self-heal the target still holds the corrupt bytes that failed the",
+   "                // verify above, so it would report success over them."
+  ],
+  "tags": "contract: failed persist is Ok only on a matching re-hash; why: concurrent CAS writer publishes equal bytes; guard: exists() would report success over corrupt self-heal target; dropped: narration of the two entry cases and of the match arms"
+ },
+ "OCX-20": {
+  "rules": [
+   "/// The deduped union of config-declared and env-declared plain-HTTP hosts, less any name a",
+   "/// SYSTEM-scope (`/etc/ocx/config.toml`) `[registries.\"<name>\"]` entry states `insecure = false`",
+   "/// for, `OCX_INSECURE_REGISTRIES` included. `None` subtracts nothing, and a non-system",
+   "/// `insecure = false` revokes nothing. The subtraction is required, or one env var defeats the",
+   "/// lock [`RegistryConfig::merge`](crate::RegistryConfig::merge) enforces against lower tiers.",
+   "///",
+   "/// Granting is byte-exact on `host[:port]`, case included, matching the transport's",
+   "/// `ClientProtocol::HttpsExcept` membership test: `registry.corp` does not cover",
+   "/// `registry.corp:5001`, and a mis-cased entry grants nothing, which fails closed",
+   "/// (`host_and_port_are_one_opaque_name`). Each gate compares its own resolved host string;",
+   "/// they agree for `host[:port]`, but Docker Hub resolves differently for the transport and for",
+   "/// [`canonicalize_registry`](ocx_oci::auth::registry_url::canonicalize_registry), so no spelling",
+   "/// of it can be granted plaintext, deliberately (see [`ocx_oci::auth::login`]).",
+   "///",
+   "/// Revoking is normalised in `same_registry_name`, because an exact match there fails open",
+   "/// (CWE-319/CWE-522). Without ASCII case folding, `OCX_INSECURE_REGISTRIES=Registry.Corp:5000`",
+   "/// or a lower-tier `[registries.\"Registry.Corp:5000\"]` walks past a lock on `registry.corp:5000`.",
+   "/// Without numeric port normalisation, `registry.corp:05000` reaches the locked TCP 5000 in",
+   "/// plaintext.",
+   "///",
+   "/// Known residual: a lock on `registry.corp` does not reach `registry.corp:80`, nor the",
+   "/// reverse. No default port is filled in, because the four consumers span both schemes and",
+   "/// any constant is wrong for some of them."
+  ],
+  "tags": "contract: union less system-locked names, None/non-system revoke nothing, exact grant semantics, per-gate subject and Docker Hub exclusion, default-port residual; guards: subtraction vs env-var bypass of RegistryConfig::merge lock, grant stays byte-exact (fails closed), revoke case-fold, revoke port normalisation, no default-port fill; pointers: RegistryConfig::merge, canonicalize_registry, ocx_oci::auth::login, host_and_port_are_one_opaque_name, same_registry_name; dropped: 'asymmetry is not a wart' argument, fleet-engineer narrative, section banners, per-gate string enumeration beyond the Docker Hub divergence"
+ },
+ "OCX-21": {
+  "rules": [
+   "        // Re-parses the whole `c/index.json` per resolve to find one entry, O(catalog); revisit",
+   "        // only if profiling shows it dominates. It is not memoized: a concurrent `ocx index update`",
+   "        // rewrites the file out-of-band and `CatalogTransaction::commit` cannot reach a cache on",
+   "        // `LocalIndex`, so a stale catalog causes spurious recovery or missed staleness. Recovery",
+   "        // re-reads under the lock; committing from this pre-lock read overwrites a concurrent update."
+  ],
+  "tags": "why: O(catalog) ceiling and revisit trigger; guards: no process-lifetime catalog memoization (stale catalog -> spurious recovery/missed staleness), recovery re-reads post-lock (consequence made explicit); dropped: ponytail: marker prefix, process ID F1 and the 'already required for the cross-check' aside"
+ },
+ "OCX-23": {
+  "rules": [
+   "/// Drops every occurrence of `value` from a `PATH`-style value, using [`move_to_front`]'s",
+   "/// splitting, empty-segment dropping and exact-segment comparison, so a directory added by",
+   "/// one is removed by the other. One surrounding pair of `\"` is stripped from `value` first,",
+   "/// as `Shell::remove_list_element` does, because the live environment spells a",
+   "/// space-bearing Windows segment either way.",
+   "///",
+   "/// `ocx launcher shim` depends on it to drop its own shim directory: a surviving one",
+   "/// resolves a claimed-but-unshipped name back to the shim, and `execvp` re-enters it forever.",
+   "///",
+   "/// **Precondition** (as [`move_to_front`]): `value` is one directory with no `PATH_SEPARATOR`.",
+   "/// Comparison is segment-exact to match the emitted shell snippets, so a trailing slash,",
+   "/// a symlink alias or a differently spelled root survives. This is not a containment check;",
+   "/// callers that must fail closed re-check the resolved answer against the resolved directory."
+  ],
+  "tags": "contract: drops all occurrences, quote-pair strip, precondition; guards: shared comparison with move_to_front, shim-directory removal prevents execvp re-entry loop, segment-exact is not containment (callers re-check resolved paths); pointers: move_to_front, Shell::remove_list_element; dropped: 'security guard, not a convenience' framing and 'minus the prepend' restatement"
+ },
+ "GRM-01": {
+  "rules": [
+   "    // Layer 2: a symlink in the tree can route a Normal-only path outside `base`. `exists()` is false",
+   "    // for a dangling symlink, so the `is_symlink()` test is required, or the guard is skipped and the",
+   "    // unvalidated join returned. `dunce::canonicalize` is required, or Windows `\\\\?\\` UNC paths give",
+   "    // false negatives. Containment compares whole components (`Path::starts_with`); a string-prefix",
+   "    // check accepts a sibling like `<base>-evil`."
+  ],
+  "tags": "why: symlink escape motivates Layer 2; guards kept: is_symlink test for dangling links, dunce canonicalize, component-wise starts_with (consequence made concrete); dropped: '(when exists OR is a symlink)' narration of the if."
+ },
+ "GRM-03": {
+  "rules": [
+   "        // Layer 2 catches a symlink routing a Normal-only path outside the root. `exists()` is false for",
+   "        // a dangling symlink, so the symlink test is required, or the guard is skipped and the join",
+   "        // returned unvalidated (a dangling symlink instead fails canonicalize with a safe `Io` error).",
+   "        // `dunce::canonicalize` is required, or Windows `\\\\?\\` UNC paths give false negatives.",
+   "        // Containment compares whole components (`Path::starts_with`); a string-prefix check accepts a",
+   "        // sibling like `<root>-evil`. The canonical path is returned so callers act on what was validated.",
+   "        // The leaf is stat'ed once, before canonicalize, for both the branch and the carve-out below; a",
+   "        // later stat (`Path::is_symlink()` is one) widens the TOCTOU window in the exploitable direction."
+  ],
+  "tags": "why: Layer 2 purpose; guards kept (each own sentence): dangling-symlink is_symlink test + safe Io outcome, dunce canonicalize, component-wise starts_with, return canonical path, single leaf stat before canonicalize reused by carve-out; over 5-line cap because guards alone exceed it; dropped: narration of the if condition, 'we' phrasing."
+ },
+ "GRM-04": {
+  "rules": [
+   "    // The parent-directory fsync is required, or a crash can lose the rename.",
+   "    // Unix-only: opening a directory as a `File` fails on Windows."
+  ],
+  "tags": "guard: dir fsync for rename durability (fact + consequence); why: cfg(unix) because directory open fails on Windows; nothing dropped."
+ },
+ "GRM-05": {
+  "rules": [
+   "/// Atomically replace the file `target` names, following a terminal symlink.",
+   "///",
+   "/// For user-authored files grim rewrites in place: [`atomic_write`]'s rename would",
+   "/// turn a symlinked one (a dotfiles-managed `grimoire.toml`, issue #117) into a",
+   "/// regular file and leave the managed copy stale. Grim-owned outputs keep plain",
+   "/// [`atomic_write`], which must clobber a planted link, or the link redirects the write.",
+   "///",
+   "/// # Errors",
+   "///",
+   "/// As [`atomic_write`]."
+  ],
+  "tags": "contract: summary, when to use (user-authored files), Errors section; guard: rename would replace a symlinked user file; guard: grim-owned outputs must not be unified onto this (planted link redirects write); pointer: issue #117 kept (resolves: grimoire-rs/grimoire#117); tightened to the 10-line app doc cap."
+ },
+ "GRM-06": {
+  "rules": [
+   "        // The sidecar is unlinked while the lock is still held: unlinked after the close, a waiter could",
+   "        // lock the doomed inode past `try_acquire`'s identity re-check and run beside the next writer.",
+   "        // Unix keeps the fd and lock until the close. On Windows (std opens with FILE_SHARE_DELETE) the",
+   "        // name stays delete-pending until our handle closes; opens meanwhile get a permission error,",
+   "        // which `try_acquire` must retry or fail spuriously. Best-effort: a leftover sidecar is harmless."
+  ],
+  "tags": "guard: unlink-before-close ordering (consequence made concrete: two unserialized writers); why: Unix fd keeps lock alive; guard: Windows delete-pending window couples to try_acquire's PermissionDenied retry; why: best-effort remove; dropped: bullet layout, 'pre-cleanup status quo' provenance."
+ },
+ "TS-03": {
+  "rules": [
+   "    // Write-then-rename in the same dir is required: load deletes an entry it cannot parse, so a",
+   "    // concurrent load of a half-written file loses the good entry. The `.tmp` suffix keeps the",
+   "    // in-flight file out of prune's `.json` filter. The tmp name is unique per write, not per repo:",
+   "    // saves for one repo overlap (a panel open racing the card prefetch), and a shared path",
+   "    // interleaves both into one file that the rename publishes torn. Racing saves last-write-win."
+  ],
+  "tags": "guards kept: write-then-rename in same dir (atomic rename), .tmp suffix vs prune's .json filter, per-write unique tmp name (provenance 'let both write' rewritten as present-tense guard); contract/why: racing saves last-write-win; dropped: 'each writes a whole entry now' provenance."
+ },
+ "TS-04": {
+  "rules": [
+   "        // `path.resolve`, not `path.join`, is required: a relative PATH entry (`.`, `bin`,",
+   "        // `./tools`) would give a relative path that the grim spawn resolves against its cwd,",
+   "        // the workspace folder, so a repository shipping its own grim would win.",
+   "        // Resolving before the access check keeps the probed file and the returned file the same."
+  ],
+  "tags": "guards kept: resolve-not-join (hijack by repo-shipped grim), resolve before access check (probe == return); dropped: the 'same threat as a bare grim' analogy (argument) and the `run()` pointer, which names no existing symbol (spawn lives in runJson)."
+ },
+ "TS-05": {
+  "rules": [
+   "/** Basename of the ad-blocker-safe alias copy of a package root, written beside the package's",
+   " * own CAS directory: `p/<ns>/<pkg>/_root.json`. The site fetches the alias because a root URL",
+   " * ending in `<pkg>.json` fails to load in browsers running EasyList/EasyPrivacy when `<pkg>`",
+   " * matches one of their ~800 unanchored `/<word>.js` rules (`/hawkeye.js` blocks",
+   " * `/p/hawkeye/hawkeye.json`); no such rule matches a final `_root.json` segment.",
+   " *",
+   " * The leading `_` is required: `PACKAGE_RE` (`viewmodel/catalog.ts`) makes every package segment",
+   " * start with `[a-z0-9]`, so no package at any depth can collide with it. It must stay inside `p/`,",
+   " * or the `_headers` `/p/*` sandbox block no longer covers it. The canonical `p/<ns>/<pkg>.json` is",
+   " * still written; the alias is an extra copy for the site's fetch, never a wire-format change. */"
+  ],
+  "tags": "contract: what the basename/path is; why+guard: alias exists because canonical <pkg>.json URLs are ad-blocked; provenance (2026-08-27 hawkeye incident, NetworkError) rewritten as a present-tense example; guards: _ prefix collision-proof via PACKAGE_RE (pointer resolves), must stay under p/ for _headers sandbox, canonical still written (no wire change)."
+ },
+ "TS-06": {
+  "rules": [
+   "/**",
+   " * Mount prefix for one source's mirrored wire tree: `\"\"` for the `root: true` source and",
+   " * `/index/<label>` for every other source (`sources/mirror.ts`'s placement).",
+   " *",
+   " * Every wire URL written to `/data/catalog/catalog.json` must go through it: `/p/...` holds only",
+   " * the root source's copy, so an unprefixed non-root URL 404s silently and the catalog renders",
+   " * logo-less and README-less. `src/theme/utils/cas.ts` re-exports it for browser-side CAS URLs,",
+   " * so both halves of a build agree by construction; a second copy could drift.",
+   " * The live import is safe: `useImageIndex.ts` already pulls this module into the browser bundle.",
+   " */"
+  ],
+  "tags": "contract: return values per source (pointer sources/mirror.ts resolves); guard: every emitted wire URL goes through it (past-tense 404 incident rewritten as present consequence); guard: theme re-exports rather than copies (pointer resolves); why: live import safe; dropped: LogoTile/IdentityBlock fallback detail, WIRE_ASSET_EXTENSIONS comparison (argument), __ocx.desc narrative."
+ },
+ "TS-07": {
+  "rules": [
+   "/**",
+   " * Fetches the wire package root from the ad-blocker-safe alias",
+   " * `<wireBase>/p/<ns>/<pkg>/_root.json` (`sources/mirror.ts`), falling back on 404 to the",
+   " * byte-identical canonical `<wireBase>/p/<ns>/<pkg>.json`. `wireBase` is the source's mount",
+   " * prefix, `''` for the `root: true` source and `index/<label>` otherwise (see `wirePrefix`).",
+   " * Arguments accept refs/getters and refetch on change, post-mount only (SSR-safe); VitePress's",
+   " * router reuses the component across package navigations, so a one-shot `onMounted` fetch would",
+   " * leave stale data on screen. CAS asset URLs (`casUrl()`, `utils/cas.ts`) must be built from the",
+   " * bare `ns`/`pkg` given here; `root.name` carries the `ocx.sh/` prefix, so a URL from it 404s.",
+   " */"
+  ],
+  "tags": "contract: fetch alias then canonical on 404, wireBase meaning, refs/getters refetch post-mount; guards: one-shot onMounted fetch leaves stale data under router reuse, CAS URLs from bare ns/pkg not root.name (404); pointers kept (mirror.ts, utils/cas.ts wirePrefix/casUrl resolve); dropped: schema root.schema.json aside, 'detail page reads it off frontmatter' narration, 'CAS gotcha' label."
+ },
+ "PY-01": {
+  "rules": [
+   "    \"\"\"Return the lowercase hex sha256 of everything an open descriptor holds.",
+   "",
+   "    The descriptor is rewound first and left at end of file.",
+   "",
+   "    Hashing through the descriptor, not re-opening the path as `_hash_path`",
+   "    does, makes the digest cover the exact bytes being installed; a second path",
+   "    lookup opens a window to swap the file between verification and use.",
+   "    \"\"\""
+  ],
+  "tags": "contract: summary (folded 'lowercase hex' Returns into it), fd rewound/left at EOF; guard: hash via descriptor not re-opened path (swap window), names sibling _hash_path; dropped: Args/Returns section scaffolding and tautological 'The descriptor'."
+ },
+ "PY-05": {
+  "rules": [
+   "    \"\"\"Look `name` up on `search_path`, entry by entry, refusing unsafe hits.",
+   "",
+   "    A hit in `cwd` (with `windows`) or in a group- or other-writable directory",
+   "    (without it) is refused as a binary-injection vector (CWE-426).",
+   "",
+   "    Returns:",
+   "        The first acceptable hit, as an absolute path, or `None`.",
+   "    \"\"\"",
+   "    # Each entry's hit is vetted rather than trusting one `shutil.which` call, which on Windows",
+   "    # searches the current directory ahead of PATH and so trusts a binary planted there.",
+   "    # `cwd` and each hit are resolved first, or a relative entry like `.` slips past the `cwd` comparison.",
+   "    # The hit is resolved, or the caller is handed a relative path that goes stale on the next `chdir`."
+  ],
+  "tags": "contract: summary, refusal rules per windows/cwd (folded windows+cwd args), Returns absolute-or-None; pointer: CWE-426; guards moved to plain # comments: per-entry vetting vs single shutil.which (cwd-first on Windows), resolve before cwd comparison (relative '.'), resolve hit (stale after chdir); dropped: tautological Args name/search_path and section scaffolding."
+ },
+ "PY-06": {
+  "rules": [
+   "    \"\"\"Return the digest the manifest body must have, or `None` when none is required.",
+   "",
+   "    A remote read off `CANONICAL_DIST_HOST` or with a mirror in play needs a pin,",
+   "    since TLS there proves reachability rather than authenticity. A local source",
+   "    (`url` and `origin` are `None`) is exempt: its bytes have provenance, and",
+   "    hashing them against a digest derived from themselves proves nothing.",
+   "",
+   "    A `dist/<sha256>.json` URL pins itself. That digest must come from the",
+   "    caller-supplied URL string before any request goes out, or a redirect could",
+   "    choose which digest the body is checked against.",
+   "",
+   "    Raises:",
+   "        DistManifestError: A pin is required and missing, or the URL and the",
+   "            explicit `sha256=` name different digests.",
+   "    \"\"\""
+  ],
+  "tags": "contract: summary (Returns folded in), when a pin is required, local-source None url/origin, snapshot URL self-pin, Raises; why: TLS proves reachability not authenticity, local bytes self-hash proves nothing (one sentence each); guard: digest from caller-supplied URL before any request, or a redirect chooses it; pointer: CANONICAL_DIST_HOST (resolves); dropped: tautological Args source/mirrored and section scaffolding."
+ },
+ "PY-07": {
+  "rules": [
+   "    \"\"\"Build an ocx argv: `[exe, *global_flags, *command, *positionals, --, *child]`.",
+   "",
+   "    `global_flags` precede the subcommand because ocx's clap grammar accepts",
+   "    global flags nowhere else. `command` is the SDK-composed subcommand path",
+   "    plus its flags; `positionals` are identifiers ocx resolves itself. `child`",
+   "    is the argv of a process ocx hosts (`run`, `package exec`), placed behind",
+   "    `--` where a leading dash is safe; when it is empty no `--` is written.",
+   "",
+   "    Raises:",
+   "        ValueError: A positional starts with `-`, so ocx would parse it as a",
+   "            flag (CWE-88).",
+   "    \"\"\""
+  ],
+  "tags": "guard: global flags before subcommand (clap accepts them nowhere else), leading-dash positional raises (kept in Raises, CWE-88 pointer); contract: summary layout, command/positionals/child roles, child behind --, empty child writes no --; dropped: Returns 'The argv, ready for run_command or spawn' (tautology), tautological exe/global_flags Args, duplicate 'Always guarded' clause (covered by Raises)."
+ },
+ "_rule_version": "procedure-v0 2026-09-27"
+}

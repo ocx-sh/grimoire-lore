@@ -1,0 +1,71 @@
+{
+ "js|prod": {
+  "files": 34,
+  "code": 1646,
+  "doc": 20,
+  "line": 41,
+  "interface": 0,
+  "license": 0,
+  "directive": 3,
+  "blank": 103,
+  "trailing": 2,
+  "code_chars": 50027,
+  "comment_chars": 2316,
+  "ratio": 0.037,
+  "ratio_chars": 0.046,
+  "doc_blocks": {
+   "count": 12,
+   "p50": 1,
+   "p90": 4,
+   "p99": 4,
+   "max": 4,
+   "gt3": 2,
+   "gt5": 0,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 0
+  },
+  "line_blocks": {
+   "count": 17,
+   "p50": 1,
+   "p90": 10,
+   "p99": 10,
+   "max": 10,
+   "gt3": 2,
+   "gt5": 2,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 20
+  }
+ },
+ "js|test": {
+  "files": 1,
+  "code": 109,
+  "doc": 0,
+  "line": 2,
+  "interface": 0,
+  "license": 0,
+  "directive": 0,
+  "blank": 32,
+  "trailing": 0,
+  "code_chars": 5466,
+  "comment_chars": 153,
+  "ratio": 0.018,
+  "ratio_chars": 0.028,
+  "doc_blocks": {
+   "count": 0
+  },
+  "line_blocks": {
+   "count": 2,
+   "p50": 1,
+   "p90": 1,
+   "p99": 1,
+   "max": 1,
+   "gt3": 0,
+   "gt5": 0,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 0
+  }
+ }
+}

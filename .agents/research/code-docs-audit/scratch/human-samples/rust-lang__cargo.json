@@ -1,0 +1,202 @@
+[
+ {
+  "file": "src/cargo/core/profiles.rs",
+  "line": 975,
+  "len": 3,
+  "kind": "line",
+  "text": "            // The feature resolver doesn't know which dependencies are\n            // plugins, so for now plugins don't split features. Since plugins\n            // are mostly deprecated, just leave this as false.",
+  "next": "host_features: false,"
+ },
+ {
+  "file": "src/cargo/core/package.rs",
+  "line": 159,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Gets the current package version.",
+  "next": "pub fn version(&self) -> &Version {"
+ },
+ {
+  "file": "src/cargo/core/compiler/compile_kind.rs",
+  "line": 84,
+  "len": 5,
+  "kind": "doc",
+  "text": "    /// Hash used for fingerprinting.\n    ///\n    /// Metadata hashing uses the normal Hash trait, which does not\n    /// differentiate on `.json` file contents. The fingerprint hash does\n    /// check the contents.",
+  "next": "pub fn fingerprint_hash(&self) -> u64 {"
+ },
+ {
+  "file": "src/cargo/ops/cargo_package.rs",
+  "line": 443,
+  "len": 5,
+  "kind": "line",
+  "text": "        // This is a collection of any dirty or untracked files. This covers:\n        // - new/modified/deleted/renamed/type change (index or worktree)\n        // - untracked files (which are \"new\" worktree files)\n        // - ignored (in case the user has an `include` directive that\n        //   conflicts with .gitignore).",
+  "next": "let mut dirty_files = Vec::new();"
+ },
+ {
+  "file": "src/cargo/core/package.rs",
+  "line": 1126,
+  "len": 1,
+  "kind": "line",
+  "text": "        // pick the correct plural of crate(s)",
+  "next": "let crate_string = if self.downloads_finished == 1 {"
+ },
+ {
+  "file": "crates/cargo-test-support/src/registry.rs",
+  "line": 79,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// If `true`, configures a registry named \"alternative\".",
+  "next": "alternative: bool,"
+ },
+ {
+  "file": "src/cargo/core/summary.rs",
+  "line": 354,
+  "len": 1,
+  "kind": "line",
+  "text": "    // Make sure every optional dep is mentioned at least once.",
+  "next": "let used: HashSet<_> = map"
+ },
+ {
+  "file": "src/cargo/core/workspace.rs",
+  "line": 1501,
+  "len": 1,
+  "kind": "line",
+  "text": "                            // This member was not requested on the command-line, skip.",
+  "next": "None"
+ },
+ {
+  "file": "src/cargo/core/resolver/mod.rs",
+  "line": 595,
+  "len": 6,
+  "kind": "doc",
+  "text": "/// Attempts to activate the summary `candidate` in the context `cx`.\n///\n/// This function will pull dependency summaries from the registry provided, and\n/// the dependencies of the package will be determined by the `opts` provided.\n/// If `candidate` was activated, this function returns the dependency frame to\n/// iterate through next.",
+  "next": "fn activate("
+ },
+ {
+  "file": "src/cargo/util/config/mod.rs",
+  "line": 188,
+  "len": 15,
+  "kind": "doc",
+  "text": "    /// This should be false if:\n    /// - this is an artifact of the rustc distribution process for \"stable\" or for \"beta\"\n    /// - this is an `#[test]` that does not opt in with `enable_nightly_features`\n    /// - this is an integration test that uses `ProcessBuilder`\n    ///      that does not opt in with `masquerade_as_nightly_cargo`\n    /// This should be true if:\n    /// - this is an artifact of the rustc distribution process for \"nightly\"\n    /// - this is being used in the rustc distribution process internally\n    /// - this is a cargo executable that was built from source\n    /// - this is an `#[test]` that called `enable_nightly_features`\n    /// - this is an integration test that uses `ProcessBuilder`\n    ///       that called `masquerade_as_nightly_cargo`\n    /// It's public to allow tests use nightly features.\n    /// NOTE: this should be set before `configure()`. If calling this from an integration test,\n    /// consider using `ConfigBuilder::enable_nightly_features` instead.",
+  "next": "pub nightly_features_allowed: bool,"
+ },
+ {
+  "file": "src/cargo/core/dependency.rs",
+  "line": 358,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Returns `false` if the dependency is only used to build the local package.",
+  "next": "pub fn is_transitive(&self) -> bool {"
+ },
+ {
+  "file": "src/cargo/core/profiles.rs",
+  "line": 113,
+  "len": 1,
+  "kind": "line",
+  "text": "        // Merge with predefined profiles.",
+  "next": "use std::collections::btree_map::Entry;"
+ },
+ {
+  "file": "src/cargo/core/compiler/build_context/target_info.rs",
+  "line": 73,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// The kind of file.",
+  "next": "pub flavor: FileFlavor,"
+ },
+ {
+  "file": "crates/cargo-util/src/paths.rs",
+  "line": 108,
+  "len": 4,
+  "kind": "doc",
+  "text": "/// Returns the absolute path of where the given executable is located based\n/// on searching the `PATH` environment variable.\n///\n/// Returns an error if it cannot be found.",
+  "next": "pub fn resolve_executable(exec: &Path) -> Result<PathBuf> {"
+ },
+ {
+  "file": "src/cargo/core/summary.rs",
+  "line": 40,
+  "len": 3,
+  "kind": "line",
+  "text": "        // ****CAUTION**** If you change anything here than may raise a new\n        // error, be sure to coordinate that change with either the index\n        // schema field or the SummariesCache version.",
+  "next": "let mut has_overlapping_features = None;"
+ },
+ {
+  "file": "src/cargo/util/graph.rs",
+  "line": 90,
+  "len": 7,
+  "kind": "doc",
+  "text": "    /// Resolves one of the paths from the given dependent package down to\n    /// a leaf.\n    ///\n    /// Each element contains a node along with an edge except the first one.\n    /// The representation would look like:\n    ///\n    /// (Node0,) -> (Node1, Edge01) -> (Node2, Edge12)...",
+  "next": "pub fn path_to_bottom<'a>(&'a self, mut pkg: &'a N) -> Vec<(&'a N, Option<&'a E>)> {"
+ },
+ {
+  "file": "src/cargo/sources/registry/mod.rs",
+  "line": 394,
+  "len": 1,
+  "kind": "line",
+  "text": "        // All dependencies are private by default",
+  "next": "let public = public.unwrap_or(false);"
+ },
+ {
+  "file": "src/cargo/util/config/mod.rs",
+  "line": 578,
+  "len": 1,
+  "kind": "line",
+  "text": "            // Lists are always merged.",
+  "next": "(Some(CV::List(..)), Some(_)) => true,"
+ },
+ {
+  "file": "src/cargo/core/resolver/mod.rs",
+  "line": 1003,
+  "len": 5,
+  "kind": "line",
+  "text": "    // Create a simple graph representation alternative of `resolve` which has\n    // only the edges we care about. Note that `BTree*` is used to produce\n    // deterministic error messages here. Also note that the main reason for\n    // this copy of the resolve graph is to avoid edges between a crate and its\n    // dev-dependency since that doesn't count for cycles.",
+  "next": "let mut graph = BTreeMap::new();"
+ },
+ {
+  "file": "src/cargo/util/config/mod.rs",
+  "line": 1970,
+  "len": 1,
+  "kind": "line",
+  "text": "        // logout",
+  "next": "let table = toml.as_table_mut().unwrap();"
+ },
+ {
+  "file": "src/cargo/ops/cargo_compile.rs",
+  "line": 986,
+  "len": 2,
+  "kind": "line",
+  "text": "                        // Examples are included as regular binaries to verify\n                        // that they compile.",
+  "next": "CompileMode::Build"
+ },
+ {
+  "file": "src/cargo/ops/resolve.rs",
+  "line": 787,
+  "len": 2,
+  "kind": "line",
+  "text": "        // Show alternative source URLs if the source URLs being patch\n        // cannot not be found in the crate graph.",
+  "next": "match ("
+ },
+ {
+  "file": "crates/cargo-test-support/src/registry.rs",
+  "line": 490,
+  "len": 5,
+  "kind": "doc",
+  "text": "    /// Adds a dev-dependency. Example:\n    /// ```\n    /// [dev-dependencies]\n    /// foo = {version = \"1.0\"}\n    /// ```",
+  "next": "pub fn dev_dep(&mut self, name: &str, vers: &str) -> &mut Package {"
+ },
+ {
+  "file": "src/cargo/sources/registry/mod.rs",
+  "line": 513,
+  "len": 2,
+  "kind": "doc",
+  "text": "/// The status of [`RegistryData::download`] which indicates if a `.crate`\n/// file has already been downloaded, or if not then the URL to download.",
+  "next": "pub enum MaybeLock {"
+ },
+ {
+  "file": "src/cargo/ops/resolve.rs",
+  "line": 251,
+  "len": 7,
+  "kind": "line",
+  "text": "    // Here we place an artificial limitation that all non-registry sources\n    // cannot be locked at more than one revision. This means that if a Git\n    // repository provides more than one package, they must all be updated in\n    // step when any of them are updated.\n    //\n    // TODO: this seems like a hokey reason to single out the registry as being\n    // different.",
+  "next": "let to_avoid_sources: HashSet<SourceId> = to_avoid"
+ }
+]

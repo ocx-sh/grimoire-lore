@@ -1,0 +1,242 @@
+[
+ {
+  "file": "src/config/errors.ts",
+  "line": 20,
+  "len": 1,
+  "kind": "doc",
+  "text": "  /** More than one `sources[]` entry sets `root: true`. */",
+  "next": "| \"MULTIPLE_ROOT\""
+ },
+ {
+  "file": "src/ci/errors.ts",
+  "line": 5,
+  "len": 2,
+  "kind": "doc",
+  "text": "  /** A discovered generated file's header names a version newer than this\n   * tool supports \u2014 it was rendered by a newer `@ocx-sh/catalog`. */",
+  "next": "| \"TOOL_TOO_OLD\""
+ },
+ {
+  "file": "src/theme/composables/usePackageRoot.ts",
+  "line": 74,
+  "len": 19,
+  "kind": "doc",
+  "text": " * Fetches the wire package root \u2014 `<wireBase>/p/<ns>/<pkg>/_root.json`, the\n * ad-blocker-safe alias `sources/mirror.ts` writes beside the canonical\n * `<wireBase>/p/<ns>/<pkg>.json`, which is used as the 404 fallback (schema:\n * `root.schema.json` either way; the two are byte-identical). `wireBase` is the mount prefix of the source this\n * package came from \u2014 `''` (the site root) for the `root: true` source,\n * `index/<label>` for every other; the detail page reads it off its own\n * frontmatter. See `utils/cas.ts`'s `wirePrefix`.\n *\n * CAS gotcha: build any CAS asset URL (`casUrl()` from `utils/cas.ts`) from\n * the bare `<ns>/<pkg>` route params passed in here \u2014 NEVER from\n * `root.name`, which carries the `ocx.sh/` prefix and 404s every CAS\n * request built from it.\n *\n * `ns`/`pkg` accept refs/getters and are re-fetched on change (post-mount\n * only, per the SSR-safety constraint) \u2014 a dynamic-route detail page's\n * component instance can be reused by VitePress's client router across a\n * navigation between two different packages, so a plain one-shot\n * `onMounted` fetch would leave stale data on screen after such a nav.\n */",
+  "next": "export function usePackageRoot("
+ },
+ {
+  "file": "src/ci/pins.ts",
+  "line": 46,
+  "len": 7,
+  "kind": "doc",
+  "text": " * Scrapes every `uses:` pin out of `files`' content (C-007 pin\n * carry-forward). An action pinned identically everywhere it appears is\n * carried forward; an action pinned to more than one distinct value is a\n * conflict, and an action pinned to anything but a 40-hex commit SHA is a\n * mutable ref \u2014 in BOTH cases the caller falls back to `DEFAULT_PINS` and\n * warns (see `COMMIT_SHA_RE` for why a mutable ref can never be carried).\n */",
+  "next": "export function scrapePins(files: readonly { content: string }[]): ScrapedPins {"
+ },
+ {
+  "file": "src/viewmodel/catalog.ts",
+  "line": 171,
+  "len": 20,
+  "kind": "doc",
+  "text": " * Mount prefix for one source's mirrored wire tree \u2014 `\"\"` for the\n * `root: true` source (mirrored at the site root) and `/index/<label>` for\n * every other configured source (`sources/mirror.ts`'s placement).\n *\n * Every wire URL this module emits into `/data/catalog/catalog.json` goes\n * through it. Without it a non-root source's `logoUrl`/`readmeUrl` pointed\n * at `/p/...`, which only ever holds the ROOT source's copy: the mirror had\n * written those exact bytes to `/index/<label>/p/...` and every request\n * 404'd, silently \u2014 `LogoTile`/`IdentityBlock` walk the svg->png candidate\n * chain and leave the monogram standing, so a wholly logo-less, README-less\n * multi-source catalog looked like a catalog whose packages publish no\n * `__ocx.desc` at all.\n *\n * Exported for the browser side too: `src/theme/utils/cas.ts` re-exports it\n * and builds its own CAS URLs through it, so both halves of a build agree by\n * construction rather than by two copies staying in step. A live import is\n * safe here where `WIRE_ASSET_EXTENSIONS`'s could not be \u2014 the dependency\n * runs theme -> viewmodel, and `useImageIndex.ts` already pulls this module\n * into the browser bundle for `readImageIndexAnnotations`.\n */",
+  "next": "export function wirePrefix(wireBase: string): string {"
+ },
+ {
+  "file": "src/theme/utils/osGlyphs.ts",
+  "line": 36,
+  "len": 4,
+  "kind": "doc",
+  "text": "/** Canonical display order: linux, darwin, windows, then anything unknown\n * (alphabetical). Exported (WP-C addition) \u2014 `FilterChips.vue`'s 3 fixed\n * platform toggles iterate this directly instead of re-declaring the same\n * list; also the natural source for WP-D's `PlatformMatrix.vue` ordering. */",
+  "next": "export const OS_ORDER = ['linux', 'darwin', 'windows']"
+ },
+ {
+  "file": "src/theme/utils/modifierKey.ts",
+  "line": 27,
+  "len": 9,
+  "kind": "doc",
+  "text": " * True on macOS, iPadOS and iOS. Read at call time rather than at module load\n * so a caller can defer it past hydration.\n *\n * `navigator.userAgentData.platform` first (the modern, non-deprecated\n * source), then `navigator.platform`, which is deprecated but still the only\n * thing every current browser reports. Under SSG there is no `navigator` at\n * all \u2014 that path returns false, which is why the caller must render the\n * non-Apple spelling server-side and swap after mount.\n */",
+  "next": "export function isApplePlatform(): boolean {"
+ },
+ {
+  "file": "src/theme/utils/dom.ts",
+  "line": 7,
+  "len": 4,
+  "kind": "doc",
+  "text": " * True when `target` is a form control or `contenteditable` element \u2014 used\n * to skip a global single-key shortcut (\"/\", etc.) while the user is\n * already typing somewhere.\n */",
+  "next": "export function isEditableTarget(target: EventTarget | null): boolean {"
+ },
+ {
+  "file": "src/sources/types.ts",
+  "line": 231,
+  "len": 20,
+  "kind": "doc",
+  "text": "/** Basename of the ad-blocker-safe ALIAS copy of a package root, written\n * beside the package's own CAS directory: `p/<ns>/<pkg>/_root.json`.\n *\n * Why an alias exists at all: the wire root's own URL ends in\n * `<pkg>.json`, so a package whose name matches one of the ~800 unanchored\n * `/<word>.js` rules in EasyList/EasyPrivacy has its root fetch BLOCKED in\n * any browser running those lists \u2014 the rule's substring matches\n * `/<word>.js` inside `/<word>.json`. Observed 2026-08-27 on\n * `ocx.sh/hawkeye/hawkeye`: EasyPrivacy's `/hawkeye.js` killed\n * `/p/hawkeye/hawkeye.json` and the detail page rendered \"Failed to load:\n * NetworkError\". The alias moves the package name out of the final\n * segment, which no such rule can match.\n *\n * `_root` is collision-proof by construction: `PACKAGE_RE`\n * (`viewmodel/catalog.ts`) requires a package segment to START with\n * `[a-z0-9]`, so no package \u2014 at any depth \u2014 can ever own this filename.\n * It sits INSIDE `p/`, so the `_headers` sandbox block for `/p/*` covers it\n * with no second rule. The canonical `p/<ns>/<pkg>.json` is still written:\n * this is an ADDITIONAL copy for the site's own fetch, never a wire-format\n * change. */",
+  "next": "const ROOT_ALIAS_BASENAME = \"_root.json\";"
+ },
+ {
+  "file": ".lighthouserc.cjs",
+  "line": 2,
+  "len": 51,
+  "kind": "doc",
+  "text": " * Lighthouse CI config for `task quality:web` (WP2, C-201/C-203). Consumed\n * OUT-OF-PROCESS by the `@lhci/cli` binary \u2014 never imported into the vitest\n * process (hence its `vitest.config.ts` coverage exclusion). `task\n * quality:web` builds the committed fixture index at\n * `test/fixtures/quality-index/` into `.lhci-site/`, and lhci audits every\n * emitted page against the category thresholds below.\n *\n * ## Thresholds: measured, then ratcheted (C-203, unchecked-green discipline)\n *\n * A gate whose red state was never observed is not a gate. These numbers are\n * the MEASURED category medians of the fixture site (3 runs/page, all 8 pages\n * \u2014 index, 404, and one detail page per fixture package), then dropped by a\n * >=0.03 margin so ordinary run-to-run variance never reds the build while a\n * real regression still does. Re-measure and re-ratchet when the theme or the\n * fixture changes; never raise a threshold above a level the site actually\n * clears.\n *\n *   category         min median across pages   threshold (floor - margin)\n *   accessibility    1.00  (every page)         0.97   error\n *   best-practices   0.96  (404, contrib/mono)  0.93   error\n *   seo              1.00  (every page)         0.97   error\n *   performance      0.88  (acme/husk)          0.85   warn\n *\n * The medians above are the ones the headless Chrome that `task quality:web`\n * selects actually produces (see that task and\n * `scripts/lhci-posix-tmpdir.cjs`); a different browser build shifts them, so\n * re-measure rather than carrying numbers across setups.\n *\n * The a11y assertion's RED state was proven by a deliberate regression (a\n * no-alt `<img>`, an empty `<button>`, and an unlabeled `<input>` added to the\n * landing page dropped index.html a11y from 0.92 to 0.77 \u2014 median over 3 runs\n * \u2014 failing the 0.84 error gate with exit code 1), then reverted to confirm\n * green. See the WP2 completion report for the transcript.\n *\n * ## Why category assertions and NOT `preset: 'lighthouse:no-pwa'`\n *\n * C-201 named that preset, but it asserts individual audits at `error`\n * (`color-contrast`, `link-name`, `link-in-text-block`, `font-size`,\n * `unused-css-rules`, `unused-javascript`, ...). WP2's shipped theme failed\n * several of those (the header brand link had no accessible name; a handful\n * of design tokens missed WCAG contrast) \u2014 WP6 (2026-08-22) closed every\n * `color-contrast`/`link-name`/`link-in-text-block` failure the fixture site\n * produced (accessibility now medians 1.00 on all 8 pages; see\n * `src/theme/styles/tokens/palette.css`'s own docblock for the token-level\n * fix). `unused-css-rules`/`unused-javascript` remain real (VitePress ships\n * more JS/CSS than the landing page uses) and still out of scope. Category\n * assertions are kept rather than switching to the preset regardless: they\n * hold the line against any FUTURE regression in whichever audits make up a\n * category, without re-opening the \"author names every audit by hand\"\n * maintenance burden the preset carries.\n */",
+  "next": "module.exports = {"
+ },
+ {
+  "file": "vitest.config.ts",
+  "line": 8,
+  "len": 10,
+  "kind": "line",
+  "text": "      // `@localSearchIndex` is a VitePress virtual module, published only by\n      // the local-search Vite plugin during a real `vitepress build`/`dev`.\n      // `SearchModal.vue` imports it, so without a stand-in Vite's\n      // import-analysis cannot even TRANSFORM that SFC and the command\n      // palette is unmountable \u2014 which is exactly how the palette shipped\n      // linking every package at a bare `/<ns>/<pkg>` path, 404ing on every\n      // non-root index, with no test able to see it. The stub resolves to an\n      // empty locale map, so `ensureDocsIndex` returns before it searches\n      // anything: this makes the PACKAGE half of the palette testable and\n      // deliberately does not fake the docs half.",
+  "next": "\"@localSearchIndex\": fileURLToPath(new URL(\"./test/fixtures/local-search-index.mts\", import.meta.url)),"
+ },
+ {
+  "file": "src/theme/utils/sanitize.ts",
+  "line": 86,
+  "len": 3,
+  "kind": "line",
+  "text": "  // GFM table column alignment (`|:--|:-:|--:|`) \u2014 verified against real\n  // markdown-it@14 output: `<th style=\"text-align:left\">`, no trailing `;`,\n  // no space after the colon.",
+  "next": "/^text-align:\\s*(?:left|center|right)$/,"
+ },
+ {
+  "file": "src/theme/utils/version.ts",
+  "line": 192,
+  "len": 1,
+  "kind": "line",
+  "text": "  // Build: Some < None",
+  "next": "if (a.build !== null && b.build === null) return -1"
+ },
+ {
+  "file": "src/sources/path.ts",
+  "line": 15,
+  "len": 3,
+  "kind": "doc",
+  "text": "/** Throws `SourceError(\"PATH_ESCAPE\", ...)` unless `real` (already resolved\n * via `realpath`) stays within `rootReal` (also already realpath'd) \u2014\n * the one containment check every symlink-aware read in this file shares. */",
+  "next": "function assertContained(rootReal: string, real: string, label: string): void {"
+ },
+ {
+  "file": "src/theme/utils/version.ts",
+  "line": 15,
+  "len": 1,
+  "kind": "line",
+  "text": "// --- Types ---",
+  "next": "export interface Version {"
+ },
+ {
+  "file": "src/theme/utils/filterPackages.ts",
+  "line": 35,
+  "len": 3,
+  "kind": "line",
+  "text": "// One index per catalog array, built lazily on first query. WeakMap keyed\n// on the array identity: `useCatalog` module-caches the fetched catalog, so\n// every consumer shares one index; a fresh fetch result gets a fresh index.",
+  "next": "const indexCache = new WeakMap<CatalogPackage[], MiniSearch<CatalogPackage>>()"
+ },
+ {
+  "file": "src/sources/labels.ts",
+  "line": 237,
+  "len": 21,
+  "kind": "doc",
+  "text": " * Top-level site paths this build owns, which a non-root label may therefore\n * not be \u2014 its packages are served at `/<label>/\u2026`, so a label equal to one\n * of these makes two different things claim one prefix, and whichever write\n * lands second wins silently.\n *\n * The sibling of `checkIndexNamespaceCollisions`, which stops the same\n * collision against a ROOT SOURCE's namespaces. That check was written first\n * and stopped one case short: the build's own reserved prefixes are just as\n * collidable and need no hostile source to conflict with, only a source\n * whose roots happen to be named `docs/\u2026`.\n *\n * Compared case-INSENSITIVELY. `SAFE_LABEL_RE` admits `Docs`, and macOS and\n * Windows both resolve that to the same directory as `docs`, so a\n * case-sensitive check would pass on CI and collide on a contributor's\n * laptop.\n *\n * `p` and `index` are `mirror.ts`'s wire trees; `data` carries\n * `data/catalog/catalog.json`; `docs` is `pages.ts`'s docs mount; `assets`\n * and `404` are VitePress's own output. Not speculative \u2014 every one is a\n * path something in this build already writes.\n */",
+  "next": "const RESERVED_LABELS: ReadonlySet<string> = new Set([\"p\", \"index\", \"data\", \"docs\", \"assets\", \"404\", \"public\"]);"
+ },
+ {
+  "file": "src/theme/utils/sanitize.ts",
+  "line": 113,
+  "len": 4,
+  "kind": "line",
+  "text": "    // Silently returning unsanitized HTML here would be worse than crashing\n    // the render \u2014 a named error surfaces a wiring mistake (this module\n    // called from a Node/SSR path) loudly instead of shipping unsanitized\n    // README content.",
+  "next": "throw new Error('sanitizeReadmeHtml is client-only (no `window` in this environment)')"
+ },
+ {
+  "file": "src/theme/composables/useToast.ts",
+  "line": 3,
+  "len": 2,
+  "kind": "line",
+  "text": "// Module-level singleton \u2014 one toast surface for the whole site\n// (CopyToast.vue in Layout renders it; any component may call toast()).",
+  "next": "const message = ref<string | null>(null)"
+ },
+ {
+  "file": "src/theme/composables/usePackageRoot.ts",
+  "line": 10,
+  "len": 3,
+  "kind": "doc",
+  "text": "  /** The owner's forge USERNAME \u2014 never a display name. Canonical since\n   *  ocx-indexbot 0.5.0. Optional because an index published before that\n   *  carries only the legacy pair below. */",
+  "next": "login?: string"
+ },
+ {
+  "file": "src/sources/types.ts",
+  "line": 125,
+  "len": 6,
+  "kind": "doc",
+  "text": "  /** `labels.ts`: an EXPLICIT `label` disagrees with the single first-name\n   * segment its own package roots carry. The label is what the index-scope\n   * tab row shows; that segment is what every card prints as part of the\n   * qualified name \u2014 two names for one index is a UI that contradicts\n   * itself, so the config is rejected rather than reconciled. Derived\n   * labels satisfy this by construction. */",
+  "next": "| \"LABEL_PREFIX_MISMATCH\""
+ },
+ {
+  "file": "src/theme/utils/modifierKey.ts",
+  "line": 19,
+  "len": 1,
+  "kind": "doc",
+  "text": "  /** True for `\u2318`, so the caller can give the glyph its own type treatment. */",
+  "next": "readonly glyph: boolean"
+ },
+ {
+  "file": "src/theme/utils/version.ts",
+  "line": 163,
+  "len": 1,
+  "kind": "line",
+  "text": "  // Variant: None > Some (default variant sorts last)",
+  "next": "if (a.variant === null && b.variant !== null) return 1"
+ },
+ {
+  "file": "src/sources/git.ts",
+  "line": 154,
+  "len": 4,
+  "kind": "doc",
+  "text": "/** `git clone --branch <ref>` only accepts a real advertised branch/tag\n * name \u2014 passing the symbolic ref `\"HEAD\"` fails with \"Remote branch HEAD\n * not found in upstream\" (verified empirically), so it's treated the same\n * as `ref` being absent: clone the remote's own default branch. */",
+  "next": "function needsBranchFlag(ref: string | undefined): ref is string {"
+ },
+ {
+  "file": "src/theme/composables/useInstallFlavors.ts",
+  "line": 16,
+  "len": 2,
+  "kind": "doc",
+  "text": "  /** Command template carrying the literal `{name}` token \u2014 substitute with\n   * `installCommand()`, never by hand. */",
+  "next": "command: string"
+ },
+ {
+  "file": "src/sources/types.ts",
+  "line": 88,
+  "len": 3,
+  "kind": "doc",
+  "text": "  /** `path.ts`: a file's realpath resolves outside its source root's\n   * realpath \u2014 a symlink escape `loadConfig`'s LEXICAL-only containment\n   * check cannot see (see that check's own doc comment in `config/load.ts`). */",
+  "next": "| \"PATH_ESCAPE\""
+ },
+ {
+  "file": "src/theme/utils/cas.ts",
+  "line": 56,
+  "len": 6,
+  "kind": "line",
+  "text": "// ponytail: the wire schema's `desc.logo` digest carries no extension (CAS\n// filenames are `.svg` or `.png`, ADR D2), so a logo URL can't be built from\n// the digest alone. Try `.svg` first (the common case), fall back to `.png`\n// on a load error, then give up (placeholder icon) \u2014 see `onLogoError`\n// callers. Upgrade path: if a future `/data/catalog` revision (WP2-F, not\n// wire-locked) adds an explicit extension field, drop the guess-and-retry.",
+  "next": "export const LOGO_EXT_CANDIDATES = ['svg', 'png'] as const"
+ },
+ {
+  "file": "src/config/load.ts",
+  "line": 281,
+  "len": 6,
+  "kind": "doc",
+  "text": " * Builds one `{ text, link }` entry, shared by `nav[]`, `footer.links[]`,\n * and `docsNav[]` \u2014 one shape, one `assertSafeNavLink` validation, never\n * duplicated per config surface. `keyPath` names the caller's own array in\n * diagnostics (`\"nav\"` by default) so an error still points at the entry\n * that actually failed rather than always saying `nav[i]`.\n */",
+  "next": "function buildNavEntry(item: unknown, index: number, keyPath = \"nav\"): NavEntry {"
+ },
+ {
+  "file": "src/theme/composables/useImageIndex.ts",
+  "line": 37,
+  "len": 13,
+  "kind": "doc",
+  "text": " * C-600: reuses `readImageIndexAnnotations` (`src/viewmodel/catalog.ts`)\n * rather than hand-rolling a second annotation reader here (the\n * install-command drift class `subsystem-theme.md` warns about). That\n * parser is deliberately strict (throws naming the digest on a malformed\n * `annotations` value) because a build-time failure should abort the build\n * loudly. A malformed value reaching the BROWSER at runtime is different:\n * this is a third-party registry's own CAS bytes, fetched directly by an\n * end user's browser, with no build-time gate to catch it first \u2014 a crash\n * here would take down the whole detail page over a decoration field, so\n * this wrapper degrades a malformed value to \"omitted\" instead of\n * propagating the throw (same posture as `casUrl`'s malformed-digest ->\n * `null`, never a broken request).\n */",
+  "next": "function safeReadDetail(index: ImageIndex, digest: string): CatalogPackageDetail {"
+ },
+ {
+  "file": "src/theme/utils/version.ts",
+  "line": 171,
+  "len": 1,
+  "kind": "line",
+  "text": "  // Major",
+  "next": "if (a.major !== b.major) return a.major - b.major"
+ }
+]

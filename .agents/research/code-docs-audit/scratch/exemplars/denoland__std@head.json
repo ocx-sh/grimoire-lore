@@ -1,0 +1,230 @@
+{
+ "js|prod": {
+  "files": 4,
+  "code": 158,
+  "doc": 0,
+  "line": 2,
+  "interface": 0,
+  "license": 4,
+  "directive": 1,
+  "blank": 18,
+  "trailing": 0,
+  "code_chars": 6361,
+  "comment_chars": 82,
+  "ratio": 0.013,
+  "ratio_chars": 0.013,
+  "doc_blocks": {
+   "count": 0
+  },
+  "line_blocks": {
+   "count": 2,
+   "p50": 1,
+   "p90": 1,
+   "p99": 1,
+   "max": 1,
+   "gt3": 0,
+   "gt5": 0,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 0
+  }
+ },
+ "js|test": {
+  "files": 53,
+  "code": 843,
+  "doc": 6,
+  "line": 290,
+  "interface": 0,
+  "license": 212,
+  "directive": 2,
+  "blank": 251,
+  "trailing": 12,
+  "code_chars": 24867,
+  "comment_chars": 7686,
+  "ratio": 0.351,
+  "ratio_chars": 0.309,
+  "doc_blocks": {
+   "count": 1,
+   "p50": 6,
+   "p90": 6,
+   "p99": 6,
+   "max": 6,
+   "gt3": 1,
+   "gt5": 1,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 6
+  },
+  "line_blocks": {
+   "count": 58,
+   "p50": 6,
+   "p90": 6,
+   "p99": 10,
+   "max": 10,
+   "gt3": 50,
+   "gt5": 35,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 215
+  }
+ },
+ "python|test": {
+  "files": 1,
+  "code": 0,
+  "doc": 0,
+  "line": 0,
+  "interface": 0,
+  "license": 0,
+  "directive": 0,
+  "blank": 1,
+  "trailing": 0,
+  "code_chars": 0,
+  "comment_chars": 0,
+  "ratio": 0.0,
+  "ratio_chars": 0.0,
+  "doc_blocks": {
+   "count": 0
+  },
+  "line_blocks": {
+   "count": 0
+  }
+ },
+ "rust|prod": {
+  "files": 3,
+  "code": 328,
+  "doc": 34,
+  "line": 8,
+  "interface": 0,
+  "license": 3,
+  "directive": 0,
+  "blank": 40,
+  "trailing": 2,
+  "code_chars": 10159,
+  "comment_chars": 2390,
+  "ratio": 0.128,
+  "ratio_chars": 0.235,
+  "doc_blocks": {
+   "count": 8,
+   "p50": 4,
+   "p90": 10,
+   "p99": 10,
+   "max": 10,
+   "gt3": 4,
+   "gt5": 2,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 18
+  },
+  "line_blocks": {
+   "count": 2,
+   "p50": 4,
+   "p90": 4,
+   "p99": 4,
+   "max": 4,
+   "gt3": 2,
+   "gt5": 0,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 0
+  }
+ },
+ "rust|test": {
+  "files": 2,
+  "code": 16,
+  "doc": 0,
+  "line": 0,
+  "interface": 0,
+  "license": 1,
+  "directive": 0,
+  "blank": 7,
+  "trailing": 0,
+  "code_chars": 409,
+  "comment_chars": 0,
+  "ratio": 0.0,
+  "ratio_chars": 0.0,
+  "doc_blocks": {
+   "count": 0
+  },
+  "line_blocks": {
+   "count": 0
+  }
+ },
+ "ts|prod": {
+  "files": 1133,
+  "code": 124575,
+  "doc": 37431,
+  "line": 4763,
+  "interface": 0,
+  "license": 1894,
+  "directive": 378,
+  "blank": 20269,
+  "trailing": 819,
+  "code_chars": 3269656,
+  "comment_chars": 1369300,
+  "ratio": 0.339,
+  "ratio_chars": 0.419,
+  "doc_blocks": {
+   "count": 2953,
+   "p50": 5,
+   "p90": 29,
+   "p99": 86,
+   "max": 354,
+   "gt3": 1966,
+   "gt5": 1402,
+   "gt10": 1166,
+   "gt20": 579,
+   "lines_in_gt5": 33523
+  },
+  "line_blocks": {
+   "count": 3022,
+   "p50": 1,
+   "p90": 3,
+   "p99": 6,
+   "max": 68,
+   "gt3": 115,
+   "gt5": 35,
+   "gt10": 14,
+   "gt20": 5,
+   "lines_in_gt5": 482
+  }
+ },
+ "ts|test": {
+  "files": 42,
+  "code": 9570,
+  "doc": 3269,
+  "line": 108,
+  "interface": 0,
+  "license": 36,
+  "directive": 99,
+  "blank": 1304,
+  "trailing": 6,
+  "code_chars": 228471,
+  "comment_chars": 102553,
+  "ratio": 0.353,
+  "ratio_chars": 0.449,
+  "doc_blocks": {
+   "count": 240,
+   "p50": 4,
+   "p90": 25,
+   "p99": 208,
+   "max": 426,
+   "gt3": 138,
+   "gt5": 105,
+   "gt10": 93,
+   "gt20": 53,
+   "lines_in_gt5": 2970
+  },
+  "line_blocks": {
+   "count": 91,
+   "p50": 1,
+   "p90": 2,
+   "p99": 4,
+   "max": 4,
+   "gt3": 2,
+   "gt5": 0,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 0
+  }
+ }
+}

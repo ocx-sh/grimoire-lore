@@ -1,6 +1,6 @@
 summary = "The OCX TypeScript quality set — standards for Node CLIs, published packages, browser SPAs and editor extension hosts, plus the tsconfig strictness floor and manifest policy"
 keywords = "typescript,quality,review,standards,types,async,errors,exit-codes,security,modules,testing,eslint,biome,tsconfig,package.json,nodenext,publint,attw,node,browser,vscode"
-description = "Everything an agent needs to write and review TypeScript the way the OCX family does: the type-aware lint gate that most repositories never actually wire, sixteen merge-blocking non-negotiables, twelve depth files covering types, async, errors, the CLI exit-code and stream contract, resources, modules and resolution, security, testing, observability, browser SPAs and the editor extension host — plus the tsconfig strictness floor per project shape, version-gated compiler flags, and the manifest and publish-verification rules for a package that ships a bin."
+description = "Everything an agent needs to write and review TypeScript the way the OCX family does: the type-aware lint gate that most repositories never actually wire, sixteen merge-blocking non-negotiables, twelve depth files covering types, async, errors, the CLI exit-code and stream contract, resources, modules and resolution, security, testing, observability, browser SPAs and the editor extension host — plus the tsconfig strictness floor per project shape, version-gated compiler flags, and the manifest and publish-verification rules for a package that ships a bin. The code-docs rule and the code-docs-cleanup skill cover comments in every language: short blocks that keep every guard."
 license = "Apache-2.0"
 repository = "https://github.com/ocx-sh/grimoire-lore"
 
@@ -18,3 +18,9 @@ repository = "https://github.com/ocx-sh/grimoire-lore"
 [rules]
 typescript-quality = "./typescript-quality"
 typescript-packaging = "./typescript-packaging"
+# code-docs globs every source extension, this set's included, and
+# code-docs-cleanup is its procedure, so both ride in this bundle.
+code-docs = "./code-docs"
+
+[skills]
+code-docs-cleanup = "./code-docs-cleanup"

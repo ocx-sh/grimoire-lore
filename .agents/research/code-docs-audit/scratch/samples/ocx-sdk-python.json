@@ -1,0 +1,322 @@
+[
+ {
+  "file": "src/ocx_sdk/_envmodel.py",
+  "line": 142,
+  "len": 23,
+  "kind": "doc",
+  "text": "    \"\"\"Fold `[env]` entries onto a copy of `base`.\n\n    Args:\n        base: The environment the entries layer onto. Copied, never mutated.\n        entries: `(key, value)` pairs in declaration order. A bare `str` value\n            is a `ConstVar`, matching ocx's own grammar.\n\n    Returns:\n        The composed environment.\n\n    Raises:\n        ValueError: Two `ListVar` entries for one key spell different\n            separators, a separator is one ocx cannot fold with, or a list\n            value is edged by the separator it ends up with. ocx classifies all\n            three as exit 65; no process ran here, so the SDK raises rather\n            than fabricate a process error.\n        TypeError: An entry carries something outside the `EnvValue` grammar.\n\n    Example:\n        >>> env = merge({\"JDK_JAVA_OPTIONS\": \"-Xmx1g\"}, [(\"JDK_JAVA_OPTIONS\", ListVar(\"-ea\", separator=\" \"))])\n        >>> env.mapping[\"JDK_JAVA_OPTIONS\"]\n        '-Xmx1g -ea'\n    \"\"\"",
+  "next": "ordered = list(entries)"
+ },
+ {
+  "file": "src/ocx_sdk/_client.py",
+  "line": 1326,
+  "len": 25,
+  "kind": "doc",
+  "text": "        \"\"\"Run a command in the project's environment, on the event loop.\n\n        Args:\n            argv: The command and its arguments. Must not be empty.\n            names: Bindings to compose.\n            groups: Groups to compose.\n            clean: Strip the ambient parent environment before composing.\n            env: Extra `[env]` entries for this call.\n            lazy_mode: When content downloads \u2014 now, or on first use.\n            pinned: Resolve through pinned digests \u2014 see `exec`.\n            records_dir: Write an execution record here \u2014 see `exec`.\n            records_name: The record's filename template \u2014 see `exec`.\n            capture: Pipe and capture both streams.\n            check: Raise on a non-zero child exit instead of returning it.\n            timeout: Seconds for the whole run. Omitted takes the config's.\n\n        Returns:\n            The child's exit code and, under `capture`, its output.\n\n        Raises:\n            ValueError: `argv` is empty, or the handle carries an `on_log`\n                callback, which v0.1 refuses on async paths.\n            OcxProcessError: The child exited non-zero under `check`.\n            OcxTimeoutError: The timeout expired.\n        \"\"\"",
+  "next": "composed = self._child_argv(argv, names, groups, clean, env, lazy_mode, pinned, records_dir, records_name)"
+ },
+ {
+  "file": "src/ocx_sdk/_dist.py",
+  "line": 205,
+  "len": 9,
+  "kind": "doc",
+  "text": "        \"\"\"Return the headers to attach to a request for `url`.\n\n        Args:\n            url: The request target.\n\n        Returns:\n            The bound headers when `url`'s origin matches, otherwise an empty\n            mapping.\n        \"\"\"",
+  "next": "if self.origin is None or _origin_of(url) != self.origin:"
+ },
+ {
+  "file": "src/ocx_sdk/_client.py",
+  "line": 3525,
+  "len": 1,
+  "kind": "doc",
+  "text": "    \"\"\"Render `--candidate`/`--current`, or nothing when ocx should decide.\"\"\"",
+  "next": "return [] if resolve is None else [f\"--{resolve}\"]"
+ },
+ {
+  "file": "src/ocx_sdk/_process.py",
+  "line": 785,
+  "len": 1,
+  "kind": "doc",
+  "text": "    \"\"\"SIGTERM the child's whole process group, if it is still there.\"\"\"",
+  "next": "if not _POSIX:  # pragma: no cover - Windows: TerminateProcess only, no graceful phase (\u00a710)"
+ },
+ {
+  "file": "src/ocx_sdk/_bootstrap.py",
+  "line": 752,
+  "len": 12,
+  "kind": "doc",
+  "text": "    \"\"\"Stream one member out of a tar archive.\n\n    Args:\n        archive: The verified archive.\n        member: Base name of the wanted member.\n        fd: Descriptor the member's bytes are written to.\n\n    Raises:\n        DistManifestError: The archive is unreadable, or its `member` is\n            missing, ambiguous, or not a regular file.\n        DownloadError: The member exceeds `_dist.ARTIFACT_MAX_BYTES`.\n    \"\"\"",
+  "next": "try:"
+ },
+ {
+  "file": "src/ocx_sdk/_client.py",
+  "line": 3509,
+  "len": 5,
+  "kind": "doc",
+  "text": "    \"\"\"Render one side of a `--x`/`--no-x` pair, or nothing when unset.\n\n    `None` is the third state ocx's own defaults occupy: neither flag is\n    emitted and the binary decides.\n    \"\"\"",
+  "next": "if value is None:"
+ },
+ {
+  "file": "src/ocx_sdk/_client.py",
+  "line": 897,
+  "len": 11,
+  "kind": "doc",
+  "text": "            \"\"\"Fail a missing attribute, with the rename hint for `run`.\n\n            The v0.1 toolchain runner was `Project.run`, so this handle \u2014 not\n            `Ocx` \u2014 is where a 0.1 call site lands after `run` became `exec`.\n\n            Args:\n                name: The attribute that was not found.\n\n            Raises:\n                AttributeError: Always.\n            \"\"\"",
+  "next": "hint = _PROJECT_RESERVED.get(name)"
+ },
+ {
+  "file": "src/ocx_sdk/_results.py",
+  "line": 2825,
+  "len": 1,
+  "kind": "doc",
+  "text": "        \"\"\"Build from one decoded array entry.\"\"\"",
+  "next": "return cls("
+ },
+ {
+  "file": "src/ocx_sdk/_results.py",
+  "line": 2805,
+  "len": 12,
+  "kind": "doc",
+  "text": "    \"\"\"One thing `ocx clean` removed, or would remove.\n\n    Attributes:\n        kind: `\"object\"` for a store object, `\"temp\"` for a temp directory,\n            or `\"consent\"` for a `state/projects/<key>/` directory whose\n            consent stamp was swept \u2014 the entry that revokes a project's\n            shell activation, which is why a preview names it. Raw `str` (D8).\n        dry_run: Whether this was a preview.\n        path: What was (or would be) removed.\n        held_by: Project `ocx.lock` paths holding the entry; empty when no\n            registered project protects it, or under `--force`.\n    \"\"\"",
+  "next": "kind: str"
+ },
+ {
+  "file": "src/ocx_sdk/_bootstrap.py",
+  "line": 431,
+  "len": 22,
+  "kind": "doc",
+  "text": "    \"\"\"Look `name` up on a PATH, entry by entry, refusing unsafe hits.\n\n    `shutil.which` inserts the current directory ahead of the search path on\n    Windows, which turns a working directory into a binary-injection vector\n    (CWE-426). Scanning entry by entry lets a hit inside the working directory\n    be dropped instead of trusted. Off Windows, a hit whose parent directory is\n    group- or other-writable is refused for the same reason.\n\n    Both the hit and `cwd` are resolved before either check: a relative PATH\n    entry like `.` otherwise slips past the working-directory comparison, and\n    the caller would be handed a path that stops meaning anything the moment\n    something calls `chdir`.\n\n    Args:\n        name: Binary name to find.\n        search_path: The PATH value to scan.\n        windows: Whether the working-directory exclusion applies.\n        cwd: The working directory to exclude.\n\n    Returns:\n        The first acceptable hit, as an absolute path, or `None`.\n    \"\"\"",
+  "next": "working = cwd.resolve()"
+ },
+ {
+  "file": "src/ocx_sdk/_results.py",
+  "line": 2896,
+  "len": 1,
+  "kind": "doc",
+  "text": "        \"\"\"Parse `ocx --format json logout` output.\"\"\"",
+  "next": "return cls(registry=_need(_object(raw, \"logout\"), \"registry\", \"logout\"))"
+ },
+ {
+  "file": "src/ocx_sdk/_results.py",
+  "line": 1288,
+  "len": 1,
+  "kind": "doc",
+  "text": "        \"\"\"Build from one decoded node of the `roots` array.\"\"\"",
+  "next": "return cls("
+ },
+ {
+  "file": "src/ocx_sdk/_env.py",
+  "line": 246,
+  "len": 4,
+  "kind": "line",
+  "text": "    # The one flag whose default is True, so it is written either way: a\n    # caller asking for the update check back has to beat an ambient\n    # OCX_NO_UPDATE_CHECK=1, which a set-only write could not do. ocx parses\n    # \"0\" as false through env::flag \u2192 BooleanString.",
+  "next": "_put(mapping, \"OCX_NO_UPDATE_CHECK\", \"1\" if config.no_update_check else \"0\")"
+ },
+ {
+  "file": "src/ocx_sdk/_dist.py",
+  "line": 614,
+  "len": 24,
+  "kind": "doc",
+  "text": "    \"\"\"Return the digest the manifest body must have, refusing an unpinned fetch.\n\n    A `dist/<sha256>.json` URL pins itself: the digest comes out of the\n    caller-supplied URL string before any request goes out, so a redirect can\n    never choose which digest the body is checked against.\n\n    Local sources are exempt from the pin requirement. The rule exists because\n    TLS to a non-canonical host proves reachability rather than authenticity;\n    bytes the caller already holds have provenance instead, and hashing them\n    against a digest derived from themselves would prove nothing.\n\n    Args:\n        source: The source being read.\n        url: Its resolved URL, or `None` for a local source.\n        origin: The URL's origin, or `None` for a local source.\n        mirrored: Whether a mirror is in play.\n\n    Returns:\n        The expected digest, or `None` when none is required.\n\n    Raises:\n        DistManifestError: A pin is required and missing, or the URL and the\n            explicit `sha256=` name different digests.\n    \"\"\"",
+  "next": "snapshot = _SNAPSHOT_RE.search(urlsplit(url).path) if url is not None else None"
+ },
+ {
+  "file": "src/ocx_sdk/_env.py",
+  "line": 151,
+  "len": 2,
+  "kind": "line",
+  "text": "    # Case rule, module docstring. Over-dropping a variable nothing reads is\n    # the cheap direction; leaking the kill switch is not.",
+  "next": "mapping = {key: value for key, value in host.source.items() if key.upper() not in _NEUTRALIZED_KEYS}"
+ },
+ {
+  "file": "src/ocx_sdk/_results.py",
+  "line": 265,
+  "len": 5,
+  "kind": "doc",
+  "text": "    \"\"\"Return a read-only copy of a JSON object, or `None` if it is absent.\n\n    Raises:\n        ValueError: `value` is present and is not an object.\n    \"\"\"",
+  "next": "_shaped(value, Mapping, \"a JSON object\")"
+ },
+ {
+  "file": "src/ocx_sdk/_dist.py",
+  "line": 873,
+  "len": 6,
+  "kind": "doc",
+  "text": "    \"\"\"Return the `User-Agent` every request identifies itself with.\n\n    Resolved rather than hardcoded so the dist host can tell which SDK\n    versions are in the wild. Read here instead of from `ocx_sdk.__version__`\n    to keep this module a leaf: the package root imports it, not the reverse.\n    \"\"\"",
+  "next": "try:"
+ },
+ {
+  "file": "src/ocx_sdk/_client.py",
+  "line": 2300,
+  "len": 31,
+  "kind": "doc",
+  "text": "        \"\"\"Publish description metadata for a package repository (C-003).\n\n        ocx prints no JSON payload for this command (D9) \u2014 it logs and\n        exits, so there is nothing typed to return.\n\n        Args:\n            identifier: The package repository to describe.\n            from_: Another package to copy the description from, instead of\n                the field arguments below \u2014 ocx's `--from` takes a package\n                identifier, not a path (`package_description_push.rs:26-27`).\n                Mutually exclusive with `readme`, `logo`, `title`,\n                `description`, and `keywords`.\n            readme: The README file to publish.\n            logo: The logo file to publish.\n            title: The display title to publish.\n            description: The prose description to publish.\n            keywords: A single delimited keywords string, **not** a list \u2014\n                ocx's own field is a bare string (C-021).\n            timeout: Seconds per attempt. Omitted takes the config's.\n            retry: Retry policy. Defaults to no retries \u2014 this is a\n                registry write (D5).\n\n        Returns:\n            The exit code and whatever ocx printed.\n\n        Raises:\n            ValueError: Neither `from_` nor any of the five field arguments\n                was given, or `from_` was given alongside one of them.\n            NotFoundError: `from_` names a source that carries no\n                description (exit 79).\n        \"\"\"",
+  "next": "fields = {\"readme\": readme, \"logo\": logo, \"title\": title, \"description\": description, \"keywords\": keywords}"
+ },
+ {
+  "file": "src/ocx_sdk/_results.py",
+  "line": 1906,
+  "len": 7,
+  "kind": "doc",
+  "text": "        \"\"\"Parse an enveloped sweep payload from a swept `sign` or `attest`.\n\n        Args:\n            raw: Captured stdout.\n            row: Parses each row's `report` object \u2014 see\n                `SweptTagReport.from_dict`.\n        \"\"\"",
+  "next": "data = _envelope(raw, _SWEEP)"
+ },
+ {
+  "file": "src/ocx_sdk/_client.py",
+  "line": 3547,
+  "len": 5,
+  "kind": "doc",
+  "text": "    \"\"\"Coerce package references to the argv strings ocx reads.\n\n    `str(PackageRef)` round-trips the identifier byte for byte, so a result\n    row flows straight back into the next call's argv.\n    \"\"\"",
+  "next": "return tuple(str(ref) for ref in refs)"
+ },
+ {
+  "file": "src/ocx_sdk/_process.py",
+  "line": 684,
+  "len": 1,
+  "kind": "doc",
+  "text": "    \"\"\"Build the pump's stderr consumer: redact, keep, log, and stream.\"\"\"",
+  "next": "def consume(line: str) -> None:"
+ },
+ {
+  "file": "src/ocx_sdk/_results.py",
+  "line": 2211,
+  "len": 10,
+  "kind": "doc",
+  "text": "    \"\"\"One platform `copy` carried over to the target (C-015, `package_copy.rs:128-136`).\n\n    Attributes:\n        platform: The platform this row describes.\n        digest: The platform manifest's digest at the target.\n        disposition: What happened to this platform's manifest at the\n            target \u2014 a D8 kebab-case scalar enum: `\"added\"`, `\"unchanged\"`,\n            `\"replaced\"`, or `\"kept-not-in-source\"`\n            (`ocx_lib/src/publisher/copy.rs:208-219`). Always present.\n    \"\"\"",
+  "next": "platform: str"
+ },
+ {
+  "file": "src/ocx_sdk/_client.py",
+  "line": 2149,
+  "len": 2,
+  "kind": "line",
+  "text": "        # Exit 1 is a failed assertion WITH the v1 envelope on stdout \u2014 a\n        # result to parse, not a process failure (WP13 finding).",
+  "next": "result = self._call(command, positionals, timeout=timeout, retry=retry, ok_codes=(0, 1))"
+ },
+ {
+  "file": "src/ocx_sdk/_process.py",
+  "line": 165,
+  "len": 22,
+  "kind": "doc",
+  "text": "    \"\"\"Build an ocx argv: `[exe, *global_flags, *command, *positionals, --, *child]`.\n\n    Global flags come **before** the subcommand \u2014 ocx's clap grammar takes\n    them there and nowhere else.\n\n    Args:\n        exe: The ocx binary.\n        global_flags: Flags that belong ahead of the subcommand.\n        command: Subcommand path plus its own flags, SDK-composed.\n        positionals: Identifiers ocx resolves itself. Always guarded: a\n            leading dash here would be parsed as a flag.\n        child: Argv for a process ocx hosts (`run`, `package exec`), emitted\n            behind `--` where a leading dash is meaningful and safe. Empty\n            means the command hosts nothing and no `--` is written.\n\n    Returns:\n        The argv, ready for `run_command` or `spawn`.\n\n    Raises:\n        ValueError: A positional starts with `-`, so ocx would parse it as a\n            flag (CWE-88).\n    \"\"\"",
+  "next": "flaglike = [value for value in positionals if value.startswith(\"-\")]"
+ },
+ {
+  "file": "src/ocx_sdk/_client.py",
+  "line": 3429,
+  "len": 19,
+  "kind": "doc",
+  "text": "        \"\"\"Refresh the managed-config snapshot from the registry.\n\n        Unlike the project-tier `lock --check`, this command answers `--check`\n        with a full payload \u2014 `status` reads `checked` or `check_unavailable`.\n\n        Args:\n            version: A tag, `sha256:<hex>`, or `tag@sha256:<hex>` to sync.\n                `None` follows the seed's own source.\n            check_only: Report status \u2014 drift, pause, pin \u2014 without fetching\n                or swapping. ocx's `--check`.\n            pause: Hold the background refresh for a duration such as `4h`\n                or `3d`, up to seven days.\n            resume: Clear an active pause and refresh immediately.\n            timeout: Seconds per attempt. Omitted takes the config's.\n            retry: Retry policy. `None` opts out; omitted takes the config's.\n\n        Returns:\n            The tier's status, source, digest, and policy.\n        \"\"\"",
+  "next": "command = ["
+ },
+ {
+  "file": "src/ocx_sdk/_process.py",
+  "line": 764,
+  "len": 1,
+  "kind": "doc",
+  "text": "    \"\"\"Terminate the child's group, wait out `grace`, then kill what is left.\"\"\"",
+  "next": "_terminate_group(proc)"
+ },
+ {
+  "file": "src/ocx_sdk/_client.py",
+  "line": 3556,
+  "len": 11,
+  "kind": "doc",
+  "text": "    \"\"\"Materialize the sweep tags and say whether this call sweeps (D2).\n\n    ocx's own discriminant is an OR over \"any tag given\" and \"a file given\"\n    (`options/tags.rs:114`), which this mirrors for `sign` and `attest`.\n\n    An **empty** `tags` is refused rather than followed. ocx would act on the\n    reference itself, which `tags=None` already spells \u2014 and spells with the\n    return type the overload set promises, where `tags=[]` would statically\n    claim a `SweepReport` and hand back a bare one. The capability stays\n    reachable by the spelling that was never a lie.\n    \"\"\"",
+  "next": "swept = tuple(tags or ())"
+ },
+ {
+  "file": "src/ocx_sdk/_results.py",
+  "line": 2681,
+  "len": 1,
+  "kind": "doc",
+  "text": "        \"\"\"Whether the audit found nothing \u2014 the exit code's answer.\"\"\"",
+  "next": "return self.exit_code == 0"
+ },
+ {
+  "file": "src/ocx_sdk/_errors.py",
+  "line": 295,
+  "len": 7,
+  "kind": "doc",
+  "text": "    \"\"\"ocx did not finish within the timeout and the child was terminated.\n\n    Attributes:\n        timeout: The per-attempt budget, in seconds, that expired.\n        argv: The argv that ran.\n        stderr: Whatever stderr was captured before the child was killed.\n    \"\"\"",
+  "next": "_hint = \"Raise `timeout=`, or check whether the registry is reachable \u2014 timeouts are not retried by default.\""
+ },
+ {
+  "file": "src/ocx_sdk/_results.py",
+  "line": 2270,
+  "len": 33,
+  "kind": "doc",
+  "text": "    \"\"\"`ocx package copy` (C-015).\n\n    **Payload is bare** (D11) \u2014 `from_json` reads the JSON root directly,\n    no envelope to unwrap. Non-empty `sidecar_conflicts` means exit 65 and\n    therefore raises; because the payload is bare, `partial_report(err)`\n    returns the same document this `from_json` parses, so the conflict list\n    is readable from the failure itself.\n\n    All eleven fields verified always present against `package_copy.rs:97-124`\n    \u2014 no `skip_serializing_if` anywhere on this struct, `description`\n    included (upstream comment: \"serializes as `null`, so the key is always\n    there to branch on\"). No D7 reordering needed: this is upstream's own\n    field order, verbatim.\n\n    Attributes:\n        source: The identifier that was copied.\n        target: Where it was copied to.\n        status: What happened, e.g. `\"copied\"`, or `\"planned\"` under\n            `dry_run=True`.\n        platforms: One row per platform manifest carried over.\n        cascade_tags_written: Cascading tags updated at the target.\n        keep_tags_written: `__ocx.keep.sha256-<hex>` tags written at the\n            target, one per platform manifest.\n        referrers_copied: Referrer-API attachments carried over.\n        sidecars_copied: Sidecar-tag attachments carried over.\n        sidecar_conflicts: Sidecar tags that already existed at the target\n            with different content. Non-empty means the call raised.\n        blobs: Blob transfer counts.\n        description: A `DescriptionOutcome` value \u2014 `\"copied\"`, `\"absent\"`,\n            or `\"skipped-dry-run\"` \u2014 **not** the description text itself.\n            Always present (`null` when there is nothing to report), not\n            absent-when-unset.\n    \"\"\"",
+  "next": "source: str"
+ },
+ {
+  "file": "src/ocx_sdk/_results.py",
+  "line": 1192,
+  "len": 1,
+  "kind": "doc",
+  "text": "        \"\"\"The pinned identifier, carrying its metadata.\"\"\"",
+  "next": "return PackageRef(self.identifier, self.metadata)"
+ },
+ {
+  "file": "src/ocx_sdk/_client.py",
+  "line": 3388,
+  "len": 21,
+  "kind": "doc",
+  "text": "        \"\"\"Adopt, or clear, the managed-config tier.\n\n        Installs no binary and touches no shell profile \u2014 the\n        automation-shaped counterpart to `self setup --managed-config`.\n\n        Args:\n            managed_config: An OCI reference to a managed-config artifact.\n                `MANAGED_CONFIG_DISABLED` clears an existing seed. `None`\n                falls back to the ambient source, then the existing seed.\n            dry_run: Report the intended actions without writing.\n            force: Overwrite a managed fence that carries local edits.\n            timeout: Seconds per attempt. Omitted takes the config's.\n            retry: Retry policy. `None` opts out; omitted takes the config's.\n\n        Returns:\n            The status ocx recorded.\n\n        Raises:\n            DirtyRcBlockError: The fence carries local edits and `force` is\n                unset.\n        \"\"\"",
+  "next": "command = ["
+ },
+ {
+  "file": "src/ocx_sdk/_results.py",
+  "line": 931,
+  "len": 1,
+  "kind": "doc",
+  "text": "        \"\"\"The declaring package, as a `PackageRef`, or `None` when unattributed.\"\"\"",
+  "next": "return PackageRef(self.package) if self.package is not None else None"
+ },
+ {
+  "file": "src/ocx_sdk/_bootstrap.py",
+  "line": 857,
+  "len": 9,
+  "kind": "doc",
+  "text": "    \"\"\"Stream an archive member into `fd`, aborting past the artifact cap.\n\n    Args:\n        stream: The member's bytes.\n        fd: Descriptor to write to.\n\n    Raises:\n        DownloadError: The member exceeds `_dist.ARTIFACT_MAX_BYTES`.\n    \"\"\"",
+  "next": "written = 0"
+ },
+ {
+  "file": "src/ocx_sdk/_results.py",
+  "line": 2354,
+  "len": 1,
+  "kind": "doc",
+  "text": "        \"\"\"Build from one decoded `capability_checks` entry.\"\"\"",
+  "next": "return cls("
+ },
+ {
+  "file": "src/ocx_sdk/_results.py",
+  "line": 1816,
+  "len": 1,
+  "kind": "doc",
+  "text": "        \"\"\"Parse `ocx --format json package attest` output (no tag sweep).\"\"\"",
+  "next": "return cls.from_dict(_envelope(raw, _ATTEST))"
+ },
+ {
+  "file": "src/ocx_sdk/_process.py",
+  "line": 704,
+  "len": 5,
+  "kind": "doc",
+  "text": "    \"\"\"Join captured bytes into redacted text, replacing anything undecodable.\n\n    Newlines are translated like the sync path's text-mode pipes, so the same\n    child yields byte-identical results from both drivers on every platform.\n    \"\"\"",
+  "next": "text = b\"\".join(chunks).decode(\"utf-8\", \"replace\")"
+ },
+ {
+  "file": "src/ocx_sdk/_env.py",
+  "line": 268,
+  "len": 3,
+  "kind": "line",
+  "text": "        # The forge identity ladder's explicit rung: ocx reads these for\n        # `announce`/`claim`, and `_secrets` scrubs the two tokens whether\n        # the config or the host supplied them.",
+  "next": "(\"OCX_ANNOUNCE_TOKEN\", config.forge_token),"
+ },
+ {
+  "file": "src/ocx_sdk/_client.py",
+  "line": 915,
+  "len": 1,
+  "kind": "doc",
+  "text": "        \"\"\"The `OcxConfig` this handle spawns under \u2014 see `Ocx.session_config`.\"\"\"",
+  "next": "return self._runner.config"
+ }
+]

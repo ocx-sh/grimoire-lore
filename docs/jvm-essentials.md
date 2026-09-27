@@ -1,7 +1,8 @@
 # jvm-essentials
 
-The OCX JVM set in one install: four rules for the files you edit, and two
-skills for the procedures you run occasionally.
+The OCX JVM set in one install: four rules for the files you edit, two
+skills for the procedures you run occasionally, and the comment rule and
+cleanup skill shared by every language set.
 
 ```sh
 grim add ghcr.io/ocx-sh/lore/jvm-essentials
@@ -15,6 +16,8 @@ grim add ghcr.io/ocx-sh/lore/jvm-essentials
 | `maven-build` | rule | Eighteen non-negotiables and 39 MUST rows across four depth files: mediation and the enforcer, the lifecycle and its plugins, Central publishing through the Portal, and the Ant legacy |
 | `jvm-release` | skill | An eight-step gate-ordered Maven Central release for Gradle and Maven, built around Central's immutability, with the dead OSSRH paths named |
 | `jvm-dependency-triage` | skill | Three entry points for a dependency problem, keyed to the tool that reports the reason rather than the one that reports the list |
+| `code-docs` | rule | Fifteen non-negotiables and 20 MUST rows across five depth files: the guard floor, where each clause of a comment goes, record pointers and process IDs, doc text that renders into help and schemas, and the length caps with their per-file ratchet. Shared by every language set |
+| `code-docs-cleanup` | skill | A ten-step, guard-first procedure for shortening existing comments, gated by a structural diff check and a cold reason re-check per shortened guard |
 
 ## Why four rules and not one
 

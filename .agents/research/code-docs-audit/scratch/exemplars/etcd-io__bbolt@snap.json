@@ -1,0 +1,80 @@
+{
+ "go|prod": {
+  "files": 33,
+  "code": 4917,
+  "doc": 724,
+  "line": 617,
+  "interface": 0,
+  "license": 0,
+  "directive": 12,
+  "blank": 1134,
+  "trailing": 79,
+  "code_chars": 112844,
+  "comment_chars": 68072,
+  "ratio": 0.273,
+  "ratio_chars": 0.603,
+  "doc_blocks": {
+   "count": 447,
+   "p50": 1,
+   "p90": 3,
+   "p99": 8,
+   "max": 17,
+   "gt3": 28,
+   "gt5": 12,
+   "gt10": 2,
+   "gt20": 0,
+   "lines_in_gt5": 108
+  },
+  "line_blocks": {
+   "count": 496,
+   "p50": 1,
+   "p90": 2,
+   "p99": 7,
+   "max": 16,
+   "gt3": 11,
+   "gt5": 5,
+   "gt10": 1,
+   "gt20": 0,
+   "lines_in_gt5": 49
+  }
+ },
+ "go|test": {
+  "files": 13,
+  "code": 5533,
+  "doc": 209,
+  "line": 290,
+  "interface": 0,
+  "license": 0,
+  "directive": 1,
+  "blank": 848,
+  "trailing": 26,
+  "code_chars": 125205,
+  "comment_chars": 23244,
+  "ratio": 0.09,
+  "ratio_chars": 0.186,
+  "doc_blocks": {
+   "count": 180,
+   "p50": 1,
+   "p90": 1,
+   "p99": 5,
+   "max": 5,
+   "gt3": 4,
+   "gt5": 0,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 0
+  },
+  "line_blocks": {
+   "count": 241,
+   "p50": 1,
+   "p90": 1,
+   "p99": 5,
+   "max": 9,
+   "gt3": 7,
+   "gt5": 2,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 15
+  }
+ }
+}

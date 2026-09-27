@@ -1,0 +1,5361 @@
+[
+ {
+  "site": "CTRL-01",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "CTRL-01-P01",
+  "survival": "n/a",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.7730196
+ },
+ {
+  "site": "CTRL-01",
+  "arm": "original",
+  "rep": 1,
+  "probe": "CTRL-01-P02",
+  "survival": "n/a",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.6431817999999999
+ },
+ {
+  "site": "CTRL-01",
+  "arm": "original",
+  "rep": 2,
+  "probe": "CTRL-01-P03",
+  "survival": "n/a",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.3876228
+ },
+ {
+  "site": "CTRL-01",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "CTRL-01-P04",
+  "survival": "n/a",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.4693008000000001
+ },
+ {
+  "site": "CTRL-02",
+  "arm": "original",
+  "rep": 2,
+  "probe": "CTRL-02-P01",
+  "survival": "n/a",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.9906892
+ },
+ {
+  "site": "CTRL-02",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "CTRL-02-P02",
+  "survival": "n/a",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 2.6825132000000003
+ },
+ {
+  "site": "CTRL-02",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "CTRL-02-P03",
+  "survival": "n/a",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.6051288
+ },
+ {
+  "site": "CTRL-02",
+  "arm": "original",
+  "rep": 1,
+  "probe": "CTRL-02-P04",
+  "survival": "n/a",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.7607065999999998
+ },
+ {
+  "site": "CTRL-03",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "CTRL-03-P01",
+  "survival": "n/a",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.700125
+ },
+ {
+  "site": "CTRL-03",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "CTRL-03-P02",
+  "survival": "n/a",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": false,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.7242778000000001
+ },
+ {
+  "site": "CTRL-03",
+  "arm": "original",
+  "rep": 1,
+  "probe": "CTRL-03-P03",
+  "survival": "n/a",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": false,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.9667136000000001
+ },
+ {
+  "site": "CTRL-03",
+  "arm": "original",
+  "rep": 2,
+  "probe": "CTRL-03-P04",
+  "survival": "n/a",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": false,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.6900122000000001
+ },
+ {
+  "site": "CTRL-04",
+  "arm": "original",
+  "rep": 2,
+  "probe": "CTRL-04-P01",
+  "survival": "n/a",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.47521179999999996
+ },
+ {
+  "site": "CTRL-04",
+  "arm": "original",
+  "rep": 1,
+  "probe": "CTRL-04-P02",
+  "survival": "n/a",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.5683756
+ },
+ {
+  "site": "CTRL-04",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "CTRL-04-P03",
+  "survival": "n/a",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.45481460000000007
+ },
+ {
+  "site": "CTRL-04",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "CTRL-04-P04",
+  "survival": "n/a",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.44059099999999995
+ },
+ {
+  "site": "CTRL-05",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "CTRL-05-P01",
+  "survival": "n/a",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": false,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.7899428
+ },
+ {
+  "site": "CTRL-05",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "CTRL-05-P02",
+  "survival": "n/a",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": false,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.6281886000000001
+ },
+ {
+  "site": "CTRL-05",
+  "arm": "original",
+  "rep": 2,
+  "probe": "CTRL-05-P03",
+  "survival": "n/a",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": false,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.40892339999999994
+ },
+ {
+  "site": "CTRL-05",
+  "arm": "original",
+  "rep": 1,
+  "probe": "CTRL-05-P04",
+  "survival": "n/a",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": false,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.8577805999999999
+ },
+ {
+  "site": "CTRL-06",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "CTRL-06-P01",
+  "survival": "n/a",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.42045560000000004
+ },
+ {
+  "site": "CTRL-06",
+  "arm": "original",
+  "rep": 1,
+  "probe": "CTRL-06-P02",
+  "survival": "n/a",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": false,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.8677060000000002
+ },
+ {
+  "site": "CTRL-06",
+  "arm": "original",
+  "rep": 2,
+  "probe": "CTRL-06-P03",
+  "survival": "n/a",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.4416886
+ },
+ {
+  "site": "CTRL-06",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "CTRL-06-P04",
+  "survival": "n/a",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.8495016
+ },
+ {
+  "site": "CTRL-07",
+  "arm": "original",
+  "rep": 2,
+  "probe": "CTRL-07-P01",
+  "survival": "n/a",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.2440054
+ },
+ {
+  "site": "CTRL-07",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "CTRL-07-P02",
+  "survival": "n/a",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": false,
+  "confabulated": false,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source",
+   "test"
+  ],
+  "usd": 1.0251540000000001
+ },
+ {
+  "site": "CTRL-07",
+  "arm": "original",
+  "rep": 1,
+  "probe": "CTRL-07-P03",
+  "survival": "n/a",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "test",
+  "touch_stores": [
+   "source",
+   "test"
+  ],
+  "usd": 0.9130957999999999
+ },
+ {
+  "site": "CTRL-07",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "CTRL-07-P04",
+  "survival": "n/a",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": false,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.4596279999999999
+ },
+ {
+  "site": "CTRL-08",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "CTRL-08-P01",
+  "survival": "n/a",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "agent-config",
+   "source"
+  ],
+  "usd": 0.7265152000000001
+ },
+ {
+  "site": "CTRL-08",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "CTRL-08-P02",
+  "survival": "n/a",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "test",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.1130258
+ },
+ {
+  "site": "CTRL-08",
+  "arm": "original",
+  "rep": 1,
+  "probe": "CTRL-08-P03",
+  "survival": "n/a",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.4848966
+ },
+ {
+  "site": "CTRL-08",
+  "arm": "original",
+  "rep": 2,
+  "probe": "CTRL-08-P04",
+  "survival": "n/a",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.8242991999999999
+ },
+ {
+  "site": "GRM-01",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "GRM-01-P01",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.8563716000000001
+ },
+ {
+  "site": "GRM-01",
+  "arm": "rules",
+  "rep": 3,
+  "probe": "GRM-01-P02",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.1536592000000003
+ },
+ {
+  "site": "GRM-01",
+  "arm": "pointer",
+  "rep": 1,
+  "probe": "GRM-01-P03",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "test",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.6728448
+ },
+ {
+  "site": "GRM-01",
+  "arm": "deleted",
+  "rep": 3,
+  "probe": "GRM-01-P04",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.820121
+ },
+ {
+  "site": "GRM-01",
+  "arm": "rules",
+  "rep": 1,
+  "probe": "GRM-01-P05",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.5829655999999996
+ },
+ {
+  "site": "GRM-01",
+  "arm": "original",
+  "rep": 1,
+  "probe": "GRM-01-P06",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.643923
+ },
+ {
+  "site": "GRM-01",
+  "arm": "original",
+  "rep": 2,
+  "probe": "GRM-01-P07",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.7933342
+ },
+ {
+  "site": "GRM-01",
+  "arm": "original",
+  "rep": 3,
+  "probe": "GRM-01-P08",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.119219
+ },
+ {
+  "site": "GRM-01",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "GRM-01-P09",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 2.2518092
+ },
+ {
+  "site": "GRM-01",
+  "arm": "pointer",
+  "rep": 2,
+  "probe": "GRM-01-P10",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.1282386
+ },
+ {
+  "site": "GRM-01",
+  "arm": "rules",
+  "rep": 2,
+  "probe": "GRM-01-P11",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.1479758
+ },
+ {
+  "site": "GRM-03",
+  "arm": "original",
+  "rep": 2,
+  "probe": "GRM-03-P01",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 2.2261362000000005
+ },
+ {
+  "site": "GRM-03",
+  "arm": "pointer",
+  "rep": 2,
+  "probe": "GRM-03-P02",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "record",
+  "touch_stores": [
+   "record",
+   "source"
+  ],
+  "usd": 1.7255208
+ },
+ {
+  "site": "GRM-03",
+  "arm": "rules",
+  "rep": 1,
+  "probe": "GRM-03-P03",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.7399752
+ },
+ {
+  "site": "GRM-03",
+  "arm": "history",
+  "rep": 1,
+  "probe": "GRM-03-P04",
+  "survival": "untouched",
+  "recovery": 0,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 2.3261673999999997
+ },
+ {
+  "site": "GRM-03",
+  "arm": "pointer",
+  "rep": 1,
+  "probe": "GRM-03-P05",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "record",
+  "touch_stores": [
+   "record",
+   "source"
+  ],
+  "usd": 2.1176570000000003
+ },
+ {
+  "site": "GRM-03",
+  "arm": "original",
+  "rep": 1,
+  "probe": "GRM-03-P06",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "agent-config",
+   "source"
+  ],
+  "usd": 2.3578256000000004
+ },
+ {
+  "site": "GRM-03",
+  "arm": "history",
+  "rep": 2,
+  "probe": "GRM-03-P07",
+  "survival": "untouched",
+  "recovery": 0,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 2.2636372
+ },
+ {
+  "site": "GRM-03",
+  "arm": "deleted",
+  "rep": 3,
+  "probe": "GRM-03-P08",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.2478866000000002
+ },
+ {
+  "site": "GRM-03",
+  "arm": "original",
+  "rep": 3,
+  "probe": "GRM-03-P09",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.2916046
+ },
+ {
+  "site": "GRM-03",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "GRM-03-P10",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 2.432009
+ },
+ {
+  "site": "GRM-03",
+  "arm": "rules",
+  "rep": 3,
+  "probe": "GRM-03-P11",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 2.0479035999999997
+ },
+ {
+  "site": "GRM-03",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "GRM-03-P12",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.9650458
+ },
+ {
+  "site": "GRM-03",
+  "arm": "rules",
+  "rep": 2,
+  "probe": "GRM-03-P13",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.3714318
+ },
+ {
+  "site": "GRM-04",
+  "arm": "rules",
+  "rep": 3,
+  "probe": "GRM-04-P01",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.9185404
+ },
+ {
+  "site": "GRM-04",
+  "arm": "history",
+  "rep": 2,
+  "probe": "GRM-04-P02",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.939141
+ },
+ {
+  "site": "GRM-04",
+  "arm": "pointer",
+  "rep": 1,
+  "probe": "GRM-04-P03",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "record",
+  "touch_stores": [
+   "record",
+   "source"
+  ],
+  "usd": 1.7161154
+ },
+ {
+  "site": "GRM-04",
+  "arm": "rules",
+  "rep": 2,
+  "probe": "GRM-04-P04",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.8254178
+ },
+ {
+  "site": "GRM-04",
+  "arm": "original",
+  "rep": 1,
+  "probe": "GRM-04-P05",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 2.3840226
+ },
+ {
+  "site": "GRM-04",
+  "arm": "pointer",
+  "rep": 2,
+  "probe": "GRM-04-P06",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "record",
+  "touch_stores": [
+   "record",
+   "source"
+  ],
+  "usd": 2.2956806000000003
+ },
+ {
+  "site": "GRM-04",
+  "arm": "original",
+  "rep": 2,
+  "probe": "GRM-04-P07",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 2.358493
+ },
+ {
+  "site": "GRM-04",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "GRM-04-P08",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.9409998000000002
+ },
+ {
+  "site": "GRM-04",
+  "arm": "history",
+  "rep": 1,
+  "probe": "GRM-04-P09",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.5576762
+ },
+ {
+  "site": "GRM-04",
+  "arm": "original",
+  "rep": 3,
+  "probe": "GRM-04-P10",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.7644994
+ },
+ {
+  "site": "GRM-04",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "GRM-04-P11",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "search",
+   "source"
+  ],
+  "usd": 2.9296602000000003
+ },
+ {
+  "site": "GRM-04",
+  "arm": "rules",
+  "rep": 1,
+  "probe": "GRM-04-P12",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.7071562
+ },
+ {
+  "site": "GRM-04",
+  "arm": "deleted",
+  "rep": 3,
+  "probe": "GRM-04-P13",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.3080171999999999
+ },
+ {
+  "site": "GRM-05",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "GRM-05-P01",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "test",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.51803
+ },
+ {
+  "site": "GRM-05",
+  "arm": "pointer",
+  "rep": 2,
+  "probe": "GRM-05-P02",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.0932760000000001
+ },
+ {
+  "site": "GRM-05",
+  "arm": "rules",
+  "rep": 2,
+  "probe": "GRM-05-P03",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.0904468
+ },
+ {
+  "site": "GRM-05",
+  "arm": "deleted",
+  "rep": 3,
+  "probe": "GRM-05-P04",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.0953644000000002
+ },
+ {
+  "site": "GRM-05",
+  "arm": "rules",
+  "rep": 3,
+  "probe": "GRM-05-P05",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.103436
+ },
+ {
+  "site": "GRM-05",
+  "arm": "original",
+  "rep": 2,
+  "probe": "GRM-05-P06",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.0957249999999998
+ },
+ {
+  "site": "GRM-05",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "GRM-05-P07",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.4505876
+ },
+ {
+  "site": "GRM-05",
+  "arm": "original",
+  "rep": 3,
+  "probe": "GRM-05-P08",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.4376516
+ },
+ {
+  "site": "GRM-05",
+  "arm": "original",
+  "rep": 1,
+  "probe": "GRM-05-P09",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.5259977999999998
+ },
+ {
+  "site": "GRM-05",
+  "arm": "pointer",
+  "rep": 1,
+  "probe": "GRM-05-P10",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 2.2178240000000002
+ },
+ {
+  "site": "GRM-05",
+  "arm": "rules",
+  "rep": 1,
+  "probe": "GRM-05-P11",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.5069818
+ },
+ {
+  "site": "GRM-06",
+  "arm": "deleted",
+  "rep": 3,
+  "probe": "GRM-06-P01",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.2199020000000003
+ },
+ {
+  "site": "GRM-06",
+  "arm": "pointer",
+  "rep": 2,
+  "probe": "GRM-06-P02",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "record",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.1745477999999998
+ },
+ {
+  "site": "GRM-06",
+  "arm": "rules",
+  "rep": 1,
+  "probe": "GRM-06-P03",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.6114332
+ },
+ {
+  "site": "GRM-06",
+  "arm": "history",
+  "rep": 1,
+  "probe": "GRM-06-P04",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.4976124000000002
+ },
+ {
+  "site": "GRM-06",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "GRM-06-P05",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "agent-rule",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.2404278000000002
+ },
+ {
+  "site": "GRM-06",
+  "arm": "rules",
+  "rep": 3,
+  "probe": "GRM-06-P06",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.1673328
+ },
+ {
+  "site": "GRM-06",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "GRM-06-P07",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "agent-rule",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 2.2252852
+ },
+ {
+  "site": "GRM-06",
+  "arm": "history",
+  "rep": 2,
+  "probe": "GRM-06-P08",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.1768114
+ },
+ {
+  "site": "GRM-06",
+  "arm": "rules",
+  "rep": 2,
+  "probe": "GRM-06-P09",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.21175720000000003
+ },
+ {
+  "site": "GRM-06",
+  "arm": "original",
+  "rep": 3,
+  "probe": "GRM-06-P10",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.561359
+ },
+ {
+  "site": "GRM-06",
+  "arm": "original",
+  "rep": 1,
+  "probe": "GRM-06-P11",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.566973
+ },
+ {
+  "site": "GRM-06",
+  "arm": "original",
+  "rep": 2,
+  "probe": "GRM-06-P12",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.1606404000000001
+ },
+ {
+  "site": "GRM-06",
+  "arm": "pointer",
+  "rep": 1,
+  "probe": "GRM-06-P13",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "agent-rule",
+  "touch_stores": [
+   "record",
+   "source"
+  ],
+  "usd": 1.6937494
+ },
+ {
+  "site": "OCX-02",
+  "arm": "rules",
+  "rep": 1,
+  "probe": "OCX-02-P01",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.6564596
+ },
+ {
+  "site": "OCX-02",
+  "arm": "original",
+  "rep": 3,
+  "probe": "OCX-02-P02",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.4344172
+ },
+ {
+  "site": "OCX-02",
+  "arm": "deleted",
+  "rep": 3,
+  "probe": "OCX-02-P03",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "agent-rule",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.7575859999999999
+ },
+ {
+  "site": "OCX-02",
+  "arm": "rules",
+  "rep": 3,
+  "probe": "OCX-02-P04",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.0320808
+ },
+ {
+  "site": "OCX-02",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "OCX-02-P05",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "agent-rule",
+  "touch_stores": [
+   "agent-config",
+   "source"
+  ],
+  "usd": 2.5257021999999996
+ },
+ {
+  "site": "OCX-02",
+  "arm": "original",
+  "rep": 2,
+  "probe": "OCX-02-P06",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.5254083999999999
+ },
+ {
+  "site": "OCX-02",
+  "arm": "history",
+  "rep": 2,
+  "probe": "OCX-02-P07",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 2.1982278
+ },
+ {
+  "site": "OCX-02",
+  "arm": "original",
+  "rep": 1,
+  "probe": "OCX-02-P08",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.9877053999999998
+ },
+ {
+  "site": "OCX-02",
+  "arm": "history",
+  "rep": 1,
+  "probe": "OCX-02-P09",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "search",
+   "source"
+  ],
+  "usd": 1.856978
+ },
+ {
+  "site": "OCX-02",
+  "arm": "rules",
+  "rep": 2,
+  "probe": "OCX-02-P10",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "agent-config",
+   "source"
+  ],
+  "usd": 1.0889989999999998
+ },
+ {
+  "site": "OCX-02",
+  "arm": "pointer",
+  "rep": 2,
+  "probe": "OCX-02-P11",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.8245571999999999
+ },
+ {
+  "site": "OCX-02",
+  "arm": "pointer",
+  "rep": 1,
+  "probe": "OCX-02-P12",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 2.393887
+ },
+ {
+  "site": "OCX-02",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "OCX-02-P13",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "test",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.5877486
+ },
+ {
+  "site": "OCX-06",
+  "arm": "pointer",
+  "rep": 1,
+  "probe": "OCX-06-P01",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "record",
+  "touch_stores": [
+   "record",
+   "source"
+  ],
+  "usd": 1.6251837999999998
+ },
+ {
+  "site": "OCX-06",
+  "arm": "deleted",
+  "rep": 3,
+  "probe": "OCX-06-P02",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "agent-rule",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.933373
+ },
+ {
+  "site": "OCX-06",
+  "arm": "original",
+  "rep": 3,
+  "probe": "OCX-06-P03",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "search",
+   "source"
+  ],
+  "usd": 1.4099199999999998
+ },
+ {
+  "site": "OCX-06",
+  "arm": "pointer",
+  "rep": 2,
+  "probe": "OCX-06-P04",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "record",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.9437112000000001
+ },
+ {
+  "site": "OCX-06",
+  "arm": "original",
+  "rep": 2,
+  "probe": "OCX-06-P05",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.3503794
+ },
+ {
+  "site": "OCX-06",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "OCX-06-P06",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.6522072000000003
+ },
+ {
+  "site": "OCX-06",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "OCX-06-P07",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.8900085999999998
+ },
+ {
+  "site": "OCX-06",
+  "arm": "history",
+  "rep": 1,
+  "probe": "OCX-06-P08",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.3060574
+ },
+ {
+  "site": "OCX-06",
+  "arm": "history",
+  "rep": 2,
+  "probe": "OCX-06-P09",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.4555324
+ },
+ {
+  "site": "OCX-06",
+  "arm": "rules",
+  "rep": 3,
+  "probe": "OCX-06-P10",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.8817706
+ },
+ {
+  "site": "OCX-06",
+  "arm": "rules",
+  "rep": 2,
+  "probe": "OCX-06-P11",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.2992228
+ },
+ {
+  "site": "OCX-06",
+  "arm": "original",
+  "rep": 1,
+  "probe": "OCX-06-P12",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.8641038
+ },
+ {
+  "site": "OCX-06",
+  "arm": "rules",
+  "rep": 1,
+  "probe": "OCX-06-P13",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.3430255999999998
+ },
+ {
+  "site": "OCX-07",
+  "arm": "pointer",
+  "rep": 2,
+  "probe": "OCX-07-P01",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.9559411999999999
+ },
+ {
+  "site": "OCX-07",
+  "arm": "rules",
+  "rep": 3,
+  "probe": "OCX-07-P02",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.8920826000000002
+ },
+ {
+  "site": "OCX-07",
+  "arm": "original",
+  "rep": 3,
+  "probe": "OCX-07-P03",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.3707284
+ },
+ {
+  "site": "OCX-07",
+  "arm": "rules",
+  "rep": 2,
+  "probe": "OCX-07-P04",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.4085974
+ },
+ {
+  "site": "OCX-07",
+  "arm": "history",
+  "rep": 2,
+  "probe": "OCX-07-P05",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.6973304
+ },
+ {
+  "site": "OCX-07",
+  "arm": "original",
+  "rep": 1,
+  "probe": "OCX-07-P06",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.3287461999999999
+ },
+ {
+  "site": "OCX-07",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "OCX-07-P07",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.5259256
+ },
+ {
+  "site": "OCX-07",
+  "arm": "original",
+  "rep": 2,
+  "probe": "OCX-07-P08",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.1448158
+ },
+ {
+  "site": "OCX-07",
+  "arm": "history",
+  "rep": 1,
+  "probe": "OCX-07-P09",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.7313341999999999
+ },
+ {
+  "site": "OCX-07",
+  "arm": "pointer",
+  "rep": 1,
+  "probe": "OCX-07-P10",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "record",
+  "touch_stores": [
+   "record",
+   "source"
+  ],
+  "usd": 0.9289178
+ },
+ {
+  "site": "OCX-07",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "OCX-07-P11",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.357819
+ },
+ {
+  "site": "OCX-07",
+  "arm": "rules",
+  "rep": 1,
+  "probe": "OCX-07-P12",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.3682996
+ },
+ {
+  "site": "OCX-07",
+  "arm": "deleted",
+  "rep": 3,
+  "probe": "OCX-07-P13",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.3879884000000002
+ },
+ {
+  "site": "OCX-09",
+  "arm": "original",
+  "rep": 3,
+  "probe": "OCX-09-P01",
+  "survival": "broken",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.4738863999999998
+ },
+ {
+  "site": "OCX-09",
+  "arm": "deleted",
+  "rep": 3,
+  "probe": "OCX-09-P02",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "search",
+   "source"
+  ],
+  "usd": 4.102496800000001
+ },
+ {
+  "site": "OCX-09",
+  "arm": "rules",
+  "rep": 2,
+  "probe": "OCX-09-P03",
+  "survival": "broken",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 2.3331552
+ },
+ {
+  "site": "OCX-09",
+  "arm": "pointer",
+  "rep": 2,
+  "probe": "OCX-09-P04",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "test",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 3.3846081999999993
+ },
+ {
+  "site": "OCX-09",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "OCX-09-P05",
+  "survival": "broken",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 3.1178876
+ },
+ {
+  "site": "OCX-09",
+  "arm": "original",
+  "rep": 2,
+  "probe": "OCX-09-P06",
+  "survival": "broken",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 2.7621314000000003
+ },
+ {
+  "site": "OCX-09",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "OCX-09-P07",
+  "survival": "broken",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "agent-rule",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 4.159699399999999
+ },
+ {
+  "site": "OCX-09",
+  "arm": "rules",
+  "rep": 3,
+  "probe": "OCX-09-P08",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 3.080629
+ },
+ {
+  "site": "OCX-09",
+  "arm": "original",
+  "rep": 1,
+  "probe": "OCX-09-P09",
+  "survival": "broken",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "search",
+   "source"
+  ],
+  "usd": 1.6457254
+ },
+ {
+  "site": "OCX-09",
+  "arm": "pointer",
+  "rep": 1,
+  "probe": "OCX-09-P10",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "agent-rule",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 2.8364152000000002
+ },
+ {
+  "site": "OCX-09",
+  "arm": "rules",
+  "rep": 1,
+  "probe": "OCX-09-P11",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "search",
+   "source"
+  ],
+  "usd": 2.4540708
+ },
+ {
+  "site": "OCX-13",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "OCX-13-P01",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "agent-rule",
+  "touch_stores": [
+   "agent-config",
+   "source"
+  ],
+  "usd": 0.9838742
+ },
+ {
+  "site": "OCX-13",
+  "arm": "pointer",
+  "rep": 1,
+  "probe": "OCX-13-P02",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "test",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.2537036000000001
+ },
+ {
+  "site": "OCX-13",
+  "arm": "pointer",
+  "rep": 2,
+  "probe": "OCX-13-P03",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "test",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.4531012
+ },
+ {
+  "site": "OCX-13",
+  "arm": "original",
+  "rep": 1,
+  "probe": "OCX-13-P04",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 2.0198785999999997
+ },
+ {
+  "site": "OCX-13",
+  "arm": "rules",
+  "rep": 1,
+  "probe": "OCX-13-P05",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "record",
+   "source"
+  ],
+  "usd": 2.137066
+ },
+ {
+  "site": "OCX-13",
+  "arm": "deleted",
+  "rep": 3,
+  "probe": "OCX-13-P06",
+  "survival": "kept",
+  "recovery": 0,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.5109378
+ },
+ {
+  "site": "OCX-13",
+  "arm": "original",
+  "rep": 3,
+  "probe": "OCX-13-P07",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.3760778
+ },
+ {
+  "site": "OCX-13",
+  "arm": "rules",
+  "rep": 2,
+  "probe": "OCX-13-P08",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "agent-rule",
+  "touch_stores": [
+   "git",
+   "source"
+  ],
+  "usd": 1.4131838
+ },
+ {
+  "site": "OCX-13",
+  "arm": "rules",
+  "rep": 3,
+  "probe": "OCX-13-P09",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "agent-rule",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.4666983999999998
+ },
+ {
+  "site": "OCX-13",
+  "arm": "original",
+  "rep": 2,
+  "probe": "OCX-13-P10",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.4405488000000001
+ },
+ {
+  "site": "OCX-13",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "OCX-13-P11",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.8643417999999998
+ },
+ {
+  "site": "OCX-14",
+  "arm": "history",
+  "rep": 2,
+  "probe": "OCX-14-P01",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.9948048
+ },
+ {
+  "site": "OCX-14",
+  "arm": "rules",
+  "rep": 1,
+  "probe": "OCX-14-P02",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.6145526000000001
+ },
+ {
+  "site": "OCX-14",
+  "arm": "rules",
+  "rep": 3,
+  "probe": "OCX-14-P03",
+  "survival": "untouched",
+  "recovery": 0,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.0898303999999999
+ },
+ {
+  "site": "OCX-14",
+  "arm": "history",
+  "rep": 1,
+  "probe": "OCX-14-P04",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "agent-rule",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.5909478
+ },
+ {
+  "site": "OCX-14",
+  "arm": "rules",
+  "rep": 2,
+  "probe": "OCX-14-P05",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.0419459999999998
+ },
+ {
+  "site": "OCX-14",
+  "arm": "pointer",
+  "rep": 1,
+  "probe": "OCX-14-P06",
+  "survival": "untouched",
+  "recovery": 0,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.6904192000000005
+ },
+ {
+  "site": "OCX-14",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "OCX-14-P07",
+  "survival": "untouched",
+  "recovery": 0,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.9335424
+ },
+ {
+  "site": "OCX-14",
+  "arm": "original",
+  "rep": 3,
+  "probe": "OCX-14-P08",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.5767360000000001
+ },
+ {
+  "site": "OCX-14",
+  "arm": "pointer",
+  "rep": 2,
+  "probe": "OCX-14-P09",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.0662146
+ },
+ {
+  "site": "OCX-14",
+  "arm": "deleted",
+  "rep": 3,
+  "probe": "OCX-14-P10",
+  "survival": "untouched",
+  "recovery": 0,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.0172018
+ },
+ {
+  "site": "OCX-14",
+  "arm": "original",
+  "rep": 1,
+  "probe": "OCX-14-P11",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.7863508
+ },
+ {
+  "site": "OCX-14",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "OCX-14-P12",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.9781398
+ },
+ {
+  "site": "OCX-14",
+  "arm": "original",
+  "rep": 2,
+  "probe": "OCX-14-P13",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.1757892
+ },
+ {
+  "site": "OCX-17",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "OCX-17-P01",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "agent-rule",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.8934943999999998
+ },
+ {
+  "site": "OCX-17",
+  "arm": "rules",
+  "rep": 1,
+  "probe": "OCX-17-P02",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 2.0051753999999997
+ },
+ {
+  "site": "OCX-17",
+  "arm": "pointer",
+  "rep": 1,
+  "probe": "OCX-17-P03",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "comment",
+  "touch_stores": [
+   "search",
+   "source"
+  ],
+  "usd": 2.0538191999999995
+ },
+ {
+  "site": "OCX-17",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "OCX-17-P04",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.3789031999999999
+ },
+ {
+  "site": "OCX-17",
+  "arm": "rules",
+  "rep": 2,
+  "probe": "OCX-17-P05",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.4288918
+ },
+ {
+  "site": "OCX-17",
+  "arm": "history",
+  "rep": 1,
+  "probe": "OCX-17-P06",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "comment",
+  "touch_stores": [
+   "search",
+   "source"
+  ],
+  "usd": 1.9372956000000001
+ },
+ {
+  "site": "OCX-17",
+  "arm": "history",
+  "rep": 2,
+  "probe": "OCX-17-P07",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "comment",
+  "touch_stores": [
+   "source",
+   "test"
+  ],
+  "usd": 1.9525836
+ },
+ {
+  "site": "OCX-17",
+  "arm": "original",
+  "rep": 3,
+  "probe": "OCX-17-P08",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.3755248
+ },
+ {
+  "site": "OCX-17",
+  "arm": "original",
+  "rep": 2,
+  "probe": "OCX-17-P09",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.8763448000000005
+ },
+ {
+  "site": "OCX-17",
+  "arm": "pointer",
+  "rep": 2,
+  "probe": "OCX-17-P10",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "record",
+  "touch_stores": [
+   "record",
+   "source"
+  ],
+  "usd": 1.8270546
+ },
+ {
+  "site": "OCX-17",
+  "arm": "rules",
+  "rep": 3,
+  "probe": "OCX-17-P11",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.4479971999999999
+ },
+ {
+  "site": "OCX-17",
+  "arm": "deleted",
+  "rep": 3,
+  "probe": "OCX-17-P12",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.3502
+ },
+ {
+  "site": "OCX-17",
+  "arm": "original",
+  "rep": 1,
+  "probe": "OCX-17-P13",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.9040122
+ },
+ {
+  "site": "OCX-19",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "OCX-19-P01",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "comment",
+  "touch_stores": [
+   "search",
+   "source"
+  ],
+  "usd": 2.6612102
+ },
+ {
+  "site": "OCX-19",
+  "arm": "rules",
+  "rep": 1,
+  "probe": "OCX-19-P02",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 2.0276218
+ },
+ {
+  "site": "OCX-19",
+  "arm": "original",
+  "rep": 1,
+  "probe": "OCX-19-P03",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 2.3113403999999997
+ },
+ {
+  "site": "OCX-19",
+  "arm": "original",
+  "rep": 2,
+  "probe": "OCX-19-P04",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "search",
+   "source"
+  ],
+  "usd": 1.5915034000000001
+ },
+ {
+  "site": "OCX-19",
+  "arm": "pointer",
+  "rep": 2,
+  "probe": "OCX-19-P05",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "test",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.5375638000000003
+ },
+ {
+  "site": "OCX-19",
+  "arm": "rules",
+  "rep": 2,
+  "probe": "OCX-19-P06",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.7884934
+ },
+ {
+  "site": "OCX-19",
+  "arm": "original",
+  "rep": 3,
+  "probe": "OCX-19-P07",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 2.1332722000000004
+ },
+ {
+  "site": "OCX-19",
+  "arm": "rules",
+  "rep": 3,
+  "probe": "OCX-19-P08",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.4981385999999999
+ },
+ {
+  "site": "OCX-19",
+  "arm": "pointer",
+  "rep": 1,
+  "probe": "OCX-19-P09",
+  "survival": "kept",
+  "recovery": 0,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 2.8491806
+ },
+ {
+  "site": "OCX-19",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "OCX-19-P10",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 2.7280572000000003
+ },
+ {
+  "site": "OCX-19",
+  "arm": "deleted",
+  "rep": 3,
+  "probe": "OCX-19-P11",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.6866624
+ },
+ {
+  "site": "OCX-20",
+  "arm": "deleted",
+  "rep": 3,
+  "probe": "OCX-20-P01",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.9081738
+ },
+ {
+  "site": "OCX-20",
+  "arm": "original",
+  "rep": 1,
+  "probe": "OCX-20-P02",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.7439564000000001
+ },
+ {
+  "site": "OCX-20",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "OCX-20-P03",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "test",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.5173215999999998
+ },
+ {
+  "site": "OCX-20",
+  "arm": "rules",
+  "rep": 1,
+  "probe": "OCX-20-P04",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.369826
+ },
+ {
+  "site": "OCX-20",
+  "arm": "original",
+  "rep": 3,
+  "probe": "OCX-20-P05",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "test",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.0071084000000001
+ },
+ {
+  "site": "OCX-20",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "OCX-20-P06",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.9650908
+ },
+ {
+  "site": "OCX-20",
+  "arm": "pointer",
+  "rep": 2,
+  "probe": "OCX-20-P07",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "test",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.4972607999999998
+ },
+ {
+  "site": "OCX-20",
+  "arm": "rules",
+  "rep": 3,
+  "probe": "OCX-20-P08",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.9637742
+ },
+ {
+  "site": "OCX-20",
+  "arm": "original",
+  "rep": 2,
+  "probe": "OCX-20-P09",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.4286188000000002
+ },
+ {
+  "site": "OCX-20",
+  "arm": "pointer",
+  "rep": 1,
+  "probe": "OCX-20-P10",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "test",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.4577876
+ },
+ {
+  "site": "OCX-20",
+  "arm": "rules",
+  "rep": 2,
+  "probe": "OCX-20-P11",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "test",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.1207672000000002
+ },
+ {
+  "site": "OCX-21",
+  "arm": "original",
+  "rep": 1,
+  "probe": "OCX-21-P01",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.7701125999999998
+ },
+ {
+  "site": "OCX-21",
+  "arm": "history",
+  "rep": 2,
+  "probe": "OCX-21-P02",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.5017674000000003
+ },
+ {
+  "site": "OCX-21",
+  "arm": "history",
+  "rep": 1,
+  "probe": "OCX-21-P03",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 2.192482
+ },
+ {
+  "site": "OCX-21",
+  "arm": "pointer",
+  "rep": 2,
+  "probe": "OCX-21-P04",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "record",
+  "touch_stores": [
+   "record",
+   "source"
+  ],
+  "usd": 1.6913996000000002
+ },
+ {
+  "site": "OCX-21",
+  "arm": "pointer",
+  "rep": 1,
+  "probe": "OCX-21-P05",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.874701
+ },
+ {
+  "site": "OCX-21",
+  "arm": "rules",
+  "rep": 1,
+  "probe": "OCX-21-P06",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.9270244
+ },
+ {
+  "site": "OCX-21",
+  "arm": "original",
+  "rep": 2,
+  "probe": "OCX-21-P07",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.390763
+ },
+ {
+  "site": "OCX-21",
+  "arm": "rules",
+  "rep": 3,
+  "probe": "OCX-21-P08",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.4805572
+ },
+ {
+  "site": "OCX-21",
+  "arm": "rules",
+  "rep": 2,
+  "probe": "OCX-21-P09",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.4332956
+ },
+ {
+  "site": "OCX-21",
+  "arm": "original",
+  "rep": 3,
+  "probe": "OCX-21-P10",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 2.5170879999999998
+ },
+ {
+  "site": "OCX-21",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "OCX-21-P11",
+  "survival": "untouched",
+  "recovery": 0,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 2.5998346
+ },
+ {
+  "site": "OCX-21",
+  "arm": "deleted",
+  "rep": 3,
+  "probe": "OCX-21-P12",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 2.0283702000000003
+ },
+ {
+  "site": "OCX-21",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "OCX-21-P13",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 2.455654
+ },
+ {
+  "site": "OCX-23",
+  "arm": "history",
+  "rep": 2,
+  "probe": "OCX-23-P01",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.9848416
+ },
+ {
+  "site": "OCX-23",
+  "arm": "original",
+  "rep": 1,
+  "probe": "OCX-23-P02",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.4375434
+ },
+ {
+  "site": "OCX-23",
+  "arm": "rules",
+  "rep": 2,
+  "probe": "OCX-23-P03",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.9596412
+ },
+ {
+  "site": "OCX-23",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "OCX-23-P04",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.4515226
+ },
+ {
+  "site": "OCX-23",
+  "arm": "rules",
+  "rep": 3,
+  "probe": "OCX-23-P05",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.8925549999999998
+ },
+ {
+  "site": "OCX-23",
+  "arm": "rules",
+  "rep": 1,
+  "probe": "OCX-23-P06",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.4462602
+ },
+ {
+  "site": "OCX-23",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "OCX-23-P07",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.3995092
+ },
+ {
+  "site": "OCX-23",
+  "arm": "pointer",
+  "rep": 1,
+  "probe": "OCX-23-P08",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.4440844
+ },
+ {
+  "site": "OCX-23",
+  "arm": "deleted",
+  "rep": 3,
+  "probe": "OCX-23-P09",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.4107846
+ },
+ {
+  "site": "OCX-23",
+  "arm": "pointer",
+  "rep": 2,
+  "probe": "OCX-23-P10",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.036492
+ },
+ {
+  "site": "OCX-23",
+  "arm": "history",
+  "rep": 1,
+  "probe": "OCX-23-P11",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 2.1488983999999998
+ },
+ {
+  "site": "OCX-23",
+  "arm": "original",
+  "rep": 3,
+  "probe": "OCX-23-P12",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.056759
+ },
+ {
+  "site": "OCX-23",
+  "arm": "original",
+  "rep": 2,
+  "probe": "OCX-23-P13",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.4704469999999998
+ },
+ {
+  "site": "PY-01",
+  "arm": "rules",
+  "rep": 2,
+  "probe": "PY-01-P01",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.6511594
+ },
+ {
+  "site": "PY-01",
+  "arm": "deleted",
+  "rep": 3,
+  "probe": "PY-01-P02",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "agent-rule",
+  "touch_stores": [
+   "agent-config",
+   "source"
+  ],
+  "usd": 0.7082473999999999
+ },
+ {
+  "site": "PY-01",
+  "arm": "history",
+  "rep": 1,
+  "probe": "PY-01-P03",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "agent-rule",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.0257366
+ },
+ {
+  "site": "PY-01",
+  "arm": "original",
+  "rep": 1,
+  "probe": "PY-01-P04",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.5764844
+ },
+ {
+  "site": "PY-01",
+  "arm": "pointer",
+  "rep": 1,
+  "probe": "PY-01-P05",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "record",
+  "touch_stores": [
+   "record",
+   "source"
+  ],
+  "usd": 0.522836
+ },
+ {
+  "site": "PY-01",
+  "arm": "history",
+  "rep": 2,
+  "probe": "PY-01-P06",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.1710402
+ },
+ {
+  "site": "PY-01",
+  "arm": "pointer",
+  "rep": 2,
+  "probe": "PY-01-P07",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "record",
+  "touch_stores": [
+   "record",
+   "source"
+  ],
+  "usd": 0.7905458
+ },
+ {
+  "site": "PY-01",
+  "arm": "rules",
+  "rep": 1,
+  "probe": "PY-01-P08",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.9353297999999999
+ },
+ {
+  "site": "PY-01",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "PY-01-P09",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "agent-rule",
+  "touch_stores": [
+   "agent-config",
+   "source"
+  ],
+  "usd": 0.7411418000000001
+ },
+ {
+  "site": "PY-01",
+  "arm": "original",
+  "rep": 3,
+  "probe": "PY-01-P10",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.3844504000000001
+ },
+ {
+  "site": "PY-01",
+  "arm": "original",
+  "rep": 2,
+  "probe": "PY-01-P11",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.3355038
+ },
+ {
+  "site": "PY-01",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "PY-01-P12",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "search",
+   "source"
+  ],
+  "usd": 0.9977894
+ },
+ {
+  "site": "PY-01",
+  "arm": "rules",
+  "rep": 3,
+  "probe": "PY-01-P13",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.8514704000000001
+ },
+ {
+  "site": "PY-05",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "PY-05-P01",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "test",
+  "touch_stores": [
+   "source",
+   "test"
+  ],
+  "usd": 0.723432
+ },
+ {
+  "site": "PY-05",
+  "arm": "rules",
+  "rep": 3,
+  "probe": "PY-05-P02",
+  "survival": "kept",
+  "recovery": 0,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source",
+   "test"
+  ],
+  "usd": 0.63064
+ },
+ {
+  "site": "PY-05",
+  "arm": "original",
+  "rep": 2,
+  "probe": "PY-05-P03",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.4264198
+ },
+ {
+  "site": "PY-05",
+  "arm": "rules",
+  "rep": 2,
+  "probe": "PY-05-P04",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.3076036
+ },
+ {
+  "site": "PY-05",
+  "arm": "rules",
+  "rep": 1,
+  "probe": "PY-05-P05",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.3687274
+ },
+ {
+  "site": "PY-05",
+  "arm": "original",
+  "rep": 3,
+  "probe": "PY-05-P06",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.21480359999999998
+ },
+ {
+  "site": "PY-05",
+  "arm": "pointer",
+  "rep": 2,
+  "probe": "PY-05-P07",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "test",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.19481620000000002
+ },
+ {
+  "site": "PY-05",
+  "arm": "deleted",
+  "rep": 3,
+  "probe": "PY-05-P08",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "test",
+  "touch_stores": [
+   "agent-config",
+   "source",
+   "test"
+  ],
+  "usd": 0.31867180000000006
+ },
+ {
+  "site": "PY-05",
+  "arm": "pointer",
+  "rep": 1,
+  "probe": "PY-05-P09",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "test",
+  "touch_stores": [
+   "source",
+   "test"
+  ],
+  "usd": 0.7708756
+ },
+ {
+  "site": "PY-05",
+  "arm": "original",
+  "rep": 1,
+  "probe": "PY-05-P10",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.5488417999999999
+ },
+ {
+  "site": "PY-05",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "PY-05-P11",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "test",
+  "touch_stores": [
+   "source",
+   "test"
+  ],
+  "usd": 0.6937244
+ },
+ {
+  "site": "PY-06",
+  "arm": "pointer",
+  "rep": 1,
+  "probe": "PY-06-P01",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source",
+   "test"
+  ],
+  "usd": 0.8618950000000001
+ },
+ {
+  "site": "PY-06",
+  "arm": "original",
+  "rep": 1,
+  "probe": "PY-06-P02",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.6692944
+ },
+ {
+  "site": "PY-06",
+  "arm": "rules",
+  "rep": 3,
+  "probe": "PY-06-P03",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.7068624
+ },
+ {
+  "site": "PY-06",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "PY-06-P04",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "agent-config",
+   "source"
+  ],
+  "usd": 0.6505382
+ },
+ {
+  "site": "PY-06",
+  "arm": "pointer",
+  "rep": 2,
+  "probe": "PY-06-P05",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source",
+   "test"
+  ],
+  "usd": 0.8204712
+ },
+ {
+  "site": "PY-06",
+  "arm": "deleted",
+  "rep": 3,
+  "probe": "PY-06-P06",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 1.0271626
+ },
+ {
+  "site": "PY-06",
+  "arm": "original",
+  "rep": 2,
+  "probe": "PY-06-P07",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.818853
+ },
+ {
+  "site": "PY-06",
+  "arm": "original",
+  "rep": 3,
+  "probe": "PY-06-P08",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.6944904000000001
+ },
+ {
+  "site": "PY-06",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "PY-06-P09",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.5450384
+ },
+ {
+  "site": "PY-06",
+  "arm": "rules",
+  "rep": 2,
+  "probe": "PY-06-P10",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.1870346
+ },
+ {
+  "site": "PY-06",
+  "arm": "rules",
+  "rep": 1,
+  "probe": "PY-06-P11",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.7458655999999999
+ },
+ {
+  "site": "PY-07",
+  "arm": "rules",
+  "rep": 1,
+  "probe": "PY-07-P01",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.44709220000000005
+ },
+ {
+  "site": "PY-07",
+  "arm": "pointer",
+  "rep": 1,
+  "probe": "PY-07-P02",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "test",
+  "touch_stores": [
+   "source",
+   "test"
+  ],
+  "usd": 0.6300704000000001
+ },
+ {
+  "site": "PY-07",
+  "arm": "deleted",
+  "rep": 3,
+  "probe": "PY-07-P03",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "test",
+  "touch_stores": [
+   "doc",
+   "source",
+   "test"
+  ],
+  "usd": 0.3011864
+ },
+ {
+  "site": "PY-07",
+  "arm": "original",
+  "rep": 2,
+  "probe": "PY-07-P04",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source",
+   "test"
+  ],
+  "usd": 0.5021536
+ },
+ {
+  "site": "PY-07",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "PY-07-P05",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "test",
+  "touch_stores": [
+   "source",
+   "test"
+  ],
+  "usd": 0.6993088000000001
+ },
+ {
+  "site": "PY-07",
+  "arm": "rules",
+  "rep": 3,
+  "probe": "PY-07-P06",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.374532
+ },
+ {
+  "site": "PY-07",
+  "arm": "pointer",
+  "rep": 2,
+  "probe": "PY-07-P07",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.2349556
+ },
+ {
+  "site": "PY-07",
+  "arm": "rules",
+  "rep": 2,
+  "probe": "PY-07-P08",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source",
+   "test"
+  ],
+  "usd": 0.6800528
+ },
+ {
+  "site": "PY-07",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "PY-07-P09",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "test",
+  "touch_stores": [
+   "source",
+   "test"
+  ],
+  "usd": 0.702898
+ },
+ {
+  "site": "PY-07",
+  "arm": "original",
+  "rep": 3,
+  "probe": "PY-07-P10",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.1870556
+ },
+ {
+  "site": "PY-07",
+  "arm": "original",
+  "rep": 1,
+  "probe": "PY-07-P11",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "test",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.39194580000000007
+ },
+ {
+  "site": "TS-03",
+  "arm": "deleted",
+  "rep": 3,
+  "probe": "TS-03-P01",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "search",
+   "source"
+  ],
+  "usd": 0.3462394
+ },
+ {
+  "site": "TS-03",
+  "arm": "rules",
+  "rep": 3,
+  "probe": "TS-03-P02",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.29423980000000005
+ },
+ {
+  "site": "TS-03",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "TS-03-P03",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.3684210000000001
+ },
+ {
+  "site": "TS-03",
+  "arm": "original",
+  "rep": 2,
+  "probe": "TS-03-P04",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.296339
+ },
+ {
+  "site": "TS-03",
+  "arm": "original",
+  "rep": 1,
+  "probe": "TS-03-P05",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.5318182
+ },
+ {
+  "site": "TS-03",
+  "arm": "history",
+  "rep": 2,
+  "probe": "TS-03-P06",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.2932162
+ },
+ {
+  "site": "TS-03",
+  "arm": "history",
+  "rep": 1,
+  "probe": "TS-03-P07",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.751242
+ },
+ {
+  "site": "TS-03",
+  "arm": "rules",
+  "rep": 2,
+  "probe": "TS-03-P08",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.4298792
+ },
+ {
+  "site": "TS-03",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "TS-03-P09",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.44944979999999995
+ },
+ {
+  "site": "TS-03",
+  "arm": "pointer",
+  "rep": 2,
+  "probe": "TS-03-P10",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "record",
+  "touch_stores": [
+   "record",
+   "source"
+  ],
+  "usd": 0.453011
+ },
+ {
+  "site": "TS-03",
+  "arm": "pointer",
+  "rep": 1,
+  "probe": "TS-03-P11",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.5962544
+ },
+ {
+  "site": "TS-03",
+  "arm": "original",
+  "rep": 3,
+  "probe": "TS-03-P12",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.38926340000000004
+ },
+ {
+  "site": "TS-03",
+  "arm": "rules",
+  "rep": 1,
+  "probe": "TS-03-P13",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.51635
+ },
+ {
+  "site": "TS-04",
+  "arm": "pointer",
+  "rep": 2,
+  "probe": "TS-04-P01",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "record",
+  "touch_stores": [
+   "record",
+   "source"
+  ],
+  "usd": 0.2817812
+ },
+ {
+  "site": "TS-04",
+  "arm": "original",
+  "rep": 3,
+  "probe": "TS-04-P02",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.27845520000000007
+ },
+ {
+  "site": "TS-04",
+  "arm": "original",
+  "rep": 2,
+  "probe": "TS-04-P03",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.2565766
+ },
+ {
+  "site": "TS-04",
+  "arm": "rules",
+  "rep": 3,
+  "probe": "TS-04-P04",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.26318640000000004
+ },
+ {
+  "site": "TS-04",
+  "arm": "deleted",
+  "rep": 3,
+  "probe": "TS-04-P05",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.290974
+ },
+ {
+  "site": "TS-04",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "TS-04-P06",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.267438
+ },
+ {
+  "site": "TS-04",
+  "arm": "rules",
+  "rep": 1,
+  "probe": "TS-04-P07",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.49068959999999995
+ },
+ {
+  "site": "TS-04",
+  "arm": "pointer",
+  "rep": 1,
+  "probe": "TS-04-P08",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "record",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.5610658
+ },
+ {
+  "site": "TS-04",
+  "arm": "rules",
+  "rep": 2,
+  "probe": "TS-04-P09",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.24684859999999997
+ },
+ {
+  "site": "TS-04",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "TS-04-P10",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.718137
+ },
+ {
+  "site": "TS-04",
+  "arm": "original",
+  "rep": 1,
+  "probe": "TS-04-P11",
+  "survival": "untouched",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.4086316
+ },
+ {
+  "site": "TS-05",
+  "arm": "rules",
+  "rep": 3,
+  "probe": "TS-05-P01",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.3365498
+ },
+ {
+  "site": "TS-05",
+  "arm": "original",
+  "rep": 2,
+  "probe": "TS-05-P02",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.22529880000000002
+ },
+ {
+  "site": "TS-05",
+  "arm": "original",
+  "rep": 3,
+  "probe": "TS-05-P03",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.409419
+ },
+ {
+  "site": "TS-05",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "TS-05-P04",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.5020898
+ },
+ {
+  "site": "TS-05",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "TS-05-P05",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "search",
+   "source"
+  ],
+  "usd": 0.49572840000000007
+ },
+ {
+  "site": "TS-05",
+  "arm": "rules",
+  "rep": 2,
+  "probe": "TS-05-P06",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.16160039999999998
+ },
+ {
+  "site": "TS-05",
+  "arm": "deleted",
+  "rep": 3,
+  "probe": "TS-05-P07",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "code-inferred",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.4070114
+ },
+ {
+  "site": "TS-05",
+  "arm": "rules",
+  "rep": 1,
+  "probe": "TS-05-P08",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.5243751999999999
+ },
+ {
+  "site": "TS-05",
+  "arm": "pointer",
+  "rep": 1,
+  "probe": "TS-05-P09",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "record",
+  "touch_stores": [
+   "record",
+   "source"
+  ],
+  "usd": 0.7365177999999999
+ },
+ {
+  "site": "TS-05",
+  "arm": "original",
+  "rep": 1,
+  "probe": "TS-05-P10",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.4926198
+ },
+ {
+  "site": "TS-05",
+  "arm": "pointer",
+  "rep": 2,
+  "probe": "TS-05-P11",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "record",
+  "touch_stores": [
+   "record",
+   "source"
+  ],
+  "usd": 0.4358158
+ },
+ {
+  "site": "TS-06",
+  "arm": "rules",
+  "rep": 1,
+  "probe": "TS-06-P01",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.5188192
+ },
+ {
+  "site": "TS-06",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "TS-06-P02",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source",
+   "test"
+  ],
+  "usd": 0.4745918
+ },
+ {
+  "site": "TS-06",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "TS-06-P03",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.6618691999999999
+ },
+ {
+  "site": "TS-06",
+  "arm": "rules",
+  "rep": 3,
+  "probe": "TS-06-P04",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "git",
+   "source"
+  ],
+  "usd": 0.32810540000000005
+ },
+ {
+  "site": "TS-06",
+  "arm": "original",
+  "rep": 2,
+  "probe": "TS-06-P05",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.32868759999999997
+ },
+ {
+  "site": "TS-06",
+  "arm": "rules",
+  "rep": 2,
+  "probe": "TS-06-P06",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.271745
+ },
+ {
+  "site": "TS-06",
+  "arm": "pointer",
+  "rep": 1,
+  "probe": "TS-06-P07",
+  "survival": "kept",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "record",
+  "touch_stores": [
+   "record",
+   "source"
+  ],
+  "usd": 0.641491
+ },
+ {
+  "site": "TS-06",
+  "arm": "original",
+  "rep": 1,
+  "probe": "TS-06-P08",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "test",
+  "touch_stores": [
+   "source",
+   "test"
+  ],
+  "usd": 0.5068134
+ },
+ {
+  "site": "TS-06",
+  "arm": "original",
+  "rep": 3,
+  "probe": "TS-06-P09",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.2760822
+ },
+ {
+  "site": "TS-06",
+  "arm": "pointer",
+  "rep": 2,
+  "probe": "TS-06-P10",
+  "survival": "kept",
+  "recovery": 3,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "record",
+  "touch_stores": [
+   "record",
+   "source"
+  ],
+  "usd": 0.31828999999999996
+ },
+ {
+  "site": "TS-06",
+  "arm": "deleted",
+  "rep": 3,
+  "probe": "TS-06-P11",
+  "survival": "kept",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "doc-comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.2754568
+ },
+ {
+  "site": "TS-07",
+  "arm": "deleted",
+  "rep": 3,
+  "probe": "TS-07-P01",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.4079276
+ },
+ {
+  "site": "TS-07",
+  "arm": "original",
+  "rep": 3,
+  "probe": "TS-07-P02",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.38808580000000004
+ },
+ {
+  "site": "TS-07",
+  "arm": "original",
+  "rep": 1,
+  "probe": "TS-07-P03",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.6824198
+ },
+ {
+  "site": "TS-07",
+  "arm": "deleted",
+  "rep": 2,
+  "probe": "TS-07-P04",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.41600760000000003
+ },
+ {
+  "site": "TS-07",
+  "arm": "deleted",
+  "rep": 1,
+  "probe": "TS-07-P05",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.6102202
+ },
+ {
+  "site": "TS-07",
+  "arm": "rules",
+  "rep": 1,
+  "probe": "TS-07-P06",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "search",
+   "source"
+  ],
+  "usd": 0.9362094000000001
+ },
+ {
+  "site": "TS-07",
+  "arm": "rules",
+  "rep": 3,
+  "probe": "TS-07-P07",
+  "survival": "untouched",
+  "recovery": 1,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": true,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.38704760000000005
+ },
+ {
+  "site": "TS-07",
+  "arm": "rules",
+  "rep": 2,
+  "probe": "TS-07-P08",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.43575
+ },
+ {
+  "site": "TS-07",
+  "arm": "original",
+  "rep": 2,
+  "probe": "TS-07-P09",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.43893719999999997
+ },
+ {
+  "site": "TS-07",
+  "arm": "pointer",
+  "rep": 1,
+  "probe": "TS-07-P10",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "search",
+   "source"
+  ],
+  "usd": 0.7752693999999999
+ },
+ {
+  "site": "TS-07",
+  "arm": "pointer",
+  "rep": 2,
+  "probe": "TS-07-P11",
+  "survival": "untouched",
+  "recovery": 2,
+  "invented": false,
+  "led_correct": true,
+  "confabulated": false,
+  "evidence": "comment",
+  "touch_stores": [
+   "source"
+  ],
+  "usd": 0.44303760000000003
+ }
+]

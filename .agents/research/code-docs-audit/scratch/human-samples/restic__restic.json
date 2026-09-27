@@ -1,0 +1,202 @@
+[
+ {
+  "file": "build.go",
+  "line": 231,
+  "len": 1,
+  "kind": "doc",
+  "text": "// LDFlags returns the string that can be passed to go build's `-ldflags`.",
+  "next": "func (cs Constants) LDFlags() string {"
+ },
+ {
+  "file": "internal/archiver/archiver.go",
+  "line": 110,
+  "len": 2,
+  "kind": "doc",
+  "text": "// ApplyDefaults returns a copy of o with the default options set for all unset\n// fields.",
+  "next": "func (o Options) ApplyDefaults() Options {"
+ },
+ {
+  "file": "internal/backend/layout_rest.go",
+  "line": 18,
+  "len": 1,
+  "kind": "doc",
+  "text": "// Name returns the name for this layout.",
+  "next": "func (l *RESTLayout) Name() string {"
+ },
+ {
+  "file": "internal/backend/local/config.go",
+  "line": 20,
+  "len": 1,
+  "kind": "doc",
+  "text": "// ParseConfig parses a local backend config.",
+  "next": "func ParseConfig(cfg string) (interface{}, error) {"
+ },
+ {
+  "file": "internal/fs/deviceid_unix.go",
+  "line": 24,
+  "len": 2,
+  "kind": "line",
+  "text": "\t\t// st.Dev is uint32 on Darwin and uint64 on Linux. Just cast\n\t\t// everything to uint64.",
+  "next": "return uint64(st.Dev), nil"
+ },
+ {
+  "file": "internal/backend/gs/gs.go",
+  "line": 54,
+  "len": 1,
+  "kind": "line",
+  "text": "\t// create a new context with the HTTP client stored at the oauth2.HTTPClient key",
+  "next": "ctx := context.WithValue(context.Background(), oauth2.HTTPClient, httpClient)"
+ },
+ {
+  "file": "internal/restic/tree_stream.go",
+  "line": 114,
+  "len": 1,
+  "kind": "line",
+  "text": "\t\t\t\t// send a new job with the new error instead of the old one",
+  "next": "j = trackedTreeItem{TreeItem: TreeItem{ID: j.ID, Error: errors.New(\"tree is nil and error is nil\")}, rootIdx: j.rootIdx}"
+ },
+ {
+  "file": "internal/fuse/snapshots_dir.go",
+  "line": 307,
+  "len": 1,
+  "kind": "line",
+  "text": "\t// Latest",
+  "next": "if d.latest != \"\" {"
+ },
+ {
+  "file": "internal/fs/vss_windows.go",
+  "line": 570,
+  "len": 1,
+  "kind": "doc",
+  "text": "// IVSSAsync VSS api interface.",
+  "next": "type IVSSAsync struct {"
+ },
+ {
+  "file": "internal/cache/backend.go",
+  "line": 64,
+  "len": 1,
+  "kind": "line",
+  "text": "\t// make sure the reader is at the start",
+  "next": "err := rd.Rewind()"
+ },
+ {
+  "file": "cmd/restic/cmd_prune.go",
+  "line": 444,
+  "len": 1,
+  "kind": "line",
+  "text": "\t// if all duplicates are repacked, print out correct statistics",
+  "next": "if repackAllPacksWithDuplicates {"
+ },
+ {
+  "file": "internal/fuse/dir.go",
+  "line": 18,
+  "len": 1,
+  "kind": "doc",
+  "text": "// Statically ensure that *dir implement those interface",
+  "next": "var _ = fs.HandleReadDirAller(&dir{})"
+ },
+ {
+  "file": "internal/restorer/restorer.go",
+  "line": 64,
+  "len": 2,
+  "kind": "line",
+  "text": "\t\t// ensure that the node name does not contain anything that refers to a\n\t\t// top-level directory.",
+  "next": "nodeName := filepath.Base(filepath.Join(string(filepath.Separator), node.Name))"
+ },
+ {
+  "file": "internal/backend/b2/b2.go",
+  "line": 183,
+  "len": 2,
+  "kind": "line",
+  "text": "\t// pass a negative length to NewRangeReader so that the remainder of the\n\t// file is read.",
+  "next": "if length == 0 {"
+ },
+ {
+  "file": "internal/backend/azure/azure.go",
+  "line": 75,
+  "len": 2,
+  "kind": "doc",
+  "text": "// Create opens the Azure backend at specified container and creates the container if\n// it does not exist yet.",
+  "next": "func Create(cfg Config, rt http.RoundTripper) (*Backend, error) {"
+ },
+ {
+  "file": "internal/backend/s3/s3.go",
+  "line": 505,
+  "len": 1,
+  "kind": "doc",
+  "text": "// Delete removes all restic keys in the bucket. It will not remove the bucket itself.",
+  "next": "func (be *Backend) Delete(ctx context.Context) error {"
+ },
+ {
+  "file": "internal/ui/table/table.go",
+  "line": 91,
+  "len": 1,
+  "kind": "line",
+  "text": "\t\t\t// apply padding",
+  "next": "pad := widths[fieldNum] - len(v)"
+ },
+ {
+  "file": "internal/backend/gs/gs.go",
+  "line": 161,
+  "len": 1,
+  "kind": "doc",
+  "text": "// SetListMaxItems sets the number of list items to load per request.",
+  "next": "func (be *Backend) SetListMaxItems(i int) {"
+ },
+ {
+  "file": "internal/bloblru/cache.go",
+  "line": 45,
+  "len": 2,
+  "kind": "doc",
+  "text": "// Add adds key id with value blob to c.\n// It may return an evicted buffer for reuse.",
+  "next": "func (c *Cache) Add(id restic.ID, blob []byte) (old []byte) {"
+ },
+ {
+  "file": "internal/repository/master_index.go",
+  "line": 67,
+  "len": 1,
+  "kind": "line",
+  "text": "\t// Check if blob is pending or in index",
+  "next": "if mi.pendingBlobs.Has(bh) {"
+ },
+ {
+  "file": "cmd/restic/cmd_snapshots.go",
+  "line": 163,
+  "len": 2,
+  "kind": "line",
+  "text": "\t// keep the reasons a snasphot is being kept in a map, so that it doesn't\n\t// get lost when the list of snapshots is sorted",
+  "next": "keepReasons := make(map[restic.ID]restic.KeepReason, len(reasons))"
+ },
+ {
+  "file": "internal/backend/local/local_windows.go",
+  "line": 7,
+  "len": 1,
+  "kind": "doc",
+  "text": "// Can't explicitly flush directory changes on Windows.",
+  "next": "func fsyncDir(dir string) error { return nil }"
+ },
+ {
+  "file": "internal/checker/checker.go",
+  "line": 241,
+  "len": 1,
+  "kind": "doc",
+  "text": "// TreeError collects several errors that occurred while processing a tree.",
+  "next": "type TreeError struct {"
+ },
+ {
+  "file": "cmd/restic/cmd_stats.go",
+  "line": 190,
+  "len": 1,
+  "kind": "line",
+  "text": "\t\t\t// only count this file if we haven't visited it before",
+  "next": "fid := makeFileIDByContents(node)"
+ },
+ {
+  "file": "internal/restorer/filerestorer.go",
+  "line": 31,
+  "len": 1,
+  "kind": "doc",
+  "text": "// information about regular file being restored",
+  "next": "type fileInfo struct {"
+ }
+]

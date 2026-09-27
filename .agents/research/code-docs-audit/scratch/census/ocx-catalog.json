@@ -1,0 +1,41 @@
+{
+ "all|prod": {
+  "files": 56,
+  "code": 3179,
+  "doc": 2670,
+  "line": 545,
+  "interface": 0,
+  "license": 0,
+  "directive": 1,
+  "blank": 692,
+  "trailing": 18,
+  "code_chars": 108529,
+  "comment_chars": 193533,
+  "ratio": 1.011,
+  "ratio_chars": 1.783,
+  "doc_blocks": {
+   "count": 322,
+   "p50": 5,
+   "p90": 18,
+   "p99": 51,
+   "max": 98,
+   "gt3": 202,
+   "gt5": 148,
+   "gt10": 77,
+   "gt20": 22,
+   "lines_in_gt5": 2207
+  },
+  "line_blocks": {
+   "count": 118,
+   "p50": 3,
+   "p90": 10,
+   "p99": 21,
+   "max": 44,
+   "gt3": 57,
+   "gt5": 32,
+   "gt10": 8,
+   "gt20": 2,
+   "lines_in_gt5": 320
+  }
+ }
+}

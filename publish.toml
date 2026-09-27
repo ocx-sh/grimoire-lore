@@ -137,7 +137,7 @@ readme = "README.md"
 logo = "assets/lore-rust.svg"
 
 [rules.rust-quality]
-version = "0.1.0"
+version = "0.2.0"
 description = { readme = "docs/rust-quality.md", logo = "assets/lore-rust.svg" }
 
 [rules.rust-cargo]
@@ -145,7 +145,7 @@ version = "0.1.0"
 description = { readme = "docs/rust-cargo.md", logo = "assets/lore-rust.svg" }
 
 [bundles.rust-essentials]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/rust-essentials.md", logo = "assets/lore-rust.svg" }
 
 # The Python quality set. `python-quality` is the index rule; its support
@@ -153,7 +153,7 @@ description = { readme = "docs/rust-essentials.md", logo = "assets/lore-rust.svg
 # is a separate rule only because its glob genuinely differs — it loads on
 # manifests and lockfiles, not on source.
 [rules.python-quality]
-version = "0.1.0"
+version = "0.2.0"
 description = { readme = "docs/python-quality.md", logo = "assets/lore-python.svg" }
 
 [rules.python-packaging]
@@ -161,7 +161,7 @@ version = "0.1.0"
 description = { readme = "docs/python-packaging.md", logo = "assets/lore-python.svg" }
 
 [bundles.python-essentials]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/python-essentials.md", logo = "assets/lore-python.svg" }
 
 # The TypeScript quality set. `typescript-quality` is the index rule; its
@@ -182,7 +182,7 @@ version = "0.1.0"
 description = { readme = "docs/css-theming.md", logo = "assets/lore-css.svg" }
 
 [rules.typescript-quality]
-version = "0.1.0"
+version = "0.2.0"
 description = { readme = "docs/typescript-quality.md", logo = "assets/lore-typescript.svg" }
 
 [rules.typescript-packaging]
@@ -190,7 +190,7 @@ version = "0.1.0"
 description = { readme = "docs/typescript-packaging.md", logo = "assets/lore-typescript.svg" }
 
 [bundles.typescript-essentials]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/typescript-essentials.md", logo = "assets/lore-typescript.svg" }
 
 # The documentation design set: one rule plus three skills, not four rules or
@@ -204,7 +204,7 @@ description = { readme = "docs/typescript-essentials.md", logo = "assets/lore-ty
 # and the repository's own CI runner. `docs-review` is the on-demand trigger:
 # a rule only loads on an edit, so grading an untouched page needs a name.
 [rules.docs-quality]
-version = "0.2.0"
+version = "0.3.0"
 description = { readme = "docs/docs-quality.md", logo = "assets/lore-docs.svg" }
 
 [skills.docs-plan]
@@ -222,6 +222,22 @@ description = { readme = "docs/docs-review.md", logo = "assets/lore-docs.svg" }
 [bundles.docs-essentials]
 version = "0.1.1"
 description = { readme = "docs/docs-essentials.md", logo = "assets/lore-docs.svg" }
+
+# The code-comments set: one rule plus one skill. `code-docs` is the index rule;
+# its support directory carries five depth files and the checks its gate runs.
+# It globs every source extension its census reads rather than one language,
+# because the failure it prevents (a guard cut to fit a length target, an essay
+# left whole) is the same in every language, and a copy per language set would
+# drift. So it is a member of every essentials bundle whose source it globs,
+# and the language sets point at it instead of carrying comment rules.
+# `code-docs-cleanup` runs once per tree or per file, which is a skill's job.
+[rules.code-docs]
+version = "0.1.0"
+description = { readme = "docs/code-docs.md", logo = "assets/lore-docs.svg" }
+
+[skills.code-docs-cleanup]
+version = "0.1.0"
+description = { readme = "docs/code-docs-cleanup.md", logo = "assets/lore-docs.svg" }
 
 # The Bazel set: one rule plus two skills. `bazel-quality` is the index rule;
 # its support directory carries the twelve depth files it routes to — eight by
@@ -263,11 +279,11 @@ description = { readme = "docs/bazel-essentials.md", logo = "assets/lore-bazel.s
 # on every edit. The Bazel-Java depth file is offered to `bazel-quality`, not
 # published here, so no two rules glob `BUILD.bazel`.
 [rules.java-quality]
-version = "0.1.0"
+version = "0.2.0"
 description = { readme = "docs/java-quality.md", logo = "assets/lore-java.svg" }
 
 [rules.kotlin-quality]
-version = "0.1.0"
+version = "0.2.0"
 description = { readme = "docs/kotlin-quality.md", logo = "assets/lore-kotlin.svg" }
 
 [rules.gradle-build]
@@ -287,7 +303,7 @@ version = "0.1.0"
 description = { readme = "docs/jvm-dependency-triage.md", logo = "assets/lore-java.svg" }
 
 [bundles.jvm-essentials]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/jvm-essentials.md", logo = "assets/lore-java.svg" }
 
 # The CMake and C++ package-management set: two rules, not one, because the
@@ -329,7 +345,7 @@ description = { readme = "docs/cmake-essentials.md", logo = "assets/lore-cmake.s
 # ships inside `bazel-quality` (0.3.0), not here, so no two rules glob
 # `BUILD.bazel`.
 [rules.go-quality]
-version = "0.1.0"
+version = "0.2.0"
 description = { readme = "docs/go-quality.md", logo = "assets/lore-go.svg" }
 
 [rules.go-modules]
@@ -349,7 +365,7 @@ version = "0.1.0"
 description = { readme = "docs/go-diagnose.md", logo = "assets/lore-go.svg" }
 
 [bundles.go-essentials]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/go-essentials.md", logo = "assets/lore-go.svg" }
 
 # The Nix set: one rule, because every Nix file shares one glob family.

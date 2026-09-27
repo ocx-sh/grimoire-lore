@@ -1,0 +1,152 @@
+{
+ "CTRL-01-P01": {
+  "site": "CTRL-01",
+  "arm": "original",
+  "rep": 1
+ },
+ "CTRL-03-P01": {
+  "site": "CTRL-03",
+  "arm": "original",
+  "rep": 1
+ },
+ "GRM-05-P01": {
+  "site": "GRM-05",
+  "arm": "original",
+  "rep": 1
+ },
+ "GRM-05-P02": {
+  "site": "GRM-05",
+  "arm": "deleted",
+  "rep": 1
+ },
+ "GRM-05-P03": {
+  "site": "GRM-05",
+  "arm": "oneline",
+  "rep": 1
+ },
+ "GRM-05-P04": {
+  "site": "GRM-05",
+  "arm": "rules",
+  "rep": 1
+ },
+ "GRM-05-P05": {
+  "site": "GRM-05",
+  "arm": "pointer",
+  "rep": 1
+ },
+ "OCX-02-P01": {
+  "site": "OCX-02",
+  "arm": "original",
+  "rep": 1
+ },
+ "OCX-02-P02": {
+  "site": "OCX-02",
+  "arm": "deleted",
+  "rep": 1
+ },
+ "OCX-09-P01": {
+  "site": "OCX-09",
+  "arm": "oneline",
+  "rep": 1
+ },
+ "OCX-09-P02": {
+  "site": "OCX-09",
+  "arm": "deleted",
+  "rep": 1
+ },
+ "OCX-09-P03": {
+  "site": "OCX-09",
+  "arm": "original",
+  "rep": 1
+ },
+ "OCX-09-P04": {
+  "site": "OCX-09",
+  "arm": "pointer",
+  "rep": 1
+ },
+ "OCX-09-P05": {
+  "site": "OCX-09",
+  "arm": "rules",
+  "rep": 1
+ },
+ "OCX-14-P01": {
+  "site": "OCX-14",
+  "arm": "original",
+  "rep": 1
+ },
+ "OCX-14-P02": {
+  "site": "OCX-14",
+  "arm": "rules",
+  "rep": 1
+ },
+ "OCX-14-P03": {
+  "site": "OCX-14",
+  "arm": "oneline",
+  "rep": 1
+ },
+ "OCX-14-P04": {
+  "site": "OCX-14",
+  "arm": "pointer",
+  "rep": 1
+ },
+ "OCX-14-P05": {
+  "site": "OCX-14",
+  "arm": "deleted",
+  "rep": 1
+ },
+ "OCX-20-P01": {
+  "site": "OCX-20",
+  "arm": "original",
+  "rep": 1
+ },
+ "OCX-20-P02": {
+  "site": "OCX-20",
+  "arm": "deleted",
+  "rep": 1
+ },
+ "PY-06-P01": {
+  "site": "PY-06",
+  "arm": "original",
+  "rep": 1
+ },
+ "PY-06-P02": {
+  "site": "PY-06",
+  "arm": "deleted",
+  "rep": 1
+ },
+ "TS-03-P01": {
+  "site": "TS-03",
+  "arm": "original",
+  "rep": 1
+ },
+ "TS-03-P02": {
+  "site": "TS-03",
+  "arm": "deleted",
+  "rep": 1
+ },
+ "TS-03-P03": {
+  "site": "TS-03",
+  "arm": "oneline",
+  "rep": 1
+ },
+ "TS-03-P04": {
+  "site": "TS-03",
+  "arm": "pointer",
+  "rep": 1
+ },
+ "TS-03-P05": {
+  "site": "TS-03",
+  "arm": "rules",
+  "rep": 1
+ },
+ "TS-06-P01": {
+  "site": "TS-06",
+  "arm": "original",
+  "rep": 1
+ },
+ "TS-06-P02": {
+  "site": "TS-06",
+  "arm": "deleted",
+  "rep": 1
+ }
+}
