@@ -1,6 +1,6 @@
 summary = "The OCX JVM set — Java and Kotlin source standards, the Gradle and Maven build-file rules, and the release and dependency-triage procedures for an SDK that ships to strangers"
 keywords = "java,kotlin,jvm,gradle,maven,ant,quality,review,standards,error-prone,nullaway,detekt,ktlint,spotbugs,junit,jacoco,kover,coroutines,virtual-threads,dependencies,version-catalog,dependency-locking,verification-metadata,shadow,fat-jar,jlink,publishing,maven-central,gradle-plugin,toolchains,release"
-description = "Everything an agent needs to write, build and ship JVM code the way the OCX family does: the java-quality rule (Error Prone and NullAway as the gate of record, with depth on types, errors, concurrency, resources, security, testing, API design, platform and runtime safety), the kotlin-quality rule (detekt and ktlint with the coroutine rules switched on, depth on nullability, coroutines, errors and resources, API and interop), the gradle-build rule (Kotlin DSL, version catalogs, dependency locking and verification, configuration cache, toolchains, plugin development, distribution and publishing) and the maven-build rule (enforcer, dependency management, release, and the Ant legacy file), plus the jvm-release skill that walks a Maven Central release end to end and the jvm-dependency-triage skill that turns a vulnerability report or a conflicting transitive into a decided, verified change."
+description = "Everything an agent needs to write, build and ship JVM code the way the OCX family does: the java-quality rule (Error Prone and NullAway as the gate of record, with depth on types, errors, concurrency, resources, security, testing, API design, platform and runtime safety), the kotlin-quality rule (detekt and ktlint with the coroutine rules switched on, depth on nullability, coroutines, errors and resources, API and interop), the gradle-build rule (Kotlin DSL, version catalogs, dependency locking and verification, configuration cache, toolchains, plugin development, distribution and publishing) and the maven-build rule (enforcer, dependency management, release, and the Ant legacy file), plus the jvm-release skill that walks a Maven Central release end to end and the jvm-dependency-triage skill that turns a vulnerability report or a conflicting transitive into a decided, verified change. The code-docs rule and the code-docs-cleanup skill cover comments in every language: short blocks that keep every guard."
 license = "Apache-2.0"
 repository = "https://github.com/ocx-sh/grimoire-lore"
 
@@ -28,7 +28,11 @@ java-quality = "./java-quality"
 kotlin-quality = "./kotlin-quality"
 gradle-build = "./gradle-build"
 maven-build = "./maven-build"
+# code-docs globs every source extension, this set's included, and
+# code-docs-cleanup is its procedure, so both ride in this bundle.
+code-docs = "./code-docs"
 
 [skills]
 jvm-release = "./jvm-release"
 jvm-dependency-triage = "./jvm-dependency-triage"
+code-docs-cleanup = "./code-docs-cleanup"

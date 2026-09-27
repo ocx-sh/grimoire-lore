@@ -1,0 +1,110 @@
+{
+ "js|other": {
+  "files": 2,
+  "code": 4,
+  "doc": 0,
+  "line": 5,
+  "interface": 0,
+  "license": 0,
+  "directive": 0,
+  "blank": 2,
+  "trailing": 0,
+  "code_chars": 19330,
+  "comment_chars": 91,
+  "ratio": 1.25,
+  "ratio_chars": 0.005,
+  "doc_blocks": {
+   "count": 0
+  },
+  "line_blocks": {
+   "count": 2,
+   "p50": 4,
+   "p90": 4,
+   "p99": 4,
+   "max": 4,
+   "gt3": 1,
+   "gt5": 0,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 0
+  }
+ },
+ "python|prod": {
+  "files": 23,
+  "code": 5555,
+  "doc": 1566,
+  "line": 324,
+  "interface": 4,
+  "license": 0,
+  "directive": 2,
+  "blank": 1095,
+  "trailing": 95,
+  "code_chars": 154144,
+  "comment_chars": 56012,
+  "ratio": 0.34,
+  "ratio_chars": 0.363,
+  "doc_blocks": {
+   "count": 225,
+   "p50": 4,
+   "p90": 13,
+   "p99": 50,
+   "max": 61,
+   "gt3": 143,
+   "gt5": 62,
+   "gt10": 29,
+   "gt20": 11,
+   "lines_in_gt5": 965
+  },
+  "line_blocks": {
+   "count": 141,
+   "p50": 1,
+   "p90": 4,
+   "p99": 13,
+   "max": 20,
+   "gt3": 21,
+   "gt5": 9,
+   "gt10": 5,
+   "gt20": 0,
+   "lines_in_gt5": 92
+  }
+ },
+ "python|test": {
+  "files": 37,
+  "code": 5520,
+  "doc": 237,
+  "line": 112,
+  "interface": 0,
+  "license": 0,
+  "directive": 1,
+  "blank": 1712,
+  "trailing": 59,
+  "code_chars": 187288,
+  "comment_chars": 11688,
+  "ratio": 0.063,
+  "ratio_chars": 0.062,
+  "doc_blocks": {
+   "count": 64,
+   "p50": 3,
+   "p90": 5,
+   "p99": 14,
+   "max": 14,
+   "gt3": 27,
+   "gt5": 2,
+   "gt10": 1,
+   "gt20": 0,
+   "lines_in_gt5": 20
+  },
+  "line_blocks": {
+   "count": 80,
+   "p50": 1,
+   "p90": 2,
+   "p99": 5,
+   "max": 5,
+   "gt3": 7,
+   "gt5": 0,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 0
+  }
+ }
+}

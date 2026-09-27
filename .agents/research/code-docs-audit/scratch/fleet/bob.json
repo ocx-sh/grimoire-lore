@@ -1,0 +1,152 @@
+{
+ "c|prod": {
+  "files": 4,
+  "code": 18,
+  "doc": 0,
+  "line": 0,
+  "interface": 0,
+  "license": 0,
+  "directive": 0,
+  "blank": 10,
+  "trailing": 0,
+  "code_chars": 248,
+  "comment_chars": 0,
+  "ratio": 0.0,
+  "ratio_chars": 0.0,
+  "doc_blocks": {
+   "count": 0
+  },
+  "line_blocks": {
+   "count": 0
+  }
+ },
+ "js|test": {
+  "files": 1,
+  "code": 23,
+  "doc": 0,
+  "line": 1,
+  "interface": 0,
+  "license": 0,
+  "directive": 1,
+  "blank": 2,
+  "trailing": 0,
+  "code_chars": 887,
+  "comment_chars": 29,
+  "ratio": 0.043,
+  "ratio_chars": 0.033,
+  "doc_blocks": {
+   "count": 0
+  },
+  "line_blocks": {
+   "count": 1,
+   "p50": 1,
+   "p90": 1,
+   "p99": 1,
+   "max": 1,
+   "gt3": 0,
+   "gt5": 0,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 0
+  }
+ },
+ "rust|prod": {
+  "files": 10,
+  "code": 1532,
+  "doc": 515,
+  "line": 179,
+  "interface": 0,
+  "license": 0,
+  "directive": 0,
+  "blank": 208,
+  "trailing": 1,
+  "code_chars": 39637,
+  "comment_chars": 42324,
+  "ratio": 0.453,
+  "ratio_chars": 1.068,
+  "doc_blocks": {
+   "count": 106,
+   "p50": 3,
+   "p90": 11,
+   "p99": 21,
+   "max": 21,
+   "gt3": 51,
+   "gt5": 34,
+   "gt10": 12,
+   "gt20": 2,
+   "lines_in_gt5": 338
+  },
+  "line_blocks": {
+   "count": 57,
+   "p50": 3,
+   "p90": 6,
+   "p99": 10,
+   "max": 10,
+   "gt3": 18,
+   "gt5": 7,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 50
+  }
+ },
+ "rust|test": {
+  "files": 5,
+  "code": 660,
+  "doc": 86,
+  "line": 27,
+  "interface": 0,
+  "license": 0,
+  "directive": 0,
+  "blank": 81,
+  "trailing": 0,
+  "code_chars": 19973,
+  "comment_chars": 7642,
+  "ratio": 0.171,
+  "ratio_chars": 0.383,
+  "doc_blocks": {
+   "count": 26,
+   "p50": 3,
+   "p90": 5,
+   "p99": 6,
+   "max": 6,
+   "gt3": 9,
+   "gt5": 2,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 12
+  },
+  "line_blocks": {
+   "count": 11,
+   "p50": 2,
+   "p90": 4,
+   "p99": 5,
+   "max": 5,
+   "gt3": 3,
+   "gt5": 0,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 0
+  }
+ },
+ "ts|test": {
+  "files": 1,
+  "code": 6,
+  "doc": 0,
+  "line": 0,
+  "interface": 0,
+  "license": 0,
+  "directive": 0,
+  "blank": 2,
+  "trailing": 0,
+  "code_chars": 261,
+  "comment_chars": 0,
+  "ratio": 0.0,
+  "ratio_chars": 0.0,
+  "doc_blocks": {
+   "count": 0
+  },
+  "line_blocks": {
+   "count": 0
+  }
+ }
+}

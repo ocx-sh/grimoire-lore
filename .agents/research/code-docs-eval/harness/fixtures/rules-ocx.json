@@ -1,0 +1,150 @@
+{
+  "OCX-02": {
+    "rules": [
+      "/// Whether `path`, an already-resolved command answer, is an ocx-generated launcher",
+      "/// trampoline. POSIX: [`TRAMPOLINE_MARKER`] is the whole second line of the first",
+      "/// [`TRAMPOLINE_PROBE_BYTES`] of a regular file. Windows: a `.exec` sidecar sits beside the",
+      "/// resolved `<stem>.exe`, or the resolved path's own extension is `.exec`.",
+      "///",
+      "/// It runs after the `PATH` exclusion of [`Env::resolve_command_excluding`], never in its",
+      "/// place, so each guard keeps its own reachable red state and a test can tell which one",
+      "/// caught an input. Matching the file rather than a directory list is what catches a",
+      "/// trampoline from a second project home on the same `PATH`.",
+      "///",
+      "/// A non-regular file answers false without being opened, and any I/O error answers false.",
+      "/// Failing closed, as `resolves_inside` in `ocx launcher shim` does, would turn a transient",
+      "/// `EACCES` on an unrelated binary into a refusal to run an ordinary command, since this runs",
+      "/// on every resolution including `/bin/sh`; the `PATH` exclusion still backstops it, and an",
+      "/// unreadable file is no worse than an absent one.",
+      "//",
+      "// Line 2 is matched whole, never by `contains()` or anywhere in the prefix: a looser match",
+      "// refuses an ordinary tool that embeds the string, and a package launcher whose baked",
+      "// `$OCX_HOME` spells the marker, breaking `ocx launcher exec`; nothing interpolated reaches",
+      "// lines 1 or 2. The prefix bound keeps the probe to one `read(2)` before every `exec`;",
+      "// `a_marker_beyond_the_probe_window_is_not_refused` fails if the bound is widened.",
+      "// `ocx_util::fs::read_bounded` does not fit: it errors past the cap, a trampoline body passes",
+      "// 256 bytes once the project root is about 146 characters deep, and the fail-open arm turns",
+      "// that error into \"not a trampoline\" for deep checkouts while shallow-root tests stay green.",
+      "// `is_file()` is checked before the open, or a FIFO on `PATH` blocks the `exec` forever.",
+      "// Windows has no content check: trampoline and lazy-shim-slot `.exe`s hardlink one blob, so",
+      "// a content match refuses shim slots. The own-`.exec` refusal is required because `which`",
+      "// treats any extension as executable, so a `PATHEXT` with `.EXEC` resolves the sidecar itself."
+    ],
+    "tags": "contract: what it answers, POSIX/Windows signals, non-regular and I/O-error answer false; guards: runs after (not instead of) the PATH exclusion, fail-open vs sibling resolves_inside, whole-line-2 anchor (not contains), prefix bound (test a_marker_beyond_the_probe_window_is_not_refused replaces the widening guard), not read_bounded, is_file before open (FIFO), no Windows content match, own-.exec refusal; why: file-not-directory matching, nothing interpolated reaches lines 1-2, unreadable==absent; implementation hazards moved to a plain // comment at the same position; dropped: process IDs C-069/C-010/C-028/D-V1/D-V12/D-V15/E-21/WP-6, stale 'why this has a body' stub provenance, validation-row argument (Item 37/WP-12e), design-story prose"
+  },
+  "OCX-06": {
+    "rules": [
+      "/// Whether the file occupying `target` *is* the file `tmp` holds, which is what lets a",
+      "/// `Published` outcome name a path this call wrote. Meaningful only on the NFS `link` +",
+      "/// `unlink` fallback; see [`persist_temp_file_noclobber`].",
+      "///",
+      "/// `target` is read with `symlink_metadata`, not `metadata`: a symlink there is never our",
+      "/// hardlink, and following one that points at the temp file would report `Published`."
+    ],
+    "tags": "contract: identity answer that makes Published name a written path, NFS-fallback-only scope; pointer: persist_temp_file_noclobber (resolves); guard: symlink_metadata must not follow, with consequence; dropped: nothing substantive, 'deliberately' rewritten as fact+consequence"
+  },
+  "OCX-07": {
+    "rules": [
+      "                // Our own link landed under this name and only the reply was lost. The temp",
+      "                // file drops here without `keep()`, leaving only the published name; keeping",
+      "                // it strands a `.tmp*` in the caller's directory on every spurious `EEXIST`."
+    ],
+    "tags": "why: own link landed, reply lost; guard: no keep() here, consequence (stranded .tmp*) made explicit; dropped: shouting emphasis only"
+  },
+  "OCX-09": {
+    "rules": [
+      "        // Step 4 (module docs): `_render_lock` stays bound until this call returns, or a",
+      "        // concurrent render of the same home interleaves its writes and races the stamp."
+    ],
+    "tags": "pointer: module-doc step 4 (resolves); guard: lock held until return, consequence from the module doc added; dropped: nothing"
+  },
+  "OCX-13": {
+    "rules": [
+      "    // `join_under_root` is lexical and the extraction root need not be empty, so an",
+      "    // intermediate symlink component can map an in-root path onto an out-of-root file;",
+      "    // without the canonical re-check that host file is hardlinked into the tree.",
+      "    // The source must already exist for `hard_link`, so canonicalizing rejects nothing",
+      "    // valid; tar's `validate_inside_dst` makes the same check for `unpack_in`."
+    ],
+    "tags": "guard: lexical join is insufficient, canonical re-check required (consequence: out-of-root host file pulled in); why: source already exists so canonicalize is safe; pointer: tar validate_inside_dst; dropped: nothing"
+  },
+  "OCX-14": {
+    "rules": [
+      "/// **A failed parent fsync is an error.** Discarding it would report a publish as landed",
+      "/// that a crash can still undo."
+    ],
+    "tags": "contract+guard: parent-fsync failure is returned, consequence of discarding kept; dropped: provenance 'the manifest writer used to discard it' (rewritten as present-tense guard)"
+  },
+  "OCX-17": {
+    "rules": [
+      "            // Every variant is spelled out rather than wildcarded, so a new `SsrfError`",
+      "            // variant is a compile error here instead of a silent exit 64."
+    ],
+    "tags": "guard: no wildcard arm, consequence (silent 64) kept; dropped: stale claim that SsrfError is #[non_exhaustive] (the enum carries no such attribute)"
+  },
+  "OCX-19": {
+    "rules": [
+      "                // A failed persist counts as success only when the bytes now at the target hash",
+      "                // to `claimed`, as a concurrent CAS writer's would. An `exists()` check is not",
+      "                // enough: on a self-heal the target still holds the corrupt bytes that failed the",
+      "                // verify above, so it would report success over them."
+    ],
+    "tags": "contract: failed persist is Ok only on a matching re-hash; why: concurrent CAS writer publishes equal bytes; guard: exists() would report success over corrupt self-heal target; dropped: narration of the two entry cases and of the match arms"
+  },
+  "OCX-20": {
+    "rules": [
+      "/// The deduped union of config-declared and env-declared plain-HTTP hosts, less any name a",
+      "/// SYSTEM-scope (`/etc/ocx/config.toml`) `[registries.\"<name>\"]` entry states `insecure = false`",
+      "/// for, `OCX_INSECURE_REGISTRIES` included. `None` subtracts nothing, and a non-system",
+      "/// `insecure = false` revokes nothing. The subtraction is required, or one env var defeats the",
+      "/// lock [`RegistryConfig::merge`](crate::RegistryConfig::merge) enforces against lower tiers.",
+      "///",
+      "/// Granting is byte-exact on `host[:port]`, case included, matching the transport's",
+      "/// `ClientProtocol::HttpsExcept` membership test: `registry.corp` does not cover",
+      "/// `registry.corp:5001`, and a mis-cased entry grants nothing, which fails closed",
+      "/// (`host_and_port_are_one_opaque_name`). Each gate compares its own resolved host string;",
+      "/// they agree for `host[:port]`, but Docker Hub resolves differently for the transport and for",
+      "/// [`canonicalize_registry`](ocx_oci::auth::registry_url::canonicalize_registry), so no spelling",
+      "/// of it can be granted plaintext, deliberately (see [`ocx_oci::auth::login`]).",
+      "///",
+      "/// Revoking is normalised in `same_registry_name`, because an exact match there fails open",
+      "/// (CWE-319/CWE-522). Without ASCII case folding, `OCX_INSECURE_REGISTRIES=Registry.Corp:5000`",
+      "/// or a lower-tier `[registries.\"Registry.Corp:5000\"]` walks past a lock on `registry.corp:5000`.",
+      "/// Without numeric port normalisation, `registry.corp:05000` reaches the locked TCP 5000 in",
+      "/// plaintext.",
+      "///",
+      "/// Known residual: a lock on `registry.corp` does not reach `registry.corp:80`, nor the",
+      "/// reverse. No default port is filled in, because the four consumers span both schemes and",
+      "/// any constant is wrong for some of them."
+    ],
+    "tags": "contract: union less system-locked names, None/non-system revoke nothing, exact grant semantics, per-gate subject and Docker Hub exclusion, default-port residual; guards: subtraction vs env-var bypass of RegistryConfig::merge lock, grant stays byte-exact (fails closed), revoke case-fold, revoke port normalisation, no default-port fill; pointers: RegistryConfig::merge, canonicalize_registry, ocx_oci::auth::login, host_and_port_are_one_opaque_name, same_registry_name; dropped: 'asymmetry is not a wart' argument, fleet-engineer narrative, section banners, per-gate string enumeration beyond the Docker Hub divergence"
+  },
+  "OCX-21": {
+    "rules": [
+      "        // Re-parses the whole `c/index.json` per resolve to find one entry, O(catalog); revisit",
+      "        // only if profiling shows it dominates. It is not memoized: a concurrent `ocx index update`",
+      "        // rewrites the file out-of-band and `CatalogTransaction::commit` cannot reach a cache on",
+      "        // `LocalIndex`, so a stale catalog causes spurious recovery or missed staleness. Recovery",
+      "        // re-reads under the lock; committing from this pre-lock read overwrites a concurrent update."
+    ],
+    "tags": "why: O(catalog) ceiling and revisit trigger; guards: no process-lifetime catalog memoization (stale catalog -> spurious recovery/missed staleness), recovery re-reads post-lock (consequence made explicit); dropped: ponytail: marker prefix, process ID F1 and the 'already required for the cross-check' aside"
+  },
+  "OCX-23": {
+    "rules": [
+      "/// Drops every occurrence of `value` from a `PATH`-style value, using [`move_to_front`]'s",
+      "/// splitting, empty-segment dropping and exact-segment comparison, so a directory added by",
+      "/// one is removed by the other. One surrounding pair of `\"` is stripped from `value` first,",
+      "/// as `Shell::remove_list_element` does, because the live environment spells a",
+      "/// space-bearing Windows segment either way.",
+      "///",
+      "/// `ocx launcher shim` depends on it to drop its own shim directory: a surviving one",
+      "/// resolves a claimed-but-unshipped name back to the shim, and `execvp` re-enters it forever.",
+      "///",
+      "/// **Precondition** (as [`move_to_front`]): `value` is one directory with no `PATH_SEPARATOR`.",
+      "/// Comparison is segment-exact to match the emitted shell snippets, so a trailing slash,",
+      "/// a symlink alias or a differently spelled root survives. This is not a containment check;",
+      "/// callers that must fail closed re-check the resolved answer against the resolved directory."
+    ],
+    "tags": "contract: drops all occurrences, quote-pair strip, precondition; guards: shared comparison with move_to_front, shim-directory removal prevents execvp re-entry loop, segment-exact is not containment (callers re-check resolved paths); pointers: move_to_front, Shell::remove_list_element; dropped: 'security guard, not a convenience' framing and 'minus the prepend' restatement"
+  }
+}

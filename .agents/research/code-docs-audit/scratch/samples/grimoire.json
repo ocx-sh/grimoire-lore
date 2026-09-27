@@ -1,0 +1,562 @@
+[
+ {
+  "file": "src/context.rs",
+  "line": 50,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// The `--progress` mode for long-running passes.",
+  "next": "progress: crate::cli::options::ProgressMode,"
+ },
+ {
+  "file": "src/catalog/rating_provider.rs",
+  "line": 395,
+  "len": 2,
+  "kind": "doc",
+  "text": "    /// The credential, still wrapped. Callers must not clone the exposed\n    /// value out of the one header site.",
+  "next": "pub fn token(&self) -> &SecretString {"
+ },
+ {
+  "file": "src/install/path_anchor.rs",
+  "line": 249,
+  "len": 2,
+  "kind": "doc",
+  "text": "    /// Parse a serialized tag. `None` for any tag grim does not know \u2014 the\n    /// fail-closed read path.",
+  "next": "fn from_serde_tag(tag: &str) -> Option<Self> {"
+ },
+ {
+  "file": "src/install/vendor_openclaw.rs",
+  "line": 117,
+  "len": 1,
+  "kind": "line",
+  "text": "        // Dead path: `kind_support` declines `Agent`. Defensive location.",
+  "next": "scope_root(workspace, scope).join(\"agents\").join(format!(\"{name}.md\"))"
+ },
+ {
+  "file": "src/tui/app.rs",
+  "line": 1119,
+  "len": 1,
+  "kind": "line",
+  "text": "                // Build a O(n) set of row repos for the related-highlight check (D2/P3.7).",
+  "next": "let row_repos: std::collections::HashSet<&str> = state.rows.iter().map(|r| r.repo.as_str()).collect();"
+ },
+ {
+  "file": "src/oci/mcp.rs",
+  "line": 408,
+  "len": 2,
+  "kind": "doc",
+  "text": "/// Iterate all `${VAR}` reference names in `value` (assumes prior\n/// validation; malformed references are skipped).",
+  "next": "pub fn env_ref_names(value: &str) -> impl Iterator<Item = &str> {"
+ },
+ {
+  "file": "src/tui/app.rs",
+  "line": 3629,
+  "len": 10,
+  "kind": "doc",
+  "text": "/// Resolve the install tag for a bundle member.\n///\n/// Priority (D8a):\n/// 1. The matching catalog row's `pinned_version` (when set and non-empty).\n/// 2. The matching catalog row's `latest_tag` (when non-empty).\n/// 3. `\"latest\"` \u2014 the same fallback `perform` uses.\n///\n/// Returns `\"latest\"` when no catalog row matches `repo` (non-catalog member).\n///\n/// Pure function \u2014 no I/O. Unit-testable standalone (C-11 pure half).",
+  "next": "pub(crate) fn resolve_member_tag(repo: &str, rows: &[TuiRow]) -> String {"
+ },
+ {
+  "file": "src/catalog/forge.rs",
+  "line": 47,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// `GITHUB_ACTIONS` truthy.",
+  "next": "pub github_actions: bool,"
+ },
+ {
+  "file": "src/config/project_config.rs",
+  "line": 45,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// The parsed project config.",
+  "next": "pub config: ProjectConfig,"
+ },
+ {
+  "file": "src/command/add.rs",
+  "line": 507,
+  "len": 6,
+  "kind": "line",
+  "text": "    // Same-name conflict guard, on full-source equality rather than the\n    // registry path's repository comparison: a path pins by content hash and\n    // carries no tag, so there is no \"same source, new version\" to admit\n    // here. Re-declaring the identical path is idempotent, anything else\n    // refuses loudly.\n    // Keep the dev-record keyspace disjoint from declared bindings (C2).",
+  "next": "reject_dev_install_collision(scope, kind, &name)?;"
+ },
+ {
+  "file": "src/catalog/registry_catalog.rs",
+  "line": 419,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// An empty catalog for `registry` (cold cache / offline miss).",
+  "next": "pub fn empty(registry: &str) -> Self {"
+ },
+ {
+  "file": "src/auth/verify.rs",
+  "line": 233,
+  "len": 2,
+  "kind": "doc",
+  "text": "/// Build a [`AuthError::VerifyUnavailable`] from an unexpected response,\n/// carrying the status-bearing `reqwest` error when the status yields one.",
+  "next": "fn status_unavailable(registry: &str, response: reqwest::Response) -> AuthError {"
+ },
+ {
+  "file": ".claude/hooks/conventional_commit_validator.py",
+  "line": 77,
+  "len": 3,
+  "kind": "line",
+  "text": "# ---------------------------------------------------------------------------\n# Entry point\n# ---------------------------------------------------------------------------",
+  "next": "def main() -> None:"
+ },
+ {
+  "file": "src/api/search_report.rs",
+  "line": 281,
+  "len": 1,
+  "kind": "doc",
+  "text": "        /// Index of the blurb column the budget applies to.",
+  "next": "const BLURB: usize = 2;"
+ },
+ {
+  "file": "src/oci/release.rs",
+  "line": 160,
+  "len": 2,
+  "kind": "line",
+  "text": "        // Explicit --cascade: require semver. A non-semver value is a typo\n        // guard; a prerelease parses but stays exact-only (never floats).",
+  "next": "Some(true) => {"
+ },
+ {
+  "file": "src/lock/file_lock.rs",
+  "line": 4,
+  "len": 9,
+  "kind": "doc",
+  "text": "//! RAII exclusive advisory lock guarding a config file.\n//!\n//! A thin newtype over the reusable [`AdvisoryFileLock`] mechanism (sidecar\n//! flock, ghost-inode re-check, `O_NOFOLLOW`, Windows delete-pending\n//! handling \u2014 see that module for the full rationale). `ConfigFileLock`\n//! names the config-flock call sites (`grim add` / `login` / `install`\n//! read-modify-write under the `<grimoire.toml>.lock` sidecar); the catalog\n//! refresh coordinator uses [`AdvisoryFileLock`] directly for the\n//! per-registry cache file.",
+  "next": "use std::path::Path;"
+ },
+ {
+  "file": "src/command/uninstall.rs",
+  "line": 87,
+  "len": 3,
+  "kind": "line",
+  "text": "    // 1. Delete materialized files + drop the install-state record \u2014 UNLESS a\n    //    declared bundle still holds the artifact (see above), in which case\n    //    nothing is deleted and only the declaration is dropped in step 2.",
+  "next": "let mut file_removed = false;"
+ },
+ {
+  "file": "src/install/path_anchor.rs",
+  "line": 403,
+  "len": 3,
+  "kind": "doc",
+  "text": "    /// The concrete on-disk root for this anchor \u2014 a pure lookup into the\n    /// pre-resolved [`AnchorRoots`] (no env reads, no I/O). `None` when the\n    /// anchor's vendor root is unresolvable.",
+  "next": "pub fn root(self, roots: &AnchorRoots) -> Option<PathBuf> {"
+ },
+ {
+  "file": "src/install/vendor_kilo.rs",
+  "line": 133,
+  "len": 1,
+  "kind": "line",
+  "text": "        // Never called: rules are skipped at the `kind_support` gate.",
+  "next": "Ok(None)"
+ },
+ {
+  "file": "src/catalog/browse_sort.rs",
+  "line": 191,
+  "len": 4,
+  "kind": "doc",
+  "text": "/// Order two rows under `mode`.\n///\n/// Total in every mode \u2014 `Ordering::Equal` is returned only for two keys\n/// carrying the same reference, which no two rows in one browse can.",
+  "next": "pub fn compare(a: &SortKey, b: &SortKey, mode: SortMode) -> Ordering {"
+ },
+ {
+  "file": "src/install/install_state.rs",
+  "line": 452,
+  "len": 2,
+  "kind": "doc",
+  "text": "/// One V1 on-disk client record: an absolute `target`/`support_dir` and the\n/// content hash captured at install time.",
+  "next": "#[derive(Debug, Deserialize)]"
+ },
+ {
+  "file": "src/catalog/registry_catalog.rs",
+  "line": 330,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// The fully-qualified `registry/repository` reference.",
+  "next": "pub fn repo(&self) -> String {"
+ },
+ {
+  "file": "src/tui/event.rs",
+  "line": 41,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Jump the selection to the first row (`Home`, with or without a modifier).",
+  "next": "Home,"
+ },
+ {
+  "file": "src/command/status.rs",
+  "line": 331,
+  "len": 2,
+  "kind": "line",
+  "text": "    // Dev-installed artifacts (`grim install <path>`): recorded but\n    // deliberately undeclared, so they appear after the declared rows.",
+  "next": "for record in state.iter_records().filter(|r| r.dev) {"
+ },
+ {
+  "file": "src/lock/locked_bundle.rs",
+  "line": 80,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Config binding name (TOML key from `[bundles]`).",
+  "next": "pub name: String,"
+ },
+ {
+  "file": "src/command/rate.rs",
+  "line": 573,
+  "len": 2,
+  "kind": "line",
+  "text": "    // Strip a single trailing newline (the common `\u2026 | grim rate` case);\n    // the credential is otherwise taken verbatim.",
+  "next": "let token = raw.strip_suffix('\\n').unwrap_or(raw);"
+ },
+ {
+  "file": "src/fetch.rs",
+  "line": 637,
+  "len": 16,
+  "kind": "doc",
+  "text": "/// Fetch the repository description companion at `reference`'s reserved\n/// `__grimoire` tag, shaping every member inline. When `out` is `Some`, the\n/// companion tree is also unpacked into that directory through install's\n/// tar-materialize guard ([`DefaultMaterializer`]).\n///\n/// The repository is retargeted to the internal companion tag before\n/// resolution; the result must be a `com.grimoire.kind: desc` companion.\n/// Bounded by the 8 MiB layer gate \u2014 no per-file truncation, so the whole\n/// companion returns in one call.\n///\n/// # Errors\n///\n/// A missing companion (not-found, 79 \u2014 parity with `grim fetch`), an\n/// offline-uncached miss (81), a `__grimoire` manifest that is not a\n/// companion or an empty companion (data error, 65), or a filesystem failure\n/// writing `out`.",
+  "next": "pub async fn fetch_description("
+ },
+ {
+  "file": "src/api/login_report.rs",
+  "line": 24,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// The registry's auth endpoint accepted the credential.",
+  "next": "Verified,"
+ },
+ {
+  "file": "src/catalog/index_announce.rs",
+  "line": 81,
+  "len": 2,
+  "kind": "doc",
+  "text": "    /// The namespace's numeric owner id on the index host (resolved by the\n    /// caller \u2014 explicitly configured or looked up via the forge API).",
+  "next": "pub owner_id: u64,"
+ },
+ {
+  "file": "src/install/vendor_warp.rs",
+  "line": 69,
+  "len": 2,
+  "kind": "line",
+  "text": "            // `.warp` is product-specific. NEVER key on `.agents/` \u2014 Warp scans\n            // the pool, so that marker says nothing about Warp specifically.",
+  "next": "ConfigScope::Project => workspace.join(\".warp\").exists(),"
+ },
+ {
+  "file": "src/tui/state.rs",
+  "line": 289,
+  "len": 2,
+  "kind": "doc",
+  "text": "    /// A user-pinned version chosen via the picker; when set, install /\n    /// update target this tag instead of the default resolution.",
+  "next": "pub pinned_version: Option<String>,"
+ },
+ {
+  "file": "src/tui/state.rs",
+  "line": 89,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Editing the search box; character keys edit the query.",
+  "next": "Search,"
+ },
+ {
+  "file": "src/tui/tree.rs",
+  "line": 933,
+  "len": 1,
+  "kind": "line",
+  "text": "                            // Placeholders carry no actionable repo.",
+  "next": "member_repo: None,"
+ },
+ {
+  "file": ".claude/hooks/hook_utils.py",
+  "line": 142,
+  "len": 1,
+  "kind": "doc",
+  "text": "        \"\"\"Count active session files.\"\"\"",
+  "next": "if not self.state_dir.exists():"
+ },
+ {
+  "file": "src/mcp/describe.rs",
+  "line": 17,
+  "len": 6,
+  "kind": "doc",
+  "text": "/// Run the `grim_describe` tool: resolve scope + access, then read the\n/// artifact's manifest-level metadata.\n///\n/// # Errors\n///\n/// See [`crate::fetch::describe_artifact`].",
+  "next": "pub async fn describe(ctx: &Context, args: &DescribeToolArgs) -> anyhow::Result<crate::fetch::DescribeReport> {"
+ },
+ {
+  "file": "src/install/claude_config.rs",
+  "line": 241,
+  "len": 5,
+  "kind": "line",
+  "text": "        // Declining is the safe half of a disagreement, not a non-event:\n        // `vendor_claude::scope_root` still falls back to\n        // `<workspace>/.claude`, so the rule and its support tree land in\n        // that environment while the exclusion does not. Warn-level matches\n        // what `installer.rs` already gives this sync's failure path.",
+  "next": "tracing::warn!("
+ },
+ {
+  "file": "src/tui/app.rs",
+  "line": 1991,
+  "len": 7,
+  "kind": "doc",
+  "text": "/// The badge state for a bundle member node.\n///\n/// The install reality from [`derive_artifact_state`], except a present-and-intact\n/// member that is **not** also declared standalone is shown as\n/// [`ArtifactState::ViaBundle`] \u2014 it is installed only because the bundle provides\n/// it. `Modified` / `Outdated` / `IntegrityMissing` keep precedence (they are not\n/// the plain `Installed` state, so they are returned unchanged).",
+  "next": "#[allow(clippy::too_many_arguments)]"
+ },
+ {
+  "file": "src/api/config_report.rs",
+  "line": 695,
+  "len": 13,
+  "kind": "doc",
+  "text": "/// Result of `grim config registry show <alias>`.\n///\n/// Plain format: one-row table \u2014 `Alias | Type | Source | Default |\n/// Filters | Insecure`. The `Filters` cell carries **counts** in `grim\n/// context`'s spelling (`N include, M exclude`, `\u2014` when unfiltered); the\n/// patterns themselves stay in `--format json`, since a glob list has no\n/// width bound (plan C-014/C-020).\n///\n/// JSON format: `{\"alias\": \"\u2026\", \"oci\": \"\u2026\"|null, \"index\": \"\u2026\"|null,\n/// \"include\": [\u2026], \"exclude\": [\u2026], \"default\": bool, \"insecure\": bool}` \u2014\n/// both locator keys always present, exactly one non-null; both pattern\n/// lists always present, `[]` when unfiltered (always-present policy,\n/// `subsystem-cli-api.md`).",
+  "next": "#[derive(Debug, Serialize)]"
+ },
+ {
+  "file": "src/tui/render.rs",
+  "line": 1883,
+  "len": 3,
+  "kind": "doc",
+  "text": "/// A centered help overlay listing every keybinding. Sized to its content so\n/// the full key map shows on a standard terminal; scrolls (offset `scroll`)\n/// when the terminal is too short to fit it all.",
+  "next": "fn draw_help(f: &mut Frame, scroll: u16) {"
+ },
+ {
+  "file": "src/install/vendor.rs",
+  "line": 171,
+  "len": 8,
+  "kind": "doc",
+  "text": "/// [`Vendor::pool_capable`] with both inputs injected.\n///\n/// Split out so the `skill_fields` conjunct is *decidable* by a test. No\n/// shipped vendor is both on the roster and declaring skill fields \u2014 Claude is\n/// the only vendor with a registry and it is deliberately off the roster \u2014 so\n/// against real vendors alone the conjunct is invisible: delete it and every\n/// assertion still passes. That is exactly the drift it exists to catch, so it\n/// gets the injected-input seam `zed_root_from` established.",
+  "next": "fn pool_capable_from(name: &str, declares_skill_fields: bool) -> bool {"
+ },
+ {
+  "file": "src/oci/access/registry_client.rs",
+  "line": 55,
+  "len": 1,
+  "kind": "doc",
+  "text": "/// Real OCI registry access backed by `oci-client`.",
+  "next": "pub struct RegistryClient {"
+ },
+ {
+  "file": "src/install/path_anchor.rs",
+  "line": 436,
+  "len": 11,
+  "kind": "doc",
+  "text": "    /// Permit an escape whose leaf is not itself a symlink: Layer 1 already\n    /// guarantees a Normal-only remainder, so the escape can only originate\n    /// from a symlinked **ancestor** inside the root \u2014 the user's own layout\n    /// (GNU stow, yadm, an iCloud/Dropbox-synced config dir). For read-only\n    /// probes; a symlinked leaf (the CWE-59 shape) stays refused.\n    ///\n    /// **`#[cfg(unix)]` only.** On Windows this variant is a synonym for\n    /// [`Self::Strict`] \u2014 every escape is refused \u2014 because `is_symlink()`\n    /// does not cover every reparse tag (`LX_SYMLINK`, `APPEXECLINK`, WCI).\n    /// Classify a new call site by intent regardless of platform; do not\n    /// assume the escape is permitted.",
+  "next": "AllowRelocatedAncestor,"
+ },
+ {
+  "file": "src/oci/release.rs",
+  "line": 38,
+  "len": 4,
+  "kind": "doc",
+  "text": "/// A release-tier failure.\n///\n/// Three-layer shape: top [`crate::error::Error`] \u2192 context-bearing\n/// [`ReleaseError`] \u2192 discriminant [`ReleaseErrorKind`].",
+  "next": "#[derive(Debug)]"
+ },
+ {
+  "file": "src/oci/access/registry_client.rs",
+  "line": 42,
+  "len": 9,
+  "kind": "doc",
+  "text": "/// The OCI empty config descriptor media type. Stamped on every pushed\n/// manifest's config descriptor (the blob is the byte-identical `{}` the OCI\n/// spec blesses for artifacts that carry an `artifactType`). The custom\n/// per-kind config type the project used before `adr_oci_empty_config_compat.md`\n/// is off GitLab's referenced-media-type allowlist and made GitLab reject the\n/// manifest (`400 MANIFEST_INVALID`); the empty type is on every registry's\n/// allowlist. The kind rides solely on the `com.grimoire.kind` annotation \u2014\n/// no `artifactType` is written either (GitLab rejects a custom one) \u2014 and the\n/// config descriptor never carries it (`adr_oci_empty_config_compat.md`).",
+  "next": "const OCI_EMPTY_CONFIG_MEDIA_TYPE: &str = \"application/vnd.oci.empty.v1+json\";"
+ },
+ {
+  "file": "src/error.rs",
+  "line": 174,
+  "len": 7,
+  "kind": "doc",
+  "text": "/// Maps an error chain to a [`Classification`] (exit code + optional\n/// reason subtype).\n///\n/// Walks `err.chain()` once, downcasts each cause to [`Error`], and\n/// exhaustively maps every Phase 1 variant. Anything not classified falls\n/// through to [`ExitCode::Failure`] with no reason; the fall-through is\n/// locked by a test so it cannot silently change.",
+  "next": "pub fn classify(err: &anyhow::Error) -> Classification {"
+ },
+ {
+  "file": "src/install/install_state.rs",
+  "line": 1075,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// The atomic write of the state file failed.",
+  "next": "#[error(\"failed to save install state {path}\")]"
+ },
+ {
+  "file": ".claude/hooks/hook_utils.py",
+  "line": 290,
+  "len": 1,
+  "kind": "doc",
+  "text": "        \"\"\"Check if commit verification was completed recently.\"\"\"",
+  "next": "verify_file = self.state_dir / \"commit-verified\""
+ },
+ {
+  "file": "src/install/installer.rs",
+  "line": 2472,
+  "len": 2,
+  "kind": "line",
+  "text": "        // Bundles expand into members at resolve time and never enter the\n        // lock, so the installer never sees one.",
+  "next": "ArtifactKind::Bundle => unreachable!(\"bundles are never materialized; they expand into members\"),"
+ },
+ {
+  "file": "src/install/install_state.rs",
+  "line": 136,
+  "len": 14,
+  "kind": "doc",
+  "text": "    /// Whether this output is present on disk: the target path exists, and \u2014\n    /// for an entry output \u2014 the managed member resolves inside the (parseable)\n    /// config file. Read-side derivations use this instead of a bare\n    /// `exists()` so an entry deleted from a still-present config file reads\n    /// as missing.\n    ///\n    /// `containment` is the caller's intent, forwarded to\n    /// [`AnchoredPath::resolve`] \u2014 see [`Containment`].\n    ///\n    /// # Errors\n    ///\n    /// [`AnchorError`] from the two-layer containment guard (an unparseable\n    /// config file is `Ok(false)`, not an error \u2014 absence, not corruption of\n    /// grim's own state).",
+  "next": "pub fn is_present(&self, roots: &AnchorRoots, containment: Containment) -> Result<bool, AnchorError> {"
+ },
+ {
+  "file": "src/install/client_target.rs",
+  "line": 62,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Claude Code \u2014 `.claude/{skills,rules}`.",
+  "next": "#[default]"
+ },
+ {
+  "file": ".claude/hooks/conventional_commit_validator.py",
+  "line": 1,
+  "len": 3,
+  "kind": "line",
+  "text": "# /// script\n# requires-python = \">=3.10\"\n# ///",
+  "next": "\"\"\"PreToolUse hook (Bash): validate conventional commit message format."
+ },
+ {
+  "file": "src/tui/render.rs",
+  "line": 348,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Which of [`Self::detail_tabs`] is showing.",
+  "next": "pub detail_tab: super::detail::DetailTab,"
+ },
+ {
+  "file": "src/command/release.rs",
+  "line": 118,
+  "len": 3,
+  "kind": "doc",
+  "text": "/// The resolved `--push-registry` endpoint: network operations target\n/// `host[/prefix]`-rewritten identifiers while every baked/reported value\n/// keeps the pull name (issue #39).",
+  "next": "#[derive(Debug)]"
+ },
+ {
+  "file": "src/command/build.rs",
+  "line": 371,
+  "len": 3,
+  "kind": "line",
+  "text": "    // Same guard for the other `.toml`-shaped artifact: a `[server]` table\n    // marks an MCP descriptor, which needs `--kind mcp` (mirrors the\n    // agent-shaped-rule nudge \u2014 `.toml` stays bundle by shape).",
+  "next": "if toml::from_str::<toml::Value>(&content).is_ok_and(|v| v.get(\"server\").is_some()) {"
+ },
+ {
+  "file": "src/resolve/resolver.rs",
+  "line": 193,
+  "len": 1,
+  "kind": "line",
+  "text": "    // Re-pin the named path-sourced entries (re-pack + re-hash).",
+  "next": "resolved.extend(resolve_path_entries(set, anchor, Some(names)).await?);"
+ },
+ {
+  "file": "src/tui/app.rs",
+  "line": 1804,
+  "len": 4,
+  "kind": "line",
+  "text": "    // Intact at the locked pin \u2014 the only thing an install would still do is\n    // materialize an output the record never covered. Mirrors\n    // `status_badge::derive_badge`; `None` (no resolvable target) keeps the\n    // pre-existing behaviour.",
+  "next": "let installed_or_pending = || {"
+ },
+ {
+  "file": "src/install/install_error.rs",
+  "line": 131,
+  "len": 5,
+  "kind": "doc",
+  "text": "    /// A local path source failed to pack at install time: it is missing,\n    /// fails validation, or is unreadable. Carries the packing\n    /// [`crate::skill::SkillError`] structurally (boxed to keep the kind\n    /// small) so the `{:#}` chain and `source()` expose the real cause\n    /// rather than a flattened string.",
+  "next": "#[error(\"local source unusable\")]"
+ },
+ {
+  "file": "src/command/rate.rs",
+  "line": 437,
+  "len": 2,
+  "kind": "line",
+  "text": "    // No host resolved means nothing was chosen, by the index or by grim \u2014\n    // reporting a source there would name a decision that never happened.",
+  "next": "let host_source = host.as_ref().map(|_| host_source.as_str().to_string());"
+ },
+ {
+  "file": "src/catalog/registry_catalog.rs",
+  "line": 367,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// RFC3339 UTC timestamp of the last (re)build.",
+  "next": "built_at: String,"
+ },
+ {
+  "file": "src/config/config_error.rs",
+  "line": 26,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Attach `path` context to `kind`.",
+  "next": "pub fn new(path: impl Into<PathBuf>, kind: ConfigErrorKind) -> Self {"
+ },
+ {
+  "file": ".claude/hooks/conventional_commit_validator.py",
+  "line": 59,
+  "len": 1,
+  "kind": "line",
+  "text": "    # Try single-quoted message",
+  "next": "match = _MSG_SINGLE_QUOTE_RE.search(command)"
+ },
+ {
+  "file": "src/tui/app.rs",
+  "line": 2968,
+  "len": 2,
+  "kind": "line",
+  "text": "    // Otherwise route a dev-install record (`grim install <path>`, no\n    // declaration) through the Dev re-materialize path.",
+  "next": "let install_state = load_state(ctx).map_err(|e| anyhow::anyhow!(\"install-state load failed: {e}\"))?;"
+ },
+ {
+  "file": "src/cli/color.rs",
+  "line": 94,
+  "len": 3,
+  "kind": "line",
+  "text": "            // Precedence: NO_COLOR off > CLICOLOR_FORCE on > CLICOLOR=0 /\n            // TERM=dumb off > stdout TTY. The two off-signals share a branch \u2014\n            // both disable, and CLICOLOR_FORCE above already claimed priority.",
+  "next": "if env.no_color {"
+ },
+ {
+  "file": "src/tui/tree.rs",
+  "line": 194,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// The row's install state (snapshotted at build for the rollup).",
+  "next": "pub state: ArtifactState,"
+ },
+ {
+  "file": "src/oci/mcp.rs",
+  "line": 207,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// An `oauth.auth_server_metadata_url` that is not an https URL.",
+  "next": "#[error(\"invalid oauth auth_server_metadata_url '{0}': expected an https:// URL\")]"
+ },
+ {
+  "file": "src/catalog/rating_provider.rs",
+  "line": 390,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// The GraphQL endpoint this credential may be sent to.",
+  "next": "pub fn endpoint(&self) -> &str {"
+ },
+ {
+  "file": "src/fetch.rs",
+  "line": 105,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// The default registry for short-id expansion.",
+  "next": "pub short_id_default: String,"
+ },
+ {
+  "file": ".claude/rules/docs-quality/checks/doc_declaration.py",
+  "line": 2,
+  "len": 21,
+  "kind": "doc",
+  "text": "\"\"\"Page declaration checks for the docs-quality rule set.\n\nRules covered:\n  DOC-TYPE-01  a doc_type comment stands inside the file's first 12 lines\n  DOC-TYPE-02  the type decision reads file content only, never a file name\n  DOC-TYPE-28  the declaration is never written as YAML front matter\n  DOC-TYPE-29  the declaration never sits above an existing front matter block\n  DOC-TYPE-30  an .mdx file uses the {/* */} opener, never an HTML comment\n  DOC-DISC-13  tutorial, how-to and landing pages also declare a doc_tier\n\nDOC-TYPE-02 holds by construction. read_declaration() and classify() take text\nand take nothing else, so no directory or file name can reach the type decision.\nThe --seed mode reads a nav config, and a seed is a one-off migration proposal\nthat a human reviews, never a runtime source of truth.\n\nUsage:\n  doc_declaration.py [--root DIR] [PATH ...] [--format text|json] [--self-test]\n  doc_declaration.py --seed [--root DIR]\n\nExit codes: 0 clean, 1 findings, 2 usage or missing input.\n\"\"\"",
+  "next": "from __future__ import annotations"
+ },
+ {
+  "file": "src/tui/render.rs",
+  "line": 560,
+  "len": 3,
+  "kind": "line",
+  "text": "                // P3.2: bundle leaves carry an expand/collapse arrow glyph.\n                // F4: use UTF-8 \u25b8/\u25be (same glyphs as group rows) \u2014 no ASCII fallback.\n                // Non-bundle leaves are rendered without prefix (unchanged).",
+  "next": "let repo_text = if *is_bundle {"
+ },
+ {
+  "file": "src/lock/grimoire_lock.rs",
+  "line": 50,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Locked skills.",
+  "next": "pub skills: Vec<LockedArtifact>,"
+ }
+]

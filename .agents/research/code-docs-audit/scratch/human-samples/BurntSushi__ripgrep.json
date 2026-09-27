@@ -1,0 +1,202 @@
+[
+ {
+  "file": "crates/core/args.rs",
+  "line": 570,
+  "len": 4,
+  "kind": "doc",
+  "text": "/// High level routines for converting command line arguments into various\n/// data structures used by ripgrep.\n///\n/// Methods are sorted alphabetically.",
+  "next": "impl ArgMatches {"
+ },
+ {
+  "file": "crates/globset/src/glob.rs",
+  "line": 124,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Tests whether the given path matches this pattern or not.",
+  "next": "pub fn is_match<P: AsRef<Path>>(&self, path: P) -> bool {"
+ },
+ {
+  "file": "crates/core/main.rs",
+  "line": 179,
+  "len": 1,
+  "kind": "line",
+  "text": "                // Otherwise, we continue on our merry way.",
+  "next": "err_message!(\"{}: {}\", subject.path().display(), err);"
+ },
+ {
+  "file": "crates/core/path_printer.rs",
+  "line": 67,
+  "len": 5,
+  "kind": "doc",
+  "text": "    /// A path terminator.\n    ///\n    /// When printing a path, it will be by terminated by the given byte.\n    ///\n    /// This is set to `\\n` by default.",
+  "next": "pub fn terminator(&mut self, terminator: u8) -> &mut PathPrinterBuilder {"
+ },
+ {
+  "file": "crates/ignore/src/lib.rs",
+  "line": 261,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Turn an error into a tagged error with the given file path.",
+  "next": "fn with_path<P: AsRef<Path>>(self, path: P) -> Error {"
+ },
+ {
+  "file": "crates/ignore/src/gitignore.rs",
+  "line": 33,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// The original glob string.",
+  "next": "original: String,"
+ },
+ {
+  "file": "crates/ignore/src/dir.rs",
+  "line": 112,
+  "len": 2,
+  "kind": "doc",
+  "text": "    /// The absolute base path of this matcher. Populated only if parent\n    /// directories are added.",
+  "next": "absolute_base: Option<Arc<PathBuf>>,"
+ },
+ {
+  "file": "crates/printer/src/lib.rs",
+  "line": 25,
+  "len": 1,
+  "kind": "doc",
+  "text": "# Example",
+  "next": "This example shows how to create a \"standard\" printer and execute a search."
+ },
+ {
+  "file": "crates/printer/src/standard.rs",
+  "line": 573,
+  "len": 1,
+  "kind": "line",
+  "text": "        // Emitting a line for each match requires finding each match.",
+  "next": "|| self.config.per_match"
+ },
+ {
+  "file": "crates/core/args.rs",
+  "line": 856,
+  "len": 5,
+  "kind": "doc",
+  "text": "    /// Return a builder for recursively traversing a directory while\n    /// respecting ignore rules.\n    ///\n    /// If there was a problem parsing the CLI arguments necessary for\n    /// constructing the builder, then this returns an error.",
+  "next": "fn walker_builder(&self, paths: &[PathBuf]) -> Result<WalkBuilder> {"
+ },
+ {
+  "file": "crates/ignore/src/gitignore.rs",
+  "line": 606,
+  "len": 1,
+  "kind": "doc",
+  "text": "/// Expands ~ in file paths to the value of $HOME.",
+  "next": "fn expand_tilde(path: &str) -> String {"
+ },
+ {
+  "file": "crates/core/app.rs",
+  "line": 237,
+  "len": 2,
+  "kind": "doc",
+  "text": "        /// The short name of a flag. This is empty if a flag only has a long\n        /// name.",
+  "next": "short: Option<&'static str>,"
+ },
+ {
+  "file": "crates/printer/src/summary.rs",
+  "line": 497,
+  "len": 6,
+  "kind": "doc",
+  "text": "    /// Return a reference to the stats produced by the printer for all\n    /// searches executed on this sink.\n    ///\n    /// This only returns stats if they were requested via the\n    /// [`SummaryBuilder`](struct.SummaryBuilder.html)\n    /// configuration.",
+  "next": "pub fn stats(&self) -> Option<&Stats> {"
+ },
+ {
+  "file": "crates/core/messages.rs",
+  "line": 71,
+  "len": 1,
+  "kind": "doc",
+  "text": "/// Indicate that ripgrep has come across a non-fatal error.",
+  "next": "pub fn set_errored() {"
+ },
+ {
+  "file": "crates/printer/src/standard.rs",
+  "line": 257,
+  "len": 10,
+  "kind": "doc",
+  "text": "    /// Set the bytes that will be used to replace each occurrence of a match\n    /// found.\n    ///\n    /// The replacement bytes given may include references to capturing groups,\n    /// which may either be in index form (e.g., `$2`) or can reference named\n    /// capturing groups if present in the original pattern (e.g., `$foo`).\n    ///\n    /// For documentation on the full format, please see the `Capture` trait's\n    /// `interpolate` method in the\n    /// [grep-printer](https://docs.rs/grep-printer) crate.",
+  "next": "pub fn replacement("
+ },
+ {
+  "file": "crates/core/app.rs",
+  "line": 435,
+  "len": 9,
+  "kind": "doc",
+  "text": "    /// Set the possible values for this argument. If this argument is not\n    /// a flag, then this panics.\n    ///\n    /// If the end user provides any value other than what is given here, then\n    /// clap will report an error to the user.\n    ///\n    /// Note that this will suppress clap's automatic output of possible values\n    /// when using -h/--help, so users of this method should provide\n    /// appropriate documentation for the choices in the \"long\" help text.",
+  "next": "fn possible_values(mut self, values: &[&'static str]) -> RGArg {"
+ },
+ {
+  "file": "crates/cli/src/process.rs",
+  "line": 287,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Create a reader for stderr that reads contents asynchronously.",
+  "next": "fn r#async(mut stderr: process::ChildStderr) -> StderrReader {"
+ },
+ {
+  "file": "crates/ignore/src/dir.rs",
+  "line": 179,
+  "len": 4,
+  "kind": "line",
+  "text": "                // There's not much we can do here, so just return our\n                // existing matcher. We drop the error to be consistent\n                // with our general pattern of ignoring I/O errors when\n                // processing ignore files.",
+  "next": "return (self.clone(), None);"
+ },
+ {
+  "file": "crates/ignore/src/types.rs",
+  "line": 233,
+  "len": 2,
+  "kind": "doc",
+  "text": "    /// Creates a new file type matcher that never matches any path and\n    /// contains no file type definitions.",
+  "next": "pub fn empty() -> Types {"
+ },
+ {
+  "file": "crates/regex/src/literal.rs",
+  "line": 308,
+  "len": 4,
+  "kind": "line",
+  "text": "    // All we do at the moment is look for prefixes and suffixes. If both\n    // are empty, then we report nothing. We should be able to do better than\n    // this, but we'll need something more expressive than just a \"set of\n    // literals.\"",
+  "next": "let lcp = lits2.longest_common_prefix();"
+ },
+ {
+  "file": "crates/ignore/src/dir.rs",
+  "line": 500,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Returns an iterator over parent ignore matchers, including this one.",
+  "next": "pub fn parents(&self) -> Parents<'_> {"
+ },
+ {
+  "file": "crates/ignore/src/gitignore.rs",
+  "line": 313,
+  "len": 6,
+  "kind": "doc",
+  "text": "    /// Create a new builder for a gitignore file.\n    ///\n    /// The path given should be the path at which the globs for this gitignore\n    /// file should be matched. Note that paths are always matched relative\n    /// to the root path given here. Generally, the root path should correspond\n    /// to the *directory* containing a `.gitignore` file.",
+  "next": "pub fn new<P: AsRef<Path>>(root: P) -> GitignoreBuilder {"
+ },
+ {
+  "file": "crates/ignore/src/default_types.rs",
+  "line": 1,
+  "len": 10,
+  "kind": "doc",
+  "text": "/// This list represents the default file types that ripgrep ships with. In\n/// general, any file format is fair game, although it should generally be\n/// limited to reasonably popular open formats. For other cases, you can add\n/// types to each invocation of ripgrep with the '--type-add' flag.\n///\n/// If you would like to add or improve this list, please file a PR:\n/// <https://github.com/BurntSushi/ripgrep>.\n///\n/// Please try to keep this list sorted lexicographically and wrapped to 79\n/// columns (inclusive).",
+  "next": "#[rustfmt::skip]"
+ },
+ {
+  "file": "crates/cli/src/pattern.rs",
+  "line": 71,
+  "len": 6,
+  "kind": "doc",
+  "text": "/// Convert arbitrary bytes into a regular expression pattern.\n///\n/// This conversion fails if the given pattern is not valid UTF-8, in which\n/// case, a targeted error with more information about where the invalid UTF-8\n/// occurs is given. The error also suggests the use of hex escape sequences,\n/// which are supported by many regex engines.",
+  "next": "pub fn pattern_from_bytes("
+ },
+ {
+  "file": "crates/ignore/src/lib.rs",
+  "line": 424,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Returns true if the match result didn't match any globs.",
+  "next": "pub fn is_none(&self) -> bool {"
+ }
+]

@@ -1,0 +1,69 @@
+{
+  "PY-01": {
+    "rules": [
+      "    \"\"\"Return the lowercase hex sha256 of everything an open descriptor holds.",
+      "",
+      "    The descriptor is rewound first and left at end of file.",
+      "",
+      "    Hashing through the descriptor, not re-opening the path as `_hash_path`",
+      "    does, makes the digest cover the exact bytes being installed; a second path",
+      "    lookup opens a window to swap the file between verification and use.",
+      "    \"\"\""
+    ],
+    "tags": "contract: summary (folded 'lowercase hex' Returns into it), fd rewound/left at EOF; guard: hash via descriptor not re-opened path (swap window), names sibling _hash_path; dropped: Args/Returns section scaffolding and tautological 'The descriptor'."
+  },
+  "PY-05": {
+    "rules": [
+      "    \"\"\"Look `name` up on `search_path`, entry by entry, refusing unsafe hits.",
+      "",
+      "    A hit in `cwd` (with `windows`) or in a group- or other-writable directory",
+      "    (without it) is refused as a binary-injection vector (CWE-426).",
+      "",
+      "    Returns:",
+      "        The first acceptable hit, as an absolute path, or `None`.",
+      "    \"\"\"",
+      "    # Each entry's hit is vetted rather than trusting one `shutil.which` call, which on Windows",
+      "    # searches the current directory ahead of PATH and so trusts a binary planted there.",
+      "    # `cwd` and each hit are resolved first, or a relative entry like `.` slips past the `cwd` comparison.",
+      "    # The hit is resolved, or the caller is handed a relative path that goes stale on the next `chdir`."
+    ],
+    "tags": "contract: summary, refusal rules per windows/cwd (folded windows+cwd args), Returns absolute-or-None; pointer: CWE-426; guards moved to plain # comments: per-entry vetting vs single shutil.which (cwd-first on Windows), resolve before cwd comparison (relative '.'), resolve hit (stale after chdir); dropped: tautological Args name/search_path and section scaffolding."
+  },
+  "PY-06": {
+    "rules": [
+      "    \"\"\"Return the digest the manifest body must have, or `None` when none is required.",
+      "",
+      "    A remote read off `CANONICAL_DIST_HOST` or with a mirror in play needs a pin,",
+      "    since TLS there proves reachability rather than authenticity. A local source",
+      "    (`url` and `origin` are `None`) is exempt: its bytes have provenance, and",
+      "    hashing them against a digest derived from themselves proves nothing.",
+      "",
+      "    A `dist/<sha256>.json` URL pins itself. That digest must come from the",
+      "    caller-supplied URL string before any request goes out, or a redirect could",
+      "    choose which digest the body is checked against.",
+      "",
+      "    Raises:",
+      "        DistManifestError: A pin is required and missing, or the URL and the",
+      "            explicit `sha256=` name different digests.",
+      "    \"\"\""
+    ],
+    "tags": "contract: summary (Returns folded in), when a pin is required, local-source None url/origin, snapshot URL self-pin, Raises; why: TLS proves reachability not authenticity, local bytes self-hash proves nothing (one sentence each); guard: digest from caller-supplied URL before any request, or a redirect chooses it; pointer: CANONICAL_DIST_HOST (resolves); dropped: tautological Args source/mirrored and section scaffolding."
+  },
+  "PY-07": {
+    "rules": [
+      "    \"\"\"Build an ocx argv: `[exe, *global_flags, *command, *positionals, --, *child]`.",
+      "",
+      "    `global_flags` precede the subcommand because ocx's clap grammar accepts",
+      "    global flags nowhere else. `command` is the SDK-composed subcommand path",
+      "    plus its flags; `positionals` are identifiers ocx resolves itself. `child`",
+      "    is the argv of a process ocx hosts (`run`, `package exec`), placed behind",
+      "    `--` where a leading dash is safe; when it is empty no `--` is written.",
+      "",
+      "    Raises:",
+      "        ValueError: A positional starts with `-`, so ocx would parse it as a",
+      "            flag (CWE-88).",
+      "    \"\"\""
+    ],
+    "tags": "guard: global flags before subcommand (clap accepts them nowhere else), leading-dash positional raises (kept in Raises, CWE-88 pointer); contract: summary layout, command/positionals/child roles, child behind --, empty child writes no --; dropped: Returns 'The argv, ready for run_command or spawn' (tautology), tautological exe/global_flags Args, duplicate 'Always guarded' clause (covered by Raises)."
+  }
+}

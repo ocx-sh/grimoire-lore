@@ -1,0 +1,202 @@
+[
+ {
+  "file": "samples/guide/src/main/java/okhttp3/recipes/kt/YubikeyClientAuth.kt",
+  "line": 83,
+  "len": 1,
+  "kind": "line",
+  "text": "    // An example test URL that returns client certificate details.",
+  "next": "val request = Request.Builder()"
+ },
+ {
+  "file": "okhttp-sse/src/main/kotlin/okhttp3/sse/internal/ServerSentEventReader.kt",
+  "line": 90,
+  "len": 1,
+  "kind": "line",
+  "text": "            // Skip the line and newline",
+  "next": "source.skip(lineEnd)"
+ },
+ {
+  "file": "okhttp/src/jvmMain/kotlin/okhttp3/internal/http2/Http2Connection.kt",
+  "line": 94,
+  "len": 1,
+  "kind": "doc",
+  "text": "  /** User code to run in response to push promise events. */",
+  "next": "private val pushObserver: PushObserver = builder.pushObserver"
+ },
+ {
+  "file": "okhttp/src/jvmMain/kotlin/okhttp3/ResponseBody.kt",
+  "line": 117,
+  "len": 6,
+  "kind": "doc",
+  "text": "   * Returns the response as a byte array.\n   *\n   * This method loads entire response body into memory. If the response body is very large this\n   * may trigger an [OutOfMemoryError]. Prefer to stream the response body if this is a\n   * possibility for your response.\n   */",
+  "next": "@Throws(IOException::class)"
+ },
+ {
+  "file": "okhttp/src/jvmMain/kotlin/okhttp3/internal/http2/Hpack.kt",
+  "line": 249,
+  "len": 1,
+  "kind": "line",
+  "text": "    // referencedHeaders is relative to nextHeaderIndex + 1.",
+  "next": "private fun dynamicTableIndex(index: Int): Int {"
+ },
+ {
+  "file": "okhttp-tls/src/main/kotlin/okhttp3/tls/internal/der/CertificateAdapters.kt",
+  "line": 297,
+  "len": 7,
+  "kind": "doc",
+  "text": "   * ```\n   * Name ::= CHOICE {\n   *   -- only one possibility for now --\n   *   rdnSequence  RDNSequence\n   * }\n   * ```\n   */",
+  "next": "internal val name: DerAdapter<Pair<DerAdapter<*>, Any?>> = Adapters.choice("
+ },
+ {
+  "file": "okhttp/src/jvmMain/kotlin/okhttp3/internal/http/RetryAndFollowUpInterceptor.kt",
+  "line": 197,
+  "len": 3,
+  "kind": "line",
+  "text": "    // An example of one we might want to retry with a different route is a problem connecting to a\n    // proxy and would manifest as a standard IOException. Unless it is one we know we should not\n    // retry, we return true and try a new route.",
+  "next": "return true"
+ },
+ {
+  "file": "okhttp/src/jvmMain/kotlin/okhttp3/internal/http2/Http2Connection.kt",
+  "line": 110,
+  "len": 3,
+  "kind": "line",
+  "text": "    // Flow control was designed more for servers, or proxies than edge clients. If we are a client,\n    // set the flow control window to 16MiB.  This avoids thrashing window updates every 64KiB, yet\n    // small enough to avoid blowing up the heap.",
+  "next": "if (builder.client) {"
+ },
+ {
+  "file": "okhttp/src/jvmMain/kotlin/okhttp3/internal/tls/BasicCertificateChainCleaner.kt",
+  "line": 99,
+  "len": 5,
+  "kind": "doc",
+  "text": "   * Returns true if [toVerify] was signed by [signingCert]'s public key.\n   *\n   * @param minIntermediates the minimum number of intermediate certificates in [signingCert]. This\n   *     is -1 if signing cert is a lone self-signed certificate.\n   */",
+  "next": "private fun verifySignature("
+ },
+ {
+  "file": "okhttp/src/jvmMain/kotlin/okhttp3/Cookie.kt",
+  "line": 84,
+  "len": 1,
+  "kind": "doc",
+  "text": "  /** Returns true if this cookie does not expire at the end of the current session. */",
+  "next": "@get:JvmName(\"persistent\") val persistent: Boolean, // True if 'expires' or 'max-age' is present."
+ },
+ {
+  "file": "okhttp/src/jvmMain/kotlin/okhttp3/EventListener.kt",
+  "line": 223,
+  "len": 7,
+  "kind": "doc",
+  "text": "   * Invoked after a connection has been released for the `call`.\n   *\n   * This method is always invoked after [connectionAcquired].\n   *\n   * This can be invoked more than 1 time for a single [Call]. For example, if the response to the\n   * [Call.request] is a redirect to a different address.\n   */",
+  "next": "open fun connectionReleased("
+ },
+ {
+  "file": "okhttp/src/jvmMain/kotlin/okhttp3/internal/platform/Platform.kt",
+  "line": 195,
+  "len": 2,
+  "kind": "line",
+  "text": "    // This explicit check avoids activating in Android Studio with Android specific classes\n    // available when running plugins inside the IDE.",
+  "next": "val isAndroid: Boolean"
+ },
+ {
+  "file": "mockwebserver/src/main/kotlin/mockwebserver3/MockWebServer.kt",
+  "line": 345,
+  "len": 7,
+  "kind": "doc",
+  "text": "   * Scripts [response] to be returned to a request made in sequence. The first request is\n   * served by the first enqueued response; the second request by the second enqueued response; and\n   * so on.\n   *\n   * @throws ClassCastException if the default dispatcher has been\n   * replaced with [setDispatcher][dispatcher].\n   */",
+  "next": "fun enqueue(response: MockResponse) ="
+ },
+ {
+  "file": "okhttp/src/jvmMain/kotlin/okhttp3/internal/connection/ExchangeFinder.kt",
+  "line": 190,
+  "len": 1,
+  "kind": "line",
+  "text": "      // Use a route from a preceding coalesced connection.",
+  "next": "routes = null"
+ },
+ {
+  "file": "okhttp/build.gradle.kts",
+  "line": 45,
+  "len": 1,
+  "kind": "line",
+  "text": "        // graal build support",
+  "next": "compileOnly(Dependencies.nativeImageSvm)"
+ },
+ {
+  "file": "okhttp/src/jvmMain/kotlin/okhttp3/CacheControl.kt",
+  "line": 403,
+  "len": 3,
+  "kind": "doc",
+  "text": "     * Returns the next index in this at or after [startIndex] that is a character from\n     * [characters]. Returns the input length if none of the requested characters can be found.\n     */",
+  "next": "private fun String.indexOfElement(characters: String, startIndex: Int = 0): Int {"
+ },
+ {
+  "file": "okhttp/src/jvmMain/kotlin/okhttp3/Connection.kt",
+  "line": 22,
+  "len": 47,
+  "kind": "doc",
+  "text": " * The sockets and streams of an HTTP, HTTPS, or HTTPS+HTTP/2 connection. May be used for multiple\n * HTTP request/response exchanges. Connections may be direct to the origin server or via a proxy.\n *\n * Typically instances of this class are created, connected and exercised automatically by the HTTP\n * client. Applications may use this class to monitor HTTP connections as members of a\n * [connection pool][ConnectionPool].\n *\n * Do not confuse this class with the misnamed `HttpURLConnection`, which isn't so much a connection\n * as a single request/response exchange.\n *\n * ## Modern TLS\n *\n * There are trade-offs when selecting which options to include when negotiating a secure connection\n * to a remote host. Newer TLS options are quite useful:\n *\n *  * Server Name Indication (SNI) enables one IP address to negotiate secure connections for\n *    multiple domain names.\n *\n *  * Application Layer Protocol Negotiation (ALPN) enables the HTTPS port (443) to be used to\n *    negotiate HTTP/2.\n *\n * Unfortunately, older HTTPS servers refuse to connect when such options are presented. Rather than\n * avoiding these options entirely, this class allows a connection to be attempted with modern\n * options and then retried without them should the attempt fail.\n *\n * ## Connection Reuse\n *\n * Each connection can carry a varying number of streams, depending on the underlying protocol being\n * used. HTTP/1.x connections can carry either zero or one streams. HTTP/2 connections can carry any\n * number of streams, dynamically configured with `SETTINGS_MAX_CONCURRENT_STREAMS`. A connection\n * currently carrying zero streams is an idle stream. We keep it alive because reusing an existing\n * connection is typically faster than establishing a new one.\n *\n * When a single logical call requires multiple streams due to redirects or authorization\n * challenges, we prefer to use the same physical connection for all streams in the sequence. There\n * are potential performance and behavior consequences to this preference. To support this feature,\n * this class separates _allocations_ from _streams_. An allocation is created by a call, used for\n * one or more streams, and then released. An allocated connection won't be stolen by other calls\n * while a redirect or authorization challenge is being handled.\n *\n * When the maximum concurrent streams limit is reduced, some allocations will be rescinded.\n * Attempting to create new streams on these allocations will fail.\n *\n * Note that an allocation may be released before its stream is completed. This is intended to make\n * bookkeeping easier for the caller: releasing the allocation as soon as the terminal stream has\n * been found. But only complete the stream once its data stream has been exhausted.\n */",
+  "next": "interface Connection {"
+ },
+ {
+  "file": "samples/guide/src/main/java/okhttp3/recipes/kt/WiresharkExample.kt",
+  "line": 104,
+  "len": 1,
+  "kind": "line",
+  "text": "              // Give it time to start collecting",
+  "next": "Thread.sleep(2000)"
+ },
+ {
+  "file": "okhttp/src/jvmMain/kotlin/okhttp3/internal/http2/Http2Writer.kt",
+  "line": 138,
+  "len": 1,
+  "kind": "doc",
+  "text": "  /** The maximum size of bytes that may be sent in a single call to [data]. */",
+  "next": "fun maxDataLength(): Int = maxFrameSize"
+ },
+ {
+  "file": "okhttp/src/jvmMain/kotlin/okhttp3/internal/cache/CacheInterceptor.kt",
+  "line": 64,
+  "len": 1,
+  "kind": "line",
+  "text": "    // If we're forbidden from using the network and the cache is insufficient, fail.",
+  "next": "if (networkRequest == null && cacheResponse == null) {"
+ },
+ {
+  "file": "okhttp/src/jvmTest/java/okhttp3/RecordedResponse.java",
+  "line": 122,
+  "len": 1,
+  "kind": "doc",
+  "text": "  /** Asserts that the current response didn't use the network. */",
+  "next": "public RecordedResponse assertNoNetworkResponse() {"
+ },
+ {
+  "file": "okhttp/src/jvmMain/kotlin/okhttp3/internal/tls/OkHostnameVerifier.kt",
+  "line": 30,
+  "len": 4,
+  "kind": "doc",
+  "text": " * A HostnameVerifier consistent with [RFC 2818][rfc_2818].\n *\n * [rfc_2818]: http://www.ietf.org/rfc/rfc2818.txt\n */",
+  "next": "@Suppress(\"NAME_SHADOWING\")"
+ },
+ {
+  "file": "okhttp/src/jvmMain/kotlin/okhttp3/EventListener.kt",
+  "line": 394,
+  "len": 4,
+  "kind": "doc",
+  "text": "   * Invoked when a call fails permanently.\n   *\n   * This method is always invoked after [callStart].\n   */",
+  "next": "open fun callFailed("
+ },
+ {
+  "file": "okhttp/src/jvmMain/kotlin/okhttp3/MultipartBody.kt",
+  "line": 237,
+  "len": 3,
+  "kind": "doc",
+  "text": "     * Set the MIME type. Expected values for `type` are [MIXED] (the default), [ALTERNATIVE],\n     * [DIGEST], [PARALLEL] and [FORM].\n     */",
+  "next": "fun setType(type: MediaType) = apply {"
+ },
+ {
+  "file": "okhttp/src/jvmMain/kotlin/okhttp3/internal/connection/RealConnectionPool.kt",
+  "line": 70,
+  "len": 7,
+  "kind": "doc",
+  "text": "   * Attempts to acquire a recycled connection to [address] for [call]. Returns true if a connection\n   * was acquired.\n   *\n   * If [routes] is non-null these are the resolved routes (ie. IP addresses) for the connection.\n   * This is used to coalesce related domains to the same HTTP/2 connection, such as `square.com`\n   * and `square.ca`.\n   */",
+  "next": "fun callAcquirePooledConnection("
+ }
+]

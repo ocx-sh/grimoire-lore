@@ -1,0 +1,110 @@
+{
+ "python|other": {
+  "files": 2,
+  "code": 144,
+  "doc": 0,
+  "line": 220,
+  "interface": 0,
+  "license": 0,
+  "directive": 1,
+  "blank": 108,
+  "trailing": 60,
+  "code_chars": 5666,
+  "comment_chars": 10122,
+  "ratio": 1.528,
+  "ratio_chars": 1.786,
+  "doc_blocks": {
+   "count": 0
+  },
+  "line_blocks": {
+   "count": 91,
+   "p50": 2,
+   "p90": 4,
+   "p99": 12,
+   "max": 12,
+   "gt3": 11,
+   "gt5": 2,
+   "gt10": 1,
+   "gt20": 0,
+   "lines_in_gt5": 20
+  }
+ },
+ "python|prod": {
+  "files": 20,
+  "code": 3594,
+  "doc": 1348,
+  "line": 441,
+  "interface": 0,
+  "license": 9,
+  "directive": 2,
+  "blank": 1029,
+  "trailing": 90,
+  "code_chars": 104217,
+  "comment_chars": 68932,
+  "ratio": 0.498,
+  "ratio_chars": 0.661,
+  "doc_blocks": {
+   "count": 224,
+   "p50": 5,
+   "p90": 11,
+   "p99": 39,
+   "max": 47,
+   "gt3": 132,
+   "gt5": 92,
+   "gt10": 33,
+   "gt20": 9,
+   "lines_in_gt5": 1044
+  },
+  "line_blocks": {
+   "count": 267,
+   "p50": 1,
+   "p90": 3,
+   "p99": 6,
+   "max": 10,
+   "gt3": 20,
+   "gt5": 6,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 41
+  }
+ },
+ "python|test": {
+  "files": 15,
+  "code": 3983,
+  "doc": 178,
+  "line": 129,
+  "interface": 0,
+  "license": 0,
+  "directive": 0,
+  "blank": 883,
+  "trailing": 16,
+  "code_chars": 121285,
+  "comment_chars": 13387,
+  "ratio": 0.077,
+  "ratio_chars": 0.11,
+  "doc_blocks": {
+   "count": 86,
+   "p50": 1,
+   "p90": 4,
+   "p99": 11,
+   "max": 11,
+   "gt3": 10,
+   "gt5": 3,
+   "gt10": 1,
+   "gt20": 0,
+   "lines_in_gt5": 25
+  },
+  "line_blocks": {
+   "count": 109,
+   "p50": 1,
+   "p90": 2,
+   "p99": 3,
+   "max": 3,
+   "gt3": 0,
+   "gt5": 0,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 0
+  }
+ }
+}

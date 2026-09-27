@@ -1,0 +1,202 @@
+[
+ {
+  "file": "src/pip/_vendor/pygments/formatters/terminal256.py",
+  "line": 280,
+  "len": 1,
+  "kind": "line",
+  "text": "                    # outfile.write( '#' + str(ttype) + '#' )",
+  "next": "except KeyError:"
+ },
+ {
+  "file": "src/pip/_vendor/distro.py",
+  "line": 637,
+  "len": 16,
+  "kind": "doc",
+  "text": "    \"\"\"\n    Provides information about a OS distribution.\n\n    This package creates a private module-global instance of this class with\n    default initialization arguments, that is used by the\n    `consolidated accessor functions`_ and `single source accessor functions`_.\n    By using default initialization arguments, that module-global instance\n    returns data about the current OS distribution (i.e. the distro this\n    package runs on).\n\n    Normally, it is not necessary to create additional instances of this class.\n    However, in situations where control is needed over the exact data sources\n    that are used, instances of this class can be created with a specific\n    distro release file, or a specific os-release file, or without invoking the\n    lsb_release command.\n    \"\"\"",
+  "next": "def __init__("
+ },
+ {
+  "file": "src/pip/_vendor/pygments/formatters/html.py",
+  "line": 921,
+  "len": 5,
+  "kind": "doc",
+  "text": "        \"\"\"\n        Wrap the ``source``, which is a generator yielding\n        individual lines, in custom generators. See docstring\n        for `format`. Can be overridden.\n        \"\"\"",
+  "next": "if self.wrapcode:"
+ },
+ {
+  "file": "src/pip/_vendor/html5lib/filters/sanitizer.py",
+  "line": 1,
+  "len": 8,
+  "kind": "doc",
+  "text": "\"\"\"Deprecated from html5lib 1.1.\n\nSee `here <https://github.com/html5lib/html5lib-python/issues/443>`_ for\ninformation about its deprecation; `Bleach <https://github.com/mozilla/bleach>`_\nis recommended as a replacement. Please let us know in the aforementioned issue\nif Bleach is unsuitable for your needs.\n\n\"\"\"",
+  "next": "from __future__ import absolute_import, division, unicode_literals"
+ },
+ {
+  "file": "src/pip/_internal/operations/prepare.py",
+  "line": 464,
+  "len": 2,
+  "kind": "line",
+  "text": "            # Check if the relevant file is already available\n            # in the download directory",
+  "next": "file_path = None"
+ },
+ {
+  "file": "src/pip/_vendor/pkg_resources/__init__.py",
+  "line": 3031,
+  "len": 1,
+  "kind": "line",
+  "text": "        # Including any condition expressions",
+  "next": "for req in self._parsed_pkg_info.get_all('Requires-Dist') or []:"
+ },
+ {
+  "file": "src/pip/_vendor/rich/layout.py",
+  "line": 48,
+  "len": 1,
+  "kind": "doc",
+  "text": "    \"\"\"Requested splitter does not exist.\"\"\"",
+  "next": "class _Placeholder:"
+ },
+ {
+  "file": "src/pip/_vendor/requests/auth.py",
+  "line": 287,
+  "len": 4,
+  "kind": "line",
+  "text": "            # In the case of HTTPDigestAuth being reused and the body of\n            # the previous request was a file-like object, pos has the\n            # file position of the previous body. Ensure it's set to\n            # None.",
+  "next": "self._thread_local.pos = None"
+ },
+ {
+  "file": "src/pip/_vendor/distlib/locators.py",
+  "line": 2,
+  "len": 5,
+  "kind": "line",
+  "text": "#\n# Copyright (C) 2012-2015 Vinay Sajip.\n# Licensed to the Python Software Foundation under a contributor agreement.\n# See LICENSE.txt and CONTRIBUTORS.txt.\n#",
+  "next": "import gzip"
+ },
+ {
+  "file": "src/pip/_vendor/urllib3/contrib/securetransport.py",
+  "line": 880,
+  "len": 5,
+  "kind": "doc",
+  "text": "        \"\"\"\n        Sets the ALPN protocols that will later be set on the context.\n\n        Raises a NotImplementedError if ALPN is not supported.\n        \"\"\"",
+  "next": "if not hasattr(Security, \"SSLSetALPNProtocols\"):"
+ },
+ {
+  "file": "src/pip/_internal/utils/logging.py",
+  "line": 34,
+  "len": 3,
+  "kind": "doc",
+  "text": "    \"\"\"\n    Raised if BrokenPipeError occurs for the stdout stream while logging.\n    \"\"\"",
+  "next": "def _is_broken_pipe_error(exc_class: Type[BaseException], exc: BaseException) -> bool:"
+ },
+ {
+  "file": "src/pip/_vendor/rich/style.py",
+  "line": 617,
+  "len": 8,
+  "kind": "doc",
+  "text": "        \"\"\"Combine styles and get result.\n\n        Args:\n            styles (Iterable[Style]): Styles to combine.\n\n        Returns:\n            Style: A new style instance.\n        \"\"\"",
+  "next": "iter_styles = iter(styles)"
+ },
+ {
+  "file": "src/pip/_vendor/html5lib/html5parser.py",
+  "line": 1003,
+  "len": 1,
+  "kind": "line",
+  "text": "            # This must be bad for performance",
+  "next": "if (self.parser.framesetOK and"
+ },
+ {
+  "file": "src/pip/_internal/network/auth.py",
+  "line": 88,
+  "len": 12,
+  "kind": "doc",
+  "text": "        \"\"\"Return the original index URL matching the requested URL.\n\n        Cached or dynamically generated credentials may work against\n        the original index URL rather than just the netloc.\n\n        The provided url should have had its username and password\n        removed already. If the original index url had credentials then\n        they will be included in the return value.\n\n        Returns None if no matching index was found, or if --no-index\n        was specified by the user.\n        \"\"\"",
+  "next": "if not url or not self.index_urls:"
+ },
+ {
+  "file": "src/pip/_internal/network/xmlrpc.py",
+  "line": 20,
+  "len": 3,
+  "kind": "doc",
+  "text": "    \"\"\"Provide a `xmlrpclib.Transport` implementation via a `PipSession`\n    object.\n    \"\"\"",
+  "next": "def __init__("
+ },
+ {
+  "file": "src/pip/_vendor/packaging/_musllinux.py",
+  "line": 23,
+  "len": 5,
+  "kind": "doc",
+  "text": "    \"\"\"Detect musl libc location by parsing the Python executable.\n\n    Based on: https://gist.github.com/lyssdod/f51579ae8d93c8657a5564aefc2ffbca\n    ELF header: https://refspecs.linuxfoundation.org/elf/gabi4+/ch4.eheader.html\n    \"\"\"",
+  "next": "f.seek(0)"
+ },
+ {
+  "file": "src/pip/_vendor/rich/traceback.py",
+  "line": 342,
+  "len": 1,
+  "kind": "doc",
+  "text": "            \"\"\"Don't allow exceptions from __str__ to propegate.\"\"\"",
+  "next": "try:"
+ },
+ {
+  "file": "src/pip/_internal/vcs/git.py",
+  "line": 450,
+  "len": 2,
+  "kind": "line",
+  "text": "        # Works around an apparent Git bug\n        # (see https://article.gmane.org/gmane.comp.version-control.git/146500)",
+  "next": "scheme, netloc, path, query, fragment = urlsplit(url)"
+ },
+ {
+  "file": "src/pip/_internal/configuration.py",
+  "line": 356,
+  "len": 1,
+  "kind": "line",
+  "text": "        # Use the highest priority parser.",
+  "next": "return parsers[-1]"
+ },
+ {
+  "file": "src/pip/_internal/vcs/versioncontrol.py",
+  "line": 275,
+  "len": 1,
+  "kind": "line",
+  "text": "    # Iterable of environment variable names to pass to call_subprocess().",
+  "next": "unset_environ: Tuple[str, ...] = ()"
+ },
+ {
+  "file": "src/pip/_internal/vcs/git.py",
+  "line": 281,
+  "len": 2,
+  "kind": "line",
+  "text": "                # Only do a checkout if the current commit id doesn't match\n                # the requested revision.",
+  "next": "if not self.is_commit_id_equal(dest, rev_options.rev):"
+ },
+ {
+  "file": "src/pip/_vendor/rich/color_triplet.py",
+  "line": 5,
+  "len": 1,
+  "kind": "doc",
+  "text": "    \"\"\"The red, green, and blue components of a color.\"\"\"",
+  "next": "red: int"
+ },
+ {
+  "file": "src/pip/_vendor/rich/palette.py",
+  "line": 59,
+  "len": 1,
+  "kind": "doc",
+  "text": "            \"\"\"Get the distance to a color.\"\"\"",
+  "next": "red2, green2, blue2 = get_color(index)"
+ },
+ {
+  "file": "src/pip/_vendor/pygments/lexers/__init__.py",
+  "line": 137,
+  "len": 1,
+  "kind": "line",
+  "text": "        # This empty dict will contain the namespace for the exec'd file",
+  "next": "custom_namespace = {}"
+ },
+ {
+  "file": "src/pip/_vendor/urllib3/contrib/securetransport.py",
+  "line": 858,
+  "len": 1,
+  "kind": "line",
+  "text": "        # For now, we just require the default cipher string.",
+  "next": "if ciphers != util.ssl_.DEFAULT_CIPHERS:"
+ }
+]

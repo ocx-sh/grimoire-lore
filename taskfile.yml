@@ -203,6 +203,22 @@ tasks:
       # resolves. `--forbid` keeps workstation paths, the corpus, and the
       # anonymised fleet module's names out of a shareable artifact.
       - "{{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' --forbid 'research-lang/exemplars' --forbid 'find_ocx' --forbid 'ocx.sh/' --forbid 'ocx.lock' rules/cmake-build.md rules/cpp-packaging.md skills/cmake-dependency-triage skills/cmake-modernize"
+      #
+      # The code-comments set is checked WITHOUT a root, for the CSS and JVM
+      # reason: it globs one extension per language across a dozen languages,
+      # an extension glob for a language cannot be a typo, and no single tree
+      # carries every one of them. The rule .md path covers its support
+      # directory, fixtures included. `--forbid` keeps workstation paths and
+      # the research corpus out of a shareable artifact.
+      - "{{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' rules/code-docs.md skills/code-docs-cleanup"
+      #
+      # Its checks carry their own fixtures and --self-test, like docs-quality's
+      # above. The cleanup skill's gate is one of them, and a broken one passes
+      # the cleanups it exists to fail.
+      - |
+        for s in rules/code-docs/checks/*.py; do
+          {{.PY}} "$s" --self-test || exit 1
+        done
     vars:
       CONSUMER: '{{.CONSUMER | default "../ocx"}}'
       # The fleet root, not a single repo — see the comment above.

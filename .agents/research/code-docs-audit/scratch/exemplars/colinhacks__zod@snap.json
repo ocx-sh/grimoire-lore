@@ -1,0 +1,131 @@
+{
+ "js|prod": {
+  "files": 4,
+  "code": 337,
+  "doc": 6,
+  "line": 156,
+  "interface": 0,
+  "license": 0,
+  "directive": 1,
+  "blank": 45,
+  "trailing": 6,
+  "code_chars": 8502,
+  "comment_chars": 6483,
+  "ratio": 0.481,
+  "ratio_chars": 0.763,
+  "doc_blocks": {
+   "count": 3,
+   "p50": 2,
+   "p90": 2,
+   "p99": 2,
+   "max": 2,
+   "gt3": 0,
+   "gt5": 0,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 0
+  },
+  "line_blocks": {
+   "count": 26,
+   "p50": 5,
+   "p90": 9,
+   "p99": 46,
+   "max": 46,
+   "gt3": 16,
+   "gt5": 6,
+   "gt10": 1,
+   "gt20": 1,
+   "lines_in_gt5": 91
+  }
+ },
+ "ts|other": {
+  "files": 8,
+  "code": 360,
+  "doc": 0,
+  "line": 0,
+  "interface": 0,
+  "license": 0,
+  "directive": 0,
+  "blank": 56,
+  "trailing": 0,
+  "code_chars": 7472,
+  "comment_chars": 0,
+  "ratio": 0.0,
+  "ratio_chars": 0.0,
+  "doc_blocks": {
+   "count": 0
+  },
+  "line_blocks": {
+   "count": 0
+  }
+ },
+ "ts|prod": {
+  "files": 17,
+  "code": 7065,
+  "doc": 26,
+  "line": 542,
+  "interface": 0,
+  "license": 0,
+  "directive": 4,
+  "blank": 841,
+  "trailing": 22,
+  "code_chars": 175316,
+  "comment_chars": 24950,
+  "ratio": 0.08,
+  "ratio_chars": 0.142,
+  "doc_blocks": {
+   "count": 12,
+   "p50": 3,
+   "p90": 4,
+   "p99": 4,
+   "max": 4,
+   "gt3": 2,
+   "gt5": 0,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 0
+  },
+  "line_blocks": {
+   "count": 94,
+   "p50": 7,
+   "p90": 7,
+   "p99": 16,
+   "max": 16,
+   "gt3": 70,
+   "gt5": 66,
+   "gt10": 4,
+   "gt20": 0,
+   "lines_in_gt5": 498
+  }
+ },
+ "ts|test": {
+  "files": 89,
+  "code": 7519,
+  "doc": 0,
+  "line": 790,
+  "interface": 0,
+  "license": 0,
+  "directive": 90,
+  "blank": 1412,
+  "trailing": 16,
+  "code_chars": 208897,
+  "comment_chars": 23754,
+  "ratio": 0.105,
+  "ratio_chars": 0.114,
+  "doc_blocks": {
+   "count": 0
+  },
+  "line_blocks": {
+   "count": 216,
+   "p50": 3,
+   "p90": 7,
+   "p99": 16,
+   "max": 50,
+   "gt3": 86,
+   "gt5": 36,
+   "gt10": 8,
+   "gt20": 2,
+   "lines_in_gt5": 382
+  }
+ }
+}

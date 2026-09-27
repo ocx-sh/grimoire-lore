@@ -1,7 +1,8 @@
 # typescript-essentials
 
-The OCX TypeScript set in one install: `typescript-quality` and
-`typescript-packaging`.
+The OCX TypeScript set in one install: `typescript-quality`,
+`typescript-packaging`, and the shared `code-docs` comment rule with its
+cleanup skill.
 
 ```sh
 grim add ghcr.io/ocx-sh/lore/typescript-essentials
@@ -11,6 +12,8 @@ grim add ghcr.io/ocx-sh/lore/typescript-essentials
 |---|---|---|
 | `typescript-quality` | `**/*.ts`, `**/*.tsx`, `**/*.mts`, `**/*.cts` | The type-aware lint gate, sixteen non-negotiables, and twelve depth files: gate wiring, types, async and deadlines, errors and untrusted payloads, the CLI exit-code and stream contract, resources and child processes, modules and resolution, security, testing, observability, browser SPAs, extension hosts |
 | `typescript-packaging` | `**/package.json`, `**/tsconfig*.json`, `**/eslint.config.*`, `**/biome.json*` | The tsconfig strictness floor per shape, `extends` topology, version-gated compiler flags, `engines`, `exports`, `bin`, dependency placement, lockfiles, and pack-install-execute publish verification |
+| `code-docs` | Every source extension, the TypeScript ones included | Fifteen non-negotiables and 20 MUST rows across five depth files: the guard floor, where each clause of a comment goes, record pointers and process IDs, doc text that renders into help and schemas, and the length caps with their per-file ratchet. Shared by every language set |
+| `code-docs-cleanup` | On request (skill) | A ten-step, guard-first procedure for shortening existing comments, gated by a structural diff check and a cold reason re-check per shortened guard |
 
 ## Why the two are separate
 

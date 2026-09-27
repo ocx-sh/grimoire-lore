@@ -1,0 +1,101 @@
+{
+ "rust|other": {
+  "files": 1,
+  "code": 5,
+  "doc": 0,
+  "line": 0,
+  "interface": 0,
+  "license": 0,
+  "directive": 0,
+  "blank": 3,
+  "trailing": 0,
+  "code_chars": 132,
+  "comment_chars": 0,
+  "ratio": 0.0,
+  "ratio_chars": 0.0,
+  "doc_blocks": {
+   "count": 0
+  },
+  "line_blocks": {
+   "count": 0
+  }
+ },
+ "rust|prod": {
+  "files": 86,
+  "code": 8093,
+  "doc": 261,
+  "line": 73,
+  "interface": 0,
+  "license": 0,
+  "directive": 0,
+  "blank": 1199,
+  "trailing": 0,
+  "code_chars": 186991,
+  "comment_chars": 14366,
+  "ratio": 0.041,
+  "ratio_chars": 0.077,
+  "doc_blocks": {
+   "count": 164,
+   "p50": 1,
+   "p90": 2,
+   "p99": 23,
+   "max": 26,
+   "gt3": 6,
+   "gt5": 5,
+   "gt10": 3,
+   "gt20": 2,
+   "lines_in_gt5": 76
+  },
+  "line_blocks": {
+   "count": 61,
+   "p50": 1,
+   "p90": 2,
+   "p99": 3,
+   "max": 3,
+   "gt3": 0,
+   "gt5": 0,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 0
+  }
+ },
+ "rust|test": {
+  "files": 63,
+  "code": 12025,
+  "doc": 18,
+  "line": 12,
+  "interface": 0,
+  "license": 0,
+  "directive": 0,
+  "blank": 1601,
+  "trailing": 0,
+  "code_chars": 196432,
+  "comment_chars": 1705,
+  "ratio": 0.002,
+  "ratio_chars": 0.009,
+  "doc_blocks": {
+   "count": 12,
+   "p50": 2,
+   "p90": 2,
+   "p99": 2,
+   "max": 2,
+   "gt3": 0,
+   "gt5": 0,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 0
+  },
+  "line_blocks": {
+   "count": 7,
+   "p50": 1,
+   "p90": 5,
+   "p99": 5,
+   "max": 5,
+   "gt3": 1,
+   "gt5": 0,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 0
+  }
+ }
+}

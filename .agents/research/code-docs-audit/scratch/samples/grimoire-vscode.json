@@ -1,0 +1,242 @@
+[
+ {
+  "file": "src/scopes.ts",
+  "line": 430,
+  "len": 5,
+  "kind": "doc",
+  "text": "  /** Where the last `--check` verdicts are remembered (see\n   *  {@link mergeCheckedFields}). In-memory by default; extension.ts swaps in a\n   *  Memento-backed store so they outlive a window reload \u2014 the 24h throttle\n   *  that gates the next check already does, and a throttle that outlives its\n   *  own result is what left a reloaded window on the lock proxy for a day. */",
+  "next": "checkStore: CheckStore = memoryCheckStore();"
+ },
+ {
+  "file": "src/views/details.ts",
+  "line": 214,
+  "len": 18,
+  "kind": "doc",
+  "text": "   * The catalog row each open panel was built from.\n   *\n   * `CatalogService.state().items` is a cache the SIDEBAR owns and replaces\n   * wholesale on every search \u2014 a keystroke that narrows the browse, a\n   * `ready` refresh after the view was hidden, or a cold window painting\n   * restored cards before any search has run all leave it without a row this\n   * panel is still showing. Every VM rebuild re-resolved the row from there,\n   * so the row's index-published signals (the rating, the pull count) blinked\n   * out on the second paint while the card that opened the panel \u2014 built once,\n   * from the row \u2014 kept showing them.\n   *\n   * Remembered per repo and refreshed whenever the shared cache still has it,\n   * so a genuinely updated row still wins and only its disappearance is\n   * absorbed.\n   *\n   * ponytail: unbounded map, one small row per artifact opened in a session.\n   * Give it the panel lifecycle if a session ever opens enough to matter.\n   */",
+  "next": "private readonly rows = new Map<string, SearchItem>();"
+ },
+ {
+  "file": "src/webview/sidebar/main.ts",
+  "line": 369,
+  "len": 1,
+  "kind": "line",
+  "text": "// --- Viewport reporting (drives the host's details prefetch) ---",
+  "next": "// One shared observer over every row/card in the results region. rootMargin"
+ },
+ {
+  "file": "src/webview/render.ts",
+  "line": 985,
+  "len": 4,
+  "kind": "line",
+  "text": "  // Updates: no chips (short, single-purpose list). Browse and Installed: the\n  // Kind chips. The view controls sit on the same row, inside the webview\n  // rather than the title bar: the title bar folds them into `\u2026` on a narrow\n  // sidebar, and the feature glossary's Show me can only pulse what it owns.",
+  "next": "return html`<div class=\"filters-row\">${state.mode === 'updates' ? nothing : renderFilters(filter)}${viewBar(state.mode, view)}</div>`;"
+ },
+ {
+  "file": "src/webview/model.ts",
+  "line": 1571,
+  "len": 6,
+  "kind": "doc",
+  "text": "/** Caps on a link's pattern lists. Grim itself caps neither (it compiles each\n *  GlobSet once per registry at config load, so count costs it nothing) \u2014 these\n *  exist because the modal has to render every pattern legibly, and\n *  showWarningMessage's detail neither scrolls nor documents a limit. Violating\n *  either rejects the whole link rather than truncating: a confirmation that\n *  shows fewer patterns than it writes is worse than no link at all. */",
+  "next": "const MAX_FILTER_PATTERNS = 10;"
+ },
+ {
+  "file": "src/webview/render.ts",
+  "line": 1496,
+  "len": 4,
+  "kind": "line",
+  "text": "  // Update takes precedence on the one row button for a direct (non-bundle)\n  // outdated install, then Complete Install; via-bundle rows always show the\n  // Bundle nav button (its update path stays in the gear), and rows with nothing\n  // outstanding show Uninstall.",
+  "next": "let button: TemplateResult;"
+ },
+ {
+  "file": "src/webview/model.ts",
+  "line": 720,
+  "len": 7,
+  "kind": "line",
+  "text": "      // `grim status` carries no registry attribution (its own `source` field\n      // means direct-vs-via-bundle), so an installed row would fall back to\n      // longest-configured-prefix \u2014 which reaches NO alias when the configured\n      // entries are indexes, and the Installed tree then roots on the bare host\n      // while Browse roots on the alias. The browse catalog holds grim's own\n      // attribution for the very same repo; borrow it. An artifact absent from\n      // the catalog keeps the fallback, as it must.",
+  "next": "const source = readSource(item?.source);"
+ },
+ {
+  "file": "src/views/details.ts",
+  "line": 833,
+  "len": 3,
+  "kind": "line",
+  "text": "      // An empty message is the user declining the disclosure \u2014 nothing\n      // happened and nothing needs saying. Everything else is a real failure,\n      // and NOTHING is recorded for it: the state stays exactly as it was.",
+  "next": "void vscode.window.showWarningMessage(outcome.message);"
+ },
+ {
+  "file": "src/watchers.ts",
+  "line": 19,
+  "len": 1,
+  "kind": "doc",
+  "text": "  /** What the currently-armed watcher set was built from \u2014 see rebuild(). */",
+  "next": "private armedKey: string | undefined;"
+ },
+ {
+  "file": "src/webview/protocol.ts",
+  "line": 507,
+  "len": 2,
+  "kind": "doc",
+  "text": "  /** Action in flight (title) or cleared (null). Broadcast to EVERY open panel,\n   *  not only the one that acted \u2014 the run holds grim's lock for all of them. */",
+  "next": "| { type: 'busy'; action: string | null }"
+ },
+ {
+  "file": "src/checkScheduler.ts",
+  "line": 14,
+  "len": 4,
+  "kind": "doc",
+  "text": "/** Quiet window before a requested check actually runs. Long enough that an\n *  install \u2192 lock-write \u2192 watcher-event \u2192 completion-refresh cascade collapses\n *  into one round; short enough that the number appears while the user is still\n *  looking at what they just did. */",
+  "next": "export const CHECK_DEBOUNCE_MS = 5000;"
+ },
+ {
+  "file": "src/views/details.ts",
+  "line": 137,
+  "len": 2,
+  "kind": "doc",
+  "text": "/** Preview-tab title marker: VS Code offers no styling for webview tab titles,\n *  so a plain \" (Preview)\" suffix stands in; plain title once permanent. */",
+  "next": "function tabTitle(base: string, preview: boolean): string {"
+ },
+ {
+  "file": "src/webview/settings/model.ts",
+  "line": 48,
+  "len": 2,
+  "kind": "doc",
+  "text": "  /** Plain-HTTP opt-in \u2014 additive, so absent on an older grim (see grim.ts's\n   *  RegistryEntry). buildRegistryRow normalizes it to a boolean. */",
+  "next": "insecure?: boolean;"
+ },
+ {
+  "file": "src/webview/model.ts",
+  "line": 1222,
+  "len": 1,
+  "kind": "doc",
+  "text": "  /** Leaf payload. Its presence is what makes a node a leaf. */",
+  "next": "card?: CardVM;"
+ },
+ {
+  "file": "src/webview/protocol.ts",
+  "line": 84,
+  "len": 3,
+  "kind": "doc",
+  "text": " * A row's community rating. `null`/absent on a row means *unrated* \u2014 no\n * rating thread exists, nothing is votable, and that is not a zero.\n */",
+  "next": "export interface RatingVM {"
+ },
+ {
+  "file": "src/views/details.ts",
+  "line": 288,
+  "len": 3,
+  "kind": "line",
+  "text": "      // Same repo re-clicked (e.g. the second click of a double-click, now that\n      // the sidebar posts single-clicks without a disambiguation delay): the\n      // content is already painted \u2014 just reveal, no repaint/revalidate churn.",
+  "next": "this.preview.panel.reveal(undefined, true);"
+ },
+ {
+  "file": "src/webview/model.ts",
+  "line": 169,
+  "len": 1,
+  "kind": "doc",
+  "text": "/** Strips tag/digest off a declared reference: \"host/r/name:1.0\" -> \"host/r/name\". */",
+  "next": "export function refRepo(ref: string): string {"
+ },
+ {
+  "file": "src/auth.ts",
+  "line": 8,
+  "len": 3,
+  "kind": "doc",
+  "text": "/** Statistic producer named by the index's `providers.rating`. Deliberately a\n *  plain string, not an enum: the value is index-supplied and an unrecognised\n *  one degrades to \"readable, not writable\". */",
+  "next": "export type RatingProvider = string;"
+ },
+ {
+  "file": "src/webview/settings/main.ts",
+  "line": 173,
+  "len": 3,
+  "kind": "doc",
+  "text": "/** Commits early only when a debounce is actually pending \u2014 a blur that lands\n *  after the timer already fired (and already committed) is a no-op, so it\n *  doesn't resend an identical value. */",
+  "next": "function flushCommit(key: string, value: string): void {"
+ },
+ {
+  "file": "src/webview/sidebar/main.ts",
+  "line": 328,
+  "len": 1,
+  "kind": "line",
+  "text": "    // Still absent (e.g. Install with no results): point at where to start.",
+  "next": "if (target !== 'search') {"
+ },
+ {
+  "file": "src/webview/settings/model.ts",
+  "line": 163,
+  "len": 5,
+  "kind": "doc",
+  "text": "/** Fixed group order (design item 2: \"Options\" / \"TUI\"). Membership follows\n *  the key itself \u2014 `options.tui.*` is the `[options.tui]` sub-table grim's\n *  config file spells \u2014 so a TUI key grim adds later lands in the right panel\n *  without a table edit here (frozen/additive tolerance: `sort` and\n *  `sort_order` fell into \"Options\" under a hardcoded membership table). */",
+  "next": "const GROUP_ORDER = ['Options', 'TUI'] as const;"
+ },
+ {
+  "file": "src/webview/protocol.ts",
+  "line": 309,
+  "len": 4,
+  "kind": "doc",
+  "text": "  /** A view control fired from the view's TITLE BAR (or the command palette).\n   *  The host is a dumb router here: view state stays webview-side, where the\n   *  active tab lives \u2014 grouping flips a different key per tab, and the host\n   *  does not know which tab is showing. */",
+  "next": "| { type: 'viewAction'; action: ViewAction }"
+ },
+ {
+  "file": "src/views/vote.ts",
+  "line": 125,
+  "len": 4,
+  "kind": "line",
+  "text": "    // PIPE NOTHING. Falling through to a token-less `grim rate` would make\n    // grim run its own credential ladder against a host we could not\n    // authenticate against; the honest answer is that we have no credential.\n    // The reason rides along so the caller can offer the way out.",
+  "next": "return { ok: false, message: noCredentialMessage(credential), credential };"
+ },
+ {
+  "file": "src/installer.ts",
+  "line": 40,
+  "len": 6,
+  "kind": "doc",
+  "text": "/** True when the resolved grim can be handed browse-filter patterns and a\n *  plain-HTTP opt-in, and asked to edit a registry in place. An older one\n *  rejects those flags and the whole `set` verb as unknown (clap, exit 64), so\n *  the panel hides the add form's pattern repeaters, its insecure checkbox and\n *  every row's edit button rather than offering controls whose every save fails. Unparseable versions read as unsupported,\n *  same reasoning as {@link grimTooOld}. Pure; exported for tests. */",
+  "next": "export function supportsRegistryEditing(version: string): boolean {"
+ },
+ {
+  "file": "src/installer.ts",
+  "line": 109,
+  "len": 2,
+  "kind": "line",
+  "text": "    // Managed binary \u2192 we can replace it in place; otherwise link the release\n    // page rather than dead-end on a skip-only toast.",
+  "next": "buttons: managed ? [UPDATE_GRIM, SKIP_VERSION] : [VIEW_RELEASE, SKIP_VERSION],"
+ },
+ {
+  "file": "src/prefetch.ts",
+  "line": 14,
+  "len": 1,
+  "kind": "doc",
+  "text": "  /** True when the repo's cached snapshot is young enough to skip it. */",
+  "next": "isFresh: (repo: string) => Promise<boolean>;"
+ },
+ {
+  "file": "src/views/sidebar.ts",
+  "line": 826,
+  "len": 2,
+  "kind": "line",
+  "text": "      // Other refresh triggers can race a watcher-driven one and carry the same\n      // error; notifyError's dedupe collapses them to one popup.",
+  "next": "notifyError(`Grimoire: ${catalogError}`, { dedupe: true });"
+ },
+ {
+  "file": "src/views/html.ts",
+  "line": 15,
+  "len": 3,
+  "kind": "doc",
+  "text": "  /** Server-side body inlined into #root so the first HTML parse shows structure\n   *  before the script runs (details skeleton). Trusted markup \u2014 callers pass\n   *  already-escaped render output. Empty for the sidebar. */",
+  "next": "bodyContent = '',"
+ },
+ {
+  "file": "src/views/details.ts",
+  "line": 235,
+  "len": 3,
+  "kind": "doc",
+  "text": "   * The catalog row for `repo`, sticky across the sidebar replacing its cache.\n   * See {@link rows}.\n   */",
+  "next": "private searchRow(repo: string): SearchItem | null {"
+ },
+ {
+  "file": "src/webview/render.ts",
+  "line": 377,
+  "len": 4,
+  "kind": "line",
+  "text": "  // Deprecation on a card is styling only \u2014 struck-through, dimmed name (the\n  // .card.deprecated rule). The message itself is a tooltip here and a banner\n  // on the details view; a coloured warning line per card made a browse list of\n  // them unreadable.",
+  "next": "const title = html`"
+ }
+]

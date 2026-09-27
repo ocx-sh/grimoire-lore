@@ -1,0 +1,202 @@
+[
+ {
+  "file": "crates/hir_def/src/body.rs",
+  "line": 229,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// The `ExprId` of the actual body expression.",
+  "next": "pub body_expr: ExprId,"
+ },
+ {
+  "file": "crates/hir_ty/src/diagnostics/decl_check/case_conv.rs",
+  "line": 72,
+  "len": 2,
+  "kind": "doc",
+  "text": "/// Converts an identifier to an UPPER_SNAKE_CASE form.\n/// Returns `None` if the string is already is UPPER_SNAKE_CASE.",
+  "next": "pub(crate) fn to_upper_snake_case(ident: &str) -> Option<String> {"
+ },
+ {
+  "file": "crates/syntax/src/lib.rs",
+  "line": 156,
+  "len": 1,
+  "kind": "doc",
+  "text": "/// `SourceFile` represents a parse tree for a single Rust file.",
+  "next": "pub use crate::ast::SourceFile;"
+ },
+ {
+  "file": "crates/hir_ty/src/diagnostics/match_check/usefulness.rs",
+  "line": 371,
+  "len": 6,
+  "kind": "doc",
+  "text": "    /// This computes `S(self.head().ctor(), self)`. See top of the file for explanations.\n    ///\n    /// Structure patterns with a partial wild pattern (Foo { a: 42, .. }) have their missing\n    /// fields filled with wild patterns.\n    ///\n    /// This is roughly the inverse of `Constructor::apply`.",
+  "next": "fn pop_head_constructor(&self, cx: &MatchCheckCtx<'_, 'p>, ctor: &Constructor) -> PatStack<'p> {"
+ },
+ {
+  "file": "crates/proc_macro_srv/src/abis/abi_1_55/proc_macro/bridge/client.rs",
+  "line": 252,
+  "len": 1,
+  "kind": "line",
+  "text": "                //     let r = Result::<_, PanicMessage>::decode(&mut &b[..], &mut ());",
+  "next": "//     bridge.cached_buffer = b;"
+ },
+ {
+  "file": "crates/ide/src/lib.rs",
+  "line": 413,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Finds all usages of the reference at point.",
+  "next": "pub fn find_all_refs("
+ },
+ {
+  "file": "crates/ide_db/src/helpers/import_assets.rs",
+  "line": 41,
+  "len": 3,
+  "kind": "doc",
+  "text": "/// A trait import needed for a given associated item access.\n/// For `some::path::SomeStruct::ASSOC_`, contains the\n/// type of `some::path::SomeStruct` and `ASSOC_` as the item name.",
+  "next": "#[derive(Debug)]"
+ },
+ {
+  "file": "crates/hir_ty/src/infer/expr.rs",
+  "line": 1130,
+  "len": 1,
+  "kind": "line",
+  "text": "            // if args are provided, it should be all of them, but we can't rely on that",
+  "next": "for arg in generic_args"
+ },
+ {
+  "file": "crates/mbe/src/token_map.rs",
+  "line": 32,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Maps `tt::TokenId` to the *relative* source range.",
+  "next": "entries: Vec<(tt::TokenId, TokenTextRange)>,"
+ },
+ {
+  "file": "crates/proc_macro_srv/src/abis/abi_1_55/proc_macro/bridge/client.rs",
+  "line": 343,
+  "len": 8,
+  "kind": "doc",
+  "text": "/// A client-side \"global object\" (usually a function pointer),\n/// which may be using a different `proc_macro` from the one\n/// used by the server, but can be interacted with compatibly.\n///\n/// N.B., `F` must have FFI-friendly memory layout (e.g., a pointer).\n/// The call ABI of function pointers used for `F` doesn't\n/// need to match between server and client, since it's only\n/// passed between them and (eventually) called by the client.",
+  "next": "#[repr(C)]"
+ },
+ {
+  "file": "crates/proc_macro_srv/src/abis/abi_1_47/proc_macro/diagnostic.rs",
+  "line": 117,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Sets the level in `self` to `level`.",
+  "next": "pub fn set_level(&mut self, level: Level) {"
+ },
+ {
+  "file": "crates/proc_macro_srv/src/abis/abi_1_56/proc_macro/diagnostic.rs",
+  "line": 97,
+  "len": 2,
+  "kind": "doc",
+  "text": "    /// Creates a new diagnostic with the given `level` and `message` pointing to\n    /// the given set of `spans`.",
+  "next": "pub fn spanned<S, T>(spans: S, level: Level, message: T) -> Diagnostic"
+ },
+ {
+  "file": "crates/mbe/src/token_map.rs",
+  "line": 29,
+  "len": 1,
+  "kind": "doc",
+  "text": "/// Maps `tt::TokenId` to the relative range of the original token.",
+  "next": "#[derive(Debug, PartialEq, Eq, Clone, Default, Hash)]"
+ },
+ {
+  "file": "crates/parser/test_data/parser/ok/0044_let_attrs.rs",
+  "line": 1,
+  "len": 1,
+  "kind": "line",
+  "text": "// https://github.com/rust-analyzer/rust-analyzer/issues/677",
+  "next": "fn main() {"
+ },
+ {
+  "file": "crates/hir_def/src/builtin_attr.rs",
+  "line": 235,
+  "len": 1,
+  "kind": "line",
+  "text": "    // RFC #1268",
+  "next": "gated!(marker, AssumedUsed, template!(Word), marker_trait_attr, experimental!(marker)),"
+ },
+ {
+  "file": "crates/hir_expand/src/eager.rs",
+  "line": 205,
+  "len": 1,
+  "kind": "line",
+  "text": "    // Collect replacement",
+  "next": "for child in children {"
+ },
+ {
+  "file": "crates/rust-analyzer/src/diagnostics/to_proto.rs",
+  "line": 32,
+  "len": 1,
+  "kind": "line",
+  "text": "            // HACK: special case for `warnings` rustc lint.",
+  "next": "Some(code)"
+ },
+ {
+  "file": "crates/flycheck/src/lib.rs",
+  "line": 120,
+  "len": 5,
+  "kind": "doc",
+  "text": "    /// WatchThread exists to wrap around the communication needed to be able to\n    /// run `cargo check` without blocking. Currently the Rust standard library\n    /// doesn't provide a way to read sub-process output without blocking, so we\n    /// have to wrap sub-processes output handling in a thread and pass messages\n    /// back over a channel.",
+  "next": "cargo_handle: Option<CargoHandle>,"
+ },
+ {
+  "file": "editors/code/src/main.ts",
+  "line": 299,
+  "len": 2,
+  "kind": "line",
+  "text": "                // Doc single-line comment\n                // e.g. ///|",
+  "next": "beforeText: /^\\s*\\/{3}.*$/,"
+ },
+ {
+  "file": "crates/parser/src/grammar/expressions.rs",
+  "line": 501,
+  "len": 2,
+  "kind": "line",
+  "text": "    // Use type_no_bounds(), because cast expressions are not\n    // allowed to have bounds.",
+  "next": "types::type_no_bounds(p);"
+ },
+ {
+  "file": "crates/proc_macro_srv/src/abis/abi_1_55/proc_macro/mod.rs",
+  "line": 1,
+  "len": 4,
+  "kind": "doc",
+  "text": "//! lib-proc-macro main module\n//!\n//! Copy from <https://github.com/rust-lang/rust/blob/6050e523bae6de61de4e060facc43dc512adaccd/src/libproc_macro/lib.rs>\n//! augmented with removing unstable features",
+  "next": "// NOTE(@edwin0cheng):"
+ },
+ {
+  "file": "crates/hir_def/src/body/scope.rs",
+  "line": 66,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// If `scope` refers to a block expression scope, returns the corresponding `BlockId`.",
+  "next": "pub fn block(&self, scope: ScopeId) -> Option<BlockId> {"
+ },
+ {
+  "file": "crates/project_model/src/cargo_workspace.rs",
+  "line": 203,
+  "len": 1,
+  "kind": "doc",
+  "text": "    /// Package that provided this target",
+  "next": "pub package: Package,"
+ },
+ {
+  "file": "crates/proc_macro_api/src/version.rs",
+  "line": 21,
+  "len": 1,
+  "kind": "doc",
+  "text": "/// Read rustc dylib information",
+  "next": "pub fn read_dylib_info(dylib_path: &AbsPath) -> io::Result<RustCInfo> {"
+ },
+ {
+  "file": "crates/ide/src/syntax_highlighting.rs",
+  "line": 342,
+  "len": 1,
+  "kind": "line",
+  "text": "                // Highlight escape sequences",
+  "next": "if let Some(char_ranges) = string.char_ranges() {"
+ }
+]

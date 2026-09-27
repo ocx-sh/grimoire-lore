@@ -1,0 +1,140 @@
+{
+ "java|prod": {
+  "files": 1405,
+  "code": 216507,
+  "doc": 94481,
+  "line": 14004,
+  "interface": 0,
+  "license": 17996,
+  "directive": 0,
+  "blank": 53531,
+  "trailing": 3309,
+  "code_chars": 6318768,
+  "comment_chars": 5221579,
+  "ratio": 0.501,
+  "ratio_chars": 0.826,
+  "doc_blocks": {
+   "count": 13013,
+   "p50": 5,
+   "p90": 14,
+   "p99": 45,
+   "max": 170,
+   "gt3": 8718,
+   "gt5": 5882,
+   "gt10": 2263,
+   "gt20": 708,
+   "lines_in_gt5": 74425
+  },
+  "line_blocks": {
+   "count": 5942,
+   "p50": 1,
+   "p90": 4,
+   "p99": 17,
+   "max": 113,
+   "gt3": 875,
+   "gt5": 417,
+   "gt10": 134,
+   "gt20": 43,
+   "lines_in_gt5": 4934
+  }
+ },
+ "java|test": {
+  "files": 1868,
+  "code": 294754,
+  "doc": 14671,
+  "line": 8821,
+  "interface": 0,
+  "license": 25504,
+  "directive": 12,
+  "blank": 56462,
+  "trailing": 4584,
+  "code_chars": 10566863,
+  "comment_chars": 1037201,
+  "ratio": 0.08,
+  "ratio_chars": 0.098,
+  "doc_blocks": {
+   "count": 3550,
+   "p50": 4,
+   "p90": 6,
+   "p99": 26,
+   "max": 72,
+   "gt3": 1983,
+   "gt5": 535,
+   "gt10": 125,
+   "gt20": 53,
+   "lines_in_gt5": 5642
+  },
+  "line_blocks": {
+   "count": 5900,
+   "p50": 1,
+   "p90": 3,
+   "p99": 7,
+   "max": 26,
+   "gt3": 340,
+   "gt5": 104,
+   "gt10": 32,
+   "gt20": 4,
+   "lines_in_gt5": 971
+  }
+ },
+ "js|prod": {
+  "files": 2,
+  "code": 12,
+  "doc": 10,
+  "line": 0,
+  "interface": 0,
+  "license": 0,
+  "directive": 0,
+  "blank": 9,
+  "trailing": 0,
+  "code_chars": 244,
+  "comment_chars": 300,
+  "ratio": 0.833,
+  "ratio_chars": 1.23,
+  "doc_blocks": {
+   "count": 3,
+   "p50": 3,
+   "p90": 4,
+   "p99": 4,
+   "max": 4,
+   "gt3": 1,
+   "gt5": 0,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 0
+  },
+  "line_blocks": {
+   "count": 0
+  }
+ },
+ "kotlin|prod": {
+  "files": 2,
+  "code": 225,
+  "doc": 0,
+  "line": 17,
+  "interface": 0,
+  "license": 0,
+  "directive": 0,
+  "blank": 20,
+  "trailing": 2,
+  "code_chars": 6164,
+  "comment_chars": 1043,
+  "ratio": 0.076,
+  "ratio_chars": 0.169,
+  "doc_blocks": {
+   "count": 0
+  },
+  "line_blocks": {
+   "count": 5,
+   "p50": 4,
+   "p90": 5,
+   "p99": 5,
+   "max": 5,
+   "gt3": 3,
+   "gt5": 0,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 0
+  }
+ }
+}

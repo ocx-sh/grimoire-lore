@@ -1,6 +1,6 @@
 summary = "The OCX Python quality set — standards for typed libraries, subprocess-driven test harnesses, automation bots and dependency-free tools, plus the manifest and distribution policy"
 keywords = "python,quality,review,standards,typing,pytest,subprocess,asyncio,httpx,security,logging,packaging,uv,ruff,pyright"
-description = "Everything an agent needs to write and review Python the way the OCX family does: the quality index and its twelve depth files, the pinned exit-code and stream contract, the process-control and pytest-harness rules, typing and annotation-evaluation policy, HTTP and untrusted-input handling, the dependency-free single-file tool rules, gate adoption mechanics, and the manifest and publishing policy."
+description = "Everything an agent needs to write and review Python the way the OCX family does: the quality index and its twelve depth files, the pinned exit-code and stream contract, the process-control and pytest-harness rules, typing and annotation-evaluation policy, HTTP and untrusted-input handling, the dependency-free single-file tool rules, gate adoption mechanics, and the manifest and publishing policy. The code-docs rule and the code-docs-cleanup skill cover comments in every language: short blocks that keep every guard."
 license = "Apache-2.0"
 repository = "https://github.com/ocx-sh/grimoire-lore"
 
@@ -18,3 +18,9 @@ repository = "https://github.com/ocx-sh/grimoire-lore"
 [rules]
 python-quality = "./python-quality"
 python-packaging = "./python-packaging"
+# code-docs globs every source extension, this set's included, and
+# code-docs-cleanup is its procedure, so both ride in this bundle.
+code-docs = "./code-docs"
+
+[skills]
+code-docs-cleanup = "./code-docs-cleanup"

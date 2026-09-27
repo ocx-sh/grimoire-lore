@@ -1,0 +1,80 @@
+{
+ "python|prod": {
+  "files": 51,
+  "code": 6155,
+  "doc": 4798,
+  "line": 372,
+  "interface": 0,
+  "license": 8,
+  "directive": 0,
+  "blank": 1342,
+  "trailing": 19,
+  "code_chars": 231628,
+  "comment_chars": 277448,
+  "ratio": 0.84,
+  "ratio_chars": 1.198,
+  "doc_blocks": {
+   "count": 392,
+   "p50": 9,
+   "p90": 25,
+   "p99": 58,
+   "max": 72,
+   "gt3": 308,
+   "gt5": 285,
+   "gt10": 165,
+   "gt20": 66,
+   "lines_in_gt5": 4535
+  },
+  "line_blocks": {
+   "count": 87,
+   "p50": 3,
+   "p90": 7,
+   "p99": 23,
+   "max": 23,
+   "gt3": 43,
+   "gt5": 16,
+   "gt10": 5,
+   "gt20": 1,
+   "lines_in_gt5": 156
+  }
+ },
+ "python|test": {
+  "files": 76,
+  "code": 14974,
+  "doc": 3228,
+  "line": 695,
+  "interface": 0,
+  "license": 8,
+  "directive": 0,
+  "blank": 5023,
+  "trailing": 217,
+  "code_chars": 595223,
+  "comment_chars": 234908,
+  "ratio": 0.262,
+  "ratio_chars": 0.395,
+  "doc_blocks": {
+   "count": 693,
+   "p50": 3,
+   "p90": 10,
+   "p99": 22,
+   "max": 45,
+   "gt3": 287,
+   "gt5": 162,
+   "gt10": 54,
+   "gt20": 12,
+   "lines_in_gt5": 1729
+  },
+  "line_blocks": {
+   "count": 401,
+   "p50": 1,
+   "p90": 3,
+   "p99": 6,
+   "max": 10,
+   "gt3": 32,
+   "gt5": 5,
+   "gt10": 0,
+   "gt20": 0,
+   "lines_in_gt5": 40
+  }
+ }
+}

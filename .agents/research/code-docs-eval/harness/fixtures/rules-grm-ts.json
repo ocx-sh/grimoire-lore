@@ -1,0 +1,119 @@
+{
+  "GRM-01": {
+    "rules": [
+      "    // Layer 2: a symlink in the tree can route a Normal-only path outside `base`. `exists()` is false",
+      "    // for a dangling symlink, so the `is_symlink()` test is required, or the guard is skipped and the",
+      "    // unvalidated join returned. `dunce::canonicalize` is required, or Windows `\\\\?\\` UNC paths give",
+      "    // false negatives. Containment compares whole components (`Path::starts_with`); a string-prefix",
+      "    // check accepts a sibling like `<base>-evil`."
+    ],
+    "tags": "why: symlink escape motivates Layer 2; guards kept: is_symlink test for dangling links, dunce canonicalize, component-wise starts_with (consequence made concrete); dropped: '(when exists OR is a symlink)' narration of the if."
+  },
+  "GRM-03": {
+    "rules": [
+      "        // Layer 2 catches a symlink routing a Normal-only path outside the root. `exists()` is false for",
+      "        // a dangling symlink, so the symlink test is required, or the guard is skipped and the join",
+      "        // returned unvalidated (a dangling symlink instead fails canonicalize with a safe `Io` error).",
+      "        // `dunce::canonicalize` is required, or Windows `\\\\?\\` UNC paths give false negatives.",
+      "        // Containment compares whole components (`Path::starts_with`); a string-prefix check accepts a",
+      "        // sibling like `<root>-evil`. The canonical path is returned so callers act on what was validated.",
+      "        // The leaf is stat'ed once, before canonicalize, for both the branch and the carve-out below; a",
+      "        // later stat (`Path::is_symlink()` is one) widens the TOCTOU window in the exploitable direction."
+    ],
+    "tags": "why: Layer 2 purpose; guards kept (each own sentence): dangling-symlink is_symlink test + safe Io outcome, dunce canonicalize, component-wise starts_with, return canonical path, single leaf stat before canonicalize reused by carve-out; over 5-line cap because guards alone exceed it; dropped: narration of the if condition, 'we' phrasing."
+  },
+  "GRM-04": {
+    "rules": [
+      "    // The parent-directory fsync is required, or a crash can lose the rename.",
+      "    // Unix-only: opening a directory as a `File` fails on Windows."
+    ],
+    "tags": "guard: dir fsync for rename durability (fact + consequence); why: cfg(unix) because directory open fails on Windows; nothing dropped."
+  },
+  "GRM-05": {
+    "rules": [
+      "/// Atomically replace the file `target` names, following a terminal symlink.",
+      "///",
+      "/// For user-authored files grim rewrites in place: [`atomic_write`]'s rename would",
+      "/// turn a symlinked one (a dotfiles-managed `grimoire.toml`, issue #117) into a",
+      "/// regular file and leave the managed copy stale. Grim-owned outputs keep plain",
+      "/// [`atomic_write`], which must clobber a planted link, or the link redirects the write.",
+      "///",
+      "/// # Errors",
+      "///",
+      "/// As [`atomic_write`]."
+    ],
+    "tags": "contract: summary, when to use (user-authored files), Errors section; guard: rename would replace a symlinked user file; guard: grim-owned outputs must not be unified onto this (planted link redirects write); pointer: issue #117 kept (resolves: grimoire-rs/grimoire#117); tightened to the 10-line app doc cap."
+  },
+  "GRM-06": {
+    "rules": [
+      "        // The sidecar is unlinked while the lock is still held: unlinked after the close, a waiter could",
+      "        // lock the doomed inode past `try_acquire`'s identity re-check and run beside the next writer.",
+      "        // Unix keeps the fd and lock until the close. On Windows (std opens with FILE_SHARE_DELETE) the",
+      "        // name stays delete-pending until our handle closes; opens meanwhile get a permission error,",
+      "        // which `try_acquire` must retry or fail spuriously. Best-effort: a leftover sidecar is harmless."
+    ],
+    "tags": "guard: unlink-before-close ordering (consequence made concrete: two unserialized writers); why: Unix fd keeps lock alive; guard: Windows delete-pending window couples to try_acquire's PermissionDenied retry; why: best-effort remove; dropped: bullet layout, 'pre-cleanup status quo' provenance."
+  },
+  "TS-03": {
+    "rules": [
+      "    // Write-then-rename in the same dir is required: load deletes an entry it cannot parse, so a",
+      "    // concurrent load of a half-written file loses the good entry. The `.tmp` suffix keeps the",
+      "    // in-flight file out of prune's `.json` filter. The tmp name is unique per write, not per repo:",
+      "    // saves for one repo overlap (a panel open racing the card prefetch), and a shared path",
+      "    // interleaves both into one file that the rename publishes torn. Racing saves last-write-win."
+    ],
+    "tags": "guards kept: write-then-rename in same dir (atomic rename), .tmp suffix vs prune's .json filter, per-write unique tmp name (provenance 'let both write' rewritten as present-tense guard); contract/why: racing saves last-write-win; dropped: 'each writes a whole entry now' provenance."
+  },
+  "TS-04": {
+    "rules": [
+      "        // `path.resolve`, not `path.join`, is required: a relative PATH entry (`.`, `bin`,",
+      "        // `./tools`) would give a relative path that the grim spawn resolves against its cwd,",
+      "        // the workspace folder, so a repository shipping its own grim would win.",
+      "        // Resolving before the access check keeps the probed file and the returned file the same."
+    ],
+    "tags": "guards kept: resolve-not-join (hijack by repo-shipped grim), resolve before access check (probe == return); dropped: the 'same threat as a bare grim' analogy (argument) and the `run()` pointer, which names no existing symbol (spawn lives in runJson)."
+  },
+  "TS-05": {
+    "rules": [
+      "/** Basename of the ad-blocker-safe alias copy of a package root, written beside the package's",
+      " * own CAS directory: `p/<ns>/<pkg>/_root.json`. The site fetches the alias because a root URL",
+      " * ending in `<pkg>.json` fails to load in browsers running EasyList/EasyPrivacy when `<pkg>`",
+      " * matches one of their ~800 unanchored `/<word>.js` rules (`/hawkeye.js` blocks",
+      " * `/p/hawkeye/hawkeye.json`); no such rule matches a final `_root.json` segment.",
+      " *",
+      " * The leading `_` is required: `PACKAGE_RE` (`viewmodel/catalog.ts`) makes every package segment",
+      " * start with `[a-z0-9]`, so no package at any depth can collide with it. It must stay inside `p/`,",
+      " * or the `_headers` `/p/*` sandbox block no longer covers it. The canonical `p/<ns>/<pkg>.json` is",
+      " * still written; the alias is an extra copy for the site's fetch, never a wire-format change. */"
+    ],
+    "tags": "contract: what the basename/path is; why+guard: alias exists because canonical <pkg>.json URLs are ad-blocked; provenance (2026-08-27 hawkeye incident, NetworkError) rewritten as a present-tense example; guards: _ prefix collision-proof via PACKAGE_RE (pointer resolves), must stay under p/ for _headers sandbox, canonical still written (no wire change)."
+  },
+  "TS-06": {
+    "rules": [
+      " * Mount prefix for one source's mirrored wire tree: `\"\"` for the `root: true` source and",
+      " * `/index/<label>` for every other source (`sources/mirror.ts`'s placement).",
+      " *",
+      " * Every wire URL written to `/data/catalog/catalog.json` must go through it: `/p/...` holds only",
+      " * the root source's copy, so an unprefixed non-root URL 404s silently and the catalog renders",
+      " * logo-less and README-less. `src/theme/utils/cas.ts` re-exports it for browser-side CAS URLs,",
+      " * so both halves of a build agree by construction; a second copy could drift.",
+      " * The live import is safe: `useImageIndex.ts` already pulls this module into the browser bundle.",
+      " */"
+    ],
+    "tags": "contract: return values per source (pointer sources/mirror.ts resolves); guard: every emitted wire URL goes through it (past-tense 404 incident rewritten as present consequence); guard: theme re-exports rather than copies (pointer resolves); why: live import safe; dropped: LogoTile/IdentityBlock fallback detail, WIRE_ASSET_EXTENSIONS comparison (argument), __ocx.desc narrative."
+  },
+  "TS-07": {
+    "rules": [
+      " * Fetches the wire package root from the ad-blocker-safe alias",
+      " * `<wireBase>/p/<ns>/<pkg>/_root.json` (`sources/mirror.ts`), falling back on 404 to the",
+      " * byte-identical canonical `<wireBase>/p/<ns>/<pkg>.json`. `wireBase` is the source's mount",
+      " * prefix, `''` for the `root: true` source and `index/<label>` otherwise (see `wirePrefix`).",
+      " * Arguments accept refs/getters and refetch on change, post-mount only (SSR-safe); VitePress's",
+      " * router reuses the component across package navigations, so a one-shot `onMounted` fetch would",
+      " * leave stale data on screen. CAS asset URLs (`casUrl()`, `utils/cas.ts`) must be built from the",
+      " * bare `ns`/`pkg` given here; `root.name` carries the `ocx.sh/` prefix, so a URL from it 404s.",
+      " */"
+    ],
+    "tags": "contract: fetch alias then canonical on 404, wireBase meaning, refs/getters refetch post-mount; guards: one-shot onMounted fetch leaves stale data under router reuse, CAS URLs from bare ns/pkg not root.name (404); pointers kept (mirror.ts, utils/cas.ts wirePrefix/casUrl resolve); dropped: schema root.schema.json aside, 'detail page reads it off frontmatter' narration, 'CAS gotcha' label."
+  }
+}
