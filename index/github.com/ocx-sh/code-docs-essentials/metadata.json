@@ -1,0 +1,32 @@
+{
+  "created": "2026-09-27T20:55:17+02:00",
+  "description": "Comment standards for code that AI agents mostly write and read, without a language set: the code-docs rule (the guard floor, where each clause of a comment goes, record pointers and process IDs, doc text that renders into help and schemas, the length caps with their per-file ratchet, and the five standard-library check scripts it ships) and the code-docs-cleanup skill that shortens existing comments while proving every guard keeps its reason.",
+  "keywords": [
+    "comments",
+    "code-comments",
+    "doc-comments",
+    "docstrings",
+    "rustdoc",
+    "tsdoc",
+    "jsdoc",
+    "godoc",
+    "javadoc",
+    "kdoc",
+    "guards",
+    "comment-density",
+    "ratchet",
+    "cleanup",
+    "ai-agents"
+  ],
+  "kind": "bundle",
+  "license": "Apache-2.0",
+  "name": "code-docs-essentials",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/code-docs-essentials",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "The code-comments set, the code-docs rule and the code-docs-cleanup skill, for any language"
+}
