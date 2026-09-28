@@ -10,11 +10,13 @@ checks.
 grim add ghcr.io/ocx-sh/lore/code-docs
 ```
 
-It loads on every source extension its census reads. That is Rust, Python
-and its .pyi stubs (loaded, not measured), TypeScript and JavaScript, Go,
-Java, Kotlin, Swift, C#, Scala, C and C++, plus the script blocks of Vue,
-Svelte and Astro files. The index is 199 lines and always present. A depth file is read
-only when the work calls for it.
+It loads on every source, build and script file. The census measures Rust,
+Python, TypeScript and JavaScript, Go, Java, Kotlin, Swift, C#, Scala, C and
+C++, plus the script blocks of Vue, Svelte and Astro files. It loads without
+measuring on .pyi stubs, Objective-C, Ruby, PHP, Lua, Dart, Zig, shell and
+PowerShell, Makefiles, Dockerfiles, CMake, Bazel and Starlark, Nix, and Gradle
+Groovy; there the rows hold in review. The index is 231 lines and always
+present. A depth file is read only when the work calls for it.
 
 ## Two failures, in opposite directions
 

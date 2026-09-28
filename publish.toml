@@ -141,7 +141,7 @@ version = "0.2.0"
 description = { readme = "docs/rust-quality.md", logo = "assets/lore-rust.svg" }
 
 [rules.rust-cargo]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/rust-cargo.md", logo = "assets/lore-rust.svg" }
 
 [bundles.rust-essentials]
@@ -153,15 +153,15 @@ description = { readme = "docs/rust-essentials.md", logo = "assets/lore-rust.svg
 # is a separate rule only because its glob genuinely differs — it loads on
 # manifests and lockfiles, not on source.
 [rules.python-quality]
-version = "0.2.0"
+version = "0.2.1"
 description = { readme = "docs/python-quality.md", logo = "assets/lore-python.svg" }
 
 [rules.python-packaging]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/python-packaging.md", logo = "assets/lore-python.svg" }
 
 [bundles.python-essentials]
-version = "0.1.1"
+version = "0.1.2"
 description = { readme = "docs/python-essentials.md", logo = "assets/lore-python.svg" }
 
 # The TypeScript quality set. `typescript-quality` is the index rule; its
@@ -182,15 +182,15 @@ version = "0.1.0"
 description = { readme = "docs/css-theming.md", logo = "assets/lore-css.svg" }
 
 [rules.typescript-quality]
-version = "0.2.0"
+version = "0.2.1"
 description = { readme = "docs/typescript-quality.md", logo = "assets/lore-typescript.svg" }
 
 [rules.typescript-packaging]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/typescript-packaging.md", logo = "assets/lore-typescript.svg" }
 
 [bundles.typescript-essentials]
-version = "0.1.1"
+version = "0.1.2"
 description = { readme = "docs/typescript-essentials.md", logo = "assets/lore-typescript.svg" }
 
 # The documentation design set: one rule plus three skills, not four rules or
@@ -234,7 +234,7 @@ description = { readme = "docs/docs-essentials.md", logo = "assets/lore-docs.svg
 # `code-docs-essentials` bundles the pair on its own, for a repository without
 # a language set.
 [rules.code-docs]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/code-docs.md", logo = "assets/lore-code-docs.svg" }
 
 [skills.code-docs-cleanup]
@@ -242,7 +242,7 @@ version = "0.1.0"
 description = { readme = "docs/code-docs-cleanup.md", logo = "assets/lore-code-docs.svg" }
 
 [bundles.code-docs-essentials]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/code-docs-essentials.md", logo = "assets/lore-code-docs.svg" }
 
 # The Bazel set: one rule plus two skills. `bazel-quality` is the index rule;
@@ -285,11 +285,11 @@ description = { readme = "docs/bazel-essentials.md", logo = "assets/lore-bazel.s
 # on every edit. The Bazel-Java depth file is offered to `bazel-quality`, not
 # published here, so no two rules glob `BUILD.bazel`.
 [rules.java-quality]
-version = "0.2.0"
+version = "0.2.1"
 description = { readme = "docs/java-quality.md", logo = "assets/lore-java.svg" }
 
 [rules.kotlin-quality]
-version = "0.2.0"
+version = "0.2.1"
 description = { readme = "docs/kotlin-quality.md", logo = "assets/lore-kotlin.svg" }
 
 [rules.gradle-build]

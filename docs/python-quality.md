@@ -7,7 +7,8 @@ the pinned exit-code contract, and twelve depth files routed to by task.
 grim add ghcr.io/ocx-sh/lore/python-quality
 ```
 
-Loads on `**/*.py`. The index is 125 lines and always present; the depth is
+Loads on `**/*.py`, `**/*.pyi` and the ruff config (`ruff.toml`,
+`.ruff.toml`). The index is 128 lines and always present; the depth is
 read only when the work calls for it.
 
 ## Written against four shapes, not one

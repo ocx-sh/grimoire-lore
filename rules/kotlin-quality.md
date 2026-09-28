@@ -2,6 +2,8 @@
 paths:
   - "**/*.kt"
   - "**/*.kts"
+  - "**/detekt*.yml"
+  - "**/detekt*.yaml"
 summary: The Kotlin quality index — the gate, the non-negotiables, and where the depth lives
 keywords: kotlin,jvm,quality,standards,review,coroutines,cancellation,dispatchers,detekt,ktlint,kover,explicit-api,binary-compatibility,abi,jvmtarget,ksp,kapt,java-interop,jspecify,runtest,gradle
 license: Apache-2.0

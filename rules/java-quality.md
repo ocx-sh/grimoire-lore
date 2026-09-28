@@ -1,6 +1,7 @@
 ---
 paths:
   - "**/*.java"
+  - "**/junit-platform.properties"
 summary: The Java quality index — the gate, the non-negotiables, and where the depth lives
 keywords: java,jvm,quality,standards,review,nullness,jspecify,nullaway,error-prone,concurrency,virtual-threads,records,exceptions,security,deserialization,junit,jacoco,japicmp,jdk,gradle,maven
 license: Apache-2.0

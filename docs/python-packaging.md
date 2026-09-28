@@ -52,7 +52,7 @@ if you publish.
 
 ## Sibling
 
-`python-quality` covers the Python itself and loads on `**/*.py`. Its
+`python-quality` covers the Python itself and loads on `**/*.py`, `**/*.pyi` and the ruff config. Its
 `ci-gate.md` depth file is where gate adoption lives — the ordered
 sequence for turning a lint on over a tree that has none. The two rules
 are bundled as `python-essentials`.

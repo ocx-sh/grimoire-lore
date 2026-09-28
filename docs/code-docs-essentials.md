@@ -11,7 +11,7 @@ grim add ghcr.io/ocx-sh/lore/code-docs-essentials
 
 | Package | Loads on | Carries |
 |---|---|---|
-| [`code-docs`](https://github.com/ocx-sh/grimoire-lore/blob/main/docs/code-docs.md) | Every source extension its census reads | Fifteen non-negotiables and 22 MUST rows across five depth files: the guard floor, where each clause of a comment goes, record pointers and process IDs, doc text that renders into help and schemas, and the length caps with their per-file ratchet. Five stdlib checks back the gate |
+| [`code-docs`](https://github.com/ocx-sh/grimoire-lore/blob/main/docs/code-docs.md) | Every source, build and script file | Fifteen non-negotiables and 22 MUST rows across five depth files: the guard floor, where each clause of a comment goes, record pointers and process IDs, doc text that renders into help and schemas, and the length caps with their per-file ratchet. Five stdlib checks back the gate |
 | [`code-docs-cleanup`](https://github.com/ocx-sh/grimoire-lore/blob/main/docs/code-docs-cleanup.md) | On request (skill) | A ten-step, guard-first procedure for shortening existing comments, gated by a structural diff check and a cold reason re-check per shortened guard |
 
 ## When to install this one

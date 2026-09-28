@@ -9,7 +9,9 @@ grim add ghcr.io/ocx-sh/lore/typescript-packaging
 ```
 
 Loads on `**/package.json`, `**/tsconfig*.json`, `**/eslint.config.*`,
-`**/biome.json` and `**/biome.jsonc` — the files no compiler checks, and
+`**/biome.json`, `**/biome.jsonc`, the lockfiles (`package-lock.json`,
+`npm-shrinkwrap.json`, `pnpm-lock.yaml`, `yarn.lock`, `bun.lock`) and
+`pnpm-workspace.yaml` — the files no compiler checks, and
 globs the `typescript-quality` sibling deliberately avoids, so the two never
 load together.
 
@@ -90,6 +92,7 @@ a second copy.
 ## Sibling
 
 `typescript-quality` covers the TypeScript itself and loads on `**/*.ts`,
-`**/*.tsx`, `**/*.mts` and `**/*.cts`. Its `gate.md` depth file is where lint
+`**/*.tsx`, `**/*.mts` and `**/*.cts`, plus the install config
+(`.npmrc`, `.yarnrc.yml`, `bunfig.toml`). Its `gate.md` depth file is where lint
 adoption lives — how to make a check able to go red at all. Bundled as
 `typescript-essentials`.

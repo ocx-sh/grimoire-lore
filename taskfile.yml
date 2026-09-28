@@ -81,7 +81,7 @@ tasks:
       # keeps liveness real for the other four globs, which do resolve.
       - |
         if [ -d "{{.CONSUMER}}" ]; then
-          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --root {{.CONSUMER}} --allow-absent '**/clippy.toml' rules/rust-quality.md rules/rust-cargo.md rules/python-quality.md rules/python-packaging.md .claude/skills/research-lang
+          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --root {{.CONSUMER}} --allow-absent '**/clippy.toml' --allow-absent '**/rust-toolchain' --allow-absent '**/.clippy.toml' --allow-absent '**/.rustfmt.toml' --allow-absent '**/.cargo/config' --allow-absent '**/ruff.toml' --allow-absent '**/.ruff.toml' rules/rust-quality.md rules/rust-cargo.md rules/python-quality.md rules/python-packaging.md .claude/skills/research-lang
         else
           echo "note: no consumer at {{.CONSUMER}} — glob liveness NOT checked for rust/python; run locally against a Rust repo"
           {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py rules/rust-quality.md rules/rust-cargo.md rules/python-quality.md rules/python-packaging.md .claude/skills/research-lang
@@ -102,7 +102,7 @@ tasks:
       # TypeScript glob as dead against a runner's parent directory.
       - |
         if [ -d "{{.TS_CONSUMER}}" ] && [ -n "$(find "{{.TS_CONSUMER}}" -name '*.ts' -not -path '*/node_modules/*' -not -path '*/.agents/*' -print -quit 2>/dev/null)" ]; then
-          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --root {{.TS_CONSUMER}} rules/typescript-quality.md rules/typescript-packaging.md
+          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --root {{.TS_CONSUMER}} --allow-absent '**/npm-shrinkwrap.json' rules/typescript-quality.md rules/typescript-packaging.md
         else
           echo "note: no TypeScript under {{.TS_CONSUMER}} — glob liveness NOT checked for typescript; run locally against a tree containing TypeScript"
           {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py rules/typescript-quality.md rules/typescript-packaging.md

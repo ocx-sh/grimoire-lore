@@ -7,7 +7,8 @@ merge-blocking non-negotiables, and twelve depth files routed to by task.
 grim add ghcr.io/ocx-sh/lore/typescript-quality
 ```
 
-Loads on `**/*.ts`, `**/*.tsx`, `**/*.mts` and `**/*.cts`. The index is 142
+Loads on `**/*.ts`, `**/*.tsx`, `**/*.mts` and `**/*.cts`, plus the install
+config (`.npmrc`, `.yarnrc.yml`, `bunfig.toml`). The index is 149
 lines and always present; a depth file is read only when the work calls for
 it.
 

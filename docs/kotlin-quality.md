@@ -7,7 +7,8 @@ non-negotiables, and seven depth files routed to by task.
 grim add ghcr.io/ocx-sh/lore/kotlin-quality
 ```
 
-Loads on `**/*.kt` and `**/*.kts`. The index is 156 lines and always present; a
+Loads on `**/*.kt`, `**/*.kts` and the detekt config (`detekt*.yml`). The index
+is 161 lines and always present; a
 depth file is read only when the work calls for it.
 
 ## It starts by assuming your analyzers do not activate

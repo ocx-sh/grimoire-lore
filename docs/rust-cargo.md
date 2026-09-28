@@ -7,8 +7,9 @@ release profiles for a Rust workspace that ships prebuilt binaries.
 grim add ghcr.io/ocx-sh/lore/rust-cargo
 ```
 
-Loads on `**/Cargo.toml`, `clippy.toml`, `rustfmt.toml`, `deny.toml` and
-`rust-toolchain.toml`.
+Loads on `**/Cargo.toml`, `Cargo.lock`, `clippy.toml`, `rustfmt.toml` (and
+their dotted forms), `deny.toml`, `rust-toolchain.toml` (and the legacy
+`rust-toolchain`) and `.cargo/config.toml`.
 
 ## Two layers, and they are adopted differently
 
