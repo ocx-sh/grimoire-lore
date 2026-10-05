@@ -1,5 +1,5 @@
 {
-  "created": "2026-09-27T20:11:48+02:00",
+  "created": "2026-09-28T14:23:36+02:00",
   "description": "Everything an agent needs to write and review Python the way the OCX family does: the quality index and its twelve depth files, the pinned exit-code and stream contract, the process-control and pytest-harness rules, typing and annotation-evaluation policy, HTTP and untrusted-input handling, the dependency-free single-file tool rules, gate adoption mechanics, and the manifest and publishing policy. The code-docs rule and the code-docs-cleanup skill cover comments in every language: short blocks that keep every guard.",
   "keywords": [
     "python",
