@@ -1,0 +1,284 @@
+{
+ "refused_halves": [
+  "Finding 1, other half: the SW-GATE-26 row in rules/swift-package/gates.md must state that exit 70 now also covers a swiftlint_version pin that differs from the running binary.",
+  "Finding 15 (class b, manifest evaluated with environment or file side effects): the note or CONSIDER row belongs in rules/swift-package/manifest.md. I did not add a rule in my files because the evidence shows no merge-blocking risk.",
+  "Finding 3, lint half: a check that fails any '| xargs' without -0 or -d in shipped cells belongs in .claude/skills/research-lang/scripts/check-artifacts.py. I ran the equivalent scan over my files and found none; the remaining hits are prose.",
+  "Finding 2, extensionless scripts (ci/check): not covered. I narrowed the SW-CORE-01 sentence to say such a script is read by eye. A shebang scan would need a script change.",
+  "Finding 8, other halves: the Sources-operand cells in errors.md, io.md, security.md and cli-contract.md need the same Fixtures, TestUtils and playground exclusions. Several cells in concurrency.md (S7 to S10 and the awk finders) and api-design.md (the SW-API-10 grep) still scan Sources unexcluded; I left them because the finding named pubenum, T03, T04, T13 and E04/E15.",
+  "Finding 27 (v5-reason awk in manifest.md line 59): needs the any-.v5-token widening that weaken-check.sh already has. This is the manifest.md owner's.",
+  "Skills and rule files outside my list (swift-upgrade, swift-release, swift-diagnose, gates.md, release.md, errors.md, io.md, security.md, testing.md, cli-contract.md, swift-package.md) are not touched.",
+  "Class (b), manifests evaluated with environment-dependent or side-effecting code (ProcessInfo/Context.environment reads, `.write()` at manifest evaluation): the owner of rules/swift-package/manifest.md should add the one-line note there. Evidence is SQLite.swift, swift-markdown and SwiftGen, all of which are in the findings. I found no merge-blocking risk, so I wrote no rule.",
+  "SW-ERR K3 sibling in rules/swift-quality/checks/k07.sh and the NOSHIP/GEN arrays (finding 8): they still need `Fixtures`, `TestUtils` and `*.playground` added, and a playground mention in the k07 header. The same excludes are not yet applied to the other Sources-operand cells outside my files (api-design.md, language.md, concurrency.md). Within my files they are applied only to the G4, G1-03b, G1-24 and P4 cells that the evidence measured. The security.md and network.md Sources cells were not measured on fixtures.",
+  "The io.md P4 and api-design.md:215 `import Foundation` cell: api-design.md SW-API-12 still carries the old pattern (no canImport(Darwin), no access-level prefix, no NUL-safe xargs). Its owner must copy the new io.md P4 command.",
+  "The XCTest-only wording of SW-TEST-14 and SW-TEST-17 also belongs in skills/swift-diagnose C.4 (that skill's owner).",
+  "Finding 37, restricting cli-contract cells to the paths of executableTarget targets: not done. I scoped the whole G block with the G0 guard instead. A mixed package still scans its library targets, and the file now says those hits are SW-ERR and SW-IO findings.",
+  "The stale refused halves in the findings file for canary.sh (`find -L` and a symlinked-Sources plant), language.md T06 exit-123 wording, release.md, gates.md, manifest.md and skills/*: not my files, no edit. The swift-upgrade (548) and swift-release (526) body-line limits were fixed by their owners, since the checker now prints clean.",
+  "R0, skill half: swift-upgrade U8 needs the 'unable to find target' row, and its 'exit 1 = no edits' claim must be corrected.",
+  "R10, skill half: swift-upgrade U2 must call the consumer probe, not 'swift package resolve && swift build on the old image', which can never pass.",
+  "R1, script half: rules/swift-quality/checks/swiftlint-gate.sh must map 'configuration specified version' to exit 70. My rows state that contract, but the script does not do it yet.",
+  "R2, R18, R19: weaken-check.sh and silence-check.sh pathspecs (Rakefile, *.rake, GNUmakefile, justfile, Package*.swift treatWarning removals, Dockerfile*/Containerfile/.env/*.service carriers) and the SW-CORE-01 sentence are not my files.",
+  "H1, index half: rules/swift-quality.md step 5 guard must read 'DOCC=1 swift package plugin --list'. Without DOCC=1 the guard always prints SKIP when the plugin is declared only under DOCC (reproduced).",
+  "R23, other half: swift-quality.md cells and the swift-release/swift-upgrade skills that cite the swift:6.2.0 floor leg need the 'verify the patch per tree' qualifier.",
+  "R3, R8, R22, R27, R29, R16, R9, R6, R12, R13, R14, R24, R25, R26: files outside my list (swift-quality cells, k07.sh, skills).",
+  "Refused halves H4, H5, H7, H9, H10, H12 to H17, H20, H24: swift-quality files, canary.sh and skills. canary.sh still needs find -L plus a symlinked-Sources plant, and the jq/docker guards.",
+  "Skill body limits (swift-upgrade 548 lines, swift-release 526 lines): not my files. The checker printed clean at my last run, so another fixer evidently already moved them.",
+  "Class (b), manifests evaluated with environment-dependent or side-effecting code (ProcessInfo, Context.environment, `.write()` at evaluation): the note belongs in rules/swift-package/manifest.md, which is not my file. The evidence (SQLite.swift TARGET_OS_ANDROID, swift-markdown SWIFTCI_USE_LOCAL_DEPS, SwiftGen Komondor write) shows no merge-blocking risk, so one line there is enough, not a new rule or row. Suggested cell: `grep -n -e 'ProcessInfo' -e 'Context.environment' -e '.write()' Package*.swift`, read each hit.",
+  "Class (a) sweep outside my files: rules/swift-quality/checks/*.sh and every rules/**/*.md cell that tests stderr presence need the same exit-status judgement. k07.sh line 99 was the only instance reported, and the checks/ scripts are another fixer's.",
+  "SW-PKG-32 clause for the migrate exit-1 'Could not update manifest ... unable to find target' case, and the SW-PKG-33 wording for the consumer check, are in rules/swift-package/manifest.md. The skill half says: source edits are kept, the manifest is edited by hand, and the proof is the dump-package count. A consumer on the old image must resolve the previous release, and the library itself is expected to fail on that image with the `tools version` line.",
+  "SW-PKG-14 clause (RH23, migration holds mode 5 per target in the loop and never package-level) is in rules/swift-package.md, which has no free line in a 200-line body. U2 already states it.",
+  "rules/swift-package/release.md SW-REL-03 watched-red clause (exit 1 on 6.4.0 default and on 6.3.3 with --build-system swiftbuild, exit 0 on 6.3.3 default) and the `-not -path './.build/*'` on the sdk-checksum block: rule file, not mine.",
+  "canary.sh find -L / grep -R agreement and its symlinked-Sources plant, plus the `command -v jq` / `${DIR:?}` guards in canary.sh and the optional-legs.md docker cells (opt_104): canary.sh is not my file. I did not touch the docker cells in skills/swift-release/references/optional-legs.md, because none of the findings that reach my skill files named them.",
+  "The remaining refused halves (v5-reason awk, gate_59 plugin guard, gate_95 swiftlint --config, srel_* cells, testing.md LinuxMain and `#if os`, cli-contract exit cells, `grep -r` Sources cells, manifest.md cells recursing over '.', SW-GATE-08 swift-version-file cell, SW-GATE-06 rules-complete, SW-GATE-24 `_arguments_override`, apple.md --exclude-dir=.build, SW-ERR-05 bare swiftlint, io.md Foundation guard, SW-GATE-25 floor patch) land in rules/*, not in my files."
+ ],
+ "round2": [
+  {
+   "file": "skills/swift-diagnose/SKILL.md",
+   "rule_id": "SW-CORE-18",
+   "known_class": "4",
+   "severity": "fix",
+   "evidence": "Step 0 persisted-enable=no grep (L138, 'empty output is the pass') has no --exclude-dir=.claude/.agents. Run on the RediStack scratch copy with the rule set installed it printed './.claude/rules/swift-quality/checks/weaken-check.sh:25:# SWIFT_BACKTRACE=enable=no printed all four.' and exited 0, so the pass can never be empty on an installed tree. The index backtrace-grep carries the excludes; the skill copy and its 're-run Step 0 on the fixed tree' instruction do not.",
+   "fix": "Add --exclude-dir=.claude --exclude-dir=.agents to the Step 0 grep (match the index backtrace-grep), or state in the skill that .claude lines are the installed rule set.",
+   "trees": [
+    "apple__swift-nio-ssh",
+    "swift-server__RediStack",
+    "mxcl__PromiseKit"
+   ]
+  },
+  {
+   "file": "rules/swift-quality.md (backtrace-grep L139), skills/swift-diagnose/SKILL.md L138, rules/swift-quality/checks/weaken-check.sh L43",
+   "rule_id": "SW-CORE-18",
+   "known_class": "17",
+   "severity": "fix",
+   "evidence": "Measured on 6.4: SWIFT_BACKTRACE=enable=false, enable=off, enable=0 and color=no,enable=no each cut the planted crash from 54 stderr lines to 13 (backtracer off), same as enable=no. Planted carriers in a scratch repo: backtrace-grep/Step 0 print only Dockerfile.1 (enable=no), ci.yml and 'enable=no,color=no'; they miss enable=false/off/0, 'color=no,enable=no', app.Dockerfile (glob is Dockerfile*), justfile, mise.toml, prod.env (.env* needs a leading dot) and devcontainer.json. weaken-check prints 7 of 11 planted carriers: it misses the same four value variants and the JSON form (a quote sits between the name and ':'), and it prints the '# SWIFT_BACKTRACE=enable=no' comment-only line.",
+   "fix": "Match 'SWIFT_BACKTRACE[^\\n]*enable[=: \"]*(no|false|off|0)\\b' (value alternatives, any position in the comma list), allow an optional quote before [=:], and widen carriers to *Dockerfile*, *.env, .env*, justfile/Justfile, *.toml, *.json. Skip lines whose first non-space char is '#'.",
+   "trees": [
+    "apple__swift-nio-ssh",
+    "swift-server__RediStack",
+    "mxcl__PromiseKit"
+   ]
+  },
+  {
+   "file": "rules/swift-quality.md",
+   "rule_id": "SW-GATE-21",
+   "known_class": "14",
+   "severity": "fix",
+   "evidence": "Index done-gate step 5 (L49) reads 'if swift package plugin --list | grep -q generate-documentation; then DOCC=1 ...'. gates.md L59 says the DOCC=1 before --list matters because the plugin is declared only under that variable. Plant: manifest adds swift-docc-plugin only when ProcessInfo environment DOCC == \"1\". Index form prints count 0 and takes the 'SKIP 5: no docc plugin declared' branch with exit 0; DOCC=1 swift package plugin --list lists generate-documentation. The two copies of the gate disagree and the index copy silently skips DocC on the manifest shape the rule itself describes.",
+   "fix": "Put DOCC=1 before 'swift package plugin --list' in the index copy so it is byte-identical to gates.md L59.",
+   "trees": [
+    "apple__swift-nio-ssh",
+    "swift-server__RediStack",
+    "mxcl__PromiseKit"
+   ]
+  },
+  {
+   "file": "rules/swift-quality/testing.md",
+   "rule_id": "SW-TEST-01",
+   "known_class": "3",
+   "severity": "fix",
+   "evidence": "sw-test-01 (and the sw-test-03 and sw-test-18 added-line forms) diff 'origin/main...HEAD': committed changes only. A new untracked Tests/FooTests.swift with 'import XCTest' and an uncommitted edit adding setenv( both print nothing, so empty output reads as pass on a working tree full of violations. The guard line only checks that origin/main resolves.",
+   "fix": "Use 'git add -N .' then 'git diff --merge-base \"$BASE\"' (as hatch-delta and pubenum do) so uncommitted and untracked files are in scope.",
+   "trees": [
+    "apple__swift-nio-ssh",
+    "swift-server__RediStack",
+    "mxcl__PromiseKit"
+   ]
+  },
+  {
+   "file": "rules/swift-quality/api-design.md",
+   "rule_id": "SW-API-05",
+   "known_class": "19",
+   "severity": "fix",
+   "evidence": "pubenum gate form 'git add -N . && git diff --name-only -z ... --merge-base \"$BASE\" ... | xargs -r -0 perl pubenum.pl' has no BASE guard. With BASE=nonexistent (and on the PromiseKit copy, which has no origin) git prints 'fatal: bad revision' to stderr, xargs -r gets empty input and the pipeline exits 0 with no stdout; with a valid BASE the same plant prints 'public enum Bad lacks @nonexhaustive'. A mistyped or absent base is a silent pass. Sibling forms (testing, hatch-delta, apple) guard with rev-parse --verify.",
+   "fix": "Prefix the gate with 'git rev-parse --verify -q \"${BASE}^{commit}\" >/dev/null || { echo \"BASE does not resolve\" >&2; exit 66; }' and set -o pipefail.",
+   "trees": [
+    "apple__swift-nio-ssh",
+    "swift-server__RediStack",
+    "mxcl__PromiseKit"
+   ]
+  },
+  {
+   "file": "rules/swift-quality/concurrency.md",
+   "rule_id": "SW-CONC-01",
+   "known_class": "19",
+   "severity": "nit",
+   "evidence": "S1 changed-files line hard-codes origin/main with no resolve guard and no 'git add -N': on PromiseKit it printed 'fatal: bad revision origin/main' and exited 0, and an untracked new file with an undocumented @unchecked Sendable is not listed by plain 'git diff --name-only'.",
+   "fix": "Use the same guarded 'git add -N . && git diff --merge-base \"$BASE\"' form as hatch-delta.",
+   "trees": [
+    "apple__swift-nio-ssh",
+    "swift-server__RediStack",
+    "mxcl__PromiseKit"
+   ]
+  },
+  {
+   "file": "skills/swift-release/SKILL.md",
+   "rule_id": "SW-REL-01",
+   "known_class": "4",
+   "severity": "nit",
+   "evidence": "Pre-tag step runs plain 'git status --porcelain # any output is the finding'. On any tree with the rule set installed it prints '?? .claude/' (measured on PromiseKit and nio-ssh copies), so a clean release tree can never pass. swift-upgrade U0 already uses the ':(exclude).claude' ':(exclude).agents' pathspec after measuring this.",
+   "fix": "Use git status --porcelain -- . ':(exclude).claude' ':(exclude).agents' as swift-upgrade does.",
+   "trees": [
+    "apple__swift-nio-ssh",
+    "swift-server__RediStack",
+    "mxcl__PromiseKit"
+   ]
+  },
+  {
+   "file": "skills/swift-upgrade/references/dated-rechecks-tools.md",
+   "rule_id": "SW-CORE-10",
+   "known_class": "12",
+   "severity": "fix",
+   "evidence": "Recheck commands L42, L81, L144, L215 use 'swift build --scratch-path .build-tp|.build-isc|.build-ser|.build-tl' inside the tree and never remove them. After the cells ran on nio-ssh and RediStack, git status showed '?? .build-isc/ .build-ser/ .build-tl/ .build-tp/' (trips the U0/U8 clean-tree test), and every '--exclude-dir=.build' grep still scans them: G7 printed './.build-tl/checkouts/swift-nio/.swift-format' and 50 sibling lines as config findings, and whole-tree k07 on a planted '.build-tp/checkouts/dep/Sources/Dep/a.swift' printed the @unchecked Sendable line. The rest of the skill keeps scratch outside the tree ($S/...).",
+   "fix": "Use --scratch-path \"$S/tp\" (outside the tree) in all four commands, or rm -rf the directories after the recheck and add them to the cell.",
+   "trees": [
+    "apple__swift-nio-ssh",
+    "swift-server__RediStack",
+    "mxcl__PromiseKit"
+   ]
+  },
+  {
+   "file": "rules/swift-quality/language.md (SW-LANG-03 Linux build) and skills/swift-upgrade/SKILL.md U7",
+   "rule_id": "SW-LANG-03",
+   "known_class": "NEW",
+   "new_class": "container build shares and pollutes the host .build",
+   "severity": "fix",
+   "evidence": "'docker run --rm -v \"$PWD\":/src -w /src swift:6.4 swift build' runs as root with the repo as /src and no --scratch-path. Afterwards nio-ssh and PromiseKit .build held root-owned dirs (.build/x86_64-unknown-linux-gnu, repositories/*), later non-root cells printed 'find: ./.build/...: Permission denied', and the next host-path build failed with \"precompiled file '/src/.build/.../SwiftShims.pcm' was compiled with module cache path '...' ... missing required module 'SwiftShims'\" (and the reverse: Stale file ... outside the allowed root paths). U7 passes --scratch-path /tmp/u7 for exactly this reason; SW-LANG-03 and the floor-leg line do not.",
+   "fix": "Add -u \"$(id -u):$(id -g)\" and --scratch-path /tmp/lang03 to the docker commands in language.md (build and the 6.2.0 floor test), and say a .build populated by the host cannot be reused by the /src mount.",
+   "trees": [
+    "apple__swift-nio-ssh",
+    "swift-server__RediStack",
+    "mxcl__PromiseKit"
+   ]
+  },
+  {
+   "file": "skills/swift-upgrade/SKILL.md",
+   "rule_id": "SW-CORE-12",
+   "known_class": "13",
+   "severity": "fix",
+   "evidence": "U8 says migrate with a Package@swift-X.swift in effect 'edits the dead Package.swift, exits 0 and enables nothing'. Dry-run on PromiseKit (Package.swift tools 4.0 shadowed by Package@swift-5.3.swift on 6.4): 'swift package migrate --target PromiseKit --to-feature ExistentialAny' applied 15 fix-its in 6 source files, then exited 1 with 'Could not update manifest ... (package manifest version 4.0.0 is too old: please update to manifest version 5.8.0 or newer)'; dump-package count was 0. The exit-1 taxonomy lists only 'no edits' and 'unable to find target'; this third form (source edits kept, dead manifest too old) is missing, and the exit-0 claim holds only when the dead manifest is >= 5.8.",
+   "fix": "Add the 'manifest version X is too old' exit-1 form to the U8 taxonomy and qualify the exit-0 claim by the dead manifest's tools version; keep 'git checkout -- .' as the recovery.",
+   "trees": [
+    "apple__swift-nio-ssh",
+    "swift-server__RediStack",
+    "mxcl__PromiseKit"
+   ]
+  },
+  {
+   "file": "rules/swift-package/gates.md",
+   "rule_id": "SW-GATE-13",
+   "known_class": "13",
+   "severity": "fix",
+   "evidence": "Row says the flag 'exits 1 on any warning including an ungrouped one (6.4.0)'. On 6.4 the Swift-5-mode warning \"passing non-Sendable parameter 'body' to function expecting a '@Sendable' closure\" is not promoted: swiftc 6.4 -swift-version 5 -warnings-as-errors exits 0 with the warning (also with -strict-concurrency=targeted), exits 1 only with =complete or -swift-version 6. swift:6.3 turns the same line into 'error:' and exits 1. In the trees: 'swift build -Xswiftc -warnings-as-errors' exits 0 on 6.4 with 4 Sendable warnings on PromiseKit (Box.swift:95,97) and on RediStack (HashCommands.swift:387, tools 6 with swiftLanguageModes [.v5]), while 6.3 would fail. Done-gate steps 2 and 3 and swift-upgrade U7 ('exit 0 on both toolchains') are false green on a Swift 5 mode package on the 6.4 leg.",
+   "fix": "Narrow the claim to Swift 6 mode (or packages with StrictConcurrency enabled), say 6.4 leaves minimal-checking Sendable warnings as warnings, and make the gate count warning lines (swift build ... 2>&1 | grep -c 'warning:') for mode-5 packages.",
+   "trees": [
+    "apple__swift-nio-ssh",
+    "swift-server__RediStack",
+    "mxcl__PromiseKit"
+   ]
+  },
+  {
+   "file": "rules/swift-quality/checks/tsan-check.sh",
+   "rule_id": "SW-GATE-27",
+   "known_class": "NEW",
+   "new_class": "wrapper with unbounded runtime",
+   "severity": "nit",
+   "evidence": "On PromiseKit the first tsan-check.sh run printed nothing for 8+ minutes at 0% CPU: container ps showed 'swift-test --sanitize=thread' alive with a defunct '[CorePromise-tes]' runner, and a direct run of the same command logged 'ThreadSanitizer: CHECK failed: tsan_rtl.cpp:1086'. Two later runs completed (exit 1, real data races at LoggingTests.swift:95). The script has no timeout, buffers all output until exit, and only treats 'FATAL: ThreadSanitizer' (not 'CHECK failed') as 'did not run' (70). One hang in three runs.",
+   "fix": "Wrap swift test in 'timeout \"${TSAN_TIMEOUT:-1200}\"' mapping 124 to exit 70, and add 'ThreadSanitizer: CHECK failed' to the exit-70 patterns.",
+   "trees": [
+    "apple__swift-nio-ssh",
+    "swift-server__RediStack",
+    "mxcl__PromiseKit"
+   ]
+  },
+  {
+   "file": "rules/swift-quality/errors.md",
+   "rule_id": "SW-ERR-10",
+   "known_class": "21",
+   "severity": "nit",
+   "evidence": "K1 'grep -RPzo catch\\b[^{};]*\\{\\s*\\}' matches the word catch inside a doc comment and runs across lines to the next empty body: on PromiseKit it printed Sources/Catchable.swift 'catch` and `recover` to your object that conforms to `Thenable` ... public protocol CatchMixin: Thenable {}' (a protocol, not a catch clause).",
+   "fix": "Anchor on a statement start ('^[[:space:]]*(\\}[[:space:]]*)?catch\\b' with (?m)) and skip lines starting with //, ///, or *.",
+   "trees": [
+    "apple__swift-nio-ssh",
+    "swift-server__RediStack",
+    "mxcl__PromiseKit"
+   ]
+  },
+  {
+   "file": "rules/swift-quality/cli-contract.md",
+   "rule_id": "SW-CLI-03",
+   "known_class": "7",
+   "severity": "nit",
+   "evidence": "The G0 gate is package-level ('any executable target') but every G1 grep scans all of Sources. swift-nio-ssh has sample/benchmark executables (NIOSSHClient, NIOSSHServer, NIOSSHPerformanceTester) beside the NIOSSH library; the block printed 66 lines, including 12 library fatalError lines (G1-03b: AESGCM.swift, SSHChildChannel.swift, CSPRNG.swift, UserAuthenticationMethod.swift) and 'try' lines in the benchmark main.swift.",
+   "fix": "Scope G1 to the executable targets' directories (list them from dump-package) and apply the NOSHIP excludes (Example*, Demo*, Benchmark*).",
+   "trees": [
+    "apple__swift-nio-ssh",
+    "swift-server__RediStack",
+    "mxcl__PromiseKit"
+   ]
+  },
+  {
+   "file": "rules/swift-quality/security.md",
+   "rule_id": "SW-SEC-04",
+   "known_class": "16",
+   "severity": "nit",
+   "evidence": "The reserveCapacity alternative prints bounded literals: swift-nio-ssh prints reserveCapacity(1), (8) and (3) (NIOSSHCertifiedPublicKey.swift:711, SSHChannelMultiplexer.swift:47, UserAuthenticationMethod.swift:66) beside the real wire-sized sites (SSHTerminalModes.swift:396, RESPTranslator.swift:255 elementCount).",
+   "fix": "Drop hits whose argument is an integer literal: pipe through grep -v -E 'reserveCapacity\\([0-9_]+\\)'.",
+   "trees": [
+    "apple__swift-nio-ssh",
+    "swift-server__RediStack",
+    "mxcl__PromiseKit"
+   ]
+  },
+  {
+   "file": "rules/swift-quality/testing.md",
+   "rule_id": "SW-TEST-19",
+   "known_class": "21",
+   "severity": "nit",
+   "evidence": "The fixed-port alternative '[Pp]ort: *[1-9][0-9]{3,4}' matches protocol-message values that are never bound: swift-nio-ssh prints 15 lines (EndToEndTests.swift '.listen(host: \"localhost\", port: 8765)', ChildChannelMultiplexerTests originatorAddress port: 8765, SSHMessagesTests firstPort: 65536) from SSH TCP-forwarding request fixtures.",
+   "fix": "Restrict to bind/connect call shapes (bind(host:port:), ServerBootstrap, .connect(host:) with a real listener) or document the '// literal ok:' escape in the rule row for protocol libraries.",
+   "trees": [
+    "apple__swift-nio-ssh",
+    "swift-server__RediStack",
+    "mxcl__PromiseKit"
+   ]
+  },
+  {
+   "file": "rules/swift-quality.md",
+   "rule_id": "SW-CORE-11",
+   "known_class": "16",
+   "severity": "nit",
+   "evidence": "flag-grep ('-swift-version' in *.yml) prints PromiseKit's .github/workflows/ci.yml:31,57,59 ('swift build -Xswiftc -swift-version -Xswiftc 3|4|4.2'). These are deliberate legacy-language-mode legs on Swift 4.x containers, not a leaked Swift 6 probe, but the rule says empty output is the only pass.",
+   "fix": "Narrow the pattern to the probe values ('-swift-version[^0-9]*6') or allow a trailing '# legacy-mode leg:' marker.",
+   "trees": [
+    "apple__swift-nio-ssh",
+    "swift-server__RediStack",
+    "mxcl__PromiseKit"
+   ]
+  },
+  {
+   "file": "rules/swift-quality/language.md",
+   "rule_id": "SW-LANG-01",
+   "known_class": "7",
+   "severity": "nit",
+   "evidence": "T04 and T06 ignore the manifest exclude list and comments. On PromiseKit (Package@swift-5.3.swift excludes AnyPromise.swift and *.m from the Linux target) T04 prints 10 @objc/NSObject lines from AnyPromise.swift that never compile on Linux; T06 prints doc-comment samples (Thenable.swift:26, firstly.swift:8-21) and Documentation/Examples/URLSession+BadResponseErrors.swift, because NOSHIP does not exclude 'Documentation' and the grep does not skip '///' lines. T07/T08 also scan Tests (RediStack ConnectionPoolTests.swift:646).",
+   "fix": "Say in the row that the hit list must be intersected with the effective manifest's target sources (exclude:), add Documentation to NOSHIP and filter '^[[:space:]]*///'.",
+   "trees": [
+    "apple__swift-nio-ssh",
+    "swift-server__RediStack",
+    "mxcl__PromiseKit"
+   ]
+  },
+  {
+   "file": "rules/swift-quality/concurrency.md",
+   "rule_id": "SW-CONC-31",
+   "known_class": "21",
+   "severity": "nit",
+   "evidence": "S10 lists any file naming DiscardingTaskGroup with no cap word. RediStack's Sources/RediStack/Cluster/SwiftPolyfill.swift (exit 123) only declares 'protocol DiscardingTaskGroupProtocol' and two conformance extensions; there is no accept loop.",
+   "fix": "Require a call site (withDiscardingTaskGroup( or withThrowingDiscardingTaskGroup() instead of the bare type name.",
+   "trees": [
+    "apple__swift-nio-ssh",
+    "swift-server__RediStack",
+    "mxcl__PromiseKit"
+   ]
+  }
+ ]
+}

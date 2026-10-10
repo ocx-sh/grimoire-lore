@@ -246,18 +246,18 @@ version = "0.1.1"
 description = { readme = "docs/code-docs-essentials.md", logo = "assets/lore-code-docs.svg" }
 
 # The Bazel set: one rule plus two skills. `bazel-quality` is the index rule;
-# its support directory carries the twelve depth files it routes to — eight by
+# its support directory carries the fifteen depth files it routes to — eight by
 # concern (Starlark, Bzlmod, hermeticity, caching, testing, CI, architecture,
-# flags) and four by language (Rust, Python, TypeScript, C++), because the
-# rulesets genuinely diverge per language and a single flat file would restate
-# every exception in every paragraph. The glob set is the fifteen names the
-# build system itself guarantees (BUILD, .bzl, MODULE.bazel, the rc files, the
-# lockfile, .bazelversion, .bazelignore, the legacy WORKSPACE names, .star and
-# .scl); it deliberately does not touch Cargo.toml, pyproject or package.json,
-# which the language sets own. `bazel-adopt` runs once per repository and
+# flags) and seven by language (Rust, Python, TypeScript, C++, Go, Java/Kotlin,
+# Swift), because the rulesets genuinely diverge per language and a single flat
+# file would restate every exception in every paragraph. The glob set is the
+# sixteen names the build system itself guarantees (BUILD, .bzl, MODULE.bazel,
+# the rc files, the lockfile, .bazelversion, .bazelignore, the legacy WORKSPACE
+# names, .star and .scl); it deliberately does not touch Cargo.toml,
+# pyproject or package.json, which the language sets own. `bazel-adopt` runs once per repository and
 # `bazel-diagnose` runs on a symptom; neither belongs on every edit.
 [rules.bazel-quality]
-version = "0.3.0"
+version = "0.4.0"
 description = { readme = "docs/bazel-quality.md", logo = "assets/lore-bazel.svg" }
 
 [skills.bazel-adopt]
@@ -269,7 +269,7 @@ version = "0.1.0"
 description = { readme = "docs/bazel-diagnose.md", logo = "assets/lore-bazel.svg" }
 
 [bundles.bazel-essentials]
-version = "0.1.1"
+version = "0.1.2"
 description = { readme = "docs/bazel-essentials.md", logo = "assets/lore-bazel.svg" }
 # The JVM set: four rules split by what the file under edit is, not by
 # language family alone. `java-quality` and `kotlin-quality` load on source and
@@ -400,3 +400,40 @@ description = { readme = "docs/nix-diagnose.md", logo = "assets/lore-nix.svg" }
 [bundles.nix-essentials]
 version = "0.1.0"
 description = { readme = "docs/nix-essentials.md", logo = "assets/lore-nix.svg" }
+
+# The Swift set: two rules split by which file is under edit, not by language
+# family. `swift-quality` loads on `**/*.swift` only and routes to ten depth
+# files by task: language era, concurrency, errors, API design, testing, the
+# CLI contract, files and processes, networking, security and Apple apps.
+# `swift-package` loads on `**/Package.swift`, `**/Package@swift-*.swift`,
+# `**/Package.resolved`, `**/.swift-format`, `**/.swiftformat`,
+# `**/.swiftlint.yml`, `**/.swift-version` and `**/.spi.yml`, the manifest and
+# tool-config files no compiler checks, and routes to three depth files:
+# manifest, gates and release. Workflows, Dockerfiles, `*.pbxproj`,
+# `*.xcconfig` and `.swiftlint.yaml` are never globbed; the `swift-quality`
+# index routes those by task. The three skills are procedures run once per
+# upgrade, per incident or per release. The bundle also carries `code-docs` and
+# `code-docs-cleanup`, which are shared by every language set.
+[rules.swift-quality]
+version = "0.1.0"
+description = { readme = "docs/swift-quality.md", logo = "assets/lore-swift.svg" }
+
+[rules.swift-package]
+version = "0.1.0"
+description = { readme = "docs/swift-package.md", logo = "assets/lore-swift.svg" }
+
+[skills.swift-upgrade]
+version = "0.1.0"
+description = { readme = "docs/swift-upgrade.md", logo = "assets/lore-swift.svg" }
+
+[skills.swift-diagnose]
+version = "0.1.0"
+description = { readme = "docs/swift-diagnose.md", logo = "assets/lore-swift.svg" }
+
+[skills.swift-release]
+version = "0.1.0"
+description = { readme = "docs/swift-release.md", logo = "assets/lore-swift.svg" }
+
+[bundles.swift-essentials]
+version = "0.1.0"
+description = { readme = "docs/swift-essentials.md", logo = "assets/lore-swift.svg" }

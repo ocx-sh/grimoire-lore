@@ -9,7 +9,7 @@ grim add ghcr.io/ocx-sh/lore/bazel-essentials
 
 | Member | Kind | Covers |
 |---|---|---|
-| `bazel-quality` | rule | Nineteen non-negotiables and 353 rules across thirteen depth files: Starlark and BUILD shape, Bzlmod and repository rules, hermeticity, caching and remote execution, testing, CI and target selection, architecture, flags and versions, and one file each for Rust, Python, TypeScript, C++, and Java with Kotlin |
+| `bazel-quality` | rule | Nineteen non-negotiables and 390 further rules across fifteen depth files: Starlark and BUILD shape, Bzlmod and repository rules, hermeticity, caching and remote execution, testing, CI and target selection, architecture, flags and versions, and one file each for Rust, Python, TypeScript, C++, Java with Kotlin, Go and Swift |
 | `bazel-adopt` | skill | The go/no-go gate from measured signals, then the migration order: pins, lockfile, cache wiring, CI lanes, one branch per language |
 | `bazel-diagnose` | skill | A build that is already wrong, routed by symptom to the command that settles it |
 
