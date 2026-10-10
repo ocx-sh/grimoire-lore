@@ -1,0 +1,26 @@
+{
+  "created": "2026-10-10T21:42:16+02:00",
+  "description": "Swift Package",
+  "keywords": [
+    "swift",
+    "swiftpm",
+    "package",
+    "manifest",
+    "swift-format",
+    "swiftlint",
+    "toolchain",
+    "release",
+    "ci"
+  ],
+  "kind": "rule",
+  "license": "Apache-2.0",
+  "name": "swift-package",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/swift-package",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "The Swift package and build-config index, with the gate, the non-negotiables, the SW-PKG rules, and where the manifest, lint-gate and release depth lives"
+}

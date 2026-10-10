@@ -1,0 +1,32 @@
+{
+  "created": "2026-10-10T21:42:16+02:00",
+  "description": "Ordered runbook for cutting a Swift release, for a CLI or server shipped as static per-architecture Linux binaries and for a library or SDK shipped as a SwiftPM tag, from the toolchain pin and the vX.Y.Z tag decision through the API-breakage gate, the static Linux SDK build, the statically-linked and glibc-floor checks, version stamping, stripping with an unstripped twin, the CycloneDX SBOM and checksums, to CI attestation and verifying what was published. Use when tagging or releasing a Swift package, CLI or SDK, writing or reviewing a release workflow, Dockerfile or Makefile that runs swift build -c release, building a static or musl binary with --swift-sdk, deciding a version bump, generating an SBOM with --sbom-spec, or hitting the errors GLIBC_2.43 not found, has multiple target triples, Unknown option '--sbom-spec' or Couldn’t get revision. Not for bumping the toolchain or a Swift 6 migration, not for crashes or Illegal instruction, and not for Xcode, app signing or notarization.",
+  "keywords": [
+    "swift",
+    "swiftpm",
+    "release",
+    "static-linux-sdk",
+    "musl",
+    "glibc",
+    "sbom",
+    "cyclonedx",
+    "semver",
+    "tag",
+    "api-breakage",
+    "version-stamping",
+    "checksums",
+    "strip",
+    "attestation",
+    "github-actions"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "swift-release",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/swift-release",
+  "schema": 1,
+  "summary": "Gate-ordered Swift release procedure for static Linux CLIs and tagged libraries, built around the permanence of a pushed tag, with its commands watched red and green on Swift 6.4.0 and 6.3.3"
+}

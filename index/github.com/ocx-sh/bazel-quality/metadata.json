@@ -1,5 +1,5 @@
 {
-  "created": "2026-09-26T16:18:20+02:00",
+  "created": "2026-10-10T21:42:16+02:00",
   "description": "Bazel Quality",
   "keywords": [
     "bazel",
@@ -21,6 +21,12 @@
     "go_deps",
     "nogo",
     "x_defs",
+    "rules_swift",
+    "swift_library",
+    "swift_binary",
+    "swift_test",
+    "swift.toolchain",
+    "rules_swift_package_manager",
     "bazel-diff",
     "target-determinator",
     "rules_rust",
