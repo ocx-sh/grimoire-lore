@@ -1,0 +1,29 @@
+{
+  "created": "2026-10-10T21:42:16+02:00",
+  "description": "Swift Quality",
+  "keywords": [
+    "swift",
+    "swiftpm",
+    "quality",
+    "concurrency",
+    "sendable",
+    "errors",
+    "testing",
+    "cli",
+    "subprocess",
+    "networking",
+    "security",
+    "swiftui"
+  ],
+  "kind": "rule",
+  "license": "Apache-2.0",
+  "name": "swift-quality",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/swift-quality",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "The Swift quality index, holding the gate, the non-negotiables, the SW-CORE rules, and where the depth lives"
+}

@@ -1,0 +1,36 @@
+{
+  "created": "2026-10-10T21:42:16+02:00",
+  "description": "Use when asked to move a Swift library, CLI or server package (not an app target) from Swift 5 to Swift 6 language mode or to fix its Swift 6 concurrency errors, to bump the toolchain, .swift-version or swift-tools-version, to enable an upcoming feature such as NonisolatedNonsendingByDefault, ExistentialAny or MemberImportVisibility, to run swift package migrate, or after errors such as \"is not concurrency-safe because\", \"this is an error in the Swift 6 language mode\", \"unknown warning group\", \"is not a recognized upcoming feature\" or \"Unknown option '--targets'\". Not for diagnosing a crash, hang or slow type-check (swift-diagnose) and not for cutting a release (swift-release).",
+  "keywords": [
+    "swift",
+    "swiftpm",
+    "upgrade",
+    "swift-6",
+    "language-mode",
+    "strict-concurrency",
+    "sendable",
+    "concurrency-migration",
+    "migrate",
+    "upcoming-feature",
+    "toolchain",
+    "swift-version",
+    "swift-tools-version",
+    "existentialany",
+    "nonisolatednonsendingbydefault",
+    "memberimportvisibility",
+    "hatch",
+    "nonisolated-unsafe",
+    "warnings-as-errors",
+    "dated-recheck"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "swift-upgrade",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/swift-upgrade",
+  "schema": 1,
+  "summary": "Order-sensitive Swift 6 mode, upcoming-feature and toolchain upgrade procedure with a zero-new-hatch delta and dated probes, measured on Swift 6.4.0 and 6.3.3"
+}
