@@ -1,3 +1,41 @@
+# Swift program (LANDED 2026-10-10)
+
+Started and finished 2026-10-10 (`/research-lang swift`, ultracode on).
+Frame `.agents/research/swift-frame.md`; map and authoring notes N-1..N-14 in
+`.agents/research/swift-topic-map.md`; 15 consolidations `swift-*.md`.
+
+## What shipped
+
+- Rules `swift-quality` (index + 10 depth files + `checks/`, 260 IDs) and
+  `swift-package` (index + manifest/gates/release, 89 IDs); skills
+  `swift-upgrade`, `swift-diagnose`, `swift-release`; bundle
+  `swift-essentials` (all 0.1.0); `bazel-quality/swift.md` (bazel-quality
+  0.4.0, bazel-essentials 0.1.2); BZL-HERM-07 Swift carve-out in hermeticity.md.
+- Measured on Swift 6.4.0 / 6.3.3 / 6.2 floor over 40 upstream exemplars;
+  Apple-only claims read-only (no macOS host).
+
+## Validation and convergence
+
+- Phase 8: 11 review->fix units + consistency pass (receipt
+  `swift-topic-map/scratch/review-receipt.json`, classes `review-classes.md`).
+- Held-out rounds on 18 fresh trees (`~/.cache/research-lang/heldout/swift`):
+  round 1 (9 trees) 3 new classes, round 2 (5) 2, round 3 (3) 2 minor, round 4
+  (3) 0 new classes, 0 new MUST -> converged. Receipts
+  `heldout-receipt.json`, `converge{,2,3}-receipt.json`, `final-receipt.json`.
+
+## Open, for the owner
+
+- Owner decisions no fixer may close: SW-LANG-13 scope, SW-NET-19 keep or
+  drop, skill trigger-eval records, on-demand glob on the 14 older bazel depth
+  files, checker not flagging glued code fences or `xargs` without `-0`.
+- M-M-17/M-M-18: docs-quality declaration example fails DocC
+  `--warnings-as-errors`; cli-contract exit-table drift vs the Rust set.
+- Command blocks duplicated between rules and skills (release stamp-check,
+  repro-check, glibc-floor awk, toolchain-pin grep): keep one copy next round.
+- A root-owned `.build-root` under the held-out scratch tree needs root to delete.
+
+---
+
 # Nix program (AUTHORED, ON BRANCH `nix`, unpushed)
 
 Started 2026-09-27 in the `nix` worktree (`.agents/worktrees/nix`, branch `nix`,

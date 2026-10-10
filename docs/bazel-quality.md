@@ -1,7 +1,7 @@
 # bazel-quality
 
 Standards for writing and reviewing Bazel: the gate, nineteen
-merge-blocking non-negotiables, and fourteen depth files routed to by task.
+merge-blocking non-negotiables, and fifteen depth files routed to by task.
 
 ```sh
 grim add ghcr.io/ocx-sh/lore/bazel-quality
@@ -11,7 +11,7 @@ Loads on the files the build system itself names: `BUILD.bazel`, `BUILD`,
 `*.bzl`, `MODULE.bazel` and its lockfile, `REPO.bazel`, the rc files
 (`.bazelrc`, `*.bazelrc`, `.bazelrc.*`), `.bazelversion`, `.bazelignore`,
 `*.star`, `*.scl`, and the three legacy `WORKSPACE` names it exists to catch.
-The index is 168 lines and always present; a depth file is read only when
+The index is 169 lines and always present; a depth file is read only when
 the work calls for it. It deliberately never loads on `Cargo.toml`,
 `pyproject.toml`, `package.json` or a source file — the language sets own
 those.
@@ -49,26 +49,40 @@ the rules:
 ## What is in it
 
 The index carries the gate, nineteen non-negotiables, and three
-cross-cutting rules it owns outright. 368 further rules live in fourteen
+cross-cutting rules it owns outright. 390 further rules live in fifteen
 depth files — eight by concern (Starlark and BUILD shape, Bzlmod and
 repository rules, hermeticity, caching and remote execution, testing, CI and
-target selection, architecture, flags and versions) and six by language
-(Rust, Python, TypeScript, C++, Java with Kotlin, and Go, if you adopt
-Bazel for Go), because the rulesets genuinely diverge per ruleset and a
-flat file would restate every exception in every paragraph.
+target selection, architecture, flags and versions) and seven by language
+(Rust, Python, TypeScript, C++, Java with Kotlin, Go and Swift, the last two
+if you adopt Bazel for them), because the rulesets genuinely diverge per
+ruleset and a flat file would restate every exception in every paragraph.
 
 Every rule carries an ID, a rationale, a runnable verification that says
 which way empty output reads and which Bazel version it was run on, and a
 severity. The depth files do not point at each other.
 
-The Go file is the one language file that says up front it may not apply:
-its own summary line binds it only if you adopt Bazel for Go. Its fifteen
-rules, twelve of them MUST, cover the SDK and dependency wiring, nogo as
-an extra layer that never substitutes for `go vet` and lint, the race
+The Go and Swift files are the language files that say up front they may not
+apply: each binds only if you adopt Bazel for that language. The Go file's
+fifteen rules, twelve of them MUST, cover the SDK and dependency wiring, nogo
+as an extra layer that never substitutes for `go vet` and lint, the race
 flag, cross-compiling with `--platforms`, and stamping and auditing a
-release binary. It cites BZL-MOD, BZL-HERM, BZL-CACHE, BZL-TEST, BZL-FLAG,
-BZL-ARCH, BZL-LARK and BZL-CI by ID and restates none of them, the same
-discipline the index holds itself to.
+release binary.
+
+The Swift file is the only one whose first rule is a scope probe: it binds
+only when a `MODULE.bazel` already declares `rules_swift`, and in any other
+Swift repository SwiftPM stays the build. Its twenty-two rules, nine of
+them MUST, cover bzlmod-only `rules_swift` 4.x, the host or hermetic
+toolchain and the `CC=clang` line, feature lists scoped to first-party
+packages so a third-party dependency never inherits the warnings gate,
+`swift.enable_v6` and the feature names that fail green when misspelt,
+`module_name`, `swift_test` over Swift Testing and its fixture lookup, and
+the `rules_swift_package_manager` lockfile gate. Bazel 8.8.0 and 9.2.0 were
+run, macOS and Windows were not. It sits beside `swift-quality` and
+`swift-package`, which own the sources and the manifests.
+
+Both cite BZL-MOD, BZL-HERM, BZL-CACHE, BZL-TEST, BZL-FLAG, BZL-ARCH,
+BZL-LARK and BZL-CI by ID and restate none of them, the same discipline the
+index holds itself to.
 
 ## Every verification was watched go red
 
@@ -97,8 +111,9 @@ target compiles.
 
 ## Siblings
 
-`rust-cargo`, `python-packaging`, `typescript-packaging` and `go-modules` own
-the manifests and lockfiles this set never loads on; `rust-quality`,
-`python-quality`, `typescript-quality` and `go-quality` own the sources.
+`rust-cargo`, `python-packaging`, `typescript-packaging`, `go-modules` and
+`swift-package` own the manifests and lockfiles this set never loads on;
+`rust-quality`, `python-quality`, `typescript-quality`, `go-quality` and
+`swift-quality` own the sources.
 Bundled with the two skills as
 `bazel-essentials`.

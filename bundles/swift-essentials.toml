@@ -1,0 +1,32 @@
+summary = "The OCX Swift set: Swift source standards, the SwiftPM manifest and tool-config rule, and the upgrade, diagnosis and release procedures"
+keywords = "swift,swiftpm,quality,review,standards,swift-6,strict-concurrency,sendable,actors,mutex,tasks,cancellation,typed-throws,errors,swift-testing,xctest,swift-format,swiftlint,warnings-as-errors,tsan,docc,api-breakage,cli,swift-argument-parser,exit-codes,subprocess,atomic-write,filepath,asynchttpclient,urlsession,security,swiftui,observation,static-linux-sdk,musl,release,sbom,upgrade,migrate,diagnose,backtrace"
+description = "Everything an agent needs to write, gate, ship and debug Swift 6 the way the OCX family does: the swift-quality rule (the gate block, the non-negotiables and ten depth files on language era, concurrency and isolation, errors, library and SDK API design, testing, the CLI contract, files and processes, networking, security, and Apple-platform apps), the swift-package rule (tools-version and language-mode policy, dependency and Package.resolved hygiene, the pinned swift-format and SwiftLint configs, warning control, CI gates and release engineering), plus the swift-upgrade skill that moves a package to Swift 6 language mode or a new toolchain, the swift-diagnose skill for a trapped, hung, racy or slow-to-compile process, and the swift-release skill that cuts static Linux release binaries. The code-docs rule and the code-docs-cleanup skill cover comments in every language: short blocks that keep every guard."
+license = "Apache-2.0"
+repository = "https://github.com/ocx-sh/grimoire-lore"
+
+# Members are same-directory relative: this catalog publishes flat under
+# ghcr.io/ocx-sh/lore/<name>, so `./swift-quality` resolves against wherever
+# the bundle itself was pulled from — a mirror keeps working.
+#
+# MEMBERS CARRY NO TAG. Not a digest, not an exact version, not a floating
+# major, not `latest` — `latest` is a tag like any other and naming it is still
+# a pin. A bundle is a *set*, not a snapshot: its job is to say "these belong
+# together", and the consumer's own `grimoire.lock` is what freezes them.
+#
+# Do not pass --pin when releasing this bundle.
+#
+# The Bazel-Swift depth file is not a member — it ships inside `bazel-quality`,
+# which already owns `BUILD.bazel`.
+
+[rules]
+swift-quality = "./swift-quality"
+swift-package = "./swift-package"
+# code-docs globs every source extension, this set's included, and
+# code-docs-cleanup is its procedure, so both ride in this bundle.
+code-docs = "./code-docs"
+
+[skills]
+swift-upgrade = "./swift-upgrade"
+swift-diagnose = "./swift-diagnose"
+swift-release = "./swift-release"
+code-docs-cleanup = "./code-docs-cleanup"

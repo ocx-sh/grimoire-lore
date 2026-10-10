@@ -1,0 +1,190 @@
+{
+  "summary": "Swift research program convergence: final fix wave for held-out round 4 findings and refused halves by file owner",
+  "agentCount": 4,
+  "logs": [],
+  "result": {
+    "fixes": [
+      {
+        "unit": "swift quality rules/checks (held-out round 4)",
+        "applied": [
+          "Finding 0 (class 1): the libc @preconcurrency allow-list skip now accepts leading attributes (@unsafe @preconcurrency import Glibc) in rules/swift-quality/checks/k07.sh, rules/swift-quality/checks/weaken-check.sh and the hatch-delta awk in rules/swift-quality.md. Plant: red on '@unsafe @preconcurrency import Foo' in all three, green on the libc chain with @unsafe, @unsafe public and plain forms. console-kit k07.sh no longer prints any preconcurrency line (13 other genuine tells remain). Header of weaken-check.sh updated.",
+          "Finding 0 language.md half: L02 unguarded-libc-import grep in rules/swift-quality/language.md widened to leading attributes and access modifiers (red on an unguarded '@unsafe @preconcurrency import Glibc', green on the guarded and Foundation-only twins, empty on console-kit, swift-numerics, case-paths); '@unsafe @preconcurrency import Glibc' example and a dated measurement note added after the right-hand example.",
+          "Finding 5 (class 49): fold-check.sh finds only root manifests (-maxdepth 1) and its header says so. console-kit no longer prints the 7 lines of Benchmarks/Package.swift (root's 7 shared-array lines remain, as documented); numerics and case-paths stay green; plant red on a post-loop literal, nested-manifest twin green.",
+          "Finding 7 (class 79): pin-grep in rules/swift-quality.md gains -e 'swift_versions:' -e 'swift_version:'; SW-CORE-09 verification says a reusable-workflow input list is a leg to read by hand. Plant pr.yml with linux_swift_versions prints 1 line (old grep 0), clean twin exits 1 with no output.",
+          "Refused-half: swift-quality.md done-gate step 2 now carries the SW-GATE-13 qualifier (exit 0 does not cover a .v5 target on 6.4, run mode5-warnings). Step 5 DOCC=1, backtrace-grep widening, canary.sh find -L, swiftlint-gate.sh exit 70 mapping, SW-LANG-03 docker -u/--scratch-path/HOME and SW-API-12 Foundation grep were already present in my files; verified, no edit.",
+          "Checker: check-artifacts.py printed clean; swift-quality.md body is 198 lines."
+        ],
+        "refused": [
+          "Findings 1, 2, 3, 4, 6, 8, 9, 10, 11 (security.md SW-SEC-18, cli-contract.md, errors.md, swift-release/SKILL.md, preflight.md, swift-upgrade/SKILL.md) are not in my files; security.md and errors.md carry uncommitted edits from other fixers and were not touched.",
+          "Finding 7 other half: skills/swift-upgrade/SKILL.md U1 inventory needs the same -e 'swift_versions:' -e 'swift_version:' additions as the swift-quality.md pin-grep, plus the hand-read note for reusable-workflow input lists.",
+          "Finding 0 other half: none outstanding beyond mine (concurrency.md S2 already accepts the prefix and is empty on the plant).",
+          "Sources-operand Fixtures/TestUtils/playground excludes on concurrency.md S7-S10, awk finders, api-design.md SW-API-10/17/20 greps: left, no measured defect.",
+          "swiftlint-gate.sh timeout and checks/*.sh build/test timeouts: left; only tsan-check.sh runs a build or test and it already has TSAN_TIMEOUT and exit 70.",
+          "gates.md SW-GATE-26/27/13 rows, manifest.md SW-PKG-32/33, release.md SW-REL-03, swift-upgrade U7 -u/--scratch-path, swift-diagnose line 138 excludes and C.4 XCTest wording, and the check-artifacts.py xargs/shebang lints belong to other owners and need their own halves.",
+          "language.md SW-LANG-03 does not cite SW-REL-04 container-scratch (restates the scratch note in its own paragraph); left as is, the restatement is accurate and already present."
+        ],
+        "checker_clean": true
+      },
+      {
+        "unit": "swift-quality fixer: errors.md, io.md, network.md, security.md, testing.md, cli-contract.md",
+        "applied": [
+          "SW-SEC-18 (security.md): the grep now matches conformers only, `(struct|class|enum|actor|extension) Name<...>? : ... RandomNumberGenerator`, with the libc names kept (escaped for -E). Reproduced the swift-numerics RealTestSupport.swift:30 hit. Now red on a 4-conformer plant (plus 5 libc lines), green on a twin with generic parameters, and 0 on swift-numerics, case-paths and console-kit. Measured 2026-10-10.",
+          "SW-ERR-15 G4 cell (errors.md): now an awk pass that skips `//` and `///` lines (this removes the Polar.swift:115 prose hit), skips a same-line `invariant:`, and skips a `precondition(` inside the first function after a `- Precondition:` doc line. Red on a plant (3 lines), green on a twin, and the same under GNU awk and mawk 1.3.4. Row text states the heuristic's limits: a nested function ends the exemption, and prose-form docs still print.",
+          "SW-CLI-08, SW-CLI-23, SW-CLI-25 and the other G4 lines (cli-contract.md): wrapped in the G0 scope (DIRS from dump-package/jq, X excludes, notice and skip when there is no executable target). Reproduced the case-paths Plugin.swift and console-kit entrypoint.swift hits. Now case-paths and numerics print the notice and console-kit prints nothing. A plant prints 5 lines and the twin and a library-only package print 0 lines or the notice. I added a sentence saying a macro plugin is not a CLI (dump-package types it `macro`).",
+          "SW-CLI G2-15 (cli-contract.md): the hard-coded `Sources/App` is replaced by the executable targets from dump-package. G2-15a excludes them by basename, so it also scans non-Vapor layouts and a library gets no exemption. G2-15d is guarded by a non-empty list. The 'No such file or directory' error is gone on all three trees. A plant prints the Lib hit plus '2 bootstrap calls in the entry target', and the twin and library-only package print nothing."
+        ],
+        "refused": [
+          "Index half of the CompilerPlugin note: rules/swift-quality.md was not in my list. cli-contract.md carries the sentence; the index may want one pointer line if the owner wants it there.",
+          "SW-ERR-05 bare swiftlint-gate.sh cell in errors.md and the io.md Foundation guard: the earlier refused-half text gives no measured defect, so left unchanged as instructed.",
+          "SW-API-12 import-Foundation pattern copy (api-design.md) and the unexcluded Sources cells in concurrency.md, api-design.md and language.md: not my files. Their owners need the Fixtures, TestUtils and *.playground excludes.",
+          "No findings landed in io.md, network.md or testing.md.",
+          "The G0 and G4 blocks need jq on PATH, and the swift-tools container has none. I ran the blocks on the host with a `swift` wrapper function that calls run.sh. Not a rule defect, but the toolchain wrapper cannot run them alone."
+        ],
+        "checker_clean": true
+      },
+      {
+        "unit": "swift-package-rules-gates-manifest-release",
+        "applied": [
+          "gates.md SW-GATE-13: narrowed the exit-1 claim to Swift 6 mode or mode 5 with StrictConcurrency. Reproduced on 6.4.0: .v6 and .v5+StrictConcurrency exit 1, plain .v5 exits 0 with no output. Done-gate steps 2 and 3 now say a .v5 package without StrictConcurrency counts mode5-warnings lines.",
+          "gates.md SW-GATE-27: added the container scratch default (--scratch-path under TMPDIR/tsan-scratch, SW-REL-04 owns the rule). Watched: green run in the container left no .build beside Package.swift, and TSAN_TIMEOUT=2 exits 70. The TSAN_TIMEOUT, CHECK failed and exit 70 text was already there.",
+          "manifest.md SW-PKG-32: added the 'manifest version 5.7.0 is too old' exit-1 clause (sources edited, manifest not). Added the tools >= 5.8 condition on the exit-0 claim. Watched: tools 5.7 exits 1 with 1 fix-it applied and manifest unchanged, tools 5.8 exits 0.",
+          "release.md SW-REL-11: .claude/ and .agents/ are untracked files that turn the SBOM tag into -modified, so the rule now says to add them to .git/info/exclude first. Watched: untracked .claude/ gives v1.0.0-modified, excluded gives v1.0.0.",
+          "release.md api-cause block (SW-REL-20): run once into a log and read it only on a non-zero exit, with grep '[1-9][0-9]* breaking change' or 'get revision'. Documented that --scratch-path goes before the subcommand (after it exits 64). Watched: plant prints '1 breaking change detected', missing tag prints 'Couldn't get revision', clean prints nothing. The old grep matched the pass line.",
+          "Checker run from the worktree root prints clean."
+        ],
+        "refused": [
+          "Round 2 findings 0 to 11: none lands in my four files. The skill and check halves belong to the owners of swift-release SKILL.md, preflight.md, swift-upgrade SKILL.md, k07.sh, fold-check.sh, security.md, cli-contract.md and errors.md.",
+          "SW-REL-17: release.md already has the find -maxdepth 1 cell with the nested-Benchmarks note, so only the preflight.md P10 half remains, and that is not mine. SW-REL-11 step 2 / step 8: the swift-release SKILL.md still needs the printf '.claude/\\n.agents/\\n' >> .git/info/exclude line in step 2. SW-GATE-20 step 3: swift-release SKILL.md step 3 needs the same log-once grep as the api-cause block.",
+          "Already applied before this pass, left alone: SW-GATE-26 swiftlint_version pin exit 70 row, the SW-GATE-27 TSAN_TIMEOUT and CHECK failed text, SW-PKG-33 consumer-probe wording, the manifest.md side-effects note and the widened v5-reason awk.",
+          "SW-REL-03: no measured defect named in the findings and the row already carries the 6.4.1 re-check and the behavioural probe, so it is unchanged. Sources-operand excludes, canary.sh and swiftlint-gate.sh timeouts, the check-artifacts.py xargs lint and the language.md, swift-upgrade and swift-diagnose container flags are other owners' files."
+        ],
+        "checker_clean": true
+      },
+      {
+        "unit": "swift-upgrade, swift-diagnose, swift-release, bundles/bazel-essentials.toml",
+        "applied": [
+          "Finding 3 (swift-release SKILL step 10): sha-pin line now skips commented lines with -e '^[^:]*:[0-9]+: *#', like gates.md SW-GATE-23. Console-kit lines 55 and 57 printed before and are gone after. A plant with an unpinned @v4 prints, and the pinned, local and commented twin prints nothing.",
+          "Finding 4 (preflight.md P10): replaced the whole-tree grep with find . -maxdepth 1 -name 'Package*.swift' -exec grep -Hn ... {} + and a grep -v that drops // comment lines. console-kit's Benchmarks/Package.swift no longer prints. numerics and case-paths stay empty. A planted root branch: dependency prints, and its twin does not. The P10 row in the table gained the 2026-10-10 note.",
+          "Finding 6 (swift-release step 2): added printf '.claude/\\n.agents/\\n' >> \"$(git rev-parse --git-path info/exclude)\" with the reason. Reproduced on swift:6.4: clean tag gave v1.0.0, an untracked .claude/ gave v1.0.0-modified and step 8's grep -L listed it, and with the exclude the SBOM is v1.0.0 again.",
+          "Finding 7 (swift-upgrade U1): inventory grep gained -e 'swift_versions?:' and the prose says a linux_swift_versions or swift_version input list is a leg to read by hand. A plant with linux_swift_versions prints, and the twin prints nothing. swift-numerics prints its windows_exclude_swift_versions line, which the reader judges by hand.",
+          "Finding 8 (swift-upgrade U2): one sentence says a package with per-target literals and no loop first gets SW-PKG-18's example loop.",
+          "Finding 11 (swift-release step 3): the API gate runs once into $LOG and echoes the exit. The grep is now '[1-9][0-9]* breaking change' or 'get revision' and is read only on a non-zero exit. A note says --scratch-path goes before the subcommand. Watched on a library plant: pass prints no hit (grep exit 1), a removed function prints '1 breaking change detected', a missing tag prints 'get revision'.",
+          "Refused half (swift-diagnose TSan step): the build block now passes --scratch-path /tmp/tsan and runs /tmp/tsan/debug/app, which the prose already said. Built on swift:6.4 and left no .build in the tree.",
+          "Refused half (swift-upgrade done-gate): the opening 'Done is exit 0' bullet now carries the SW-GATE-13 qualifier, that a mode-5 target also needs count u7 to print 0. U7 already had it.",
+          "Already in place, verified and left unchanged: swift-diagnose Step 0 backtrace grep (widened pattern, exclude-dir .claude/.agents, comment lines skipped; planted carriers print, .claude and a comment line and enable=yes do not), the U7 dk helper with -u, HOME and a per-run scratch path, the Dockerfile --scratch-path /scratch in optional-legs.md, the library-floor-proof dk with -u, and C.4 XCTest wording on --repeat-until and --disable-xctest.",
+          "bundles/bazel-essentials.toml: description already says 390 rules across fifteen depth files and lists Rust, Python, TypeScript, C++, Java with Kotlin, Go and Swift, matching docs/bazel-essentials.md line 12 (and 15 files in rules/bazel-quality/). No edit needed.",
+          "Skill bodies: swift-diagnose 434, swift-release 497, swift-upgrade 500 (the checker counts the body lines). Checker output: clean."
+        ],
+        "refused": [
+          "Finding 0 (rules/swift-quality/checks/k07.sh, weaken-check.sh, swift-quality.md hatch-delta awk): not my files. The leading-attribute prefix (@unsafe @preconcurrency import Glibc) belongs in all three libc skips, and the @unsafe form belongs in the language.md example.",
+          "Finding 1 (rules/swift-quality/security.md SW-SEC-18): not my file. It needs the conformer-only pattern '(struct|class|enum|actor|extension)[^{]*:[^{]*RandomNumberGenerator' and a generic-parameter twin in the watched-green set.",
+          "Findings 2, 9, 10 (cli-contract.md SW-CLI-08/23/25 and G2-15, errors.md SW-ERR-15): not my files.",
+          "Finding 5 (checks/fold-check.sh SW-CORE-13): not my file.",
+          "Finding 7 other half: the SW-CORE-09 pin-grep in rules/swift-quality.md:131 still lacks -e 'swift_versions?:' and the reusable-workflow note. It is not my file.",
+          "gates.md SW-GATE-27 (TSAN_TIMEOUT, exit 70, container scratch default), SW-GATE-26 (exit 70 on a swiftlint_version mismatch) and SW-GATE-13 (narrow the exit-1 claim, warning-line count for mode-5 packages): not my file.",
+          "rules/swift-package/manifest.md SW-PKG-32/33, rules/swift-package/release.md SW-REL-03, rules/swift-quality/language.md SW-LANG-03 and the swift:6.2.0 floor leg (-u, HOME, --scratch-path, cite SW-REL-04), api-design.md SW-API-12 and the Sources-operand cell excludes: not my files. The Sources-operand excludes also have no measured defect, so they are left.",
+          "swift-release step 6/8 and U7 container wording beyond what is already in the files: no further defect found. Class (b) timeouts for checks/*.sh and swiftlint-gate.sh, canary.sh guards, and the check-artifacts.py xargs-without--0 lint belong to other files.",
+          "A root-owned .build-root directory under the heldout scratch-fixer-pkg tree cannot be removed without root and is left for the owner."
+        ],
+        "checker_clean": true
+      }
+    ]
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Fix"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "fix-q-core",
+      "phaseIndex": 1,
+      "phaseTitle": "Fix",
+      "agentId": "ad5f0cd773e6bb0e0",
+      "model": "claude-sonnet-5-5",
+      "state": "done",
+      "startedAt": 1791660921282,
+      "queuedAt": 1791660921261,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "swift quality rules/checks (held-out round 4)",
+      "promptPreview": "Model rationale: implementation edits to a decided finding list, sonnet default per routing policy.\n\nWorktree /home/mherwig/dev/grimoire-lore/.agents/worktrees/swift holds a Swift lore set. Held-out round 3 on fresh trees produced the findings in /home/mherwig/dev/grimoire-lore/.agents/worktrees/swift/.agents/research/swift-topic-map/scratch/heldout4-findings.json: key round2 (12 items with file, …",
+      "promptFramed": true,
+      "lastProgressAt": 1791661046673,
+      "tokens": 94733,
+      "toolCalls": 34,
+      "durationMs": 125390,
+      "resultPreview": "{\"unit\":\"swift quality rules/checks (held-out round 4)\",\"applied\":[\"Finding 0 (class 1): the libc @preconcurrency allow-list skip now accepts leading attributes (@unsafe @preconcurrency import Glibc) in rules/swift-quality/checks/k07.sh, rules/swift-quality/checks/weaken-check.sh and the hatch-delta awk in rules/swift-quality.md. Plant: red on '@unsafe @preconcurrency import Foo' in all three, gre…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "fix-q-rest",
+      "phaseIndex": 1,
+      "phaseTitle": "Fix",
+      "agentId": "a74522b1ec56e733e",
+      "model": "claude-sonnet-5-5",
+      "state": "done",
+      "startedAt": 1791660921282,
+      "queuedAt": 1791660921261,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "swift-quality fixer: errors.md, io.md, network.md, security…",
+      "promptPreview": "Model rationale: implementation edits to a decided finding list, sonnet default per routing policy.\n\nWorktree /home/mherwig/dev/grimoire-lore/.agents/worktrees/swift holds a Swift lore set. Held-out round 3 on fresh trees produced the findings in /home/mherwig/dev/grimoire-lore/.agents/worktrees/swift/.agents/research/swift-topic-map/scratch/heldout4-findings.json: key round2 (12 items with file, …",
+      "promptFramed": true,
+      "lastProgressAt": 1791661116240,
+      "tokens": 88858,
+      "toolCalls": 29,
+      "durationMs": 193449,
+      "resultPreview": "{\"unit\":\"swift-quality fixer: errors.md, io.md, network.md, security.md, testing.md, cli-contract.md\",\"applied\":[\"SW-SEC-18 (security.md): the grep now matches conformers only, `(struct|class|enum|actor|extension) Name<...>? : ... RandomNumberGenerator`, with the libc names kept (escaped for -E). Reproduced the swift-numerics RealTestSupport.swift:30 hit. Now red on a 4-conformer plant (plus 5 lib…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 3,
+      "label": "fix-pkg",
+      "phaseIndex": 1,
+      "phaseTitle": "Fix",
+      "agentId": "a6a4a228871d972da",
+      "model": "claude-sonnet-5-5",
+      "state": "done",
+      "startedAt": 1791660921282,
+      "queuedAt": 1791660921261,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "swift-package-rules-gates-manifest-release",
+      "promptPreview": "Model rationale: implementation edits to a decided finding list, sonnet default per routing policy.\n\nWorktree /home/mherwig/dev/grimoire-lore/.agents/worktrees/swift holds a Swift lore set. Held-out round 3 on fresh trees produced the findings in /home/mherwig/dev/grimoire-lore/.agents/worktrees/swift/.agents/research/swift-topic-map/scratch/heldout4-findings.json: key round2 (12 items with file, …",
+      "promptFramed": true,
+      "lastProgressAt": 1791661189245,
+      "tokens": 105503,
+      "toolCalls": 35,
+      "durationMs": 266454,
+      "resultPreview": "{\"unit\":\"swift-package-rules-gates-manifest-release\",\"applied\":[\"gates.md SW-GATE-13: narrowed the exit-1 claim to Swift 6 mode or mode 5 with StrictConcurrency. Reproduced on 6.4.0: .v6 and .v5+StrictConcurrency exit 1, plain .v5 exits 0 with no output. Done-gate steps 2 and 3 now say a .v5 package without StrictConcurrency counts mode5-warnings lines.\",\"gates.md SW-GATE-27: added the container s…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 4,
+      "label": "fix-skills",
+      "phaseIndex": 1,
+      "phaseTitle": "Fix",
+      "agentId": "a72d48fda767966b1",
+      "model": "claude-sonnet-5-5",
+      "state": "done",
+      "startedAt": 1791660921282,
+      "queuedAt": 1791660921261,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "swift-upgrade, swift-diagnose, swift-release, bundles/bazel…",
+      "promptPreview": "Model rationale: implementation edits to a decided finding list, sonnet default per routing policy.\n\nWorktree /home/mherwig/dev/grimoire-lore/.agents/worktrees/swift holds a Swift lore set. Held-out round 3 on fresh trees produced the findings in /home/mherwig/dev/grimoire-lore/.agents/worktrees/swift/.agents/research/swift-topic-map/scratch/heldout4-findings.json: key round2 (12 items with file, …",
+      "promptFramed": true,
+      "lastProgressAt": 1791661170278,
+      "tokens": 119461,
+      "toolCalls": 39,
+      "durationMs": 247486,
+      "resultPreview": "{\"unit\":\"swift-upgrade, swift-diagnose, swift-release, bundles/bazel-essentials.toml\",\"applied\":[\"Finding 3 (swift-release SKILL step 10): sha-pin line now skips commented lines with -e '^[^:]*:[0-9]+: *#', like gates.md SW-GATE-23. Console-kit lines 55 and 57 printed before and are gone after. A plant with an unpinned @v4 prints, and the pinned, local and commented twin prints nothing.\",\"Finding …"
+    }
+  ],
+  "totalTokens": 408555,
+  "totalToolCalls": 137
+}

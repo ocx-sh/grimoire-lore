@@ -157,6 +157,23 @@ tasks:
           {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' rules/nix-quality.md skills/nix-flake-adopt skills/nix-flake-release skills/nix-diagnose
         fi
       #
+      # The Swift set follows the Go reasoning: the fleet holds no Swift, so
+      # glob liveness needs an outside tree. It was grounded on a 40-repo
+      # upstream exemplar corpus (see `.agents/research/swift-frame.md`);
+      # apple/containerization carries Package.swift, Package.resolved,
+      # .swift-format, .swift-version and .spi.yml. The allow-absent names are
+      # correct globs that tree lacks but other exemplars carry (swiftly,
+      # tuist, swift-async-algorithms), plus the depth files' never-matching
+      # on-demand globs. Set SWIFT_CONSUMER to a SwiftPM checkout to also check
+      # glob liveness.
+      - |
+        if [ -n "{{.SWIFT_CONSUMER}}" ] && [ -f "{{.SWIFT_CONSUMER}}/Package.swift" ]; then
+          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --root {{.SWIFT_CONSUMER}} --forbid '/home/mherwig' --forbid '.agents/research' --allow-absent '**/.swiftformat' --allow-absent '**/.swiftlint.yml' --allow-absent '**/Package@swift-*.swift' --allow-absent '**/.swift-quality-depth-on-demand' --allow-absent '**/.swift-package-depth-on-demand' rules/swift-quality.md rules/swift-package.md skills/swift-upgrade skills/swift-diagnose skills/swift-release
+        else
+          echo "note: SWIFT_CONSUMER unset — glob liveness NOT checked for swift; set it to a SwiftPM checkout to include it"
+          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' rules/swift-quality.md rules/swift-package.md skills/swift-upgrade skills/swift-diagnose skills/swift-release
+        fi
+      #
       # Every checks/*.py script carries its own fixtures and its own
       # --self-test mode. Run all eight here, so a broken check is caught next
       # to the artifact validation above, not only the first time a real page
@@ -228,6 +245,8 @@ tasks:
       GO_CONSUMER: '{{.GO_CONSUMER | default ""}}'
       # No default: the fleet has no flake to point at.
       NIX_CONSUMER: '{{.NIX_CONSUMER | default ""}}'
+      # No default: the fleet has no SwiftPM package to point at.
+      SWIFT_CONSUMER: '{{.SWIFT_CONSUMER | default ""}}'
 
   build:
     desc: Build every publishable artifact without pushing anything

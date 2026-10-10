@@ -1,0 +1,512 @@
+[
+ {
+  "file": "rules/swift-quality/checks/canary.sh (SW-CORE-03) and every grep -r cell with a Sources operand",
+  "rule_id": "SW-CORE-03",
+  "known_class": "NEW",
+  "new_class": "scan/canary disagree on symlinked sources: find lists symlinks, grep -r skips them, so the canary passes while the grep cells scan nothing",
+  "severity": "fix",
+  "evidence": "RxSwift Sources/ is a symlink farm (412 *.swift via find Sources). 'grep -rl --include=*.swift . Sources' sees 1 file there (Kingfisher 98/98, SwiftTerm 132/132). canary.sh exits 0 on RxSwift. i100 (grep -rn ... Sources) prints nothing on RxSwift. Any '... Sources' operand cell reads as a pass on the layout, and the canary meant to catch exactly that stays green.",
+  "fix": "Make canary.sh count with grep -r (or find -type f) so a symlink-only tree goes red; add 'find -L' or 'grep -R' to the rule text of Sources-operand cells and plant a symlinked Sources dir in the canary's watched-red list.",
+  "trees": [
+   "onevcat__Kingfisher",
+   "ReactiveX__RxSwift",
+   "migueldeicaza__SwiftTerm"
+  ]
+ },
+ {
+  "file": "rules/swift-quality/apple.md + concurrency.md (SW-APPLE-04, SW-CONC-29, k07.sh E14)",
+  "rule_id": "SW-APPLE-04",
+  "known_class": "NEW",
+  "new_class": "rule dead-end: prescribed replacement API is unavailable at the tree's own floor and the only remaining shape is a forbidden tell",
+  "severity": "fix",
+  "evidence": "SwiftTerm Package.swift floor iOS 14 / macOS 13, library also built on Linux. Mutex needs iOS 18, OSAllocatedUnfairLock (apple.md:68) needs iOS 16, NSLock is a SW-GATE-10 tell (k07 E14 prints Locked.swift:22 NSLock, LocalProcess.swift:43, HeadlessTerminal.swift:30). The tree's answer, Locked.swift, is Mutex behind #available(macOS 15, iOS 18...) with an NSLock fallback, a shape no row blesses; cell 04a prints the demo pbxproj IPHONEOS 13.0/15.0 lines against it. SW-APPLE-04 is scoped to app code, so a cross-platform library below iOS 16 has no compliant lock.",
+  "fix": "Add a row/sentence: a library with an Apple floor below iOS 16 uses one NSLock-or-Mutex wrapper type with a comment naming the floor, behind #available + #if canImport(Synchronization); exempt that wrapper from E14.",
+  "trees": [
+   "onevcat__Kingfisher",
+   "ReactiveX__RxSwift",
+   "migueldeicaza__SwiftTerm"
+  ]
+ },
+ {
+  "file": "skills/swift-upgrade/SKILL.md U2 vs rules/swift-package.md SW-PKG-14",
+  "rule_id": "SW-PKG-14",
+  "known_class": "57",
+  "severity": "fix",
+  "evidence": "U2 says to add package-level 'swiftLanguageModes: [.v5]' when the old tools version is below 6.0; SW-PKG-14 (MUST) forbids any package-level [.v5] and demands per-target .swiftLanguageMode(.v5). Worse, RxSwift (tools 5.5 and 5.9) already has 'swiftLanguageVersions: [.v5]'; following U2 literally and adding swiftLanguageModes next to it fails with 'error: extra argument swiftLanguageModes in call' (reproduced on swift:6.4 with tools 6.2).",
+  "fix": "U2: if swiftLanguageVersions exists, rename it to swiftLanguageModes rather than add; reconcile with SW-PKG-14 by saying U2's package-level [.v5] is the temporary migration state removed in U6, or use per-target modes from the start.",
+  "trees": [
+   "onevcat__Kingfisher",
+   "ReactiveX__RxSwift",
+   "migueldeicaza__SwiftTerm"
+  ]
+ },
+ {
+  "file": "skills/swift-upgrade/SKILL.md U1/U2 and references/toolchain-pin.md",
+  "rule_id": "SW-GATE-08",
+  "known_class": "NEW",
+  "new_class": "procedure assumes preconditions its first step never establishes (container CI, pin at or above the manifest floor)",
+  "severity": "fix",
+  "evidence": "Dry-run. RxSwift: .swift-version is 6.1, U2 sets tools-version 6.2 for a library; U1 only says create .swift-version when absent, so no step raises 6.1 before U2 and the toolchain-pin bump order (pin first, manifest in its own commit) is not tied to U1. Kingfisher has no .swift-version and CI is macOS xcode-select (Xcode_26.x), SwiftTerm CI mixes xcode-select and 'container: swift:6.2-jammy / swift:6.3.3'; U1's 'derive the CI image from the file' has no Xcode-select branch.",
+  "fix": "U1: if .swift-version exists and is below the target tools floor, bump it first (own commit); add a line for Xcode-select CI: pin the Xcode and record the swift --version patch, state the derivation does not apply.",
+  "trees": [
+   "onevcat__Kingfisher",
+   "ReactiveX__RxSwift",
+   "migueldeicaza__SwiftTerm"
+  ]
+ },
+ {
+  "file": "skills/swift-upgrade/SKILL.md (Scope, U2-U7)",
+  "rule_id": "SW-CONC-28",
+  "known_class": "57",
+  "severity": "fix",
+  "evidence": "Dry-run rung: Kingfisher = tools 6.2, package-level .v5, no pin, first step U0 then U1 create .swift-version; RxSwift = tools 5.5 plus Package@swift-5.9.swift shadowing it, mode 5 via swiftLanguageVersions, first step U0 then U1/U2 on BOTH manifests (SW-PKG-21), raising the floor from 5.5 to 6.2 drops all consumers below 6.2 with no decision point; SwiftTerm = tools 6.2 with [.v6] already, so it is past U6. Scope says 'or already in Swift 6 mode' but U2 says the package stays in Swift 5 mode and U4 adds StrictConcurrency, and no step says which of U2-U7 to skip when the tree is already mode 6.",
+  "fix": "Add an entry table after U0: mode 6 already means jump to U8/U10; a library whose current tools floor is below 6.2 means ask the owner before U2 (consumer break), not raise it.",
+  "trees": [
+   "onevcat__Kingfisher",
+   "ReactiveX__RxSwift",
+   "migueldeicaza__SwiftTerm"
+  ]
+ },
+ {
+  "file": "rules/swift-quality/language.md line 46 (T06 linux-tells)",
+  "rule_id": "SW-IO-02 cross-check T06",
+  "known_class": "52",
+  "severity": "nit",
+  "evidence": "Prose says xargs exits 123 when its grep prints; T06 uses grep -L behind xargs, where 123 means a file was LISTED (no guard), and behind a plain grep 123 means no match. Reading rc as written inverts the verdict on Kingfisher (107 lines) vs a clean tree.",
+  "fix": "State the exit meaning per command form, or drop the exit sentence and say 'any listed file is a hit'.",
+  "trees": [
+   "onevcat__Kingfisher",
+   "ReactiveX__RxSwift",
+   "migueldeicaza__SwiftTerm"
+  ]
+ },
+ {
+  "file": "rules/swift-quality/language.md T07 (redundant optional binding)",
+  "rule_id": "SW-LANG T07",
+  "known_class": "9",
+  "severity": "fix",
+  "evidence": "The pattern 'if|guard let X = X<non-ident char>' also matches type-narrowing casts: RxSwift 3/3 hits are 'guard let json = json as? [AnyObject]' (WikipediaAPI.swift:47, RandomUserAPI.swift:21, URLSession+Rx.swift:81); Kingfisher 4 of 75, SwiftTerm 1 of 21 (iOSTextInput.swift:359 'guard let from = from as? TextPosition'). Shorthand 'if let x' is impossible there, the binding is not redundant.",
+  "fix": "End the pattern with ' *\\({\\|,\\|$\\)' instead of a negated char class so ' as?' no longer matches; keep the plant for the cast form.",
+  "trees": [
+   "onevcat__Kingfisher",
+   "ReactiveX__RxSwift",
+   "migueldeicaza__SwiftTerm"
+  ]
+ },
+ {
+  "file": "rules/swift-quality/language.md linux-tells T03/T04/T05 (cells 10,11,12)",
+  "rule_id": "SW-LANG linux-tells",
+  "known_class": "73",
+  "severity": "nit",
+  "evidence": "Cells run over the whole tree including Demo/, RxExample/, TerminalApp/ and on Kingfisher, whose manifest platforms are Apple-only (no Linux leg): T03 147 hits, T04 29, RxSwift 124/150, SwiftTerm 80/284, majority in app/demo targets or inside #if canImport. The rule only binds a target that builds on Linux.",
+  "fix": "Gate the cell on 'dump-package platforms lists linux or is empty' and scope the operand to library target paths.",
+  "trees": [
+   "onevcat__Kingfisher",
+   "ReactiveX__RxSwift",
+   "migueldeicaza__SwiftTerm"
+  ]
+ },
+ {
+  "file": "rules/swift-quality/api-design.md pubenum (cell 59)",
+  "rule_id": "SW-API-05",
+  "known_class": "42",
+  "severity": "fix",
+  "evidence": "SW-API-05 binds every NEW public enum; the scan runs over Sources and prints every existing one: SwiftTerm 52, Kingfisher 35, RxSwift 16 (KingfisherError, CallbackQueue, SingleTrait...). No changed-files form is offered, so on a mature library the output is a census, not a gate.",
+  "fix": "Pipe the changed-file list (git diff --name-only --diff-filter=AM \"$BASE\") into pubenum.pl for the gate; keep the whole-tree form labelled census.",
+  "trees": [
+   "onevcat__Kingfisher",
+   "ReactiveX__RxSwift",
+   "migueldeicaza__SwiftTerm"
+  ]
+ },
+ {
+  "file": "rules/swift-quality/apple.md apple-swiftui 10c, apple-floor 04a/11",
+  "rule_id": "SW-APPLE-02/04/11",
+  "known_class": "49",
+  "severity": "nit",
+  "evidence": "Floor/census cells include sample-app code and pbxprojs that are not shipped targets: 04a on SwiftTerm prints TerminalApp/*.xcodeproj IPHONEOS_DEPLOYMENT_TARGET 13.0/15.0 though the shipped Package.swift floor is iOS 14 (line 239); 10c on Kingfisher/SwiftTerm lists Demo/ and TerminalApp/ lines (.cornerRadius, .foregroundColor, UIScreen.main); pbx-blocks.awk reads Demo projects the same way. Rule says 'every shipped target'.",
+  "fix": "Add --exclude-dir for Demo, Example*, TerminalApp, Tools in the census cells, or state that demo projects are skipped unless they ship.",
+  "trees": [
+   "onevcat__Kingfisher",
+   "ReactiveX__RxSwift",
+   "migueldeicaza__SwiftTerm"
+  ]
+ },
+ {
+  "file": "rules/swift-quality/checks/k07.sh whole-tree run",
+  "rule_id": "SW-GATE-10",
+  "known_class": "33",
+  "severity": "nit",
+  "evidence": "Whole-tree k07: SwiftTerm 267 lines (144 in Tests/Tools/TerminalApp), Kingfisher 152 (4 doc/comment lines such as CallbackQueue.swift:34 '/// Dispatches the closure to DispatchQueue.main'), RxSwift 103 (47 in Tests/RxExample). Header already documents E09/E14 comment noise, but the inventory buries 3-4 real library hatches (Locked.swift, AtomicInt.swift) under 100+ test and demo lines.",
+  "fix": "Skip lines whose first non-blank token is // and add an exclude for Tests/Demo/Example dirs by default in the whole-tree form.",
+  "trees": [
+   "onevcat__Kingfisher",
+   "ReactiveX__RxSwift",
+   "migueldeicaza__SwiftTerm"
+  ]
+ },
+ {
+  "file": "rules/swift-quality/checks/weaken-check.sh",
+  "rule_id": "SW-GATE-12 (weaken-check.sh, silence-check.sh)",
+  "known_class": "4",
+  "severity": "fix",
+  "evidence": "With the rule set installed as an untracked .claude/ (an adopter's fresh install), BASE=origin/main bash weaken-check.sh exits 1 with 15 lines and silence-check.sh exits 1 with 13 lines on all 3 trees. Every line is a '+' line of the installed checks/k07.sh, weaken-check.sh or silence-check.sh themselves, because git add -N makes them added lines. k07.sh excludes .claude and stays clean on the same tree, so the three checks disagree. Diagnose Step 'Never edit the check' tells the agent to run both before reporting a fix.",
+  "fix": "Add the exclusion k07.sh uses (':(exclude).claude' and ':(exclude).agents' in the pathspecs or the diff filter) to weaken-check.sh and silence-check.sh, then rerun with a fixture that has rules/ copied into .claude/.",
+  "trees": [
+   "vapor__postgres-nio",
+   "soto-project__soto-core",
+   "apple__swift-certificates"
+  ]
+ },
+ {
+  "file": "rules/swift-package/gates.md",
+  "rule_id": "SW-GATE-09, SW-GATE-27 (tsan-suppressions), SW-GATE-03 (resolvedpairing)",
+  "known_class": "4",
+  "severity": "fix",
+  "evidence": "Three gates.md greps use operand '.' with --include='*.sh' and no --exclude-dir=.claude. With the set installed under .claude/, GATE09 (swiftformat|--lenient) prints 4 lines, tsan-suppressions (race:|TSAN_OPTIONS) prints 4 lines, and resolvedpairing prints 1 line (weaken-check.sh:37), all from .claude/rules/swift-quality/checks/*.sh, on all 3 trees. 'Output is the violation' is then always red. The same cell with --exclude-dir=.claude is empty (GATE09_claude rc=1), and swift-quality.md's idx_* cells already carry --exclude-dir=.claude --exclude-dir=.agents.",
+  "fix": "Add --exclude-dir=.claude --exclude-dir=.agents to every '.'-operand grep in gates.md that includes *.sh or *.yml (GATE-03, GATE-09, GATE-27 and the sibling ones).",
+  "trees": [
+   "vapor__postgres-nio",
+   "soto-project__soto-core",
+   "apple__swift-certificates"
+  ]
+ },
+ {
+  "file": "rules/swift-quality/security.md",
+  "rule_id": "SW-SEC-11",
+  "known_class": "12",
+  "severity": "fix",
+  "evidence": "Line 113: grep -rn --include='Package*.swift' -e 'strictMemorySafety' . has no --exclude-dir=.build. After swift build (6.4, exit 0 for soto and certificates) it prints ./.build/checkouts/swift-collections/Package.swift:111 '.strictMemorySafety(),' and the Package@swift-6.2.swift line on postgres-nio and soto-core. It printed nothing before the build (c_SEC11 rc=1 lines=0).",
+  "fix": "Add --exclude-dir=.build (and .claude/.agents) to the SW-SEC-11 grep.",
+  "trees": [
+   "vapor__postgres-nio",
+   "soto-project__soto-core",
+   "apple__swift-certificates"
+  ]
+ },
+ {
+  "file": "rules/swift-package/release.md",
+  "rule_id": "SW-REL-02 (sdk-checksum block, line 84)",
+  "known_class": "20",
+  "severity": "fix",
+  "evidence": "The sdk-checksum find . ... | grep 'swift sdk install' | grep -v -- --checksum has no -not -path './.build/*'. After swift build it prints ./.build/checkouts/swift-crypto/scripts/generate-linux-sdks.sh:60 on all 3 trees, and ./.build/checkouts/swift-nio/scripts/install_swift_sdk.sh:277 on 2 of them. skills/swift-release/references/preflight.md:31 carries the exclusion, so the rule and the skill disagree.",
+  "fix": "Copy the -not -path './.build/*' (and .claude) filter from preflight.md:31 into release.md:84.",
+  "trees": [
+   "vapor__postgres-nio",
+   "soto-project__soto-core",
+   "apple__swift-certificates"
+  ]
+ },
+ {
+  "file": "rules/swift-quality/concurrency.md",
+  "rule_id": "SW-CONC-10 (S2)",
+  "known_class": "8",
+  "severity": "fix",
+  "evidence": "Planted Sources/a.swift and ran the S2 awk as written. It prints '@preconcurrency import struct Glibc.timeval' (line 1) and '@preconcurrency import Glibc.sys' (line 2), both libc shims the rule allows, because the module token is parsed as 'struct' and 'Glibc.sys'. It prints nothing for '@preconcurrency public import Foo' (line 3) and '@preconcurrency internal import Bar' (line 4), real non-shim hatches, because the index() test requires 'import' right after the attribute. k07.sh's visibility-aware regex handles the second case but not the first.",
+  "fix": "Normalise the line first (strip a visibility modifier and a kind keyword struct|class|enum|func|var|let|typealias|protocol), take the first dotted component as the module, and match 'import' anywhere after @preconcurrency. Add both plants and a Glibc.timeval twin to the cell.",
+  "trees": [
+   "vapor__postgres-nio",
+   "soto-project__soto-core",
+   "apple__swift-certificates"
+  ]
+ },
+ {
+  "file": "rules/swift-quality/concurrency.md",
+  "rule_id": "SW-CONC-13 vs SW-CONC-15",
+  "known_class": "14",
+  "severity": "nit",
+  "evidence": "soto-core AWSClient.swift:157-173 is the bridge SW-CONC-15 prescribes (@available(*, noasync) with a message, DispatchSemaphore.wait()). It needs a statement-position 'Task {' that the creator awaits through the semaphore. C13_a flags that Task (line 163) as a violation, and C15 flags the semaphore (162, 173). SW-CONC-13 only exempts '_ = Task { } // fire-and-forget:', which is wrong for an awaited task. The rule set therefore has no spelling of its own bridge that passes both greps.",
+  "fix": "State in SW-CONC-13 and SW-CONC-15 that a Task inside a noasync bridge whose creator awaits it (semaphore or group) is allowed. Give the noasync bridge a marker comment that both cells grep -v.",
+  "trees": [
+   "vapor__postgres-nio",
+   "soto-project__soto-core",
+   "apple__swift-certificates"
+  ]
+ },
+ {
+  "file": "rules/swift-quality/security.md",
+  "rule_id": "SW-SEC-03 (a1 cell)",
+  "known_class": "9",
+  "severity": "nit",
+  "evidence": "The first a-greps command matches the prefix 'readToEnd('. soto-core ConfigFileLoader.swift:175 and LoginTokenManager.swift:70 use 'try await read.readToEnd(maximumSizeAllowed: .megabytes(1))', the capped form the rule asks for, and both print. The real hit, CredentialProcessProvider.swift:103 readDataToEndOfFile() on a child process's stdout, is mixed in with them. The cell says 'empty output = pass' while a compliant tree is non-empty.",
+  "fix": "Use 'readToEnd()' (empty parens) or add '| grep -v maximumSizeAllowed' to the cell. Say that NIOFileSystem readToEnd(maximumSizeAllowed:) is the compliant form.",
+  "trees": [
+   "vapor__postgres-nio",
+   "soto-project__soto-core",
+   "apple__swift-certificates"
+  ]
+ },
+ {
+  "file": "rules/swift-quality/errors.md",
+  "rule_id": "SW-ERR-21 (N2)",
+  "known_class": "21",
+  "severity": "nit",
+  "evidence": "soto-core AWSClient.swift:571 declares 'extension AWSClient.ClientError: CustomStringConvertible' in the same file that declares ClientError, yet N2 prints 'AWSClient.swift: error type ClientError has no description conformance'. The skip regex is extension\\s+\\Q$n\\E\\s*:, which cannot match a qualified nested name. The doc only admits the cross-file false positive.",
+  "fix": "Change the regex to extension\\s+(?:\\w+\\.)*\\Q$n\\E\\s*: and add a qualified-extension twin to the cell.",
+  "trees": [
+   "vapor__postgres-nio",
+   "soto-project__soto-core",
+   "apple__swift-certificates"
+  ]
+ },
+ {
+  "file": "skills/swift-diagnose/SKILL.md",
+  "rule_id": "Route by exit code and first line (line-4 claim), exit-0 row",
+  "known_class": "64",
+  "severity": "nit",
+  "evidence": "The prose says the message line is line 4 and that head -n 3 is wrong. On 6.4.0 with stderr redirected to a file, nilcrash (Unexpectedly found nil) and precondition put the message on line 1, and head -n 3 does show it. The overflow plant has a blank line first and the 'Swift runtime failure' text only at line 10 (inside a frame line), so neither is line 4. The grep route command is correct on all 6 plants (132, 132, 132, 0, 124, 124). Separately, the exit-0 row (worker-thread trap) came up with Foundation Thread.sleep(0.5) once, in the cold first run, contradicting 'Foundation Thread.sleep gives 132 with no prefix'. 10 warm reruns gave 132 each.",
+  "fix": "Say 'the message is line 1 for Fatal error and Precondition, and inside frame 0 for Swift runtime failure; the banner position varies, so use the grep'. Mark the exit-0 trigger as timing dependent.",
+  "trees": [
+   "vapor__postgres-nio",
+   "soto-project__soto-core",
+   "apple__swift-certificates"
+  ]
+ },
+ {
+  "file": "rules/swift-package/manifest.md",
+  "rule_id": "SW-PKG-25, SW-PKG-20",
+  "known_class": "49",
+  "severity": "nit",
+  "evidence": "The cells recurse with operand '.', so they read nested non-published manifests. swift-certificates Benchmarks/Package.swift:26 ('swift-crypto' 3.12.3..<5.0.0) is a PKG25 hit while the library manifest is ..<6.0.0 and compliant. soto-core Benchmark/Package.swift:10 (.package(name:)) is a PKG20 hit. The rule text says 'Libraries and the SDK', so the root manifest is the scope.",
+  "fix": "Scope both cells to the root: find . -maxdepth 1 -name 'Package*.swift' (as SW-REL-17 does), or add --exclude-dir=Benchmarks --exclude-dir=Benchmark --exclude-dir=Examples.",
+  "trees": [
+   "vapor__postgres-nio",
+   "soto-project__soto-core",
+   "apple__swift-certificates"
+  ]
+ },
+ {
+  "file": "rules/swift-quality.md",
+  "rule_id": "The Gate step 2 (SW-GATE-13) on an adopted repository",
+  "known_class": "61",
+  "severity": "nit",
+  "evidence": "swift build -Xswiftc -warnings-as-errors exits 1 on postgres-nio at its main commit (6.4.0) on first-party code: ConnectionRequest.swift:17 (setter private in an @inlinable function) and :32 and :35 (default expression for inference, 'will be an error in a future Swift language mode'). soto-core and swift-certificates exit 0. The gate block says 'stop at the first non-zero exit' and gives no route for a red step that was already red at the base. SW-CORE-04 records a 'green build' baseline but not the red case.",
+  "fix": "Add one line under the gate block: run steps 2 and 3 on the base ref once, record the red ones in the receipt, and treat a step as a regression only when its diagnostics differ from the base (SW-CORE-04).",
+  "trees": [
+   "vapor__postgres-nio",
+   "soto-project__soto-core",
+   "apple__swift-certificates"
+  ]
+ },
+ {
+  "file": "rules/swift-package/release.md",
+  "rule_id": "SW-REL-03",
+  "known_class": "13",
+  "severity": "fix",
+  "evidence": "Verify column says 'Watched red: exit 1 on 6.4.0 and 6.3.3, exit 0 with the native engine'. Re-measured on Mint and a minimal JSONEncoder probe: 6.4 default engine exit 1; 6.4 --build-system native exit 0; 6.3.3 default engine (native there) exit 0 with only a linker warning; only 6.3.3 --build-system swiftbuild exits 1. The probe text says 'on the default engine', which on 6.3.3 is native, so the 6.3.3 leg of the behavioural probe is green. The skill's 'fails once Foundation is reachable' repeats it without the engine qualifier.",
+  "fix": "Rewrite the watched-red clause to 'exit 1 on 6.4.0 default engine and on 6.3.3 with --build-system swiftbuild; exit 0 on 6.3.3 default (native) and on 6.4.0 with --build-system native'. Say the probe is 6.4-only, and carry the same qualifier into the swift-release skill wording.",
+  "trees": [
+   "swiftlang__swift-docc",
+   "jpsim__Yams",
+   "yonaskolb__Mint"
+  ]
+ },
+ {
+  "file": "rules/swift-quality.md",
+  "rule_id": "hatch-delta (index cell)",
+  "known_class": "1",
+  "severity": "fix",
+  "evidence": "Cell `git add -N . && git diff -U0 --merge-base \"$BASE\" -- '*.swift' | awk '/^\\+[^+]/ && /@unchecked Sendable|nonisolated\\(unsafe\\)|Task\\.detached|@preconcurrency|MainActor\\.assumeIsolated|MainActor\\.run/'` prints the libc @preconcurrency import chain that the language/gate depth files mandate as the compliant spelling; on the plant branches (p-yams, p-mint) the compliant line is printed next to the real hatch with no way to tell them apart. The cell also needs BASE set (fatal: bad revision 'origin/main...HEAD' in test_60 on a clone without origin/main).",
+  "fix": "Exclude `import (Glibc|Musl|Darwin)` @preconcurrency lines from the awk, and add a guard that fails loudly when BASE does not resolve.",
+  "trees": [
+   "swiftlang__swift-docc",
+   "jpsim__Yams",
+   "yonaskolb__Mint"
+  ]
+ },
+ {
+  "file": "rules/swift-package/gates.md",
+  "rule_id": "resolved-pairing",
+  "known_class": "4",
+  "severity": "fix",
+  "evidence": "`grep -rq \"${S[@]}\" ... .` has no --exclude-dir=.claude. With the set installed under .claude/ in each tree, the rule files themselves contain 'force-resolved-versions', so the cell is silent (pass) on trees whose workflows never pair it: gate_247/268 style MISSING lines vanished once .claude was present. The cell cannot go red in an installed project.",
+  "fix": "Add --exclude-dir=.claude (and --exclude-dir=.agents) to the S array, as the other cells do.",
+  "trees": [
+   "swiftlang__swift-docc",
+   "jpsim__Yams",
+   "yonaskolb__Mint"
+  ]
+ },
+ {
+  "file": "rules/swift-package/release.md",
+  "rule_id": "sdk-checksum cell",
+  "known_class": "20",
+  "severity": "nit",
+  "evidence": "`find . -type f \\( -name 'Dockerfile*' ... \\) -print0 | xargs -0 -r -n1 sh -c ...` lacks `-not -path './.build/*'` that preflight P4 has. After swift build with dependencies, dependency checkout Dockerfiles and workflows under .build/checkouts are scanned; Yams and Mint checkouts produced foreign hits.",
+  "fix": "Add -not -path './.build/*' (and .claude) to the find, identical to preflight P4.",
+  "trees": [
+   "swiftlang__swift-docc",
+   "jpsim__Yams",
+   "yonaskolb__Mint"
+  ]
+ },
+ {
+  "file": "rules/swift-quality/checks/weaken-check.sh",
+  "rule_id": "weaken-check",
+  "known_class": "33",
+  "severity": "fix",
+  "evidence": "On the unmodified Yams tree gate_71 prints weaken-check.sh's own regex line (`/^-.*(warnings-as-errors|Werror|sanitize|warn-long-e...`) and silence-check.sh / k07.sh comment lines show in gate_203 and in_gate_85_10 (4 to 6 hits each on all three trees): the install under .claude/ matches its own patterns. Noise on a clean tree makes the gate unreadable; real hits drown.",
+  "fix": "Exclude .claude/ and .agents/ in these cells and scripts (grep --exclude-dir, git pathspec ':!.claude').",
+  "trees": [
+   "swiftlang__swift-docc",
+   "jpsim__Yams",
+   "yonaskolb__Mint"
+  ]
+ },
+ {
+  "file": "rules/swift-quality.md",
+  "rule_id": "v5-reason awk",
+  "known_class": "17",
+  "severity": "fix",
+  "evidence": "Pattern `/swiftLanguageMode\\(\\.v5\\)|languageMode: *\\.v5/` misses `.swiftLanguageMode(.v5)` spelled via a helper (`swiftSettings(.v5)` or a shared `let v5 = SwiftSetting...` array). Plant on p-mint with helper call: no hit and migrate check exit 1 on the helper call, so the reason-comment gate stays green on a v5 opt-out.",
+  "fix": "Match `\\.v5\\b` on any `swiftSettings`/`languageMode`/`swiftLanguageMode` context, or require the opt-out only through the inline form and flag the helper form.",
+  "trees": [
+   "swiftlang__swift-docc",
+   "jpsim__Yams",
+   "yonaskolb__Mint"
+  ]
+ },
+ {
+  "file": "rules/swift-quality/io.md",
+  "rule_id": "SW-IO pipelines (xargs)",
+  "known_class": "40",
+  "severity": "fix",
+  "evidence": "Pipelines like `grep -rl ... Sources | xargs -r grep -L -e 'sort'` use no -Z/-0. A file in a directory named 'My App' splits on the space: grep: My: No such file or directory and the check silently under-reports (io_103/io_105/io_161 rc=123). On the real trees rc=123 appears on Yams and Mint even without spaces, because xargs returns 123 whenever grep -L finds files; the cell reads as an error not a result.",
+  "fix": "Use `grep -rlZ ... | xargs -0 -r grep -L` and wrap the exit-code semantic (`|| true`) with a one-line note of the 123 meaning.",
+  "trees": [
+   "swiftlang__swift-docc",
+   "jpsim__Yams",
+   "yonaskolb__Mint"
+  ]
+ },
+ {
+  "file": "rules/swift-quality.md",
+  "rule_id": "gate step 1 (format/lint)",
+  "known_class": "74",
+  "severity": "fix",
+  "evidence": "Gate step-1 cells and idx_41/gate_50 reformat the tree in place and `git add -N .` mutates the index. Run as written in a clean tree they dirty it (swift-format -i, swiftlint --fix); on Mint swiftlint --strict (gate_95) reports 1655 stderr lines (NoAccessLevelOnExtensionDeclaration) and rc=123 with no config. The index cell is destructive and not marked.",
+  "fix": "Mark the step as mutating, or run it on a copy (`git stash`-free: git worktree/rsync), and give the swiftlint cell --config pointing at the repo config or an explicit 'no config' branch.",
+  "trees": [
+   "swiftlang__swift-docc",
+   "jpsim__Yams",
+   "yonaskolb__Mint"
+  ]
+ },
+ {
+  "file": "rules/swift-quality.md",
+  "rule_id": "gate_59/idx_50 docc cell",
+  "known_class": "60",
+  "severity": "nit",
+  "evidence": "`swift package generate-documentation` exits 64 'Unknown subcommand or plugin name' on Yams and Mint (and Mint additionally tries to fetch Spectre first, 32 stderr lines), since swift-docc-plugin is an undeclared dependency of the tree. The cell gives no distinction between 'plugin absent' and 'docs broken'.",
+  "fix": "Precede with a plugin-present grep (`swift package plugin --list | grep generate-documentation`) and report SKIP when absent.",
+  "trees": [
+   "swiftlang__swift-docc",
+   "jpsim__Yams",
+   "yonaskolb__Mint"
+  ]
+ },
+ {
+  "file": "rules/swift-quality/checks/canary.sh",
+  "rule_id": "jq/docker/curl dependency in cells",
+  "known_class": "60",
+  "severity": "fix",
+  "evidence": "In the bare swift:6.4 image, srel_243/srel_244 exit 127 (jq: command not found) on Yams; opt_104 says 'docker: command not found'; srel_279 runs an empty command ('line 1: : command not found') because a $VAR placeholder is unset; srel_293 and srel_341 grep '/trace.txt' and '/*.cdx.json' because the dir variable is unset (empty-string expansion to root).",
+  "fix": "Declare jq/docker as prerequisites in each block header and guard each with `command -v ... || exit 69`; require `: \"${DIR:?set DIR}\"` before use so empty variables never become '/'.",
+  "trees": [
+   "swiftlang__swift-docc",
+   "jpsim__Yams",
+   "yonaskolb__Mint"
+  ]
+ },
+ {
+  "file": "skills/swift-release/references/preflight.md",
+  "rule_id": "P2/P4 on zero-dependency or no-workflow CLI",
+  "known_class": "73",
+  "severity": "fix",
+  "evidence": "On Mint (no release workflow, no Dockerfile, no .swift-version) the step cells rc=2 with `grep: .github/workflows/release.yml: No such file or directory`, `grep: Dockerfile: No such file or directory`, `.swift-version: No such file or directory` (in_rel_211/212, srel_387-390, pre_24/pre_31). Missing file is a different state than 'check passes' but the exit code 2 is not mapped in the table, and on the SKILL runbook a literal reader gets a dead-end.",
+  "fix": "Make each scan `[ -f F ] || { echo ABSENT: F; exit 0; }` with a defined meaning, and say in the preflight which absent files are FAIL (release.yml) versus N/A (Dockerfile).",
+  "trees": [
+   "swiftlang__swift-docc",
+   "jpsim__Yams",
+   "yonaskolb__Mint"
+  ]
+ },
+ {
+  "file": "skills/swift-release/SKILL.md",
+  "rule_id": "step 6 static build",
+  "known_class": "57",
+  "severity": "fix",
+  "evidence": "Ran the skill literally on Mint in a scratch copy: step 6 (static Linux SDK build) fails because a dependency level musl failure (not Foundation-related reachability in the Mint sources); the skill has no branch for 'static build fails inside a dependency' and the only fallbacks documented are the glibc native recipe flagged by SW-REL-03. Result: dead end.",
+  "fix": "Add a decision row: dependency fails to build on the musl SDK, then record the failing module, fall back to a glibc (dynamic or --build-system native) build with a SW-REL-03 comment, and name the issue to report.",
+  "trees": [
+   "swiftlang__swift-docc",
+   "jpsim__Yams",
+   "yonaskolb__Mint"
+  ]
+ },
+ {
+  "file": "rules/swift-package.md",
+  "rule_id": "scope table",
+  "known_class": "38",
+  "severity": "nit",
+  "evidence": "The scope list has a row for library packages and for a binary distributed as an OCI/container artifact, but no row for a source-distributed CLI plus library (Mint, swift-docc): Mint runs through steps 1-8 yet three of the rows (SW-REL checksum, SBOM, attest) do not apply and the doc does not say so, so each reader decides ad hoc.",
+  "fix": "Add a scope row 'source-distributed CLI plus library' and list which SW-REL and SW-PKG rules apply.",
+  "trees": [
+   "swiftlang__swift-docc",
+   "jpsim__Yams",
+   "yonaskolb__Mint"
+  ]
+ },
+ {
+  "file": "rules/swift-quality/language.md",
+  "rule_id": "SW-LANG access-control and Sendable cells",
+  "known_class": "33",
+  "severity": "nit",
+  "evidence": "lang_252 (8-9 hits on Mint, Yams), lang_262 (13 on Mint, 7 on Yams: 'public class' flagged), lang_258 (@_implementationOnly import CYaml, 3 hits on Yams) are mature-code idioms that exist for Swift 5 source compatibility; hits are not graded as MUST or advisory so a literal reader treats 'public class' on a 5.x-era library as a blocker.",
+  "fix": "Label these cells advisory on trees whose tools-version is below 6.0 and require a classification line (migrate / keep) in the output.",
+  "trees": [
+   "swiftlang__swift-docc",
+   "jpsim__Yams",
+   "yonaskolb__Mint"
+  ]
+ },
+ {
+  "file": "rules/swift-quality/testing.md",
+  "rule_id": "SW-TEST cells (macOS-only and LinuxMain)",
+  "known_class": "33",
+  "severity": "nit",
+  "evidence": "in_test_91_5 prints Tests/LinuxMain.swift (7 files on Mint, 22 on Yams) and test_226 prints #if os(macOS) / #if os(tvOS) blocks in Mint and Yams tests: pre-5.4 LinuxMain.swift is dead on current toolchains and `#if os(...)` is the platform gate the rule wants. Both read as violations.",
+  "fix": "Scope the cell to Tests/ without the LinuxMain.swift and to #if blocks that disable a test body rather than wrapping platform APIs.",
+  "trees": [
+   "swiftlang__swift-docc",
+   "jpsim__Yams",
+   "yonaskolb__Mint"
+  ]
+ },
+ {
+  "file": "rules/swift-quality/cli-contract.md",
+  "rule_id": "SW-CLI exit cells",
+  "known_class": "33",
+  "severity": "nit",
+  "evidence": "cli_53/cli_54/cli_58 flag `exit(status)` in Mint's single CLI entrypoint and fatalError/print in Yams' library Parser (no CLI). Mint's `exit(status)` is the compliant top-level exit; Yams is a library with no CLI contract at all.",
+  "fix": "Add 'applies to executable targets only' to the cell header and restrict the grep to targets reported by dump-package as .executableTarget.",
+  "trees": [
+   "swiftlang__swift-docc",
+   "jpsim__Yams",
+   "yonaskolb__Mint"
+  ]
+ },
+ {
+  "file": "rules/swift-package/manifest.md",
+  "rule_id": "tools-version / shadow manifest",
+  "known_class": "62",
+  "severity": "fix",
+  "evidence": "Yams has Package.swift (5.7) and Package@swift-6.0.swift (6.0). dump-package on 6.4 and 6.3 legs reads the shadow file (tools 6.0) while the manifest cells (in_man_44_4, in_pkg_90_5, 96_8, 97_3, 97_4 run `grep ./Package.swift`) read the 5.7 file and exit 1 with the file name printed; the cell result depends on which manifest the leg reads, and the doc never says which is canonical.",
+  "fix": "Have manifest cells iterate `Package*.swift` and label each hit with the file, or state that the Package@swift-X.swift for the leg's toolchain is the one verified.",
+  "trees": [
+   "swiftlang__swift-docc",
+   "jpsim__Yams",
+   "yonaskolb__Mint"
+  ]
+ }
+]
