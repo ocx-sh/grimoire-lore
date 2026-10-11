@@ -34,7 +34,7 @@ question is answered before a packaging DSL is touched, and for a library the
 answer ends the decision immediately.
 
 Gate, one grep over every build file in the repository:
-`grep -rln --include='build.gradle.kts' --include='build.gradle' --include='pom.xml' -e 'com.gradleup.shadow' -e 'maven-shade-plugin' .`
+`git ls-files -z --cached --others --exclude-standard -- ':(glob)**/build.gradle.kts' ':(glob)**/build.gradle' ':(glob)**/pom.xml' | xargs -0 -r grep -l -e 'com.gradleup.shadow' -e 'maven-shade-plugin' --`
 Empty output means no module merges anything, which is the pass for this section
 and the two that follow.
 
@@ -43,7 +43,14 @@ and the two that follow.
 | GRADLE-DIST-01 | Classify every module as (a) a program someone runs, (b) something loaded into another process such as a Gradle plugin, a javac plugin or a java agent, or (c) a dependency someone declares and calls, and write that classification into the build file beside the packaging block before adding one. | Every rule in this file branches on the classification, and case (c) ends the decision with a plain jar. An unclassified module gets whatever shape its tutorial had. | Reading check, no command. The module's own consumption instructions decide it: "add this dependency" is (c), "run this jar" is (a), "apply this plugin" is (b). A shading plugin in a module that states no classification is the finding. | MUST |
 | GRADLE-DIST-02 | Do not publish a merged jar under a case (c) library's primary coordinates. A library that genuinely must vendor a colliding dependency satisfies all three of: every bundled package relocated under the library's own namespace, every non-vendored dependency left a real POM dependency, and the reason recorded in the build file. | Merging changes the library's binary identity for every consumer and duplicates transitives the consumer may already carry. The carve-out is conjunctive because exactly one artifact in the 32-repository corpus meets it: `kafka-clients` ships shaded under its primary coordinates with all three conditions held. Nothing else measured does. | The gate grep above. For each module it names, read whether that module's artifact is the one the project README or BOM tells consumers to declare. If it is, all three conditions must be visible in the build file. Empty gate output is the pass, not a skipped check. | MUST |
 | GRADLE-DIST-04 | A library ships exactly four things: the library jar, a sources jar, a javadoc or Dokka jar, and a complete POM plus Gradle Module Metadata. No `application`, no `bootJar`, no jlink image, no jpackage installer, no container. | Any executable in a case (c) module is a second, unclassified product smuggled into the library's release, and consumers resolve it whether or not they want it. | `./gradlew outgoingVariants`, or read the published POM: no `-all`, `-fat` or `-shaded` classifier and no operating-system-suffixed archive. A classifier of that shape is the finding. | MUST |
-| GRADLE-DIST-03 | Shading a published Gradle plugin is opt-in. `com.gradle.plugin-publish` does not apply Shadow for you, so neither assume a plugin jar is already merged nor add Shadow to make the plugin self-contained. Where a module does apply `com.gradleup.shadow`, audit the built jar for third-party packages that landed un-relocated. | Measured against `com.gradle.plugin-publish` 2.1.0 on 2026-09-12: it publishes the shadow jar as the main artifact only when the module applies Shadow itself, and Shadow's own build applies plugin-publish while neither shading nor relocating. A plugin's classes land in the host build's classloader beside every other plugin's, so an un-relocated bundled parser collides silently. Whether to relocate at all is GRADLE-PLUG-21. | Intersect the gate grep with `grep -rln --include='build.gradle.kts' --include='build.gradle' -e 'com.gradle.plugin-publish' .`. A plugin module in only the second set publishes a thin jar, which is the pass. A module in both is audited from the jar listing in the next section. | SHOULD |
+| GRADLE-DIST-03 | Shading a published Gradle plugin is opt-in. `com.gradle.plugin-publish` does not apply Shadow for you, so neither assume a plugin jar is already merged nor add Shadow to make the plugin self-contained. Where a module does apply `com.gradleup.shadow`, audit the built jar for third-party packages that landed un-relocated. | Measured against `com.gradle.plugin-publish` 2.1.0 on 2026-09-12: it publishes the shadow jar as the main artifact only when the module applies Shadow itself, and Shadow's own build applies plugin-publish while neither shading nor relocating. A plugin's classes land in the host build's classloader beside every other plugin's, so an un-relocated bundled parser collides silently. Whether to relocate at all is GRADLE-PLUG-21. | Intersect the gate grep with see block GRADLE-DIST-03. A plugin module in only the second set publishes a thin jar, which is the pass. A module in both is audited from the jar listing in the next section. | SHOULD |
+
+```sh
+# GRADLE-DIST-03
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/build.gradle.kts' \
+  ':(glob)**/build.gradle' |
+  xargs -0 -r grep -l -e 'com.gradle.plugin-publish' --
+```
 
 ## One Listing of the Built Jar
 
@@ -62,9 +69,20 @@ must print the union of the inputs, and a short listing is the finding.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| GRADLE-DIST-05 | Every shaded jar excludes `META-INF/*.SF`, `META-INF/*.DSA`, `META-INF/*.RSA` and `META-INF/*.EC`. All four, in one list. | A signed dependency's signature no longer matches the merged content, so the JVM throws `SecurityException: Invalid signature file digest for Manifest main attributes` at class load. Re-signing does not fix it, because the original signer never signed these bytes. `.EC` for ECDSA is the extension the most-copied fix omits, jmh-gradle-plugin's own upstream source included. Measured 0 of 32 corpus repositories exclude any of them, so this is the ruleset's largest commitment against current practice and it is latent in all ten shading repositories. | Gate 1. Any line printed is the defect. Statically, `grep -rn --include='build.gradle.kts' --include='build.gradle' --include='pom.xml' -e 'META-INF/\*\.RSA' .` and confirm `.EC` sits in the same list. **Empty output here is the finding, not the pass**, because it means no signature exclusion exists anywhere. | MUST |
+| GRADLE-DIST-05 | Every shaded jar excludes `META-INF/*.SF`, `META-INF/*.DSA`, `META-INF/*.RSA` and `META-INF/*.EC`. All four, in one list. | A signed dependency's signature no longer matches the merged content, so the JVM throws `SecurityException: Invalid signature file digest for Manifest main attributes` at class load. Re-signing does not fix it, because the original signer never signed these bytes. `.EC` for ECDSA is the extension the most-copied fix omits, jmh-gradle-plugin's own upstream source included. Measured 0 of 32 corpus repositories exclude any of them, so this is the ruleset's largest commitment against current practice and it is latent in all ten shading repositories. | Gate 1. Any line printed is the defect. Statically, see block GRADLE-DIST-05 and confirm `.EC` sits in the same list. **Empty output here is the finding, not the pass**, because it means no signature exclusion exists anywhere. | MUST |
 | GRADLE-DIST-06 | Every shaded jar excludes `META-INF/versions/*/module-info.class`, and the exclusion stays written down even on Shadow 9.0.0 and above where it is the default. | A multi-release dependency's module descriptor describes that dependency, not the merged artifact, so it breaks JPMS resolution or exposes a garbage automatic-module name. The default arrived in Shadow 9.0.0 (2025-08-07, verified 2026-09-12) and below that version there is nothing to inherit. | Gate 2, which must print nothing, and empty output is the pass. Cross-check the applied Shadow version against 9.0.0 before relying on the default instead of the line. | MUST |
-| GRADLE-DIST-07 | Call `mergeServiceFiles()` in Gradle, or configure `ServicesResourceTransformer` in Maven, on any shaded jar bundling more than one dependency that ships `META-INF/services/*`. | Shadow's default duplicate strategy is `EXCLUDE`: the first provider file wins, the rest are dropped with no warning and no build failure, and the symptom is a missing JDBC driver or Jackson module at runtime. Maven's transformer additionally rewrites class names inside the service files when relocation is in play. | Gate 3: the merged jar's service-file list equals the union across the inputs, and any shortfall is the finding. Statically, `grep -rn --include='build.gradle.kts' --include='pom.xml' -e 'mergeServiceFiles' -e 'ServicesResourceTransformer' .`, where empty output beside a multi-provider merge is the finding and not the pass. | MUST |
+| GRADLE-DIST-07 | Call `mergeServiceFiles()` in Gradle, or configure `ServicesResourceTransformer` in Maven, on any shaded jar bundling more than one dependency that ships `META-INF/services/*`. | Shadow's default duplicate strategy is `EXCLUDE`: the first provider file wins, the rest are dropped with no warning and no build failure, and the symptom is a missing JDBC driver or Jackson module at runtime. Maven's transformer additionally rewrites class names inside the service files when relocation is in play. | Gate 3: the merged jar's service-file list equals the union across the inputs, and any shortfall is the finding. Statically, see block GRADLE-DIST-07, where empty output beside a multi-provider merge is the finding and not the pass. | MUST |
+
+```sh
+# GRADLE-DIST-05
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/build.gradle.kts' \
+  ':(glob)**/build.gradle' ':(glob)**/pom.xml' |
+  xargs -0 -r grep -H -n -e 'META-INF/\*\.RSA' --
+# GRADLE-DIST-07
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/build.gradle.kts' \
+  ':(glob)**/pom.xml' |
+  xargs -0 -r grep -H -n -e 'mergeServiceFiles' -e 'ServicesResourceTransformer' --
+```
 
 ```kotlin
 // wrong: builds, runs the happy path, and ships three latent failures
@@ -89,10 +107,10 @@ tasks.shadowJar {
 
 Four greps, each run before the feature it names is switched on:
 
-- `grep -rn --include='build.gradle.kts' --include='pom.xml' -e 'spring.factories' -e 'AppendingTransformer' -e 'PropertiesTransformer' .`
-- `grep -rn -A3 --include='build.gradle.kts' -e 'minimize()' .`
-- `grep -rn --include='build.gradle.kts' --include='pom.xml' -e 'relocate(' -e 'Log4j2PluginsCacheFileTransformer' .`
-- `grep -rn --include='build.gradle.kts' --include='build.gradle' -e 'johnrengelman' .`
+- `git ls-files -z --cached --others --exclude-standard -- ':(glob)**/build.gradle.kts' ':(glob)**/pom.xml' | xargs -0 -r grep -H -n -e 'spring.factories' -e 'AppendingTransformer' -e 'PropertiesTransformer' --`
+- `git ls-files -z --cached --others --exclude-standard -- ':(glob)**/build.gradle.kts' | xargs -0 -r grep -H -n -A 3 -e 'minimize()' --`
+- `git ls-files -z --cached --others --exclude-standard -- ':(glob)**/build.gradle.kts' ':(glob)**/pom.xml' | xargs -0 -r grep -H -n -e 'relocate(' -e 'Log4j2PluginsCacheFileTransformer' --`
+- `git ls-files -z --cached --others --exclude-standard -- ':(glob)**/build.gradle.kts' ':(glob)**/build.gradle' | xargs -0 -r grep -H -n -e 'johnrengelman' --`
 
 The fourth must print nothing and empty output there is the pass. The other three
 are read for what is missing beside what they find.
@@ -128,7 +146,7 @@ and Gatekeeper blocks a signed-but-unnotarized application everywhere except the
 build machine (JDK 25 tool specification, verified 2026-09-12).
 
 Gate: `./gradlew tasks --group=distribution`, then
-`grep -rln --include='build.gradle.kts' --include='build.gradle' -e 'org.springframework.boot' .`
+`git ls-files -z --cached --others --exclude-standard -- ':(glob)**/build.gradle.kts' ':(glob)**/build.gradle' | xargs -0 -r grep -l -e 'org.springframework.boot' --`
 intersected with the same grep for `com.gradleup.shadow`, then
 `grep -n -e '^COPY' Dockerfile` where one exists.
 

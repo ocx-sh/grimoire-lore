@@ -32,18 +32,29 @@ so a retired flag is a silent no-op. One grep locates all three rows, and every
 hit is read against the Kotlin version the build pins.
 
 ```bash
-grep -rn --include='*.gradle.kts' --include='gradle.properties' \
-  -e '-Xwhen-guards' -e '-Xnon-local-break-continue' \
-  -e '-Xmulti-dollar-interpolation' -e '-Xcontext-parameters' \
-  -e '-Xcontext-receivers' -e 'Xjvm-default' -e 'jvmDefault' .
-grep -rn -e 'kotlin' gradle/libs.versions.toml
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.gradle.kts' \
+  ':(glob)**/gradle.properties' |
+  xargs -0 -r grep -H -n -e '-Xwhen-guards' -e '-Xnon-local-break-continue' \
+    -e '-Xmulti-dollar-interpolation' -e '-Xcontext-parameters' -e '-Xcontext-receivers' \
+    -e 'Xjvm-default' -e 'jvmDefault' --
+git ls-files -z --cached --others --exclude-standard -- 'gradle/libs.versions.toml' |
+  xargs -0 -r grep -H -n -e 'kotlin' --
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
 | KT-COMP-01 | Never emit `-Xwhen-guards`, `-Xnon-local-break-continue` or `-Xmulti-dollar-interpolation` (all three Stable and flag-retired in Kotlin 2.2.0, 2025-06-23), or `-Xcontext-parameters` (Stable in 2.4.0, 2026-07-14). `-Xcontext-receivers` is a defect on any Kotlin 2.2.0 or newer build, because that design was withdrawn rather than renamed. Verified 2026-09-12. | The flags are accepted and do nothing, and none of them appears in the current [compiler reference](https://kotlinlang.org/docs/compiler-reference.html). An agent that adds one "to be safe" ships dead configuration that a later reader treats as load-bearing. | The first grep above, read against the Kotlin version the second prints. Empty output is the pass. Any of the five names on a build at or above its stabilisation version is the finding. | MUST |
-| KT-COMP-02 | Never write `-Xjvm-default` as a string in `freeCompilerArgs`. Use the typed `compilerOptions.jvmDefault` property with a `JvmDefaultMode` value (`ENABLE`, `NO_COMPATIBILITY` or `DISABLE`). Verified 2026-09-12. | `-Xjvm-default` is deprecated in favour of the stable option and the Gradle DSL property, and the string form invites the old-to-new value mismatch, where `all-compatibility` became `ENABLE` and `all` became `NO_COMPATIBILITY`. Translating the flag name instead of the intent inverts the behaviour. | `grep -rn --include='*.gradle.kts' -e 'Xjvm-default' .`. Empty output is the pass. Every hit on a Kotlin 2.2.0 or newer build is the finding. | MUST |
-| KT-COMP-03 | A library or SDK that publishes Kotlin interfaces states `compilerOptions.jvmDefault` explicitly, and does not rely on the compiler default. Verified 2026-09-12. | The default flipped from `DISABLE` to `ENABLE` in Kotlin 2.2.0 ([whatsnew22](https://kotlinlang.org/docs/whatsnew22.html)), so an unconfigured interface silently begins emitting real JVM `default` methods and compatibility bridges on a routine Kotlin bump. That is a behaviour change for binary consumers, and `KT-API`'s ABI gate is what reports it after the fact. | `grep -rn --include='*.gradle.kts' -e 'jvmDefault' .` in a module that publishes interfaces. Empty output **is the finding**. Confirm intent with `javap -p` on a public interface either side of a Kotlin-version bump, where a newly present `default` method means the flip was missed. | MUST (library, SDK) |
+| KT-COMP-02 | Never write `-Xjvm-default` as a string in `freeCompilerArgs`. Use the typed `compilerOptions.jvmDefault` property with a `JvmDefaultMode` value (`ENABLE`, `NO_COMPATIBILITY` or `DISABLE`). Verified 2026-09-12. | `-Xjvm-default` is deprecated in favour of the stable option and the Gradle DSL property, and the string form invites the old-to-new value mismatch, where `all-compatibility` became `ENABLE` and `all` became `NO_COMPATIBILITY`. Translating the flag name instead of the intent inverts the behaviour. | see block KT-COMP-02. Empty output is the pass. Every hit on a Kotlin 2.2.0 or newer build is the finding. | MUST |
+| KT-COMP-03 | A library or SDK that publishes Kotlin interfaces states `compilerOptions.jvmDefault` explicitly, and does not rely on the compiler default. Verified 2026-09-12. | The default flipped from `DISABLE` to `ENABLE` in Kotlin 2.2.0 ([whatsnew22](https://kotlinlang.org/docs/whatsnew22.html)), so an unconfigured interface silently begins emitting real JVM `default` methods and compatibility bridges on a routine Kotlin bump. That is a behaviour change for binary consumers, and `KT-API`'s ABI gate is what reports it after the fact. | see block KT-COMP-03 in a module that publishes interfaces. Empty output **is the finding**. Confirm intent with `javap -p` on a public interface either side of a Kotlin-version bump, where a newly present `default` method means the flip was missed. | MUST (library, SDK) |
+
+```sh
+# KT-COMP-02
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.gradle.kts' |
+  xargs -0 -r grep -H -n -e 'Xjvm-default' --
+# KT-COMP-03
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.gradle.kts' |
+  xargs -0 -r grep -H -n -e 'jvmDefault' --
+```
 
 ```kotlin
 // wrong: the 2023-era string, and `all` does not mean what its name suggests
@@ -63,20 +74,29 @@ Two gates. The first reads the compile configuration, the second reads the
 pinned versions the build resolves against.
 
 ```bash
-grep -rn -A3 --include='*.gradle.kts' -e 'jvmToolchain' -e 'jvmTarget' \
-  -e 'jvmTargetValidationMode' .
-grep -rn --include='*.gradle.kts' --include='gradle.properties' \
-  -e 'language-version' -e 'KotlinVersion.KOTLIN_1' .
-grep -rn -e 'kotlin' -e 'agp' gradle/libs.versions.toml
-grep -rn -e 'distributionUrl' gradle/wrapper/gradle-wrapper.properties
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.gradle.kts' |
+  xargs -0 -r grep -H -n -A 3 -e 'jvmToolchain' -e 'jvmTarget' -e 'jvmTargetValidationMode' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.gradle.kts' \
+  ':(glob)**/gradle.properties' |
+  xargs -0 -r grep -H -n -e 'language-version' -e 'KotlinVersion.KOTLIN_1' --
+git ls-files -z --cached --others --exclude-standard -- 'gradle/libs.versions.toml' |
+  xargs -0 -r grep -H -n -e 'kotlin' -e 'agp' --
+git ls-files -z --cached --others --exclude-standard -- 'gradle/wrapper/gradle-wrapper.properties' |
+  xargs -0 -r grep -H -n -e 'distributionUrl' --
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
 | KT-COMP-04 | Set `compilerOptions.jvmTarget` explicitly wherever `jvmToolchain(N)` is set, and in a mixed Java and Kotlin module make it equal the Java side's `options.release`. **Pinned default**, override once in your own build config and record why: that number is **17**, owned by `JAVA-PLAT-02` and verified 2026-09-12. | `jvmToolchain` back-fills `jvmTarget` only when the build has not set it, and `jvmTarget` itself still defaults to `"1.8"` ([gradle-compiler-options](https://kotlinlang.org/docs/gradle-compiler-options.html)). So `jvmToolchain(21)` alone compiles on JDK 21 and ships Java 8 bytecode, which is the default state of a Kotlin build rather than an accident. This row is the Kotlin statement of `JAVA-PLAT-01`'s decision, written where the Kotlin edit happens. | The first grep above. Every `jvmToolchain` hit must show a sibling `jvmTarget` inside the same block, and a module with a Kotlin compile task and no `jvmTarget` anywhere **is the finding**, not a pass. Then read that value against the module's `options.release`, because a Kotlin-only module never triggers the build-time validator. | MUST |
-| KT-COMP-05 | Do not weaken `jvmTargetValidationMode`. Its default is `ERROR` on current KGP with Gradle 8.0 or newer (verified 2026-09-12), and any `WARNING` or `IGNORE` value carries a comment naming what it unblocks. | A `compileJava` and `compileKotlin` target disagreement fails the build outright, and a reviewer expecting an advisory warning is describing pre-Gradle-8.0 behaviour. The corpus's only hit on this property is a downgrade, which is what the property is reached for. | `grep -rn --include='*.gradle.kts' -e 'jvmTargetValidationMode' .`. Empty output **is the pass**, because the safe default applies. Every hit is read for its justification, and an uncommented downgrade is the finding. | MUST |
+| KT-COMP-05 | Do not weaken `jvmTargetValidationMode`. Its default is `ERROR` on current KGP with Gradle 8.0 or newer (verified 2026-09-12), and any `WARNING` or `IGNORE` value carries a comment naming what it unblocks. | A `compileJava` and `compileKotlin` target disagreement fails the build outright, and a reviewer expecting an advisory warning is describing pre-Gradle-8.0 behaviour. The corpus's only hit on this property is a downgrade, which is what the property is reached for. | see block KT-COMP-05. Empty output **is the pass**, because the safe default applies. Every hit is read for its justification, and an uncommented downgrade is the finding. | MUST |
 | KT-COMP-06 | Read the KGP and Gradle compatibility table before bumping either one, and treat a Gradle bump that crosses a KGP ceiling as a required KGP bump in the same change. | The envelope is a hard minimum and maximum, not a rule of thumb, and the **ceiling** is the load-bearing number that a "bump Gradle" change walks off. "Kotlin 2.4 needs Gradle 9 or newer" is wrong in both directions, since the floor across Kotlin 2.4.x is still Gradle 7.6.3 ([gradle-configure-project](https://kotlinlang.org/docs/gradle-configure-project.html)). | The third and fourth greps above, read against the table below. Empty output from either **is the finding**, because it means the version or the wrapper is not pinned in the file the check expects. A KGP version absent from the table is read from the linked page instead of guessed. | MUST |
 | KT-COMP-07 | Never emit K1-era advice, and name which of the two facts a claim depends on: `-language-version 1.8` and `1.9` were dropped in Kotlin **2.3.0**, and the K1 compiler itself was removed in **2.4.0**. Verified 2026-09-12. | The two are routinely collapsed into one, and they license different instructions. A "fall back to K1" instruction on 2.4.0 or newer is unexecutable rather than merely stale, and a language-version pin below 2.0 fails the build on 2.3.0 or newer. | The second grep above. Empty output is the pass. Any language-version value below `2.0` on a Kotlin 2.3.0 or newer build is the finding, as is any prose or comment offering a K1 fallback. | MUST |
+
+```sh
+# KT-COMP-05
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.gradle.kts' |
+  xargs -0 -r grep -H -n -e 'jvmTargetValidationMode' --
+```
 
 | KGP version | Highest Gradle it supports |
 |---|---|
@@ -107,9 +127,10 @@ design during a migration, so presence alone settles nothing and each hit is
 read.
 
 ```bash
-grep -rn --include='*.gradle.kts' -e 'kotlin("kapt")' \
-  -e 'org.jetbrains.kotlin.kapt' -e 'kapt(' -e 'ksp(' .
-grep -rn --include='gradle.properties' -e 'ksp.useKSP2' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.gradle.kts' |
+  xargs -0 -r grep -H -n -e 'kotlin("kapt")' -e 'org.jetbrains.kotlin.kapt' -e 'kapt(' -e 'ksp(' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/gradle.properties' |
+  xargs -0 -r grep -H -n -e 'ksp.useKSP2' --
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
@@ -124,10 +145,13 @@ Three unrelated reads of the build configuration, grouped because none of them
 has a compiler-side gate.
 
 ```bash
-grep -rn --include='*.gradle.kts' -e 'tasks.dokkaHtml' -e 'DokkaTask' \
-  -e 'dokkaHtmlMultiModule' -e 'extraWarnings' -e '-Wextra' .
-grep -rn --include='gradle.properties' -e 'kotlin.daemon' -e 'org.gradle.jvmargs' .
-grep -rn -e 'dokka' gradle/libs.versions.toml
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.gradle.kts' |
+  xargs -0 -r grep -H -n -e 'tasks.dokkaHtml' -e 'DokkaTask' -e 'dokkaHtmlMultiModule' \
+    -e 'extraWarnings' -e '-Wextra' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/gradle.properties' |
+  xargs -0 -r grep -H -n -e 'kotlin.daemon' -e 'org.gradle.jvmargs' --
+git ls-files -z --cached --others --exclude-standard -- 'gradle/libs.versions.toml' |
+  xargs -0 -r grep -H -n -e 'dokka' --
 ```
 
 | ID | Rule | Rationale | Verification | Severity |

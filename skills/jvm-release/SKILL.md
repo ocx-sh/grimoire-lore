@@ -42,6 +42,8 @@ Gradle Plugin Portal publishing is a different target with a different gate set
 and is not covered here. Every version and count below was verified 2026-09-12
 unless the line says otherwise.
 
+Every search command here lists its files with `git ls-files`, so run it from the root of a git work tree. It reads tracked files and untracked files that are not ignored; a path matched by `.gitignore` is not searched.
+
 ## Pinned defaults
 
 These four encode an agreed decision rather than a derived fact. Each is a
@@ -133,12 +135,12 @@ tasks.withType<PublishToMavenRepository>().configureEach {
 
 **Check:** `./gradlew :module:publish --dry-run` must list the gate task ahead
 of the upload task. For Maven the ordering is the bound phase, not a run:
-`grep -rn -A 6 --include='pom.xml' -e 'japicmp-maven-plugin' .` must show an
+`git ls-files -z --cached --others --exclude-standard -- ':(glob)**/pom.xml' | xargs -0 -r grep -H -n -A 6 -e 'japicmp-maven-plugin' --` must show an
 `<execution>` whose `<phase>` is `verify` or earlier, which the lifecycle puts
 ahead of `deploy`. An execution with no phase, or empty output, is the finding.
 Never run `mvn deploy` to inspect ordering.
 Output that lists the upload with no gate task before it is the finding. Then
-`grep -rnE -e 'ignoreMissingClasses' -e '<(skip)>true' --include='*.gradle.kts' --include='*.gradle' --include='pom.xml' .`
+`git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.gradle.kts' ':(glob)**/*.gradle' ':(glob)**/pom.xml' | xargs -0 -r grep -H -n -E -e 'ignoreMissingClasses' -e '<(skip)>true' --`
 with no accompanying allowlist file: any hit is the finding, empty output is
 the pass.
 
@@ -227,7 +229,7 @@ required to publish, with no PGP replacement date set. Corpus adoption is 0 of
 32, so adding one is a deliberate improvement rather than a norm, and it should
 be described that way in the pull request.
 
-**Check:** `grep -rn -e 'useGpgCmd' --include='*.gradle.kts' --include='*.gradle' .`
+**Check:** `git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.gradle.kts' ':(glob)**/*.gradle' | xargs -0 -r grep -H -n -e 'useGpgCmd' --`
 A hit reachable from a CI-invoked task is the finding. Empty output with signing
 configured means the wrapper plugin supplies it, so read that plugin's docs
 rather than treating empty as proof. A `.sigstore.json` present with no `.asc`
@@ -260,7 +262,7 @@ configuration cache for that task instead, so the build stays green and gets
 slower for reasons nothing reports. A literal in a committed build file is also
 a secret in version control.
 
-**Check:** `grep -rn -A3 -e 'credentials' --include='*.gradle.kts' --include='*.gradle' .`
+**Check:** `git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.gradle.kts' ':(glob)**/*.gradle' | xargs -0 -r grep -H -n -A 3 -e 'credentials' --`
 Any `username` or `password` bound to a string literal is the finding, empty
 output is the pass. Then run the publish task twice: the second run must print
 the literal line `Reusing configuration cache.` Its absence, with no other
@@ -290,7 +292,7 @@ resolution depend on whatever is in that machine's `~/.m2` that day. Neither
 `publishToMavenLocal` as a producer-side verification task nor the probe above,
 a Maven module reading `~/.m2` as its default mechanism, is reached by it.
 
-**Check:** `grep -rn -e 'mavenLocal()' --include='*.gradle.kts' --include='*.gradle' .`
+**Check:** `git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.gradle.kts' ':(glob)**/*.gradle' | xargs -0 -r grep -H -n -e 'mavenLocal()' --`
 A hit inside a committed `repositories { }` block is the finding, empty output
 is the pass. A hit inside the consumability probe is the carve-out and is not
 reported.
@@ -323,7 +325,7 @@ None of them is a working target in 2026.
 | `maven.consumer.pom.flatten=true` and `<packaging>bom</packaging>` | Maven 4 only and opt-in. Central tops out at `maven-core` 4.0.0-rc-6 as of 2026-09-12, with no plain 4.0.0. An RC feature in a runbook breaks when the RC changes shape |
 
 **Check:**
-`grep -rn -e 'oss.sonatype.org' -e 's01.oss.sonatype' -e 'nexus-staging' -e 'codearte' .`
+`git ls-files -z --cached --others --exclude-standard -- '.' | xargs -0 -r grep -H -n -e 'oss.sonatype.org' -e 's01.oss.sonatype' -e 'nexus-staging' -e 'codearte' --`
 Any hit outside a migration-history comment is stale, empty output is the pass.
 Before writing any Maven 4 claim, query the registry rather than the Maven
 site's own version banner, which runs ahead of what Central serves:

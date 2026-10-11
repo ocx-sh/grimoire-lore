@@ -63,11 +63,31 @@ below are diff-review pre-filters, never substitutes for the run.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| GRADLE-CACHE-01 | Never touch a `Project` from a task action: no `Task.getProject()`, no `project.copy {}`, no `project.exec {}`, no `project.logger`. Inject `FileSystemOperations` or `ExecOperations`, and bind every value read from `Project` to a `Property<T>` at configuration time. | A hard configuration-cache violation that still compiles, and the shape that saturates Groovy-era training data. | The gate run above. Pre-filter: `grep -rn --include='*.kt' --include='*.gradle.kts' --include='*.java' -e 'getProject()' -e 'project.copy' -e 'project.exec' -e 'project.logger' .`, then read whether each hit sits inside a `doLast`, `doFirst` or `@TaskAction` body. Empty pre-filter output clears the pre-filter, not the rule. | MUST |
-| GRADLE-CACHE-02 | Never read a file, spawn a process, or resolve a `Configuration` at configuration time. Use `providers.fileContents(f).asText`, `providers.exec()` or `providers.javaexec()`, a `ValueSource` for anything else, and defer resolution into the task action behind a `FileCollection` or `Provider`. | An undeclared read or exec is an untracked cache input, and resolving at configuration time also defeats configuration avoidance. It stays legal ([#2298](https://github.com/gradle/gradle/issues/2298) is open), so no tool fails it for you. | The gate run above. Pre-filter: `grep -rn --include='*.kt' --include='*.gradle.kts' -e 'readText()' -e 'Files.readString' -e 'Files.readAllLines' -e 'ProcessBuilder(' -e 'Runtime.getRuntime().exec' .` and read each hit that is outside a task action. Empty pre-filter output clears the pre-filter, not the rule. | MUST |
-| GRADLE-CACHE-03 | Never enumerate `System.getenv()` or `System.getProperties()`. Read one named key, or use `providers.environmentVariablesPrefixedBy("PREFIX")`. | Gradle's own wording: every available property becomes one cache input. A single `.forEach {}` turns the whole ambient environment into cache-busting state. | `grep -rn --include='*.kt' --include='*.gradle.kts' -e 'System.getenv()' -e 'System.getProperties()' .` Any hit calling `getenv` with no argument is the finding. Empty output is the pass. | MUST |
-| GRADLE-CACHE-04 | Never register a `BuildListener` or `TaskExecutionListener` from a plugin or a build script. Use a Build Service implementing `OperationCompletionListener`, registered through `BuildEventsListenerRegistry`. | Flatly disallowed with no fallback flag, and still an unsolved migration gap for build-start and build-finish hooks ([#18520](https://github.com/gradle/gradle/issues/18520), open as of 2026-09-12). | `grep -rn --include='*.kt' --include='*.gradle.kts' --include='*.java' -e 'addBuildListener' -e 'addListener(' -e 'TaskExecutionListener' -e 'BuildListener' .` Any hit is the finding. Empty output is the pass. | MUST |
+| GRADLE-CACHE-01 | Never touch a `Project` from a task action: no `Task.getProject()`, no `project.copy {}`, no `project.exec {}`, no `project.logger`. Inject `FileSystemOperations` or `ExecOperations`, and bind every value read from `Project` to a `Property<T>` at configuration time. | A hard configuration-cache violation that still compiles, and the shape that saturates Groovy-era training data. | The gate run above. Pre-filter: see block GRADLE-CACHE-01, then read whether each hit sits inside a `doLast`, `doFirst` or `@TaskAction` body. Empty pre-filter output clears the pre-filter, not the rule. | MUST |
+| GRADLE-CACHE-02 | Never read a file, spawn a process, or resolve a `Configuration` at configuration time. Use `providers.fileContents(f).asText`, `providers.exec()` or `providers.javaexec()`, a `ValueSource` for anything else, and defer resolution into the task action behind a `FileCollection` or `Provider`. | An undeclared read or exec is an untracked cache input, and resolving at configuration time also defeats configuration avoidance. It stays legal ([#2298](https://github.com/gradle/gradle/issues/2298) is open), so no tool fails it for you. | The gate run above. Pre-filter: see block GRADLE-CACHE-02 and read each hit that is outside a task action. Empty pre-filter output clears the pre-filter, not the rule. | MUST |
+| GRADLE-CACHE-03 | Never enumerate `System.getenv()` or `System.getProperties()`. Read one named key, or use `providers.environmentVariablesPrefixedBy("PREFIX")`. | Gradle's own wording: every available property becomes one cache input. A single `.forEach {}` turns the whole ambient environment into cache-busting state. | see block GRADLE-CACHE-03 Any hit calling `getenv` with no argument is the finding. Empty output is the pass. | MUST |
+| GRADLE-CACHE-04 | Never register a `BuildListener` or `TaskExecutionListener` from a plugin or a build script. Use a Build Service implementing `OperationCompletionListener`, registered through `BuildEventsListenerRegistry`. | Flatly disallowed with no fallback flag, and still an unsolved migration gap for build-start and build-finish hooks ([#18520](https://github.com/gradle/gradle/issues/18520), open as of 2026-09-12). | see block GRADLE-CACHE-04 Any hit is the finding. Empty output is the pass. | MUST |
 | GRADLE-CACHE-05 | Never hold live-JVM state in a task field or capture it in a task action: `ClassLoader`, `Thread`, `Socket`, `OutputStream`, `Lock`, `ReadWriteLock`, `Semaphore`, `CountDownLatch`, `CyclicBarrier`, `Phaser`. The same bar rejects `Gradle`, `Settings`, `SourceSet`, `Configuration` and `SourceDirectorySet` as inputs. A Build Service holds shared live state, and `FileCollection`, `FileTree` or `Provider<ResolvedComponentResult>` replace the coarse types. | These do not represent task inputs or outputs and cannot be serialized into a cache entry. `System.in`, `System.out` and `System.err` are the one documented exception, for `Exec` and `JavaExec`. | The gate run above names the offending field and its owning class. No report file is the pass. | MUST |
+
+```sh
+# GRADLE-CACHE-01
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.kt' ':(glob)**/*.gradle.kts' \
+  ':(glob)**/*.java' |
+  xargs -0 -r grep -H -n -e 'getProject()' -e 'project.copy' -e 'project.exec' -e 'project.logger' \
+    --
+# GRADLE-CACHE-02
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.kt' ':(glob)**/*.gradle.kts' |
+  xargs -0 -r grep -H -n -e 'readText()' -e 'Files.readString' -e 'Files.readAllLines' \
+    -e 'ProcessBuilder(' -e 'Runtime.getRuntime().exec' --
+# GRADLE-CACHE-03
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.kt' ':(glob)**/*.gradle.kts' |
+  xargs -0 -r grep -H -n -e 'System.getenv()' -e 'System.getProperties()' --
+# GRADLE-CACHE-04
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.kt' ':(glob)**/*.gradle.kts' \
+  ':(glob)**/*.java' |
+  xargs -0 -r grep -H -n -e 'addBuildListener' -e 'addListener(' -e 'TaskExecutionListener' \
+    -e 'BuildListener' --
+```
 
 ```kotlin
 // wrong: compiles, runs, and is a hard configuration-cache violation
@@ -92,8 +112,21 @@ build twice.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| GRADLE-CACHE-06 | Turn the cache on with `org.gradle.configuration-cache=true` in the root `gradle.properties`, never with a CI-only `--configuration-cache` flag, and leave `--configuration-cache-problems` at its default `fail`. `warn` is a migration aid with a tracked expiry, never a steady state. **pinned**: SHOULD for an existing build, raised to MUST for any module you publish. Override the raise once, in your own config, not per module. | CI overwhelmingly inherits the property (10 of 32) rather than re-asserting the flag (3 of 32), so reading `gradle.properties` first is the reliable heuristic. Gradle 9.0.0 also removed warn mode's old escape hatch: a task marked `notCompatibleWithConfigurationCache` now always discards the entry (verified 2026-09-12). | `grep -rn --include='gradle.properties' -e 'configuration-cache' .` Here **empty output is the finding**: opt-in has not happened. Then `grep -rn -e 'configuration-cache-problems=warn' .` and treat any hit with no linked tracking issue as the finding, with empty output the pass. | SHOULD |
-| GRADLE-CACHE-08 | Never read "the build went green" as "the build was cached". Gradle 9 silently disables the cache for a task rather than failing, in several documented cases. The named one is a `maven-publish` repository with an explicit `credentials {}` block ([#24040](https://github.com/gradle/gradle/issues/24040)). | Automatic graceful fallback means a permanently uncached task produces no error at all, so the only observable difference is a line of build output. | Run the identical invocation twice. The second run must print `Reusing configuration cache.` Absence of that line is the finding. Pre-filter for the known trap: `grep -rn -A3 --include='*.gradle.kts' --include='*.gradle' -e 'credentials' .` and check each hit for a literal credential block rather than `PasswordCredentials` or an environment-backed provider. | SHOULD |
+| GRADLE-CACHE-06 | Turn the cache on with `org.gradle.configuration-cache=true` in the root `gradle.properties`, never with a CI-only `--configuration-cache` flag, and leave `--configuration-cache-problems` at its default `fail`. `warn` is a migration aid with a tracked expiry, never a steady state. **pinned**: SHOULD for an existing build, raised to MUST for any module you publish. Override the raise once, in your own config, not per module. | CI overwhelmingly inherits the property (10 of 32) rather than re-asserting the flag (3 of 32), so reading `gradle.properties` first is the reliable heuristic. Gradle 9.0.0 also removed warn mode's old escape hatch: a task marked `notCompatibleWithConfigurationCache` now always discards the entry (verified 2026-09-12). | see block GRADLE-CACHE-06 (1 of 2) Here **empty output is the finding**: opt-in has not happened. Then see block GRADLE-CACHE-06 (2 of 2) and treat any hit with no linked tracking issue as the finding, with empty output the pass. | SHOULD |
+| GRADLE-CACHE-08 | Never read "the build went green" as "the build was cached". Gradle 9 silently disables the cache for a task rather than failing, in several documented cases. The named one is a `maven-publish` repository with an explicit `credentials {}` block ([#24040](https://github.com/gradle/gradle/issues/24040)). | Automatic graceful fallback means a permanently uncached task produces no error at all, so the only observable difference is a line of build output. | Run the identical invocation twice. The second run must print `Reusing configuration cache.` Absence of that line is the finding. Pre-filter for the known trap: see block GRADLE-CACHE-08 and check each hit for a literal credential block rather than `PasswordCredentials` or an environment-backed provider. | SHOULD |
+
+```sh
+# GRADLE-CACHE-06 (1 of 2)
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/gradle.properties' |
+  xargs -0 -r grep -H -n -e 'configuration-cache' --
+# GRADLE-CACHE-06 (2 of 2)
+git ls-files -z --cached --others --exclude-standard -- '.' |
+  xargs -0 -r grep -H -n -e 'configuration-cache-problems=warn' --
+# GRADLE-CACHE-08
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.gradle.kts' \
+  ':(glob)**/*.gradle' |
+  xargs -0 -r grep -H -n -A 3 -e 'credentials' --
+```
 
 ## Isolated Projects
 
@@ -103,8 +136,20 @@ constraint categories are unenforced by Gradle's own admission, and `group` and
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| GRADLE-CACHE-09 | Write `org.gradle.isolated-projects`. Never `org.gradle.unsafe.isolated-projects`. | The `unsafe.` spelling dominated blogs and talks for years and is what a model reaches for. It was deprecated in 9.7.0 and is slated for removal. 0 of 32 surveyed repos use it, 5 of 32 use the live key. | `grep -rn --include='gradle.properties' -e 'unsafe.isolated-projects' .` Any hit is the finding. Empty output is the pass. | MUST |
-| GRADLE-CACHE-10 | Do not gate CI on Isolated Projects. Run it manually in diagnostics mode to collect violations, and keep it out of the required checks. | Adoption of the property is not adoption of a gate. 5 of 32 surveyed repos set the key, which reads as ready until the 9.7.0 docs' own "not fully enforced yet" on two constraint categories is read. | `grep -rn --include='gradle.properties' -e 'isolated-projects' .` and `grep -rn --include='*.yml' --include='*.yaml' -e 'isolated-projects' .` The property set **and** the CI job listed as a required check is the finding. Empty output from either is the pass. | SHOULD |
+| GRADLE-CACHE-09 | Write `org.gradle.isolated-projects`. Never `org.gradle.unsafe.isolated-projects`. | The `unsafe.` spelling dominated blogs and talks for years and is what a model reaches for. It was deprecated in 9.7.0 and is slated for removal. 0 of 32 surveyed repos use it, 5 of 32 use the live key. | see block GRADLE-CACHE-09 Any hit is the finding. Empty output is the pass. | MUST |
+| GRADLE-CACHE-10 | Do not gate CI on Isolated Projects. Run it manually in diagnostics mode to collect violations, and keep it out of the required checks. | Adoption of the property is not adoption of a gate. 5 of 32 surveyed repos set the key, which reads as ready until the 9.7.0 docs' own "not fully enforced yet" on two constraint categories is read. | see block GRADLE-CACHE-10 (1 of 2) and see block GRADLE-CACHE-10 (2 of 2) The property set **and** the CI job listed as a required check is the finding. Empty output from either is the pass. | SHOULD |
+
+```sh
+# GRADLE-CACHE-09
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/gradle.properties' |
+  xargs -0 -r grep -H -n -e 'unsafe.isolated-projects' --
+# GRADLE-CACHE-10 (1 of 2)
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/gradle.properties' |
+  xargs -0 -r grep -H -n -e 'isolated-projects' --
+# GRADLE-CACHE-10 (2 of 2)
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.yml' ':(glob)**/*.yaml' |
+  xargs -0 -r grep -H -n -e 'isolated-projects' --
+```
 
 ## Task Inputs and Outputs
 
@@ -126,9 +171,18 @@ as its own required CI step belongs to `GRADLE-PLUG-01` and `GRADLE-PLUG-02` in
 |---|---|---|---|---|
 | GRADLE-CACHE-11 | Every task property and every artifact-transform property carries exactly one of `@Input`, `@InputFile`, `@InputDirectory`, `@InputFiles`, `@OutputFile`, `@OutputDirectory`, `@Nested`, `@Internal` or `@Console`. `@Optional` is a modifier, never the whole annotation. | An unannotated property silently disables up-to-date checking and caching for the **whole task**. There is no error, just a task that always reruns or never does. | `validatePlugins` reports `missing_annotation`. No reported problem is the pass. | MUST |
 | GRADLE-CACHE-12 | Never annotate a `File`, `RegularFileProperty` or `DirectoryProperty` with `@Input`. Use `@InputFile` or `@InputDirectory`. | Gradle stores the value (the path), not the content, so the file changes under you undetected. This is the most natural-language-plausible mistake in the whole annotation set. | `validatePlugins` reports `incorrect_use_of_input_annotation`, and no reported problem is the pass. Reading test for a diff: does the declared type implement `FileSystemLocation`, or is it a `File` or `FileCollection`? Then `@Input` is wrong on sight. | MUST |
-| GRADLE-CACHE-13 | Every file input of a cacheable task declares a normalization strategy: `@PathSensitive(NONE)` for a single file, `@PathSensitive(RELATIVE)` for a directory, `@Classpath` or `@CompileClasspath` for a classpath. Never `ABSOLUTE`, and never `ABSOLUTE` on a cacheable transform at all. | `ABSOLUTE` makes the build cache non-relocatable across machines and checkout locations, the top named cause of cross-machine misses. With no strategy at all, Gradle's own text calls caching "highly ineffective". | `validatePlugins` reports `missing_normalization_annotation` and `cacheable_transform_cant_use_absolute_sensitivity`, and no reported problem is the pass. Pre-filter: `grep -rn --include='*.kt' --include='*.java' -e 'PathSensitivity.ABSOLUTE' .`, where any hit is the finding. | MUST |
-| GRADLE-CACHE-14 | A JVM **compile** classpath input is `@CompileClasspath`, not `@InputFiles` and not `@Classpath`. | `@CompileClasspath` ignores everything but ABI-affecting class changes, which is what makes compile avoidance possible. `@InputFiles` busts the cache on an upstream jar's timestamp. `validatePlugins` does not catch this one, because all three annotations are individually legal. | `grep -rn -B2 --include='*.kt' --include='*.java' -e 'compileClasspath' -e 'Classpath' .` A property named with a `Classpath` suffix, or fed from a source set's `compileClasspath`, that carries anything but `@CompileClasspath` is the finding. Empty output is the pass. | SHOULD |
+| GRADLE-CACHE-13 | Every file input of a cacheable task declares a normalization strategy: `@PathSensitive(NONE)` for a single file, `@PathSensitive(RELATIVE)` for a directory, `@Classpath` or `@CompileClasspath` for a classpath. Never `ABSOLUTE`, and never `ABSOLUTE` on a cacheable transform at all. | `ABSOLUTE` makes the build cache non-relocatable across machines and checkout locations, the top named cause of cross-machine misses. With no strategy at all, Gradle's own text calls caching "highly ineffective". | `validatePlugins` reports `missing_normalization_annotation` and `cacheable_transform_cant_use_absolute_sensitivity`, and no reported problem is the pass. Pre-filter: see block GRADLE-CACHE-13, where any hit is the finding. | MUST |
+| GRADLE-CACHE-14 | A JVM **compile** classpath input is `@CompileClasspath`, not `@InputFiles` and not `@Classpath`. | `@CompileClasspath` ignores everything but ABI-affecting class changes, which is what makes compile avoidance possible. `@InputFiles` busts the cache on an upstream jar's timestamp. `validatePlugins` does not catch this one, because all three annotations are individually legal. | see block GRADLE-CACHE-14 A property named with a `Classpath` suffix, or fed from a source set's `compileClasspath`, that carries anything but `@CompileClasspath` is the finding. Empty output is the pass. | SHOULD |
 | GRADLE-CACHE-15 | Wire a task's dependency on another task's output through the provider chain: `.from(producerTask)`, or `.set(producer.flatMap { it.outputFile })`. Never a bare `File` or `archivePath` reference, with or without `dependsOn`. | `dependsOn` orders but does not declare the input, so the build then works only by incidental ordering and breaks on `--parallel` or on a clean checkout. | `validatePlugins` reports `implicit_dependency`, and no reported problem is the pass. Reproduce a suspected hit with a clean checkout plus `--parallel`. | MUST |
+
+```sh
+# GRADLE-CACHE-13
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.kt' ':(glob)**/*.java' |
+  xargs -0 -r grep -H -n -e 'PathSensitivity.ABSOLUTE' --
+# GRADLE-CACHE-14
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.kt' ':(glob)**/*.java' |
+  xargs -0 -r grep -H -n -B 2 -e 'compileClasspath' -e 'Classpath' --
+```
 
 ## Archive Reproducibility
 
@@ -137,7 +191,15 @@ editing any archive task. The correct edit inverts at 9.0.0.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| GRADLE-CACHE-17 | On Gradle 9.0.0 and later, do not add `reproducibleFileOrder`, `preserveFileTimestamps` or `useFileSystemPermissions()` to an archive task, and read any existing setting as a reproducibility **opt-out** that must carry a justifying comment or be deleted. Below 9.0.0, the absence of `reproducibleFileOrder = true` plus `preserveFileTimestamps = false` is the finding instead. | 9.0.0 flipped all three defaults together: file order false to true, timestamps true to false, permissions umask to 0755 and 0644 (verified 2026-09-12). Setting them to the new values is dead code. Setting them to the old values is an active regression to non-deterministic archives, usually carried forward unexamined across an 8 to 9 upgrade. | Read `distributionUrl` first. On 9.0.0 or later: `grep -rn --include='*.gradle.kts' --include='*.gradle' -e 'reproducibleFileOrder' -e 'preserveFileTimestamps' -e 'useFileSystemPermissions' .` Any hit with no adjacent justifying comment is the finding, and empty output is the pass. This grep over-reports roughly threefold, because `preserveFileTimestamps` is also a hand-written Shadow `Transformer` parameter name, so read each hit's task context. | MUST |
+| GRADLE-CACHE-17 | On Gradle 9.0.0 and later, do not add `reproducibleFileOrder`, `preserveFileTimestamps` or `useFileSystemPermissions()` to an archive task, and read any existing setting as a reproducibility **opt-out** that must carry a justifying comment or be deleted. Below 9.0.0, the absence of `reproducibleFileOrder = true` plus `preserveFileTimestamps = false` is the finding instead. | 9.0.0 flipped all three defaults together: file order false to true, timestamps true to false, permissions umask to 0755 and 0644 (verified 2026-09-12). Setting them to the new values is dead code. Setting them to the old values is an active regression to non-deterministic archives, usually carried forward unexamined across an 8 to 9 upgrade. | Read `distributionUrl` first. On 9.0.0 or later: see block GRADLE-CACHE-17 Any hit with no adjacent justifying comment is the finding, and empty output is the pass. This grep over-reports roughly threefold, because `preserveFileTimestamps` is also a hand-written Shadow `Transformer` parameter name, so read each hit's task context. | MUST |
+
+```sh
+# GRADLE-CACHE-17
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.gradle.kts' \
+  ':(glob)**/*.gradle' |
+  xargs -0 -r grep -H -n -e 'reproducibleFileOrder' -e 'preserveFileTimestamps' \
+    -e 'useFileSystemPermissions' --
+```
 
 Both directions occur in public builds. Kafka pins wrapper 9.7.1 and sets all
 three properties back to the pre-9 values, line for line Gradle's own revert

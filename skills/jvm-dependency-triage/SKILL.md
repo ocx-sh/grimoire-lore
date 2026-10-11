@@ -51,6 +51,8 @@ Establish the build system first. Gradle resolves per *configuration*, so `runti
 `compileClasspath` can answer differently for the same coordinate. Maven resolves one tree per
 scope, and neither answer transfers.
 
+Every search command here lists its files with `git ls-files`, so run it from the root of a git work tree. It reads tracked files and untracked files that are not ignored; a path matched by `.gitignore` is not searched.
+
 ## 1. A version you did not choose
 
 ### 1.1 Run the tool that reports the reason, not the one that reports the list
@@ -112,9 +114,10 @@ non-exclusive `content { includeGroup(…) }` restricts what one repository is *
 does not stop another repository in the list from answering.
 
 ```bash
-grep -rn -e 'exclusiveContent' -e 'includeGroup' \
-  --include='settings.gradle' --include='settings.gradle.kts' \
-  --include='*.settings.gradle.kts' --include='*.gradle.kts' --include='*.gradle' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/settings.gradle' \
+  ':(glob)**/settings.gradle.kts' ':(glob)**/*.settings.gradle.kts' ':(glob)**/*.gradle.kts' \
+  ':(glob)**/*.gradle' |
+  xargs -0 -r grep -H -n -e 'exclusiveContent' -e 'includeGroup' --
 ```
 
 An `includeGroup` for an internal namespace with no wrapping `exclusiveContent` is the finding.
@@ -178,11 +181,16 @@ leaked transitive, so a published module always gets `--upgrade`.
 For the first three greps, empty output is the pass.
 
 ```bash
-grep -rn -e 'enforcedPlatform(' --include='*.gradle.kts' --include='*.gradle' .
-grep -rn -e 'strictly(' --include='*.gradle.kts' --include='*.gradle' \
-  --include='*.versions.toml' .
-grep -rnE -B 4 -e '</?systemPath>' --include='pom.xml' .
-grep -rn -A 24 -e 'maven-enforcer-plugin' --include='pom.xml' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.gradle.kts' \
+  ':(glob)**/*.gradle' |
+  xargs -0 -r grep -H -n -e 'enforcedPlatform(' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.gradle.kts' \
+  ':(glob)**/*.gradle' ':(glob)**/*.versions.toml' |
+  xargs -0 -r grep -H -n -e 'strictly(' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/pom.xml' |
+  xargs -0 -r grep -H -n -E -B 4 -e '</?systemPath>' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/pom.xml' |
+  xargs -0 -r grep -H -n -A 24 -e 'maven-enforcer-plugin' --
 ```
 
 - **`enforcedPlatform()`**: grep, then **read the owning module**, because a raw count flags
@@ -209,9 +217,12 @@ resolved version may still differ due to conflict resolution, so a transitive re
 wins silently, with no build failure and no diff in the TOML.
 
 ```bash
-grep -rn -e 'versionCatalogs' --include='settings.gradle' \
-  --include='settings.gradle.kts' --include='*.settings.gradle.kts' .
-grep -rln -e 'alias(libs.' --include='*.gradle.kts' --include='*.gradle' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/settings.gradle' \
+  ':(glob)**/settings.gradle.kts' ':(glob)**/*.settings.gradle.kts' |
+  xargs -0 -r grep -H -n -e 'versionCatalogs' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.gradle.kts' \
+  ':(glob)**/*.gradle' |
+  xargs -0 -r grep -l -e 'alias(libs.' --
 find . -name gradle.lockfile -o -name buildscript-gradle.lockfile
 ```
 
@@ -275,8 +286,10 @@ these the publisher's bytes", and neither substitutes for the other.
 ### 3.3 The bump must not leak a dynamic version
 
 ```bash
-grep -rnE -e '-SNAPSHOT' -e 'latest\.(release|integration)' -e ':[0-9][^"]*\.\+' -e '"[0-9][^"]*\.\+"' -e '[:"]\[[0-9]' \
-  --include='*.gradle.kts' --include='*.gradle' --include='*.versions.toml' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.gradle.kts' \
+  ':(glob)**/*.gradle' ':(glob)**/*.versions.toml' |
+  xargs -0 -r grep -H -n -E -e '-SNAPSHOT' -e 'latest\.(release|integration)' -e ':[0-9][^"]*\.\+' \
+    -e '"[0-9][^"]*\.\+"' -e '[:"]\[[0-9]' --
 mvn -q enforcer:enforce -Drules=banDynamicVersions
 mvn -q enforcer:enforce -Drules=banDuplicatePomDependencyVersions
 ```
