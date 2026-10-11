@@ -153,15 +153,15 @@ description = { readme = "docs/rust-essentials.md", logo = "assets/lore-rust.svg
 # is a separate rule only because its glob genuinely differs — it loads on
 # manifests and lockfiles, not on source.
 [rules.python-quality]
-version = "0.2.1"
+version = "0.2.2"
 description = { readme = "docs/python-quality.md", logo = "assets/lore-python.svg" }
 
 [rules.python-packaging]
-version = "0.1.1"
+version = "0.1.2"
 description = { readme = "docs/python-packaging.md", logo = "assets/lore-python.svg" }
 
 [bundles.python-essentials]
-version = "0.1.2"
+version = "0.1.3"
 description = { readme = "docs/python-essentials.md", logo = "assets/lore-python.svg" }
 
 # The TypeScript quality set. `typescript-quality` is the index rule; its
