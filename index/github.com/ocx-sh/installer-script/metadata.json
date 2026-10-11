@@ -1,0 +1,31 @@
+{
+  "created": "2026-10-11T16:33:21+02:00",
+  "description": "Procedure for writing, auditing or reworking a one-line installer, either an install.sh run as curl piped to sh or an install.ps1 run as irm piped to iex, including a generated cargo-dist installer. Covers the header and exit table, truncation-safe structure, downloader probes, integrity before extraction, platform detection, prompts, user-space install, PATH edits, and the behavioural kit that runs the installer against stubs on several interpreters and PowerShell engines. Use when someone asks to \"write an install.sh\", \"write an install.ps1\", \"make a curl | sh installer\", \"irm | iex installer\", \"audit this installer\", \"does the installer verify the checksum\", \"cargo-dist installer\", \"installer fails on alpine or busybox wget\", \"installer killed my PowerShell window\", \"truncated download ran half the script\", or \"ship an installer script\". Not for porting an ordinary script (shell-port), diagnosing a failing script (shell-diagnose), or shell-init and completion emitters (shell-integration).",
+  "keywords": [
+    "installer",
+    "install.sh",
+    "install.ps1",
+    "curl",
+    "irm",
+    "iex",
+    "cargo-dist",
+    "checksum",
+    "truncation",
+    "busybox",
+    "wget",
+    "powershell",
+    "dash",
+    "posix",
+    "path"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "installer-script",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/installer-script",
+  "schema": 1,
+  "summary": "Writes and audits curl-to-sh and irm-to-iex installers, then proves them with a behavioural kit run on dash, busybox ash, bash 3.2 and Windows PowerShell 5.1 and 7, measured 2026-10-11"
+}

@@ -1,0 +1,29 @@
+{
+  "created": "2026-10-11T16:33:21+02:00",
+  "description": "PowerShell Quality",
+  "keywords": [
+    "powershell",
+    "pwsh",
+    "windows-powershell",
+    "ps1",
+    "psm1",
+    "psd1",
+    "psscriptanalyzer",
+    "pester",
+    "installer",
+    "irm-iex",
+    "encoding",
+    "native-commands"
+  ],
+  "kind": "rule",
+  "license": "Apache-2.0",
+  "name": "powershell-quality",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/powershell-quality",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "The PowerShell quality index, holding the gate, the target by script kind, the hoisted MUST rules, the tell cells, and where the depth lives"
+}

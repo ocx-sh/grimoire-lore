@@ -1,0 +1,31 @@
+{
+  "created": "2026-10-11T16:33:21+02:00",
+  "description": "Procedure for porting a shell script to a target matrix: bash 3.2 through 5.3 (the macOS system bash), or POSIX sh on dash, busybox ash and bash --posix. Runs a baseline on every leg, the bash 4 denylist, fixes by class, reruns until the output is byte-identical, and ends in a receipt, or pins the floor with a guard instead. Use when someone says \"make this work on macOS\", \"port this script to bash 3.2\", \"works on Linux but not on my Mac\", \"bad substitution\", \"declare: -A: invalid option\", \"mapfile: command not found\", \"unbound variable\" on an empty array, \"needs bash 4\", \"support the system bash\", \"make this POSIX sh\", \"run on Alpine\", \"run on busybox\", \"run on dash\", \"convert this bash script to sh\", or \"Illegal option -o pipefail\". Not for a failure whose cause is unknown (shell-diagnose), shell generated for other shells (shell-integration), an install.sh and install.ps1 pair (installer-script), or PowerShell.",
+  "keywords": [
+    "shell",
+    "bash",
+    "port",
+    "portability",
+    "macos",
+    "bash-3.2",
+    "posix",
+    "sh",
+    "dash",
+    "busybox",
+    "alpine",
+    "floor",
+    "mapfile",
+    "associative-array",
+    "matrix"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "shell-port",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/shell-port",
+  "schema": 1,
+  "summary": "Ports a shell script to a bash 3.2 to 5.3 or dash, ash and bash --posix matrix with a baseline, the bash 4 denylist and a byte-identical acceptance, or pins the floor with a guard"
+}

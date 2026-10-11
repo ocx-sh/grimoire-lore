@@ -1,0 +1,35 @@
+{
+  "created": "2026-10-11T16:33:21+02:00",
+  "description": "Symptom-routed diagnosis of a shell script, CI step or PowerShell installer that is already failing, routing a failure on exit code, first stderr line and interpreter identity to the one measurement that names its cause. Covers exit 126 or 127 on a file that exists, a CR byte in a shebang, a pipefail abort on dash, bash 3.2 constructs, exit 141, 143, 269 or 397, an empty array under set -u, zsh unmatched globs, PowerShell 5.1 parse errors, exit under irm piped to iex, nushell removed commands, a cmd /c hang in Git Bash, and busybox wget flags. Use when someone reports \"Permission denied\", \"bad interpreter\", \"required file not found\", \"Illegal option -o pipefail\", \"[[: not found\", \"bad substitution\", \"unbound variable\", \"no matches found\", \"The token '&&' is not a valid statement separator\", \"works locally but fails in CI\" or an exit status above 128. Not for writing portable shell (shell-quality), a bash 3.2 port (shell-port), shell integration (shell-integration) or an installer (installer-script).",
+  "keywords": [
+    "shell",
+    "diagnose",
+    "debugging",
+    "exit-code",
+    "126",
+    "127",
+    "bad-interpreter",
+    "crlf",
+    "pipefail",
+    "dash",
+    "bash",
+    "zsh",
+    "sigpipe",
+    "signal",
+    "powershell",
+    "nushell",
+    "git-bash",
+    "busybox",
+    "wget"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "shell-diagnose",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/shell-diagnose",
+  "schema": 1,
+  "summary": "Routes a failing shell script, CI step or PowerShell installer by exit code, first stderr line and interpreter identity to the one measurement that names its cause, consent-gated, captured 2026-10-11 on dash 0.5.12, busybox 1.37, bash 3.2 to 5.3, zsh 5.0.8 to 5.9, nu 0.105.1 and 0.116.0, PowerShell 5.1, 7.4.7 and 7.6.6"
+}

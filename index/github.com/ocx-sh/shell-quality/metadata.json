@@ -1,0 +1,33 @@
+{
+  "created": "2026-10-11T16:33:21+02:00",
+  "description": "Shell Quality",
+  "keywords": [
+    "shell",
+    "sh",
+    "posix",
+    "bash",
+    "zsh",
+    "ksh",
+    "fish",
+    "nushell",
+    "elvish",
+    "shellcheck",
+    "shfmt",
+    "bats",
+    "github-actions",
+    "taskfile",
+    "gitlab-ci",
+    "installer"
+  ],
+  "kind": "rule",
+  "license": "Apache-2.0",
+  "name": "shell-quality",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/shell-quality",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "The shell quality index, holding the gate, the floor-first rule, the script kinds, the SH-CORE rules, the tell cells, and where the depth lives"
+}
