@@ -48,13 +48,13 @@ jobs:
       - name: format and dead code
         run: |
           nix fmt -- --ci
-          if grep -rn -e 'nixfmt-rfc-style' -e 'nixfmt-classic' -e 'nixpkgs-fmt' --include='*.nix' .; then exit 1; fi
+          if git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.nix' | xargs -0 -r grep -H -n -e 'nixfmt-rfc-style' -e 'nixfmt-classic' -e 'nixpkgs-fmt' -- | awk '{ print; found = 1 } END { exit !found }'; then exit 1; fi
           nix shell --inputs-from . nixpkgs#deadnix --command deadnix --fail --no-lambda-pattern-names .
       - name: trust boundaries
         run: |
           fail=0
-          grep -rnE --exclude-dir=.git --exclude-dir=.claude -e 'accept-flake-[c]onfig' -e 'trusted-[u]sers' -e 'settings\.access-[t]okens' -e 'gh[pousr]_[A-Za-z0-9]{20,}' -e 'github_pat_[A-Za-z0-9_]{20,}' -e 'glpat-[A-Za-z0-9_-]{20,}' . && fail=1
-          grep -rn --exclude-dir=.git --exclude-dir=.claude --exclude='*.md' --exclude='*.mdx' -e 'access-[t]okens *=' -e '--access-[t]okens' . | grep -v -e '[$]{{ secrets[.]' -e '[$]{{ github[.]token }}' && fail=1
+          git ls-files -z --cached --others --exclude-standard -- ':(exclude,glob)**/.claude/**' | xargs -0 -r grep -H -n -E -e 'accept-flake-[c]onfig' -e 'trusted-[u]sers' -e 'settings\.access-[t]okens' -e 'gh[pousr]_[A-Za-z0-9]{20,}' -e 'github_pat_[A-Za-z0-9_]{20,}' -e 'glpat-[A-Za-z0-9_-]{20,}' -- | awk '{ print; found = 1 } END { exit !found }' && fail=1
+          git ls-files -z --cached --others --exclude-standard -- ':(exclude,glob)**/.claude/**' ':(exclude,glob)**/*.md' ':(exclude,glob)**/*.mdx' | xargs -0 -r grep -H -n -e 'access-[t]okens *=' -e '--access-[t]okens' -- | grep -v -e '[$]{{ secrets[.]' -e '[$]{{ github[.]token }}' && fail=1
           git ls-files -- '*.env' '*.env.*' '*.pem' '*.key' '*.p12' '*.pfx' '*secret*' '*token*' '*credential*'
           exit "$fail"
       - name: flake check
@@ -122,9 +122,10 @@ Three shell details in the file are load-bearing. Keep them when editing:
 
 - **No bare `! grep`.** Bash's `-e` ignores the status of a command negated with
   `!`, so `! grep … .` inside a `run:` block never fails the step. The file uses
-  `if grep …; then exit 1; fi` and `grep … && fail=1`. The two grep lines are
-  the `nix-quality` rule's gate step 2a, verbatim. Watched 2026-09-27 (GNU grep
-  3.12): each planted violation alone failed the step (an
+  `if <git-fed grep> | awk '{ print; found = 1 } END { exit !found }'; then exit 1; fi`
+  and the same tail followed by `&& fail=1`, because the status of a `xargs` pipeline is not
+  portable. The two grep lines are the `nix-quality` rule's gate step 2a,
+  verbatim. Watched 2026-09-27 under GNU and busybox tools: each planted violation alone failed the step (an
   `--accept-flake-config` README line, a `trusted-users` module line, a literal
   `ghp_` token, a `nix.settings.access-tokens` line even when fed from
   `${{ secrets.… }}`, a literal `access-tokens =` workflow line, and an
@@ -138,9 +139,9 @@ Three shell details in the file are load-bearing. Keep them when editing:
   not the workflow's own line, so the gate does not report itself. The clean
   fixture, which carries this file, passed, and so did its twin with the rules
   and skills installed under `.claude`. Installed copies of the nix-quality rules and these skills contain
-  every pattern in full, so each grep also takes `--exclude-dir=` for the
-  directory your agent client installs into (`--exclude-dir=.claude` in the file
-  above).
+  every pattern in full, so each `git ls-files` also carries a
+  `':(exclude,glob)**/DIR/**'` pathspec for the directory your agent client
+  installs into (`':(exclude,glob)**/.claude/**'` in the file above).
 - **No `${{` inside `run:` text.** GitHub expands it before the shell runs, so
   the secrets filter is spelled `'[$]{{ secrets[.]'` and `'[$]{{ github[.]token }}'`.
 
@@ -155,7 +156,7 @@ Three shell details in the file are load-bearing. Keep them when editing:
 | Append `--extra-experimental-features flake-self-attrs` to the **lix** line only | `flake.nix` declares `inputs.self` | NIX-GATE-16, NIX-INP-09 |
 | Drop `macos-15` from the matrix | the flake does not declare `aarch64-darwin` | NIX-GATE-15 |
 | Add a `nix build .#checks.x86_64-linux.smoke` line per non-package check (substitute your check name) | a `checks` entry that is not a package | NIX-GATE-10 |
-| Replace `.claude` in each `--exclude-dir=.claude` of the trust-boundaries step with the directory your agent client installs rules and skills into | the repository commits installed rules or skills, whose text names the banned strings, outside `.claude` | NIX-SEC-02, NIX-SEC-03, NIX-SEC-08 |
+| Replace `.claude` in each `':(exclude,glob)**/.claude/**'` pathspec of the trust-boundaries step with the directory your agent client installs rules and skills into | the repository commits installed rules or skills, whose text names the banned strings, outside `.claude` | NIX-SEC-02, NIX-SEC-03, NIX-SEC-08 |
 
 Watched on the workspace fixture: the Lix leg without the flag failed with
 `experimental Lix feature 'flake-self-attrs' is disabled`, exit 1, and passed
@@ -170,10 +171,10 @@ and never merged automatically (NIX-INP-11, NIX-SEC-07).
 
 ```sh
 # Empty output is the pass. Any line is an action not pinned to a 40-hex SHA (NIX-GATE-12).
-grep -rn -E -e 'uses:[[:space:]]*[^.[:space:]][^[:space:]]*@' .github/workflows |
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' | xargs -0 -r grep -H -n -E -e 'uses:[[:space:]]*[^.[:space:]][^[:space:]]*@' -- |
   grep -v -E -e '@[0-9a-f]{40}[[:space:]]' -e '@[0-9a-f]{40}$'
 # Empty output is the pass. A floating ref or a Determinate installer is the finding (NIX-GATE-13).
-grep -rn -e '@main' -e 'nix-installer-action' .github/workflows
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' | xargs -0 -r grep -H -n -e '@main' -e 'nix-installer-action' --
 ```
 
 Watched: the first printed both `actions/checkout@v7` lines of a planted copy,
@@ -212,8 +213,8 @@ NIX-SEC-02), and never tell users to add themselves to `trusted-users`
 
 | Check | Command | Pass |
 |---|---|---|
-| no banned install line | `grep -n -e 'nix-env -i' -e 'nix-env --install' -e 'accept-flake-[c]onfig' README.md` | empty output (exit 1). Any line is the finding (NIX-REL-09). Exit 2 means no root `README.md`: name the file that carries the install section. Nested READMEs of vendored or example code are out of scope |
-| `install` only as the comment | `grep -c -e '^ *nix profile install' README.md` | prints `0` with exit 1. `1` or more (exit 0) is the finding (NIX-REL-09) |
+| no banned install line | `grep -n -e 'nix-env -i' -e 'nix-env --install' -e 'accept-flake-[c]onfig' -- README.md` | empty output. Any line is the finding (NIX-REL-09). Exit 2 means no root `README.md`: name the file that carries the install section. Nested READMEs of vendored or example code are out of scope |
+| `install` only as the comment | `grep -c -e '^ *nix profile install' -- README.md` | prints `0` with exit 1. `1` or more (exit 0) is the finding (NIX-REL-09) |
 | the lines work | each line run with `.` in place of `github:example/octool` | exit 0. Before the first push the `github:` ref does not exist yet. The pushed-tag run is NIX-REL-16's, in the release procedure |
 
 Watched: a README carrying `nix profile install … --accept-flake-config` and

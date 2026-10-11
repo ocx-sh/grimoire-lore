@@ -382,23 +382,23 @@ description = { readme = "docs/go-essentials.md", logo = "assets/lore-go.svg" }
 # routed by task from the index, never globbed. The three skills are procedures
 # run once per adoption, per release or per incident.
 [rules.nix-quality]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/nix-quality.md", logo = "assets/lore-nix.svg" }
 
 [skills.nix-flake-adopt]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/nix-flake-adopt.md", logo = "assets/lore-nix.svg" }
 
 [skills.nix-flake-release]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/nix-flake-release.md", logo = "assets/lore-nix.svg" }
 
 [skills.nix-diagnose]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/nix-diagnose.md", logo = "assets/lore-nix.svg" }
 
 [bundles.nix-essentials]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/nix-essentials.md", logo = "assets/lore-nix.svg" }
 
 # The Swift set: two rules split by which file is under edit, not by language

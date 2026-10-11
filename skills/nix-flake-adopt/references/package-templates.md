@@ -151,7 +151,7 @@ What to change, line by line:
 
 | Line | Keep it when | Otherwise | Rule |
 |---|---|---|---|
-| `outputHashes` | `grep -c 'source = "git+' Cargo.lock` prints more than `0`. One entry per distinct git revision, keyed by any one `name-version` from it, hash obtained in step 5 | delete the attribute and write `cargoLock.lockFile = ./Cargo.lock;` | NIX-PKG-22 |
+| `outputHashes` | `grep -c -e 'source = "git+' -- Cargo.lock` prints more than `0`. One entry per distinct git revision, keyed by any one `name-version` from it, hash obtained in step 5 | delete the attribute and write `cargoLock.lockFile = ./Cargo.lock;` | NIX-PKG-22 |
 | `cargoBuildFlags` | the workspace has more than one binary crate to ship. Name each `-p` | delete it: the default builds the root package | NIX-PKG-13 |
 | `versionCheckProgramArg` | the CLI has no `--version` and does not print its version in `--help` | delete it: the hook's default runs `--version`, then `--help` | NIX-PKG-19 |
 | `./external` | the path dependencies live in submodules there | list the real submodule directories | NIX-INP-09 |

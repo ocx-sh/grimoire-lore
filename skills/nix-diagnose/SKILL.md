@@ -177,7 +177,7 @@ and empty output passes:
 
 ```sh
 git ls-files --others --exclude-standard .
-grep -rn -e '"${src}/' -e '"${finalAttrs.src}/' -e '"${self}/' --include='*.nix' . | grep -e 'readFile "' -e 'importTOML "' -e 'importJSON "' -e 'lockFile = "'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.nix' | xargs -0 -r grep -H -n -e '"${src}/' -e '"${finalAttrs.src}/' -e '"${self}/' -- | grep -e 'readFile "' -e 'importTOML "' -e 'importJSON "' -e 'lockFile = "'
 ```
 
 - The first lists files the flake cannot see because they are untracked
@@ -305,7 +305,7 @@ so the exit code alone cannot tell them apart (NIX-GATE-11):
 
 ```sh
 flake-checker --no-telemetry --fail-mode flake.lock > fc.out 2>&1
-grep -c -e 'Error: Invalid(' -e 'Error: FlakeLock(' fc.out
+grep -c -e 'Error: Invalid(' -e 'Error: FlakeLock(' -- fc.out
 ```
 
 A count of 1 or more means the tool could not run (no root `nixpkgs` input, or

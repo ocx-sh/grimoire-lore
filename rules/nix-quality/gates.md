@@ -26,22 +26,22 @@ Contents: [Dates and Floors](#dates-and-floors) · [Format: nix fmt and the Name
 
 Every grep here is a violation locator unless its cell says otherwise. Every command was watched red on a planted violation and green on a compliant twin, on a warm store except where a row says cold.
 
-In CI, run the index's gate block as one named target. Its step 2a security lines are NIX-SEC's, carried verbatim: the bracketed patterns (`accept-flake-[c]onfig`, `trusted-[u]sers`, `settings\.access-[t]okens`, `access-[t]okens *=`) and the `[$]{{ secrets[.]` and `[$]{{ github[.]token }}` filter keep the workflow or gate script from matching itself and GitHub from parsing the filter as an expression, and `--exclude-dir=.claude` (your client's directory) skips the installed rules. Write each locator as `if grep …; then exit 1; fi`. A negated `! grep …` never fails a `bash -e` step.
+In CI, run the index's gate block as one named target. Its step 2a security lines are NIX-SEC's, carried verbatim: the bracketed patterns (`accept-flake-[c]onfig`, `trusted-[u]sers`, `settings\.access-[t]okens`, `access-[t]okens *=`) and the `[$]{{ secrets[.]` and `[$]{{ github[.]token }}` filter keep the workflow or gate script from matching itself and GitHub from parsing the filter as an expression, and the `':(exclude,glob)**/.claude/**'` pathspec (replace `.claude` with your client's directory) skips the installed rules. Write each locator as `if grep …; then exit 1; fi`. A negated `! grep …` never fails a `bash -e` step.
 
 ## Format: nix fmt and the Name Grep
 
 ```sh
 nix fmt -- --ci
-grep -rn -e 'nixfmt-rfc-style' -e 'nixfmt-classic' -e 'nixpkgs-fmt' --include='*.nix' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.nix' | xargs -0 -r grep -H -n -e 'nixfmt-rfc-style' -e 'nixfmt-classic' -e 'nixpkgs-fmt' --
 ```
 
-`nix fmt -- --ci` exits 0 with `(0 changed)` on a formatted tree and exits 1 with `Error: unexpected changes detected, --fail-on-change is enabled` otherwise. It writes the fix into the checkout, so run it in a disposable CI checkout. The grep passes on empty output (exit 1). A hit that names the tool as data rather than as this flake's formatter, hook or package passes: a hook library's own hook definitions, a formatter registry, an option example or an unrelated package that shares the name.
+`nix fmt -- --ci` exits 0 with `(0 changed)` on a formatted tree and exits 1 with `Error: unexpected changes detected, --fail-on-change is enabled` otherwise. It writes the fix into the checkout, so run it in a disposable CI checkout. The grep passes on empty output. A hit that names the tool as data rather than as this flake's formatter, hook or package passes: a hook library's own hook definitions, a formatter registry, an option example or an unrelated package that shares the name.
 
 | ID | Rule | Rationale | Verification | Severity | Floor / impl |
 |---|---|---|---|---|---|
 | NIX-GATE-01 | Declare `formatter.<system>` as `pkgs.nixfmt-tree`, or a treefmt-nix wrapper that enables nixfmt. Never bare `pkgs.nixfmt`. | nixfmt formats only the files it is given. A bare `nix fmt` hands it none, so it reads stdin and exits 1 while the author believes the tree is formatted. `nix flake check` also hard-fails a `formatter` that is not a derivation. Whether to declare one at all is NIX-FLK-17. | Plant a misformatted tracked file, run `nix fmt`, then `git status --porcelain --untracked-files=all .`. Pass: exit 0 and the file listed as modified. Finding: exit 1 with `unexpected end of input`. | MUST (every shape that declares `formatter`) | CppNix 2.35.2 `nix fmt` passes no file arguments. nixfmt-tree 2.6.0, present before nixpkgs 25.05 |
 | NIX-GATE-02 | Check formatting in CI with `nix fmt -- --ci`, never `nixfmt --check .`. | `--ci` is treefmt's fail-on-change mode. nixfmt's directory mode still runs but warns `Passing directories or non-Nix files (such as ".") is deprecated and will be unsupported soon`. | The section's first command and its exit codes. A treefmt-nix flake may instead expose `checks.<system>.formatting = treefmtEval.config.build.check self`, which turns `nix flake check` red on the same tree. | MUST (every shape that declares `formatter`) | treefmt v2 `--ci`, nixfmt 1.5.0 |
-| NIX-GATE-03 | Never write `nixfmt-rfc-style`, `nixfmt-classic` or `nixpkgs-fmt` as a package, hook or formatter in new code. An alejandra repository keeps alejandra. | On nixpkgs 26.11pre `nixfmt-rfc-style` is a `warnAlias` that prints an evaluation warning on every instantiation, `nixfmt-classic` throws (removed 2026-07-01), and `nixpkgs-fmt` is archived (2024-07-24) yet still evaluates, so nothing forces the move. | The section's grep. Empty output (exit 1) is the pass, any hit (exit 0) is the finding. It also catches git-hooks.nix `hooks.nixfmt-rfc-style` and `hooks.nixpkgs-fmt`. | MUST (all shapes) | nixpkgs ≥25.11 rename, the classic throw from 26.11pre (re-check at each nixpkgs release) |
+| NIX-GATE-03 | Never write `nixfmt-rfc-style`, `nixfmt-classic` or `nixpkgs-fmt` as a package, hook or formatter in new code. An alejandra repository keeps alejandra. | On nixpkgs 26.11pre `nixfmt-rfc-style` is a `warnAlias` that prints an evaluation warning on every instantiation, `nixfmt-classic` throws (removed 2026-07-01), and `nixpkgs-fmt` is archived (2024-07-24) yet still evaluates, so nothing forces the move. | The section's grep. Empty output is the pass, any hit is the finding. It also catches git-hooks.nix `hooks.nixfmt-rfc-style` and `hooks.nixpkgs-fmt`. | MUST (all shapes) | nixpkgs ≥25.11 rename, the classic throw from 26.11pre (re-check at each nixpkgs release) |
 | NIX-GATE-04 | Exclude generated Nix, vendored trees and parser fixtures by directory, with one list shared by the formatter (`settings.excludes` or `settings.formatter.nixfmt.excludes`), deadnix `--exclude` and statix `-i`. | A formatter fights a generator's output, and linters grade code nobody wrote: in `oxalica/nil`, `test_data/` alone produced 596 of 599 statix syntax errors and 670 of 1,914 deadnix findings. A generated `data.json` is not `.nix`, so the list matters only for generated `.nix`. | With a misformatted `generated/data.nix`, `nix fmt -- --ci` exits 1 without the exclude and 0 with `pkgs.nixfmt-tree.override { settings.formatter.nixfmt.excludes = [ "generated/*" ]; }`. Reading heuristic: the three lists name the same directories. | MUST (any shape carrying such files, so every D) | nixfmt-tree `settings` override, nixpkgs 26.11pre |
 
 ```nix
@@ -94,10 +94,11 @@ List only excluded directories that exist, taken from the NIX-GATE-04 list. Exit
 
 ```sh
 statix check -c statix.toml -o errfmt . | grep -e ':W:12:' -e ':W:17:'
-grep -rn -e 'nixf-diagnose' .github/workflows
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' | xargs -0 -r grep -H -n -e 'nixf-diagnose' --
+git ls-files --cached --others --exclude-standard -- ':(glob).github/workflows/**' | awk 'END { if (NR == 0) print "canary: no workflow file listed" }'
 ```
 
-The statix line passes on empty output (grep exit 1), and any printed W12 or W17 line is the finding. Other W codes are style and never block. statix without a committed statix.toml prints `config error: path error` and exits 0, which means nothing was checked. The grep passes on empty output (exit 1), and exits 2 when the repository has no `.github/workflows`, which means nothing to check.
+The statix line passes on empty output, and any printed W12 or W17 line is the finding. Other W codes are style and never block. statix without a committed statix.toml prints `config error: path error` and exits 0, which means nothing was checked. The grep passes on empty output, and so does a repository with no workflow file, which means nothing was checked. The canary line prints when the pathspec lists no file.
 
 | ID | Rule | Rationale | Verification | Severity | Floor / impl |
 |---|---|---|---|---|---|
@@ -137,7 +138,7 @@ First name the failing system (evaluate the red output once per system). A red o
 
 ```sh
 set -o pipefail; nix eval --raw .#packages.x86_64-linux --apply 'ps: toString (map (n: ".#packages.x86_64-linux.\\\"" + n + "\\\"") (builtins.attrNames ps))' | xargs -r nix build --no-link --print-build-logs
-grep -rn -e 'nix build' -e 'nix-fast-build' .github/workflows
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' | xargs -0 -r grep -H -n -e 'nix build' -e 'nix-fast-build' --
 ```
 
 Substitute your system for `x86_64-linux` and run once per system the runner can build. The pipeline exits 0 when every package builds and exits 123 with `Cannot build '…'` when one fails. When the package set itself fails to evaluate, `nix eval` builds nothing and `pipefail` makes the line exit 1; without `pipefail` it exits 0. Each name is quoted (`\\\"` reaches `xargs` as `\"`), so an attribute name holding a dot (`0.10.0`) stays one attribute. For the grep, empty output is the finding, unless the workflow calls the index's chained gate target: then run the same grep over the file that defines that target, and a printed line passes.
@@ -152,7 +153,7 @@ Cost note, measured 2026-09-27 on one sample: ocx's per-PR build takes 7m12s on 
 
 ```sh
 flake-checker --no-telemetry --fail-mode --condition "numDaysOld < 30 && ((gitRef == '' && owner == '') || (supportedRefs.contains(gitRef) && owner == 'NixOS'))" flake.lock 2> flake-checker.err
-grep -c -e 'Error: Invalid(' -e 'Error: FlakeLock(' flake-checker.err
+grep -c -e 'Error: Invalid(' -e 'Error: FlakeLock(' -- flake-checker.err
 ```
 
 The condition is NIX-INP-06's. Exit 0 from flake-checker is clean. On exit 1 the grep decides: a count of 0 (grep exit 1) is a finding, and a count of 1 or more (grep exit 0) means the tool could not run.
@@ -164,20 +165,21 @@ The condition is NIX-INP-06's. Exit 0 from flake-checker is clean. On exit 1 the
 ## The Workflow: Pins, Installer, Cache, Runners
 
 ```sh
-grep -rn -E -e 'uses: [^ ]+@' .github/workflows | grep -v -E -e '@[0-9a-f]{40} ' -e '@[0-9a-f]{40}$'
-grep -rn -e '@main' -e 'nix-installer-action' -e 'magic-nix-cache-action@v[0-9]$' -e 'magic-nix-cache-action@v[0-9][^0-9]' -e 'magic-nix-cache-action@v10' .github/workflows
-grep -rn -e 'install_url:' .github/workflows
-grep -rn -E -e 'magic-nix-cache-action@[0-9a-f]{40} +# *v([0-9]|10)([^0-9]|$)' .github/workflows
-grep -rn -e 'install_url:' .github/workflows | grep -v -e 'releases.nixos.org/nix/nix-[0-9]'
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' | xargs -0 -r grep -H -n -E -e 'uses: [^ ]+@' -- | grep -v -E -e '@[0-9a-f]{40} ' -e '@[0-9a-f]{40}$'
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' | xargs -0 -r grep -H -n -e '@main' -e 'nix-installer-action' -e 'magic-nix-cache-action@v[0-9]$' -e 'magic-nix-cache-action@v[0-9][^0-9]' -e 'magic-nix-cache-action@v10' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' | xargs -0 -r grep -H -n -e 'install_url:' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' | xargs -0 -r grep -H -n -E -e 'magic-nix-cache-action@[0-9a-f]{40} +# *v([0-9]|10)([^0-9]|$)' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' | xargs -0 -r grep -H -n -e 'install_url:' -- | grep -v -e 'releases.nixos.org/nix/nix-[0-9]'
+git ls-files --cached --others --exclude-standard -- ':(glob).github/workflows/**' | awk 'END { if (NR == 0) print "canary: no workflow file listed" }'
 ```
 
-The first line is the pin check and the second the installer check. Both pass on empty output (exit 1), and each printed line is a finding. For the third, empty output is the finding. Every grep exits 2 when `.github/workflows` does not exist, which means there is no workflow to check. The fourth line catches a SHA-pinned `magic-nix-cache-action` whose version comment is below v11, and passes on empty output (exit 1). The fifth prints every `install_url` that is not a versioned `releases.nixos.org/nix/nix-X.Y.Z/install` URL. Each printed line is read: an expression that resolves to a versioned URL (a matrix value, `${{ env.NIX_VERSION }}`) passes, and an unversioned URL is the finding.
+The first line is the pin check and the second the installer check. Both pass on empty output, and each printed line is a finding. For the third, empty output is the finding. When `.github/workflows` lists no file every grep prints nothing, which reads as a pass for the other lines and as the finding for the third. The canary line, last in the block, prints in that case, and then nothing was checked. The fourth line catches a SHA-pinned `magic-nix-cache-action` whose version comment is below v11, and passes on empty output. The fifth prints every `install_url` that is not a versioned `releases.nixos.org/nix/nix-X.Y.Z/install` URL. Each printed line is read: an expression that resolves to a versioned URL (a matrix value, `${{ env.NIX_VERSION }}`) passes, and an unversioned URL is the finding.
 
 | ID | Rule | Rationale | Verification | Severity | Floor / impl |
 |---|---|---|---|---|---|
-| NIX-GATE-12 | Pin every `uses:` in a Nix workflow to a 40-hex commit SHA with a version comment. | `@main` and `@vN` move under the flake. Among 37 exemplar flakes (NixOS/nixpkgs excluded), half the `install-nix-action` uses and all 4 `determinate-nix-action` uses float. | The pin check. Watched red: 5 floating refs printed, exit 0. Watched green: SHA-pinned refs with and without a trailing comment, empty, exit 1. The version comment is read. | MUST (every shape with a Nix workflow) | GitHub Actions, 2026-09 |
+| NIX-GATE-12 | Pin every `uses:` in a Nix workflow to a 40-hex commit SHA with a version comment. | `@main` and `@vN` move under the flake. Among 37 exemplar flakes (NixOS/nixpkgs excluded), half the `install-nix-action` uses and all 4 `determinate-nix-action` uses float. | The pin check. Watched red: 5 floating refs printed, exit 0. Watched green: SHA-pinned refs with and without a trailing comment, empty. The version comment is read. | MUST (every shape with a Nix workflow) | GitHub Actions, 2026-09 |
 | NIX-GATE-13 | Install upstream CppNix with `cachix/install-nix-action` and pin the Nix version with `install_url: https://releases.nixos.org/nix/nix-2.35.2/install` (substitute your version). Use a Determinate installer only when Determinate Nix is the stated intent, and then `determinate-nix-action` SHA-pinned per NIX-GATE-12, never `nix-installer-action`. | `nix-installer-action` installs Determinate Nix by default, and its README calls upstream mode "not a supported configuration". The action SHA fixes Nix only implicitly (v31.11.1 hardcodes 2.35.2), so the next action bump silently changes Nix. | The installer check, where any hit is the finding, then the `install_url:` grep, where empty output is the finding. Watched red on a workflow using `nix-installer-action@main` and no `install_url`, green on its twin. | MUST (every shape with a Nix workflow) | install-nix-action v31.11.1, commit `13d8dd58da0234aa297dedd986986ccb8e7f3e24` (2026-08-13). The installed Nix carries the CVE-2026-39860 fix for its line (NIX-SEC-06) |
-| NIX-GATE-14 | Cache the store with `nix-community/cache-nix-action` v7, SHA-pinned, with `primary-key` on `hashFiles('flake.lock')`. Never use `magic-nix-cache-action` below v11 or at `@main`. **Pinned default:** add no public substituter. | The pre-2025 Magic Nix Cache API died on 2025-02-01, and v11 onward is a community revival (v15 current on 2026-09-09). cache-nix-action wraps GitHub's own cache client and GC-bounds the saved store. Neither cache was measured on a real runner. | The installer check catches `magic-nix-cache-action@v2` and `@v9`, while `@v15` stays clean. The fourth line catches the SHA-pinned form (watched: `# v9` hit, exit 0, and `# v15` empty, exit 1). The `primary-key` is a reading heuristic. Substituter trust is NIX-SEC-01's. | SHOULD (every shape with CI) | cache-nix-action v7 (2026-01-08) |
+| NIX-GATE-14 | Cache the store with `nix-community/cache-nix-action` v7, SHA-pinned, with `primary-key` on `hashFiles('flake.lock')`. Never use `magic-nix-cache-action` below v11 or at `@main`. **Pinned default:** add no public substituter. | The pre-2025 Magic Nix Cache API died on 2025-02-01, and v11 onward is a community revival (v15 current on 2026-09-09). cache-nix-action wraps GitHub's own cache client and GC-bounds the saved store. Neither cache was measured on a real runner. | The installer check catches `magic-nix-cache-action@v2` and `@v9`, while `@v15` stays clean. The fourth line catches the SHA-pinned form (watched: `# v9` hit, and `# v15` empty). The `primary-key` is a reading heuristic. Substituter trust is NIX-SEC-01's. | SHOULD (every shape with CI) | cache-nix-action v7 (2026-01-08) |
 | NIX-GATE-15 | Run the gate on `ubuntu-24.04`, `ubuntu-24.04-arm` and one Apple-silicon macOS runner (`macos-15` or `macos-14`) when the flake declares `aarch64-darwin`. Add no Intel macOS and no Windows runner. | x86_64-darwin throws on nixpkgs 26.11, and no exemplar runs Nix CI on Windows. | Reading heuristic: the set of runner OSes equals the set of OS halves of the declared systems. | SHOULD (A, B, C. A D flake evaluates darwin without building it, for the reason NIX-GEN states) | GitHub-hosted runner labels, 2026-09 (re-check when a label is retired) |
 
 ## Implementation Legs: Lix and the Floor
@@ -203,7 +205,7 @@ The first line is the Lix leg. Both legs take nixpkgs from the flake's lock with
 
 Ranked by how often the exemplar flakes (NixOS/nixpkgs excluded) and the runs show them.
 
-1. **A CI job that runs `nix flake check` alone**, so formatting, dead code, IFD and real builds go unchecked. Only 14 of 37 exemplar CIs run even that. `grep -rn -e 'nix fmt -- --ci' -e 'deadnix --fail' -e 'allow-import-from-derivation false' -e 'nix build' .github/workflows` must print one line per step, and a missing pattern is a missing step, unless the workflow calls the index's chained gate target: then run the same grep over the file that defines that target, and a printed line passes (NIX-GATE-02, NIX-GATE-05, NIX-GATE-08, NIX-GATE-10).
+1. **A CI job that runs `nix flake check` alone**, so formatting, dead code, IFD and real builds go unchecked. Only 14 of 37 exemplar CIs run even that. `git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' | xargs -0 -r grep -H -n -e 'nix fmt -- --ci' -e 'deadnix --fail' -e 'allow-import-from-derivation false' -e 'nix build' --` must print one line per step, and a missing pattern is a missing step, unless the workflow calls the index's chained gate target: then run the same grep over the file that defines that target, and a printed line passes (NIX-GATE-02, NIX-GATE-05, NIX-GATE-08, NIX-GATE-10).
 2. **The wrong formatter name or shape**: `nixfmt-rfc-style`, `nixpkgs-fmt`, or bare `pkgs.nixfmt` (NIX-GATE-01, NIX-GATE-03).
 3. **Floating actions**, and `nix-installer-action` assumed to install upstream Nix (NIX-GATE-12, NIX-GATE-13).
 4. **deadnix wired without `--fail`**, so the step is always green, as in `ipetkov/crane`'s CI, or `--edit` without `-L`, which deletes `self` and `callPackage` formals (NIX-GATE-05).
