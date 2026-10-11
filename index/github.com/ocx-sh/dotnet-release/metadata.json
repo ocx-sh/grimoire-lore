@@ -1,0 +1,33 @@
+{
+  "created": "2026-10-11T14:58:36+02:00",
+  "description": "Ordered runbook for cutting a .NET release, for a NuGet library or SDK (version from the tag, cold restore, pack, package validation, dotnet-validate, PublicAPI promotion, Trusted Publishing from a tag job) and for an app (publish mode table, trim and AOT warning gate, run the artifact, SHA256SUMS and provenance, container, SIGTERM). Use when releasing, tagging or packing a .NET package or app, writing or reviewing a release workflow, choosing a dotnet publish mode, or hitting NU5104, NU5125, package validation errors (CP0002, CP0008), IL2026 or IL3050 on publish, an app that exits 134 after a clean publish, or a nupkg versioned 0.0.0-alpha.0. Not for moving to a new SDK or target framework (dotnet-upgrade), not for a build, restore or test that already fails (dotnet-diagnose), and not for MSI, MSIX, Authenticode or app-store signing.",
+  "keywords": [
+    "dotnet",
+    "nuget",
+    "release",
+    "pack",
+    "package-validation",
+    "dotnet-validate",
+    "minver",
+    "publicapi",
+    "trusted-publishing",
+    "publish",
+    "trimming",
+    "native-aot",
+    "self-contained",
+    "single-file",
+    "sha256sums",
+    "attestation",
+    "container"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "dotnet-release",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/dotnet-release",
+  "schema": 1,
+  "summary": "Gate-ordered .NET release procedure for NuGet libraries and published apps, built around the permanence of a pushed tag and a nuget.org version, with its commands watched red and green on SDK 10.0.401"
+}

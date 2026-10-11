@@ -1,0 +1,34 @@
+{
+  "created": "2026-10-11T14:58:36+02:00",
+  "description": "Procedure for moving a .NET library from net8.0 to net10.0 on SDK 10 and C# 14, one commit per step, proved by per-TFM test counts, and for probing .NET 11 on a throwaway branch. Use when .NET 8 and 9 reach end of support on 2026-11-10, when asked to add net10.0, pin SDK 10 in global.json, move to LangVersion 14 or AnalysisLevel 10.0-all, migrate a .sln to .slnx or undo a failed upgrade, and when an SDK, target-framework or AnalysisLevel change shows NETSDK1045, \"framework not found\", \"A compatible .NET SDK was not found\", MSB1003, MSB1011, NU1510, NU1903 or IDE0370, or `dotnet test` prints \"Testing with VSTest target is no longer supported by Microsoft.Testing.Platform\" (the `test.runner` key of `global.json`). Not for a build that fails for another reason (dotnet-diagnose), the build standards (dotnet-build), cutting a release (dotnet-release), or migrating an application, ASP.NET, WPF, MAUI or .NET Framework project.",
+  "keywords": [
+    "dotnet",
+    "upgrade",
+    "net10",
+    "net8",
+    "sdk",
+    "global-json",
+    "tfm",
+    "target-framework",
+    "analysislevel",
+    "langversion",
+    "csharp-14",
+    "nuget-audit",
+    "nu1510",
+    "slnx",
+    "rollback",
+    "end-of-support",
+    "net11",
+    "dated-recheck"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "dotnet-upgrade",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/dotnet-upgrade",
+  "schema": 1,
+  "summary": "Order-sensitive net8.0 to net10.0 upgrade ladder for a .NET library with a tag-plus-worktree rollback, per-TFM test-count proof and dated .NET 11 re-checks, measured on SDK 8.0.425, 10.0.401 and 11.0 RC1"
+}

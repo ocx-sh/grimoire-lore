@@ -1,0 +1,31 @@
+{
+  "created": "2026-10-11T14:58:36+02:00",
+  "description": ".NET Build",
+  "keywords": [
+    "dotnet",
+    "msbuild",
+    "csproj",
+    "nuget",
+    "analyzers",
+    "globalconfig",
+    "bannedsymbols",
+    "central-package-management",
+    "global-json",
+    "tfm",
+    "pack",
+    "nupkg",
+    "trusted-publishing",
+    "release"
+  ],
+  "kind": "rule",
+  "license": "Apache-2.0",
+  "name": "dotnet-build",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/dotnet-build",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "The .NET build index, with the gate, the non-negotiables, the CS-BUILD rules, the analyzer posture files and where the packaging depth lives"
+}
