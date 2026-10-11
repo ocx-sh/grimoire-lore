@@ -1,5 +1,5 @@
 {
-  "created": "2026-09-27T18:13:16+02:00",
+  "created": "2026-10-11T15:14:40+02:00",
   "description": "Ordered runbook for cutting a release of a Nix flake, from the lock and version checks through the full gate with --all-systems and the CppNix, floor and Lix legs, the vX.Y.Z tag, proving the tag with nix run from a clean store, deprecating a renamed output behind a warning, and the nix-update contract for a package.nix with a fetcher src, plus the no-tag branch for a flake generated from a package index. Use when tagging or releasing a flake, bumping a flake project's version, checking that the version a flake builds equals its tag, renaming or removing a published package or output, writing a Nix release workflow, preparing or bumping a nixpkgs copy with nix-update, or landing a data update to a generated flake. Not for adding a flake to a repository, and not for diagnosing a failing evaluation or build.",
   "keywords": [
     "nix",

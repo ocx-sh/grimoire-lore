@@ -1,5 +1,5 @@
 {
-  "created": "2026-10-10T21:42:16+02:00",
+  "created": "2026-10-11T15:14:40+02:00",
   "description": "Everything an agent needs to write, gate, ship and debug Swift 6 the way the OCX family does: the swift-quality rule (the gate block, the non-negotiables and ten depth files on language era, concurrency and isolation, errors, library and SDK API design, testing, the CLI contract, files and processes, networking, security, and Apple-platform apps), the swift-package rule (tools-version and language-mode policy, dependency and Package.resolved hygiene, the pinned swift-format and SwiftLint configs, warning control, CI gates and release engineering), plus the swift-upgrade skill that moves a package to Swift 6 language mode or a new toolchain, the swift-diagnose skill for a trapped, hung, racy or slow-to-compile process, and the swift-release skill that cuts static Linux release binaries. The code-docs rule and the code-docs-cleanup skill cover comments in every language: short blocks that keep every guard.",
   "keywords": [
     "swift",

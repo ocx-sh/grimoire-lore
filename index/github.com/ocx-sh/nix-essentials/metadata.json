@@ -1,5 +1,5 @@
 {
-  "created": "2026-09-27T18:13:16+02:00",
+  "created": "2026-10-11T15:14:40+02:00",
   "description": "Everything an agent needs to author, gate, publish and debug Nix flakes the way the OCX family does: the nix-quality rule (the gate block, the non-negotiables and nine depth files on flake outputs and systems, inputs and the lock, packaging, flakes generated from an external package index, the formatter, lint and CI gates, release and consumer install UX, the language traps, trust boundaries, and exported modules), plus the nix-flake-adopt skill that adds or modernizes a flake, the nix-flake-release skill that cuts and proves a release, and the nix-diagnose skill for an evaluation or build failure.",
   "keywords": [
     "nix",

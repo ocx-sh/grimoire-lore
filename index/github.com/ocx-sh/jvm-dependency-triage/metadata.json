@@ -1,5 +1,5 @@
 {
-  "created": "2026-09-13T18:55:44+02:00",
+  "created": "2026-10-11T15:14:40+02:00",
   "description": "Three-entry-point triage for JVM dependency problems, with the exact Gradle, Maven and rules_jvm_external commands and what each output shape means. Use when a resolved version is not the one that was declared, when a dependency sits on the wrong configuration or scope, when NoClassDefFoundError appears at runtime but the build compiled clean, when a version bump or a Dependabot or Renovate pull request needs review, when Gradle and Maven disagree about which version wins, or when a coordinate has to be checked against the real repository before it is written down. Not for choosing a library. The gradle-build and maven-build rules carry the standards this procedure enforces.",
   "keywords": [
     "dependency",

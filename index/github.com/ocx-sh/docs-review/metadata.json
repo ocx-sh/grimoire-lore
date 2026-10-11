@@ -1,5 +1,5 @@
 {
-  "created": "2026-09-22T23:35:53+02:00",
+  "created": "2026-10-11T15:14:40+02:00",
   "description": "Grade documentation pages against the docs-quality rule set on demand, in any directory and any markup format (Markdown, MDX, reStructuredText, MyST, AsciiDoc). Use when someone asks to review, check, grade, lint or audit a doc page, a README, a changelog, a docs directory or the docs changed on a branch, asks whether a page meets docs-quality, or wants the docs gate run by hand. Not for deciding which pages to write, which is docs-plan, and not for wiring the checks into CI, which is docs-instrument.",
   "keywords": [
     "docs",

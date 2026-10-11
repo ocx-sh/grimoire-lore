@@ -1,5 +1,5 @@
 {
-  "created": "2026-09-13T18:55:44+02:00",
+  "created": "2026-10-11T15:14:40+02:00",
   "description": "Ordered runbook for publishing a Java or Kotlin artifact to Maven Central through the Central Portal, covering Gradle and Maven side by side, from namespace verification and the tag-versus-version gate through the binary-compatibility gate, the required per-file set, signing, and the exit semantics that decide whether a green job means live. Use when cutting a release, publishing or staging to Maven Central or the Central Portal, writing or reviewing a release workflow, wiring nmcp, the vanniktech plugin, maven-publish or central-publishing-maven-plugin, deciding whether a release job's green means published or only validated, or asking how to fix an artifact that is already on Central. Not for choosing dependency versions, and not for Gradle Plugin Portal publishing.",
   "keywords": [
     "jvm",

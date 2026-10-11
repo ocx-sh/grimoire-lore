@@ -1,5 +1,5 @@
 {
-  "created": "2026-10-10T21:42:16+02:00",
+  "created": "2026-10-11T15:14:40+02:00",
   "description": "Symptom-routed diagnosis of a Swift program or test that is already wrong, covering crashes routed by exit code plus first stderr line, hangs and deadlocks, a swift test that never finishes, data races, nondeterministic output, and expressions the type checker cannot solve. Use when someone reports \"Illegal instruction\", \"exit code 132\", exit 134, 137, 139, 141, 143 or 124, \"Fatal error: Unexpectedly found nil\", \"Error raised at top level\", \"SWIFT TASK CONTINUATION MISUSE\", \"Program crashed:\" with exit 0, \"Segmentation fault\", a crash with no backtrace, \"ThreadSanitizer: data race\", \"Swift access race\", a process that hangs, freezes, is stuck or deadlocks, a test that never finishes or times out in CI, a build that takes minutes, or \"unable to type-check this expression in reasonable time\". Not for Swift 6 concurrency migration (including its compile-time Sendable errors) or a toolchain bump (swift-upgrade), not for the coding standards (swift-quality), and not for cutting a release (swift-release).",
   "keywords": [
     "swift",

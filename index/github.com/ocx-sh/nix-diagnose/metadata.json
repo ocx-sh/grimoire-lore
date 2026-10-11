@@ -1,5 +1,5 @@
 {
-  "created": "2026-09-27T18:13:16+02:00",
+  "created": "2026-10-11T15:14:40+02:00",
   "description": "Error-keyed diagnosis procedure for a Nix evaluation, flake check or build that already fails, covering infinite recursion, undefined variables, \"is not a derivation\", overlay argument errors, \"path is not valid\" on a cold store, x86_64-darwin throws, follow cycles, hash mismatches, IFD refusals, red --all-systems runs, a Lix leg that disagrees with CppNix, a flake check that looks hung, and an error that did not change after a fix. Use when someone pastes a Nix error, says nix flake check or nix build fails, evaluation is stuck, infinite recursion encountered, --all-systems is red, it works locally but fails in CI, Lix says something different, the Nix upgrade broke the flake, or asks why a Nix error happens. Not for writing flake standards, which the nix-quality rule carries, and not for adding a flake to a repository or cutting a release, which are nix-flake-adopt and nix-flake-release.",
   "keywords": [
     "nix",

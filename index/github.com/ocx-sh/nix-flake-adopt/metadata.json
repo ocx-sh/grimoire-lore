@@ -1,5 +1,5 @@
 {
-  "created": "2026-09-27T18:13:16+02:00",
+  "created": "2026-10-11T15:14:40+02:00",
   "description": "Ordered procedure for adding a Nix flake to an existing repository or modernizing one, from reading the Nix era and the flake shape through the flake.nix template, a package.nix for a Rust CLI, a Rust workspace with git submodules or a Python library, real hashes, git add, the gate, the nix.yml CI workflow and the README install block. Use when a repository gets its first flake.nix or package.nix, when wiring Nix CI or a Nix install section, or when migrating a flake off flake-utils, per-system import nixpkgs, pkgs.system, rec derivations, file-scope with pkgs, nixfmt-rfc-style, singular outputs or x86_64-darwin. Not for cutting a release or tag (nix-flake-release), triaging an evaluation or build error (nix-diagnose), generating flakes from a package index, or writing a NixOS, home-manager or nix-darwin module.",
   "keywords": [
     "nix",
