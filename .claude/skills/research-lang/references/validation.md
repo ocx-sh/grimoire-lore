@@ -97,6 +97,8 @@ artifacts once with these questions:
 - **Verification honesty**: does each verification command actually
   detect the violation? Run one or two against a deliberately broken
   file and confirm they fail — a check that cannot go red proves nothing.
+  Run each once with GNU tools and once with busybox first on `PATH`;
+  a cell that is red on one and green on the other is not portable.
 - **Single source of truth**: does any fact appear in two files? The
   copies will diverge. Designate an owner and link.
 - **Era check**: is anything version-specific unlabelled?

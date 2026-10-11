@@ -103,6 +103,8 @@ These are the rules that decide whether the output is worth its tokens.
 3. **Every rule carries a verification.** A command, a lint name, a grep,
    or a named reading heuristic. A rule nobody can check is a comment.
    Rules without verification do not enter the ruleset.
+   A file-search command uses the portable dialect in
+   [references/rule-distillation.md](references/rule-distillation.md#verification-commands).
 4. **Drop what the model already does.** Keep only guidance an agent gets
    wrong without being told. Restating common knowledge costs context and
    dilutes the rules that matter.

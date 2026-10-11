@@ -5,7 +5,8 @@ consolidated rulesets into artifacts an agent loads while it codes.
 
 Contents: [The Funnel](#the-funnel) · [Selection](#selection) ·
 [Placement](#placement) · [The Index + Support Directory Shape](#the-index--support-directory-shape) ·
-[Rule Anatomy](#rule-anatomy) · [Severity](#severity) ·
+[Rule Anatomy](#rule-anatomy) ·
+[Verification Commands](#verification-commands) · [Severity](#severity) ·
 [Writing for an Agent Reader](#writing-for-an-agent-reader) ·
 [Portability](#portability) · [Review Skills](#review-skills)
 
@@ -151,6 +152,61 @@ stated once, not restated per row.
 Where the mistake is easier shown than described, add a **minimal**
 wrong/right pair. Two three-line snippets, not a tutorial. Snippets are
 the most expensive content per byte in the file; earn each one.
+
+## Verification Commands
+
+A verification that is a file search runs on stock macOS, Debian, Alpine
+(busybox), Windows and under zsh. Measured on busybox: the recursive and
+Perl forms are masked or wrong in 17 of 18 cells, `rg` is absent on stock
+macOS, Debian, Alpine and Windows, and zsh aborts on an unquoted glob that
+matches nothing. Write every cell in this dialect.
+
+- **File lists come from git**, with quoted pathspecs. A directory scope
+  `src/` becomes `':(glob)src/**/*.ext'`, and a skipped tree is
+  `':(exclude,glob)**/vendor/**'`. Never an unquoted glob or `**`.
+- **grep takes portable options only**: `-E -F -e -H -n -l -L -c -o -q -s -v -w
+  -x -i --`. Never `-r -R --include --exclude --exclude-dir -P -z -Z -U -I
+  --null --color`, never `$'..'`. One `-e` per top-level alternative, `--`
+  before the operands, and `xargs -0 -r` always.
+- **`-o` is the exception to both.** busybox `-o -w` emits partial tokens
+  (`SHARED-002` prints `HARED-002`), and busybox `-o` with two `-e` prints only
+  one pattern's matches on a line. So an `-o` cell never takes `-w` and carries
+  one `-E` pattern with `|`. For a whole-token census, match the full word run
+  (`[A-Za-z0-9_]*(TOKEN)[A-Za-z0-9_]*`) and pipe through a `grep -E` that
+  anchors the exact token, or end the pattern on `([^A-Za-z0-9_]|$)` and strip
+  that character with `sed`.
+- **An empty file list reads as a pass.** A git-fed cell over a pathspec that
+  lists nothing prints nothing. Where the scope may be absent, add a canary:
+  `git ls-files ... | awk 'END { if (NR == 0) print "canary: nothing listed" }'`.
+- **No `rg`.** Translate it to `grep -E`: `\d` is `[0-9]`, `\s` is
+  `[[:space:]]`, `\w` is `[[:alnum:]_]`, `\b` is `-w` or an explicit class
+  boundary, `-t TYPE` and `-g GLOB` become pathspecs, `--files-without-match`
+  is `grep -L`.
+- **Multi-line, lookaround, backreference and `-P` matches, and "file has A
+  and lacks B", are a small POSIX awk script** in the set's own `checks/`
+  directory, run as the git-fed list piped to `xargs -0 -r awk -f
+  checks/NAME.awk --`. Pass patterns through the environment, not `-v`, which
+  rewrites backslashes. Use `LC_ALL=C` where byte classes matter.
+- **No `$(...)`, no backticks and no angle-bracket placeholders** in a
+  command. A subject the reader supplies is a quoted variable the prose
+  defines (`"$CI"`).
+- **A command with a `|` never sits in a table cell.** Put it in a fenced
+  `sh` block right below the table, labelled with the row's ID, and make the
+  cell say `see block ID`.
+
+```sh
+# RULE-07: any hit is the finding
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' ':(exclude,glob)**/vendor/**' \
+  | xargs -0 -r grep -H -n -e 'exec\.Command(' --
+# RULE-08: files that spawn a child and never set a wait delay
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | HAS='exec\.Command\(' LACKS='\.WaitDelay' xargs -0 -r awk -f checks/file_gate.awk --
+```
+
+Watch each cell go red on a planted file and green on its clean twin under
+GNU tools and under busybox (`grep`, `xargs` and `awk` first on `PATH`).
+Judge an inline cell by its output, never its exit status: `grep -L` through
+`xargs` inverts on busybox.
 
 ## Severity
 
