@@ -1,0 +1,30 @@
+summary = "The OCX Shell set: shell and PowerShell source standards, and the integration, installer, port and diagnosis procedures"
+keywords = "shell,sh,posix,bash,bash-3.2,zsh,ksh,fish,nushell,elvish,powershell,pwsh,windows-powershell,shellcheck,shfmt,bats,pester,psscriptanalyzer,github-actions,taskfile,gitlab-ci,installer,install.sh,install.ps1,curl-pipe-sh,irm-iex,rc,completions,emit,quoting,portability,macos,busybox,dash,diagnose,exit-codes"
+description = "Everything an agent needs to write, gate, port, ship and debug shell scripts across operating systems and shells the way the OCX family does: the shell-quality rule (the gate block, the floor-first rule, the script kinds and fourteen depth files on dialect, errors, expansion, security, CI, installers, userland, testing, gates, multi-shell emitters, zsh, fish, nushell and elvish), the powershell-quality rule (the gate wrapper, the target by script kind and six depth files on compatibility, encoding, errors, gates, native commands and security), plus the shell-integration skill for code that writes shell code or edits startup files, the installer-script skill for curl-to-sh and irm-to-iex installers, the shell-port skill that moves a script to bash 3.2 or POSIX sh, and the shell-diagnose skill for a script, CI step or installer that is already failing. The code-docs rule and the code-docs-cleanup skill cover comments in every language: short blocks that keep every guard."
+license = "Apache-2.0"
+repository = "https://github.com/ocx-sh/grimoire-lore"
+
+# Members are same-directory relative: this catalog publishes flat under
+# ghcr.io/ocx-sh/lore/<name>, so `./shell-quality` resolves against wherever
+# the bundle itself was pulled from — a mirror keeps working.
+#
+# MEMBERS CARRY NO TAG. Not a digest, not an exact version, not a floating
+# major, not `latest` — `latest` is a tag like any other and naming it is still
+# a pin. A bundle is a *set*, not a snapshot: its job is to say "these belong
+# together", and the consumer's own `grimoire.lock` is what freezes them.
+#
+# Do not pass --pin when releasing this bundle.
+
+[rules]
+shell-quality = "./shell-quality"
+powershell-quality = "./powershell-quality"
+# code-docs globs every source extension, this set's included, and
+# code-docs-cleanup is its procedure, so both ride in this bundle.
+code-docs = "./code-docs"
+
+[skills]
+shell-integration = "./shell-integration"
+installer-script = "./installer-script"
+shell-port = "./shell-port"
+shell-diagnose = "./shell-diagnose"
+code-docs-cleanup = "./code-docs-cleanup"

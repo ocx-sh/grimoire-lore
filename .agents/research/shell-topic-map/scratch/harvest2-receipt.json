@@ -1,0 +1,209 @@
+{
+  "summary": "Shell research program phase 6 after a dive wave: one opus agent harvests the new consolidations, appends the landing report to the topic map, applies the stop condition, and commissions the next wave (revised staged briefs plus follow-ups) or declares ready-to-draft with binding authoring notes",
+  "agentCount": 1,
+  "logs": [
+    "Verdict: needs-another-round · next wave 13 · IDs 199 · MUST 124 · families 12 · contradictions 28"
+  ],
+  "result": {
+    "harvest": {
+      "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.agents/research/shell-topic-map.md",
+      "verdict": "needs-another-round",
+      "verdict_reason": "The wave-plan stop condition is not met. Wave 2 produced 124 new MUST rules and new failure classes:\n- container-job sh -e (SH-CI-04)\n- WinPS writer mixing (SH-CI-11)\n- PROMPT_COMMAND element 0 (SH-EMIT-24)\n- Taskfile item scope (SH-CI-17)\n- PSSA fail-open (PS-GATE-01/02)\n\nEight families have no consolidation: SH-INST, SH-SEC, SH-TEST, SH-ZSH, SH-FISH, SH-NU, SH-ELV and PS-SEC. Load-bearing questions are still open but answerable now by fixture runs on this host: the verification dialect (X1/M-X-05), the SC2312 burn-down (X4), pwsh 7.6 encoding on Windows, and completions and dir-hooks. No held-out round has run.",
+      "next_wave": [
+        {
+          "group": "gate",
+          "group_label": "The gate of record (SH-GATE)",
+          "id_family": "SH-GATE",
+          "slug": "verify-dialect",
+          "label": "Catalog verification dialect: git-fed lists, -e alternatives, xargs -r, red/green on GNU, busybox and uutils",
+          "brief": "Revision of shell-gate.md, holding SH-GATE IDs stable. It decides M-X-05 and contradiction X1 in shell-topic-map.md 'Wave 2 landed'.\nQuestion: which single verification shape do all shipped checks use, so that they work unchanged on GNU grep 3.12 (ubuntu:24.04), busybox 1.37 (alpine:3.22) and uutils 0.10 (ubuntu:26.04)? BSD/macOS is read only.\nInputs:\n- shell-dialect.md conflict 5 and the T4 rows (busybox rejects grep -r --include; the error hides behind a pipe, UF V3)\n- SH-GATE-09 files()\n- SH-ERR G-* gates at shell-errexit.md:248-252\n- the PCRE (-P/-z) cells in SH-CI-01/02/06/07/11/22\nCandidate shape:\n- shell files: SH-GATE-09 files()\n- every other file: git ls-files -z -- DIR, piped to xargs -0 -r grep -n -e PAT -e PAT2\n- PCRE checks labelled (GNU grep) with a python3 -I fallback, or moved into checks/\nFixtures in fixtures/verify-dialect/: take 12 representative cells (2 per consolidation) in their current and rewritten forms. Run each on the three images, plus Git Bash through matrix.sh win.\nRecord: exit code, stdout and stderr for the plant and its twin. Mark every case where an error is masked as 'clean'.\nAlso measure:\n- git pathspec '*.yml' depth matching\n- quoted --include globs on busybox\n- a markdown-table pipe rendered inside a cell\n- what empty output means when grep exits 2\nDecide:\n- the binding shape list for the authoring notes\n- which cells must move to checks/ scripts\n- whether busybox counts as a supported verification host\n- the M-X-05 answer for the owner\nEnv: ~/.cache/research-lang/shell-tools/run.sh (shellcheck 0.11.0, shfmt 3.13.1, fish, nu, elvish, pwsh on PATH) and matrix.sh <family> <script> (posix, bash 3.2-5.3, zsh 5.0.8-5.9, fish 3.6-4.9, nu 0.105/0.116, elvish, pwsh 7.4/7.6 + WinPS 5.1, win = Git Bash + WinPS 5.1 on the host, staged only under C:/Users/ecom/shell-wintest); fixtures only under ~/.cache/research-lang/shell-tools/fixtures/verify-dialect/, never /tmp; no macOS host, so BSD/macOS claims are \"unverified: read only\"; quote every check verbatim with its exit code red on the plant and green on its twin; ocx and fleet defects are reported with file:line and a reproducer, never fixed (owner Q6)."
+        },
+        {
+          "group": "errexit",
+          "group_label": "Error model, traps and exit codes (SH-ERR)",
+          "id_family": "SH-ERR",
+          "slug": "shopts-and-burndown",
+          "label": "SC2310/SC2312 burn-down, nullglob/failglob, Git Bash signal statuses",
+          "brief": "Revision of shell-errexit.md, holding SH-ERR IDs stable. It settles contradictions X4 (SC2312) and X5 (gate exits) with numbers for the owner.\nQuestion 1: per authored fleet file (SH-GATE-09 files(), excluding worktrees and sibling clones), how many SC2310 and SC2312 hits does ShellCheck 0.11.0 report? What fraction are true defects against noise? Classify a sample of 40.\nQuestion 2: should hardened bash scripts set shopt -s nullglob or failglob? Measure on bash 3.2-5.3 the effect on for-loops, rm, case and arrays. Decide jointly with SH-EXP-21; zsh nomatch is out of scope (W3-3).\nQuestion 3: on Git Bash 5.2.15 on the host (matrix.sh win), what exit statuses come back for INT, TERM and HUP through SH-ERR-16 handlers, and for kill -l decoding (SH-ERR-19)?\nQuestion 4: the SH-ERR-22 re-raise pattern on dash, busybox ash, bash 3.2 and 5.3.\nAlso give a per-site migration cost for SH-ERR-25 against SH-GATE-08 (exits 66 and 79).\nFixtures in fixtures/shopts-and-burndown/:\n(a) a burn-down script whose output is the per-repo count table\n(b) glob.sh with nullglob and failglob plant/twin pairs\n(c) sig.sh run under Git Bash\nDecide:\n- the recommended default for X4, with counts\n- whether SH-EXP-21 names a shopt\n- the Windows rows for SH-ERR-16 and SH-ERR-19\nEnv: ~/.cache/research-lang/shell-tools/run.sh (shellcheck 0.11.0, shfmt 3.13.1, fish, nu, elvish, pwsh on PATH) and matrix.sh <family> <script> (posix, bash 3.2-5.3, zsh 5.0.8-5.9, fish 3.6-4.9, nu 0.105/0.116, elvish, pwsh 7.4/7.6 + WinPS 5.1, win = Git Bash + WinPS 5.1 on the host, staged only under C:/Users/ecom/shell-wintest); fixtures only under ~/.cache/research-lang/shell-tools/fixtures/shopts-and-burndown/, never /tmp; no macOS host, so BSD/macOS claims are \"unverified: read only\"; quote every check verbatim with its exit code red on the plant and green on its twin; ocx and fleet defects are reported with file:line and a reproducer, never fixed (owner Q6)."
+        },
+        {
+          "group": "pwsh",
+          "group_label": "PowerShell 5.1 and 7 (PS-COMPAT, PS-ENC, PS-ERR, PS-NATIVE, PS-GATE)",
+          "id_family": "PS-ENC",
+          "slug": "windows-7x-and-resolver",
+          "label": "pwsh 7.6 on Windows: encoding and console, Test-CommandResolves precision, IncludeRules vs ParseError, runner-file writer",
+          "brief": "Revision of shell-pwsh.md, holding PS-* IDs stable. It covers the open questions in the 'Another research round' section of shell-pwsh.md, plus contradiction X8.\nUse the portable pwsh 7.4.7 and 7.6.6 zips under C:/Users/ecom/shell-wintest/pwsh-<ver>/, as [err] did.\nQuestion 1, encoding on Windows 7.x:\n- default $OutputEncoding and console code page\n- bytes written by >, Out-File and Set-Content\n- reading a BOM-less UTF-8 .ps1 that contains U+2019\n- -Encoding oem\nDoes any PS-ENC-01..06 rule change for 7.6 on Windows?\nQuestion 2: false-positive and catch rate of Test-CommandResolves (PS-GATE-06) on the WinPS 5.1 host over the 1,327-file corpus. Include dynamic names and module commands, and plant 10 hallucinated cmdlets and parameters. This decides SHOULD against MUST.\nQuestion 3: does a settings file with IncludeRules and no Severity report ParseError? Use dotnet's shape.\nQuestion 4 (X8): on 5.1, AppendAllText(UTF8Encoding $false) into a fresh $GITHUB_ENV, read back with ReadAllLines(UTF8). Also Out-File -Encoding utf8 -Append into a fresh file, and the mix of the two. Record the bytes.\nFixtures in fixtures/windows-7x-and-resolver/.\nDecide:\n- PS-ENC deltas for 7.6 on Windows\n- the PS-GATE-06 level\n- the dotnet IncludeRules verdict\n- the X8 writer text for PS-ENC-03 and SH-CI-11\nEnv: ~/.cache/research-lang/shell-tools/run.sh (shellcheck 0.11.0, shfmt 3.13.1, fish, nu, elvish, pwsh on PATH) and matrix.sh <family> <script> (posix, bash 3.2-5.3, zsh 5.0.8-5.9, fish 3.6-4.9, nu 0.105/0.116, elvish, pwsh 7.4/7.6 + WinPS 5.1, win = Git Bash + WinPS 5.1 on the host, staged only under C:/Users/ecom/shell-wintest); fixtures only under ~/.cache/research-lang/shell-tools/fixtures/windows-7x-and-resolver/, never /tmp; no macOS host, so BSD/macOS claims are \"unverified: read only\"; quote every check verbatim with its exit code red on the plant and green on its twin; ocx and fleet defects are reported with file:line and a reproducer, never fixed (owner Q6)."
+        },
+        {
+          "group": "emit",
+          "group_label": "The multi-shell emission contract (SH-EMIT)",
+          "id_family": "SH-EMIT",
+          "slug": "completions-and-dir-hooks",
+          "label": "Completions registration per shell, dir-change and pre-exec hooks, cmd.exe Batch corpus",
+          "brief": "Revision of shell-emit.md, holding SH-EMIT-01..32 stable; new rules continue from SH-EMIT-33. Promotes M-M-17 (the trigger fired: grim completions and ocx completion injection are live emitters).\nQuestion 1: for each shell, which completion install location works without editing the user's rc, and how is 'registered' proven in a real interpreter?\n- bash-completion user dir\n- zsh fpath plus compdef\n- the fish completions dir\n- the nu external completer\n- elvish\n- PowerShell Register-ArgumentCompleter, and -NativeFallback from 7.6\nQuestion 2: which dir-change and pre-exec hook points can an emitter use without breaking bash-preexec 0.5 or ble.sh users? Candidates: bash DEBUG trap, PS0, zsh chpwd, fish --on-variable PWD, nu pre_execution and env_change PWD, PowerShell LocationChangedAction. Each must pass the SH-EMIT-24..29 harness (user hook present, sourced once and twice).\nQuestion 3: cmd.exe Batch, i.e. ocx's Batch arm. What is the minimum hostile corpus for SET \"K=v\"? Cover % doubling, ! under delayed expansion, CR/LF and chcp 65001. Which values must be refused? Run on the host through cmd.exe /c from a C: cwd.\nFixtures in fixtures/completions-and-dir-hooks/. Grim and ocx emitters are evidence only, read at a pinned SHA.\nDecide: new SH-EMIT rows (completions, dir hooks, Batch quoter and refusal set), each with a harness check watched red.\nEnv: ~/.cache/research-lang/shell-tools/run.sh (shellcheck 0.11.0, shfmt 3.13.1, fish, nu, elvish, pwsh on PATH) and matrix.sh <family> <script> (posix, bash 3.2-5.3, zsh 5.0.8-5.9, fish 3.6-4.9, nu 0.105/0.116, elvish, pwsh 7.4/7.6 + WinPS 5.1, win = Git Bash + WinPS 5.1 on the host, staged only under C:/Users/ecom/shell-wintest); fixtures only under ~/.cache/research-lang/shell-tools/fixtures/completions-and-dir-hooks/, never /tmp; no macOS host, so BSD/macOS claims are \"unverified: read only\"; quote every check verbatim with its exit code red on the plant and green on its twin; ocx and fleet defects are reported with file:line and a reproducer, never fixed (owner Q6)."
+        },
+        {
+          "group": "ci",
+          "group_label": "CI shells (SH-CI)",
+          "id_family": "SH-CI",
+          "slug": "outputs-scope-and-taskfile-windows",
+          "label": "SH-CI-07 scope (steps/needs outputs, zizmor persona), Taskfile on Windows, GitLab CI templates",
+          "brief": "Revision of shell-ci.md, holding SH-CI-01..22 stable; new rules continue from SH-CI-23. It covers the open subareas at the end of shell-ci.md.\nQuestion 1: should steps.*.outputs.*, needs.*.outputs.* and matrix.* inside run bodies become a MUST?\n- Build a two-job act fixture where job A's output carries attacker text from an issue title, and job B interpolates it.\n- Run zizmor 1.30.1 under the regular, pedantic and auditor personas at --min-severity low, medium and high over the fleet's 26 workflow dirs.\n- Count findings per persona.\nQuestion 2: task 3.54.0 on the Windows host (matrix.sh win and native cmd).\n- How do platforms:, external commands resolved from the Windows PATH, and path separators behave?\n- Is there a greppable SH-CI-20 check that lifts it from SHOULD?\nQuestion 3: audit the 21 GitLab CI files in the fleet for default-shell, set -e and pipefail, and $CI_COMMIT_* injection in script:. Find them with git ls-files over the fleet repos, excluding worktrees.\nAlso re-point the stale citations recorded in contradiction X7.\nFixtures in fixtures/outputs-scope-and-taskfile-windows/.\nDecide:\n- the SH-CI-07 scope verdict, with zizmor persona and severity\n- the SH-CI-20 level\n- whether GitLab CI needs rows (and whether .gitlab-ci.yml joins the shell-quality globs)\nEnv: ~/.cache/research-lang/shell-tools/run.sh (shellcheck 0.11.0, shfmt 3.13.1, fish, nu, elvish, pwsh on PATH) and matrix.sh <family> <script> (posix, bash 3.2-5.3, zsh 5.0.8-5.9, fish 3.6-4.9, nu 0.105/0.116, elvish, pwsh 7.4/7.6 + WinPS 5.1, win = Git Bash + WinPS 5.1 on the host, staged only under C:/Users/ecom/shell-wintest); fixtures only under ~/.cache/research-lang/shell-tools/fixtures/outputs-scope-and-taskfile-windows/, never /tmp; no macOS host, so BSD/macOS claims are \"unverified: read only\"; quote every check verbatim with its exit code red on the plant and green on its twin; ocx and fleet defects are reported with file:line and a reproducer, never fixed (owner Q6)."
+        },
+        {
+          "group": "installer",
+          "group_label": "Installer pairs (SH-INST, PS-SEC)",
+          "id_family": "SH-INST",
+          "slug": "sh-contract",
+          "label": "The install.sh contract (W3-1, revised after wave 2)",
+          "brief": "Rows: M-N-01..M-N-12, M-D-09.\nBuild on wave 2. Cite these, do not restate them:\n- SH-DIAL-04 matrix and T3 header\n- the SH-ERR-23 installer prologue\n- SH-ERR-15/16 traps\n- SH-USER-06/07/10 probes (busybox wget --https-only)\n- SH-GATE-16 ASCII\n- SH-EMIT-16..23 rc contract, with SH-EMIT-19 winning over SH-USER-12 (X19)\nFetch: rustup-init.sh, docker install.sh and rootless-install.sh, deno install.sh and Homebrew install.sh at the [inst] SHAs; the cargo-dist 0.33.0 shell template.\nPin, for the 17 corpus installers: truncation guard, integrity source, TLS flags, platform mapping, exit taxonomy (SH-ERR-25 kinds), trap and /dev/tty prompts.\nFleet:\n- www-setup/src/install.sh (busybox wget crash at :352-354; non-ASCII yash failure)\n- setup-grimoire/.github/scripts/install.sh:82\n- grimoire's cargo-dist front door\nExemplars:\n- rustup-init.sh:931 (main last) and :742\n- the docker trap at rootless-install.sh:265; the map's install.sh:809-813 citation is wrong\n- [inst] K3S:408, CDIST:1460, CDIST:1749\nPlant in fixtures/sh-contract/:\n(a) truncated.sh: the installer cut at 60% and piped to sh; the twin has main last\n(b) platform.sh: stubbed uname and ldd\n(c) a run on alpine:3.22 with busybox wget only, deb12 dash, bash 3.2 --posix, and yash with LC_ALL=C\n(d) run twice against a throwaway HOME: the rc diff is empty\nDecide:\n- the SH-INST MUST rows\n- the installer-script skill procedure and receipt\n- the generated-installer audit checklist\nChase: cargo-dist 0.33.0 TLS flags and the Rosetta precedence bug in newer releases (pin version and date).\nEnv: ~/.cache/research-lang/shell-tools/run.sh (shellcheck 0.11.0, shfmt 3.13.1, fish, nu, elvish, pwsh on PATH) and matrix.sh <family> <script> (posix, bash 3.2-5.3, zsh 5.0.8-5.9, fish 3.6-4.9, nu 0.105/0.116, elvish, pwsh 7.4/7.6 + WinPS 5.1, win = Git Bash + WinPS 5.1 on the host, staged only under C:/Users/ecom/shell-wintest); fixtures only under ~/.cache/research-lang/shell-tools/fixtures/sh-contract/, never /tmp; no macOS host, so BSD/macOS claims are \"unverified: read only\"; quote every check verbatim with its exit code red on the plant and green on its twin; ocx and fleet defects are reported with file:line and a reproducer, never fixed (owner Q6)."
+        },
+        {
+          "group": "installer",
+          "group_label": "Installer pairs (SH-INST, PS-SEC)",
+          "id_family": "PS-SEC",
+          "slug": "ps1-front-door",
+          "label": "install.ps1: irm | iex delivery, TLS, integrity and 5.1 safety (W3-2, revised after wave 2)",
+          "brief": "Rows: M-U-01, M-U-03, M-U-04, M-Q-03, M-P-06, M-N-02 (the ps1 half).\nBuild on shell-pwsh.md. Cite these, do not restate them:\n- PS-COMPAT-01/06/09 (#Requires 5.1, -UseBasicParsing, TLS)\n- PS-ENC-01..03 (ASCII, no BOM, writer)\n- PS-ERR-05 (no exit under iex)\n- PS-NATIVE-01/02\n- PS-GATE-07 (execution policy; M-U-02 is carried there)\n- SH-CI-11 and PS-ENC-03 runner-file writes (X8)\nFetch: about_Execution_Policies; the PSAvoidUsingInvokeExpression doc; the scoop installer; the cargo-dist 0.33.0 powershell template; Get-FileHash and ZipFile docs.\nPin on the 5.1 host and on pwsh 7.6:\n- default TLS protocols\n- Expand-Archive against ZipFile\n- param blocks and $PSScriptRoot under iex\n- Get-FileHash\nFleet:\n- www-setup/src/install.ps1 (:182 and :734 exit under iex; :721 Add-Content to GITHUB_PATH)\n- the grimoire front door ps1:4-5 claims a SHA-256 check that the template lacks\nPlant in fixtures/ps1-front-door/:\n(a) served.ps1 through Get-Content | iex with a failing step: the host survives and $LASTEXITCODE is set\n(b) zip-slip.zip with a ../ entry; the twin checks each entry path\n(c) hash-mismatch aborts before extraction\nDecide:\n- the PS-SEC MUST rows\n- the PowerShell half of the installer-script skill\n- the evidence verdict on grimoire's front-door claim, for the owner\nEnv: ~/.cache/research-lang/shell-tools/run.sh (shellcheck 0.11.0, shfmt 3.13.1, fish, nu, elvish, pwsh on PATH) and matrix.sh <family> <script> (posix, bash 3.2-5.3, zsh 5.0.8-5.9, fish 3.6-4.9, nu 0.105/0.116, elvish, pwsh 7.4/7.6 + WinPS 5.1, win = Git Bash + WinPS 5.1 on the host, staged only under C:/Users/ecom/shell-wintest); fixtures only under ~/.cache/research-lang/shell-tools/fixtures/ps1-front-door/, never /tmp; no macOS host, so BSD/macOS claims are \"unverified: read only\"; quote every check verbatim with its exit code red on the plant and green on its twin; ocx and fleet defects are reported with file:line and a reproducer, never fixed (owner Q6)."
+        },
+        {
+          "group": "alt-shells",
+          "group_label": "zsh, fish, nushell and elvish (SH-ZSH, SH-FISH, SH-NU, SH-ELV)",
+          "id_family": "SH-ZSH",
+          "slug": "zsh",
+          "label": "zsh scripts and bash code sourced in zsh (W3-3, revised: absorbs expansion zsh-semantics, SH-ERR-27, M-X-02)",
+          "brief": "Rows: M-I-01..M-I-06, M-C-13 (the zsh half), the shell-expansion.md follow-up 'zsh semantics', SH-ERR-27 (trap EXIT in functions, err_return), and M-X-02 (catalog blocks abort under nomatch).\nFetch: zsh NEWS (the 5.10 draft); the zsh options manual (SH_WORD_SPLIT, NOMATCH, ERR_EXIT, ERR_RETURN, LOCAL_OPTIONS); the shfmt zsh notes.\nPin on zsh 5.0.8, 5.3.1, 5.8 and 5.9:\n- splitting, arrays, nomatch\n- the path/PATH tie, status and pipestatus, read -A\n- set -e with ! pipelines\n- emulate -L sh and emulate -L zsh\n- SC1071: zsh files cannot be ShellChecked, per shell-expansion.md\nAlso pin SH-EMIT-25 (add-zsh-hook) and the zsh startup files; cite them, do not restate.\nFleet: 1 .zsh file; the 5 nomatch catalog sites listed in M-X-02.\nPlant in fixtures/zsh/:\n(a) bash-in-zsh.sh sourced from zsh, with an emulate -L sh twin\n(b) errexit.zsh: set -e; ! false | true, on 5.0.8 and on 5.9\n(c) shfmt -ln zsh on a realistic .zshrc\n(d) each M-X-02 block, under zsh -c and under the bash twin\nDecide:\n- the zsh.md rows: prologue, broken bash habits, startup placement, the emulate bridge\n- whether zsh gets a gate beyond zsh -n plus shfmt\n- the SH-ERR-27 level\nEnv: ~/.cache/research-lang/shell-tools/run.sh (shellcheck 0.11.0, shfmt 3.13.1, fish, nu, elvish, pwsh on PATH) and matrix.sh <family> <script> (posix, bash 3.2-5.3, zsh 5.0.8-5.9, fish 3.6-4.9, nu 0.105/0.116, elvish, pwsh 7.4/7.6 + WinPS 5.1, win = Git Bash + WinPS 5.1 on the host, staged only under C:/Users/ecom/shell-wintest); fixtures only under ~/.cache/research-lang/shell-tools/fixtures/zsh/, never /tmp; no macOS host, so BSD/macOS claims are \"unverified: read only\"; quote every check verbatim with its exit code red on the plant and green on its twin; ocx and fleet defects are reported with file:line and a reproducer, never fixed (owner Q6)."
+        },
+        {
+          "group": "alt-shells",
+          "group_label": "zsh, fish, nushell and elvish (SH-ZSH, SH-FISH, SH-NU, SH-ELV)",
+          "id_family": "SH-FISH",
+          "slug": "fish",
+          "label": "fish 3.6 to 4.9 for scripts and emitted config (W3-4, revised: cleanup model, SH-EMIT-17/26)",
+          "brief": "Rows: M-J-01..M-J-07, plus the fish cleanup model named as an errexit follow-up. fish has no errexit: what replaces set -e and trap EXIT? Measure 'and'/'or', $status, --on-event fish_exit and function --on-signal.\nCite, do not restate:\n- SH-EMIT-17 (conf.d/<tool>.fish, rewrite whole)\n- SH-EMIT-26 (--on-event fish_prompt)\n- the fish quoter in SH-EMIT-02\nFetch: the fish CHANGELOG 4.0 to 4.9.3; the fish language docs; the littlecheck tests in tests/checks.\nPin on fish 3.6.0, 4.0.2, 4.7.0 and 4.9.3:\n- the ? glob, { } compound commands, for-loop locals\n- status features, test-require-arg, the status=123 override\n- conf.d load order, the frozen theme files\n- fish --no-execute as the parse gate\nFleet: www-setup/src/install.fish (650 lines); ocx hook.rs:320-345 and conf.d/ocx.fish.\nExemplars: virtualenv, pdm and uv activate.fish; mise fish quoting corruption.\nPlant in fixtures/fish/:\n(a) breaks.fish, one construct per function, recorded per version\n(b) a conf.d placement sourced twice: no duplicate handlers\n(c) cleanup.fish: an interrupted run leaves no temp dir; the twin lacks the handler\nDecide: the fish.md rows: supported range (3.6 to 4.9 until Debian 12 EOL), constructs to avoid, placement, version detection, the gate, the cleanup idiom.\nEnv: ~/.cache/research-lang/shell-tools/run.sh (shellcheck 0.11.0, shfmt 3.13.1, fish, nu, elvish, pwsh on PATH) and matrix.sh <family> <script> (posix, bash 3.2-5.3, zsh 5.0.8-5.9, fish 3.6-4.9, nu 0.105/0.116, elvish, pwsh 7.4/7.6 + WinPS 5.1, win = Git Bash + WinPS 5.1 on the host, staged only under C:/Users/ecom/shell-wintest); fixtures only under ~/.cache/research-lang/shell-tools/fixtures/fish/, never /tmp; no macOS host, so BSD/macOS claims are \"unverified: read only\"; quote every check verbatim with its exit code red on the plant and green on its twin; ocx and fleet defects are reported with file:line and a reproducer, never fixed (owner Q6)."
+        },
+        {
+          "group": "alt-shells",
+          "group_label": "zsh, fish, nushell and elvish (SH-ZSH, SH-FISH, SH-NU, SH-ELV)",
+          "id_family": "SH-NU",
+          "slug": "nu-and-elvish",
+          "label": "nushell churn and elvish for emitted code (W3-5, revised with SH-EMIT findings)",
+          "brief": "Rows: M-K-01..M-K-07, M-L-01..M-L-03, plus the nu and elvish cleanup models (errexit follow-up).\nWave-2 facts to build on, not re-derive:\n- nu login.nu loads before autoload (shell-emit.md conflict 5)\n- the nu 0.107 hook order\n- get -o / get --optional breaks 0.105.1 (virtualenv activate.nu)\n- SH-EMIT-27 (nu hook list normalising) and SH-EMIT-28 (elvish marker closure)\n- nu from json and elvish from-json as data channels (SH-EMIT-06)\nFetch: nushell release posts 0.100 to 0.116.1, especially 0.107, 0.110, 0.114 and 0.116; elvish 0.21.0 notes and the 0.22 draft.\nPin on nu 0.105.1 and 0.116.1:\n- each removed or renamed item: parse error, warning or silent\n- a wrapper over nu --ide-check that exits non-zero on any diagnostic\n- the safe intersection that parses on both\n- try/catch and finally-like cleanup in nu\nPin elvish -compileonly false positives on edit:, and elvish defer and try/finally.\nFleet: ocx shims.rs:604-638 and the nu describe guard; www-setup install.nu (547 lines) and install.elv (566 lines).\nPlant in fixtures/nu-and-elvish/:\n(a) stale/, one removed command per file, on both versions\n(b) fallthrough.nu: \"abc\" | size; record which external ran\n(c) guard/: a version-split file; the old nu never parses the new-only file\n(d) cleanup.nu and cleanup.elv, with plant and twin\nDecide:\n- nushell.md and elvish.md rows: version range, the parse-gate wrapper, the guard and file-split pattern, the dated stale-command denylist\n- the cleanup idiom per shell\nEnv: ~/.cache/research-lang/shell-tools/run.sh (shellcheck 0.11.0, shfmt 3.13.1, fish, nu, elvish, pwsh on PATH) and matrix.sh <family> <script> (posix, bash 3.2-5.3, zsh 5.0.8-5.9, fish 3.6-4.9, nu 0.105/0.116, elvish, pwsh 7.4/7.6 + WinPS 5.1, win = Git Bash + WinPS 5.1 on the host, staged only under C:/Users/ecom/shell-wintest); fixtures only under ~/.cache/research-lang/shell-tools/fixtures/nu-and-elvish/, never /tmp; no macOS host, so BSD/macOS claims are \"unverified: read only\"; quote every check verbatim with its exit code red on the plant and green on its twin; ocx and fleet defects are reported with file:line and a reproducer, never fixed (owner Q6)."
+        },
+        {
+          "group": "testing",
+          "group_label": "Shell and PowerShell tests (SH-TEST)",
+          "id_family": "SH-TEST",
+          "slug": "bats-pester-matrix",
+          "label": "bats, Pester and the interpreter matrix in CI (W3-6)",
+          "brief": "Rows: M-G-01..M-G-05, M-T-04, M-T-05.\nWave-2 context:\n- SH-EXP-23 (verify by final state, not exit status)\n- SH-EMIT-04/32 (hostile corpus; fail when an interpreter is absent)\n- SH-DIAL-04 (the posix matrix list)\n- SH-ERR-24 (verifier semantics)\n- PS-COMPAT-08 (Import-Module on real 5.1)\nCite these, do not restate them.\nFetch: the bats CHANGELOG and gotchas page; the shellspec README; Pester releases (the 6.0.0 breaking list).\nPin:\n- bats 1.11.1, 1.13.0 and 1.14.0 for run plus set -e, ! cmd, [[ ]] on bash 3.2, and an empty suite\n- Pester 5.7.1 against 6.2.0 on the 5.1 host and on 7.6 for Should against Should-*\n- Pester 5's discovery/run split\nFleet: 10 .bats files (1997 lines) under setup-grimoire and www-setup tests/install; the server.bash helpers; fleet Pester usage.\nPlant in fixtures/bats-pester-matrix/:\n(a) vacuous.bats: each vacuous form wrapped around a failing assertion; red means the suite stays green\n(b) a CI matrix sketch running one suite on bash:3.2 and bash:5.3\n(c) pester5.Tests.ps1 against Pester 6 assertions on 5.1 and 7.6\n(d) code outside BeforeAll that runs at discovery\nDecide:\n- the testing.md rows: framework per dialect, watched-red assertion forms, version pins\n- the Pester pin for PS-GATE\n- the CI matrix recipe\nEnv: ~/.cache/research-lang/shell-tools/run.sh (shellcheck 0.11.0, shfmt 3.13.1, fish, nu, elvish, pwsh on PATH) and matrix.sh <family> <script> (posix, bash 3.2-5.3, zsh 5.0.8-5.9, fish 3.6-4.9, nu 0.105/0.116, elvish, pwsh 7.4/7.6 + WinPS 5.1, win = Git Bash + WinPS 5.1 on the host, staged only under C:/Users/ecom/shell-wintest); fixtures only under ~/.cache/research-lang/shell-tools/fixtures/bats-pester-matrix/, never /tmp; no macOS host, so BSD/macOS claims are \"unverified: read only\"; quote every check verbatim with its exit code red on the plant and green on its twin; ocx and fleet defects are reported with file:line and a reproducer, never fixed (owner Q6)."
+        },
+        {
+          "group": "security",
+          "group_label": "Security beyond quoting (SH-SEC)",
+          "id_family": "SH-SEC",
+          "slug": "injection-and-secrets",
+          "label": "Secrets, environment import, PATH, locking, option/pattern injection, arithmetic reach (W3-7, revised)",
+          "brief": "Rows: M-E-04..M-E-07, M-C-20, M-D-07, M-D-15, plus two follow-ups from shell-expansion.md:\n- option and pattern injection: a leading-dash argument, -- handling, a case/[[ == ]] pattern from data, grep -e/-F\n- arithmetic reach: $(( )), [[ -eq ]], let, declare -i, array subscripts evaluating attacker text on bash 3.2-5.3\nCite and do not restate SH-EXP-13 (eval), SH-EXP-16 (layers), SH-EXP-19 (validate before arithmetic) and SH-CI-07/08 (GHA injection).\nFetch: the OWASP OS Command Injection cheat sheet; CWE-78 and CWE-88; BashFAQ/045, /062 and /111; bash 5.3 NEWS item p (NULL PATH); sudo-rs flags against GNU sudo (-n, -E, -S).\nPin:\n- argv secret visibility (ps, /proc/<pid>/cmdline)\n- set -x leakage\n- whether non-interactive sh and bash honour BASH_ENV and ENV\n- NULL PATH on 5.2 against 5.3\n- mkdir-lock atomicity against flock absence (SH-USER-06)\nFleet: grep the authored files (SH-GATE-09 files()) for tokens on argv, set -x near secrets, sourced writable config, and unvalidated arithmetic on external input.\nPlant in fixtures/injection-and-secrets/:\n(a) secret-argv.sh against a header read from a file or stdin\n(b) bash-env.sh per shell\n(c) null-path.sh\n(d) arith.sh: a[$(touch canary)] via a subscript and via [[ -eq ]] on 3.2 and 5.3; the twin validates first\n(e) optinj.sh: a file named -rf passed to rm; the twin uses -- or ./\nDecide: the security.md rows, each with its check.\nEnv: ~/.cache/research-lang/shell-tools/run.sh (shellcheck 0.11.0, shfmt 3.13.1, fish, nu, elvish, pwsh on PATH) and matrix.sh <family> <script> (posix, bash 3.2-5.3, zsh 5.0.8-5.9, fish 3.6-4.9, nu 0.105/0.116, elvish, pwsh 7.4/7.6 + WinPS 5.1, win = Git Bash + WinPS 5.1 on the host, staged only under C:/Users/ecom/shell-wintest); fixtures only under ~/.cache/research-lang/shell-tools/fixtures/injection-and-secrets/, never /tmp; no macOS host, so BSD/macOS claims are \"unverified: read only\"; quote every check verbatim with its exit code red on the plant and green on its twin; ocx and fleet defects are reported with file:line and a reproducer, never fixed (owner Q6)."
+        },
+        {
+          "group": "skills",
+          "group_label": "Procedures (SH-CORE)",
+          "id_family": "SH-CORE",
+          "slug": "diagnose-and-port",
+          "label": "The shell-diagnose catalog and the shell-port runbook (W3-8, revised to cite wave-2 IDs)",
+          "brief": "Rows: M-W-01..M-W-04.\nCite rule IDs from the seven wave-2 consolidations, applying the shell-topic-map.md 'Wave 2 landed' (e) owner choices: X2, X7, X9, X13, X19 and so on. Rows for families still in wave 3 cite M-IDs.\nSkills are procedures only. A duplicated MUST goes in a '# / Finding / Rule' table, never rule-ID-first.\nFetch: skills/swift-diagnose and skills/go-upgrade SKILL.md, for the house shape.\nPin the exact error text, per symptom and per interpreter:\n- CR in the shebang (127, bad interpreter)\n- 'Illegal option -o pipefail' (dash 0.5.12-6ubuntu5 against -12ubuntu3)\n- 141/269/397 and 143/271/399\n- 'unbound variable' on an empty array on 3.2\n- zsh 'no matches found'\n- nu removed-command parse errors\n- WinPS \"The token '&&' is not a valid statement separator\"\n- 5.1 mojibake\n- '[[: not found' in a container job\n- the MSYS cmd /c hang\n- the mvdan/sh assoc panic\nFleet:\n- the 5 authored bash 4+ files as port candidates\n- www-setup install.sh and install.ps1 as the installer-script worked example\n- the ocx emitter as the shell-integration example\nPlant in fixtures/diagnose-and-port/:\n(a) one reproducer per symptom, captured verbatim\n(b) one 3.2-incompatible fleet-shaped script ported end to end by the draft shell-port steps, with the receipt filled in\n(c) a dry run of shell-integration against a 3-target toy emitter, ending in the SH-EMIT-04 round trip\nDecide:\n- the shell-diagnose table (symptom, cause, check, fix)\n- the shell-port procedure and receipt\n- the MUST-row tables of shell-integration and installer-script\n- each SKILL.md stays under 500 lines\nChase: text that varies by version gets one row per variant.\nEnv: ~/.cache/research-lang/shell-tools/run.sh (shellcheck 0.11.0, shfmt 3.13.1, fish, nu, elvish, pwsh on PATH) and matrix.sh <family> <script> (posix, bash 3.2-5.3, zsh 5.0.8-5.9, fish 3.6-4.9, nu 0.105/0.116, elvish, pwsh 7.4/7.6 + WinPS 5.1, win = Git Bash + WinPS 5.1 on the host, staged only under C:/Users/ecom/shell-wintest); fixtures only under ~/.cache/research-lang/shell-tools/fixtures/diagnose-and-port/, never /tmp; no macOS host, so BSD/macOS claims are \"unverified: read only\"; quote every check verbatim with its exit code red on the plant and green on its twin; ocx and fleet defects are reported with file:line and a reproducer, never fixed (owner Q6)."
+        }
+      ],
+      "frame_corrections": [
+        "Map conflict 3 was wrong: yash 2.52 supports pipefail (shell-dialect.md).",
+        "The (( ))/[[ ]] errexit boundary is bash 4.1, not 4.2 (M-B-03; shell-errexit.md).",
+        "Empty \"$@\" under set -u fails only on posh; \"${@}\" fails on bash 3.2 (M-B-06).",
+        "xargs -r: the map's reasoning is inverted. Always pass -r (SH-USER-08; X7 on 4 images, BSD no-op read only).",
+        "which is absent on 8 of 21 base images, not 7. 'macOS /bin/sh is dash' appears in 6 repos, not 4 (shell-dialect.md T5, SH-DIAL-22).",
+        "SC2046 is a warning and SC2068 an error, not info (shell-expansion.md C1).",
+        "busybox getopt supports long options (shell-dialect.md).",
+        "source <(...) works on bash 4.0-5.0 in default mode. 3.2 is a silent no-op, and --posix fails before 5.1 (M-M-10; shell-emit.md conflict 2).",
+        "nushell login.nu loads before autoload, not last (shell-emit.md conflict 5).",
+        "Q7 tool list: ocx, direnv 2.37.1 and mise 2026.10.2 execute the curly-quote payload; starship shows a parse error only; zoxide is not affected (shell-emit.md conflicts 6-7). The orchestrator reproduced it on pwsh 7.4, 7.6.6 and WinPS 5.1.",
+        "$PSNativeCommandUseErrorActionPreference is 7.4+, not 7.3+ (M-Q-01; shell-pwsh.md conflict 6).",
+        "H5 is refined: GHA shell: pwsh is last-native-wins, not invisible (shell-pwsh.md verdict 3).",
+        "test-installers.yml has 6 injection sites (206, 207, 239, 241, 269, 271), not 2. update-dist.yml:27 is a low-severity site (shell-ci.md conflict 11).",
+        "read -p works in Taskfile cmds on task 3.53.1-3.54.0 (M-H-07; shell-ci.md conflict 5).",
+        "WinPS 5.1 >> into GITHUB_ENV decodes fine. What corrupts is mixing writers and Add-Content, not UTF-16 as such (shell-ci.md C7, C9).",
+        "Steps in container: jobs default to sh -e inside the image. The map had no row for this (SH-CI-04).",
+        "shfmt treats a shebang-less .sh as bash (SH-DIAL-01). bash -n misses unterminated arrays on 3.2-5.1 (SH-GATE-11).",
+        "The gate's missing-input exit is 79, not 66 (SH-GATE-08).",
+        "The docker-install trap citation install.sh:809-813 is wrong; the trap is in rootless-install.sh:265.",
+        "Ubuntu 26.04 has a mixed userland: cp and mv are GNU, while date, ls and sort are uutils 0.10.0."
+      ],
+      "rule_totals": {
+        "ids": 199,
+        "must": 124,
+        "families": 12
+      },
+      "contradictions_across_consolidations": [
+        "X1 discovery. The SH-ERR G-* gates and the SH-GATE/SH-EXP/SH-CI verify cells use grep -r --include, while SH-GATE-09 and SH-DIAL conflict 5 require git-fed discovery. SH-GATE-09 keeps the text. Every other check lists files with git ls-files -z -- DIR and matches with xargs -0 -r grep.",
+        "X2 SC3040 directive. SH-ERR-13 is bare; SH-DIAL-08 and SH-GATE-07 require a reason. SH-DIAL-07/08 keep the text; SH-ERR-13 and SH-CI-03 become pointers.",
+        "X3 SC3043 reason text. SH-DIAL-17 and the SH-GATE-07 table differ. SH-DIAL-17 keeps the text.",
+        "X4 SC2312. SH-GATE-02 and SH-GATE-19 enable check-extra-masked-returns; SH-ERR-07 does not. SH-ERR-07 keeps the text (owner default); the rc becomes four keys and SHELLCHECK_OPTS drops the option.",
+        "X5 gate exits. SH-ERR-25's carve-out (64/65/66/69/70) differs from SH-GATE-08 (69/78/79). SH-GATE-08 keeps the text for new gates; SH-ERR-25 cites it (owner default).",
+        "X6 actionlint. SH-GATE-19 is pitted against SH-EXP C2's --exclude style codes and SH-CI-19's 'exclusion list'. Default severity stays (SH-GATE-01). --exclude is allowed only for codes in the SH-GATE-07 allow table; SC2129 is the one measured candidate; never SC2086 or SC2046.",
+        "X7 stale cross-refs. Re-point each:\n- SH-EXP-20 to SH-ERR-12\n- SH-EXP-16 to SH-CI-07/08 and SH-EMIT-03\n- SH-CI 'SH-GATE-01/27' to SH-GATE-01 and SH-GATE-19\n- 'SH-GATE-32' does not exist: drop it\n- 'BVG-02/03' to SH-DIAL-06 and SH-DIAL-25\n- SH-CI-12 'PS-ERR-01/04' to PS-ERR-03",
+        "X8 5.1 runner-file writer. SH-CI-11 requires 'only Out-File -Encoding utf8 -Append'; PS-ENC-03 says never Out-File or -Encoding utf8. PS-ENC-03 keeps the writer (AppendAllText with UTF8Encoding $false). SH-CI-11 keeps its bans (no >>, no bare Add-Content, no mixing) and allows Out-File utf8 only inside a shell: powershell step body.",
+        "X9. SH-CI-12 (SHOULD) and PS-ERR-03 (MUST) cover the same pwsh run-step native guard. PS-ERR-03 keeps the text; SH-CI-12 is dropped to a pointer.",
+        "X10 custom shell templates. SH-CI-05 is scoped to bash; PowerShell templates are PS-GATE-08's text.",
+        "X11 layered quoting. SH-EXP-16 against SH-EMIT-10: SH-EXP-16 keeps the text and SH-EMIT-10 points to it for emitted text. SC2029 is inadmissible in both.",
+        "X12. SH-DIAL-09 and SH-DIAL-04 against SH-EMIT-12 and SH-EMIT-15: both stay, since authored and emitted scopes differ. SH-EMIT cites SH-DIAL; SH-DIAL-04 owns the interpreter list.",
+        "X13. SH-GATE-20's tell greps overlap SH-USER-01/04, SH-DIAL-12, SH-EXP-13, SH-ERR-10 and SH-EMIT-13. The owners keep the text; SH-GATE-20 becomes the SH-CORE tell table (M-O-03), with each row naming its owner.",
+        "X14 version sniffing. SH-USER-05 keeps the text; SH-CI-15 and SH-EMIT-30 cite it.",
+        "X15 Git Bash. SH-USER-15 keeps the facts; SH-CI-14 keeps only the CI grep.",
+        "X16 non-ASCII. SH-GATE-16 is MUST for installers and SHOULD otherwise, but the shipped shell-gate.sh fails every #!/bin/sh file. SH-GATE-16 wins: the script warns for non-installers.",
+        "X17 verifier semantics. SH-ERR-24 judges by exit status; the cells say 'output is the violation'. These are scope-split, not contradictory: scripts follow SH-ERR-24, inline cells follow output semantics.",
+        "X18 xargs -r. shell-emit.md owner Q5 says 'GNU only'; SH-USER-08 says always, measured on GNU, busybox and uutils. SH-USER-08 keeps the text.",
+        "X19. SH-USER-12 says atomic mv onto the name; SH-EMIT-19 says never rename onto the rc path and keep mode, owner and symlink. SH-EMIT-19 keeps the text for user-owned or possibly-symlinked files; SH-USER-12 is scoped to script-owned files.",
+        "X20 sourced library. SH-GATE-18 allows shell=dash, which SH-DIAL-01 does not. SH-DIAL-01 and SH-DIAL-26 keep the text; SH-ERR-11 keeps no-options; SH-DIAL-21 owns the extension.",
+        "X21 kind tables. SH-DIAL T3 against SH-ERR-23 and SH-ERR-25: SH-ERR-23 keeps the prologue, SH-DIAL-03 the header and floor, SH-ERR-25 the exit table.",
+        "X22 empty arrays. SH-ERR-12 keeps the text; SH-EXP-20 becomes a pointer plus the measurement.",
+        "X23 echo. SH-DIAL-12 (sh constructs) and SH-EXP-09 (data in any dialect) both stay with their scopes stated.",
+        "X24 test -a/-o. SH-DIAL-11 keeps the text over SH-EXP-08.",
+        "X25 sh subset. SH-DIAL-02 owns the gate; SH-EXP-10/12 keep only the tells ShellCheck misses.",
+        "X26 SIGPIPE, xargs and IFS. SH-ERR-09 owns SIGPIPE, with SH-CI-16 as the CI trigger. SH-USER-08 owns -r, SH-EXP-14 owns -0, SH-ERR-03 owns IFS.",
+        "X27. SH-ERR-10 (MUST: no eval \"$(cmd)\") and SH-EMIT-14 (SHOULD: capture then eval in rc) are consistent. Both stay with their scopes.",
+        "X28. PS-GATE-07 owns execution policy; the future PS-SEC cites it."
+      ],
+      "authoring_notes": []
+    }
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Harvest"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "harvest:wave2",
+      "phaseIndex": 1,
+      "phaseTitle": "Harvest",
+      "agentId": "ae0512d7cdd0ff2e5",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1791677271091,
+      "queuedAt": 1791677271064,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.ag…",
+      "promptPreview": "Model rationale: opus — harvesting a wave, the convergence verdict, revising the next wave's commissions and the cross-consolidation contradiction sweep are decisions with a blast radius over every artifact the program ships.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- You are phase 6 (Iterate) of the research-lang program for shell scripting across operating systems and shells…",
+      "promptFramed": true,
+      "lastProgressAt": 1791677972863,
+      "tokens": 161469,
+      "toolCalls": 40,
+      "durationMs": 701771,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.agents/research/shell-topic-map.md\",\"verdict\":\"needs-another-round\",\"verdict_reason\":\"The wave-plan stop condition is not met. Wave 2 produced 124 new MUST rules and new failure classes:\\n- container-job sh -e (SH-CI-04)\\n- WinPS writer mixing (SH-CI-11)\\n- PROMPT_COMMAND element 0 (SH-EMIT-24)\\n- Taskfile item scope (SH-CI-17)\\n- P…"
+    }
+  ],
+  "totalTokens": 161469,
+  "totalToolCalls": 40
+}

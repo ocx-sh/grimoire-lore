@@ -480,3 +480,41 @@ description = { readme = "docs/dotnet-release.md", logo = "assets/lore-dotnet.sv
 [bundles.dotnet-essentials]
 version = "0.1.0"
 description = { readme = "docs/dotnet-essentials.md", logo = "assets/lore-dotnet.svg" }
+
+# The Shell set: two rules split by language family, because the globs differ
+# and a `.sh` edit is not a `.ps1` edit. `shell-quality` loads on shell source
+# in every dialect (sh, bash, zsh, ksh, fish, nushell, elvish), `.shellcheckrc`,
+# and the files that carry shell in CI (GitHub workflows and actions, Taskfiles,
+# GitLab CI), and routes to fourteen depth files by task. `powershell-quality`
+# loads on `*.ps1`, `*.psm1` and `*.psd1` and routes to six. Dotfiles such as
+# `.bashrc`, `Makefile`, `Dockerfile` and extensionless `bin/*` are never
+# globbed. The four skills are procedures run once per integration, installer,
+# port or incident. The bundle also carries `code-docs` and `code-docs-cleanup`,
+# which are shared by every language set.
+[rules.shell-quality]
+version = "0.1.0"
+description = { readme = "docs/shell-quality.md", logo = "assets/lore-shell.svg" }
+
+[rules.powershell-quality]
+version = "0.1.0"
+description = { readme = "docs/powershell-quality.md", logo = "assets/lore-shell.svg" }
+
+[skills.shell-integration]
+version = "0.1.0"
+description = { readme = "docs/shell-integration.md", logo = "assets/lore-shell.svg" }
+
+[skills.installer-script]
+version = "0.1.0"
+description = { readme = "docs/installer-script.md", logo = "assets/lore-shell.svg" }
+
+[skills.shell-port]
+version = "0.1.0"
+description = { readme = "docs/shell-port.md", logo = "assets/lore-shell.svg" }
+
+[skills.shell-diagnose]
+version = "0.1.0"
+description = { readme = "docs/shell-diagnose.md", logo = "assets/lore-shell.svg" }
+
+[bundles.shell-essentials]
+version = "0.1.0"
+description = { readme = "docs/shell-essentials.md", logo = "assets/lore-shell.svg" }
