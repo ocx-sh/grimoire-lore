@@ -1,0 +1,33 @@
+{
+  "created": "2026-10-11T16:33:21+02:00",
+  "description": "Procedure for building or auditing code that writes shell code for several shells or edits their startup files, such as a tool init command, a PATH or prompt hook, an rc or profile block, a generated completion script or a cmd.exe Batch line. Covers one quoter per target, refusing values a target cannot carry, the 36-case hostile round trip, rc file choice and byte-safe edits, append-safe hooks, completion registration proven by read-back, undo, and a harness kit run on the oldest and newest interpreter. Use when someone asks to \"generate shell code from Rust, Go or Python\", \"write tool init for bash zsh fish nu elvish\", \"add a PROMPT_COMMAND or precmd hook\", \"edit .bashrc or a PowerShell profile\", \"install shell completions\", \"quote a value for fish, nu, elvish or pwsh\", \"audit an env emitter\", \"completions installed but nothing happens\". Not for scripts that quote for themselves (shell-port), failing scripts (shell-diagnose) or curl-to-sh installers (installer-script).",
+  "keywords": [
+    "shell",
+    "emit",
+    "quoting",
+    "rc",
+    "profile",
+    "hooks",
+    "completions",
+    "bash",
+    "zsh",
+    "fish",
+    "nushell",
+    "elvish",
+    "powershell",
+    "cmd",
+    "batch",
+    "prompt",
+    "init"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "shell-integration",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/shell-integration",
+  "schema": 1,
+  "summary": "Builds and audits multi-shell emitters, rc editors, hooks and completion registration, then proves them with a round-trip, hook, rc, read-back and Batch harness kit, measured 2026-10-11"
+}
