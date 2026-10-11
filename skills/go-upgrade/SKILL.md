@@ -136,14 +136,15 @@ v=$(go list -m -f '{{.GoVersion}}') && test -n "$v" && test "$(printf '%s\n1.26.
 # Patch-level floor (GO-MOD-01). Any output is the finding. Empty output passes.
 go list -m -f '{{.GoVersion}}' | grep -v -E -e '^1\.[0-9]+(\.0)?$'
 # toolchain lines (GO-MOD-02). A hit in a library or SDK go.mod is the finding. Empty output passes.
-grep -rn --include='go.mod' -e '^toolchain' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/go.mod' \
+  | xargs -0 -r grep -H -n -e '^toolchain' --
 # Redundant or stale lines (GO-MOD-03). Exit 0 with empty output passes.
 go mod tidy -diff
 ```
 
 Then read every `actions/setup-go` step against GO-MOD-16 (a reading heuristic,
 because a workflow's version resolution cannot run locally):
-`grep -rn -A3 -e 'actions/setup-go' .github/workflows` lists them. A CLI release
+`git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' | xargs -0 -r grep -H -n -e 'actions/setup-go' -e 'go-version' --` lists them. A CLI release
 job reads `go-version-file: go.mod`, which picks up the `toolchain` line. A bare
 `go 1.N.0` line with no `toolchain` line installs exactly `1.N.0`. Empty output
 means the repository has no setup-go step to check.
@@ -213,7 +214,7 @@ of them carries it, drop the gopls step from the gate (GO-GATE-01 step 10).
 
 1. Move the exact pin in every workflow and install script. Never `latest`
    (GO-GATE-08). Check:
-   `grep -rn -E -e 'golangci-lint[^ ]*@latest' -e 'version: *latest' .github/workflows`.
+   `git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' | xargs -0 -r grep -H -n -E -e 'golangci-lint[^ ]*@latest' -e 'version: *latest' --`.
    Any output is the finding, empty output passes.
 2. Run the dated re-probes in [references/probes.md](references/probes.md) on the
    new version, before trusting its verdicts:
@@ -237,7 +238,8 @@ of them carries it, drop the gopls step from the gate (GO-GATE-01 step 10).
 
 ```sh
 # Any output names a pin to re-justify. Empty output passes.
-grep -rn -E --exclude-dir=.git -e 'GOEXPERIMENT[^a-zA-Z0-9_]+([a-z0-9]+,)*no[a-z0-9]+' .
+git ls-files -z --cached --others --exclude-standard \
+  | xargs -0 -r grep -H -n -E -e 'GOEXPERIMENT[^a-zA-Z0-9_]+([a-z0-9]+,)*no[a-z0-9]+' --
 ```
 
 Each hit has one of three outcomes on the destination toolchain (GO-LANG-16):
@@ -266,7 +268,7 @@ BZL-GO-07's external `vet` on every rules_go or Go bump. Also re-probe whether n
 Run GO-GATE-01's block from every module root. Every step blocks on its exit
 code, never on its stdout text. On a Go-version matrix, steps 1 to 4 and 7 to 9
 run once on the `stable` leg, and steps 5 and 6 on every leg. The step-10 gopls
-`yield` check runs only where `grep -rln --include='*.go' -e 'func(yield func(' .`
+`yield` check runs only where `git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' | xargs -0 -r grep -l -e 'func(yield func(' --`
 prints a file (empty output means no iterator producers and no step).
 
 ## Runbook B: triage a dependency

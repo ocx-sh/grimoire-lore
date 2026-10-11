@@ -351,19 +351,19 @@ description = { readme = "docs/cmake-essentials.md", logo = "assets/lore-cmake.s
 # ships inside `bazel-quality` (0.3.0), not here, so no two rules glob
 # `BUILD.bazel`.
 [rules.go-quality]
-version = "0.2.0"
+version = "0.2.1"
 description = { readme = "docs/go-quality.md", logo = "assets/lore-go.svg" }
 
 [rules.go-modules]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/go-modules.md", logo = "assets/lore-go.svg" }
 
 [skills.go-release]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/go-release.md", logo = "assets/lore-go.svg" }
 
 [skills.go-upgrade]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/go-upgrade.md", logo = "assets/lore-go.svg" }
 
 [skills.go-diagnose]
@@ -371,7 +371,7 @@ version = "0.1.0"
 description = { readme = "docs/go-diagnose.md", logo = "assets/lore-go.svg" }
 
 [bundles.go-essentials]
-version = "0.1.1"
+version = "0.1.2"
 description = { readme = "docs/go-essentials.md", logo = "assets/lore-go.svg" }
 
 # The Nix set: one rule, because every Nix file shares one glob family.

@@ -146,7 +146,13 @@ is not the gate. It fails only on a schema error or a missing git remote
 | No clock-derived value | `grep -n -e '{{ *\.Date' -e '{{ *\.Now' -e '{{ *time ' .goreleaser.yaml` | empty output. Any line is the finding | GO-REL-01 |
 | No strip (pinned) | `grep -n -e '-s -w' .goreleaser.yaml` | empty output. Any line is the finding | GO-REL-05 |
 | No image block | `grep -n -e '^dockers:' -e '^dockers_v2:' .goreleaser.yaml` | empty output, unless an image was asked for | GO-REL-10 |
-| No stored key, no deprecated cosign flags | `grep -rn -e '--output-signature' -e '--output-certificate' -e 'COSIGN_PRIVATE_KEY' .github .goreleaser.yaml` | empty output. Any line is the finding | GO-REL-11 |
+| No stored key, no deprecated cosign flags | see block GO-REL-11 (no stored key) | empty output. Any line is the finding | GO-REL-11 |
+
+```sh
+# GO-REL-11 (no stored key)
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/**' '.goreleaser.yaml' \
+  | xargs -0 -r grep -H -n -e '--output-signature' -e '--output-certificate' -e 'COSIGN_PRIVATE_KEY' --
+```
 
 The clock grep matters even though step 8 exists. goreleaser 2.17.1 resolves
 `{{ .Date }}` to the commit time, so a double build stays byte-identical with
@@ -316,15 +322,27 @@ the SBOMs and not one binary (measured on goreleaser 2.17.1, 2026-09-26).
 
 | Check | Command | Pass | Rule |
 |---|---|---|---|
-| OIDC permission | `grep -rn -e 'id-token: *write' --include='release*.yml' .github/workflows` | a line printed. Empty output is the finding | GO-REL-11 |
-| Attestation covers the assets | `grep -rn -e 'subject-checksums: *dist/checksums.txt' --include='release*.yml' .github/workflows` | a line printed. Empty output is the finding | GO-REL-11 |
-| Tags fetched | `grep -rn -A3 -e 'actions/checkout' --include='release*.yml' .github/workflows` | the block shows `fetch-depth: 0`. Empty output means no workflow named release*.yml exists: point the grep at the real release workflow. A reading heuristic | GO-REL-06 |
+| OIDC permission | see block GO-REL-11 (OIDC permission) | a line printed. Empty output is the finding | GO-REL-11 |
+| Attestation covers the assets | see block GO-REL-11 (attestation) | a line printed. Empty output is the finding | GO-REL-11 |
+| Tags fetched | see block GO-REL-06 (tags fetched) | a `fetch-depth` line follows each `actions/checkout` line, and it reads `fetch-depth: 0`. Empty output means no workflow named release*.yml exists: point the grep at the real release workflow. A reading heuristic | GO-REL-06 |
 | Actions pinned | the command below the table | empty output | GO-REL-12 |
 
 ```sh
+# GO-REL-11 (OIDC permission)
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**/release*.yml' \
+  | xargs -0 -r grep -H -n -e 'id-token: *write' --
+# GO-REL-11 (attestation)
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**/release*.yml' \
+  | xargs -0 -r grep -H -n -e 'subject-checksums: *dist/checksums.txt' --
+# GO-REL-06 (tags fetched)
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**/release*.yml' \
+  | xargs -0 -r grep -H -n -e 'actions/checkout' -e 'fetch-depth' --
+```
+
+```sh
 # Every uses: at a 40-hex SHA, local ./ actions exempt. Any output is a finding, empty output is the pass.
-grep -rn -E -e 'uses:[[:space:]]*[^.[:space:]][^[:space:]]*@' .github/workflows |
-  grep -v -E -e '@[0-9a-f]{40}[[:space:]]' -e '@[0-9a-f]{40}$'
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' \
+  | xargs -0 -r grep -H -n -E -e 'uses:[[:space:]]*[^.[:space:]][^[:space:]]*@' -- | grep -v -E -e '@[0-9a-f]{40}[[:space:]]' -e '@[0-9a-f]{40}$'
 ```
 
 The pin applies to every workflow in the repository, lint and docs included,

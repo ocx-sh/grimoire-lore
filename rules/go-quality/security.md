@@ -55,7 +55,8 @@ not on exit status, because a pipeline's exit code is the last stage's.
 ## The gosec Preset That Must Stay Off
 
 ```bash
-grep -rn -E --include='*golangci*' -e '^[^#]*common-false-positives' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*golangci*' \
+  | xargs -0 -r grep -H -n -E -e '^[^#]*common-false-positives' --
 golangci-lint run ./...
 ```
 
@@ -74,15 +75,21 @@ Two rows add a grep for the half gosec does not see. Both are in the block under
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
 | GO-SEC-02 | Generate every token, key, nonce, salt, session ID and upload or resource ID with `crypto/rand.Text()` or `crypto/rand.Read`. Never use `math/rand` or `math/rand/v2` for these, at any Go version. Non-secret randomness (backoff jitter, load shuffling, sampling) uses `math/rand/v2` and carries `//nolint:gosec // G404: retry jitter, not a secret`. | Neither `math/rand` package is unpredictable to an observer, and v2 changed the API, not the security model. An ID minted with `math/rand` and returned as a URL path segment is a session-hijack shape. | gosec **G404** fires on both packages. No output is the pass. A jitter site without the reasoned suppression is also a finding. | MUST |
-| GO-SEC-03 | Never set `InsecureSkipVerify` in non-test code, including from a flag, env var or config value. To trust a private registry, add its CA to `tls.Config.RootCAs` (a `--ca-file` flag). For a plaintext registry, dial HTTP only for hosts in an exact `host:port` allow-list (pinned default: mirror the wrapped CLI's list, which is `OCX_INSECURE_REGISTRIES` for ocx and which the adopter renames). Never lower `MinVersion` below `tls.VersionTLS12`, and never set `CipherSuites` or `CurvePreferences`. | `InsecureSkipVerify` accepts any certificate for any host, a full MITM bypass. A global `--insecure` flag turns it on for every registry the process touches, including the credential exchange. A per-host plaintext list names exactly what it downgrades. A hand-written cipher or curve list freezes out the defaults' future upgrades. | gosec **G402** fires on a literal `true`, on a variable (`may be set to true`) and on `MinVersion: tls.VersionTLS10` (`TLS MinVersion too low`). It is silent on a hand-set secure `CipherSuites` list, so also run `grep -rn --include='*.go' -e 'CipherSuites:' -e 'CurvePreferences:' .`, where any output is the finding. `_test.go` is excluded from gosec by GO-GATE-09. | MUST |
+| GO-SEC-03 | Never set `InsecureSkipVerify` in non-test code, including from a flag, env var or config value. To trust a private registry, add its CA to `tls.Config.RootCAs` (a `--ca-file` flag). For a plaintext registry, dial HTTP only for hosts in an exact `host:port` allow-list (pinned default: mirror the wrapped CLI's list, which is `OCX_INSECURE_REGISTRIES` for ocx and which the adopter renames). Never lower `MinVersion` below `tls.VersionTLS12`, and never set `CipherSuites` or `CurvePreferences`. | `InsecureSkipVerify` accepts any certificate for any host, a full MITM bypass. A global `--insecure` flag turns it on for every registry the process touches, including the credential exchange. A per-host plaintext list names exactly what it downgrades. A hand-written cipher or curve list freezes out the defaults' future upgrades. | gosec **G402** fires on a literal `true`, on a variable (`may be set to true`) and on `MinVersion: tls.VersionTLS10` (`TLS MinVersion too low`). It is silent on a hand-set secure `CipherSuites` list, so also see block GO-SEC-03, where any output is the finding. `_test.go` is excluded from gosec by GO-GATE-09. | MUST |
 | GO-SEC-04 | A struct that reaches `encoding/json`, yaml, xml or toml marshalling never carries a secret-named field (`password`, `secret`, `token`, by gosec's pattern). When a wire protocol requires the secret, as a credential-helper payload or a token-printing command does, the field lives on an unexported DTO filled from `Secret.Reveal()` at the send site, with `//nolint:gosec // G117: credential-helper protocol requires the secret on the wire`. | An untagged credential field reaches every log line, error and API response that serializes the struct. Renaming the JSON tag does not help: G117 still fires on `json:"password"`, which is correct. | gosec **G117**. No output is the pass. | MUST |
 | GO-SEC-05 | Bound every untrusted stream before a decoder or parser reads it. For a request body, set `r.Body = http.MaxBytesReader(w, r.Body, max)` before `json.NewDecoder`, `io.ReadAll` or `ParseMultipartForm`, and a smaller `maxMemory` argument alone is not the fix. For a response body, file or archive member, use `json.NewDecoder(io.LimitReader(r, max+1))`. GO-NET-07 owns the `io.ReadAll` form and GO-IO-03 owns decompression. | Otherwise an attacker-sized body is read to completion. `ParseMultipartForm`'s `maxMemory` bounds only the in-memory part and spills the rest to disk. A registry manifest decoded straight off `resp.Body` has no ceiling, and GO-NET-07's `io.ReadAll` grep cannot see a decoder. | Multipart: gosec **G120**, which still fires on `ParseMultipartForm(10<<20)` until `MaxBytesReader` comes first. Decoders: the `decoder-bound` grep below, whose output is the candidate file list. Empty output is the pass. The full linter roster is silent on an unbounded decoder. | MUST |
 
+```sh
+# GO-SEC-03
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | xargs -0 -r grep -H -n -e 'CipherSuites:' -e 'CurvePreferences:' --
+```
+
 ```bash
+# checks/ is this rule's own go-quality/checks/ directory, wherever the rule is installed
 # decoder-bound (GO-SEC-05): files that decode a body with no bound. Empty output is the pass.
-grep -rl --include='*.go' -e 'json\.NewDecoder(' . \
-  | xargs -r grep -l -e '\.Body' \
-  | xargs -r grep -L -e 'MaxBytesReader' -e 'LimitReader'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | HAS='json\.NewDecoder\(' ALSO='\.Body' LACKS='MaxBytesReader|LimitReader' xargs -0 -r awk -f checks/file_gate.awk --
 ```
 
 ```go
@@ -99,24 +106,14 @@ gosec sees part of each row. The grep sees the rest and its hits are read, not a
 
 ```bash
 golangci-lint run ./...
-grep -rn --include='*.go' -e '"unsafe"' -e '//go:linkname' -e 'import "C"' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | xargs -0 -r grep -H -n -e '"unsafe"' -e '//go:linkname' -e 'import "C"' --
 # raw-secret-field (GO-SEC-07): credential-named string or []byte fields. Empty output is the pass.
-grep -rniwE --include='*.go' \
-  -e '^[[:space:]]+[a-z]*passw(or)?d[[:space:]]+string' \
-  -e '^[[:space:]]+[a-z]*passw(or)?d[[:space:]]+\[\]byte' \
-  -e '^[[:space:]]+[a-z]*token[[:space:]]+string' \
-  -e '^[[:space:]]+[a-z]*token[[:space:]]+\[\]byte' \
-  -e '^[[:space:]]+[a-z]*secret[[:space:]]+string' \
-  -e '^[[:space:]]+[a-z]*secret[[:space:]]+\[\]byte' \
-  -e '^[[:space:]]+[a-z]*apikey[[:space:]]+string' \
-  -e '^[[:space:]]+[a-z]*apikey[[:space:]]+\[\]byte' \
-  -e '^[[:space:]]+[a-z]*privatekey[[:space:]]+string' \
-  -e '^[[:space:]]+[a-z]*privatekey[[:space:]]+\[\]byte' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | xargs -0 -r grep -H -n -i -w -E -e '^[[:space:]]+[a-z]*passw(or)?d[[:space:]]+string' -e '^[[:space:]]+[a-z]*passw(or)?d[[:space:]]+\[\]byte' -e '^[[:space:]]+[a-z]*token[[:space:]]+string' -e '^[[:space:]]+[a-z]*token[[:space:]]+\[\]byte' -e '^[[:space:]]+[a-z]*secret[[:space:]]+string' -e '^[[:space:]]+[a-z]*secret[[:space:]]+\[\]byte' -e '^[[:space:]]+[a-z]*apikey[[:space:]]+string' -e '^[[:space:]]+[a-z]*apikey[[:space:]]+\[\]byte' -e '^[[:space:]]+[a-z]*privatekey[[:space:]]+string' -e '^[[:space:]]+[a-z]*privatekey[[:space:]]+\[\]byte' --
 # credential-literal (GO-SEC-08): a credential name assigned a string literal. Empty output is the pass.
-grep -rniE --include='*.go' \
-  -e 'password[[:space:]]*:?=[[:space:]]*"' -e 'secret[[:space:]]*:?=[[:space:]]*"' \
-  -e 'token[[:space:]]*:?=[[:space:]]*"' -e 'apikey[[:space:]]*:?=[[:space:]]*"' \
-  -e 'api_key[[:space:]]*:?=[[:space:]]*"' -e 'credential[[:space:]]*:?=[[:space:]]*"' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | xargs -0 -r grep -H -n -i -E -e 'password[[:space:]]*:?=[[:space:]]*"' -e 'secret[[:space:]]*:?=[[:space:]]*"' -e 'token[[:space:]]*:?=[[:space:]]*"' -e 'apikey[[:space:]]*:?=[[:space:]]*"' -e 'api_key[[:space:]]*:?=[[:space:]]*"' -e 'credential[[:space:]]*:?=[[:space:]]*"' --
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
@@ -145,12 +142,11 @@ No analyzer gates these rows. The triage greps narrow the reading list, and thei
 
 ```bash
 # secret-compare (GO-SEC-09): files with credential-named funcs that use == and no constant-time compare.
-grep -rlE --include='*.go' -e 'func.*[Kk]ey' -e 'func.*[Ss]ecret' -e 'func.*[Tt]oken' -e 'func.*[Pp]assword' . \
-  | xargs -r grep -l -e '==' \
-  | xargs -r grep -L -e 'subtle\.ConstantTimeCompare' -e 'hmac\.Equal'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | HAS='func.*[Kk]ey|func.*[Ss]ecret|func.*[Tt]oken|func.*[Pp]assword' ALSO='==' LACKS='subtle\.ConstantTimeCompare|hmac\.Equal' xargs -0 -r awk -f checks/file_gate.awk --
 # text-template-sink (GO-SEC-10): text/template in a file that writes an HTTP response.
-grep -rl --include='*.go' -e '"text/template"' . \
-  | xargs -r grep -l -e 'http\.ResponseWriter'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | HAS='"text/template"' ALSO='http\.ResponseWriter' xargs -0 -r awk -f checks/file_gate.awk --
 ```
 
 | ID | Rule | Rationale | Verification | Severity |

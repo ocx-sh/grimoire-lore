@@ -39,7 +39,8 @@ otherwise.
 
 ```sh
 go list -m -f '{{.GoVersion}}'                       # the module line
-grep -rn --include='*.go' -e '^//go:build.*go1\.' .  # files that override it
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | xargs -0 -r grep -H -n -e '^//go:build.*go1\.' --   # files that override it
 go fix -diff ./...                                   # GO-GATE-03 owns the gate half
 go vet ./...                                         # stdversion, fast, on go1.27.1
 go build ./...                                       # also on the oldstable leg (GO-MOD-16)
@@ -70,10 +71,19 @@ One gate, `golangci-lint run ./...` with the fleet configuration (GO-GATE-09), r
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| GO-LANG-05 | Never disable SA1019 repo-wide: no `-SA1019` in golangci-lint's staticcheck `checks` or in `staticcheck.conf`. Suppress one site with `//nolint:staticcheck // SA1019: reason`, or with an exclusion scoped to the deprecation message. Treat an SA1019 hit on a symbol with no `//go:fix inline` shim as a manual rewrite `go fix` never does: `httputil.ReverseProxy.Director` to `Rewrite`, `reflect.SliceHeader`/`StringHeader` to `unsafe.Slice`/`unsafe.String`. | An empty `go fix -diff` is not "nothing deprecated", because only shimmed APIs are inlined. A global `-SA1019`, copied from widely read repositories including kubernetes and terraform, hides `rand.Seed` and every future deprecation. | `grep -rn -e '-SA1019' --include='*golangci*' --include='staticcheck.conf' .`: any output is the finding, and empty output is the pass. | MUST |
+| GO-LANG-05 | Never disable SA1019 repo-wide: no `-SA1019` in golangci-lint's staticcheck `checks` or in `staticcheck.conf`. Suppress one site with `//nolint:staticcheck // SA1019: reason`, or with an exclusion scoped to the deprecation message. Treat an SA1019 hit on a symbol with no `//go:fix inline` shim as a manual rewrite `go fix` never does: `httputil.ReverseProxy.Director` to `Rewrite`, `reflect.SliceHeader`/`StringHeader` to `unsafe.Slice`/`unsafe.String`. | An empty `go fix -diff` is not "nothing deprecated", because only shimmed APIs are inlined. A global `-SA1019`, copied from widely read repositories including kubernetes and terraform, hides `rand.Seed` and every future deprecation. | see block GO-LANG-05: any output is the finding, and empty output is the pass. | MUST |
 | GO-LANG-06 | Never call `math/rand.Seed`. For a reproducible sequence, build a local generator, `rand.New(rand.NewPCG(s1, s2))` from `math/rand/v2`, and pass it explicitly. New code imports `math/rand/v2`, never v1. Secrets come from `crypto/rand`, and the G404 suppression for non-security jitter is GO-SEC-02's. | Since go 1.24 `Seed` is a no-op keyed on the main module's `go` line (`randseednop`), while at go 1.23 it still seeds. Bumping the line silently breaks "seeded" test data. | staticcheck in the gate reports `SA1019: math/rand.Seed has been deprecated`. | MUST |
 | GO-LANG-22 | Never import `golang.org/x/exp/constraints`. Use `cmp.Ordered` and the stdlib `slices` and `maps`. **pinned:** the package-scoped depguard entry is part of GO-MOD-08's `superseded` list, never a deny on all of `golang.org/x/exp`. | Superseded since Go 1.21, with zero importers in 35 surveyed repositories. The Go blog's still-live 2022 generics introduction shows it as the canonical constraint, so models reproduce the import. | The gate reports `import 'golang.org/x/exp/constraints' is not allowed from list 'superseded'` (measured 2026-09-26). | MUST |
-| GO-LANG-07 | Compare `time.Time` with `Equal`, never `==` or `!=`. Never key a map or a dedup set by a raw `time.Time`: key by `t.UnixNano()`, or apply one normalization (`t.UTC().Round(0)`) to every key on every path. | `==` also compares the monotonic reading and the Location, so a JSON round-trip of the same instant is unequal and a map lookup misses silently. | revive `time-equal`, in GO-GATE-15's rule list, with zero false positives on 435k lines of exemplar code (measured 2026-09-26). gocritic misses it. Map keys: `grep -rn --include='*.go' -e 'map\[time\.Time\]' .`, then read each hit. Empty output is the pass. | MUST |
+| GO-LANG-07 | Compare `time.Time` with `Equal`, never `==` or `!=`. Never key a map or a dedup set by a raw `time.Time`: key by `t.UnixNano()`, or apply one normalization (`t.UTC().Round(0)`) to every key on every path. | `==` also compares the monotonic reading and the Location, so a JSON round-trip of the same instant is unequal and a map lookup misses silently. | revive `time-equal`, in GO-GATE-15's rule list, with zero false positives on 435k lines of exemplar code (measured 2026-09-26). gocritic misses it. Map keys: see block GO-LANG-07, then read each hit. Empty output is the pass. | MUST |
+
+```sh
+# GO-LANG-05
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*golangci*' ':(glob)**/staticcheck.conf' \
+  | xargs -0 -r grep -H -n -e '-SA1019' --
+# GO-LANG-07
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | xargs -0 -r grep -H -n -e 'map\[time\.Time\]' --
+```
 
 ```go
 // wrong: a no-op once the main module says go 1.24, so the data changes every run
@@ -88,8 +98,11 @@ return r.IntN(10)
 ## Iterators: gopls `yield` and goleak
 
 ```sh
-# gopls-yield: pinned gopls v0.23.0, run where grep -rln --include='*.go' -e 'func(yield func(' . prints a file
-find . -name '*.go' -not -path '*/vendor/*' -print0 | xargs -0 -r gopls check | grep -e 'yield may be called again'
+# gopls-yield: pinned gopls v0.23.0, run where the first command below prints a file
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | xargs -0 -r grep -l -F -e 'func(yield func(' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' ':(exclude,glob)**/vendor/**' \
+  | xargs -0 -r gopls check | grep -e 'yield may be called again'
 go test ./...
 ```
 
@@ -101,7 +114,13 @@ conditional step.
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
 | GO-LANG-08 | Never let an `iter.Seq`/`iter.Seq2` producer call `yield` again after it may have returned false. Check the result (`if !yield(v) { return }`) wherever another `yield` or loop iteration can follow on some path. A `yield` that is the last action on its path may go unchecked, but name that shape in review. Each exported producer gets one test that `break`s out of a `range` over it early. | The runtime panics only when some consumer exits early, so the defect ships green. No fixer writes iterators. | `gopls-yield` above, watched red on the loop and sequential shapes and green on the terminal and checked ones. Runtime: the early-break test under `go test ./...` panics with `range function continued iteration after function for loop body returned false`. | MUST |
-| GO-LANG-18 | Every `iter.Pull`/`iter.Pull2` call keeps `stop`: `defer stop()` on the next line, or store it on a value whose `Close` every path reaches. Never discard it with `_`. A package that calls `iter.Pull` counts as spawning a goroutine for GO-CONC-11, so it gets `goleak.VerifyTestMain(m)` and one test that stops consuming before the sequence ends. | A discarded or unreached `stop` leaks the iterator's goroutine permanently, and vet, staticcheck and golangci-lint are silent. | `go test ./...` with `goleak.VerifyTestMain` reports `found unexpected goroutines` naming `iter.Pull`. `synctest.Test` is the stdlib-only alternative for this one shape. Locate sites with `grep -rn --include='*.go' -e 'iter\.Pull(' -e 'iter\.Pull2(' .` and read each for `stop`. Empty output means the row does not apply. | MUST |
+| GO-LANG-18 | Every `iter.Pull`/`iter.Pull2` call keeps `stop`: `defer stop()` on the next line, or store it on a value whose `Close` every path reaches. Never discard it with `_`. A package that calls `iter.Pull` counts as spawning a goroutine for GO-CONC-11, so it gets `goleak.VerifyTestMain(m)` and one test that stops consuming before the sequence ends. | A discarded or unreached `stop` leaks the iterator's goroutine permanently, and vet, staticcheck and golangci-lint are silent. | `go test ./...` with `goleak.VerifyTestMain` reports `found unexpected goroutines` naming `iter.Pull`. `synctest.Test` is the stdlib-only alternative for this one shape. Locate sites (see block GO-LANG-18) and read each for `stop`. Empty output means the row does not apply. | MUST |
+
+```sh
+# GO-LANG-18
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | xargs -0 -r grep -H -n -e 'iter\.Pull(' -e 'iter\.Pull2(' --
+```
 
 ```go
 // wrong: keeps yielding after the consumer's break, which panics at run time
@@ -136,15 +155,30 @@ grep here is a work list: empty output means the row does not apply, and each hi
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| GO-LANG-12 | Decode JSON whose integers can exceed 2^53 into typed fields (`int64`, `uint64`, `json.Number`) or through `Decoder.UseNumber()`, never into `any` or `map[string]any`. **pinned:** an SDK that wraps a CLI decodes the CLI's JSON envelope into typed structs only. | `9007199254740993` decodes to `9.007199254740992e+15` with `err == nil`, and the 1.27 v2 backing does not change that. | `grep -rn --include='*.go' -e 'map\[string\]any' -e 'map\[string\]interface{}' .`, then read each unmarshal target. | SHOULD |
-| GO-LANG-13 | Index, slice or truncate a string that is not guaranteed ASCII (registry and OCI names, user input, paths, error text) by rune, never by byte offset. Fuzz such helpers with multibyte seeds and assert `utf8.ValidString` (GO-TEST-14). | `"café-ñandú"[:4]` is `"caf\xc3"`, invalid UTF-8 and no panic. SA6003 is a performance check on a different pattern and does not fire. | `grep -rn --include='*.go' -E -e '\[:[0-9]+\]' .` is a broad aid that also matches byte slices. The fuzz target makes it mechanical. | SHOULD |
-| GO-LANG-20 | When the element type can be a float, route every comparator given to `slices.SortFunc`, `SortStableFunc`, `BinarySearchFunc`, `CompareFunc`, `MinFunc`, `MaxFunc` or `sort.Slice` through `cmp.Compare` or `cmp.Less`, or call the `cmp.Ordered` functions directly. Never hand-roll `<` for these, and never write a `Number` constraint with `if a < b` for a min or max helper. | With NaN present `<` is not a strict weak ordering. The measured output is `[3 NaN 1 NaN 2]`, and `naiveMax(1, NaN) != naiveMax(NaN, 1)`. `cmp.Compare` orders NaN first, deterministically. | `grep -rn --include='*.go' -e 'SortFunc(' -e 'SortStableFunc(' -e 'BinarySearchFunc(' -e 'CompareFunc(' -e 'MinFunc(' -e 'MaxFunc(' -e 'sort\.Slice(' .`, then read each comparator for a bare `<` or `>` on a float operand. | MUST (float-capable) · SHOULD elsewhere |
+| GO-LANG-12 | Decode JSON whose integers can exceed 2^53 into typed fields (`int64`, `uint64`, `json.Number`) or through `Decoder.UseNumber()`, never into `any` or `map[string]any`. **pinned:** an SDK that wraps a CLI decodes the CLI's JSON envelope into typed structs only. | `9007199254740993` decodes to `9.007199254740992e+15` with `err == nil`, and the 1.27 v2 backing does not change that. | see block GO-LANG-12, then read each unmarshal target. | SHOULD |
+| GO-LANG-13 | Index, slice or truncate a string that is not guaranteed ASCII (registry and OCI names, user input, paths, error text) by rune, never by byte offset. Fuzz such helpers with multibyte seeds and assert `utf8.ValidString` (GO-TEST-14). | `"café-ñandú"[:4]` is `"caf\xc3"`, invalid UTF-8 and no panic. SA6003 is a performance check on a different pattern and does not fire. | see block GO-LANG-13, a broad aid that also matches byte slices. The fuzz target makes it mechanical. | SHOULD |
+| GO-LANG-20 | When the element type can be a float, route every comparator given to `slices.SortFunc`, `SortStableFunc`, `BinarySearchFunc`, `CompareFunc`, `MinFunc`, `MaxFunc` or `sort.Slice` through `cmp.Compare` or `cmp.Less`, or call the `cmp.Ordered` functions directly. Never hand-roll `<` for these, and never write a `Number` constraint with `if a < b` for a min or max helper. | With NaN present `<` is not a strict weak ordering. The measured output is `[3 NaN 1 NaN 2]`, and `naiveMax(1, NaN) != naiveMax(NaN, 1)`. `cmp.Compare` orders NaN first, deterministically. | see block GO-LANG-20, then read each comparator for a bare `<` or `>` on a float operand. | MUST (float-capable) · SHOULD elsewhere |
 | GO-LANG-21 | When a `comparable` type parameter can be instantiated with `any` or another interface type, document that an uncomparable dynamic value (slice, map, func) panics on `==` or as a map key, and test that path if external input reaches it. | Since Go 1.20 interface types satisfy `comparable` statically, so `hash of unhashable type []int` appears only at run time. | Read every `[K comparable]` parameter instantiated with, or exported for, `any` or an interface type. | SHOULD |
 | GO-LANG-24 | Constrain a generic interface's own type parameter with `any`. Put a stronger constraint (`comparable`, `cmp.Ordered`, a self-referential method constraint) on the concrete implementations, unless every implementation needs it. | An over-constrained interface forecloses implementations that do not need the extra power. The Go blog's generic-interfaces post says to leave stronger constraints to implementations. | For each generic interface, compare its constraint with what every in-module implementation uses. | SHOULD |
 | GO-LANG-25 | Name iterator-returning functions by the `iter` convention: `All` for the single natural full sequence, `Backward` for reverse order, `Keys` or `Values` for map-like projections, and a domain name (`Preorder`) when several sequences exist and none is the default. Put configuration on the arguments (`Scan(min, max)`), never on a family of name variants. | The stdlib (`slices.All`, `maps.Keys`, go 1.23) sets the reader's expectation, and an off-convention name hides which sequence is the default. | `go doc` review of each exported iterator-returning name against the convention. | SHOULD |
 | GO-LANG-19 | Write a constraint's basic-kind elements as approximations (`~string`, `~int`) unless the constraint deliberately excludes named types. When a caller hits `possibly missing ~`, fix the constraint once, never by converting at the call site. | Without `~` every `type ID string` is rejected, and the error surfaces at some later caller, not at the constraint's author. | Read at authoring time. Once triggered, `go build` prints `does not satisfy` followed by `possibly missing ~`. | SHOULD |
-| GO-LANG-14 | Add a type parameter only when the module instantiates it with two or more types, or the algorithm is type-indifferent (a container, a `slices`- or `maps`-style helper). Otherwise write concrete code or an interface. Apply the single-instantiation finding only to unexported or internal functions, because a repo-local count cannot see an exported function's callers. | No fixer ever introduces a type parameter, and "write code, not types" is the Go team's guidance. Counting `Name[` misses nearly every inferred call. | From the declaring package's directory (rename `contains`): `NAME=contains; grep -rn --include='*.go' -e "\b$NAME(" .`. The declaration does not match, so one line of output is one call site, the finding. `Name[` counts only zero-argument constructors such as `New[T]()`. | SHOULD |
+| GO-LANG-14 | Add a type parameter only when the module instantiates it with two or more types, or the algorithm is type-indifferent (a container, a `slices`- or `maps`-style helper). Otherwise write concrete code or an interface. Apply the single-instantiation finding only to unexported or internal functions, because a repo-local count cannot see an exported function's callers. | No fixer ever introduces a type parameter, and "write code, not types" is the Go team's guidance. Counting `Name[` misses nearly every inferred call. | From the declaring package's directory (rename `contains`): see block GO-LANG-14. The declaration does not match, so one line of output is one call site, the finding. `Name[` counts only zero-argument constructors such as `New[T]()`. | SHOULD |
 | GO-LANG-26 | Export `[]T` for a collection that is fully materialized before the call returns (one response body, one JSON document, one completed scan). Export `iter.Seq[T]` or `iter.Seq2[K, V]` only for an unbounded, lazy or single-pass source. **pinned:** an SDK's envelope collections (installed packages, tags) export `[]T`. | `iter.Seq` costs every caller that is not a plain `for` a `slices.Collect`, and buys nothing when no laziness exists. | One question per exported collection: does the producer hold the whole collection before returning? If yes, `[]T`, and an `iter.Seq` is the finding. | MUST (SDK) · SHOULD elsewhere |
+
+```sh
+# GO-LANG-12
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | xargs -0 -r grep -H -n -e 'map\[string\]any' -e 'map\[string\]interface{}' --
+# GO-LANG-13
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | xargs -0 -r grep -H -n -E -e '\[:[0-9]+\]' --
+# GO-LANG-20
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | xargs -0 -r grep -H -n -e 'SortFunc(' -e 'SortStableFunc(' -e 'BinarySearchFunc(' -e 'CompareFunc(' -e 'MinFunc(' -e 'MaxFunc(' -e 'sort\.Slice(' --
+# GO-LANG-14
+NAME=contains; git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | xargs -0 -r grep -H -n -E -e "(^|[^[:alnum:]_])${NAME}[(]" --
+```
 
 ## Moving to a New Go Release
 
@@ -153,8 +187,14 @@ The `go-upgrade` skill runs these rows as numbered steps and cites their IDs.
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
 | GO-LANG-15 | Move a module to a new release in this order. (1) Read the notes of every release crossed against the silent-change table below. (2) Save `go list -f '{{.DefaultGODEBUG}}' ./...` before and after, and account for each difference. (3) Bump `go`, then the CLI's `toolchain` line (GO-MOD-01, GO-MOD-02), as a deliberate change. (4) Run `go fix ./...` after the bump and read stderr for `ignoring alternative fix`. (5) Run `go vet ./...` and clear `stdversion`. (6) Bump the golangci-lint pin and config (GO-GATE-08). (7) Run GO-LANG-16's audit. (8) Run the full gate (GO-GATE-01). Only then triage govulncheck (GO-MOD-12), as a separate diff. | Fixers decline below the new floor, so `go fix` before the bump under-modernizes. Dependabot never opens a toolchain-only PR ([dependabot-core#13520](https://github.com/dependabot/dependabot-core/issues/13520), open on 2026-09-26), so the bump is scheduled work. | Each step's own check. Step 4's order was watched: `errorsastype` is silent at go 1.25 and fires at go 1.26. | SHOULD |
-| GO-LANG-16 | On every `go`-line bump, re-justify each opt-out `GOEXPERIMENT` pin (`nojsonv2`, `nogreenteagc`, any `no`-prefixed name) in a Makefile, Dockerfile, workflow or script, and give each a comment saying why. An opt-out of a now-default experiment is a real opt-out: `nojsonv2` and `nogreenteagc` on 1.27.1 both change behaviour. An opt-in pin of a now-default experiment is a harmless no-op. A pin naming a removed experiment breaks the build. | A pin written for an earlier release silently keeps a module on the old JSON implementation or the old GC after the bump. Both opt-outs are announced for removal, so each minor needs a re-check. | `grep -rn -E --exclude-dir=.git -e 'GOEXPERIMENT[^a-zA-Z0-9_]+([a-z0-9]+,)*no[a-z0-9]+' .` lists every opt-out pin in any file type, YAML env maps included (measured 2026-09-26). Output is the work list: a hit with no reason comment beside it is the finding, and empty output means no opt-out pin exists. A binary's own stamp is GO-OBS-22's check. | SHOULD |
+| GO-LANG-16 | On every `go`-line bump, re-justify each opt-out `GOEXPERIMENT` pin (`nojsonv2`, `nogreenteagc`, any `no`-prefixed name) in a Makefile, Dockerfile, workflow or script, and give each a comment saying why. An opt-out of a now-default experiment is a real opt-out: `nojsonv2` and `nogreenteagc` on 1.27.1 both change behaviour. An opt-in pin of a now-default experiment is a harmless no-op. A pin naming a removed experiment breaks the build. | A pin written for an earlier release silently keeps a module on the old JSON implementation or the old GC after the bump. Both opt-outs are announced for removal, so each minor needs a re-check. | see block GO-LANG-16, which lists every opt-out pin in any file type, YAML env maps included (measured 2026-09-26). Output is the work list: a hit with no reason comment beside it is the finding, and empty output means no opt-out pin exists. A binary's own stamp is GO-OBS-22's check. | SHOULD |
 | GO-LANG-17 | In a repository that commits `go.work`, keep its `godebug` block identical to every member module's own `godebug` lines, or have neither. | In workspace mode a member's `godebug` is ignored without warning, while under `GOWORK=off` (GO-MOD-05's per-member CI leg) it applies, so the two builds run with different runtime defaults. | `godebug-parity` below, run from the workspace root. Any output is the finding, and empty output is the pass. It compares every main and test-main package under each member, so a library member is covered through its tests (watched 2026-09-26 on Go 1.27.1: red on a library member with a test and on a main member, empty on the twin). | SHOULD |
+
+```sh
+# GO-LANG-16
+git ls-files -z --cached --others --exclude-standard \
+  | xargs -0 -r grep -H -n -E -e 'GOEXPERIMENT[^a-zA-Z0-9_]+([a-z0-9]+,)*no[a-z0-9]+' --
+```
 
 ```sh
 # godebug-parity
