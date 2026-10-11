@@ -7,6 +7,8 @@ resolves once the new manifest is released.
 Measured 2026-10-10 on SQLite.swift (tools 6.1 raised to 6.2, previous release `0.15.4`)
 with the `swift:6.1` and `swift:6.2` images, needing `docker` and `git`.
 
+Commands in this file were translated 2026-10-11 to the portable dialect (git-fed file lists, POSIX grep and awk) and each was re-watched red on a plant and green on a twin under GNU and busybox; a "measured 2026-10-10" date below dates the original form.
+
 ## Why not build the library on the old image
 
 The old toolchain refuses the raised manifest by design: `swift package dump-package`
@@ -39,9 +41,9 @@ import PackageDescription
 let package = Package(name: "c", dependencies: [.package(url: "file://$W/lib", from: "$V")],
     targets: [.executableTarget(name: "c")])
 MANIFEST
-dk "$W/lib" swift package dump-package >/dev/null 2>"$W/lib.err"; echo "library on $OLDIMG: exit $?"; grep -m1 -e 'tools version' "$W/lib.err"
+dk "$W/lib" swift package dump-package >/dev/null 2>"$W/lib.err"; echo "library on $OLDIMG: exit $?"; grep -e 'tools version' "$W/lib.err" | head -n 1
 dk "$W/consumer" swift package resolve >/dev/null 2>"$W/c.err"; echo "consumer resolve exit $?"
-GOT=$(grep -A8 -F -e 'lib' "$W/consumer/Package.resolved" | grep -m1 -o -E '"version" : "[^"]+"')
+GOT=$(awk 'index($0, "lib") > 0 { n = 9 } n > 0 { print; n-- }' "$W/consumer/Package.resolved" | grep -o -E '"version" : "[^"]+"' | head -n 1)
 echo "resolved $GOT, want $V"
 case $GOT in *"$V\"") echo OK ;; *) echo "FAIL: consumer did not stay on $V" ;; esac
 rm -rf "$W"

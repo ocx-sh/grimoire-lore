@@ -25,6 +25,8 @@ Contents: [U10.7 TemporaryPointers](#u107-werror-temporarypointers-on-64) ·
 [U10.16 Type-check limit](#u1016-the-type-check-limit-on-a-loaded-runner) ·
 [U10.17 swift-protobuf TSan](#u1017-the-swift-protobuf-64-tsan-failure)
 
+Commands in this file were translated 2026-10-11 to the portable dialect (git-fed file lists, POSIX grep and awk) and each was re-watched red on a plant and green on a twin under GNU and busybox; a "measured 2026-10-10" date below dates the original form.
+
 ## U10.7 -Werror TemporaryPointers on 6.4
 
 Rule: SW-SEC-11.
@@ -275,7 +277,7 @@ handles by report kind. Re-read the upstream workflow:
 
 ```sh
 git clone --depth 1 https://github.com/apple/swift-protobuf /tmp/swift-protobuf-probe
-grep -rn -i -e 'sanitize' -e 'is failing' --include='*.yml' --include='*.yaml' /tmp/swift-protobuf-probe/.github
+(cd /tmp/swift-protobuf-probe && git ls-files -z --cached --others --exclude-standard -- ':(glob).github/**/*.yml' ':(glob).github/**/*.yaml' | xargs -0 -r grep -H -n -i -e 'sanitize' -e 'is failing' --)
 ```
 
 On 2026-10-10 it printed the two `Looks like 6.4 is failing` comments and the

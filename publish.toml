@@ -415,25 +415,25 @@ description = { readme = "docs/nix-essentials.md", logo = "assets/lore-nix.svg" 
 # upgrade, per incident or per release. The bundle also carries `code-docs` and
 # `code-docs-cleanup`, which are shared by every language set.
 [rules.swift-quality]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/swift-quality.md", logo = "assets/lore-swift.svg" }
 
 [rules.swift-package]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/swift-package.md", logo = "assets/lore-swift.svg" }
 
 [skills.swift-upgrade]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/swift-upgrade.md", logo = "assets/lore-swift.svg" }
 
 [skills.swift-diagnose]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/swift-diagnose.md", logo = "assets/lore-swift.svg" }
 
 [skills.swift-release]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/swift-release.md", logo = "assets/lore-swift.svg" }
 
 [bundles.swift-essentials]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/swift-essentials.md", logo = "assets/lore-swift.svg" }

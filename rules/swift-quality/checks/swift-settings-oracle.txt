@@ -1,14 +1,14 @@
 # swift-settings-oracle.txt: the SWIFT_* build-setting names Xcode's build engine knows, one per line (SW-APPLE-01).
 # 183 names read from swiftlang/swift-build at commit 2187330e13e7 (Swift.xcspec and BuiltinMacros.swift), read 2026-10-10.
 # Use: names in a project that this file does not list are misspelt or invented (a typo reads as a setting that works):
-#   grep -Rhow -e 'SWIFT_[A-Z0-9_]*' --include='*.pbxproj' --include='*.xcconfig' --include='project.yml' --include='target.yml' . | sort -u | grep -v -x -F -f swift-settings-oracle.txt
+#   git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.pbxproj' ':(glob)**/*.xcconfig' ':(glob)**/project.yml' ':(glob)**/target.yml' | xargs -0 -r cat -- | grep -o -E -e '[A-Za-z0-9_]*SWIFT_[A-Za-z0-9_]*' | grep -E -e '^SWIFT_[A-Z0-9_]*$' | sort -u | awk 'NR == FNR { ok[$0] = 1; next } !($0 in ok)' swift-settings-oracle.txt -
 # A hit means "verify against the current swift-build, then fix the name or add it here". Xcode's closed engine may add names
 # this open copy lacks. The pipeline also finds 2 interpolation fragments (SWIFT_RESPONSE_FILE_PATH_ and
-# SWIFT_STRICT_CONCURRENCY_IN_SWIFT_VERSION) that are not settings: the grep -v at its end removes them (185 raw names, 183 kept).
+# SWIFT_STRICT_CONCURRENCY_IN_SWIFT_VERSION) that are not settings: the last grep -v of the regeneration removes them (185 raw names, 183 kept).
 # Regenerate on each swift-build bump, from a checkout of swiftlang/swift-build (comment lines start with #, so
 # `grep -v '^#' swift-settings-oracle.txt` must be byte-identical to this output):
-#   grep -Rhow -e 'SWIFT_[A-Z0-9_]*' --include='*.xcspec' --include='BuiltinMacros.swift' Sources | LC_ALL=C sort -u | grep -v -x -e SWIFT_RESPONSE_FILE_PATH_ -e SWIFT_STRICT_CONCURRENCY_IN_SWIFT_VERSION
-# Never delete or blank a line: an empty line is a pattern that matches every name under grep -F -f.
+#   git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.xcspec' ':(glob)Sources/**/BuiltinMacros.swift' | xargs -0 -r cat -- | grep -o -E -e '[A-Za-z0-9_]*SWIFT_[A-Za-z0-9_]*' | grep -E -e '^SWIFT_[A-Z0-9_]*$' | LC_ALL=C sort -u | grep -v -x -e SWIFT_RESPONSE_FILE_PATH_ -e SWIFT_STRICT_CONCURRENCY_IN_SWIFT_VERSION
+# Never delete or blank a line: the awk reads the file as exact names, one per line.
 SWIFT_ABI_CHECKER_BASELINE_DIR
 SWIFT_ABI_CHECKER_DOWNGRADE_ERRORS
 SWIFT_ABI_CHECKER_EXCEPTIONS_FILE

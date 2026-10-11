@@ -13,6 +13,8 @@ Contents: [One pin, derived everywhere](#one-pin-derived-everywhere) ·
 [The inventory grep](#the-inventory-grep) ·
 [The bump order](#the-bump-order)
 
+Commands in this file were translated 2026-10-11 to the portable dialect (git-fed file lists, POSIX grep and awk) and each was re-watched red on a plant and green on a twin under GNU and busybox; a "measured 2026-10-10" date below dates the original form.
+
 ## One pin, derived everywhere
 
 `.swift-version` holds the exact patch, for example `6.4.0`. The primary CI image is
@@ -68,7 +70,7 @@ is either derived or a deliberate leg. A tree with no `.swift-version` needs the
 created first (the exact patch of `swift --version`) and its CI image derived from it.
 
 ```sh
-grep -rn -E -e 'swift:[0-9]' -e 'matrix\.swift' -e '^[[:space:]]*swift:[[:space:]]*(\[|-)?[[:space:]]*["'"'"']?[0-9]' -e '^[[:space:]]*swift:[[:space:]]*$' --include='*.yml' --include='*.yaml' --include='Dockerfile*' --include='Makefile' --exclude-dir=.build --exclude-dir=.git --exclude-dir=.claude --exclude-dir=.agents .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.yml' ':(glob)**/*.yaml' ':(glob)**/Dockerfile*' ':(glob)**/Makefile' ':(exclude,glob)**/.build/**' ':(exclude,glob)**/.claude/**' ':(exclude,glob)**/.agents/**' | xargs -0 -r grep -H -n -E -e 'swift:[0-9]' -e 'matrix\.swift' -e '^[[:space:]]*swift:[[:space:]]*(\[|-)?[[:space:]]*["'"'"']?[0-9]' -e '^[[:space:]]*swift:[[:space:]]*$' --
 ```
 
 Output is the inventory. Empty output means no literal tag. A `matrix.swift` or bare
@@ -89,7 +91,7 @@ their lines, a `container: swift:6.4.0` twin printed nothing, exit 1). A hit on
 `swift --version` the run prints, and never derive an image for that tree:
 
 ```sh
-grep -rn -E -e 'xcode-select' -e 'Xcode_[0-9]' -e 'setup-xcode' -e 'xcode-version' -e 'DEVELOPER_DIR' -e '^[[:space:]]*(-[[:space:]]*)?xcode:' -e 'runs-on:.*[Mm]ac[Oo][Ss]' -e 'macos-[0-9a-z]' --include='*.yml' --include='*.yaml' --include='Makefile' --exclude-dir=.build --exclude-dir=.git --exclude-dir=.claude --exclude-dir=.agents .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.yml' ':(glob)**/*.yaml' ':(glob)**/Makefile' ':(exclude,glob)**/.build/**' ':(exclude,glob)**/.claude/**' ':(exclude,glob)**/.agents/**' | xargs -0 -r grep -H -n -E -e 'xcode-select' -e 'Xcode_[0-9]' -e 'setup-xcode' -e 'xcode-version' -e 'DEVELOPER_DIR' -e '^[[:space:]]*(-[[:space:]]*)?xcode:' -e 'runs-on:.*[Mm]ac[Oo][Ss]' -e 'macos-[0-9a-z]' --
 ```
 
 The manifest floor is a separate number. `swift package tools-version` prints it,

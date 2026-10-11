@@ -37,6 +37,8 @@ Contents: [Consent first](#consent-first) Â· [Stop condition](#stop-condition) Â
 | [references/backtrace-settings.md](references/backtrace-settings.md) | Empty stderr on a crash, or any `SWIFT_BACKTRACE` question |
 | [references/typecheck.md](references/typecheck.md) | "unable to type-check", or a build that is slow with no error |
 
+Commands in this file were translated 2026-10-11 to the portable dialect (git-fed file lists, POSIX grep and awk) and each was re-watched red on a plant and green on a twin under GNU and busybox; a "measured 2026-10-10" date below dates the original form.
+
 ## Consent first
 
 Touch only a process the operator has named as theirs to touch. For a
@@ -135,7 +137,7 @@ persisted `enable=no` (SW-CORE-18). Output is a violation and empty output is th
 pass:
 
 ```sh
-grep -rIn -E -e 'SWIFT_BACKTRACE[^#]*enable[=: "]*(no|false|off|0)\b' --include='*Dockerfile*' --include='*Containerfile*' --include='*.service' --include='*.yml' --include='*.yaml' --include='*.sh' --include='*akefile*' --include='*[Jj]ustfile' --include='*.mk' --include='*.rake' --include='*.toml' --include='*.json' --include='*.env' --include='.env*' --exclude-dir=.build --exclude-dir='.build-*' --exclude-dir=.git --exclude-dir=.claude --exclude-dir=.agents . | grep -v -E '^[^:]+:[0-9]+:[[:space:]]*#'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*Dockerfile*' ':(glob)**/*Containerfile*' ':(glob)**/*.service' ':(glob)**/*.yml' ':(glob)**/*.yaml' ':(glob)**/*.sh' ':(glob)**/*akefile*' ':(glob)**/*[Jj]ustfile' ':(glob)**/*.mk' ':(glob)**/*.rake' ':(glob)**/*.toml' ':(glob)**/*.json' ':(glob)**/*.env' ':(glob)**/.env*' ':(exclude,glob)**/.build/**' ':(exclude,glob)**/.build-*/**' ':(exclude,glob)**/.claude/**' ':(exclude,glob)**/.agents/**' | xargs -0 -r grep -H -n -E -e 'SWIFT_BACKTRACE[^#]*enable[=: "]*(no|false|off|0)\b' -- | grep -v -E '^[^:]+:[0-9]+:[[:space:]]*#'
 ```
 
 Measured 2026-10-10 on 6.4.0: `enable=false`, `off`, `0` and `no` each switch the
@@ -156,7 +158,7 @@ Never route on the exit code alone (SW-CORE-16). 132 covers six causes, 134 two,
 non-empty stderr line, and for a hang the CPU and the SIGQUIT dump.
 
 ```sh
-timeout 30 ./.build/debug/app args > stdout.txt 2> stderr.txt; echo "rc=$?"; grep -n -m4 -E 'Fatal error|Precondition failed|Program crashed|Swift runtime failure|Error raised|CONTINUATION|double free|corrupted|invalid pointer|malloc\(\)' stderr.txt
+timeout 30 ./.build/debug/app args > stdout.txt 2> stderr.txt; echo "rc=$?"; grep -n -E 'Fatal error|Precondition failed|Program crashed|Swift runtime failure|Error raised|CONTINUATION|double free|corrupted|invalid pointer|malloc\(\)' stderr.txt | head -n 4
 ```
 
 Rename the binary and arguments. Do not count lines: the message position varies
@@ -290,7 +292,7 @@ needs a rebuild.
    kill -QUIT "$PID"
    sleep 1
    kill -0 "$PID" && echo "alive after QUIT"
-   grep -m1 -e 'Signal 3: Backtracing' hang.err
+   grep -e 'Signal 3: Backtracing' hang.err | head -n 1
    ```
    `SigIgn` must read `0000000000000000`. `0000000000000006` (bare `&` and
    `setsid`) or `0000000000000007` (`nohup`) means no dump is possible.

@@ -9,6 +9,8 @@ metadata:
 
 # swift-release
 
+Commands in this file were translated 2026-10-11 to the portable dialect (git-fed file lists, POSIX grep and awk) and each was re-watched red on a plant and green on a twin under GNU and busybox; a "measured 2026-10-10" date below dates the original form.
+
 ## A pushed tag is permanent. Read this before step 1
 
 SwiftPM has no `retract` and no yank. A consumer's `Package.resolved` pins a
@@ -89,7 +91,7 @@ line is an ordinary build defect, which step 2 reports as its finding:
 
 ```sh
 LOG=$(mktemp); swift build --scratch-path "$(mktemp -d)" > "$LOG" 2>&1; echo "linux build exit $?"
-grep -m1 -E -e "no such module '(AppKit|Cocoa|UIKit|SwiftUI|WatchKit)'" "$LOG"
+grep -E -e "no such module '(AppKit|Cocoa|UIKit|SwiftUI|WatchKit)'" "$LOG" | head -n 1
 ```
 
 Watched 2026-10-10 on `swift:6.4`: SwiftGen printed `linux build exit 1` and
@@ -335,15 +337,14 @@ runs on musl's 128 KiB non-main stack and crashed at depth 400 with exit 139
 where glibc passed (measured 2026-10-10 on 6.4.0 and 6.3.3): run the largest input the CLI accepts, require exit 0, then
 bound the depth or link with `-Xlinker -z -Xlinker stack-size=0x80000`. And
 `dlopen` returns nil on the static leg, so code that loads at run time is
-compiled out under `#if`. The grep finds candidates, and reading decides. It is
-`-R`, not `-r`: `-r` skips a symlinked directory or file below `Sources`, so a
-symlink-farm layout (RxSwift, 412 files) scanned 1 and printed nothing. Run the
-canary of SW-CORE-03 first: `grep -Rl --include='*.swift' . Sources | wc -l` must
-equal `find -L Sources -name '*.swift' | wc -l` (watched 2026-10-10: a planted
-symlinked `Sources/M` gave 0 with `-r` and 1 with `-R`, the compliant twin 1 and 1):
+compiled out under `#if`. The grep finds candidates, and reading decides. The list is git-fed, not a recursive grep: a recursive grep skips a symlinked file below `Sources`, so a
+symlink-farm layout (RxSwift, 412 files) scanned 1 and printed nothing, while the list reads all 412 (a symlinked
+directory is one entry the list does not descend: name its real directory). Run the canary of SW-CORE-03 first:
+`bash .claude/rules/swift-quality/checks/canary.sh` exits 1 when the list holds no Swift file (watched 2026-10-10 on the old recursive form: a planted
+symlinked `Sources/M` gave 0 files and the compliant twin 1):
 
 ```sh
-grep -Rn --include='*.swift' -e 'dlopen(' -e 'NSClassFromString' -e 'Bundle(path' Sources
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.swift' | xargs -0 -r grep -H -n -e 'dlopen(' -e 'NSClassFromString' -e 'Bundle(path' --
 ```
 
 If the binary needs `dlopen`, NSS or a C library the SDK lacks, the static
@@ -437,8 +438,8 @@ if [ -f .github/workflows/release.yml ]; then
 else
   echo 'FINDING: no .github/workflows/release.yml, a CLI release has no attesting workflow'
 fi
-[ -d .github/workflows ] && grep -rn -e 'uses: ' --include='*.yml' --include='*.yaml' .github/workflows | grep -v -e 'uses: \./' | grep -v -E -e '@[0-9a-f]{40}' -e '^[^:]*:[0-9]+: *#'
-[ -d .github/workflows ] && grep -rn -e 'uses: .*@main' -e 'uses: .*@master' --include='*.yml' --include='*.yaml' .github/workflows
+[ -d .github/workflows ] && git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**/*.yml' ':(glob).github/workflows/**/*.yaml' | xargs -0 -r grep -H -n -e 'uses: ' -- | grep -v -e 'uses: \./' | grep -v -E -e '@[0-9a-f]{40}' -e '^[^:]*:[0-9]+: *#'
+[ -d .github/workflows ] && git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**/*.yml' ':(glob).github/workflows/**/*.yaml' | xargs -0 -r grep -H -n -e 'uses: .*@main' -e 'uses: .*@master' --
 ```
 
 ### 11. Verify what was published
