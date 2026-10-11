@@ -1,0 +1,729 @@
+{
+  "summary": "Shell research program wave 1: seven grounding audits (fleet, ocx emitter, installers, exemplar corpus, emitters, platform matrix, config) and five landscape scouts over the shell corpora",
+  "agentCount": 12,
+  "logs": [
+    "ground ok: 7/7, scouts ok: 5/5"
+  ],
+  "result": {
+    "ground": [
+      {
+        "key": "config-inventory",
+        "r": {
+          "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.agents/research/shell-audit/config-inventory.md",
+          "headline_numbers": [
+            "Reference rules swift/go/nix: 206/182/198 index lines, 260/203/142 rule IDs, 24/18/15 non-negotiable rows; 10/10/9 depth files",
+            "Never-matching paths glob on depth files: 19 of 155 (12.3%); the other 136 files (2.87 MB) autoload, including all go, nix, rust, python and typescript depth files",
+            "check-artifacts.py proves glob liveness via rglob after stripping '**/'. Brace globs are dead. No shebang or content glob exists anywhere. Of 207 catalog globs, 9 are exact extensionless names and 0 are content-based",
+            "628 fenced sh/bash blocks (2,977 lines) are never linted by the checker, which only lints inline backtick spans. Shellcheck finds 67 blocks with findings and 15 with errors (13 are <placeholder> operands). 29 blocks (4.6%) are non-POSIX under -s sh",
+            "Shipped shell: 9 bash scripts, all in swift-quality/checks. 0 shellcheck default findings, 33 under -s sh. 0 of 9 use set -e, 7 use set -u, bash -n passes on bash 3.2 through 5.3",
+            "Catalog hits: shfmt 0, bashism 0, pwsh 0, shellcheck 6 lines (5 are disable comments), pipefail 27 lines",
+            "Verification column: 2,734 rule rows, 1,668 (61%) with a command, 687 start grep, 497 start rg. 232 blocks use grep -r --include, 108 xargs -r. Busybox 1.37 fails --include, -P, find -printf and sed -z",
+            "Fleet shell by the task's exclusion rules: 647 .sh and 393 extensionless sh-shebang files (frame said ~1450 and ~1100). 376 of the 393 are ocx-generated trampolines. First-party shell-family files: 246 in 19 repos",
+            "Gating: 4 repos (179 files, 73%) run shellcheck and shfmt on source. 6 repos (33 files) are actionlint-only. 9 repos (34 files) have no gate. .shellcheckrc 0, .editorconfig shell sections 0, PSScriptAnalyzerSettings 1, pre-commit shell hooks 0",
+            "Fleet AI config: 3,739 files in 32 repos (2,545 lore-installed, 1,187 native). Native shell rules: quality-bash.md (150 lines, in 4 repos) plus 3 www-setup rules (272/232/182 lines)",
+            "Measured: dash 0.5.12 and posh abort on 'set -o pipefail || ...'. Signal-kill status is 143 in 8 shells but 271 in ksh93u+m and 399 in yash. '! pipeline' is errexit-exempt in 11 of 11 shells. Empty \"${a[@]}\" under set -u fails on bash 3.2, 4.0 and 4.2. zsh 5.0.8 errexit with '!' pipelines is wrong; 5.3.1 and later are fine"
+          ],
+          "top_smells": [
+            "Depth-file never-glob convention covers only 12.3% of depth files; the checker does not enforce it, so a shell set copying go or nix would leak every depth file into every session",
+            "The checker skips fenced blocks: 628 sh/bash blocks are unlinted, 13 have <placeholder> operands that do not parse, and unquoted globs abort under zsh when nothing matches",
+            "Fleet quality-bash.md (4 repos, byte-identical copies) mandates set -euo pipefail and IFS=$'\\n\\t' on every .sh, blocks [ ] in favour of [[ ]], asserts 'macOS /bin/sh is dash', and prescribes an args array expansion that fails on bash 3.2/4.0/4.2 under set -u",
+            "grimoire's shell gate exits 0 with 'skipping' when shellcheck is absent. Only 4 of 19 shell-owning repos run a source gate, and there is no .shellcheckrc anywhere",
+            "The catalog's verification commands assume GNU grep and ripgrep (497 rg rows, 232 grep --include blocks) and no index declares rg as a dependency; they fail on busybox",
+            "Two exit-code taxonomies in one product family: Rust uses 64-82 with usage = 64, while the www-setup installers use 2-7 with usage = 2",
+            "skills/nix-flake-adopt says GitHub Actions uses 'bash --noprofile --norc -eo pipefail'. That holds only for an explicit shell: bash (unverified here)"
+          ],
+          "patterns_worth_encoding": [
+            "${arr[@]+\"${arr[@]}\"} for arrays that may be empty under set -u (tsan-check.sh:32; measured clean on bash 3.2-5.3)",
+            "set -u plus explicit exit-status handling instead of set -e for check scripts, fail closed by status never by stderr (9/9 shipped checks; k07.sh:8-11)",
+            "Script-header exit table with sysexits-aligned 64/65/66 and 123 for a finding behind xargs; trap 'rm -f ...' EXIT with bare mktemp",
+            "Watched-red-and-green verification cells naming tool version and date (GO-CORE-02/03), plus a Floor / impl column as the precedent for a per-shell matrix",
+            "No early-exit reader after a producer under pipefail (CMK-CORE-05); '! pipeline' is errexit-exempt (measured 11/11)",
+            "Statement-position checks for exit and verification calls: not in $(...), an if condition or a pipeline stage (www-setup installers.md:198)",
+            "Installer discipline from www-setup: stdout silent on success, prose on stderr, five-way parity in one PR, bash 3.2 subset, shasum -a 256 not sha256sum",
+            "Matrix gate that runs real shells (ocx shell-zoo: Debian and Alpine/busybox, macOS and Windows weekly)",
+            "Set layout: rules/shell-quality.md plus a depth dir with the never-glob, checks/*.sh, skills with a duplicated MUST table, untagged bundle with code-docs members, publish.toml, docs, logo and taskfile block"
+          ],
+          "contradictions_of_frame": [
+            "Frame says no shell AI config exists and that code-docs ships shell checks. In fact code-docs/checks is 5 Python files with no shell. The fleet has quality-bash.md in 4 repos and 3 www-setup rules that the shell set must reconcile with",
+            "Frame counts ~1450 .sh and ~1100 extensionless sh files of unknown origin. Measured 647 and 393, and 376 of the 393 are generated, git-ignored ocx trampolines",
+            "H2 (set -euo pipefail is cargo-culted) splits: the fleet rule mandates it, but the catalog's own 9 checks deliberately use set -u only. The set -e traps are measured and hold; the empty-array trap is version-gated below bash 4.4",
+            "No glob form can reach a shebang-only script. Brace globs are dead in the checker and break Cursor and Antigravity, and the live-root check needs --allow-absent for .zsh, .ksh and .shellcheckrc",
+            "Q1 (POSIX sh for installers) conflicts with the loaded fleet rule that blocks [ ] and mandates bash idioms, unless the shell set supersedes it",
+            "H7 says macOS /bin/sh is bash 3.2 in POSIX mode; the fleet rule says it is dash. No macOS host, so both are read-only and one is wrong",
+            "Never-glob is not the catalog convention in practice: 19 of 155 depth files",
+            "Rule frontmatter has no description or metadata; paths, summary, keywords, license and repository are top-level and the checker enforces that form"
+          ]
+        }
+      },
+      {
+        "key": "fleet-shell-shape",
+        "r": {
+          "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.agents/research/shell-audit/fleet-shell-shape.md",
+          "headline_numbers": [
+            "1064 shell-ish files in 149 repo roots after exclusions and remote dedupe: 633 *.sh, 5 *.bash, 1 *.zsh, 23 *.ps1 (+2 psm1, 1 psd1), 6 *.fish, 3 *.nu, 1 *.elv, 389 extensionless with shebang. Only 390 (37%) are fleet-written (213 authored, 48 agent-config copies, 129 agent research scratch); 170 are vendored upstream; 504 are generated or untracked.",
+            "The ~1100 extensionless #!/bin/sh files are 389 files, 313 of them ocx toolchain trampolines (marker '# ocx-toolchain-trampoline', gitignored under .ocx/toolchain/shells/, 106 distinct contents). Authored extensionless: 6.",
+            "Authored shell is 213 files and 17.7 KLOC in 17 repos. 155 of 197 authored shell files (79%) are bash by shebang, 31 are sh, 11 have no shebang.",
+            "H1 refuted: 0 of 190 sh-shebang scripts (31 authored) carry any SC3xxx. With every inline shellcheck directive stripped, only www-setup/src/install.sh remains (19x SC3043, local, runtime-probed by has_local at :39). Five largest authored sh scripts parse on 10 of 11 POSIX interpreters; yash fails only on UTF-8 comments in a POSIX locale.",
+            "shellcheck 0.11.0 over 534 scripts: 521 findings across 30 codes. Authored 4.9 findings/KLOC (0.6 warning+; 65 findings = 44 info, 13 style, 8 warning). ocx 1.4/KLOC, agent research scratch 79.2/KLOC (16x), vendored devcontainers 70.1, uv 0.",
+            "shfmt: 161/197 authored files (82%) are clean under the fleet's own 'shfmt -d -i 4 -ci' (ocx 117/117); agent scratch uses 2-space (97 of 129 files, only 17 clean under -i 4 -ci).",
+            "set -euo pipefail in 136/197 authored files (69%), or 63/82 (77%) of bash scripts excluding ocx's 73 identical doc snippets; 0 pipefail in any sh-shebang script; 0 'local x=$(cmd)' in authored code; SC2310 (set -e suppressed) 69 hits in 9 files, SC2312 150 hits in 41 files.",
+            "Bash 4+ features appear in only 5 of 166 authored bash files (local -A, mapfile, ${x,,}, EPOCHREALTIME); 1 is taskfile-invoked; 0 BASH_VERSION guards. bash 3.2 probes: local -A invalid option, mapfile not found, bad substitution, set -u + empty array unbound variable (3.2 to 4.2, fixed 4.4), set -e + '( false )' continues only on 3.2.",
+            "CI: 137 workflows + 15 composite actions, 628 run blocks in 28 repos; 516 (82%) use the default shell; 22 of 39 default-shell pipelines have no pipefail; defaults.run.shell used by only 4 jobs; ${{ }} in 74 blocks, attacker-controllable event fields in 1 (an echo), 6 real inputs.release_tag interpolations inside single quotes (test-installers.yml:206-207). Mirror template: 745 workflows, 740 distinct, 770 pipelines without pipefail.",
+            "Taskfiles: 99 files, 751 tasks, 954 cmds (116 multi-line). Real bash-only constructs: 4 in 2 files (ocx-mirror release.taskfile.yml:55,119,121; ocx satellite.taskfile.yml:183). task 3.53.1 mvdan/sh runs arrays, [[, declare -A, mapfile, local; errexit on and pipefail off by default; panics on associative keys containing '-'.",
+            "PowerShell: 26 files (13 authored), 0 BOM, 0 CRLF in authored; 25/26 parse clean on Windows PowerShell 5.1.26100, pwsh 7.4.7 and 7.6.6 (the failure is virtualenv's un-rendered template); 0 PS7-only syntax; #Requires -Version 5.1 in 2; Set-StrictMode in 2.",
+            "fish/nu/elvish: 10 files, only 3 authored (www-setup/src/install.{fish,nu,elv}, 650/547/566 LOC), all parse on fish 3.6.0, nu 0.105.1, elvish 0.21.0."
+          ],
+          "top_smells": [
+            "Agent-written research scratch has no gate: 129 files at 79.2 findings/KLOC vs 4.9 for gated authored code (16x), 55% with no set flags, 2-space style outside the fleet's -i 4 -ci. The gap is the gate, not the model (ocx agents land at 1.4/KLOC under shell:verify).",
+            "Default-shell run: blocks hide semantics: 82% of fleet blocks and 96% of the mirror template run 'bash -e {0}' with no pipefail; only 4 jobs set defaults.run.shell.",
+            "${{ inputs.release_tag }} interpolated inside single quotes in run: (www-setup test-installers.yml:206-207) is the only real injection shape; fix is env: indirection.",
+            "bash-4 features and set -u + empty-array expansion behind #!/usr/bin/env bash with no BASH_VERSION guard (5 files, 6 files / 7 arrays); silently wrong on macOS bash 3.2 (local -A continues with an indexed array).",
+            "Gate scope gaps: git ls-files '*.sh' skips *.bash (4 bats helpers), 10 *.bats files (1997 lines) and extensionless hooks; 7 authored-shell repos have 0 files clean under -i 4 -ci.",
+            "set -e suppression inside functions called from conditions (SC2310 x69 in 9 files, SC2312 x150 in 41 files) is invisible without shellcheck -o check-set-e-suppressed, which no repo enables.",
+            "93 of 186 shebang scripts are committed mode 100644 (62 are ocx doc snippets), including grimoire/docs/public/install.sh.",
+            "oras-www/tools/*.sh: 47 findings in 406 LOC, cat | while read, unquoted vars, no set: the worst authored code."
+          ],
+          "patterns_worth_encoding": [
+            "Dialect by shebang, honestly: 31 #!/bin/sh scripts with 0 bashisms; bash scripts say bash. Never put 'set -o pipefail' in #!/bin/sh (dash 0.5.12 exits 2, posh exits 1; measured).",
+            "The rustup local idiom with a scoped, reasoned shellcheck disable (www-setup/src/install.sh:5,39-40): has_local() { local _ 2>/dev/null; } / has_local || alias local=typeset. local works on all 11 POSIX shells measured; ksh93u+m leaves the variable unset.",
+            "Fleet gate recipe: 'shellcheck -S warning' plus 'shfmt -d -i 4 -ci' over git ls-files '*.sh' with fixtures excluded by pathspec (ocx/taskfiles/shell.taskfile.yml:38,48); extend the file list to *.bash and extensionless shebang files.",
+            "Strict header plus cleanup: set -euo pipefail for bash, set -eu for sh, trap cleanup EXIT next to mktemp -d (32 of 35 files), installers use 'trap cleanup EXIT INT TERM HUP'; no ERR traps.",
+            "Installer set: one directory, five dialects (sh/ps1/fish/nu/elv) sharing sed-able <TOKEN> placeholders; PowerShell side uses #Requires -Version 5.1, Set-StrictMode Latest, ErrorActionPreference Stop, -UseBasicParsing, TLS1.2 and a PSEdition check instead of $IsWindows (undefined on 5.1).",
+            "Checksum tool detection (command -v sha256sum else shasum -a 256) and no GNU-only flags in installers (0 date -d, grep -P, stat -c, find -printf, sort -V).",
+            "CI: defaults.run.shell: bash per job, explicit shell: pwsh on Windows, env: instead of ${{ }} for inputs; remember pwsh steps do not fail on mid-script native exit codes on 5.1/7.4/7.6 unless $PSNativeCommandUseErrorActionPreference is set (7.4+).",
+            "Taskfile cmds: errexit on, pipefail off by default; avoid printf -v, PIPESTATUS, read -p, BASH_VERSION and associative keys containing '-' (panics in task 3.53.1).",
+            "Small probe fixtures (b4.sh, emptyarr.sh, h2c.sh, pf.sh, gh_bash.sh, gh_pwsh.ps1, enc_nobom.ps1, tf/Taskfile.yml) are reusable as verification fixtures for rule depth files."
+          ],
+          "contradictions_of_frame": [
+            "Fleet size: frame's ~1450 *.sh is the count before the sibling-clone exclusion (ablation stage 3 = 1433); real is 633 raw and 187 authored. Frame's 132 *.bash is 5 (4 authored bats helpers); 49 ps1 is 23; 22 fish / 21 nu is 6 / 3.",
+            "The ~1100 extensionless #!/bin/sh files are 389, of which 313 are ocx-generated gitignored trampolines; only 6 are authored (5 bd-managed hooks).",
+            "H1 is refuted: 0 of 190 sh-shebang scripts have SC3xxx (31 authored); the only local use is one deliberate, runtime-probed file. The real dialect risk is bash version (3.2) in bash-shebang scripts, not bash-in-sh.",
+            "H2 is only partly right: strict mode is common (77% of non-snippet bash) but is not cargo-culted into sh scripts and the named 'local x=$(cmd)' pattern is absent (0); the actual hazard is set -e suppression (SC2310/SC2312) and the bash 3.2 differences.",
+            "H4 does not hold for installers: they are POSIX and probe checksum tools; GNU-isms (sed -i x2, readlink -f x1, xargs -r x4) sit in test/manual scripts and the Swift check scripts.",
+            "H5 holds and is measured: 516 of 628 blocks use the default shell; pipelines run without pipefail; native non-zero exits do not fail pwsh steps on 5.1, 7.4.7, 7.6.6.",
+            "H6's 'agents fail most on bashisms under #!/bin/sh' is not what the fleet shows: agent sh scripts have 0 SC3xxx; their failures are unquoted expansions (SC2086), unguarded cd (SC2164) and absent strict mode.",
+            "Taskfile cmds are not limited to POSIX: task 3.53.1's mvdan/sh runs arrays, [[, declare -A, mapfile, local; only printf -v, PIPESTATUS, read -p, BASH_* vars and dashed associative keys fail."
+          ]
+        }
+      },
+      {
+        "key": "ocx-emitter",
+        "r": {
+          "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.agents/research/shell-audit/ocx-emitter.md",
+          "headline_numbers": [
+            "24,527 shell-emission source lines across shell.rs+hook.rs+escape.rs+reconcile.rs+coexistence.rs, ocx_setup rc_block/profiles/shims/lib, ocx_cli activate/conventions/shell_state",
+            "363/363 unit tests pass for ocx_shell+ocx_setup at HEAD (5de9d777eb7d)",
+            "Hostile-value round-trip corpus 1: 982/989 ok (99.3%) across 10 shell targets x 43 values, via the real built ocx binary run through real interpreters",
+            "PATH-kind corpus: 642/667 ok; LIST-kind corpus: 636/667 ok with all 29 failures concentrated on posh (a POSIX quoted-glob portability bug)",
+            "0 version-floor failures across bash 3.2-5.3, zsh 5.0.8-5.9, 11 posix-family shells, fish 3.6.0-4.9.3, nu 0.105.1/0.116.0, elvish 0.21.0, pwsh 7.4/7.6.6, and real Windows PowerShell 5.1",
+            "rc-file idempotency: byte-identical tree after a second ocx self setup run"
+          ],
+          "top_smells": [
+            "PowerShell curly-quote injection: single_quoted_doubled (escape.rs:35) only doubles ASCII ', not PowerShell's Unicode quote-equivalence class (U+2018/2019/201A/201B); reproduced file-creation injection on pwsh 7.4, pwsh 7.6.6 and real Windows PowerShell 5.1 via the real emitted ocx output",
+            "Every ocx self setup rc-file write silently downgrades permissions to 0600, even starting from a plain 0644 .bashrc, with no documentation or opt-out (ocx_util::fs::write_bytes_atomic always builds its tempfile at 0o600)",
+            "A symlinked rc file (~/.zshrc -> dotfiles/zshrc) is replaced outright by a plain file on ocx self setup; the dotfiles-managed target is never written and the symlink is gone afterward - no symlink-aware code path exists anywhere in ocx_setup",
+            "posh (POSIX conformance-test shell) disagrees with every other measured POSIX implementation on export_list/remove_list_element's shared ${var%%\"lit\"*} construct, failing all 29/29 list-kind corpus values - low real-world severity since posh isn't a real distro /bin/sh, but a genuine portability counter-example",
+            ".bash_login-only login shells never get the ocx fence in the file bash actually reads at login (profiles.rs never targets or probes .bash_login), so activation silently fails to take effect for that login path"
+          ],
+          "patterns_worth_encoding": [
+            "Parity-test the emitted shell string against the equivalent in-process Rust computation (ocx's PARITY_ARMS + assert_every_present_interpreter_ran's three-way absent/broken/silent classification) - a strong, re-usable pattern for any multi-shell emitter, worth a shell-integration skill callout",
+            "Name escapers by quoting context, never by shell alone (fish_single_quoted vs fish_double_quoted), with a test pinned on the one byte that distinguishes them - ocx's own comment frames the risk precisely: \"the wrong fish escaper is a shell injection\"",
+            "Resolve PowerShell's $PROFILE via a live subprocess query rather than a hardcoded path table - the only correct strategy given OneDrive/GPO Documents redirection and the 5.1-vs-7 directory-name split (WindowsPowerShell vs PowerShell)",
+            "Any canonical 'hostile value corpus' this research program publishes should include the PowerShell curly-quote class (U+2018/2019/201A/201B, and presumably U+201C-201F for double-quoted) - four independently measured tools (ocx, direnv, starship, mise) all missed it, suggesting it's an ecosystem-wide blind spot worth naming explicitly rather than assuming ASCII-only hostile corpora are sufficient"
+          ],
+          "contradictions_of_frame": [
+            "H3 (ocx's escaping has edge cases in at least one of fish/nu/elvish/pwsh) is confirmed but sharper than hypothesized: not a conventional unescaped-metacharacter bug - every ASCII metacharacter is handled correctly in every shell - but a Unicode tokenizer-equivalence class specific to PowerShell that doubling the ASCII apostrophe cannot defend against, reproducing as real command execution on Windows PowerShell 5.1 itself, not just a pwsh 7.2+ convenience-feature quirk",
+            "H9 (nushell's version churn makes it the riskiest emitted-code target) is NOT supported by this surface: nu 0.105.1 and 0.116.0 produced byte-identical floor-test results for the full activation/hook/PATH stream, and the one plausible break point ($env.PATH's string-vs-list auto-conversion) is already guarded by a shared describe-check in both shims.rs and activate.rs. Zero nu-version-specific failures were found here - H9 may still hold for nu scripting idioms generally, but not for ocx's emitted integration code",
+            "The exemplar comparison contradicts an implicit assumption that mature prior art (direnv, starship, mise, zoxide) would be ahead of ocx on PowerShell escaping: all four use the identical doubling-only single-quote escaper and are equally vulnerable to the same curly-quote class - ocx is not behind the field here, the whole field has the same blind spot"
+          ]
+        }
+      },
+      {
+        "key": "installers",
+        "r": {
+          "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.agents/research/shell-audit/installers.md",
+          "headline_numbers": [
+            "Fleet: 60 dirs, 59 remotes. 127 filename hits + 14 content hits resolve to 10 authored installers (4 sh, 3 ps1, 3 fish/nu/elv) in 4 repos, plus 1 inline template and 2 vendored. Name heuristic: 111/127 false positives (87%), recall 7/10; content heuristic recall 5/10.",
+            "Parse matrix, declared-POSIX files: 11 files x 11 shells = 121 cells, 119 pass. Both failures are yash 2.52 in the C locale on non-ASCII bytes. Invocations verified by 5 planted errors x 11 shells = 55/55 rejected.",
+            "Non-ASCII bytes: 3 of 6 fleet sh files, 0 of 11 exemplar sh, 0 of 5 exemplar ps1. The 3 fleet files fail yash C-locale 3/3.",
+            "shellcheck 0.11.0 -s sh on 11 declared-POSIX files: 568 findings, 4 files clean (frontdoor and www-setup among them). 181 SC3xxx, 178 of them SC3043 `local` in rustup and cargo-dist (polyfilled). Fleet #!/bin/sh installers with SC3xxx: 0 of 2.",
+            "PowerShell: 8 files x 3 engines (5.1.26100.9444, 7.4.7, 7.6.6) = 24/24 parse. 7-only parameters in 1 file (setup-grimoire install.ps1:52-53, pwsh-only by design). `exit` inside `irm | iex` killed the host on 3/3 engines.",
+            "Platform detection stubs: 13 scenarios x 6 installers x 3 shells = 234 runs, 0 shell divergences. Silently wrong targets: deno 7/13, oras-www 5/13, www-setup 0/13 (5 explicit exit 7).",
+            "Integrity over 17 sh installers: pinned 2, manifest from another origin 1, same-origin sidecar 3, GPG 1, delegated 1, none 9 (incl. rustup). cargo-dist 0.33.0 PowerShell template: 0 hash tokens.",
+            "Truncation guard 10/17; trap cleanup 8/17 (neither rustup nor cargo-dist traps); exit-code taxonomy 1/17 (www-setup); script-level rc editing 3/11 exemplars, 0/4 fleet; automated uninstall 3/17, 0/4 fleet.",
+            "Reproduced defects: BusyBox wget crash in www-setup on alpine:3.22 (rc=3), cargo-dist Rosetta precedence bug, k3s {1..3} loop runs once in 7/11 shells, docker --setup-repo swallows next flag in 11/11, posh rejects \"$@\" under set -u."
+          ],
+          "top_smells": [
+            "Grimoire PowerShell front door (grimoire/docs/public/install.ps1:4-5) claims the cargo-dist installer verifies SHA-256, but the pinned cargo-dist 0.33.0 installer.ps1.j2 and its rendered output contain zero checksum/sha256/FileHash tokens. Template-level; generated release asset not fetched.",
+            "www-setup/src/install.sh (:352-354) and grimoire/docs/public/install.sh (:29) pass --secure-protocol/--https-only to wget unprobed. On stock alpine:3.22 (BusyBox 1.37, no curl) install.sh dies: `wget: unrecognized option`, 3 retries, rc=3, message blames the network. rustup guards with check_help_for.",
+            "www-setup/src/install.ps1:182 and :734 use `exit` while the documented usage is `irm | iex`; the host session dies on 3/3 engines (5.1, 7.4, 7.6). Scoop's Exit-Install (`$Global:LASTEXITCODE` + `break`) is the safe form.",
+            "Non-ASCII bytes (em dashes in runtime strings) in the curl-piped fleet sh installers: 114 bytes in www-setup/src/install.sh, 3 in the grimoire front door; yash in the C locale cannot read them. The ps1 is deliberately ASCII, the sh is not.",
+            "Fail-open integrity on the rolling path: www-setup warns and continues when no sha256 tool exists (install.sh:405) or the manifest row has no hash (:861); the pinned path is fail-closed. cargo-dist skips the same way (:354, :1773).",
+            "cargo-dist installer shipped to grim users: Rosetta check `sysctl .. 2>/dev/null || true | grep -q` has wrong precedence (template :1316): leaks sysctl stdout and picks arm64 when sysctl returns 0 for value 0; rustup has the correct form. It also downloads with plain `curl -sSfL`, no --proto or TLS floor.",
+            "Upstream defects in exemplars worth not copying: k3s `for i in {1..3}` under #!/bin/sh, docker-install `--setup-repo` double shift (dry-run becomes real), deno silent default to x86_64-linux-gnu (7/13 scenarios) and `curl -s` without -f, rustup/dotnet/nvm/brew with no download integrity."
+          ],
+          "patterns_worth_encoding": [
+            "Truncation guard: body in main(), `main \"$@\"` as last line (or a { } block). 10/17 have it; deno and dotnet do not.",
+            "Declare one dialect, verify with the 11-shell `-n` set after proving each invocation on planted errors (55/55), polyfill `local` with has_local + alias typeset and a shellcheck disable comment; yash needs ASCII or a UTF-8 locale; nu-check needs an exit wrapper; use bash -n, not --posix, for bash files.",
+            "ASCII-only installer payloads: 11/11 exemplar sh and 5/5 exemplar ps1 are ASCII; non-ASCII breaks yash (C locale) and Windows PowerShell 5.1 (em dash decodes as 226,8364,8221).",
+            "Integrity with a root of trust other than the asset origin, a fail-closed `required` mode (www-setup verify_checksum), or a pinned hash (mold, vcpkg). Never print 'verified' on a path that can skip.",
+            "wget --https-only/--secure-protocol only after a --help capability probe (rustup check_help_for); BusyBox wget rejects both. curl --proto '=https' --tlsv1.2 --retry 3 --retry-connrefused, never --retry-all-errors where a 404 fallback follows.",
+            "mktemp + trap on EXIT INT TERM HUP, expanded at definition when the variable is local (setup-grimoire, front door). Flagships rustup and cargo-dist have no trap.",
+            "Platform detection that fails loudly: explicit support matrix with exit 7, musl via ldd then /lib/ld-musl-* then /etc/alpine-release, Rosetta via (sysctl ... || true) | grep. Test with uname/ldd/sysctl stubs across ash, dash and bash 3.2 (13-scenario harness found 12 silent-wrong cells in 2 installers).",
+            "Documented exit-code taxonomy (0-7) and an offline test hatch (__OCX_TESTING_INSTALL_BINARY) so the real script runs end to end under every shell; 10 of 12 shell rows passed.",
+            "PowerShell installers: #Requires -Version 5.1, explicit Tls12, custom retry instead of 7-only -MaximumRetryCount, .NET ZipFile with zip-slip check, Get-FileHash, ASCII source, and never `exit` under irm | iex (use $Global:LASTEXITCODE + break).",
+            "Bash 3.2 floor patterns when macOS is a target: no empty arrays under set -u, awk tolower instead of ${x,,}, find -print -quit instead of | head -1 under pipefail; e2e passed on bash 3.2/4.0/4.4/5.3. A bash installer that may be piped to sh should guard on BASH_VERSION before the first bashism (Homebrew)."
+          ],
+          "contradictions_of_frame": [
+            "H1 contradicted for installers: 0 of 2 fleet #!/bin/sh installers have any shellcheck -s sh finding; 178 of 181 SC3xxx hits in the corpus are the deliberately polyfilled `local`. Real bashisms live upstream (k3s brace expansion, acme read -p and $'..').",
+            "H2 contradicted for the fleet: 0 masking `local x=$(cmd)` in the 4 fleet sh files (all 5 hits are dotnet-install); pipefail appears in 3/17, all bash; the two flagship POSIX installers use `set -u` only and handle errors by hand.",
+            "H4 largely contradicted: 0 GNU-userland true positives in fleet installers (regex false-positive rates 67-100%); exemplar hits are feature-detected (acme sed -i). Upstream is not strictly POSIX either: 3/11 exemplar sh files are bash by declaration.",
+            "H8 partly confirmed: only 1 of 3 fleet ps1 files targets 5.1 (www-setup, #Requires 5.1); setup-grimoire is pwsh-only by design; all 8 parse on 5.1, 7.4 and 7.6.",
+            "Frame item 3 is wrong for ocx: no ocx script installer exists (ocx/dist-workspace.toml:11 installers = []); the five dialect installers are in www-setup/src. setup-ocx is TypeScript (no shell to audit); grimoire-duo is a second checkout of the grimoire remote (8 byte-identical installer copies, deduped).",
+            "The strategy split has a cost the frame does not show: grimoire delegates to cargo-dist 0.33.0 and inherits its gaps (no ps1 hash, Rosetta bug, no TLS floor), while ocx pins dist 0.31.0 and hand-writes verification, exit codes and a test hatch."
+          ]
+        }
+      },
+      {
+        "key": "exemplar-shape",
+        "r": {
+          "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.agents/research/shell-audit/exemplar-shape.md",
+          "headline_numbers": [
+            "39 repos audited, 18,447 files walked, 10,525 shell-family files: sh-shebang 2,049, bash 2,064, zsh 594, bats 295, fish 1,657, nu 1,756, elvish 65, ps1/psm1 1,328, psd1 101. Shebangs: 'env bash' 1,927 vs '/bin/bash' 79 (24:1); '/bin/sh' 1,757.",
+            "shellcheck 0.11.0 --norc over 2,174 files (git, mise, nvm, oils capped at 300 each): 13,865 findings, 40% of files clean. Top codes SC2086 4,387, SC2016 2,608, SC1091 1,108, SC2329 1,020, SC2034 709, SC2006 422.",
+            "Only 36 of 1,020 '#!/bin/sh' files (3.5%) have any SC3xxx finding, and 22 (2.2%) once 'local' is ignored. dash -n fails on 8 of 1,733 sh files (7 in git, 1 cargo-dist template). yash -n fails on 94, but 86 of those pass under a UTF-8 locale (non-ASCII comments).",
+            "errexit in 835 of 5,072 shell files (16%), nounset 10%, pipefail 8%. Bash product code: errexit 68%, pipefail 25%. '#!/bin/sh' product code: errexit 22%, pipefail 0%. Only 231 files carry all three.",
+            "Bash 4+ features are almost absent: of 1,676 non-oils bash files, declare -A is in 4, mapfile in 1, case-mod in 3, '[[ -v' in 1. 'bash -n' under 3.2.57 fails 19 of 2,062 files: 15 oils fixtures, 3 extglob false positives, 1 real (oh-my-posh omp.bash:34).",
+            "Floor testing: of the 11 repos with a stated floor, only 4 test it (bats-core bash 3.2-5.x docker matrix, nvm, shellspec 24 workflows, acme.sh 15 BSD/Solaris VMs). Homebrew, rustup and zoxide check syntax or lint only. pyenv, atuin, git completion and mise rely on BASH_VERSINFO guards.",
+            "shellcheck disables: 1,185 inline directives in 21 repos, only about 12.5% justified. Only 2 repos have a .shellcheckrc (mise: SC1008 SC2002 SC2088 SC2129 SC2164 SC2317; shellspec: SC2317). SC2317/SC2329 are the first codes switched off (mise, shellspec, docker-install).",
+            "shfmt 3.13.1: 980 of 2,151 parseable files (45.6%) clean at their dominant indent with default style. Indent: 2 spaces 54%, tab 32%, 4 spaces 13%. bats-core pins shfmt 3.5.1 and 3.13.1 flags 48 files (version drift); acme.sh, pinned to 3.1.2, is 0 dirty on 3.13.1.",
+            "Tests: git 1,061 files / 19,917 test_expect cases; oils 223 spec files / 3,965 cases; mise 1,366 e2e files; 677 Pester-style *.Tests.ps1; 295 .bats. Only bats-core and shellspec measure shell coverage (kcov).",
+            "PowerShell: 1,327 ps1/psm1 parsed on real Windows PowerShell 5.1.26100 and pwsh 7.6.6: 52 fail 5.1, 6 fail 7.6. 46 of the 47 5.1-only failures are the PowerShell repo's own test fixtures; the only production hit is vcpkg get-vulkan-sdk-components-info.ps1:54 (leading-pipe continuation, 7.0+). All Pester, Scoop, posh-git, dotnet and deno installer ps1 parse on 5.1.",
+            "PSScriptAnalyzer 1.25.0 default rules: 1,119 files, 5,051 findings, 32% of files clean. Top rules PSUseDeclaredVarsMoreThanAssignments 1,580, PSAvoidUsingWriteHost 753, PSReviewUnusedParameter 546. Pester is v5 syntax everywhere ('Should -Be' about 18,600 lines vs 8 legacy). Consumers pin Pester 5.x.",
+            "Version churn, parse-only with planted-error checks: nu_scripts 1,545 files, 69 (4.5%) differ between nu 0.105.1 and 0.116.0 (28 old-only, 41 new-only). fish 1,657 files, 15 fail on 3.6.0 vs 5 on 4.9.3 (10 files, 0.6%). Nu is about 7x churnier per file at parse level."
+          ],
+          "top_smells": [
+            "Unquoted expansion (SC2086): 4,387 findings, 32% of all; worst in installers (dotnet-install 236, k3s 320, oils 2,932).",
+            "Declare-and-assign masking: 527 'local|declare|export x=$(..)' lines (SC2155 202 findings). Run across 11 posix-family shells: 'local x=$(false)' reports rc=0 everywhere; the split form reports rc=1.",
+            "'|| true' disarms errexit for a whole function: 950 occurrences. Run shows 'h || true' suspends set -e inside h in all 11 shells.",
+            "'$?' checks instead of 'if cmd' (SC2181 232, 186 in acme.sh where it is house style and CI excludes it); 'read' without -r (SC2162 100), 'cd' without guard (SC2164 133), array word-splitting (SC2206/2207 234).",
+            "Unguarded bash 4.x syntax in code that runs in a user's login shell: oh-my-posh omp.bash:34 '[[ -v ]]' does not even parse on bash 3.2/4.0 (run confirmed); direnv stdlib.sh:1404 'local -A' dies on 3.2 at call time; mise e2e uses mapfile despite its own bash-3.2 changelog note.",
+            "'bash -n' false positives: scripts that 'shopt -s extglob' at runtime fail a 3.2 parse check unless run with -O extglob (Homebrew uninstall.sh, direnv stdlib.sh, pyenv python-build).",
+            "Non-ASCII bytes in '#!/bin/sh' scripts break yash outside a UTF-8 locale (86 files, mostly acme.sh box-drawing comments).",
+            "Formatter version drift: shfmt 3.13.1 re-formats 48 bats-core files that its pinned 3.5.1 accepted ('>| \"$f\"' spacing, continuation indent).",
+            "H6-style bashisms (echo -e, which, function f(), '[[' in sh, sed -i in sh) are rare in maintained sh: 4/5/0/4/7 of 796 '#!/bin/sh' files outside git and oils. They are agent failure modes, not upstream habits."
+          ],
+          "patterns_worth_encoding": [
+            "Gate bash features by version with a real fallback: ((${BASH_VERSINFO[0]} > 3)) around declare -A (pyenv-rehash:139), [ \"${BASH_VERSINFO[0]:-0}\" -ge 4 ] with a tr fallback (git-completion.bash:2917), ((BASH_VERSINFO[0] >= 5)) for EPOCHREALTIME (omp.bash:52). 29 bash files carry such guards.",
+            "Version-gate preamble that parses in every shell and exits with a message (bats-core bin/bats:8-15, 'needs to be run by Bash >= 3.2').",
+            "Sourced libraries must preserve the caller's errexit: nvm.sh:3877-3905 probes ${-#*e}, does set +e, restores. Never 'set -e' in anything sourced.",
+            "Bootstrap scripts use explicit-error wrappers instead of errexit: rustup-init.sh ensure/need_cmd/assert_nz/ignore, Homebrew abort + trap EXIT, acme.sh _err + return 1; git t/ uses && chains with --chain-lint.",
+            "local portability: probe '(PATH=\"\" local x)' and 'alias local=typeset' (rustup-init.sh:12-19). Verified: ksh93u+m 2023 and 1.0.10 both say 'local: not found'.",
+            "Test the floor, not just the head: docker bash:3.2..5.x matrix (bats-core), sh/bash/dash/zsh x gawk/mawk (nvm), per-OS shell lists incl. BSDs/Solaris via vmactions (shellspec, acme.sh), /bin/bash -O extglob -n on macOS when a full run is too costly (Homebrew).",
+            "Harness dispatches the test shell by shebang and injects strictness from outside (mise e2e/run_test:170-178: zsh -f, fish --no-config, bash --noprofile --norc -euo pipefail).",
+            "Test emitted shell code with the real interpreter plus linters, one test per (shell, check): zoxide src/shell.rs runs bash, dash, shellcheck, shfmt, fish + fish_indent, elvish (minus edit: lines), nu, pwsh, tcsh, xonsh, zsh over 20 cargo test fns.",
+            "Small justified central lint config: mise .shellcheckrc 6 codes, shellspec 1 (SC2317); relaxable set SC2317/SC2329/SC1091/SC2016; keep SC2086/SC2155/SC2164/SC2162. Disable inline with a reason.",
+            "Pin shfmt (acme.sh v3.1.2, bats-core v3.5.1) or drift will dirty files; mise's editorconfig-driven shfmt (simplify, switch_case_indent, indent 2) is 0 dirty of 1,396 files.",
+            "PowerShell: keep 5.1 parse-clean and verify with [Parser]::ParseFile on the Windows host; pin Pester to 5.x; PSScriptAnalyzer Severity=Error,Warning with explicit ExcludeRules (posh-git, Scoop Install, Pester) rather than IncludeRules allow-lists; commonly excluded: PSAvoidUsingWriteHost, PSUseApprovedVerbs, PSUseShouldProcessForStateChangingFunctions, PSAvoidGlobalVars."
+          ],
+          "contradictions_of_frame": [
+            "H1 (bashisms under #!/bin/sh) is NOT borne out in the exemplars: 3.5% of 1,020 sh files have any SC3xxx, 2.2% without 'local'. The claim is a fleet claim; this audit did not measure the fleet.",
+            "H2 (set -euo pipefail present in most bash scripts) contradicted: errexit in 28% of bash files (68% of product code, 18% of tests), pipefail 12%, all three 11%. Long-lived POSIX projects (git, acme.sh, nvm.sh, rustup-init.sh) avoid errexit deliberately; mise injects it from the harness.",
+            "H4 ('upstream installers are strictly POSIX') is really 'POSIX plus local': rustup-init.sh (shellcheck shell=dash, SC2039 disabled, local=typeset alias), cargo-dist (SC2039 disabled), k3s and docker-install use local; Homebrew install and dotnet-install are bash; only acme.sh and deno_install avoid local entirely.",
+            "H6 failure list (echo -e, which, function f(), '[[' in sh, sed -i) is rare in maintained code: '[[' in 4 of 796 '#!/bin/sh' files outside git/oils, echo -e 4, which 5, function f() 0. The corpus's real recurring risks are SC2086 and SC2155.",
+            "H8 (Windows ships only 5.1, installers must target 5.1) confirmed by parse (590 of 591 third-party ps1 outside the PowerShell and PSScriptAnalyzer repos parse on 5.1.26100), but parse-clean is not run-clean: -UseBasicParsing appears in only 12 of 31 Invoke-WebRequest files.",
+            "H9 (nu churn worst) holds directionally but small in absolute terms: 4.5% of nu_scripts files differ between nu 0.105.1 and 0.116.0 (95.9% still parse on 0.116.0, 95.1% on 0.105.1) vs 0.6% for fish files across 3.6 vs 4.9. Runtime/removed-command churn is not measured by nu-check or fish -n.",
+            "Frame says 41 exemplar repos; 39 repos were audited (the other 2 of 41 directories, runner-images and shellcheck.wiki, are documents).",
+            "Implicit expectation that modern bash (printf -v, ${x@Q}, mapfile, declare -A) is common is wrong for portable-minded repos: bash >=4 features appear almost only in oils (a shell implementation's tests) and pure-bash-bible."
+          ]
+        }
+      },
+      {
+        "key": "emitters-compared",
+        "r": {
+          "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.agents/research/shell-audit/emitters-compared.md",
+          "headline_numbers": [
+            "20 hostile escape cases; 16 upstream escape functions run verbatim across bash 3.2-5.3, zsh 5.0.8-5.9, dash/ash/mksh/ksh93/yash/posh, fish 3.6.0-4.9.3, nu 0.105.1/0.116.0, elvish 0.21.0, pwsh 7.4/7.6.6/WinPS 5.1",
+            "Per-shell hand-written quoters (direnv, omp, mise elvish/pwsh): 20/20 wherever their syntax is supported; `$'..'` quoter 1/20 on dash/yash/posh",
+            "Shared POSIX quoter reused outside POSIX: fish 17/20 (mise and starship), nu 17/20 mise and 18/20 starship, elvish 17/20 mise and 18/20 starship",
+            "E2E with released binaries: mise 2026.10.2 fish corrupts `a\\\\b` to `a\\b` (4/4 fish), a trailing `\\` makes the whole file unparseable; starship 1.25.1 `init nu` and `init elvish` fail at an install path containing `'`",
+            "direnv 2.37.1 exports 10/10 hostile values on bash 3.2-5.3, zsh 5.0.8-5.9, fish 3.6-4.9.3, elvish and pwsh 7.6.6; 9/10 on pwsh 7.4.7 because an empty value removes the variable",
+            "PROMPT_COMMAND coexistence over 8 bash versions: omp fails 16/50 realistic scenarios on bash 4.0-5.0 and 18/50 on 3.2, 0/75 on 5.1-5.3; zoxide, direnv, mise and starship fail 0 everywhere (isolated snippet, not the full omp script)",
+            "Real init output parses OK: bash -n 24/24, zsh -n 12/12, fish -n 12/12, nu-check 4/4, pwsh ParseFile 6/6; elvish parse unverified because of a harness limit",
+            "Startup median of 20 runs: starship init 2.5-2.7 ms, direnv hook 3.0 ms, mise activate 14.9-16.0 ms, mise hook-env 20.5 ms",
+            "Changelogs: 15383 bullets over 1038 releases; version-or-compat-flagged share of shell mentions is nu 21%, elvish 24% (n=21), fish 14%, bash 10%, zsh 6%, pwsh 4.5%; zoxide has 11 nushell version-pin entries vs 1 each for fish and elvish (classifier noise 10-20%)",
+            "Tests: starship 4 unit tests and zero interpreters; mise 81 unit tests, 72 snapshot blocks, 339 Pester It blocks and no elvish e2e; direnv runs 7 real shells; omp e2e runs 5 shells with nu pinned to 0.113.1"
+          ],
+          "top_smells": [
+            "Shared POSIX quoter reused for fish, nu and elvish (mise, starship). It fails exactly where the target's single-quote semantics differ, and two cases reproduce with released binaries.",
+            "oh-my-posh bash assigns PROMPT_COMMAND as an array unconditionally, so its hook is inert on bash 3.2-5.0 whenever another hook is already set. Measured on the isolated snippet only.",
+            "mise fish emits silently corrupted values (backslash) with exit 0, which is worse than the parse failure on a trailing backslash.",
+            "No hostile-input tests per target shell. starship runs no interpreters, mise has no elvish e2e, and each measured defect sits in an untested cell.",
+            "Elvish hooks are unguarded against re-source in direnv and mise, and zoxide appends before-chdir unconditionally.",
+            "pwsh version-dependent semantics: `$env:X=''` removes the variable on 7.4.7 and 5.1 but keeps it on 7.6.6, and WinPS 5.1 mangles non-ASCII literals through the OEM code page.",
+            "mise per-prompt hook-env costs about 20 ms against 2.5-3 ms for the other emitters.",
+            "conda `_replace_prefix_in_path` deletes a contiguous PATH range, and `path_list[last_idx+1]` raises IndexError when the env bin is the last entry. Reproduced on the isolated logic only."
+          ],
+          "patterns_worth_encoding": [
+            "Write one quoter per target shell from that shell's grammar. Never reuse `'\\''` for fish (backslash is special in single quotes) or for nu and elvish (no `'` inside single quotes).",
+            "Use a data channel (JSON or CSV) where the shell can parse one, as direnv does for elvish, murex and json and mise does for nu env. Then nothing needs escaping.",
+            "Test every quoter against a 20-case hostile corpus through the real interpreter, byte-compared. Every defect found in this audit falls on that list.",
+            "Install bash hooks with a PROMPT_COMMAND that is string-or-array aware. Preserve the previous value and never assign a bare array when bash may be older than 5.1.",
+            "Give every hook a per-shell re-source guard: bash pattern check, zsh add-zsh-hook, fish function redefinition, pwsh `$global:` flag, atuin-style include guard. Elvish needs one too.",
+            "Use starship's two-phase init (stub plus `--print-full-init`) so bash 3.2 and POSIX-mode bash do not depend on `source <(...)`.",
+            "Emit ASCII-only expressions on Windows PowerShell 5.1 (`[char]0xE9`), as oh-my-posh does.",
+            "Install nu support through the autoload dir, gate on `(version).minor` in the script, and pin the nu version in CI.",
+            "Cache init output on disk keyed by ConfigHash plus build version, written atomically (oh-my-posh), when generation is expensive.",
+            "Run per-shell tests with real interpreters in CI (direnv test/direnv-test.*, fzf tmux tests, omp e2e)."
+          ],
+          "contradictions_of_frame": [
+            "H3 confirmed in a narrower form. Escape bugs are not everywhere: 0 hand-written per-shell quoters failed where their syntax is supported, and all measured failures come from a shared POSIX quoter applied to fish, nu or elvish.",
+            "H9 only partly holds. nu has the highest flagged share among large-n shells (21%) and the most version pins (zoxide 11), but it has fewer total entries than bash and fish, and elvish is flagged higher (24%, n=21). Default emitted nu code from zoxide, mise and starship parsed on both nu 0.105.1 and 0.116.0 with 0 failures. The live nu failure was escaping, not version churn.",
+            "Bash pitfalls are narrow. The four non-omp emitters coexist on every bash version from 3.2 to 5.3, and escaping is not the bash risk. The real pitfalls are PROMPT_COMMAND array semantics before 5.1, `source <(...)` on bash 3.2/4.0/POSIX mode, and `$'..'` being unsupported on dash, yash and posh.",
+            "Version drift did not break default emitted code across 8 bash, 4 zsh, 4 fish, 2 nu and 2 pwsh versions. The version-dependent behaviours found were the pwsh empty-env semantics and the nu `run` keyword.",
+            "Test volume does not predict defects. mise has the most tests and the most measured defects, and direnv has fewer tests and none.",
+            "Startup cost does not track shell portability. It comes from mise's per-prompt hook-env, whatever the target shell."
+          ]
+        }
+      },
+      {
+        "key": "platform-matrix",
+        "r": {
+          "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.agents/research/shell-audit/platform-matrix.md",
+          "headline_numbers": [
+            "21 of 21 images probed (debian 11/12/13, ubuntu 20.04/22.04/24.04/25.10/26.04/26.10, alpine 3.22/3.23, alma 8/9/10, AL2/AL2023, fedora 44, leap 16.0, arch, busybox 1.37, nixos/nix); 0 pull failures. These are Docker base images, not cloud images.",
+            "/bin/sh is dash on 9/21, bash in POSIX mode on 9/21, busybox ash on 3/21. bash is installed on 18/21. zsh, ksh, mksh and fish are installed on 0/21.",
+            "12/21 images' /bin/sh silently accepts [[ ]], ==, $'..', ${x//}, function and source. The 9 dash images reject every one. Arrays work on 9/21 only.",
+            "set -o pipefail works in /bin/sh on 16/21. Only 4 of the 9 dash images have it (deb13 and ubuntu 25.10/26.04/26.10, dash 0.5.12-12*). deb11, deb12, ubuntu 20.04/22.04/24.04 do not.",
+            "9/21 images have neither curl nor wget (every Debian and Ubuntu image). curl is missing on 12/21.",
+            "Rust uutils coreutils on 3/21: ubuntu 25.10 (107 applets), 26.04 (108), 26.10 (105). cp/mv/rm stay GNU on 25.10 and 26.04 and go Rust only on 26.10. 20/20 behaviour probes passed on uutils.",
+            "21/21 pass: readlink -f, realpath, mktemp -d, sha256sum, date -d, stat -c, base64 -d, install -D, timeout, xargs -r. 18/21 pass grep -P, 16/21 find -printf, 13/21 which, 18/21 flock. shasum is on 0/21.",
+            "Runner readmes: 0 of 19 list zsh, fish or ksh. All 6 macOS readmes list Bash 3.2.57. All 5 Windows readmes list Bash 5.3.15(2) (Git Bash). pwsh is 7.6.x everywhere. ubuntu-latest is 24.04 (dash 0.5.12-6ubuntu5, no pipefail) and moves to 26.04 in Nov 2026.",
+            "Measured with the runner's exact command lines. bash -e {0} lets 'false | true; next' continue (exit 0). bash --noprofile --norc -eo pipefail {0} exits 1. A failing native command in the middle of a pwsh step gives step exit 0 on pwsh 7.6.6 and Windows PowerShell 5.1.",
+            "macOS, from Apple source tags. readlink -f arrives in 12.3 (file_cmds-352.40.6 stat.c:222 options \"n\" vs file_cmds-353.100.22 stat.c:242 \"fn\"). realpath arrives in 13.0 (shell_cmds-278). bash is 3.2.57 through 26.5 (bash-144 version.h:14). zsh is 5.8 on 12.x and 5.9 on 14.0 through 26.5. jq arrives in 15.0 (text_cmds-190.0.1). sha256sum has no applet through 26.0.",
+            "Windows host (measured): Windows 11 build 26200, Windows PowerShell 5.1.26100.9444, no pwsh installed, Git Bash 5.2.15 on Git 2.40.0. On 5.1: > and Out-File write UTF-16LE+BOM, Console.OutputEncoding is IBM437, $OutputEncoding is ASCII, $IsWindows is undefined, and && / ?? / ternary are parse errors.",
+            "PowerShell lifecycle: 7.6 LTS released 18-Mar-2026, EOS 14-Nov-2028. 7.4 LTS and 7.5 EOS 10-Nov-2026, 31 days after research date.",
+            "oils spec: 223 files, 3965 cases, 1358 divergent cases, 2714 annotations (non-osh). By shell, annotations: mksh 796, dash 686 (439 N-I, the most), zsh 505 (184 BUG, the most), bash 371, ash 291, yash 59. Divergence rate vs the oils reference: yash 54.6%, dash 42.3%, ash 40.2%, zsh 38.0%, mksh 34.4%, bash 13.2%. The top 30 areas hold 58.7% of annotations; 99/223 files have none.",
+            "Top divergence areas: builtin-read (130), arith (107), builtin-printf (104), errexit-osh (92), ble-idioms (72), assign (68), sh-options (65), builtin-vars (61), vars-special (58), bugs (57)."
+          ],
+          "top_smells": [
+            "#!/bin/sh scripts validated only on a bash-as-sh host: 12/21 default images accept bashisms that the 9 dash images reject",
+            "curl-only bootstrap: 9/21 images have neither curl nor wget, 12/21 lack curl",
+            "GitHub Actions default shell is not shell: bash. Unspecified is bash -e {0} with no pipefail, sh is dash, and pwsh swallows mid-script native failures (measured)",
+            "macOS bash 3.2.57 with BSD userland: sed -i needs a suffix arg, no date -d, no stat -c, no grep -P, no sha256sum, no timeout or flock, readlink -f only from 12.3, realpath only from 13.0 (all source-verified)",
+            "Sniffing GNU by --version output: Ubuntu 25.10+ reports uutils but 20/20 probed behaviours still pass",
+            "Assuming which, enhanced getopt, flock, tput, ps, find, xargs or tar exist: absent on 7, 5, 3, 9, 10, 2 and 2 of 21 images respectively",
+            "Treating Alpine busybox ash as a conservative POSIX proxy: it accepts [[, $'..', ${x//}, pipefail, wait -n, printf -v and trap ERR, all of which dash rejects",
+            "PowerShell 5.1 emitters: UTF-16LE+BOM from > and Out-File, -Encoding utf8 writes a BOM, $OutputEncoding is ASCII, curl and sort are aliases, no &&, ??, ternary or -Parallel",
+            "RHEL 8 and AL2 /bin/sh is bash 4.4/4.2, where <() is a syntax error in POSIX mode; it works from bash 5.1 (measured)",
+            "dash $((i++)), trap ERR, wait -n, printf -v and ${x/a/b} fail on dash 0.5.12 but pass on busybox ash and bash"
+          ],
+          "patterns_worth_encoding": [
+            "Pick the dialect from the deployment target. #!/bin/sh means dash 0.5.11/0.5.12-6 semantics: no [[, arrays, $'..', ${//}, pipefail, source, == or $((i++)). local is fine. Use printf, not echo.",
+            "Probe capabilities functionally (readlink -f, date -d, sed -i); use command -v only for presence. Never grep --version for GNU.",
+            "Version the pipefail rule instead of banning it: dash packages 0.5.12-12* accept it, and 0.5.12-2/-6ubuntu5 and older do not.",
+            "Downloader fallback chain: curl -fsSL, then wget -qO-, then a one-line error naming both. Both are absent on 9/21 base images.",
+            "Cross-OS userland table from this audit. Present on 21/21 images: readlink -f, realpath, mktemp -d, sha256sum, date -d @N, stat -c, install -D, base64 -d, timeout, xargs -r. For macOS use sed -i.bak, date -r or -v, stat -f, shasum -a 256, no timeout or flock. Gate on realpath >= macOS 13 and readlink -f >= 12.3.",
+            "CI: always set shell: bash or defaults.run.shell. For sh steps use set -eu, and add pipefail only where the dash version supports it. In pwsh steps check $LASTEXITCODE after each native call, or set $PSNativeCommandUseErrorActionPreference = $true (present on 7.4.7 and 7.6.6, absent on 5.1).",
+            "PowerShell 5.1 floor kit for installers: no &&, ??, ternary, -Parallel or -AsHashtable. Write files with [IO.File]::WriteAllText and a no-BOM UTF8Encoding. Call curl.exe explicitly. Pass -UseBasicParsing. Do not pipe non-ASCII to natives without setting $OutputEncoding.",
+            "pwsh floor: 7.4+ until 10-Nov-2026, 7.6+ after. Windows ships only 5.1, so installers target 5.1.",
+            "Use the oils hot spots as the cross-shell review checklist: read, printf, arith, assignment forms, set -o options, errexit edge cases, arrays. Most divergence is in builtins and expansion semantics, not grammar.",
+            "State what 'shell: bash' means per runner OS: Linux bash 5.1-5.3, macOS /bin/bash 3.2.57 (login shell forced via chsh), Windows Git Bash 5.3.15 with MSYS2 tools not on PATH.",
+            "Pin locale deliberately: LANG is unset in 20/21 images, and C.UTF-8 is absent on Alpine, busybox and nix."
+          ],
+          "contradictions_of_frame": [
+            "'dash lacks pipefail' is false for Debian 13 and Ubuntu 25.10/26.04/26.10 (dash 0.5.12-12*): sh -c 'set -o pipefail; false | true' returns 1. 4 of 9 dash images have it. The 26.04 runner changes shell: sh semantics when ubuntu-latest moves in Nov 2026.",
+            "Ubuntu 25.10+ 'ships Rust coreutils by default' is only partly true: 25.10 and 26.04 keep GNU cp/mv/rm and use uutils for the rest (107/108 applets). Only 26.10 (still a development branch) is fully Rust. The 26.04 runner image lists only the coreutils package, so uutils there is unverified.",
+            "H5 holds on every point and is refined: the Windows default is pwsh falling back to powershell, never cmd. pwsh's $ErrorActionPreference='stop' does not govern native exit codes. Measured exit 0 with a failing native mid-script on both pwsh 7.6.6 and Windows PowerShell 5.1.",
+            "H7 is mostly confirmed (bash 3.2.57 and zsh 5.9 in macOS 26.x from Apple source). Nuance: the macOS runner image installs no Homebrew bash at all (toolset-15.json lists only gnu-tar), so runner bash is 3.2.57. The /private/var/select/sh shim rests on secondary sources, not verified on macOS 26.",
+            "H8 confirmed with dates (7.6 LTS to 14-Nov-2028, 7.4 EOS 10-Nov-2026). The Windows host has 5.1.26100.9444 and no pwsh.",
+            "The frame's 'macOS sha256sum added in 14?' has no support: no Apple tag through 26.0 has a sha256sum applet. realpath is 13.0, readlink -f is 12.3.",
+            "Alpine busybox ash is the Alpine /bin/sh, but it accepts far more than dash ([[, $'..', ${x//}, pipefail, wait -n, printf -v, trap ERR), so a script that passes on Alpine can fail on Ubuntu sh.",
+            "bash-as-/bin/sh is not one dialect: bash versions run 4.2.46 to 5.3.20 across those 9 images. Process substitution is rejected in --posix mode up to bash 5.0 and accepted from 5.1 (measured on bash 3.2 to 5.3), so RHEL 8 and AL2 sh differ from RHEL 9+.",
+            "The curl-based bootstrap assumption fails in the base images: 9/21 have neither curl nor wget. The runner images do carry curl (8.18 on 26.04), so containers and runners differ.",
+            "The oils suite carries no fish, nu, elvish, pwsh, ksh93 or BSD sh columns, so it gives no measured divergence data for those shells. It measures distance from a bash-leaning reference, which flatters bash (13.2%)."
+          ]
+        }
+      }
+    ],
+    "scouts": [
+      {
+        "key": "canonical",
+        "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.agents/research/shell-topic-map/canonical.md",
+        "sources": 65,
+        "primary": 63,
+        "n": 50,
+        "shifts": [
+          "POSIX.1-2024 (2024): pipefail, $'..', read -d, find -print0, xargs -0/-r, sed -E, realpath, printf %n$ standardised; test -a/-o removed. Invalidates 'pipefail/read -d are bashisms' and 'test -a/-o is fine'.",
+          "dash 0.5.13 (2025-09-21; latest 0.5.13.5 2026-07-18) adds pipefail, $'..', multibyte; Debian sid and Ubuntu 26.04 still ship 0.5.12-12, so /bin/sh there still lacks them.",
+          "yash 2.59 (2025-05-13): POSIX-2024 read -d, trap -p, exit-in-trap; 2.60 (2025-09-15), 2.61 (2026-03-03).",
+          "bash 5.3 (2025): ${ cmd; } funsubs, GLOBSORT, source -p, BASH_MONOSECONDS, trap -P, exit-in-trap per interp 1602; 5.2 patsub_replacement; BASH_COMPAT only compat knob since 5.1.",
+          "fish 4.0 (2025-02-27) to 4.9.3 (2026-09-08): Rust core, { } grouping 4.1, ? glob off, UTF-8 assumed 4.2, no universal colour vars 4.3, status=123 cmd error 4.9.",
+          "nushell 0.108 to 0.116.1 (2025-10 to 2026-10-04): pipefail default 0.111 (2026-02-28), $nu.temp-dir 0.110, submodules/-- parsing/str upcase deprecated 0.114 (2026-07-04), YAML 1.2 0.115, completions rework 0.116; && still a parse error.",
+          "elvish 0.21.0 (2024-08-14) removed a=b cmd; no release since, repo last commit 2025-07-14.",
+          "PowerShell 7.6 LTS (2026-03-18, EOS 2028-11-14); 7.4 and 7.5 EOS 2026-11-10; 7.7 preview.5 on .NET 11 (2026-09-21); Windows still ships only 5.1.",
+          "Ubuntu 25.10 (2025-10) ships uutils Rust coreutils by default, invalidating 'Ubuntu userland is GNU coreutils'.",
+          "zsh docs show 5.9.2 (2026-07-12); master NEWS lists unreleased 5.10 with refined ERR_EXIT/ERR_RETURN.",
+          "Apple support page (2026-06-15): zsh default, /var/select/sh switches sh among bash, dash, zsh; contradicts Autoconf's 'macOS sh is zsh' (macOS read-only, unverified).",
+          "ShellCheck 0.11.0 lags POSIX.1-2024: SC3003, SC3040, SC3045 still flag $'..', pipefail, read -d under -s sh."
+        ]
+      },
+      {
+        "key": "practitioner",
+        "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.agents/research/shell-topic-map/practitioner.md",
+        "sources": 63,
+        "primary": 27,
+        "n": 49,
+        "shifts": [
+          "POSIX.1-2024 (Issue 8, 2024): adds set -o pipefail (Defect 789), $'..', read -d, find -print0/-iname, xargs -0, readlink, test -nt/-ot/-ef and </>; removes test -a/-o and ( ); dash 0.5.12 still lacks pipefail, $'..', read -d (measured 2026-10-10)",
+          "Bash 5.3 (2025): funsubs ${ cmd; } and ${| cmd; }, GLOBSORT, array_expand_once replaces assoc_expand_once, BASH_MONOSECONDS, source -p, trap -P; BashPitfalls #65 (edited 2025-07-18) records read -d '' read-past-delimiter bug in bash 5.0-5.3-rc1 multibyte locales, and bash 5.2 broke the (( hash[\\$key]++ )) backslash workaround",
+          "fish 4.0.0 (2025-02-27) Rust rewrite, ? glob off; 4.1 (2025-09-27) {echo,echo} compound command; 4.2 (2025-11-10) UTF-8 assumed; 4.3 (2025-12-28) no default universal vars; 4.7 (2026-05-05); 4.9.0 (2026-09-03) status=N cmd error; latest 4.9.3 (2026-09-08)",
+          "nushell 0.110 (2026-01-17) to 0.116.1 (2026-10-04): 0.111 finally, 0.112.2 argument-quoting regression fix (2026-04-15), 0.114.0 (2026-07-04) submodules not implicitly imported, enforce-runtime-annotations opt-out, POSIX -- support, str upcase/downcase deprecated, 0.115 (2026-08-15) YAML rework",
+          "PowerShell: 7.5 GA 2025-01-23; 7.6 LTS GA 2026-03-18 (7.6.6) EOL 2028-11-14; 7.4 LTS and 7.5 both end support 2026-11-10; 7.7-preview in progress; 5.1 unchanged (measured 5.1.26100.9444 vs 7.4.7 and 7.6.6)",
+          "ShellCheck wiki: SC3001-SC3067 replaced retired SC2039; SC2329 (function never invoked) added next to SC2317",
+          "Wooledge Bashism page (2025-04-19) and BashFAQ/031 now mark $'..', </>, -nt/-ot/-ef as POSIX.1-2024; older sources (Rich tricks, Bash Hackers wiki, Quotes page) still call them non-standard",
+          "Unix SE canonical answers still edited: echo vs printf last edited 2026-07-07; quoting-security 2024-08-06; shell-loop 2024-03-26",
+          "Stale advice now wrong: SC2039, which, -UseBasicParsing on pwsh 7 (no-op), Write-Host non-interactive pre-5.0 claim, fish ? globs, pre-0.114 nushell module import docs"
+        ]
+      },
+      {
+        "key": "codified",
+        "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.agents/research/shell-topic-map/codified.md",
+        "sources": 33,
+        "primary": 30,
+        "n": 53,
+        "shifts": [
+          "POSIX.1-2024 reached ShellCheck: 0.11.0 (2025-08-03) removed SC3013 and relaxed SC3012; master accepts pipefail in SC3040 and removes SC3003 ($'..'); dash 0.5.12 and posh still lack both (measured); Debian Policy 10.4 still cites POSIX.1-2017",
+          "ShellCheck 0.9.0 (2022-12-12) added dataflow analysis; 0.10.0 (2024-03-07) added the busybox dialect; 0.11.0 made SC2002 default-off, moved SC2236/2237 to avoid-negated-conditions, added SC2329/2330/2331/2332/SC3062; master adds SC2337, EditorConfig shellcheck.* keys, --files-from",
+          "shfmt 3.13.0 (2026-03-09) added zsh parsing/formatting and -l exits non-zero; 3.14.0 (2026-08-28) added --detect and many interpreter fixes relevant to Taskfile cmds",
+          "bats-core 1.14.0 (2026-07-21): run honours set -e in functions, empty suite is an error; support matrix tops out at bash 5.2",
+          "PSScriptAnalyzer 1.24.0 dropped PowerShell 3/4 hosts; 1.25.0 added AvoidReservedWordsAsFunctionNames, UseConsistentParametersKind, UseConsistentParameterSetName, UseSingleValueFromPipelineParameter, optional UseConstrainedLanguageMode; bundled compat profiles still stop at 7.0",
+          "PowerShell lifecycle (2026-08-13): 7.6.6 LTS, 7.5.11 Stable, 7.4 LTS ends 2026-11-10, 7.7 preview; 7.3 changed native argument passing (breaking)",
+          "bash 5.3 (2025): ${ cmd; } funsubs, GLOBSORT, BASH_MONOSECONDS, trap -P, null PATH equals '.', posix-mode locale-aware test < >",
+          "Pester 6 preview introduces Should-* assertions (6.2.0 notes, 2026-09); Pester 5.7.1 is the stable module in the toolchain",
+          "Ubuntu DashAsBinSh wiki page is now an empty stub (archived); Shellshock is fully historical on the measured matrix (BASH_FUNC_name%% import only)",
+          "oils/YSH 0.38.0 (2026-09-17) documents strict_* options and nine named errexit pitfalls as the current codified critique of POSIX/bash"
+        ]
+      },
+      {
+        "key": "failure",
+        "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.agents/research/shell-topic-map/failure.md",
+        "sources": 46,
+        "primary": 35,
+        "n": 50,
+        "shifts": [
+          "POSIX.1-2024 adds set -o pipefail; ShellCheck 0.11.0 still emits SC3040; Debian 13 dash 0.5.12-12 and Alpine ash support it, Debian 12 and Ubuntu 24.04 dash and posh do not (measured 2026-10-10)",
+          "fish 4.0.0 (2025-02-27) Rust rewrite: ? no longer a glob (measured), for-loop locals, test-require-arg and remove-percent-self flags, 4.1 {echo,echo} compound commands, 4.5 no terminfo; latest 4.9.3 (2026-09-08)",
+          "nushell 0.100-0.116.1: $nu.home-path/temp-path renamed (0.110, 2026-01-17), str upcase deprecated (0.114, 2026-07-04), into value replaced by detect type (0.108), env_change before pre_prompt (0.107), keyword shadowing disallowed (0.115); old training data is suspect",
+          "Windows PowerShell 5.1 Invoke-WebRequest prompts unless -UseBasicParsing since 2025-12-09 (CVE-2025-54100); measured failing under -NonInteractive on 5.1.26100.9444",
+          "PowerShell 7.6 is LTS (2026-03-18, EOS 2028-11-14); 7.4 LTS and 7.5 EOS 2026-11-10; 7.7 preview New-Guid emits UUIDv7; installer floor stays 5.1",
+          "bash 5.3 (2025): ${ cmd; } funsubs, array_expand_once replaces assoc_expand_once, GLOBSORT, NULL PATH means '.', trap -P; bash 5.2 changed array-subscript re-evaluation (BashPitfalls 61/62 workarounds are version-specific)",
+          "ShellCheck 0.11.0: SC2329 function-never-invoked is the second most frequent code on the exemplar corpus; errexit checks (SC2310-SC2312) remain optional; no bash-version target setting (issue 2615 open)",
+          "Ubuntu 25.10 shipped uutils coreutils by default (date -r bug broke unattended-upgrades); 26.04 LTS keeps GNU cp/mv/rm",
+          "elvish 0.21.0 removed a=b command temporary assignment, eawk and ~/.elvish; deprecated implicit cd",
+          "bats 1.12.0 on bash 5.3.0: failed assertions reported as going unnoticed unless wrapped in a subshell (bats-core#1200, closed 2026-04-13)"
+        ]
+      },
+      {
+        "key": "shifts",
+        "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.agents/research/shell-topic-map/shifts.md",
+        "sources": 45,
+        "primary": 32,
+        "n": 53,
+        "shifts": [
+          "POSIX.1-2024 (2024) standardizes pipefail, $'..', read -d, find -print0, xargs -0/-r, realpath, readlink, timeout, test -ef/-nt/-ot; implementations ship unevenly (measured: dash 0.5.12, yash 2.52, posh lack them)",
+          "Debian dash 0.5.12-7 (2024-05-17) backports pipefail; upstream dash 0.5.13 (2025-09-21) is first with $'..'; Ubuntu 24.04 dash 0.5.12-6ubuntu5 rejects pipefail",
+          "bash 5.2 defaults flipped silently (patsub_replacement & in replacements, globskipdots); bash 5.3 released 2025-07-05 with funsubs, GLOBSORT, source -p, trap -P; macOS stays at bash 3.2.57",
+          "ShellCheck 0.11.0 (2025-08-03) still flags POSIX.1-2024 features (SC3040/SC3003/SC3045); git master fixes SC3040/SC3003 and adds SC2337",
+          "Ubuntu 25.10 made rust-coreutils and sudo-rs default; Ubuntu 26.04 measured: uutils 0.10.0 date/ls/sort, bash 5.3, dash with pipefail; GitHub ubuntu-latest moves to 26.04 2026-10-19 to 2026-11-19",
+          "fish 4.0 (2025-02-27) Rust port through 4.9.3 (2026-09-08): qmark-noglob, { } compound, bind -k removed, UTF-8 assumption, frozen theme files, terminfo dropped",
+          "nushell 0.100 to 0.116.1: $nu.home-path/temp-path renamed (0.110), str upcase deprecated (0.114), implicit submodule import removed (0.114), find case-sensitive and hook order (0.107); no 1.0 date",
+          "elvish 0.21.0 (2024-08-14) is still the latest release; 0.22 only a draft",
+          "PowerShell 7.6 LTS GA 2026-03-18 (EOS 2028-11-14); 7.4 and 7.5 EOS 2026-11-10; PowerShell 2.0 removed from Windows 11 24H2/Server 2025 (Aug/Sep 2025); 5.1 remains inbox",
+          "Pester 6.0.0 (2026-07-07), PSScriptAnalyzer 1.25.0 (2026-03-20), bats-core 1.14.0 (2026-07-21, run honours set -e), shfmt 3.13 zsh support (2026-03-09) and 3.14.1 (2026-09-06)",
+          "zsh 5.9.1 (2026-05-31) and 5.9.2 (2026-07-12) released, 5.10 pending; yash 2.59 (2025-05-13) POSIX.1-2024 push; busybox 1.38.0 unstable (2026-05-13) ash <<<; Oils 0.38.0 (2026-09-17)",
+          "Debian 13 (trixie) puts /tmp on tmpfs by default and ships fish 4.0.2, bash 5.2.37, no yash"
+        ]
+      }
+    ]
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Ground"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 2,
+      "title": "Scout"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "ground:config-inventory",
+      "phaseIndex": 1,
+      "phaseTitle": "Ground",
+      "agentId": "acc8b195ada548253",
+      "model": "claude-sonnet-5-5",
+      "state": "done",
+      "startedAt": 1791665317318,
+      "queuedAt": 1791665317274,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.ag…",
+      "promptPreview": "Model rationale: sonnet — inventory and faithful digesting of existing config; no judgment that becomes a rule\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is the research program that makes an AI-agent fleet expert in SHELL SCRIPTING ACROSS OPERATING SYSTEMS AND SHELLS as of late 2026: POSIX sh and its implementations (dash, busybox ash, bash --posix, mksh, ksh93, yash, po…",
+      "promptFramed": true,
+      "lastProgressAt": 1791666550221,
+      "tokens": 87125,
+      "toolCalls": 116,
+      "durationMs": 1232900,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.agents/research/shell-audit/config-inventory.md\",\"headline_numbers\":[\"Reference rules swift/go/nix: 206/182/198 index lines, 260/203/142 rule IDs, 24/18/15 non-negotiable rows; 10/10/9 depth files\",\"Never-matching paths glob on depth files: 19 of 155 (12.3%); the other 136 files (2.87 MB) autoload, including all go, nix, rust, pytho…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "ground:fleet-shell-shape",
+      "phaseIndex": 1,
+      "phaseTitle": "Ground",
+      "agentId": "aac16e91dd5da281b",
+      "model": "claude-sonnet-5-5",
+      "state": "done",
+      "startedAt": 1791665317318,
+      "queuedAt": 1791665317274,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.ag…",
+      "promptPreview": "Model rationale: sonnet — counting and running linters over fleet shell code; volume work with commands, no rule decisions\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is the research program that makes an AI-agent fleet expert in SHELL SCRIPTING ACROSS OPERATING SYSTEMS AND SHELLS as of late 2026: POSIX sh and its implementations (dash, busybox ash, bash --posix, mksh, ksh…",
+      "promptFramed": true,
+      "lastProgressAt": 1791667002567,
+      "tokens": 311309,
+      "toolCalls": 122,
+      "durationMs": 1683548,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.agents/research/shell-audit/fleet-shell-shape.md\",\"headline_numbers\":[\"1064 shell-ish files in 149 repo roots after exclusions and remote dedupe: 633 *.sh, 5 *.bash, 1 *.zsh, 23 *.ps1 (+2 psm1, 1 psd1), 6 *.fish, 3 *.nu, 1 *.elv, 389 extensionless with shebang. Only 390 (37%) are fleet-written (213 authored, 48 agent-config copies, …"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 3,
+      "label": "ground:ocx-emitter",
+      "phaseIndex": 1,
+      "phaseTitle": "Ground",
+      "agentId": "a93702851559390c9",
+      "model": "claude-sonnet-5-5",
+      "fallbackModel": "claude-sonnet-5",
+      "state": "done",
+      "startedAt": 1791665317318,
+      "queuedAt": 1791665317274,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.ag…",
+      "promptPreview": "Model rationale: sonnet — auditing a real multi-shell code emitter and running its output through every target interpreter; measurement, not rule decisions\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is the research program that makes an AI-agent fleet expert in SHELL SCRIPTING ACROSS OPERATING SYSTEMS AND SHELLS as of late 2026: POSIX sh and its implementations (dash, bus…",
+      "promptFramed": true,
+      "lastProgressAt": 1791666821648,
+      "tokens": 301806,
+      "toolCalls": 132,
+      "durationMs": 1502646,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.agents/research/shell-audit/ocx-emitter.md\",\"headline_numbers\":[\"24,527 shell-emission source lines across shell.rs+hook.rs+escape.rs+reconcile.rs+coexistence.rs, ocx_setup rc_block/profiles/shims/lib, ocx_cli activate/conventions/shell_state\",\"363/363 unit tests pass for ocx_shell+ocx_setup at HEAD (5de9d777eb7d)\",\"Hostile-value ro…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 4,
+      "label": "ground:installers",
+      "phaseIndex": 1,
+      "phaseTitle": "Ground",
+      "agentId": "a764ab968672df8ea",
+      "model": "claude-sonnet-5-5",
+      "state": "done",
+      "startedAt": 1791665317318,
+      "queuedAt": 1791665317274,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.ag…",
+      "promptPreview": "Model rationale: sonnet — auditing installer scripts across the fleet and exemplars with real multi-shell syntax runs; measurement, not rule decisions\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is the research program that makes an AI-agent fleet expert in SHELL SCRIPTING ACROSS OPERATING SYSTEMS AND SHELLS as of late 2026: POSIX sh and its implementations (dash, busybox …",
+      "promptFramed": true,
+      "lastProgressAt": 1791668140682,
+      "tokens": 292372,
+      "toolCalls": 225,
+      "durationMs": 2821679,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.agents/research/shell-audit/installers.md\",\"headline_numbers\":[\"Fleet: 60 dirs, 59 remotes. 127 filename hits + 14 content hits resolve to 10 authored installers (4 sh, 3 ps1, 3 fish/nu/elv) in 4 repos, plus 1 inline template and 2 vendored. Name heuristic: 111/127 false positives (87%), recall 7/10; content heuristic recall 5/10.\",…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 5,
+      "label": "ground:exemplar-shape",
+      "phaseIndex": 1,
+      "phaseTitle": "Ground",
+      "agentId": "a0f6022250fcf2f6a",
+      "model": "claude-sonnet-5-5",
+      "state": "done",
+      "startedAt": 1791665317319,
+      "queuedAt": 1791665317275,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.ag…",
+      "promptPreview": "Model rationale: sonnet — counting and linting shell code across 41 exemplar repositories; volume work with commands, no rule decisions\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is the research program that makes an AI-agent fleet expert in SHELL SCRIPTING ACROSS OPERATING SYSTEMS AND SHELLS as of late 2026: POSIX sh and its implementations (dash, busybox ash, bash --pos…",
+      "promptFramed": true,
+      "lastProgressAt": 1791666789753,
+      "tokens": 348572,
+      "toolCalls": 117,
+      "durationMs": 1470750,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.agents/research/shell-audit/exemplar-shape.md\",\"headline_numbers\":[\"39 repos audited, 18,447 files walked, 10,525 shell-family files: sh-shebang 2,049, bash 2,064, zsh 594, bats 295, fish 1,657, nu 1,756, elvish 65, ps1/psm1 1,328, psd1 101. Shebangs: 'env bash' 1,927 vs '/bin/bash' 79 (24:1); '/bin/sh' 1,757.\",\"shellcheck 0.11.0 --…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 6,
+      "label": "ground:emitters-compared",
+      "phaseIndex": 1,
+      "phaseTitle": "Ground",
+      "agentId": "a32683cd01b0a8605",
+      "model": "claude-sonnet-5-5",
+      "state": "done",
+      "startedAt": 1791665317319,
+      "queuedAt": 1791665317275,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.ag…",
+      "promptPreview": "Model rationale: sonnet — comparative reading and running of eight multi-shell emitters; measurement, not rule decisions\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is the research program that makes an AI-agent fleet expert in SHELL SCRIPTING ACROSS OPERATING SYSTEMS AND SHELLS as of late 2026: POSIX sh and its implementations (dash, busybox ash, bash --posix, mksh, ksh93…",
+      "promptFramed": true,
+      "lastProgressAt": 1791666825308,
+      "tokens": 96174,
+      "toolCalls": 156,
+      "durationMs": 1506305,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.agents/research/shell-audit/emitters-compared.md\",\"headline_numbers\":[\"20 hostile escape cases; 16 upstream escape functions run verbatim across bash 3.2-5.3, zsh 5.0.8-5.9, dash/ash/mksh/ksh93/yash/posh, fish 3.6.0-4.9.3, nu 0.105.1/0.116.0, elvish 0.21.0, pwsh 7.4/7.6.6/WinPS 5.1\",\"Per-shell hand-written quoters (direnv, omp, mise…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 7,
+      "label": "ground:platform-matrix",
+      "phaseIndex": 1,
+      "phaseTitle": "Ground",
+      "agentId": "ac050d2591cbd0c92",
+      "model": "claude-sonnet-5-5",
+      "state": "done",
+      "startedAt": 1791665317319,
+      "queuedAt": 1791665317275,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.ag…",
+      "promptPreview": "Model rationale: sonnet — measuring default shells and userland across OS images and reading platform docs; fact gathering, no rule decisions\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is the research program that makes an AI-agent fleet expert in SHELL SCRIPTING ACROSS OPERATING SYSTEMS AND SHELLS as of late 2026: POSIX sh and its implementations (dash, busybox ash, bash…",
+      "promptFramed": true,
+      "lastProgressAt": 1791666463905,
+      "tokens": 266201,
+      "toolCalls": 94,
+      "durationMs": 1144902,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.agents/research/shell-audit/platform-matrix.md\",\"headline_numbers\":[\"21 of 21 images probed (debian 11/12/13, ubuntu 20.04/22.04/24.04/25.10/26.04/26.10, alpine 3.22/3.23, alma 8/9/10, AL2/AL2023, fedora 44, leap 16.0, arch, busybox 1.37, nixos/nix); 0 pull failures. These are Docker base images, not cloud images.\",\"/bin/sh is dash …"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 8,
+      "label": "scout:canonical",
+      "phaseIndex": 2,
+      "phaseTitle": "Scout",
+      "agentId": "a20f87170702e918e",
+      "model": "claude-sonnet-5-5",
+      "state": "done",
+      "startedAt": 1791665317319,
+      "queuedAt": 1791665317275,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.ag…",
+      "promptPreview": "Model rationale: sonnet — corpus survey and enumeration; cheap-tier volume reading, no rule decisions\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is the research program that makes an AI-agent fleet expert in SHELL SCRIPTING ACROSS OPERATING SYSTEMS AND SHELLS as of late 2026: POSIX sh and its implementations (dash, busybox ash, bash --posix, mksh, ksh93, yash, posh, FreeB…",
+      "promptFramed": true,
+      "lastProgressAt": 1791666686511,
+      "tokens": 108761,
+      "toolCalls": 165,
+      "durationMs": 1369186,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.agents/research/shell-topic-map/canonical.md\",\"sources_count\":65,\"primary_sources_count\":63,\"candidates\":[{\"slug\":\"sh-target-selection\",\"why\":\"What /bin/sh actually is per OS (dash on Debian/Ubuntu, bash-posix on RHEL/macOS, ash on Alpine) decides dialect.\",\"source\":\"https://www.debian.org/doc/debian-policy/ch-files.html\",\"covered\":…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 9,
+      "label": "scout:practitioner",
+      "phaseIndex": 2,
+      "phaseTitle": "Scout",
+      "agentId": "a641409888fbe15ad",
+      "model": "claude-sonnet-5-5",
+      "state": "done",
+      "startedAt": 1791665317319,
+      "queuedAt": 1791665317275,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.ag…",
+      "promptPreview": "Model rationale: sonnet — corpus survey and enumeration; cheap-tier volume reading, no rule decisions\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is the research program that makes an AI-agent fleet expert in SHELL SCRIPTING ACROSS OPERATING SYSTEMS AND SHELLS as of late 2026: POSIX sh and its implementations (dash, busybox ash, bash --posix, mksh, ksh93, yash, posh, FreeB…",
+      "promptFramed": true,
+      "lastProgressAt": 1791666634769,
+      "tokens": 85842,
+      "toolCalls": 121,
+      "durationMs": 1315684,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.agents/research/shell-topic-map/practitioner.md\",\"sources_count\":63,\"primary_sources_count\":27,\"candidates\":[{\"slug\":\"shebang-dialect-choice\",\"why\":\"Which shebang (sh/bash/env bash/pinned bash) fits the syntax used; gates every portability rule\",\"source\":\"https://mywiki.wooledge.org/Bashism\",\"covered\":\"no\",\"surface\":\"posix\",\"priorit…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 10,
+      "label": "scout:codified",
+      "phaseIndex": 2,
+      "phaseTitle": "Scout",
+      "agentId": "a666467951b408129",
+      "model": "claude-sonnet-5-5",
+      "state": "done",
+      "startedAt": 1791665317319,
+      "queuedAt": 1791665317275,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.ag…",
+      "promptPreview": "Model rationale: sonnet — corpus survey and enumeration; cheap-tier volume reading, no rule decisions\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is the research program that makes an AI-agent fleet expert in SHELL SCRIPTING ACROSS OPERATING SYSTEMS AND SHELLS as of late 2026: POSIX sh and its implementations (dash, busybox ash, bash --posix, mksh, ksh93, yash, posh, FreeB…",
+      "promptFramed": true,
+      "lastProgressAt": 1791666371490,
+      "tokens": 292984,
+      "toolCalls": 100,
+      "durationMs": 1052403,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.agents/research/shell-topic-map/codified.md\",\"sources_count\":33,\"primary_sources_count\":30,\"candidates\":[{\"slug\":\"sh-dialect-floor-posix2024\",\"why\":\"Three baselines disagree on what a #!/bin/sh script may assume (POSIX.1-2024, Debian Policy 10.4 extras, shipped dash 0.5.12); SC3xxx and runtime diverge (measured: pipefail and $'..' f…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 11,
+      "label": "scout:failure",
+      "phaseIndex": 2,
+      "phaseTitle": "Scout",
+      "agentId": "af57051fe516cbc46",
+      "model": "claude-sonnet-5-5",
+      "state": "done",
+      "startedAt": 1791665317320,
+      "queuedAt": 1791665317275,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.ag…",
+      "promptPreview": "Model rationale: sonnet — corpus survey and enumeration; cheap-tier volume reading, no rule decisions\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is the research program that makes an AI-agent fleet expert in SHELL SCRIPTING ACROSS OPERATING SYSTEMS AND SHELLS as of late 2026: POSIX sh and its implementations (dash, busybox ash, bash --posix, mksh, ksh93, yash, posh, FreeB…",
+      "promptFramed": true,
+      "lastProgressAt": 1791666776526,
+      "tokens": 301891,
+      "toolCalls": 123,
+      "durationMs": 1457440,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.agents/research/shell-topic-map/failure.md\",\"sources_count\":46,\"primary_sources_count\":35,\"candidates\":[{\"slug\":\"dialect-declaration\",\"why\":\"Which dialect does the script target, and do shebang, extension, shellcheck shell= directive and body agree? Gates every other portability rule (SC2148, SC3xxx).\",\"source\":\"https://www.shellche…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 12,
+      "label": "scout:shifts",
+      "phaseIndex": 2,
+      "phaseTitle": "Scout",
+      "agentId": "ab455f2884d87f339",
+      "model": "claude-sonnet-5-5",
+      "state": "done",
+      "startedAt": 1791665317320,
+      "queuedAt": 1791665317275,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.ag…",
+      "promptPreview": "Model rationale: sonnet — corpus survey and enumeration; cheap-tier volume reading, no rule decisions\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- This is the research program that makes an AI-agent fleet expert in SHELL SCRIPTING ACROSS OPERATING SYSTEMS AND SHELLS as of late 2026: POSIX sh and its implementations (dash, busybox ash, bash --posix, mksh, ksh93, yash, posh, FreeB…",
+      "promptFramed": true,
+      "lastProgressAt": 1791666615427,
+      "tokens": 334372,
+      "toolCalls": 132,
+      "durationMs": 1296341,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.agents/research/shell-topic-map/shifts.md\",\"sources_count\":45,\"primary_sources_count\":32,\"candidates\":[{\"slug\":\"posix-2024-feature-floor\",\"why\":\"Which formerly-bashism features are now POSIX.1-2024 (pipefail, $'..', read -d, find -print0, xargs -0/-r, realpath, readlink, timeout, test -ef/-nt/-ot) and which still are not (mktemp, st…"
+    }
+  ],
+  "totalTokens": 2827409,
+  "totalToolCalls": 1603
+}

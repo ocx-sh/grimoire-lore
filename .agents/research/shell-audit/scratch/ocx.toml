@@ -1,0 +1,13 @@
+#:schema https://ocx.sh/schemas/project/v1.json
+# Shell research toolchain (2026-10-10). Default group = current releases.
+[tools]
+fish = "ocx.sh/fish-shell/fish:4.9.3"
+nu = "ocx.sh/nushell/nushell:0.116.0"
+elvish = "ocx.sh/elvish/elvish:0.21.0"
+pwsh = "ocx.sh/powershell/powershell:7.6.6"
+shellcheck = "ocx.sh/shellcheck/shellcheck:0.11.0"
+shfmt = "ocx.sh/shfmt/shfmt:3.13.1"
+
+[group.old.tools]
+fish = "ocx.sh/fish-shell/fish:4.7.0"
+nu = "ocx.sh/nushell/nushell:0.105.1"

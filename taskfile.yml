@@ -193,6 +193,21 @@ tasks:
           {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' rules/csharp-quality.md rules/dotnet-build.md skills/dotnet-upgrade skills/dotnet-diagnose skills/dotnet-release
         fi
       #
+      # The shell set is checked against SHELL_CONSUMER (default ../www-setup),
+      # a tree holding shell, PowerShell, workflow and Taskfile files. The
+      # allow-absent names are correct globs that tree lacks (zsh, ksh, a
+      # shellcheckrc, composite actions, .yaml workflows, GitLab CI) plus the
+      # depth files' never-matching on-demand globs. The guard probes for
+      # shell CONTENT, so an adopter without that tree falls through to the
+      # rootless check and CI never breaks on its absence.
+      - |
+        if [ -d "{{.SHELL_CONSUMER}}" ] && [ -n "$(find "{{.SHELL_CONSUMER}}" -name '*.sh' -not -path '*/node_modules/*' -not -path '*/.agents/*' -print -quit 2>/dev/null)" ]; then
+          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --root {{.SHELL_CONSUMER}} --forbid '/home/' --forbid '.cache/research-lang' --forbid 'matrix.sh' --allow-absent '**/*.zsh' --allow-absent '**/*.ksh' --allow-absent '**/.shellcheckrc' --allow-absent '**/action.yml' --allow-absent '**/action.yaml' --allow-absent '**/.github/workflows/*.yaml' --allow-absent '**/Taskfile.yml' --allow-absent '**/.gitlab-ci.yml' --allow-absent '**/.gitlab-ci/*.yml' --allow-absent '**/.shell-quality-depth-on-demand' --allow-absent '**/.powershell-quality-depth-on-demand' rules/shell-quality.md rules/shell-quality rules/powershell-quality.md rules/powershell-quality skills/shell-integration skills/installer-script skills/shell-port skills/shell-diagnose
+        else
+          echo "note: no shell tree under {{.SHELL_CONSUMER}} — glob liveness NOT checked for shell; set SHELL_CONSUMER to a tree with shell and PowerShell files to include it"
+          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --forbid '/home/' --forbid '.cache/research-lang' --forbid 'matrix.sh' rules/shell-quality.md rules/shell-quality rules/powershell-quality.md rules/powershell-quality skills/shell-integration skills/installer-script skills/shell-port skills/shell-diagnose
+        fi
+      #
       # Every checks/*.py script carries its own fixtures and its own
       # --self-test mode. Run all eight here, so a broken check is caught next
       # to the artifact validation above, not only the first time a real page
@@ -268,6 +283,8 @@ tasks:
       SWIFT_CONSUMER: '{{.SWIFT_CONSUMER | default ""}}'
       # No default: the fleet has no .NET tree to point at.
       CSHARP_CONSUMER: '{{.CSHARP_CONSUMER | default ""}}'
+      # A tree with shell and PowerShell files; absent paths fall back to no root.
+      SHELL_CONSUMER: '{{.SHELL_CONSUMER | default "../www-setup"}}'
 
   build:
     desc: Build every publishable artifact without pushing anything

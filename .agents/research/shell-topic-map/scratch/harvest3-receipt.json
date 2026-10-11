@@ -1,0 +1,169 @@
+{
+  "summary": "Shell research program phase 6 after a dive wave: one opus agent harvests the new consolidations, appends the landing report to the topic map, applies the stop condition, and commissions the next wave (revised staged briefs plus follow-ups) or declares ready-to-draft with binding authoring notes",
+  "agentCount": 1,
+  "logs": [
+    "Verdict: needs-another-round · next wave 8 · IDs 371 · MUST 251 · families 21 · contradictions 30"
+  ],
+  "result": {
+    "harvest": {
+      "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.agents/research/shell-topic-map.md",
+      "verdict": "needs-another-round",
+      "verdict_reason": "Wave 3 added 172 IDs and 127 MUST rules (371 IDs, 251 MUST, 21 families). Of those MUST rules, 94 sit in the nine families opened this wave (SH-ZSH, SH-FISH, SH-NU, SH-ELV, SH-INST, PS-SEC, SH-SEC, SH-TEST, SH-CORE). The wave also found new failure classes, for example the zsh emulate errexit reset, the fish || skip, the nu tail-try hang, cargo-dist failing open, sudo-rs -E, bats and Pester vacuous exits, and the zizmor dotted-matrix miss. No out-of-corpus held-out round has run: the security 'held-out' round resampled the corpus's own 40 clones (shell-security.md:13) and still found a missing class. Load-bearing questions answerable by fixture runs remain: the held-out round, completeness of the SH-SEC-02 check, and the ble.sh and Windows clauses of the SH-EMIT-24/43 MUST rules. The next wave is the held-out round plus two small revisions. If that round is clean (only instances of existing classes and check fixes), the next iterate returns ready-to-draft.",
+      "next_wave": [
+        {
+          "group": "heldout",
+          "group_label": "Held-out round (out-of-corpus validation)",
+          "id_family": "SH-DIAL, SH-USER, SH-ERR, SH-EXP, SH-GATE, SH-SEC, SH-CORE (validation; IDs stable, new IDs only for a new failure class)",
+          "slug": "posix-scripts",
+          "label": "Held-out round: POSIX sh and bash scripts",
+          "brief": "Purpose: the drafting gate. Run every POSIX/bash MUST rule and check over fresh trees the program has never read, and decide per family whether the round is clean.\nTrees: about 12 blob-less depth-1 clones under /home/mherwig/.cache/research-lang/heldout/shell/<owner>__<repo> (on disk, never /tmp). Candidates: asdf-vm/asdf, dokku/dokku, tfutils/tfenv, nodenv/nodenv, dylanaraps/neofetch, pi-hole/pi-hole, GameServerManagers/LinuxGSM, Bash-it/bash-it, kubernetes/kubernetes (sparse hack/), void-linux/void-packages (sparse common/), syndbg/goenv, sdkman/sdkman-cli. Exclude every repo in shell-audit/scratch/exemplar-shas.md (the 41-repo corpus) and everything under /home/mherwig/dev. Record SHAs.\nTools: ST/run.sh toolchain (ShellCheck 0.11.0, shfmt 3.13.1); /home/mherwig/.cache/research-lang/shell-tools/matrix.sh families posix and bash.\nRun:\n(1) The shell-gate.sh logic of shell-gate.md, using the four-key rc (topic map X51: no check-extra-masked-returns).\n(2) Every inline cell of shell-dialect.md, shell-errexit.md, shell-expansion.md, shell-gate.md, shell-security.md (the 17-cell block) and SH-CORE-07's tells. Translate first any cell still in the banned dialect (X52): git-fed lists, grep -H -n -E -e, no -r/--include/-P/$'..', PREFLIGHT line, pass = empty stdout and stderr.\n(3) The SH-ERR-31 empty-glob check over every glob loop found. Its evidence today is 7 fleet loops.\n(4) matrix.sh posix on 3 sampled #!/bin/sh scripts and matrix.sh bash (3.2 and 5.3) on 3 sampled bash scripts.\nClassify every finding:\n(i) An instance of an existing ID and failure class.\n(ii) A check false positive or false negative. This gets a cell amendment, re-run red on a plant and green on a twin.\n(iii) A new failure class. This gets a candidate rule with a plant/twin run.\nReport per-ID hit counts, and the false-positive rate for listing cells from a read sample.\nDecide: clean or not clean per family. Name the amendment and the ID for each item in (ii) and (iii). Fixtures go under shell-tools/fixtures/heldout-posix-scripts/."
+        },
+        {
+          "group": "heldout",
+          "group_label": "Held-out round (out-of-corpus validation)",
+          "id_family": "SH-INST, PS-SEC (validation; IDs stable)",
+          "slug": "installers",
+          "label": "Held-out round: install.sh and install.ps1 pairs",
+          "brief": "Purpose: test the 20 SH-INST and PS-SEC MUST rules, which rest on 17 corpus installers, against 8 or more installers outside the corpus.\nTrees: clones under /home/mherwig/.cache/research-lang/heldout/shell/. Candidates: pnpm/get.pnpm.io (sh and ps1), prefix-dev/pixi (install/install.sh and install.ps1), superfly/flyctl (installers/), oven-sh/bun (src/cli/install.sh and install.ps1), volta-cli/volta, Schniz/fnm (.ci/install.sh), ollama/ollama (scripts/install.sh), tailscale/tailscale (scripts/installer.sh), helm/helm (scripts/get-helm-3), coder/coder (install.sh), casey/just (www/install.sh). Use astral-sh/uv only if an installer is committed. Exclude the 41 corpus repos and the fleet. Record SHAs.\nRun the installer kit exactly as shell-installer.md names it:\n- mx.sh t-trunc, t-tamper, t-flags, t-platform and t-tty, plus t-trap.py, with the network stubbed. The sweep is vacuous unless stubbed (SH-INST-01 scope note).\n- The R7 PS greps in the git-fed form.\n- check-iex-survival.ps1 in its repl and ci modes, iex-semantics.ps1 and zipcheck.ps1, on pwsh 7.6.6 and Windows PowerShell 5.1 through matrix.sh pwsh and win. Stage only under C:\\Users\\ecom\\shell-wintest.\n- The BusyBox wget run on alpine:3.22 (R8).\nFill the SH-INST-20 ten-row checklist per installer. Classify every finding: an existing class, a check fix, or a new class (with plant and twin).\nDecide: clean or not clean for SH-INST and PS-SEC. Check whether any root-requiring installer in the sample makes deferred row M-N-13 load-bearing. Report third-party defects in the consolidation only; nothing is filed (topic map X55)."
+        },
+        {
+          "group": "heldout",
+          "group_label": "Held-out round (out-of-corpus validation)",
+          "id_family": "SH-CI (validation; IDs stable)",
+          "slug": "ci-and-taskfiles",
+          "label": "Held-out round: workflows, Taskfiles and GitLab CI",
+          "brief": "Purpose: test SH-CI-01..30 against workflows, Taskfiles and GitLab files the program never read. SH-CI-23..30 come from one revision round.\nTrees: sparse clones (.github/, Taskfile*, .gitlab-ci.yml) under /home/mherwig/.cache/research-lang/heldout/shell/. Candidates:\n- GitHub: astral-sh/ruff, BurntSushi/ripgrep, cli/cli, neovim/neovim, sharkdp/bat, tokio-rs/tokio.\n- Taskfile: go-task/task, goreleaser/goreleaser, arduino/arduino-cli.\n- GitLab: gitlab-org/gitlab-runner, gitlab-org/cli, fdroid/fdroidserver, inkscape/inkscape.\nExclude the 41 corpus repos, including actions/runner-images, and the fleet. Record SHAs.\nRun:\n- Every SH-CI grep in the git-fed dialect.\n- job-shell-lint.py, win-task-lint.py, and gl-extract.py followed by shellcheck -s sh (the appendices of shell-ci.md).\n- actionlint 1.7.12 at default severity.\n- zizmor 1.30.1 with the regular persona at --min-severity medium.\nMeasure the false-positive rate of the SH-CI-23 and SH-CI-24 greps on non-generated files, and confirm that the generated-file exemption is recognisable. Check that SH-CI-30's widened grep keeps its precision.\nClassify every finding: an existing class, a check fix, or a new class (with plant and twin).\nDecide: clean or not clean for SH-CI, with any amendment named by ID. Do not dispatch or push anything."
+        },
+        {
+          "group": "heldout",
+          "group_label": "Held-out round (out-of-corpus validation)",
+          "id_family": "SH-EMIT, SH-ZSH, SH-FISH, SH-NU, SH-ELV (validation; IDs stable)",
+          "slug": "emitters-and-alt-shells",
+          "label": "Held-out round: emitters and authored zsh/fish/nu/elvish files",
+          "brief": "Purpose: test the SH-EMIT harnesses and the 41 alt-shell MUST rules on tools and files outside the corpus.\nEmitters, using released binaries staged in the cache: Schniz/fnm (bash, zsh, fish, pwsh and cmd env output), version-fox/vfox, cantino/mcfly, carapace-sh/carapace-bin, Canop/broot, nvbn/thefuck, and casey/just for clap_complete completions.\nAuthored files, cloned under /home/mherwig/.cache/research-lang/heldout/shell/: PatrickF1/fzf.fish, IlanCosman/tide, sindresorhus/pure, zsh-users/zsh-syntax-highlighting, nushell/nupm, zzamboni/elvish-modules. Exclude the 41 corpus repos (which include zoxide, direnv, mise, starship, atuin, fisher, nu_scripts and ohmyzsh) and the fleet. Record SHAs and versions.\nRun:\n- The 36-case corpus.txt through every value-emitting arm, in the real interpreter, oldest and newest per family (SH-EMIT-04).\n- check-rc-edit.sh.\n- The bash 40-scenario hook matrix and the zsh, fish and nu hook harnesses.\n- The completion read-back (FC/comp).\n- inject.ps1 u2018 on pwsh 7.6.6 and Windows PowerShell 5.1 via matrix.sh pwsh and win.\n- For the alt-shell files: checks Z1-Z8, F1-F7, N1-N5 (nu-gate.nu --strict on 0.100.0 and 0.116.1) and E1-E3 (elv-gate.sh on 0.18.0 and 0.21.0).\nClassify every finding: an existing class, a check fix, or a new class (with plant and twin).\nDecide: clean or not clean per family. Third-party injection findings are recorded only; the curly-quote disclosure is the owner's call and nothing is filed (topic map X55, map Q7)."
+        },
+        {
+          "group": "heldout",
+          "group_label": "Held-out round (out-of-corpus validation)",
+          "id_family": "PS-COMPAT, PS-ENC, PS-ERR, PS-NATIVE, PS-GATE (validation; IDs stable)",
+          "slug": "powershell",
+          "label": "Held-out round: PowerShell repos and the resolver out of sample",
+          "brief": "Purpose: test the PS-* MUST rules, including PS-ENC-07..10 and PS-GATE-01..05, on PowerShell outside the 1,327-file corpus. Also answer the PS-GATE-06 out-of-sample question.\nTrees: clones under /home/mherwig/.cache/research-lang/heldout/shell/. Candidates: chocolatey/choco (src/chocolatey.resources/helpers), PowerShell/PSReadLine, microsoft/winget-cli (tools/), badgerati/Pode, ChrisTitusTech/winutil, dataplat/dbatools (sparse public/ subset), PowerShell/vscode-powershell, RamblingCookieMonster/PSDepend, Azure/azure-powershell (sparse tools/). Exclude the corpus (PowerShell, PSScriptAnalyzer, Pester, Scoop, its installer, posh-git, dotnet install-scripts, vcpkg) and the fleet. Record SHAs.\nRun, on the Windows host via matrix.sh win and pwsh, staged only under C:\\Users\\ecom\\shell-wintest:\n- parse-gate.ps1 under powershell.exe 5.1, for every file without #Requires 7.x.\n- PSSA 1.25.0 through the corrected wrapper with the four per-kind settings files.\n- The V1, V2, V3a, V3b and V7 greps in the git-fed dialect.\n- denylist-51-rev2.ps1.\n- pwsh-run-lint.py over the repos' workflows.\n- Test-CommandResolves on the target host, tuned with an allow-list derived only from the corpus. Measure its false-finding rate out of sample (pwsh open question 'Resolver out of sample').\nClassify every finding: an existing class, a check fix, or a new class (with plant and twin).\nDecide: clean or not clean per PS family, and whether PS-GATE-06 can be MUST for a project that supplies its own allow-list (default: stays SHOULD and advisory)."
+        },
+        {
+          "group": "heldout",
+          "group_label": "Held-out round (out-of-corpus validation)",
+          "id_family": "SH-TEST (validation; IDs stable)",
+          "slug": "test-suites",
+          "label": "Held-out round: bats and Pester suites, dynamic and parallel census",
+          "brief": "Purpose: SH-TEST rests on one dive and has never seen a suite outside the corpus (testing subarea 5). Run its checks on fresh suites, and settle whether the census holds for dynamic and parallel bats (testing subarea 1, owner O6).\nTrees: clones under /home/mherwig/.cache/research-lang/heldout/shell/.\n- bats: asdf-vm/asdf, dokku/dokku, nodenv/nodenv, basherpm/basher, jasonkarns/bats-mock, syndbg/goenv, Bash-it/bash-it, bats-core/bats-assert, bats-core/bats-file.\n- Pester: badgerati/Pode, dataplat/dbatools (sparse tests/ subset), RamblingCookieMonster/PSDepend, PowerShell/PSReadLine.\nExclude bats-core/bats-core, shellspec, pyenv, rbenv, Pester and the fleet. Record SHAs.\nRun checks/bats-lint.sh and bats-census.sh as shell-testing.md defines them, with bats 1.14.0 on bash:5.3 for every suite and bash:3.2 for two. Count the vacuous forms found beyond the 13 planted ones.\nBuild fixtures for bats_test_function suites, for -j N (GNU parallel present), and for --formatter junit. Decide whether the census input rule needs an expected-count file, and whether bats --count -r DIR can replace the static grep.\nPester: Invoke-PesterGate.ps1, cells P1 and P2, and Test-DiscoveryCode.ps1 on pwsh 7.6.6, with Pester 6.2.0 and 5.9.1.\nClassify every finding: an existing class, a check fix, or a new class (with plant and twin).\nDecide: clean or not clean for SH-TEST, and the census amendment if any. Fixtures go under shell-tools/fixtures/heldout-test-suites/."
+        },
+        {
+          "group": "security",
+          "group_label": "Security: injection and secrets",
+          "id_family": "SH-SEC",
+          "slug": "argv-through-variables-and-credentials",
+          "label": "Revision: variable-carried secrets, credential forms, names outside bash",
+          "brief": "Revision of shell-security.md. IDs SH-SEC-01..12 stay stable; any new rule takes SH-SEC-13 or above.\nThree questions, each load-bearing:\n(1) Completeness of SH-SEC-02's check. A secret that reaches argv through a variable is invisible to s02-argv. Examples: h=\"Authorization: Bearer $T\"; curl -H \"$h\"; args+=(-H \"...$T\"); a URL with userinfo built in a variable. Write checks/secret-argv.sh as a two-pass awk script: pass 1 marks variables assigned from secret-named sources, pass 2 flags their use in curl, wget, git, docker, gh or cargo argv. It follows the SH-GATE-30/31 shape: awk only, exit map 0/1/69/74/78/79. Watch it red on plants and green on twins on GNU, busybox 1.37 and uutils (SH-GATE-33 hosts). Measure precision on the 40 corpus clones (SS/mine-argv.sh baseline), on the fleet, and on heldout/shell trees if present (do not wait for them). Decide: MUST cell or listing cell.\n(2) Credential remedy forms the rule recommends but never ran (security Q1). Cover git through GIT_ASKPASS, credential.helper store/cache and an http.extraHeader passed through the environment, against userinfo URLs, checking .git/config persistence and /proc/<pid>/cmdline. Cover cargo login reading the token on stdin and CARGO_REGISTRY_TOKEN in the environment, against a stub alternative registry. Run each on the matrix and record what argv shows.\n(3) The scope of SH-SEC-09 outside bash. Run local \"$k=v\", typeset -n, read \"$k\" and printf-style dynamic names on dash, busybox ash, mksh, ksh93u+m, yash, posh and zsh, via matrix.sh posix and zsh.\nFixtures go under shell-tools/fixtures/shell-security-rev/. Decide amendments by ID, and log them in a Revision log section."
+        },
+        {
+          "group": "emit",
+          "group_label": "Multi-shell emission",
+          "id_family": "SH-EMIT",
+          "slug": "ble-release-and-windows-rows",
+          "label": "Revision: ble.sh tagged release and the Windows emitter rows",
+          "brief": "Revision of shell-emit.md. IDs SH-EMIT-01..50 stay stable. Rows that belong to SH-NU and SH-ELV are handed to shell-alt-shells.md by pointer, not edited.\n(1) ble.sh. SH-EMIT-24 and SH-EMIT-43 are MUST rules, and their ble.sh clauses were measured on one nightly (0.4.0-nightly+d81fd54, bash 5.2.21). Build the latest tagged ble.sh release and the current nightly. Re-run FR/hooks/bash/twin.sh with ble-attach before and after, sourced once and twice, plus the blehook PRECMD and CHPWD forms, on bash 5.2 and 5.3. Decide: the clauses hold on the release, or they are scoped to 'nightly as of <date>'.\n(2) pwsh 7.6 Windows rows (emit subarea 1b). Run on the Windows host via matrix.sh pwsh and win, staged only under C:\\Users\\ecom\\shell-wintest. Never write the owner's real $PROFILE or registry. Resolve profile paths per edition read-only, and run the rc-edit harness against copied profile files under the staging dir. Cover: completion registration read-back (SH-EMIT-33, 38, 39; Register-ArgumentCompleter, -NativeFallback on 7.6.6 and 5.1); LocationChangedAction combined through [Delegate]::Combine and the 5.1 prompt wrapper (SH-EMIT-42); the env and data channel rows (SH-EMIT-06, 07: empty $env:X, base64 payload).\n(3) Windows config paths for nu and elvish. Use portable nu 0.116.1 and elvish 0.21.0 staged in the same dir with config locations redirected into staging. Measure $nu.data-dir/vendor/autoload (SH-EMIT-17, SH-NU-07) and the rc.elv location (emit subarea 1c).\nDecide per row: confirmed, scoped, or amended. Log every change in the Revision log. Fixtures go under shell-tools/fixtures/shell-emit-rev2/."
+        }
+      ],
+      "frame_corrections": [
+        "No out-of-corpus held-out round has run; the security group's 'held-out round' sampled the 41-repo corpus's own 40 code clones (shell-security.md:13)",
+        "The wave-2 map's closing line says '30-repo corpus'; the corpus is 41 repos (shell-frame.md, codebases item 5)",
+        "cargo-dist 0.33.0 is class 'pinned' (embedded per-archive digests), not sidecar/manifest (shell-installer.md C4)",
+        "shasum and openssl are absent on stock ubuntu:24.04, ubuntu:26.04, debian:12, alpine:3.22 and busybox:1.37; the [sh] 26.04 row came from a custom image (shell-installer.md C6)",
+        "shell-dialect.md:111 swaps the {1..3} composition: mksh runs it once and ksh93u+m three times (shell-installer.md C7)",
+        "The www-setup comment that Expand-Archive validates entries only from 7.4 does not reproduce on 5.1.26100.9444 (shell-installer.md C9)",
+        "Hosted GitHub Windows images put Git's usr\\bin and mingw64\\bin on PATH (PathOption=CmdTools); platform-matrix.md:267 is wrong (shell-ci.md C14)",
+        "GitLab CI files in the fleet: 12, not 21 (shell-ci.md revision log)",
+        "M-X-02: at least 18 zsh-nomatch sites in 15 catalog files, not 5 places (shell-alt-shells.md Verdict 2)",
+        "M-G-01: shellspec's last release is 0.28.1 (2021-01-11), not 2024-09 (shell-testing.md C8)",
+        "M-G-03: bats 1.14.0 run honours only a set -e the called function sets; plain commands need --errexit (shell-testing.md C9)",
+        "sudo-rs -E is not 'discouraged' but silently dropped, with a warning and exit 0, on 0.2.8 and 0.2.13 (shell-security.md C14)",
+        "bash 5.3 NEWS item p (NULL PATH as '.') is not a behaviour change (shell-security.md C10)",
+        "The fleet runs Pester 6.2.0 under a step titled 'Install Pester (v5)'; www-setup/.claude/rules/testing-pwsh.md is stale (shell-testing.md C14)",
+        "House skill bodies are 497 to 499 lines and the checker enforces 500 on the body (shell-skills.md C1)",
+        "Bare nu-check and nu --ide-check exit 0 on broken or erroring files; the SH-GATE-11 nu row is a parse floor, not a gate (shell-skills.md R13, shell-alt-shells.md C7)",
+        "H6 refined for the newly opened families: the top failures are bash habits in zsh/fish files and blind gates (alt-shells failure modes 1-2), $ErrorActionPreference='Stop' assumed to cover natives (pwsh failure mode 1), and a missing or fail-open integrity check (installer failure mode 1)",
+        "H9 sharpened: a parse-clean nu installer already warns on 0.114.1 and 0.116.1 (shell-alt-shells.md C7)"
+      ],
+      "rule_totals": {
+        "ids": 371,
+        "must": 251,
+        "families": 21
+      },
+      "contradictions_across_consolidations": [
+        "X29 iex exit and detection: PS-ERR-05 (break, $null -eq $MyInvocation.MyCommand.Path) vs PS-SEC-09 and PS-SEC-08(d). Keep PS-SEC-09 (exit shape) and PS-SEC-08(d) ([string]::IsNullOrEmpty($PSCommandPath)); PS-ERR-05 becomes a pointer",
+        "X30 5.1 runner-file writer (supersedes X8): SH-CI-11 (Out-File only) vs installer C2 / retired PS-SEC-12 (AppendAllText only) vs PS-ENC-10 (both accepted, alone and mixed; AppendAllText is the default). Keep PS-ENC-10; SH-CI-11 becomes a pointer row that keeps its >> and bare Add-Content greps",
+        "X31 TLS on 5.1: PS-COMPAT-09 (SHOULD, -bor Tls12) vs PS-SEC-06 (MUST: guarded, numeric, Desktop only). Keep PS-SEC-06; PS-COMPAT-09 becomes a pointer; www-setup install.ps1:337,355 flips from satisfied to violated",
+        "X32 #Requires in iex scripts: installer Verdict 8 summary ('No #Requires') vs PS-COMPAT-01 and PS-SEC-08(a). Keep the rule texts of PS-COMPAT-01 and PS-SEC-08(a), which agree; the Verdict 8 wording is not carried",
+        "X33 \"$@\" forwarding: retired SH-INST-13 folds into SH-ERR-12, which keeps the text and gains ${1+\"$@\"} at every forwarding site",
+        "X34 installer exit header: SH-ERR-25 (SHOULD) vs SH-INST-09 (MUST). SH-INST-09 owns the installer kind; the empty-glob exit uses the installer's 0-7 table for installers and SH-ERR-31's 79 for CLIs and gates",
+        "X35 parse-gate rows: SH-GATE-11 (zsh on 5.0.8, nu-check/--ide-check, elvish -compileonly) vs SH-ZSH-12, SH-NU-02, SH-ELV-02 and SH-FISH-01. The family rules keep the text; SH-GATE-11 and diagnose route row 16 cite them",
+        "X36 shfmt scope: SH-GATE-09 includes zsh vs SH-ZSH-12/alt-shells C10 (advisory) and SH-FISH-03. Keep SH-ZSH-12 and SH-FISH-03; the blocking shfmt set excludes zsh",
+        "X37 trap EXIT inside a function: SH-ERR-27 (CONSIDER) vs SH-ZSH-08 (MUST in bash-sourced files). Keep SH-ZSH-08 for any zsh-reachable file; SH-ERR-27 stays CONSIDER for bash-only files",
+        "X38 echo -e: SH-EXP-09 vs SH-ZSH-15. Both keep their text, scoped (alt-shells C3)",
+        "X39 fish/nu own file: SH-EMIT-17 (SHOULD, where) vs SH-FISH-13 (MUST, content). Both keep their text; SH-NU-07 and SH-FISH-15 point to SH-EMIT",
+        "X40 .zshenv vs rc target: SH-ZSH-11 and SH-EMIT-16 agree on .zprofile; no change",
+        "X41 emitted PS quoting: SH-EMIT-03 vs SH-EMIT-08 vs PS-ENC-08 are consistent once scoped (authored files / 5.1-bound output / literal form); all keep their text",
+        "X42 dynamic names: SH-EXP-13 (recommends printf -v) vs SH-SEC-09. Keep SH-SEC-09; SH-EXP-13 gains 'literal or validated identifier only'",
+        "X43 locking: M-D-07 / SH-USER-06 vs SH-SEC-07. SH-SEC-07 keeps the lock text; SH-USER-06 keeps tool availability; SH-USER-12 keeps atomic replace",
+        "X44 never-disable list: SH-GATE-06 (5 codes) vs SH-SEC-01 (+SC2254, SC2053, SC2295, SC2035, SC2156). SH-GATE-06 keeps the list mechanics with all 10 codes; SH-SEC-01 keeps the reason and its cells",
+        "X45 absent-interpreter skips: SH-EMIT-32 (CONSIDER) vs SH-TEST-10 (MUST). Keep SH-TEST-10; SH-EMIT-32 becomes a pointer",
+        "X46 POSIX interpreter list: testing dive (dash+posh) vs SH-DIAL-04. Keep SH-DIAL-04; SH-TEST-13 cites it",
+        "X47 SH-EXP-21 takes errexit C-12's reworded text; SH-ERR-29..31 own glob shopts",
+        "X48 Pester rule placement: artifact decision (shell-quality/testing.md) vs testing O1. IDs stay SH-TEST-18..22 and are authored into powershell-quality/gates.md; testing.md carries SH-TEST-01..17 and a pointer",
+        "X49 test hatches: SH-TEST-17 vs SH-INST-19 (both SHOULD). SH-INST-19 owns the installer hatch contract; SH-TEST-17 cites it",
+        "X50 tell table and eval capture: SH-CORE-07 owns the table (X13 confirmed); SH-EXP-13 vs SH-EMIT-14 is settled by the skills C3 joint reading with tell-ok:",
+        "X51 SC2310/SC2312: SH-GATE-02 and G1 (both enable lines) vs SH-ERR-07 and SH-ERR-33. Keep SH-ERR-07 (191 sites, 2 strict); SH-GATE-02 is four keys",
+        "X52 verification dialect (X1 continued): banned grep forms remain in alt-shells (35 lines), pwsh (32 plus 13 -P), ci (25 plus 12 -P), emit (19 plus 3 -P), errexit 18, expansion 13, skills 7, dialect 5, installer 3, testing 2; SH-ZSH-06 recommends grep -r --include; emit C20 reads grep's exit status. Keep SH-GATE-21..31; drafters translate every cell; SH-ZSH-06's preferred form becomes the git-fed shape or find -name",
+        "X53 non-ASCII checks: emit C20 grep vs SH-GATE-16 awk vs PS-ENC-01/08 greps. SH-GATE-16 keeps the sh/bash text; the other checks are re-expressed in the dialect and judged by output",
+        "X54 waiver tokens vd-ok:, userland-ok:, sec-ok: and tell-ok: overlap; all four are kept, scoped by family, each with a same-line reason, and listed in one index table",
+        "X55 filing fleet defects: alt-shells Q4 (default: file issues) vs frame Q6, map Q7, ci Q5, emit Q1 and errexit Q3. The program files nothing; alt-shells Q4 is overturned to report-only",
+        "X56 git operands: SH-SEC-08 (-- before variable operands) vs SH-CI-29 (a ref is never written after --). Both keep their text; SH-SEC-08 points to SH-CI-29's ref clause",
+        "X57 skills MUST tables cite M-IDs and the formerly dangling PS-SEC-08 (now a defined MUST). Drafters re-point to SH-INST, PS-SEC, SH-NU-02 and SH-ZSH-12 and re-run must-cell.sh and sev-cell.sh; the installer-script hold is released",
+        "X58 execution policy: X28 stands. PS-GATE-07 keeps the Set-ExecutionPolicy text; PS-SEC-11 keeps the installer-specific ban and cites PS-GATE-07"
+      ],
+      "authoring_notes": []
+    }
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Harvest"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "harvest:wave3",
+      "phaseIndex": 1,
+      "phaseTitle": "Harvest",
+      "agentId": "a28b41da3dc8acf42",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1791706671560,
+      "queuedAt": 1791706671531,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.ag…",
+      "promptPreview": "Model rationale: opus — harvesting a wave, the convergence verdict, revising the next wave's commissions and the cross-consolidation contradiction sweep are decisions with a blast radius over every artifact the program ships.\n\nPROJECT CONTEXT (context for you, not content to reproduce):\n- You are phase 6 (Iterate) of the research-lang program for shell scripting across operating systems and shells…",
+      "promptFramed": true,
+      "lastProgressAt": 1791707904288,
+      "tokens": 260890,
+      "toolCalls": 86,
+      "durationMs": 1232727,
+      "resultPreview": "{\"path\":\"/home/mherwig/dev/grimoire-lore/.agents/worktrees/shell/.agents/research/shell-topic-map.md\",\"verdict\":\"needs-another-round\",\"verdict_reason\":\"Wave 3 added 172 IDs and 127 MUST rules (371 IDs, 251 MUST, 21 families). Of those MUST rules, 94 sit in the nine families opened this wave (SH-ZSH, SH-FISH, SH-NU, SH-ELV, SH-INST, PS-SEC, SH-SEC, SH-TEST, SH-CORE). The wave also found new failure…"
+    }
+  ],
+  "totalTokens": 260890,
+  "totalToolCalls": 86
+}

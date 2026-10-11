@@ -1,3 +1,34 @@
+# Shell program (LANDED 2026-10-11)
+
+`/research-lang` shell portability (POSIX sh implementations, bash 3.2-5.3, zsh, ksh, fish, nushell,
+elvish, Windows PowerShell 5.1, pwsh 7.x, userland, CI shells, emitters, installers). Frame
+`.agents/research/shell-frame.md`; map and binding authoring notes `.agents/research/shell-topic-map.md`.
+
+## What shipped
+- rules/shell-quality: index + 14 depth files + checks/ (314 IDs). rules/powershell-quality: index +
+  6 depth files + checks/ (63 IDs). Skills shell-integration, installer-script, shell-port,
+  shell-diagnose. Bundle shell-essentials 0.1.0 (plus code-docs, code-docs-cleanup).
+- Verification dialect (git-fed file lists, POSIX grep options, awk checks) is now catalog-wide:
+  [ocx-sh/grimoire-lore#25](https://github.com/ocx-sh/grimoire-lore/pull/25) rewrote every sibling set.
+- Security fixes found by the program, merged: [ocx-sh/ocx#612](https://github.com/ocx-sh/ocx/pull/612)
+  (PowerShell curly-quote injection), [ocx-sh/www-setup#29](https://github.com/ocx-sh/www-setup/pull/29)
+  (workflow input injection, exit under irm|iex). Same curly-quote class exists in mise, direnv,
+  starship: not disclosed upstream (owner did not ask).
+
+## Validation and convergence
+- Four dive waves, held-out round over 64 fresh trees, then a confirmation round over 52 more fresh
+  trees against the drafts (434 cells, 41 cell defects fixed, 24 provisional/pending marks cleared).
+- Still provisional or pending (marked in the files): one row per index; SH-EMIT-24 ble.sh clause,
+  SH-EMIT-43 bash directory-hook fixture, pty fish completion readback. macOS/BSD read-only, not run.
+- Known limit: `files()` (shfmt -f) misses shebang-only files with other extensions; listing cell
+  `i00-gap` covers it.
+
+## Environment and cleanup
+- Toolchain `~/.cache/research-lang/shell-tools` (keep for re-runs). Exemplar, held-out and confirm
+  clones under `~/.cache/research-lang/{exemplars,heldout,confirm}/shell`: deleted on landing.
+
+---
+
 # C# / .NET program (AUTHORED, ON BRANCH `csharp`)
 
 Started 2026-10-10, closed 2026-10-11 (`/research-lang C#`, ultracode). Purpose

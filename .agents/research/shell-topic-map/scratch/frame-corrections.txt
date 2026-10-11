@@ -1,0 +1,25 @@
+- .sh count is 647 raw / 187 authored, not ~1450 [fleet], [cfg] s6.4
+- Extensionless #!/bin/sh files are 389-393, not ~1100; 313-376 are gitignored ocx trampolines and only 6 are authored [fleet] #3, [cfg] s6.4
+- .bash 5 not 132; .ps1 23-25 not 49; .fish 6 not 22; .nu 3 not 21 [fleet]
+- H1 refuted: 0/190 sh-shebang scripts carry SC3xxx (exemplars 3.5%) [fleet] #6, [ex]
+- H2 split: errexit present in 77% of non-snippet bash; the hazard is SC2310 x69 / SC2312 x150 suppression [fleet] #9
+- H3 confirmed and sharpened: pwsh curly quotes U+2018-201B escape the literal (ocx escape.rs:35 plus four upstreams); a shared POSIX quoter fails 17-18/20 on fish/nu/elvish [ocx], [emit]
+- H4 refuted for installers; GNU-isms only in test/manual and Swift checks; but www-setup's installer crashes on busybox wget [fleet] Axis 5, [inst]
+- H5 confirmed and extended: a mid-script native failure in a pwsh step is invisible on 5.1 and 7.6.6 [plat]
+- H9 split: nu churns most (4.5% vs fish 0.6%), but ocx's guarded nu passes 0.105.1 and 0.116.0 [ex], [ocx]
+- ocx ships no installer pair; the installers live in www-setup/src, and grimoire uses a cargo-dist 0.33.0 front door [ocx], [inst]
+- The code-docs rule globs shell extensions but carries no shell checks [cfg]
+- nushell current is 0.116.1 (2026-10-04) [canon], [shift] s9
+- zsh 5.9.1 and 5.9.2 exist; 5.10 is unreleased [shift] s6
+- elvish -compileonly exists and works on 0.21.0 (55/55); [ocx] was wrong [inst], [ex]
+- Debian 13 drops yash but keeps posh 0.14.1 [shift] s5
+- A dash version string does not identify features: Debian 0.5.12-12 accepts pipefail, -2 and -6ubuntu5 reject it [shift] s3, [plat]
+- ubuntu-latest moves to 26.04 between 2026-10-19 and 2026-11-19 (bash 5.3.9, uutils, ShellCheck 0.11.0) [shift] s13
+- Ubuntu 25.10+ ships uutils coreutils, not GNU [shift] s12
+- Rule frontmatter has no description/metadata: paths, summary, keywords, license, repository [cfg] s1.2
+- The depth-file never-glob is adopted by only 19/155 depth files, and the checker does not enforce it [cfg] s1.6
+- .shellcheckrc matches 0 fleet files; the only PSSA settings file is www-setup's [cfg] s6
+- No glob form reaches shebang-only scripts on any client or the checker [cfg] s2.4
+- GHA windows-2025 shell: bash is Git Bash 5.3.15; the host's is 5.2.15 [plat], [shift] s13
+- PowerShell 7.4 is no longer a floor to write: 7.4 and 7.5 reach EOS 2026-11-10, so Q2 becomes 7.6 LTS [shift] s11
+- macOS /bin/sh is bash 3.2 in POSIX mode, not dash as fleet quality-bash.md claims [plat], [frame] H7
