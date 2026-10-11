@@ -137,15 +137,15 @@ readme = "README.md"
 logo = "assets/lore-rust.svg"
 
 [rules.rust-quality]
-version = "0.2.0"
+version = "0.2.1"
 description = { readme = "docs/rust-quality.md", logo = "assets/lore-rust.svg" }
 
 [rules.rust-cargo]
-version = "0.1.1"
+version = "0.1.2"
 description = { readme = "docs/rust-cargo.md", logo = "assets/lore-rust.svg" }
 
 [bundles.rust-essentials]
-version = "0.1.1"
+version = "0.1.2"
 description = { readme = "docs/rust-essentials.md", logo = "assets/lore-rust.svg" }
 
 # The Python quality set. `python-quality` is the index rule; its support
