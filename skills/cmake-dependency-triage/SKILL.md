@@ -76,7 +76,18 @@ Run the four steps in order, on the tree that showed the symptom. `build` and
 
 ```sh
 NAME=dep
-grep -rn --include='CMakeCache.txt' -e "^${NAME}_DIR" -e "^${NAME}_ROOT" -e '^CMAKE_PREFIX_PATH' -e '^VCPKG_INSTALLED_DIR' -e '^CMAKE_TOOLCHAIN_FILE' -e '^CMAKE_PROJECT_TOP_LEVEL_INCLUDES' -e '^CPM_PACKAGE_' -e '^CPM_USE_LOCAL_PACKAGES' -e '^CPM_SOURCE_CACHE' -e '^HUNTER_CACHED_ROOT' build
+find build -type f -name 'CMakeCache.txt' -print0 \
+  | xargs -0 -r grep -H -n \
+    -e "^${NAME}_DIR" \
+    -e "^${NAME}_ROOT" \
+    -e '^CMAKE_PREFIX_PATH' \
+    -e '^VCPKG_INSTALLED_DIR' \
+    -e '^CMAKE_TOOLCHAIN_FILE' \
+    -e '^CMAKE_PROJECT_TOP_LEVEL_INCLUDES' \
+    -e '^CPM_PACKAGE_' \
+    -e '^CPM_USE_LOCAL_PACKAGES' \
+    -e '^CPM_SOURCE_CACHE' \
+    -e '^HUNTER_CACHED_ROOT' --
 ```
 
 The patterns are a union, so read each line, and the first row below that
@@ -87,7 +98,7 @@ from. Lines from a second `CMakeCache.txt` are a nested configure's (C8).
 
 | What the output shows | Reading | Go to |
 |---|---|---|
-| `CMAKE_TOOLCHAIN_FILE` names `vcpkg.cmake`, and no `VCPKG_INSTALLED_DIR` line | vcpkg's toolchain never ran. A toolchain given to an existing build tree is cached and never loaded: `grep -rn --include='CMakeSystem.cmake' -e 'include(' build/CMakeFiles` prints nothing (3.31.12 and 4.4.2) | T1 |
+| `CMAKE_TOOLCHAIN_FILE` names `vcpkg.cmake`, and no `VCPKG_INSTALLED_DIR` line | vcpkg's toolchain never ran. A toolchain given to an existing build tree is cached and never loaded: Block T1 reading prints nothing (3.31.12 and 4.4.2) | T1 |
 | A `dep_DIR` line while `CMAKE_PROJECT_TOP_LEVEL_INCLUDES` names cmake-conan with `CMakeConfigDeps` | The provider's own search failed, and its fallback `find_package` found a copy outside Conan | T13 |
 | `dep_DIR` is a Conan `generators` folder | That folder is the copy of record, whatever version it now describes. Read the version there, never from `conan graph info` | T8 |
 | `CPM_USE_LOCAL_PACKAGES:BOOL=ON` | CPM ran `find_package` before fetching. The option is read from the environment on the first configure and then cached, so unsetting the variable or `-U dep_DIR` keeps the local copy (4.4.2) | T15 |
@@ -99,6 +110,11 @@ from. Lines from a second `CMakeCache.txt` are a nested configure's (C8).
 | No `dep_DIR` line, with `CMAKE_PROJECT_TOP_LEVEL_INCLUDES` naming a provider | Expected under cmake-conan with `CMakeConfigDeps`: the provider sets `dep_DIR` as a normal variable (measured 3.31.12 and 4.4.2) | T3 |
 | No `dep_DIR` line and no provider | A Find module answered, or the call never ran. A module's copy is its `<NAME>_LIBRARY*` and `<NAME>_INCLUDE_DIR` cache lines, grepped with `NAME` as the call spells it | [references](references/reading-the-answers.md#module-mode-find_package) |
 | `dep_DIR` under the expected prefix, and no row above matches | The configured copy is right for this lookup. A binary that reports another version at run time is a second lookup (C8), the loader (T11), or, with no `ldd` line for the library, a bundled copy compiled in (T14). One that loads another file of the same package is the imported configuration (C3). Otherwise a wrong version is the manager's | C8, T11, T14, C3, T8, T9 |
+
+```sh
+# T1 reading
+find build/CMakeFiles -type f -name 'CMakeSystem.cmake' -print0 | xargs -0 -r grep -H -n -e 'include(' --
+```
 
 ### 2. Reconfigure fresh, with the search printed
 
@@ -133,8 +149,8 @@ and step 4's C4 question reads one that stayed (T1, CMK-DEP-21).
 ### 3. On CMake 4.1 and newer, read the configure log
 
 ```sh
-grep -rc --include='CMakeConfigureLog.yaml' -e 'kind: "find_package-v1"' build
-grep -rn --include='CMakeConfigureLog.yaml' -e '^    name: ' -e '^      path: ' -e '^      mode: ' -e '^      version: ' build
+find build -type f -name 'CMakeConfigureLog.yaml' -print0 | xargs -0 -r grep -H -c -e 'kind: "find_package-v1"' --
+find build -type f -name 'CMakeConfigureLog.yaml' -print0 | xargs -0 -r grep -H -n -e '^    name: ' -e '^      path: ' -e '^      mode: ' -e '^      version: ' --
 ```
 
 Run both only after step 2's `--fresh` configure, because the log appends on a
@@ -175,15 +191,17 @@ The C3 reads of the artifact and its source, whatever the entry row:
 BIN=build/app
 ldd "$BIN"
 readelf -d "$BIN"
-grep -rho --include='build.ninja' --include='flags.make' -e '-isystem [^ ]*' -e ' -I[^ ]*' build | sort -u
-grep -rn --include='*.h' --include='*.hpp' -e 'define FMT_VERSION ' /usr/local/include /opt/spdlog/include
+find build -type f \( -name 'build.ninja' -o -name 'flags.make' \) -print0 | xargs -0 -r grep -H -o -E -e '-isystem [^ ]*| -I[^ ]*' -- | sed -e 's/^[^:]*://' | sort -u
+find /usr/local/include /opt/spdlog/include -type f \( -name '*.h' -o -name '*.hpp' \) -print0 | xargs -0 -r grep -H -n -e 'define FMT_VERSION ' --
 DIR=build/_deps/dep-src
 git -C "$DIR" status --porcelain
-grep -rn --include='CMakeLists.txt' --include='*.cmake' -e 'PATCH_COMMAND' .
-grep -rn --include='CMakeLists.txt' --include='*.cmake' --include='CMakePresets.json' --include='CMakeUserPresets.json' --include='*.yml' --include='*.yaml' --include='*.sh' -e 'FETCHCONTENT_SOURCE_DIR_' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' | xargs -0 -r grep -H -n -e 'PATCH_COMMAND' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' ':(glob)**/CMakePresets.json' ':(glob)**/CMakeUserPresets.json' ':(glob)**/*.yml' ':(glob)**/*.yaml' ':(glob)**/*.sh' \
+  | xargs -0 -r grep -H -n \
+    -e 'FETCHCONTENT_SOURCE_DIR_' --
 PKGDIR=/usr/local/lib/cmake/dep
-grep -rn --include='*.cmake' -e 'IMPORTED_CONFIGURATIONS' "$PKGDIR"
-grep -rn --include='CMakeCache.txt' -e '^CMAKE_BUILD_TYPE' -e '^CMAKE_CONFIGURATION_TYPES' -e '^CMAKE_MAP_IMPORTED_CONFIG_' build
+find "$PKGDIR" -type f -name '*.cmake' -print0 | xargs -0 -r grep -H -n -e 'IMPORTED_CONFIGURATIONS' --
+find build -type f -name 'CMakeCache.txt' -print0 | xargs -0 -r grep -H -n -e '^CMAKE_BUILD_TYPE' -e '^CMAKE_CONFIGURATION_TYPES' -e '^CMAKE_MAP_IMPORTED_CONFIG_' --
 ```
 
 - **T11, `ldd` and `readelf -d`** on the binary and its build-tree twin. The
@@ -223,9 +241,9 @@ The C8 reads, from the artifact's side, with `LIB` as the library's file name:
 
 ```sh
 LIB=libzstd
-grep -rho --include='build.ninja' --include='link.txt' -e "[^ ]*/${LIB}[.][^ ]*" build | sort -u
-grep -rn --include='CMakeConfigureLog.yaml' -e "^    found: \"[^\"]*/${LIB}[.]" build
-grep -rl --include='CMakeCache.txt' -e '^CMAKE_HOME_DIRECTORY' build
+find build -type f \( -name 'build.ninja' -o -name 'link.txt' \) -print0 | xargs -0 -r grep -H -o -e "[^ ]*/${LIB}[.][^ ]*" -- | sed -e 's/^[^:]*://' | sort -u
+find build -type f -name 'CMakeConfigureLog.yaml' -print0 | xargs -0 -r grep -H -n -e "^    found: \"[^\"]*/${LIB}[.]" --
+find build -type f -name 'CMakeCache.txt' -print0 | xargs -0 -r grep -l -e '^CMAKE_HOME_DIRECTORY' --
 ```
 
 - **Link lines.** One directory passes. Empty output means a wrong `LIB`, or a
@@ -302,7 +320,7 @@ and `--debug-find-pkg` never names the installed prefix (both lines). Name the
 declaring line with a grep, never a trace:
 
 ```sh
-grep -rn --include='*.cmake' --include='CMakeLists.txt' -e 'OVERRIDE_FIND_PACKAGE' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.cmake' ':(glob)**/CMakeLists.txt' | xargs -0 -r grep -H -n -e 'OVERRIDE_FIND_PACKAGE' --
 ```
 
 Empty output, or a hit only inside `CPM.cmake` (CPM writes the redirect for
@@ -323,8 +341,8 @@ second grep is T10's:
 PRESET=default
 mkdir -p logs
 cmake --preset "$PRESET" --fresh "$GATE" -DCMAKE_POLICY_DEFAULT_CMP0170=NEW > logs/configure.log 2>&1
-grep -rn --include='configure.log' -e 'conan_cmakedeps_paths' logs
-grep -rn --include='CMakeLists.txt' --include='*.cmake' -e 'SET_DEPENDENCY_PROVIDER' -e 'CMAKE_PROJECT_TOP_LEVEL_INCLUDES' .
+find logs -type f -name 'configure.log' -print0 | xargs -0 -r grep -H -n -e 'conan_cmakedeps_paths' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' | xargs -0 -r grep -H -n -e 'SET_DEPENDENCY_PROVIDER' -e 'CMAKE_PROJECT_TOP_LEVEL_INCLUDES' --
 ```
 
 A leg without presets captures the step 2 command the same way. Empty output
@@ -346,8 +364,8 @@ a dependency on its link interface. Only a compiled consumer fails (class C7).
 ```sh
 NAME=dep2
 PREFIX=/usr/local
-grep -rn --include="${NAME}Config.cmake" --include="${NAME}-config.cmake" -e 'find_dependency' "$PREFIX"
-grep -rn --include="${NAME}*argets.cmake" -e 'INTERFACE_LINK_LIBRARIES' "$PREFIX"
+find "$PREFIX" -type f \( -name "${NAME}Config.cmake" -o -name "${NAME}-config.cmake" \) -print0 | xargs -0 -r grep -H -n -e 'find_dependency' --
+find "$PREFIX" -type f -name "${NAME}*argets.cmake" -print0 | xargs -0 -r grep -H -n -e 'INTERFACE_LINK_LIBRARIES' --
 ```
 
 Empty output from the first while the second names another package's target
@@ -375,9 +393,12 @@ clears it on 4.4.2 ([FM11](references/failure-modes.md#c6-a-gate-stop-in-third-p
 List the floor writes, then the absolute destinations:
 
 ```sh
-grep -rn --include='*.cmake' --include='CMakeLists.txt' --include='CMakePresets.json' --include='*.yml' --include='*.yaml' -e 'CMAKE_POLICY_VERSION_MINIMUM' -e 'CMAKE_POLICY_DEFAULT_CMP' .
-grep -rn --include='CMakeLists.txt' --include='*.cmake' -e 'CMAKE_INSTALL_FULL_' build/_deps
-grep -rn --include='CMakeLists.txt' --include='*.cmake' -e '"cmake_minimum_required(VERSION' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.cmake' ':(glob)**/CMakeLists.txt' ':(glob)**/CMakePresets.json' ':(glob)**/*.yml' ':(glob)**/*.yaml' \
+  | xargs -0 -r grep -H -n \
+    -e 'CMAKE_POLICY_VERSION_MINIMUM' \
+    -e 'CMAKE_POLICY_DEFAULT_CMP' --
+find build/_deps -type f \( -name 'CMakeLists.txt' -o -name '*.cmake' \) -print0 | xargs -0 -r grep -H -n -e 'CMAKE_INSTALL_FULL_' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' | xargs -0 -r grep -H -n -e '"cmake_minimum_required(VERSION' --
 ```
 
 Empty first output passes. Each hit must be a set/restore around one call that
@@ -395,7 +416,7 @@ the tree builds against:
 
 ```sh
 conan graph info . --profile:host=default --profile:build=default
-grep -rn --include='*ConfigVersion.cmake' --include='*-config-version.cmake' --include='*-data.cmake' -e 'set(PACKAGE_VERSION ' -e '_PACKAGE_FOLDER_[A-Z]* "' build
+find build -type f \( -name '*ConfigVersion.cmake' -o -name '*-config-version.cmake' -o -name '*-data.cmake' \) -print0 | xargs -0 -r grep -H -n -e 'set(PACKAGE_VERSION ' -e '_PACKAGE_FOLDER_[A-Z]* "' --
 ```
 
 Hits under `generators` are this tree's version and package folder, and empty
@@ -406,7 +427,7 @@ For vcpkg, step 1's lines answer "which tree" (a `_DIR` outside
 `VCPKG_INSTALLED_DIR` is T1), and `status` answers the version:
 
 ```sh
-grep -rn --include='status' -e '^Package: ' -e '^Version: ' -e '^Status: ' build/vcpkg_installed/vcpkg
+find build/vcpkg_installed/vcpkg -type f -name 'status' -print0 | xargs -0 -r grep -H -n -e '^Package: ' -e '^Version: ' -e '^Status: ' --
 ```
 
 Only an `install ok installed` entry counts, and empty output means no manifest
@@ -419,7 +440,11 @@ Step 1's `CPM_PACKAGE_<name>_VERSION` and `_SOURCE_DIR` lines are CPM's record.
 List the declarations, the lock included:
 
 ```sh
-grep -rn --include='CMakeLists.txt' --include='*.cmake' --exclude='CPM.cmake' --exclude='cpm-package-lock.cmake' --exclude-dir='_deps' -e 'CPMUsePackageLock' -e 'CPMDeclarePackage' -e 'CPMAddPackage' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' ':(exclude,glob)**/_deps/**' ':(exclude,glob)**/CPM.cmake' ':(exclude,glob)**/cpm-package-lock.cmake' \
+  | xargs -0 -r grep -H -n \
+    -e 'CPMUsePackageLock' \
+    -e 'CPMDeclarePackage' \
+    -e 'CPMAddPackage' --
 ```
 
 Empty output means no CPM (not applicable). A `CPMDeclarePackage` beats every

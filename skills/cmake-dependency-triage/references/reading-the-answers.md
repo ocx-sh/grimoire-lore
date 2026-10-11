@@ -52,7 +52,7 @@ a `_ROOT` hint (see [Toolchain-injected paths](#toolchain-injected-paths)).
 
 ```sh
 DIR=build/vcpkg_installed/x64-linux/share/dep
-grep -rn --include='*ConfigVersion.cmake' --include='*-config-version.cmake' -e 'set(PACKAGE_VERSION ' "$DIR"
+find "$DIR" -type f \( -name '*ConfigVersion.cmake' -o -name '*-config-version.cmake' \) -print0 | xargs -0 -r grep -H -n -e 'set(PACKAGE_VERSION ' --
 ```
 
 Empty output means the package ships no version file, so CMake knows no
@@ -98,7 +98,8 @@ file name. `--trace-source=CMakeLists.txt` traces only files of that name and
 printed 0 lines for a declare kept in a `.cmake` module (4.4.2).
 
 ```sh
-grep -rn -A2 --include='*.cmake' --include='CMakeLists.txt' -e 'FetchContent_Declare' -e 'CPMAddPackage' -e 'CPMDeclarePackage' -e 'CPMUsePackageLock' .
+CHECKS=.claude/skills/cmake-dependency-triage/checks    # where this checks/ directory is installed
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.cmake' ':(glob)**/CMakeLists.txt' | xargs -0 -r awk -v re='FetchContent_Declare|CPMAddPackage|CPMDeclarePackage|CPMUsePackageLock' -v A=2 -f "$CHECKS/context.awk" --
 ```
 
 Empty output means the tree declares nothing through FetchContent or CPM, so
@@ -180,7 +181,7 @@ is written on the first configure only, and its `include(` line is the loaded
 toolchain:
 
 ```sh
-grep -rn --include='CMakeSystem.cmake' -e 'include(' build/CMakeFiles
+find build/CMakeFiles -type f -name 'CMakeSystem.cmake' -print0 | xargs -0 -r grep -H -n -e 'include(' --
 ```
 
 Empty output while the cache names a toolchain means the toolchain was given
@@ -242,10 +243,10 @@ resolve (CMK-CONAN-09). A version that "should have floated" and did not,
 or floated in CI but not locally, starts there:
 
 ```sh
-grep -rn --include='conanfile.py' --include='conanfile.txt' -e '/\[' .
-grep -rn -e 'conan install' .github
-grep -rn -e '--lockfile[= ]' -e ' -l ' .github
-grep -rn -e '--lockfile=""' -e "--lockfile=''" -e '--lockfile= ' -e '--lockfile=$' -e '--lockfile-partial' .github
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/conanfile.py' ':(glob)**/conanfile.txt' | xargs -0 -r grep -H -n -e '/\[' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/**' | xargs -0 -r grep -H -n -e 'conan install' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/**' | xargs -0 -r grep -H -n -e '--lockfile[= ]' -e ' -l ' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/**' | xargs -0 -r grep -H -n -e '--lockfile=""' -e "--lockfile=''" -e '--lockfile= ' -e '--lockfile=$' -e '--lockfile-partial' --
 ```
 
 A hit from the first means ranges exist, and `git ls-files conan.lock` must then

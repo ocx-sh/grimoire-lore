@@ -48,7 +48,8 @@ cheap phase:
 ```bash
 mvn validate                                         # every bound execution, before compile
 mvn enforcer:enforce -Drules=requireUpperBoundDeps   # try one rule without editing the POM
-grep -rnE -e 'version>(LATEST|RELEASE)' -e 'version>[][(]' -e 'SNAPSHOT' --include='pom.xml' .  # MVN-DEP-04 proxy
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/pom.xml' |
+  xargs -0 -r grep -H -n -E -e 'version>(LATEST|RELEASE)' -e 'version>[][(]' -e 'SNAPSHOT' --  # MVN-DEP-04 proxy
 ```
 
 **Pinned default:** `banDynamicVersions`,
@@ -59,11 +60,17 @@ adopter overrides the set once, in their own parent POM, never per module.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| MVN-DEP-03 | Bind `maven-enforcer-plugin` with an explicit execution declaring the `enforce` goal. Never treat the plugin's presence, or a rules block with no execution, as enforcement. **pinned** | Nothing runs until the goal is bound, so a POM can carry a full rule list, review clean, and enforce none of it. A `pluginManagement`-only version pin is inert for the same reason. | `grep -rn -A6 -e 'maven-enforcer-plugin' --include='pom.xml' .`, then confirm each hit's plugin element contains an executions block whose goal is `enforce`. Empty output, or output with no executions block, is the finding rather than the pass. | MUST |
+| MVN-DEP-03 | Bind `maven-enforcer-plugin` with an explicit execution declaring the `enforce` goal. Never treat the plugin's presence, or a rules block with no execution, as enforcement. **pinned** | Nothing runs until the goal is bound, so a POM can carry a full rule list, review clean, and enforce none of it. A `pluginManagement`-only version pin is inert for the same reason. | see block MVN-DEP-03, then confirm each hit's plugin element contains an executions block whose goal is `enforce`. Empty output, or output with no executions block, is the finding rather than the pass. | MUST |
 | MVN-DEP-04 | Bind `banDynamicVersions` with its default all-false allow flags on any POM that is released. | A released artifact carrying a range, `LATEST`, `RELEASE` or a `-SNAPSHOT` is neither reproducible nor safely re-resolvable months later. Range notation has a sharp edge that reads backwards: `2.0-rc1` sorts below `2.0`, so the range `[1.0,2.0)` includes the release candidate. | `mvn enforcer:enforce -Drules=banDynamicVersions`. A successful build is the pass and a failure names the offending coordinate. The gate block's third command is the fast local proxy, and empty output is the pass there. | MUST |
 | MVN-DEP-05 | Bind `banDuplicatePomDependencyVersions`, which has no configuration, on every POM. | A dependency declared twice in one dependencies block with the same groupId, artifactId, type and classifier is always a copy-paste or a merge artifact. The rule has no configuration surface to get wrong and 0 of the 32 corpus exemplars enable it anyway. | `mvn enforcer:enforce -Drules=banDuplicatePomDependencyVersions`. A successful build is the pass and a failure names the duplicated coordinate. | MUST |
 | MVN-DEP-06 | Bind `requireUpperBoundDeps` on every reactor as the universal floor. Add `dependencyConvergence` only where two or more paths genuinely reach the same library, such as a logging facade, a test library, or a protobuf or gRPC runtime. | Mediation has no floor check of its own, so a shallow stale direct pin beats a deeper edge that needs something newer. `requireUpperBoundDeps` catches exactly that and nothing else, which means far fewer false positives in a large reactor than full convergence, and it has a real adoption base (grpc-java's example POMs) where convergence has a single one (assertj). | `mvn enforcer:enforce -Drules=requireUpperBoundDeps`. A successful build is the pass. A failure names one resolved version and one required floor, whereas a `dependencyConvergence` failure names two *paths*: match the fix to the message shape, not to the more familiar rule name. | SHOULD |
 | MVN-DEP-07 | Bind `requirePluginVersions`, whose `banLatest`, `banRelease`, `banSnapshots` and `banTimestamps` sub-flags all default to true, rather than relying on manual `pluginManagement` discipline. | Pinning every plugin version by hand is the right practice and two large exemplars do it, but manual discipline degrades under future edits with no build-time backstop, and 0 of 32 bind the rule that would hold it. | `mvn enforcer:enforce -Drules=requirePluginVersions`. A successful build is the pass and a failure names the unversioned plugin. | SHOULD |
+
+```sh
+# MVN-DEP-03
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/pom.xml' |
+  xargs -0 -r grep -H -n -A 6 -e 'maven-enforcer-plugin' --
+```
 
 ```xml
 <!-- wrong: a complete rule list that reviews clean and runs nothing -->
@@ -95,8 +102,10 @@ Two defects that no command reports, because both are legal POMs. Maven 3.9.x,
 verified 2026-09-12.
 
 ```bash
-grep -rn -B4 -e 'systemPath' --include='pom.xml' .                      # MVN-DEP-08
-grep -rn -e 'combine.children' -e 'combine.self' --include='pom.xml' .  # MVN-DEP-09
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/pom.xml' |
+  xargs -0 -r grep -H -n -B 4 -e 'systemPath' --  # MVN-DEP-08
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/pom.xml' |
+  xargs -0 -r grep -H -n -e 'combine.children' -e 'combine.self' --  # MVN-DEP-09
 ```
 
 | ID | Rule | Rationale | Verification | Severity |

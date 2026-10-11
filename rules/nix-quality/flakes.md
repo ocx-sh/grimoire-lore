@@ -43,8 +43,8 @@ run from the checkout. Add `--no-write-lock-file` only for a flake you do not ow
 
 Every grep here except the FLK-07 candidate grep (read each hit), the FLK-09
 grep (read with its jq line), the FLK-11 site count and the FLK-04 and FLK-12
-counts (`0` is the pass) is a violation locator: empty output (exit 1) is the
-pass, a hit (exit 0) is the finding. Every command was watched red on a planted violation
+counts (`0` is the pass) is a violation locator: empty output is the
+pass, a hit is the finding. Every command was watched red on a planted violation
 and green on its twin on CppNix 2.35.2 with a warm store, unless its cell says
 reading heuristic.
 
@@ -54,7 +54,7 @@ reading heuristic.
 nix flake check --no-build --option allow-import-from-derivation false .   # gate step 4, exit 0 = pass, exit 1 = contract error
 nix flake check --no-build . 2>&1 | grep -c 'is deprecated; use'           # FLK-04, prints 0 (grep exit 1) = pass
 nix flake check --no-build . 2>&1 | grep "unknown flake output 'schemas'"   # FLK-05, empty = pass
-grep -rnE --include='*.nix' -e 'overlays?(\.[A-Za-z_-]+)? *= *self *:' -e 'overlays?(\.[A-Za-z_-]+)? *= *prev *:' -e 'overlays?(\.[A-Za-z_-]+)? *= *[{][^}=]*[}] *:' .   # FLK-02 pre-check, empty = pass
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.nix' | xargs -0 -r grep -H -n -E -e 'overlays?(\.[A-Za-z_-]+)? *= *self *:' -e 'overlays?(\.[A-Za-z_-]+)? *= *prev *:' -e 'overlays?(\.[A-Za-z_-]+)? *= *[{][^}=]*[}] *:' --   # FLK-02 pre-check, empty = pass
 nix shell --inputs-from . nixpkgs#nixVersions.nix_2_31 --command nix flake check --no-build --option allow-import-from-derivation false .   # FLK-19 on a Lix host, exit 0 = pass, nix_2_31 replaced by gate step 9 floor element
 ```
 
@@ -85,7 +85,7 @@ nix shell --inputs-from . nixpkgs#nixVersions.nix_2_31 --command nix flake check
 ## The Cold Store
 
 ```sh
-grep -rn --include='*.nix' -e '"${[A-Za-z_.]*src}/' -e '"${builtins.path' .   # FLK-07 pre-check, empty = pass, read each hit
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.nix' | xargs -0 -r grep -H -n -e '"${[A-Za-z_.]*src}/' -e '"${builtins.path' --   # FLK-07 pre-check, empty = pass, read each hit
 ```
 
 The authoritative check is gate step 4 on a fresh CI runner, whose store has
@@ -115,8 +115,8 @@ never copied the flake's source. A warm laptop hides the failure.
 
 ```sh
 nix flake check --no-build --all-systems .   # gate step 5, exit 0 = pass
-grep -rnE --include='*.nix' -e 'flake-utils' -e 'flakeExposed' -e 'systems\.doubles' -e 'nix-systems/default"' .   # FLK-08, empty = pass
-grep -rn --include='*.nix' -e 'x86_64-darwin' .   # FLK-09, read with the next line
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.nix' | xargs -0 -r grep -H -n -E -e 'flake-utils' -e 'flakeExposed' -e 'systems\.doubles' -e 'nix-systems/default"' --   # FLK-08, empty = pass
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.nix' | xargs -0 -r grep -H -n -e 'x86_64-darwin' --   # FLK-09, read with the next line
 jq -r '.nodes[.nodes.root.inputs.nixpkgs // "nixpkgs"] as $n | if $n then $n.original | .ref // .url // .rev // "no ref: the default branch" else "no nixpkgs node" end' flake.lock   # FLK-09, the nixpkgs branch (a channel URL names it)
 nix flake metadata --json . | jq '.locks.nodes|length'   # FLK-10, lock node count
 ```
@@ -132,8 +132,8 @@ The right form is the `forAllSystems` binding in the shape A skeleton below.
 ## The nixpkgs Instance
 
 ```sh
-grep -rn --include='*.nix' -e 'import nixpkgs' -e 'import inputs.nixpkgs' .   # FLK-11, at most one site
-grep -rnE --include='*.nix' -e '^pkgs\.system[^[:alnum:]_-]' -e '^pkgs\.system$' -e '[^[:alnum:]_.-]pkgs\.system[^[:alnum:]_-]' -e '[^[:alnum:]_.-]pkgs\.system$' .   # FLK-12 pre-check, empty = pass
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.nix' | xargs -0 -r grep -H -n -e 'import nixpkgs' -e 'import inputs.nixpkgs' --   # FLK-11, at most one site
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.nix' | xargs -0 -r grep -H -n -E -e '^pkgs\.system[^[:alnum:]_-]' -e '^pkgs\.system$' -e '[^[:alnum:]_.-]pkgs\.system[^[:alnum:]_-]' -e '[^[:alnum:]_.-]pkgs\.system$' --   # FLK-12 pre-check, empty = pass
 nix flake check --no-build --all-systems . 2>&1 | grep -c "has been renamed to/replaced by 'stdenv.hostPlatform.system'"   # FLK-12, prints 0 = pass
 ```
 
@@ -147,7 +147,7 @@ nix flake check --no-build --all-systems . 2>&1 | grep -c "has been renamed to/r
 ```sh
 nix eval --raw .#packages.x86_64-linux.octool.drvPath
 nix eval --impure --raw --expr 'let f = builtins.getFlake (toString ./.); in (f.inputs.nixpkgs.legacyPackages.x86_64-linux.extend f.overlays.default).octool.drvPath'
-grep -rn --include='flake.nix' -e 'mkDerivation' -e 'buildRustPackage' -e 'buildPythonApplication' -e 'buildGoModule' -e 'craneLib.buildPackage' .   # FLK-14, empty = pass
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/flake.nix' | xargs -0 -r grep -H -n -e 'mkDerivation' -e 'buildRustPackage' -e 'buildPythonApplication' -e 'buildGoModule' -e 'craneLib.buildPackage' --   # FLK-14, empty = pass
 ```
 
 Substitute your attribute for `octool` in both `nix eval` lines. The two

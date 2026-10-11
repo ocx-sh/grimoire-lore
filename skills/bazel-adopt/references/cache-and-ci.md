@@ -64,7 +64,7 @@ to `grpcs` when the URI carries none, so an unscoped URI against an HTTP-only
 server speaks the wrong protocol.
 
 ```sh
-grep -rn -e 'remote_cache=' -e 'remote_executor=' --include='*.bazelrc*' --include='*.yml' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.bazelrc*' ':(glob)**/*.yml' | xargs -0 -r grep -H -n -e 'remote_cache=' -e 'remote_executor=' --
 ```
 
 Every match must carry `://`. **Empty output = nothing remote configured = you
@@ -106,7 +106,7 @@ trigger.
   (BZL-CACHE-04).
 
 ```sh
-git ls-files | grep -E '\.bazelrc' | xargs -r grep -n -e credential_helper -e remote_header
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.bazelrc*' | xargs -0 -r grep -H -n -e credential_helper -e remote_header --
 ```
 
 **Empty output = pass; empty `xargs` input means no rc file is tracked.** Any
@@ -124,7 +124,7 @@ failure (BZL-CACHE-07):
    path rooted outside the workspace. An executor never ran the provisioning step
    that populated it. First filter, then read every site that *emits* launcher
    content, because a generated string is invisible to the grep:
-   `grep -rn '"/home/\|"/Users/\|\$HOME\|/opt/' <generator .bzl files>` —
+   `GENERATOR_DIR=path/to/generator; git ls-files -z --cached --others --exclude-standard -- ":(glob)${GENERATOR_DIR}/**" | xargs -0 -r grep -H -n -E -e '"/home/' -e '"/Users/' -e '\$HOME' -e '/opt/' --` —
    **empty from the grep is necessary and not sufficient** (BZL-CACHE-06).
 2. Every tool resolves through a declared toolchain or a `File` input, never the
    invoking shell's `PATH`. Bazel does not track tools outside the workspace, so
@@ -194,7 +194,7 @@ the *number* as the tool's own — `buildifier_prebuilt` through 8.5.1.3 pipes
 (BZL-LARK-31, BZL-CI-07).
 
 ```sh
-grep -rn '|| true\|continue-on-error' .github/workflows/
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' | xargs -0 -r grep -H -n -E -e '\|\| true' -e 'continue-on-error' --
 ```
 
 **Empty output = pass.** Each hit needs an adjacent comment declaring that leg a
@@ -204,7 +204,7 @@ Confirm CI actually invokes the build tool on a merge-gating path, never inferri
 it from a badge, a `.bazelversion` file or an install step (BZL-CI-04):
 
 ```sh
-grep -rn 'bazel\|bazelisk' .github/workflows/
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' | xargs -0 -r grep -H -n -E -e 'bazel' -e 'bazelisk' --
 ```
 
 At least one hit must sit in a `run:`/`script:` step of a required check. **Empty

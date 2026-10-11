@@ -117,7 +117,7 @@ git ls-files --stage . | grep -e '^160000'
 
 Copy this whole file: skeleton A of the `nix-quality` rule plus the
 `flake-compat` input. Rename `octool` everywhere (five places) and the description.
-`grep -c octool flake.nix` prints `0` (exit 1) afterwards. A tree with gitlinks
+`grep -c -e 'octool' -- flake.nix` prints `0` (exit 1) afterwards. A tree with gitlinks
 adds `self.submodules = true;` as the first line of `inputs`. A Python library
 takes its own `flake.nix` from
 [references/package-templates.md](references/package-templates.md#python-library).
@@ -216,7 +216,7 @@ An in-repo `src` has no hash. A hash appears for each git revision in
 `Cargo.lock` (NIX-PKG-22) and for any fetcher. Never type one, and never keep
 a `tag = "<hex>"` that nurl printed for a SHA shorter than 40 hex (NIX-PKG-02).
 
-1. `grep -c 'source = "git+' Cargo.lock`. `0` means no `outputHashes`. More
+1. `grep -c -e 'source = "git+' -- Cargo.lock`. `0` means no `outputHashes`. More
    than `0` means one entry per distinct git revision.
 2. Set each unknown hash to `lib.fakeHash` and build the package. A flake check
    with `--no-build` passes with the fake hash present, so only the build shows
@@ -232,8 +232,8 @@ a `tag = "<hex>"` that nurl printed for a SHA shorter than 40 hex (NIX-PKG-02).
 3. Leave no fake hash behind:
 
    ```sh
-   # Empty output (exit 1) is the pass. Any line is a hash that was never filled in, unless it only quotes the symbol in a documentation string. A commented-out line never matches.
-   grep -rn -e '^[^#]*lib\.fakeHash' -e '^[^#]*lib\.fakeSha256' -e '^[^#]*lib\.fakeSha512' --include='*.nix' .
+   # Empty output is the pass. Any line is a hash that was never filled in, unless it only quotes the symbol in a documentation string. A commented-out line never matches.
+   git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.nix' | xargs -0 -r grep -H -n -e '^[^#]*lib\.fakeHash' -e '^[^#]*lib\.fakeSha256' -e '^[^#]*lib\.fakeSha512' --
    ```
 
 Every later change to a fetcher argument resets its hash to `lib.fakeHash` in
@@ -262,9 +262,9 @@ skills into: their text names every banned string.
 
 ```sh
 nix fmt -- --ci                                                     # exit 0 (NIX-GATE-01, NIX-GATE-02)
-grep -rn -e 'nixfmt-rfc-style' -e 'nixfmt-classic' -e 'nixpkgs-fmt' --include='*.nix' .   # empty (NIX-GATE-03)
-grep -rnE --exclude-dir=.git --exclude-dir=.claude -e 'accept-flake-[c]onfig' -e 'trusted-[u]sers' -e 'settings\.access-[t]okens' -e 'gh[pousr]_[A-Za-z0-9]{20,}' -e 'github_pat_[A-Za-z0-9_]{20,}' -e 'glpat-[A-Za-z0-9_-]{20,}' .   # empty (NIX-SEC-02, NIX-SEC-03, NIX-SEC-08). A NIX-SEC-08 hit inside an exported host-administration module is read and passes
-grep -rn --exclude-dir=.git --exclude-dir=.claude --exclude='*.md' --exclude='*.mdx' -e 'access-[t]okens *=' -e '--access-[t]okens' . | grep -v -e '[$]{{ secrets[.]' -e '[$]{{ github[.]token }}'   # empty (NIX-SEC-03)
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.nix' | xargs -0 -r grep -H -n -e 'nixfmt-rfc-style' -e 'nixfmt-classic' -e 'nixpkgs-fmt' --   # empty (NIX-GATE-03)
+git ls-files -z --cached --others --exclude-standard -- ':(exclude,glob)**/.claude/**' | xargs -0 -r grep -H -n -E -e 'accept-flake-[c]onfig' -e 'trusted-[u]sers' -e 'settings\.access-[t]okens' -e 'gh[pousr]_[A-Za-z0-9]{20,}' -e 'github_pat_[A-Za-z0-9_]{20,}' -e 'glpat-[A-Za-z0-9_-]{20,}' --   # empty (NIX-SEC-02, NIX-SEC-03, NIX-SEC-08). A NIX-SEC-08 hit inside an exported host-administration module is read and passes
+git ls-files -z --cached --others --exclude-standard -- ':(exclude,glob)**/.claude/**' ':(exclude,glob)**/*.md' ':(exclude,glob)**/*.mdx' | xargs -0 -r grep -H -n -e 'access-[t]okens *=' -e '--access-[t]okens' -- | grep -v -e '[$]{{ secrets[.]' -e '[$]{{ github[.]token }}'   # empty (NIX-SEC-03)
 git ls-files -- '*.env' '*.env.*' '*.pem' '*.key' '*.p12' '*.pfx' '*secret*' '*token*' '*credential*'   # candidates: read each, a tracked plaintext credential is the finding (NIX-SEC-04)
 nix shell --inputs-from . nixpkgs#deadnix --command deadnix --fail --no-lambda-pattern-names .   # exit 0 (NIX-GATE-05)
 nix flake check --no-build --option allow-import-from-derivation false   # exit 0 (NIX-GATE-08)
@@ -278,10 +278,15 @@ Then the proofs this procedure adds:
 | Proof | Command | Pass | Rule |
 |---|---|---|---|
 | the formatter is the pinned one | `nix eval --raw .#formatter.x86_64-linux.pname` | prints `nixfmt-tree`. `nixfmt` (bare, or through the `nixfmt-rfc-style` alias) is the finding | NIX-GATE-01 |
-| no crane, no rust-overlay (pinned) | `grep -rn -e 'crane' -e 'rust-overlay' --include='*.nix' .` | empty output. Any line is the finding | NIX-PKG-16 |
+| no crane, no rust-overlay (pinned) | see block NIX-PKG-16 | empty output. Any line is the finding | NIX-PKG-16 |
 | the non-flake bridge builds | `nix-build . --no-out-link` and `nix-shell . --run true` | both exit 0 | NIX-REL-05 |
 | the devShell holds what it promises | `nix develop -i --no-write-lock-file . --command bash -c 'command -v deadnix'`, repeated per promised tool | exit 0 per tool. Without `-i` the host `PATH` leaks in and fakes a pass | NIX-FLK-18 |
 | the Lix leg (advisory) | `nix shell --inputs-from . nixpkgs#lix --command nix flake check --no-build` | exit 0. With `inputs.self` declared, append `--extra-experimental-features flake-self-attrs` | NIX-GATE-16 |
+
+```sh
+# NIX-PKG-16
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.nix' | xargs -0 -r grep -H -n -e 'crane' -e 'rust-overlay' --
+```
 
 Watch one step go red before trusting the block. These were watched on the
 templates, each against the step that caught it:
@@ -324,14 +329,14 @@ Inventory the legacy forms first. Every line prints nothing on the templates.
 On a planted legacy flake every line printed at least one hit.
 
 ```sh
-# Each line: empty output (exit 1) is the pass, any line is a form to replace.
-grep -rn -e 'flake-utils' -e 'eachDefaultSystem' -e 'flakeExposed' -e 'nix-systems/default' --include='*.nix' .
-grep -rn -e 'x86_64-darwin' --include='*.nix' .
-grep -rn -e 'import nixpkgs' -e 'import inputs.nixpkgs' --include='*.nix' .
-grep -rn -e '[^A-Za-z0-9_-]pkgs\.system[^A-Za-z0-9_-]' -e '[^A-Za-z0-9_-]pkgs\.system$' -e '^pkgs\.system' --include='*.nix' .
-grep -rn -E -e '^with lib[[:space:]]*;[[:space:]]*$' -e '^with lib[[:space:]]*;[[:space:]]*[^[[:space:]]' -e '^with pkgs[[:space:]]*;[[:space:]]*$' -e '^with pkgs[[:space:]]*;[[:space:]]*[^[[:space:]]' -e '^with builtins[[:space:]]*;[[:space:]]*$' -e '^with builtins[[:space:]]*;[[:space:]]*[^[[:space:]]' --include='*.nix' .
-grep -rn -e 'mkDerivation rec' -e 'Package rec' --include='*.nix' .
-grep -rn -e 'nixfmt-rfc-style' -e 'nixfmt-classic' -e 'nixpkgs-fmt' --include='*.nix' .
+# Each line: empty output is the pass, any line is a form to replace.
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.nix' | xargs -0 -r grep -H -n -e 'flake-utils' -e 'eachDefaultSystem' -e 'flakeExposed' -e 'nix-systems/default' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.nix' | xargs -0 -r grep -H -n -e 'x86_64-darwin' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.nix' | xargs -0 -r grep -H -n -e 'import nixpkgs' -e 'import inputs.nixpkgs' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.nix' | xargs -0 -r grep -H -n -e '[^A-Za-z0-9_-]pkgs\.system[^A-Za-z0-9_-]' -e '[^A-Za-z0-9_-]pkgs\.system$' -e '^pkgs\.system' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.nix' | xargs -0 -r grep -H -n -E -e '^with lib[[:space:]]*;[[:space:]]*$' -e '^with lib[[:space:]]*;[[:space:]]*[^[[:space:]]' -e '^with pkgs[[:space:]]*;[[:space:]]*$' -e '^with pkgs[[:space:]]*;[[:space:]]*[^[[:space:]]' -e '^with builtins[[:space:]]*;[[:space:]]*$' -e '^with builtins[[:space:]]*;[[:space:]]*[^[[:space:]]' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.nix' | xargs -0 -r grep -H -n -e 'mkDerivation rec' -e 'Package rec' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.nix' | xargs -0 -r grep -H -n -e 'nixfmt-rfc-style' -e 'nixfmt-classic' -e 'nixpkgs-fmt' --
 ```
 
 | Legacy form | Replace with | Rule |

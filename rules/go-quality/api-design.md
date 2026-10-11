@@ -52,10 +52,11 @@ staticcheck 0.8.1), staticcheck 2026.2.1, and `gorelease`/`apidiff` from
 Three CI script steps, run from the SDK module root under bash or zsh:
 
 ```bash
+# checks/ is this rule's own go-quality/checks/ directory, wherever the rule is installed
 # GO-API-01: prints the number of non-internal packages. 1 is the pass.
 go list ./... | grep -c -v -e '/internal/'
 # GO-API-02: prints any/interface{} on the exported surface. Empty output is the pass.
-go doc -all . | grep -e '^func ' -e '^type ' -e '^var ' -e '^const ' -e $'^\t' | grep -v -e $'^\t\t*//' | grep -e '\bany\b' -e 'interface{}'
+go doc -all . | awk -f checks/exported_any.awk
 # GO-API-03: presence check. Empty output is the finding.
 go doc -short . | grep -E '^type Option func\(\*options\) error'
 ```
@@ -95,7 +96,13 @@ this file (GO-GATE-18). Exit 0 with `0 issues.` is the pass.
 | GO-API-06 | No mutable package-level variables and no `init()`. Put state in the `Client` or pass it as a parameter. | A global that every caller's test setup must reset is hidden coupling. Measured 6.4 and 0.4 hits per 10k LOC on five library exemplars with zero false positives. | `gochecknoglobals` and `gochecknoinits` in the overlay. `Err*` sentinels and `regexp.MustCompile` vars are already exempt, so no allowlist is needed. | MUST (SDK) · SHOULD (library) |
 | GO-API-07 | Declare interfaces in the package that consumes them and return concrete types from constructors. An exported interface needs two or more real implementations or a doc sentence saying why it exists. | A single-implementation interface blocks adding methods (every addition breaks implementers) and hides the concrete API. | `ireturn` at its default allow list. A legitimate subsystem constructor carries `//nolint:ireturn // reason`. The implementation count is a reading check. | SHOULD |
 | GO-API-08 | Check every `switch` over a typed enum with `exhaustive`, where a `default:` arm does not count. Enums whose values the package defines start at `iota + 1`, so zero means unset. Externally defined values such as `ExitCode` keep their real numbers. | Go has no closed sum types, so a new `ExitCode` constant is silently unhandled everywhere it is switched on. | `exhaustive` at `default-signifies-exhaustive: false`, in both the overlay and the CLI file. | MUST (SDK, CLI) · SHOULD (other code) |
-| GO-API-09 | No exported SDK method returns `(nil, nil)`, and the SDK never suppresses `nilnil`. | The wrapped CLI already types absence as an exit code (**pinned:** 79, `*ExitError`). A second, nil-shaped absence panics on the caller's first dereference. | `nilnil` from the baseline, plus `grep -rnE --include='*.go' 'nolint:[a-z,]*nilnil' .` from the SDK root: output is the finding, empty output is the pass. | MUST (SDK) |
+| GO-API-09 | No exported SDK method returns `(nil, nil)`, and the SDK never suppresses `nilnil`. | The wrapped CLI already types absence as an exit code (**pinned:** 79, `*ExitError`). A second, nil-shaped absence panics on the caller's first dereference. | `nilnil` from the baseline, plus see block GO-API-09, run from the SDK root: output is the finding, empty output is the pass. | MUST (SDK) |
+
+```sh
+# GO-API-09
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | xargs -0 -r grep -H -n -E -e 'nolint:[a-z,]*nilnil' --
+```
 
 ## API Evolution at Release
 
@@ -107,7 +114,8 @@ go run golang.org/x/exp/cmd/gorelease@v0.0.0-20260908205506-85c1c2202aba -base="
 # GO-API-10, v0 modules: output forces a minor bump and a changelog line.
 go run golang.org/x/exp/cmd/gorelease@v0.0.0-20260908205506-85c1c2202aba -base="$BASE" -version="$NEXT" | grep -e '^## incompatible changes'
 # GO-API-11: a misspelled deprecation prefix. Empty output is the pass.
-grep -rn -i --include='*.go' -e '^\s*//\s*deprecated\b' . | grep -v -e '// Deprecated: '
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | xargs -0 -r grep -H -n -i -E -e '^[[:space:]]*//[[:space:]]*deprecated([^[:alnum:]_]|$)' -- | grep -v -e '// Deprecated: '
 # GO-API-11: exits 1 while a call through a //go:fix inline function remains.
 go fix -diff ./...
 ```
@@ -137,8 +145,14 @@ or calls `WithTimeoutCause`, so these are commitments, not codified convention.
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
 | GO-API-18 | Gate every typed call on the wrapped binary's version. `NewClient` never probes. Each typed method first calls one unexported gate that runs the plain version command (**pinned:** `ocx version`, one bare semver token) through the single spawn point with the caller's `ctx`. Cache under a mutex, set only on success. Compare the numeric `MAJOR.MINOR.PATCH` core, dropping any `-pre` or `+build` tail. Reject an unparsable version, accept one newer than `TestedOcxVersion`, fail only below `MinSupportedOcx` with `*VersionCompatError{Found, Minimum}`. No semver dependency (GO-MOD-10). `*ExitError` also carries `Stderr string` and an eagerly decoded `Envelope *ErrorEnvelope` that is `nil` on non-JSON stdout. | A caller that makes no typed call pays no spawn, and a failed probe or timeout must retry on the next call. A per-field `strconv.Atoi` split reads `2-rc1` as 0 and rejects every release candidate at the floor. | Contract test: below the floor gives `*VersionCompatError` with both fields set, above gives `nil`, and a second call after a cached success does not re-exec even when the fake now reports a failing version. Comparator table: `0.6.2-rc1` vs `0.6.2` not less, `0.6.10` vs `0.6.2` not less, `garbage` less. The error fields are a reading check. | MUST (SDK, version gate) · SHOULD (SDK, error fields) |
-| GO-API-19 | In the spawn point, map a signal-killed child to `*ExitError{Code: 128 + int(ws.Signal())}` whenever `ee.Sys().(syscall.WaitStatus)` reports `Signaled()`. Never pass on the raw `ExitCode()` and never report success. The classifier file carries no `//go:build` constraint. | `ExitCode()` is -1 on a signal death, and 255 once a CLI forwards it through `os.Exit`. `syscall.WaitStatus` exists on every GOOS, so a `unix` tag only deletes the classifier from the Windows build. | Contract test: signal a blocking helper child and assert `Code == 143` for SIGTERM and `137` for SIGKILL, skipped on Windows. `GOOS=windows go vet ./internal/process/...` must exit 0. `grep -rn --include='*.go' -F '.ExitCode()' internal/process` is a review locator only: the compliant classifier reads `ExitCode()` before its `Signaled()` branch. | MUST (SDK) |
+| GO-API-19 | In the spawn point, map a signal-killed child to `*ExitError{Code: 128 + int(ws.Signal())}` whenever `ee.Sys().(syscall.WaitStatus)` reports `Signaled()`. Never pass on the raw `ExitCode()` and never report success. The classifier file carries no `//go:build` constraint. | `ExitCode()` is -1 on a signal death, and 255 once a CLI forwards it through `os.Exit`. `syscall.WaitStatus` exists on every GOOS, so a `unix` tag only deletes the classifier from the Windows build. | Contract test: signal a blocking helper child and assert `Code == 143` for SIGTERM and `137` for SIGKILL, skipped on Windows. `GOOS=windows go vet ./internal/process/...` must exit 0. see block GO-API-19, a review locator only: the compliant classifier reads `ExitCode()` before its `Signaled()` branch. | MUST (SDK) |
 | GO-API-20 | The SDK's own timeout is `context.WithTimeoutCause(ctx, d, cause)` where `cause` is a `*TimeoutError` whose `Is` targets the exported `ErrOcxTimeout`, never the bare sentinel. After `Wait`, check `context.Cause(ctx)` before classifying the exit. If it is the SDK's own `*TimeoutError`, fill in `Stderr` and return it, otherwise classify (GO-API-19). A caller's earlier deadline surfaces as the caller's cause, never as `ErrOcxTimeout`. This supersedes GO-CONC-17's sentinel example. | `Cmd.Wait` returns the kill's `*exec.ExitError` in preference to the context error, so classify-first reports the SDK's own timeout as exit 137. A bare-sentinel cause passes `errors.Is` and fails only `errors.AsType[*TimeoutError]`, so an `errors.Is`-only suite stays green. | Contract test, own deadline: `errors.Is(err, ErrOcxTimeout)`, `errors.AsType[*TimeoutError]` with `Stderr` intact, and `errors.AsType[*ExitError]` false. A shorter caller deadline gives `context.DeadlineExceeded` and never `ErrOcxTimeout`. A real helper child that writes stderr and stalls past the deadline yields `*TimeoutError` with that stderr. GO-IO-10's grep is silent on classify-first. | MUST (SDK) |
+
+```sh
+# GO-API-19
+git ls-files -z --cached --others --exclude-standard -- ':(glob)internal/process/**/*.go' \
+  | xargs -0 -r grep -H -n -F -e '.ExitCode()' --
+```
 
 ```go
 // wrong: Wait returns the kill's *exec.ExitError, so the SDK's own

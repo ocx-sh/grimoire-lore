@@ -26,10 +26,12 @@
 # every entry except E15, whose tells are comments. The inventory form (`k07.sh e01`) stays the raw grep. E10 is not issued.
 # Blind spots: a tell split over two lines, `@unchecked  Sendable` with two spaces, a typealias alias, a tell in a
 # test-like directory not named Tests. A repository with no Tests directory gets a silent e08.
-# Symlinks: the scan is `grep -r` over `.`, which reads real files at their own path and skips symlinks, so a symlink farm
-# (RxSwift `Sources/` links into `RxSwift/`) is not scanned twice, and the canary counts real files (`-type f`, no `-L`).
-# A tree whose only Swift sources are symlinks scans nothing and fails the canary. Cells that name a `Sources` operand use
-# `grep -R` and `find -L`, and canary.sh agrees with them.
+# File list: every scan reads `git ls-files -z --cached --others --exclude-standard`, tracked and untracked files with
+# .gitignore applied, so a path with a space is one operand and no recursive-grep option is needed. A symlinked file is one list
+# entry that grep reads, so a symlink farm (RxSwift `Sources/` links into `RxSwift/`) scans in full and prints a hit under
+# both paths. A symlinked directory is one entry the list does not descend: name its real directory. The canary counts the
+# same list, and canary.sh agrees with it. A tracked file deleted from the work tree makes grep exit 2 and the scan fail
+# closed: stage the deletion or restore the file.
 # E14 skips a line that carries the comment `// floor: iOS 14` (any text after `floor:`): the one lock wrapper of a library
 # whose Apple floor is below iOS 16 (SW-APPLE-04). Every other NSLock line prints.
 # Test-support targets, golden fixtures and playgrounds are skipped: SwiftGen printed 20+ E15 lines from SwiftGen.playground and
@@ -38,33 +40,39 @@
 # (measured 2026-10-10; the comment, Demo and Docs filters 2026-10-10): whole tree red, BASE-scoped clean file green, bare hatch red, hatch with a reason green,
 # `// ok` red, committed and untracked tells red, branch behind main green, empty tree red at the canary; the libc import
 # chain green (only a swift-format-ignore-file line, an E15 item, prints); a nested Pkgs/Sub/Tests hatch green.
-GEN=(--exclude='*.pb.swift' --exclude='*.grpc.swift' --exclude='*.generated.swift' --exclude='*+Generated.swift' --exclude-dir='Generated' --exclude-dir='generated')
-SIDE=(--exclude-dir='Fixtures' --exclude-dir='*.playground')
-NOSHIP=(--exclude-dir='Demo*' --exclude-dir='Example*' --exclude-dir='*Example' --exclude-dir='Sample*' --exclude-dir='Docs' --exclude-dir='Benchmarks' --exclude-dir='*TestUtils' --exclude-dir='*TestSupport')
-P=(--include='*.swift' --exclude-dir='.build' --exclude-dir='Tests' "${GEN[@]}" "${SIDE[@]}" "${NOSHIP[@]}")
+GEN=(':(exclude,glob)**/*.pb.swift' ':(exclude,glob)**/*.grpc.swift' ':(exclude,glob)**/*.generated.swift' ':(exclude,glob)**/*+Generated.swift' ':(exclude,glob)**/Generated/**' ':(exclude,glob)**/generated/**')
+SIDE=(':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/*.playground/**')
+NOSHIP=(':(exclude,glob)**/Demo*/**' ':(exclude,glob)**/Example*/**' ':(exclude,glob)**/*Example/**' ':(exclude,glob)**/Sample*/**' ':(exclude,glob)**/Docs/**' ':(exclude,glob)**/Benchmarks/**' ':(exclude,glob)**/*TestUtils/**' ':(exclude,glob)**/*TestSupport/**')
+P=(':(glob)**/*.swift' ':(exclude,glob)**/.build/**' ':(exclude,glob)**/Tests/**' "${GEN[@]}" "${SIDE[@]}" "${NOSHIP[@]}")
+# list PATHSPEC...: the git-fed file list. gx ARGS...: grep ARGS over that list, exit 0 for a hit or none and 2 for an error
+# (xargs alone reports 123 for both). tag: the ./ prefix every printed line carries.
+list() { git ls-files -z --cached --others --exclude-standard -- "$@"; }
+gx() { xargs -0 -r sh -c 'grep -H -n "$@"; [ "$?" -le 1 ]' sh "$@"; }
+tag() { sed 's|^|./|'; }
+scan_p() { list "${P[@]}" | gx "$@" -- | tag; }
 # E01 @unchecked Sendable, E02 nonisolated(unsafe), E03 Task.detached (SW-CONC; E01 E02 E03 E06 run through hatches() in the gate)
-e01() { grep -rn "${P[@]}" -F -e '@unchecked Sendable' .; }
-e02() { grep -rn "${P[@]}" -F -e 'nonisolated(unsafe)' .; }
-e03() { grep -rn "${P[@]}" -F -e 'Task.detached' .; }
+e01() { scan_p -F -e '@unchecked Sendable'; }
+e02() { scan_p -F -e 'nonisolated(unsafe)'; }
+e03() { scan_p -F -e 'Task.detached'; }
 # E04 GCD; E05 MainActor.run (a tell, not a ban)
-e04() { grep -rn "${P[@]}" -F -e 'DispatchQueue.' -e 'DispatchQueue(' -e 'DispatchSemaphore' -e 'DispatchGroup' .; }
-e05() { grep -rn "${P[@]}" -F -e 'MainActor.run' .; }
+e04() { scan_p -F -e 'DispatchQueue.' -e 'DispatchQueue(' -e 'DispatchSemaphore' -e 'DispatchGroup'; }
+e05() { scan_p -F -e 'MainActor.run'; }
 # E06 isolation hatches that need a justification; E07 blocking or legacy sleeps in production code
-e06() { grep -rn "${P[@]}" -F -e '@preconcurrency' -e 'MainActor.assumeIsolated' .; }
-e07() { grep -rn "${P[@]}" -e 'Thread\.sleep' -e '[^.A-Za-z_]usleep(' -e 'Task\.sleep(nanoseconds' .; }
+e06() { scan_p -F -e '@preconcurrency' -e 'MainActor.assumeIsolated'; }
+e07() { scan_p -e 'Thread\.sleep' -e '[^.A-Za-z_]usleep(' -e 'Task\.sleep(nanoseconds'; }
 # E08 sleeps in tests, whole-tree form (reads only Tests; silent when there is no Tests directory)
-e08() { [ -d Tests ] || return 0; grep -rn --include='*.swift' -e '^usleep(' -e '^nanosleep(' -e '^sleep(' -e '[^[:alnum:]_]usleep(' -e '[^[:alnum:]_]nanosleep(' -e '[^[:alnum:]_]sleep(' ./Tests | awk '!/func +(sleep|usleep|nanosleep)\(/'; }
+e08() { [ -d Tests ] || return 0; list ':(glob)Tests/**/*.swift' | gx -e '^usleep(' -e '^nanosleep(' -e '^sleep(' -e '[^[:alnum:]_]usleep(' -e '[^[:alnum:]_]nanosleep(' -e '[^[:alnum:]_]sleep(' -- | tag | awk '!/func +(sleep|usleep|nanosleep)\(/'; }
 # E09 force try and force cast; E11 Foundation.Process; E12 pre-Observation SwiftUI state
-e09() { grep -rn "${P[@]}" -F -e 'try!' -e ' as! ' .; }
-e11() { grep -rn "${P[@]}" -e '[^A-Za-z_]Process()' -e NSTask -e '\.launchPath' .; }
-e12() { grep -rn "${P[@]}" -F -e 'ObservableObject' -e '@Published' -e '@StateObject' -e '@ObservedObject' -e '@EnvironmentObject' .; }
+e09() { scan_p -F -e 'try!' -e ' as! '; }
+e11() { scan_p -e '[^A-Za-z_]Process()' -e NSTask -e '\.launchPath'; }
+e12() { scan_p -F -e 'ObservableObject' -e '@Published' -e '@StateObject' -e '@ObservedObject' -e '@EnvironmentObject'; }
 # E13 completion-handler APIs; E14 pre-Mutex locks
-e13() { grep -rn "${P[@]}" -e 'completion[A-Za-z]*: *@escaping' -e '@escaping *(Result<' .; }
-e14() { grep -rn "${P[@]}" -F -e 'NSLock' -e 'NSRecursiveLock' -e 'os_unfair_lock' -e 'pthread_mutex' .; }
+e13() { scan_p -e 'completion[A-Za-z]*: *@escaping' -e '@escaping *(Result<'; }
+e14() { scan_p -F -e 'NSLock' -e 'NSRecursiveLock' -e 'os_unfair_lock' -e 'pthread_mutex'; }
 # E15 linter suppressions, tests included
-e15() { grep -rn --include='*.swift' --exclude-dir='.build' "${GEN[@]}" "${SIDE[@]}" -F -e 'swift-format-ignore' -e 'swiftlint:disable' -e 'swiftformat:disable' .; }
+e15() { list ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' "${GEN[@]}" "${SIDE[@]}" | gx -F -e 'swift-format-ignore' -e 'swiftlint:disable' -e 'swiftformat:disable' -- | tag; }
 # E16 exit() outside the entry point, one -e per alternative
-e16() { grep -rn "${P[@]}" -e '^exit(' -e '[^.[:alnum:]_]exit(' -e '\bGlibc\.exit(' -e '\bDarwin\.exit(' -e '\bMusl\.exit(' -e '\bFoundation\.exit(' -e '\bucrt\.exit(' -e '\b_exit(' .; }
+e16() { scan_p -e '^exit(' -e '[^.[:alnum:]_]exit(' -e '\bGlibc\.exit(' -e '\bDarwin\.exit(' -e '\bMusl\.exit(' -e '\bFoundation\.exit(' -e '\bucrt\.exit(' -e '\b_exit('; }
 # E01 E02 E03 E06 pass only with a multi-word comment on the line or the line above: print the unjustified ones
 hatches() {
   local files; files=$(mktemp) || return 2
@@ -81,7 +89,7 @@ hatches() {
     { prev = $0 }' < "$files"
   local rc=$?; rm -f "$files"; return "$rc"
 }
-canary() { find . -name '*.swift' -type f -not -path '*/.build/*' | awk 'END { if (NR == 0) { print "K07 CANARY: no Swift file scanned" > "/dev/stderr"; exit 1 } }'; }
+canary() { list ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' | xargs -0 -r grep -c -e '' -- | awk 'END { if (NR == 0) { print "K07 CANARY: no Swift file scanned" > "/dev/stderr"; exit 1 } }'; }
 
 canary || exit 1
 if [ $# -gt 0 ]; then
@@ -115,6 +123,6 @@ e14f() { e14 | awk '!/\/\/[[:space:]]*floor:/'; }
 awk '!/^[^:]+:[0-9]+:[[:space:]]*\/\//' "$scan" > "$raw"
 scan e15 >> "$raw"
 if [ "$fail" -ne 0 ]; then echo 'K07: a scan exited with an error status; the result cannot be trusted' >&2; exit 1; fi
-if [ -n "${BASE:-}" ]; then grep -F -f "$changed" "$raw" > "$out"; else cat "$raw" > "$out"; fi
+if [ -n "${BASE:-}" ]; then awk 'FILENAME == ARGV[1] { n++; p[n] = $0; next } { for (i = 1; i <= n; i++) if (index($0, p[i]) > 0) { print; next } }' "$changed" "$raw" > "$out"; else cat "$raw" > "$out"; fi
 cat "$out"
 [ ! -s "$out" ]

@@ -1,6 +1,6 @@
 # pbx-blocks.awk: SW-APPLE-15 and SW-APPLE-02, one summary line per XCBuildConfiguration block of a project.pbxproj,
 # so a per-target isolation and language-mode choice can be read next to the target's role. A reading aid, not a gate.
-# Usage: find . -name 'project.pbxproj' -print0 | xargs -0 -r awk -f pbx-blocks.awk
+# Usage: git ls-files -z --cached --others --exclude-standard -- ':(glob)**/project.pbxproj' ':(exclude,glob)**/.build/**' | xargs -0 -r awk -f pbx-blocks.awk
 # Output, one line per block: ID NAME bundle=ID_OR_- ver=SWIFT_VERSION iso=SWIFT_DEFAULT_ACTOR_ISOLATION
 #   appr=SWIFT_APPROACHABLE_CONCURRENCY strict=SWIFT_STRICT_CONCURRENCY ios=IPHONEOS_DEPLOYMENT_TARGET ("-" = not set in the block).
 # Compare iso= with the target's role (bundle identifier suffix, product type): MainActor on the app target and on UI-only

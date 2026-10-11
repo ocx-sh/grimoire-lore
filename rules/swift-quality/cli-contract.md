@@ -27,6 +27,8 @@ Contents: [Dates and Floors](#dates-and-floors) · [Exit Status and Streams](#ex
 [Running the Binary](#running-the-binary) · [Tests](#tests) · [Documented Gaps](#documented-gaps) ·
 [What Agents Get Wrong Here](#what-agents-get-wrong-here)
 
+Commands in this file were translated 2026-10-11 to the portable dialect (git-fed file lists, POSIX grep and awk) and each was re-watched red on a plant and green on a twin under GNU and busybox; a "measured 2026-10-10" date below dates the original form.
+
 ## Dates and Floors
 
 - Manifest-gated: ArgumentParser 1.8.0 needs tools 6.0 and Swift 6 mode. swift-log 1.16 and swift-subprocess 1.0.1 and
@@ -42,7 +44,7 @@ Contents: [Dates and Floors](#dates-and-floors) · [Exit Status and Streams](#ex
 
 ## Exit Status and Streams
 
-Gate, from the package root. Source trees may be symlinks (RxSwift's `Sources/` is a symlink farm of 412 files): every scan here uses `grep -R` and `find -L`, because `grep -r` skips symlinked files and `find` without `-L` skips a symlinked directory, so the scan and the `SW-CORE-03` canary must count the same files (measured 2026-10-10: `find` 412 files, `grep -r` 1, `grep -R` 412). Empty output is the pass for every line (grep exits 1), and `R-` lines are in the contract script
+Gate, from the package root. Source trees may be symlinks (RxSwift's `Sources/` is a symlink farm of 412 files): every grep here reads the `git ls-files` list, where a symlinked file is one entry that grep reads and a symlinked directory is one entry the list does not descend (name its real directory), so the scan and the `SW-CORE-03` canary count the same files (measured 2026-10-10: `find` 412 files, the old recursive grep 1; the git-fed form translated 2026-10-11). Empty output is the pass for every line (grep exits 1), and `R-` lines are in the contract script
 under [Running the Binary](#running-the-binary). The `G` lines bind executable targets only: `G0` prints a notice when the manifest declares none, and then the `G1` lines do not run (the `if` wraps them) (a library has no CLI contract, its `fatalError` and `print` hits are `SW-ERR` and `SW-IO` matters). A macro plugin (`@main struct P: CompilerPlugin`) is not a CLI: `dump-package` types it `macro`, so `G0` skips it. The `G4` lines in [Running the Binary](#running-the-binary) repeat the `G0` scope (watched 2026-10-10: a plant with `raise(SIGINT)`, `exit(128+2)` and an `@main` lacking `SIGPIPE`, `fullMessage(for` and `sanitizeForTerminal` prints 5 lines, a twin carrying them plus an `*Example` executable and a library-only twin print none or the notice; swift-case-paths, console-kit and swift-numerics, which printed a macro plugin, an example executable and nothing before, print the notice, nothing and the notice). `G0` watched (measured 2026-10-10, Swift 6.4.0): it prints the notice and nothing else on Yams, jwt-kit, swift-prometheus (9 and 14 stray `fatalError` and `print(` lines before the wrap) and on a library-only plant, and runs the `G1` lines on Mint, swift-docc and a twin with an `.executableTarget`; a manifest that does not evaluate prints the dump-package notice on stderr instead of a false 'no executable'. The `G1` lines scan only the executable targets' directories, listed from `dump-package` with `jq` (a custom `path:` is honoured, a missing `jq` prints a notice and runs nothing), so a mixed package's library `exit` and `print(` hits stay `SW-ERR` and `SW-IO` matters: on swift-nio-ssh the old `Sources` scan printed 66 lines with 12 library `fatalError` lines, the scoped one prints none from `NIOSSH` (54 lines, all in the three executables), and a plant with a library `fatalError`, an `ExampleDemo` executable and a custom-path executable printed only the two real `exit` lines (measured 2026-10-10, Swift 6.4.0). The `X` array skips golden-output, test-support, sample and benchmark directories (`Demo*`, `Example*`, `Sample*`, `Benchmark*`, `Fixtures`, `TestUtils`, `*.playground`): SwiftGen's `fatalError` census read 459 hits, 455 of them generated fixtures. A sample or benchmark executable named otherwise (swift-nio-ssh's `NIOSSHClient`, `NIOSSHServer`, `NIOSSHPerformanceTester`) still prints: add its pattern to `X` for that tree or read and dismiss the hits. `G1-03a` also prints the single terminal `exit(status)` of a hand-written entry-point file, which is compliant: read the hit.
 
 ```bash
@@ -55,18 +57,19 @@ elif ! command -v jq >/dev/null; then
 else
   # G1 scans only the executable targets' directories (dump-package gives path null for the default Sources/<name>), minus the directories that ship no tool code
   mapfile -t DIRS < <(printf '%s\n' "$PKG" | jq -r '.targets[] | select(.type == "executable") | (.path // ("Sources/" + .name))')
-  X=(--exclude-dir='Demo*' --exclude-dir='Example*' --exclude-dir='*Example' --exclude-dir='Sample*' --exclude-dir='Benchmark*' --exclude-dir=Fixtures --exclude-dir=TestUtils --exclude-dir='*.playground')
+  X=(':(exclude,glob)**/Demo*/**' ':(exclude,glob)**/Example*/**' ':(exclude,glob)**/*Example/**' ':(exclude,glob)**/Sample*/**' ':(exclude,glob)**/Benchmark*/**' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/TestUtils/**' ':(exclude,glob)**/*.playground/**')
+  SW=(); ST=(); MN=(); for d in "${DIRS[@]}"; do SW+=(":(glob)$d/**/*.swift"); ST+=(":(glob)$d/**/Status.swift"); MN+=(":(glob)$d/**/main.swift"); done    # the entry targets' own files
   ls -d -- "${DIRS[@]}" >/dev/null || echo 'G0: an executable target directory is missing, the scope is unknown' >&2
-  grep -Rn -e 'ExitCode(' --include='*.swift' "${X[@]}" --exclude='Status.swift' "${DIRS[@]}"                              # G1-01a
-  grep -RnE -e '[a-zA-Z] *= *([2-9]|[1-5][0-9]|6[0-3]|[1-9][0-9]{2,})([^0-9.]|$)' --include='Status.swift' "${X[@]}" "${DIRS[@]}"  # G1-01b
-  grep -RnE -e 'await ' -e '(^|[^.[:alnum:]_])try[ ?!]' --include='main.swift' "${X[@]}" "${DIRS[@]}"                      # G1-02a
-  grep -Rn -e 'func main() async throws' --include='*.swift' "${X[@]}" "${DIRS[@]}"                                        # G1-02b
-  grep -RnE -e '(^|[^.[:alnum:]_])exit\(' -e '\b(Glibc|Darwin|Musl|Foundation|ucrt)\.exit\(' -e '\b_exit\(' --include='*.swift' "${X[@]}" --exclude='Stdio.swift' "${DIRS[@]}"  # G1-03a
-  grep -RnE -e '\bfatalError\(' --include='*.swift' "${X[@]}" "${DIRS[@]}"                                                 # G1-03b a tell
-  grep -RnE -e 'standard(Output|Error)\.write\([^c]' --include='*.swift' "${X[@]}" "${DIRS[@]}"                            # G1-04
-  grep -RnE -e 'print\("(Error|error|Warning|warning)' --include='*.swift' "${X[@]}" "${DIRS[@]}"                          # G1-05
-  grep -RnE -e 'NO_COLOR"\] (==|!=) nil' --include='*.swift' "${X[@]}" "${DIRS[@]}"                                        # G1-06
-  grep -RnE -e '(^|[^.[:alnum:]_])print\(' --include='*.swift' "${X[@]}" --exclude='Stdio.swift' "${DIRS[@]}"              # G1-24
+  git ls-files -z --cached --others --exclude-standard -- "${SW[@]}" ':(exclude,glob)**/Status.swift' "${X[@]}" | xargs -0 -r grep -H -n -e 'ExitCode(' --                              # G1-01a
+  git ls-files -z --cached --others --exclude-standard -- "${ST[@]}" "${X[@]}" | xargs -0 -r grep -H -n -E -e '[a-zA-Z] *= *([2-9]|[1-5][0-9]|6[0-3]|[1-9][0-9]{2,})([^0-9.]|$)' --  # G1-01b
+  git ls-files -z --cached --others --exclude-standard -- "${MN[@]}" "${X[@]}" | xargs -0 -r grep -H -n -E -e 'await ' -e '(^|[^.[:alnum:]_])try[ ?!]' --                      # G1-02a
+  git ls-files -z --cached --others --exclude-standard -- "${SW[@]}" "${X[@]}" | xargs -0 -r grep -H -n -e 'func main() async throws' --                                        # G1-02b
+  git ls-files -z --cached --others --exclude-standard -- "${SW[@]}" ':(exclude,glob)**/Stdio.swift' "${X[@]}" | xargs -0 -r grep -H -n -E -e '(^|[^.[:alnum:]_])exit\(' -e '\b(Glibc|Darwin|Musl|Foundation|ucrt)\.exit\(' -e '\b_exit\(' --  # G1-03a
+  git ls-files -z --cached --others --exclude-standard -- "${SW[@]}" "${X[@]}" | xargs -0 -r grep -H -n -E -e '\bfatalError\(' --                                                 # G1-03b a tell
+  git ls-files -z --cached --others --exclude-standard -- "${SW[@]}" "${X[@]}" | xargs -0 -r grep -H -n -E -e 'standard(Output|Error)\.write\([^c]' --                            # G1-04
+  git ls-files -z --cached --others --exclude-standard -- "${SW[@]}" "${X[@]}" | xargs -0 -r grep -H -n -E -e 'print\("(Error|error|Warning|warning)' --                          # G1-05
+  git ls-files -z --cached --others --exclude-standard -- "${SW[@]}" "${X[@]}" | xargs -0 -r grep -H -n -E -e 'NO_COLOR"\] (==|!=) nil' --                                        # G1-06
+  git ls-files -z --cached --others --exclude-standard -- "${SW[@]}" ':(exclude,glob)**/Stdio.swift' "${X[@]}" | xargs -0 -r grep -H -n -E -e '(^|[^.[:alnum:]_])print\(' --              # G1-24
 fi
 ```
 
@@ -108,26 +111,26 @@ Gate, from the package root. `G2-15a` and `G2-15d` take the entry target from `d
 line. The `-L` lines list a file that lacks the string (`xargs` exits 123 when a batch lists files and none matched, 0 for a mixed batch, so judge by output; the file lists are NUL-separated so a path with a space survives).
 
 ```bash
-DIRS=(); EX=()   # G2-15 scope: the entry targets, listed the way G0 lists them; the exclusion names them, so any layout is scanned
+DIRS=(); EX=(); SW=()   # G2-15 scope: the entry targets, listed the way G0 lists them; the exclusion names them, so any layout is scanned
 if PKG=$(swift package dump-package) && command -v jq >/dev/null; then
   mapfile -t DIRS < <(printf '%s\n' "$PKG" | jq -r '.targets[] | select(.type == "executable") | (.path // ("Sources/" + .name))')
-  for d in "${DIRS[@]}"; do EX+=(--exclude-dir="${d##*/}"); done
+  for d in "${DIRS[@]}"; do EX+=(":(exclude,glob)**/${d##*/}/**"); SW+=(":(glob)$d/**/*.swift"); done
 else echo 'G2-15: needs swift and jq to find the entry target, the two lines below are not meaningful' >&2; fi
-grep -Rn --exclude-dir=Fixtures --exclude-dir=TestUtils --exclude-dir='*.playground' -e 'LoggingSystem\.bootstrap' --include='*.swift' "${EX[@]}" Sources                       # G2-15a
-[ "${#DIRS[@]}" -gt 0 ] && grep -Rn -e 'LoggingSystem\.bootstrap' --include='*.swift' "${DIRS[@]}" | awk 'END{if (NR > 1) print NR " bootstrap calls in the entry target"}'  # G2-15d
-grep -Rn --exclude-dir=Fixtures --exclude-dir=TestUtils --exclude-dir='*.playground' -e 'StreamLogHandler\.standardOutput' --include='*.swift' Sources                                  # G2-15b
-grep -RnE --exclude-dir=Fixtures --exclude-dir=TestUtils --exclude-dir='*.playground' -e '^let +[a-zA-Z_]+ *(: *Logger)? *= *Logger\(label' -e '^var +[a-zA-Z_]+ *(: *Logger)? *= *Logger\(label' --include='*.swift' Sources  # G2-15c a tell
-grep -Rn --exclude-dir=Fixtures --exclude-dir=TestUtils --exclude-dir='*.playground' -e 'logLevel = ' --include='*.swift' Sources                                                       # G2-16 a reading heuristic
-grep -RnE --exclude-dir=Fixtures --exclude-dir=TestUtils --exclude-dir='*.playground' -e '@Option([ (].*)? var [a-zA-Z_]+ *(:[^=;{]*)?= *[^ =]' --include='*.swift' --exclude='GlobalOptions.swift' Sources  # G2-17
-grep -Rn --exclude-dir=Fixtures --exclude-dir=TestUtils --exclude-dir='*.playground' -e '"[^"]*\.config[/"]' -e 'XDG_' --include='*.swift' --exclude='XDG.swift' Sources                # G2-18
-grep -RlZ --exclude-dir=Fixtures --exclude-dir=TestUtils --exclude-dir='*.playground' -e 'ServiceGroup(' --include='*.swift' Sources | xargs -0 -r grep -L -e 'gracefulShutdownSignals'    # G2-20a
-grep -RnE --exclude-dir=Fixtures --exclude-dir=TestUtils --exclude-dir='*.playground' -e 'gracefulShutdownSignals: *\[ *\]' --include='*.swift' Sources                                 # G2-20b
-grep -RlZ --exclude-dir=Fixtures --exclude-dir=TestUtils --exclude-dir='*.playground' -e 'ServiceGroup' --include='*.swift' Sources | xargs -0 -r grep -L -e 'maximumGracefulShutdownDuration'  # G2-21
-grep -Rn --exclude-dir=Fixtures --exclude-dir=TestUtils --exclude-dir='*.playground' -e 'withThrowingTaskGroup' -e 'withThrowingDiscardingTaskGroup' --include='*.swift' Sources       # G2-26
-grep -RnE --exclude-dir=Fixtures --exclude-dir=TestUtils --exclude-dir='*.playground' -e '@[OF][a-z]*.* var format\b' -e '@[OF][a-z]*.* var color\b' -e '@[OF][a-z]*.* var quiet\b' -e '@[OF][a-z]*.* var logLevel\b' --include='*.swift' --exclude='GlobalOptions.swift' Sources  # G2-28a
-grep -RlEZ --exclude-dir=Fixtures --exclude-dir=TestUtils --exclude-dir='*.playground' -e ': *(Async)?ParsableCommand' --include='*.swift' Sources | xargs -0 -r grep -L -e '@OptionGroup'  # G2-28b
-grep -RnE --exclude-dir=Fixtures --exclude-dir=TestUtils --exclude-dir='*.playground' -e 'print\("\\r' -e 'print\("\\u\{1B\}' --include='*.swift' Sources                              # G2-30
-grep -RlZ --exclude-dir=Fixtures --exclude-dir=TestUtils --exclude-dir='*.playground' -e 'readLine(' --include='*.swift' Sources | xargs -0 -r grep -L -e 'isatty(0' -e 'isatty(STDIN_FILENO' -e 'isTTY(0' -e 'fileno(stdin'  # G2-31
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.swift' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/TestUtils/**' ':(exclude,glob)**/*.playground/**' "${EX[@]}" | xargs -0 -r grep -H -n -e 'LoggingSystem\.bootstrap' --                       # G2-15a
+[ "${#DIRS[@]}" -gt 0 ] && git ls-files -z --cached --others --exclude-standard -- "${SW[@]}" | xargs -0 -r grep -H -n -e 'LoggingSystem\.bootstrap' -- | awk 'END{if (NR > 1) print NR " bootstrap calls in the entry target"}'  # G2-15d
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.swift' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/TestUtils/**' ':(exclude,glob)**/*.playground/**' | xargs -0 -r grep -H -n -e 'StreamLogHandler\.standardOutput' --                                  # G2-15b
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.swift' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/TestUtils/**' ':(exclude,glob)**/*.playground/**' | xargs -0 -r grep -H -n -E -e '^let +[a-zA-Z_]+ *(: *Logger)? *= *Logger\(label' -e '^var +[a-zA-Z_]+ *(: *Logger)? *= *Logger\(label' --  # G2-15c a tell
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.swift' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/TestUtils/**' ':(exclude,glob)**/*.playground/**' | xargs -0 -r grep -H -n -e 'logLevel = ' --                                                       # G2-16 a reading heuristic
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.swift' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/TestUtils/**' ':(exclude,glob)**/*.playground/**' ':(exclude,glob)**/GlobalOptions.swift' | xargs -0 -r grep -H -n -E -e '@Option([ (].*)? var [a-zA-Z_]+ *(:[^=;{]*)?= *[^ =]' --  # G2-17
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.swift' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/TestUtils/**' ':(exclude,glob)**/*.playground/**' ':(exclude,glob)**/XDG.swift' | xargs -0 -r grep -H -n -e '"[^"]*\.config[/"]' -e 'XDG_' --                # G2-18
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.swift' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/TestUtils/**' ':(exclude,glob)**/*.playground/**' | xargs -0 -r grep -l -e 'ServiceGroup(' -- | tr '\n' '\0' | xargs -0 -r grep -L -e 'gracefulShutdownSignals' --    # G2-20a
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.swift' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/TestUtils/**' ':(exclude,glob)**/*.playground/**' | xargs -0 -r grep -H -n -E -e 'gracefulShutdownSignals: *\[ *\]' --                                 # G2-20b
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.swift' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/TestUtils/**' ':(exclude,glob)**/*.playground/**' | xargs -0 -r grep -l -e 'ServiceGroup' -- | tr '\n' '\0' | xargs -0 -r grep -L -e 'maximumGracefulShutdownDuration' --  # G2-21
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.swift' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/TestUtils/**' ':(exclude,glob)**/*.playground/**' | xargs -0 -r grep -H -n -e 'withThrowingTaskGroup' -e 'withThrowingDiscardingTaskGroup' --       # G2-26
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.swift' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/TestUtils/**' ':(exclude,glob)**/*.playground/**' ':(exclude,glob)**/GlobalOptions.swift' | xargs -0 -r grep -H -n -E -e '@[OF][a-z]*.* var format\b' -e '@[OF][a-z]*.* var color\b' -e '@[OF][a-z]*.* var quiet\b' -e '@[OF][a-z]*.* var logLevel\b' --  # G2-28a
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.swift' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/TestUtils/**' ':(exclude,glob)**/*.playground/**' | xargs -0 -r grep -l -E -e ': *(Async)?ParsableCommand' -- | tr '\n' '\0' | xargs -0 -r grep -L -e '@OptionGroup' --  # G2-28b
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.swift' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/TestUtils/**' ':(exclude,glob)**/*.playground/**' | xargs -0 -r grep -H -n -E -e 'print\("\\r' -e 'print\("\\u\{1B\}' --                              # G2-30
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.swift' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/TestUtils/**' ':(exclude,glob)**/*.playground/**' | xargs -0 -r grep -l -e 'readLine(' -- | tr '\n' '\0' | xargs -0 -r grep -L -e 'isatty(0' -e 'isatty(STDIN_FILENO' -e 'isTTY(0' -e 'fileno(stdin' --  # G2-31
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
@@ -149,8 +152,8 @@ Gate: `swift build` in Swift 6 language mode, then the two greps below. Diagnost
 'stdout' is not concurrency-safe because it involves shared mutable state`. Judge `G3-07b` by output, not exit status.
 
 ```bash
-grep -RlE --exclude-dir=Fixtures --exclude-dir=TestUtils --exclude-dir='*.playground' -e '\bstd(out|err)\b' --include='*.swift' --exclude='Stdio.swift' Sources                       # G3-07a
-grep -RlEZ --exclude-dir=Fixtures --exclude-dir=TestUtils --exclude-dir='*.playground' -e '\b(fflush|ferror|fputs)\(' --include='*.swift' Sources | xargs -0 -r grep -L -e '@preconcurrency import'  # G3-07b
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.swift' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/TestUtils/**' ':(exclude,glob)**/*.playground/**' ':(exclude,glob)**/Stdio.swift' | xargs -0 -r grep -l -E -e '\bstd(out|err)\b' --                       # G3-07a
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.swift' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/TestUtils/**' ':(exclude,glob)**/*.playground/**' | xargs -0 -r grep -l -E -e '\b(fflush|ferror|fputs)\(' -- | tr '\n' '\0' | xargs -0 -r grep -L -e '@preconcurrency import' --  # G3-07b
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
@@ -174,7 +177,7 @@ mytool list >&-; echo $?                                                     # 7
 mytool list > out.txt; echo $?; cat out.txt                                  # 0 and the line is present
 mytool --bogus; echo $?                                                      # R-12 prints 64
 mytool boom; echo $?                                                         # R-23 the domain error's status, not 1
-mytool $'--\e]0;x\a' 2>&1 >/dev/null | tr -cd '\033' | wc -c                 # R-25 prints 0
+printf -- '--\033]0;x\007' | xargs -0 mytool 2>&1 >/dev/null | tr -cd '\033' | wc -c        # R-25 prints 0
 set -m; mytool long 2>err & pid=$!; sleep 1.2; kill -INT $pid; sleep 1.0; kill -0 $pid && echo alive
 kill -INT $pid; sleep 0.8; kill -0 $pid || echo dead; wait $pid; echo $?     # R-11 alive, dead, 130
 set -m; mytool long 2>err & pid=$!; sleep 1.5; kill -TERM $pid; wait $pid; echo $?; cat err  # R-22 143 after the cleanup line
@@ -187,15 +190,16 @@ set -m; mytool serve 2>err & pid=$!; sleep 1; kill -INT $pid; wait $pid; echo $?
 if ! PKG=$(swift package dump-package) || ! command -v jq >/dev/null; then echo 'G4: needs swift and jq to list the executable targets' >&2
 else
   mapfile -t DIRS < <(printf '%s\n' "$PKG" | jq -r '.targets[] | select(.type == "executable") | (.path // ("Sources/" + .name))')
-  X=(--exclude-dir='Demo*' --exclude-dir='Example*' --exclude-dir='*Example' --exclude-dir='Sample*' --exclude-dir='Benchmark*' --exclude-dir=Fixtures --exclude-dir=TestUtils --exclude-dir='*.playground')
+  X=(':(exclude,glob)**/Demo*/**' ':(exclude,glob)**/Example*/**' ':(exclude,glob)**/*Example/**' ':(exclude,glob)**/Sample*/**' ':(exclude,glob)**/Benchmark*/**' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/TestUtils/**' ':(exclude,glob)**/*.playground/**')
+  SW=(); for d in "${DIRS[@]}"; do SW+=(":(glob)$d/**/*.swift"); done    # the entry targets' own files
   if [ "${#DIRS[@]}" -eq 0 ]; then echo 'G4: no executable target, SW-CLI does not apply'; else
-    grep -RlZ -e '@main' --include='*.swift' "${X[@]}" "${DIRS[@]}" | xargs -0 -r grep -L -e 'SIGPIPE'          # G4-08 a heuristic, the call may sit in a sibling file
-    grep -RnE -e '\braise\(SIG' --include='*.swift' "${X[@]}" "${DIRS[@]}"                      # G4-10
-    grep -Rn -e 'exitCode(for:' --include='*.swift' "${X[@]}" "${DIRS[@]}"                      # G4-12 a heuristic, hits belong in the entry-point file only
-    grep -RlZ -e 'SIGPIPE' --include='*.swift' "${X[@]}" "${DIRS[@]}" | xargs -0 -r grep -ln -e 'Process()'     # G4-13 a heuristic, file-level
-    grep -RnE -e '\braise\(SIG' -e 'exit\(128' --include='*.swift' "${X[@]}" "${DIRS[@]}"      # G4-22
-    grep -RlZ -e '@main' --include='*.swift' "${X[@]}" "${DIRS[@]}" | xargs -0 -r grep -L -e 'fullMessage(for'  # G4-23
-    grep -RlZ -e '@main' --include='*.swift' "${X[@]}" "${DIRS[@]}" | xargs -0 -r grep -L -e 'sanitizeForTerminal'  # G4-25
+    git ls-files -z --cached --others --exclude-standard -- "${SW[@]}" "${X[@]}" | xargs -0 -r grep -l -e '@main' -- | tr '\n' '\0' | xargs -0 -r grep -L -e 'SIGPIPE' --          # G4-08 a heuristic, the call may sit in a sibling file
+    git ls-files -z --cached --others --exclude-standard -- "${SW[@]}" "${X[@]}" | xargs -0 -r grep -H -n -E -e '\braise\(SIG' --                      # G4-10
+    git ls-files -z --cached --others --exclude-standard -- "${SW[@]}" "${X[@]}" | xargs -0 -r grep -H -n -e 'exitCode(for:' --                      # G4-12 a heuristic, hits belong in the entry-point file only
+    git ls-files -z --cached --others --exclude-standard -- "${SW[@]}" "${X[@]}" | xargs -0 -r grep -l -e 'SIGPIPE' -- | tr '\n' '\0' | xargs -0 -r grep -l -n -e 'Process()' --     # G4-13 a heuristic, file-level
+    git ls-files -z --cached --others --exclude-standard -- "${SW[@]}" "${X[@]}" | xargs -0 -r grep -H -n -E -e '\braise\(SIG' -e 'exit\(128' --      # G4-22
+    git ls-files -z --cached --others --exclude-standard -- "${SW[@]}" "${X[@]}" | xargs -0 -r grep -l -e '@main' -- | tr '\n' '\0' | xargs -0 -r grep -L -e 'fullMessage(for' --  # G4-23
+    git ls-files -z --cached --others --exclude-standard -- "${SW[@]}" "${X[@]}" | xargs -0 -r grep -l -e '@main' -- | tr '\n' '\0' | xargs -0 -r grep -L -e 'sanitizeForTerminal' --  # G4-25
   fi
 fi
 ```
@@ -210,7 +214,7 @@ fi
 | SW-CLI-13 | After ignoring SIGPIPE, spawn children with swift-subprocess, not `Foundation.Process`, or reset a `Process` child's dispositions. Child-status mapping is `SW-IO`. Floor: swift-subprocess 1.0.1. | `exec` keeps ignored dispositions, so a `Process` child shows `SigIgn 0000000180001000` (bit 12 is SIGPIPE) after the parent ignored it, and swift-subprocess resets every signal in the child (read in 1.0.1 source 2026-10-10, measured on 1.0.0). | `G4-13`, file-level, a hit needs a look. Measurement: `grep SigIgn /proc/self/status` run in the child. Watched: the measurement yes, the grep hit a planted file and is empty on the twin (measured 2026-10-10). | SHOULD |
 | SW-CLI-22 | A service that shut down gracefully exits 0 (`try await group.run()` returning is success). A finite command ended by a signal runs its cleanup, calls `fflush` (result ignored, a signal ending is already non-success), restores `SIG_DFL` and re-raises. Never `return` after cleanup and never `exit(128 + sig)`. A second signal during cleanup forces the default action at once. | Measured: `return` after cleanup exits 0 (an interrupted run reports success), unhandled exits 143 with no cleanup, re-raise exits 143 with cleanup. Whether a bounded job hosted in a `ServiceGroup` should exit 143 too is open, the default is 0 for a service and re-raise for a command. | `R-22` must show the cleanup line and 143, `G4-22` stays empty. Watched red (measured 2026-10-10): `return` exits 0 with cleanup, unhandled 143 without it, re-raise 143 with it and 130 for SIGINT. | MUST |
 | SW-CLI-23 | Replace `await Self.main(nil)` with a root hook that owns parse, run, render, classify, flush and one terminator. Declare a non-throwing `static func main() async` whose first statement is `signal(SIGPIPE, SIG_IGN)`. Run `asyncParseAsRoot(nil)` and `run()` in `do/catch`. A domain error that is neither an `ExitCode` nor an ArgumentParser error is classified first by the SW-CLI-14 `switch`. Otherwise take `Self.fullMessage(for:)` and `Self.exitCode(for:)`, write the message to stdout when the code is `.success`, else sanitized (SW-CLI-25) to stderr, then apply the SW-CLI-12 remap and `Status.checked`. Then run the flush check (SW-CLI-09) and on failure print `mytool: error: write to stdout failed: reason` and use `.io`, which replaces an earlier non-success status. Finish with `Stdio.terminate`, the only `exit` call. Never test `error is CleanExit`. A plain `ParsableCommand` root uses the same body with `parseAsRoot(nil)`. Floor: ArgumentParser 1.8. | `exit(withError:)` terminates inside `main(_:)` for help, version, completions and every error, so code after `await Self.main(nil)` runs on the success path only: `--help >/dev/full` exits 0 under that hook and 74 under this one. A flush check without the EPIPE exemption turns a `big` piped to `head -1` into 74. `exitCode(for:)` alone gives 1 for a domain error. The `CleanExit` type is internal and false for `--help`, `exitCode(for:) == .success` is the public test. | `G4-23` (output = a root that does not own rendering, whether it delegates with `Self.main(nil)` or declares no `main()` at all, a `@main` file outside the CLI root is a legitimate hit), then `R-08`, `R-09`, `R-12` and `R-23`. A grep cannot see a hook that forgets the flush check, the behaviour lines are the gate. Watched red (measured 2026-10-10, async and plain roots, Swift 6.4.0 and 6.3.3): the bare root is listed, a build without classification exits 1 for `boom` against 65. | MUST |
-| SW-CLI-25 | Apply `SW-SEC-17`'s `sanitizeForTerminal` at the root hook to `fullMessage(for:)` and to every classified error string before writing stderr. It escapes controls and bidi characters as `\u{HEX}`, it does not strip them. | ArgumentParser echoes raw ESC and BEL from argv into the terminal (measured: `mytool $'--\e]0;pwned\a'`). The stdlib has no equivalent and the root hook is the one place that reaches ArgumentParser's own messages. | `G4-25` (output = a root that never mentions the sanitiser), then `R-25` must print 0 ESC bytes. Watched red (measured 2026-10-10): the simple hook leaves 1 ESC byte on stderr, the hook leaves 0, both exit 64. | MUST (SW-SEC-17's tier) |
+| SW-CLI-25 | Apply `SW-SEC-17`'s `sanitizeForTerminal` at the root hook to `fullMessage(for:)` and to every classified error string before writing stderr. It escapes controls and bidi characters as `\u{HEX}`, it does not strip them. | ArgumentParser echoes raw ESC and BEL from argv into the terminal (measured: `mytool` given the argument `--`, ESC, `]0;pwned`, BEL). The stdlib has no equivalent and the root hook is the one place that reaches ArgumentParser's own messages. | `G4-25` (output = a root that never mentions the sanitiser), then `R-25` must print 0 ESC bytes. Watched red (measured 2026-10-10): the simple hook leaves 1 ESC byte on stderr, the hook leaves 0, both exit 64. | MUST (SW-SEC-17's tier) |
 | SW-CLI-29 | Under `--format json`, print one envelope on stdout and one human line on stderr for a failure: `{"schema_version":1,"command":"fail","exit_code":65,"error":{"kind":"data_error","message":"..."}}` with sorted keys and stable `kind` slugs (a rename bumps `schema_version`), and one snapshot test per `Status` case. Follow the public `ocx` envelope, which also carries `detail` and `context` (default, the adopter may override). | Machine consumers parse stdout alone and the stderr line is the human channel (each channel reported once, SW-CLI-05). | `R-29` must print 0, and `R-05` must print 0 in text mode. Watched: the run yes (measured 2026-10-10), the red is the absent-envelope baseline and the snapshot tests were not written. | SHOULD |
 
 ```swift
@@ -264,7 +268,7 @@ Gate: `swift test`, then `swift build` after adding a case with no mapping, and 
 classifier).
 
 ```bash
-grep -Rn --exclude-dir=Fixtures --exclude-dir=TestUtils --exclude-dir='*.playground' -e 'default:' --include='Classify*.swift' Sources                                                # G5-14
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/Classify*.swift' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/TestUtils/**' ':(exclude,glob)**/*.playground/**' | xargs -0 -r grep -H -n -e 'default:' --                                                # G5-14
 ```
 
 | ID | Rule | Rationale | Verification | Severity |

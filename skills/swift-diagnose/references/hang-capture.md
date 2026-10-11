@@ -9,6 +9,8 @@ Contents: [Does SIGQUIT print a backtrace](#does-sigquit-print-a-backtrace) ·
 [Reading the dump](#reading-the-dump) · [Under swift test](#under-swift-test) ·
 [Order of signals](#order-of-signals)
 
+Commands in this file were translated 2026-10-11 to the portable dialect (git-fed file lists, POSIX grep and awk) and each was re-watched red on a plant and green on a twin under GNU and busybox; a "measured 2026-10-10" date below dates the original form.
+
 ## Does SIGQUIT print a backtrace
 
 Two answers, both measured.
@@ -51,8 +53,8 @@ The script is step B3 of the skill (`set -m`, read `SigIgn`, `ps`, `kill -QUIT`,
 the `kill -KILL`, to read the cause (rename the module):
 
 ```bash
-grep -m1 -e '_dispatch_sema4_wait' -e 'pthread_cond_wait' -e 'futex_wait' hang.err
-grep -m3 -e ' in app at ' hang.err
+grep -e '_dispatch_sema4_wait' -e 'pthread_cond_wait' -e 'futex_wait' hang.err | head -n 1
+grep -e ' in app at ' hang.err | head -n 3
 ```
 
 What each line prints on a blocked main actor, measured (watched red against the

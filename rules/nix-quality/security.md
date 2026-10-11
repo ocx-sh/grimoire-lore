@@ -33,7 +33,7 @@ Contents: [Dates and Floors](#dates-and-floors) · [nixConfig Keys](#nixconfig-k
 - **Pinned default: NIX-SEC-06 gates CppNix only.** Lix runs as an advisory leg and Determinate Nix is untested but never deliberately broken. The consumer floor is NIX-GATE-16's computed floor, never a hardcoded version.
 - **Pinned default: an agent may run `nix develop` on a flake the project owns**, at a commit the agent or the owner authored or reviewed, never on a fork's pull request.
 - **Corpus rates** come from the 38-repository corpus read on 2026-09-27. The `nixConfig` rate counts the 37 repositories other than NixOS/nixpkgs, and the `accept-flake-config` rate counts the 36 that are neither NixOS/nix nor NixOS/nixpkgs.
-- **Every grep is a violation locator.** Empty output with exit 1 is the pass, and any printed line is the finding. Run each from the repository root. Each excludes `.claude`, where an installed copy of these rules names every pattern: replace it with the directory your agent client installs rules and skills into. A NIX-SEC-03, NIX-SEC-08 or NIX-SEC-09 hit in code that implements or documents the setting rather than using it (a Nix implementation's own sources and tests, a module option that renders it, a test's dummy token) is read and passes. NIX-SEC-02 exempts nothing.
+- **Every grep is a violation locator.** Empty output is the pass, and any printed line is the finding. Run each from the repository root. Each excludes `.claude`, where an installed copy of these rules names every pattern: replace it with the directory your agent client installs rules and skills into. A NIX-SEC-03, NIX-SEC-08 or NIX-SEC-09 hit in code that implements or documents the setting rather than using it (a Nix implementation's own sources and tests, a module option that renders it, a test's dummy token) is read and passes. NIX-SEC-02 exempts nothing.
 
 ## nixConfig Keys
 
@@ -76,20 +76,20 @@ nix eval --json --file ./flake.nix --apply 'f: builtins.attrNames (f.nixConfig o
 
 ```sh
 # NIX-SEC-02: the flag, anywhere
-grep -rn --exclude-dir=.git --exclude-dir=.claude -e 'accept-flake-[c]onfig' .
+git ls-files -z --cached --others --exclude-standard -- ':(exclude,glob)**/.claude/**' | xargs -0 -r grep -H -n -e 'accept-flake-[c]onfig' --
 # NIX-SEC-03 (a): token shapes anywhere, docs included
-grep -rnE --exclude-dir=.git --exclude-dir=.claude -e 'gh[pousr]_[A-Za-z0-9]{20,}' -e 'github_pat_[A-Za-z0-9_]{20,}' -e 'glpat-[A-Za-z0-9_-]{20,}' .
+git ls-files -z --cached --others --exclude-standard -- ':(exclude,glob)**/.claude/**' | xargs -0 -r grep -H -n -E -e 'gh[pousr]_[A-Za-z0-9]{20,}' -e 'github_pat_[A-Za-z0-9_]{20,}' -e 'glpat-[A-Za-z0-9_-]{20,}' --
 # NIX-SEC-03 (b): access-tokens outside docs that does not come from a CI secret
-grep -rn --exclude-dir=.git --exclude-dir=.claude --exclude='*.md' --exclude='*.mdx' -e 'access-[t]okens *=' -e '--access-[t]okens' . | grep -v -e '[$]{{ secrets[.]' -e '[$]{{ github[.]token }}'
+git ls-files -z --cached --others --exclude-standard -- ':(exclude,glob)**/.claude/**' ':(exclude,glob)**/*.md' ':(exclude,glob)**/*.mdx' | xargs -0 -r grep -H -n -e 'access-[t]okens *=' -e '--access-[t]okens' -- | grep -v -e '[$]{{ secrets[.]' -e '[$]{{ github[.]token }}'
 # NIX-SEC-03 (c): a token in a generated nix.conf, even from a secret
-grep -rn --exclude-dir=.git --exclude-dir=.claude -e 'settings\.access-[t]okens' .
+git ls-files -z --cached --others --exclude-standard -- ':(exclude,glob)**/.claude/**' | xargs -0 -r grep -H -n -e 'settings\.access-[t]okens' --
 # NIX-SEC-08
-grep -rn --exclude-dir=.git --exclude-dir=.claude -e 'trusted-[u]sers' .
+git ls-files -z --cached --others --exclude-standard -- ':(exclude,glob)**/.claude/**' | xargs -0 -r grep -H -n -e 'trusted-[u]sers' --
 # NIX-SEC-09
-grep -rn --exclude-dir=.git --exclude-dir=.claude -e 'ca-[d]erivations' -e 'recursive-[n]ix' .
+git ls-files -z --cached --others --exclude-standard -- ':(exclude,glob)**/.claude/**' | xargs -0 -r grep -H -n -e 'ca-[d]erivations' -e 'recursive-[n]ix' --
 ```
 
-Each line passes on empty output (exit 1). Grep (b) exempts docs, where a
+Each line passes on empty output. Grep (b) exempts docs, where a
 placeholder such as `github.com=YOUR_TOKEN` is guidance, and drops lines fed
 from `${{ secrets.… }}` or `${{ github.token }}`. That filter also hides
 `nix.settings.access-tokens` fed from a secret, which is why grep (c) exists.

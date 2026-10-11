@@ -47,12 +47,12 @@ jq '(.nodes.root.inputs // {}) | has("nixpkgs")' flake.lock
 jq -c '[.nodes.root.inputs[]? | strings] as $d | [.nodes | to_entries[] | select((.key | IN($d[])) and .value.original.rev != null) | .key]' flake.lock
 # local-input (NIX-INP-04): `[]` is the pass.
 jq -c '[.nodes | to_entries[] | select((.value.original.type == "git" and ((.value.original.url // "") | startswith("file:"))) or (.value.original.type == "path" and ((.value.original.path // "") | startswith("/")))) | .key]' flake.lock
-# cross-tree (NIX-INP-04): candidates to read. Empty output (exit 1) is the pass. A hit passes when the path resolves inside the repository's git tree and is the finding when it leaves it.
-grep -rn -e 'path:\.\./' --include='*.nix' .
+# cross-tree (NIX-INP-04): candidates to read. Empty output is the pass. A hit passes when the path resolves inside the repository's git tree and is the finding when it leaves it.
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.nix' | xargs -0 -r grep -H -n -e 'path:\.\./' --
 # indirect (NIX-INP-05): `true` with exit 0 is the pass, `false` with exit 1 the finding.
 jq -e '[.nodes[] | select(.original.type == "indirect")] | length == 0' flake.lock
-# tar-xz (NIX-INP-05): empty output (exit 1) is the pass.
-grep -rn -e 'nixexprs\.tar\.xz' --include='*.nix' .
+# tar-xz (NIX-INP-05): empty output is the pass.
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.nix' | xargs -0 -r grep -H -n -e 'nixexprs\.tar\.xz' --
 # flake-checker (NIX-INP-06): exit 0 passes. Exit 1 is a finding unless stderr holds `Error: Invalid(` or `Error: FlakeLock(`, which is a crash (NIX-GATE-11).
 flake-checker --no-telemetry --fail-mode --condition "numDaysOld < 30 && ((gitRef == '' && owner == '') || (supportedRefs.contains(gitRef) && owner == 'NixOS'))" flake.lock
 ```
@@ -64,7 +64,7 @@ flake-checker --no-telemetry --fail-mode --condition "numDaysOld < 30 && ((gitRe
 | NIX-INP-03 | Name a branch or tag in each input's `url` (`github:NixOS/nixpkgs/nixos-unstable`) and let `flake.lock` carry the rev. Put a 40-hex rev in `url` only for an input frozen on purpose, such as a regression baseline or a NIX-INP-14 wrap, with a comment saying so. | A rev in `url` makes `nix flake update systems` exit 0 with the rev unchanged, so the lock never refreshes, flake-checker's 30-day bar fails forever, and an agent reports the update as done. The cost of branch refs is the follows-removal drift that NIX-INP-08 guards. | frozen-rev. Watched red on a rev in `url` (`["systems"]`), green on the branch twin (`[]`). The update freeze itself was watched on 2.35.2 in research (rev `4e9a51a15ceb` unchanged versus moved). | SHOULD (A-E) | any |
 | NIX-INP-04 | A published flake's committed `flake.lock` holds no local input: no absolute `path:`, no `git+file:`, and no relative `path:` that leaves the flake's own git tree. The only relative form allowed is a `path:` that resolves inside the flake's own git tree (`path:./sub` from the root; `path:..`, `path:../` or `path:../..` from a nested sub-flake), and a flake using it states a consumer floor of 2.26 or later. Develop against a sibling checkout with `--override-input` on the command line, never in `flake.nix`. | An absolute path or `git+file:` resolves only on the author's machine, and a dirty `git+file:` input is refused at lock time. A cross-tree relative path fails with `access to absolute path '…' is forbidden in pure evaluation mode` on 2.31.5 and 2.35.2. Lix 2.95.2 words it `relative path '…' points outside of its parent's store path '…-source'` (re-check at each Lix release). | local-input, then cross-tree for candidates to read. Watched red on a lock with an absolute `path:` and a `git+file:` node (`["a","b"]`), green on a `path:./sub` lock (`[]`). cross-tree watched red on `path:../sibling-b`, green on `path:..`. Watched 2026-09-27: `path:../..` and `path:../` inside one tree exit 0 on CppNix 2.35.2, 2.31.5 and Lix 2.95.2. | MUST (A-E) | 2.26 for relative `path:` |
 | NIX-INP-05 | Give every input an explicit scheme: `github:` (fetched as a tarball), `git+https:` or `git+ssh:` for other forges and for any input needing submodule or LFS content (NIX-INP-14), or `https://channels.nixos.org/nixos-unstable/nixexprs.tar.zst`. Never a bare registry name (`nixpkgs`, `nixpkgs/nixos-unstable`), and never `nixexprs.tar.xz`. FlakeHub URLs are NIX-REL-06's. | An `indirect` input resolves through registry state at lock time, and today it locks to a `releases.nixos.org` tarball, not `github`, visible only in `locked.type`. nixpkgs 26.11's release notes end `.tar.xz` channels after 2027-12-31 (re-check at nixpkgs 27.05). | indirect and tar-xz. Watched red on an indirect lock (`false`, exit 1) and a `.tar.xz` URL, green on a `github:` lock and the `.tar.zst` twin. | MUST (A-E) | any. `.tar.zst` channels exist today. |
-| NIX-INP-06 | An A or D flake's root `nixpkgs` tracks a branch the installed flake-checker binary supports (0.2.15: `nixos-unstable`, `nixpkgs-unstable`, `nixos-26.05`, their `-small` variants, `nixpkgs-26.05-darwin`) and stays under 30 days old, checked by the flake-checker command above as an advisory step. The index's gate block runs this exact command, and NIX-GATE-11 owns telling a crash from a finding. | The corpus's median nixpkgs lock is 65 days old and the oldest 566 (per flake lock, so nixpkgs itself, which ships no lock, is outside the count). The 0.2.15 binary rejects `nixos-25.11` although its README lists it, and the binary wins (re-check at each flake-checker bump). | flake-checker. Watched red on an 88-day `nixos-25.11` lock (exit 1, 1 issue), green on a 3-day `nixos-unstable` twin (exit 0). A `channels.nixos.org` tarball input carries no `gitRef` and no `owner`, so the tarball clause keeps a fresh `.tar.zst` channel green; read its branch from `original.url` (a FlakeHub tarball passes the same way and is NIX-REL-06's). A ref-less `github:` input has an owner and no `gitRef`, tracks the default branch and stays red. Watched on planted locks: fresh tarball exit 0, 100-day tarball exit 1, fresh ref-less `github:NixOS/nixpkgs` exit 1. | SHOULD, advisory (A, D) | flake-checker 0.2.15 |
+| NIX-INP-06 | An A or D flake's root `nixpkgs` tracks a branch the installed flake-checker binary supports (0.2.15: `nixos-unstable`, `nixpkgs-unstable`, `nixos-26.05`, their `-small` variants, `nixpkgs-26.05-darwin`) and stays under 30 days old, checked by the flake-checker command above as an advisory step. The index's gate block runs this exact command, and NIX-GATE-11 owns telling a crash from a finding. | The corpus's median nixpkgs lock is 65 days old and the oldest 566 (per flake lock, so nixpkgs itself, which ships no lock, is outside the count). The 0.2.15 binary rejects `nixos-25.11` although its README lists it, and the binary wins (re-check at each flake-checker bump). | flake-checker. Watched red on an 88-day `nixos-25.11` lock (exit 1, 1 issue), green on a 3-day `nixos-unstable` twin. A `channels.nixos.org` tarball input carries no `gitRef` and no `owner`, so the tarball clause keeps a fresh `.tar.zst` channel green; read its branch from `original.url` (a FlakeHub tarball passes the same way and is NIX-REL-06's). A ref-less `github:` input has an owner and no `gitRef`, tracks the default branch and stays red. Watched on planted locks: fresh tarball exit 0, 100-day tarball exit 1, fresh ref-less `github:NixOS/nixpkgs` exit 1. | SHOULD, advisory (A, D) | flake-checker 0.2.15 |
 
 ```nix
 # wrong: the cache-backed input now rebuilds locally, and the library still drags in its own nixpkgs
@@ -94,8 +94,8 @@ flake-checker --no-telemetry --fail-mode --condition "numDaysOld < 30 && ((gitRe
 ## Moving the Lock
 
 ```sh
-# update-alias (NIX-INP-07): empty output (exit 1) is the pass.
-grep -rn --exclude-dir=.git --exclude-dir=.claude --exclude='CHANGELOG*' -e 'nix .*--update-[i]nput' -e 'nix .*--recreate-lock-[f]ile' .
+# update-alias (NIX-INP-07): empty output is the pass.
+git ls-files -z --cached --others --exclude-standard -- ':(exclude,glob)**/.claude/**' ':(exclude,glob)**/CHANGELOG*' | xargs -0 -r grep -H -n -e 'nix .*--update-[i]nput' -e 'nix .*--recreate-lock-[f]ile' --
 # path-narhash (NIX-INP-07): run before and after `nix flake update mylib`. The two outputs must differ.
 INPUT=mylib # substitute the path: input whose target you edited
 jq -r --arg i "$INPUT" '.nodes[$i].locked.narHash' flake.lock
@@ -116,19 +116,19 @@ nix flake lock --override-input "$DEP/nixpkgs" "github:NixOS/nixpkgs/$REV"
 ## What the Fetch Reads
 
 ```sh
-# self-flags (NIX-INP-09): each line exits 0 to pass, exit 1 is the finding.
-test ! -s .gitmodules || grep -rq -e 'self\.submodules' --include='flake.nix' .
-! grep -qs -e 'filter=lfs' .gitattributes || grep -rq -e 'self\.lfs' --include='flake.nix' .
-# eval-fetchers (NIX-INP-10): empty output (exit 1) is the pass. A hit in a flake-compat default.nix shim is exempt.
-grep -rn -e 'builtins.fetchTree' -e 'builtins.fetchGit' -e 'builtins.fetchTarball' -e 'builtins.fetchurl' --include='*.nix' .
-# eval-fetchers-bare (NIX-INP-10): the global spellings, in flake.nix only, where no flake-compat shim lives. Empty output (exit 1) is the pass.
-grep -rn -e 'fetchTarball' -e 'fetchGit' -e 'fetchTree' --include='flake.nix' .
+# self-flags (NIX-INP-09): each line exits 0 to pass, a non-zero exit is the finding.
+test ! -s .gitmodules || git ls-files -z --cached --others --exclude-standard -- ':(glob)**/flake.nix' | xargs -0 -r grep -l -e 'self\.submodules' -- | grep -q .
+! grep -qs -e 'filter=lfs' -- .gitattributes || git ls-files -z --cached --others --exclude-standard -- ':(glob)**/flake.nix' | xargs -0 -r grep -l -e 'self\.lfs' -- | grep -q .
+# eval-fetchers (NIX-INP-10): empty output is the pass. A hit in a flake-compat default.nix shim is exempt.
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.nix' | xargs -0 -r grep -H -n -e 'builtins.fetchTree' -e 'builtins.fetchGit' -e 'builtins.fetchTarball' -e 'builtins.fetchurl' --
+# eval-fetchers-bare (NIX-INP-10): the global spellings, in flake.nix only, where no flake-compat shim lives. Empty output is the pass.
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/flake.nix' | xargs -0 -r grep -H -n -e 'fetchTarball' -e 'fetchGit' -e 'fetchTree' --
 # watchdog (NIX-INP-13), needs gawk: prints one line. A max-gap of 60 or less is the pass.
 # Over 60 is an alarm naming the stalled step. `nix-exit 124` in eval.log means the timeout fired.
 { timeout 300 nix flake check --no-build -v . 2>&1; echo "nix-exit $?"; } | gawk '{ print systime(), $0; fflush() }' > eval.log
 gawk 'NR > 1 && $1 - t > gap { gap = $1 - t; after = line } { t = $1; line = $0 } END { print "max-gap", gap + 0, "after:", after }' eval.log
-# github-submodules (NIX-INP-14): empty output (exit 1) is the pass.
-grep -rn -e 'github:[^"]*[?&]submodules=' -e 'github:[^"]*[?&]lfs=' --include='*.nix' .
+# github-submodules (NIX-INP-14): empty output is the pass.
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.nix' | xargs -0 -r grep -H -n -e 'github:[^"]*[?&]submodules=' -e 'github:[^"]*[?&]lfs=' --
 ```
 
 | ID | Rule | Rationale | Verification | Severity | Floor / impl |
@@ -162,10 +162,10 @@ grep -rn -e 'github:[^"]*[?&]submodules=' -e 'github:[^"]*[?&]lfs=' --include='*
 
 ```sh
 # refresh-workflow (NIX-INP-11): both commands must list the same workflow file. Empty output from either is the finding.
-grep -rln -e 'update-flake-lock' -e 'update-flake-inputs' -e 'nix flake update' .github/workflows
-grep -rln -e 'schedule:' .github/workflows
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' | xargs -0 -r grep -l -e 'update-flake-lock' -e 'update-flake-inputs' -e 'nix flake update' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' | xargs -0 -r grep -l -e 'schedule:' --
 # refresh-token (NIX-INP-11): empty output is the pass. NIX-SEC-03's access-tokens and github_access_token lines are filtered out, because they feed Nix's fetches. Read each remaining hit: one in the PR-opening step is the finding.
-grep -rln -e 'update-flake-lock' -e 'update-flake-inputs' -e 'nix flake update' .github/workflows | xargs -r grep -Hn -e 'secrets.GITHUB_TOKEN' | grep -v -e 'access-tokens' -e 'github_access_token'
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' | xargs -0 -r grep -l -e 'update-flake-lock' -e 'update-flake-inputs' -e 'nix flake update' -- | tr '\n' '\0' | xargs -0 -r grep -H -n -e 'secrets.GITHUB_TOKEN' -- | grep -v -e 'access-tokens' -e 'github_access_token'
 # no-committed-override (NIX-INP-12): exit 0 after the override leg is the pass.
 git diff --exit-code -- flake.lock
 ```

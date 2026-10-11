@@ -46,11 +46,17 @@ golangci-lint run --enable-only=gosec ./...   # with the project gosec settings 
 ## Client Plumbing: Greps Where Empty Output Passes
 
 ```bash
-grep -rn --include='*.go' -e 'http\.DefaultClient' .                  # GO-NET-02
-grep -rn --include='*.go' -e '&http\.Transport{' .                    # GO-NET-03
-grep -rn --include='*.go' -E 'Sprintf\("[^"]*%[sv]:%[dsv]"' .         # GO-NET-04
-grep -rl --include='*.go' -e 'CheckRedirect' . | xargs -r grep -L -E 'len\(via\) *>= *[1-9]'   # GO-NET-05 hop cap
-grep -rn --include='*.go' -e 'via\[[^]]*\]\.Header' .                 # GO-NET-05 credential copy
+# checks/ is this rule's own go-quality/checks/ directory, wherever the rule is installed
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | xargs -0 -r grep -H -n -e 'http\.DefaultClient' --   # GO-NET-02
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | xargs -0 -r grep -H -n -e '&http\.Transport{' --   # GO-NET-03
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | xargs -0 -r grep -H -n -E -e 'Sprintf\("[^"]*%[sv]:%[dsv]"' --   # GO-NET-04
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | HAS='CheckRedirect' LACKS='len\(via\) *>= *[1-9]' xargs -0 -r awk -f checks/file_gate.awk --   # GO-NET-05 hop cap
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | xargs -0 -r grep -H -n -e 'via\[[^]]*\]\.Header' --   # GO-NET-05 credential copy
 ```
 
 Empty output from every line is the pass. Tests are included.
@@ -65,9 +71,12 @@ Empty output from every line is the pass. Tests are included.
 ## Stall Bounds and Body Bounds: Locate, Then Read
 
 ```bash
-grep -rn --include='*.go' --exclude='*_test.go' -e 'http\.Client{' .                           # GO-NET-06
-grep -rn --include='*.go' -e 'io\.ReadAll(' . | grep -v -e 'LimitReader' -e 'MaxBytesReader'   # GO-NET-07
-grep -rl --include='*.go' -e 'Retry-After' . | xargs -r grep -L -e 'http\.ParseTime'          # GO-NET-08
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' ':(exclude,glob)**/*_test.go' \
+  | xargs -0 -r grep -H -n -e 'http\.Client{' --   # GO-NET-06
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | xargs -0 -r grep -H -n -e 'io\.ReadAll(' -- | grep -v -e 'LimitReader' -e 'MaxBytesReader'   # GO-NET-07
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | HAS='Retry-After' LACKS='http\.ParseTime' xargs -0 -r awk -f checks/file_gate.awk --   # GO-NET-08
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
@@ -140,7 +149,8 @@ func fetch(parent context.Context, c *http.Client, url string, dst io.Writer) er
 
 ```bash
 golangci-lint run --enable-only=bodyclose ./...        # only in a package with no response wrapper type (GO-GATE-19)
-grep -rn --include='*.go' -e 'io\.Copy(io\.Discard, ' .  # GO-NET-10
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | xargs -0 -r grep -H -n -e 'io\.Copy(io\.Discard, ' --   # GO-NET-10
 ```
 
 No analyzer decides these three rows, so each is a named reading heuristic.
@@ -154,8 +164,10 @@ No analyzer decides these three rows, so each is a named reading heuristic.
 ## Registry Content and Local Stores
 
 ```bash
-grep -rn --include='*.go' -i -e 'HasPrefix(.*digest' -e 'Contains(.*digest' .   # GO-NET-13
-grep -rn --include='*.go' -e 'os\.Create(' -e 'O_TRUNC' .                        # GO-NET-14 work list
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | xargs -0 -r grep -H -n -i -e 'HasPrefix(.*digest' -e 'Contains(.*digest' --   # GO-NET-13
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | xargs -0 -r grep -H -n -e 'os\.Create(' -e 'O_TRUNC' --   # GO-NET-14 work list
 golangci-lint run --enable-only=errcheck,gosec ./...                              # GO-NET-16 adjacent hint only
 ```
 
@@ -171,8 +183,10 @@ golangci-lint run --enable-only=errcheck,gosec ./...                            
 
 ```bash
 go list -deps ./...   # GO-NET-17: read for oras.land or github.com/regclient in a CLI
-grep -rl --include='*.go' -e 'WithRetryStatusCodes(' . | xargs -r grep -l -e 'remote\.Write(' -e 'remote\.WriteLayer(' -e 'remote\.WriteIndex('   # GO-NET-17 gap 4
-grep -rn --include='*.go' -e 'User-Agent' .   # GO-NET-18: empty output is the FINDING
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | HAS='WithRetryStatusCodes\(' ALSO='remote\.Write\(|remote\.WriteLayer\(|remote\.WriteIndex\(' xargs -0 -r awk -f checks/file_gate.awk --   # GO-NET-17 gap 4
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | xargs -0 -r grep -H -n -e 'User-Agent' --   # GO-NET-18: empty output is the FINDING
 ```
 
 These are review-time SHOULDs. The gap-4 locator's empty output is the pass. The `User-Agent` grep is a presence check: empty output in a module that makes HTTP calls is the finding.

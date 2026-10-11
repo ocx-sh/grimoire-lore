@@ -53,9 +53,10 @@ covers the section: every promoted name must appear in the build's compiler
 options.
 
 ```bash
-grep -rn -e 'InterruptedExceptionSwallowed' -e 'UnusedException' \
-  -e 'CatchingUnchecked' --include='*.gradle.kts' --include='*.gradle' \
-  --include='pom.xml' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.gradle.kts' \
+  ':(glob)**/*.gradle' ':(glob)**/pom.xml' |
+  xargs -0 -r grep -H -n -e 'InterruptedExceptionSwallowed' -e 'UnusedException' \
+    -e 'CatchingUnchecked' --
 ```
 
 Fewer than three names is the finding, and empty output is the finding, not the
@@ -63,9 +64,22 @@ pass. Until that grep is clean, every row here is enforced by reading.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| JAVA-ERR-01 | A caught `InterruptedException`, including one caught implicitly by a wider `catch (Exception)` or `catch (Throwable)`, must either call `Thread.currentThread().interrupt()` or propagate. Never log it like any other exception. | Swallowing it clears cooperative cancellation for every caller up the stack. Two distinct mistakes hide here: calling `Thread.interrupted()`, which *clears* the bit, instead of `currentThread().interrupt()`, and never noticing the interrupt was caught at all. A blocking call inside a Gradle `ValueSource` or `BuildService` that swallows the interrupt breaks build cancellation. | `InterruptedInCatchBlock` (Error Prone 2.36.0 `ENABLED_WARNINGS`, verified 2026-09-12) catches only the first mistake. The second needs `-Xep:InterruptedExceptionSwallowed:ERROR`. Reading check: `grep -rn --include='*.java' -e 'catch (InterruptedException' -e 'catch (Exception' -e 'catch (Throwable' src/`, then for each hit whose `try` block calls `await(`, `wait(`, `join(`, `sleep(`, `waitFor(` or `.get(`, require `interrupt()` or a rethrow in the body. Empty output is the pass. Kotlin side: `KT-ERR-02`, where no detekt rule exists at any version. | MUST |
-| JAVA-ERR-04 | Never construct a new exception from a caught one without passing it as the cause. `new SomeException("...: " + e.getMessage())` is always wrong. | It *looks* like the failure survived, because the message string does, while the stack trace, the exception type and every suppressed exception are discarded. A typed exception mapping a child process's exit code carries the underlying `IOException` or `InterruptedException` as its cause, never a reformatted string. | `-Xep:UnusedException:ERROR` catches the general shape. The specific one: `grep -rnE --include='*.java' 'new \w*Exception\([^,)]*\.getMessage\(\)\)' src/`. Any hit is the finding, and empty output is the pass. For a deliberate ignore, name the variable `unused` or `_`, which is the convention the check itself recognises. Kotlin side: `KT-ERR-04`, where detekt's `SwallowedException` covers it on by default. | MUST |
-| JAVA-ERR-02 | Do not catch `Throwable` or `Error`, except at one documented top-level boundary such as a framework's uncaught-exception hook. In test code this is not a style point: `fail()` and every `assert*` throw `AssertionError`, so `try { ...; fail(); } catch (Throwable t) { }` makes the test structurally unable to fail. | Production: masks `OutOfMemoryError` and `StackOverflowError`. Test: masks the assertion itself, which is the failure mode an agent writing a negative test reaches for by default. | `TryFailThrowable` (Error Prone `ENABLED_ERRORS`, on by default) covers the test shape only. Reading check for the production shape: `grep -rnE --include='*.java' -e 'catch \(\s*Throwable' -e 'catch \(\s*Error' src/`. Any hit outside one documented boundary is the finding, and empty output is the pass. SonarJava `S1181` covers it where SonarQube runs, subject to the key caveat above. Kotlin side: `KT-ERR-01`, the same mistake wearing `runCatching` instead of a keyword and invisible to every lint. | MUST |
+| JAVA-ERR-01 | A caught `InterruptedException`, including one caught implicitly by a wider `catch (Exception)` or `catch (Throwable)`, must either call `Thread.currentThread().interrupt()` or propagate. Never log it like any other exception. | Swallowing it clears cooperative cancellation for every caller up the stack. Two distinct mistakes hide here: calling `Thread.interrupted()`, which *clears* the bit, instead of `currentThread().interrupt()`, and never noticing the interrupt was caught at all. A blocking call inside a Gradle `ValueSource` or `BuildService` that swallows the interrupt breaks build cancellation. | `InterruptedInCatchBlock` (Error Prone 2.36.0 `ENABLED_WARNINGS`, verified 2026-09-12) catches only the first mistake. The second needs `-Xep:InterruptedExceptionSwallowed:ERROR`. Reading check: see block JAVA-ERR-01, then for each hit whose `try` block calls `await(`, `wait(`, `join(`, `sleep(`, `waitFor(` or `.get(`, require `interrupt()` or a rethrow in the body. Empty output is the pass. Kotlin side: `KT-ERR-02`, where no detekt rule exists at any version. | MUST |
+| JAVA-ERR-04 | Never construct a new exception from a caught one without passing it as the cause. `new SomeException("...: " + e.getMessage())` is always wrong. | It *looks* like the failure survived, because the message string does, while the stack trace, the exception type and every suppressed exception are discarded. A typed exception mapping a child process's exit code carries the underlying `IOException` or `InterruptedException` as its cause, never a reformatted string. | `-Xep:UnusedException:ERROR` catches the general shape. The specific one: see block JAVA-ERR-04. Any hit is the finding, and empty output is the pass. For a deliberate ignore, name the variable `unused` or `_`, which is the convention the check itself recognises. Kotlin side: `KT-ERR-04`, where detekt's `SwallowedException` covers it on by default. | MUST |
+| JAVA-ERR-02 | Do not catch `Throwable` or `Error`, except at one documented top-level boundary such as a framework's uncaught-exception hook. In test code this is not a style point: `fail()` and every `assert*` throw `AssertionError`, so `try { ...; fail(); } catch (Throwable t) { }` makes the test structurally unable to fail. | Production: masks `OutOfMemoryError` and `StackOverflowError`. Test: masks the assertion itself, which is the failure mode an agent writing a negative test reaches for by default. | `TryFailThrowable` (Error Prone `ENABLED_ERRORS`, on by default) covers the test shape only. Reading check for the production shape: see block JAVA-ERR-02. Any hit outside one documented boundary is the finding, and empty output is the pass. SonarJava `S1181` covers it where SonarQube runs, subject to the key caveat above. Kotlin side: `KT-ERR-01`, the same mistake wearing `runCatching` instead of a keyword and invisible to every lint. | MUST |
+
+```sh
+# JAVA-ERR-01
+git ls-files -z --cached --others --exclude-standard -- ':(glob)src/**/*.java' |
+  xargs -0 -r grep -H -n -e 'catch (InterruptedException' -e 'catch (Exception' \
+    -e 'catch (Throwable' --
+# JAVA-ERR-04
+git ls-files -z --cached --others --exclude-standard -- ':(glob)src/**/*.java' |
+  xargs -0 -r grep -H -n -E -e 'new [[:alnum:]_]*Exception\([^,)]*\.getMessage\(\)\)' --
+# JAVA-ERR-02
+git ls-files -z --cached --others --exclude-standard -- ':(glob)src/**/*.java' |
+  xargs -0 -r grep -H -n -E -e 'catch \([[:space:]]*Throwable' -e 'catch \([[:space:]]*Error' --
+```
 
 ```java
 // wrong: the interrupt bit is dropped and every caller keeps waiting
@@ -86,9 +100,10 @@ fire under a plain Error Prone run (2.36.0, verified 2026-09-12), so the gate
 here is the compile itself and the only way to lose it is to turn it off:
 
 ```bash
-grep -rn -e 'StreamResourceLeak:OFF' -e 'MustBeClosedChecker:OFF' \
-  -e 'CatchAndPrintStackTrace:OFF' -e 'disableAllWarnings' \
-  --include='*.gradle.kts' --include='*.gradle' --include='pom.xml' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.gradle.kts' \
+  ':(glob)**/*.gradle' ':(glob)**/pom.xml' |
+  xargs -0 -r grep -H -n -e 'StreamResourceLeak:OFF' -e 'MustBeClosedChecker:OFF' \
+    -e 'CatchAndPrintStackTrace:OFF' -e 'disableAllWarnings' --
 ```
 
 Any hit is the finding, and empty output is the pass. A `@SuppressWarnings` for
@@ -97,8 +112,18 @@ above it, or it is the finding (`JAVA-LINT-03`).
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| JAVA-ERR-03 | Acquire every `Closeable` and `AutoCloseable` inside try-with-resources, including the `Stream` returned by `Files.walk`, `list`, `lines`, `find` and `newDirectoryStream`, and including a wrapping stream such as `ObjectInputStream` whose inner stream is closed separately. | `Stream<String>`'s type signature gives no hint that it holds an open file descriptor. The JDK's own `Files` javadoc says `lines` "encapsulates a `Reader`" and the other four "encapsulate one or more `DirectoryStream`s". Closing only the wrapped stream leaves the wrapper's own buffers and state unreleased. | `StreamResourceLeak` and `MustBeClosedChecker`, both on by default, plus SonarJava `S2095` where SonarQube runs (key unverified, see above). Do not name PMD `CloseResource` as a third option: SonarSource records `S2095` as having deprecated it, and PMD is enforced 0/32. Reading check: `grep -rn --include='*.java' -e 'Files.walk(' -e 'Files.lines(' -e 'Files.list(' -e 'Files.find(' -e 'Files.newDirectoryStream(' src/`. A hit is not itself the finding, a hit whose line is not inside a `try (` header is. Empty output is the pass. Kotlin side: `KT-ERR-03`, where the type-level gap is worse. | MUST |
-| JAVA-ERR-07 | Library code, meaning anything that is not a CLI `main`, never calls `System.exit()` and never calls `printStackTrace()` in place of the configured logger. Translate a child process's exit code into a typed exception instead of re-raising it as your own. | A library must not own process lifecycle, and a `printStackTrace()` call writes past log aggregation and past every log level. Sharper for a build plugin than for the generic case: `System.exit()` from plugin code kills the Gradle daemon mid-build. | `CatchAndPrintStackTrace` (on by default) covers the second half and reports as an ordinary compiler diagnostic. SpotBugs `DM_EXIT` covers the first half where SpotBugs is in the gate. **Do not rely on SonarJava `S4507`**: it is a Security Hotspot, invisible to a "no new Issues" quality gate. Reading check: `grep -rn --include='*.java' -e '.printStackTrace()' -e 'System.exit(' src/main/`. Any hit is the finding, and empty output is the pass. Kotlin side: `KT-ERR-05`, one detekt rule over four call shapes, shipped `active: false`. | MUST for a library, an SDK or a build plugin. N/A for a CLI entry point |
+| JAVA-ERR-03 | Acquire every `Closeable` and `AutoCloseable` inside try-with-resources, including the `Stream` returned by `Files.walk`, `list`, `lines`, `find` and `newDirectoryStream`, and including a wrapping stream such as `ObjectInputStream` whose inner stream is closed separately. | `Stream<String>`'s type signature gives no hint that it holds an open file descriptor. The JDK's own `Files` javadoc says `lines` "encapsulates a `Reader`" and the other four "encapsulate one or more `DirectoryStream`s". Closing only the wrapped stream leaves the wrapper's own buffers and state unreleased. | `StreamResourceLeak` and `MustBeClosedChecker`, both on by default, plus SonarJava `S2095` where SonarQube runs (key unverified, see above). Do not name PMD `CloseResource` as a third option: SonarSource records `S2095` as having deprecated it, and PMD is enforced 0/32. Reading check: see block JAVA-ERR-03. A hit is not itself the finding, a hit whose line is not inside a `try (` header is. Empty output is the pass. Kotlin side: `KT-ERR-03`, where the type-level gap is worse. | MUST |
+| JAVA-ERR-07 | Library code, meaning anything that is not a CLI `main`, never calls `System.exit()` and never calls `printStackTrace()` in place of the configured logger. Translate a child process's exit code into a typed exception instead of re-raising it as your own. | A library must not own process lifecycle, and a `printStackTrace()` call writes past log aggregation and past every log level. Sharper for a build plugin than for the generic case: `System.exit()` from plugin code kills the Gradle daemon mid-build. | `CatchAndPrintStackTrace` (on by default) covers the second half and reports as an ordinary compiler diagnostic. SpotBugs `DM_EXIT` covers the first half where SpotBugs is in the gate. **Do not rely on SonarJava `S4507`**: it is a Security Hotspot, invisible to a "no new Issues" quality gate. Reading check: see block JAVA-ERR-07. Any hit is the finding, and empty output is the pass. Kotlin side: `KT-ERR-05`, one detekt rule over four call shapes, shipped `active: false`. | MUST for a library, an SDK or a build plugin. N/A for a CLI entry point |
+
+```sh
+# JAVA-ERR-03
+git ls-files -z --cached --others --exclude-standard -- ':(glob)src/**/*.java' |
+  xargs -0 -r grep -H -n -e 'Files.walk(' -e 'Files.lines(' -e 'Files.list(' -e 'Files.find(' \
+    -e 'Files.newDirectoryStream(' --
+# JAVA-ERR-07
+git ls-files -z --cached --others --exclude-standard -- ':(glob)src/main/**/*.java' |
+  xargs -0 -r grep -H -n -e '.printStackTrace()' -e 'System.exit(' --
+```
 
 ```java
 // wrong: the file descriptor outlives the statement, and the type says nothing
@@ -119,15 +144,24 @@ The second needs SpotBugs actually wired into the gate (`JAVA-LINT-10`), and its
 standalone check is a two-stage grep:
 
 ```bash
-grep -rl --include='*.java' 'implements Serializable' src/ | xargs -r grep -L 'serialVersionUID'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)src/**/*.java' |
+  xargs -0 -r grep -l -e 'implements Serializable' -- |
+  tr '\n' '\0' |
+  xargs -0 -r grep -L -e 'serialVersionUID' --
 ```
 
 Every file named is a finding. Empty output is the pass.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| JAVA-ERR-06 | Do not override `finalize()`. Use try-with-resources for scoped cleanup and `java.lang.ref.Cleaner` for GC-triggered cleanup of a native handle. | Terminally deprecated since JDK 18 ([JEP 421](https://openjdk.org/jeps/421), verified 2026-09-12) for unpredictable latency and resurrection risk. `Cleaner` (JDK 9) gives the same GC trigger without either. | `-Xlint:removal -Werror` fails the build. Reading check: `grep -rn --include='*.java' 'void finalize(' src/`. Any hit is the finding, and empty output is the pass. | MUST |
+| JAVA-ERR-06 | Do not override `finalize()`. Use try-with-resources for scoped cleanup and `java.lang.ref.Cleaner` for GC-triggered cleanup of a native handle. | Terminally deprecated since JDK 18 ([JEP 421](https://openjdk.org/jeps/421), verified 2026-09-12) for unpredictable latency and resurrection risk. `Cleaner` (JDK 9) gives the same GC trigger without either. | `-Xlint:removal -Werror` fails the build. Reading check: see block JAVA-ERR-06. Any hit is the finding, and empty output is the pass. | MUST |
 | JAVA-ERR-08 | Every `Serializable` class declares an explicit `private static final long serialVersionUID`. | An implicit UID is computed from the class's structure and changes silently on an innocuous edit or a compiler upgrade, breaking deserialization of already-persisted instances. | SpotBugs `SE_NO_SERIALVERSIONID` (`BAD_PRACTICE`, detector on by default) or SonarJava `S2057`, where either is a gating step rather than a reporting one. Otherwise the two-stage grep above. | SHOULD |
+
+```sh
+# JAVA-ERR-06
+git ls-files -z --cached --others --exclude-standard -- ':(glob)src/**/*.java' |
+  xargs -0 -r grep -H -n -e 'void finalize(' --
+```
 
 ## No Gate Exists
 
@@ -135,7 +169,13 @@ Reading only. Nothing mechanical catches "this blocking call has no timeout".
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| JAVA-ERR-05 | Shut down every `ExecutorService` on every exit path. If you use JDK 19's `close()` through try-with-resources, know that it blocks **indefinitely**: there is no timeout parameter, unlike `shutdown()` plus `awaitTermination(t, unit)` plus `shutdownNow()`. | Porting bounded shutdown code to `try (var pool = ...)` silently removes the bound `awaitTermination(30, SECONDS)` used to provide, turning a slow task into a hung build. The JDK 19 javadoc is explicit that `close()` waits until all tasks have completed execution. | `grep -rn --include='*.java' -e 'Executors.new' -e 'ExecutorService' src/` locates the pools. Empty output means there are none, which is a pass. For each hit, confirm a `shutdown()` or a resource block on every path, and for `close()`-based code confirm the call site tolerates an unbounded wait. Pool sizing and the virtual-thread-per-task regime are `JAVA-CONC`'s, not this rule's. | MUST |
+| JAVA-ERR-05 | Shut down every `ExecutorService` on every exit path. If you use JDK 19's `close()` through try-with-resources, know that it blocks **indefinitely**: there is no timeout parameter, unlike `shutdown()` plus `awaitTermination(t, unit)` plus `shutdownNow()`. | Porting bounded shutdown code to `try (var pool = ...)` silently removes the bound `awaitTermination(30, SECONDS)` used to provide, turning a slow task into a hung build. The JDK 19 javadoc is explicit that `close()` waits until all tasks have completed execution. | see block JAVA-ERR-05 locates the pools. Empty output means there are none, which is a pass. For each hit, confirm a `shutdown()` or a resource block on every path, and for `close()`-based code confirm the call site tolerates an unbounded wait. Pool sizing and the virtual-thread-per-task regime are `JAVA-CONC`'s, not this rule's. | MUST |
+
+```sh
+# JAVA-ERR-05
+git ls-files -z --cached --others --exclude-standard -- ':(glob)src/**/*.java' |
+  xargs -0 -r grep -H -n -e 'Executors.new' -e 'ExecutorService' --
+```
 
 **Sneaky-throw gets no rule in either direction, deliberately.** Prefer wrapping
 a checked exception in a standard unchecked one (`UncheckedIOException`,

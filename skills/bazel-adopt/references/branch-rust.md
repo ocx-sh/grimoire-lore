@@ -33,7 +33,7 @@ default Rust version changed in four of five consecutive ruleset releases. Give 
 (BZL-RUST-31).
 
 ```sh
-grep -n 'rust.toolchain(' MODULE.bazel
+grep -n -e 'rust.toolchain(' -- MODULE.bazel
 ```
 
 **Empty output on a repository that uses the `rust` extension is the finding** —
@@ -71,7 +71,7 @@ Set an explicit `lockfile =` on every crate_universe instance —
 because repinning is disabled there unconditionally.
 
 ```sh
-grep -n 'from_cargo(\|from_specs(\|crates_repository(' MODULE.bazel *.bzl
+git ls-files -z --cached --others --exclude-standard -- 'MODULE.bazel' ':(glob)*.bzl' | xargs -0 -r grep -H -n -E -e 'from_cargo\(' -e 'from_specs\(' -e 'crates_repository\(' --
 ```
 
 Read each hit forward to its closing paren and confirm a `lockfile =`. **A hit
@@ -113,7 +113,7 @@ Scope every `CARGO_BAZEL_*` variable to the single job that needs it:
 An ordinary build job that leaves it unset **is** the drift gate (BZL-RUST-02).
 
 ```sh
-grep -rn 'CARGO_BAZEL_' .github/workflows/
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' | xargs -0 -r grep -H -n -e 'CARGO_BAZEL_' --
 ```
 
 **Empty output = every ordinary lane is a drift gate = pass.** A hit outside a
@@ -156,7 +156,7 @@ example README still links the page — and never keep a `build.rs` running a
 protobuf code generator as the Bazel path.
 
 ```sh
-grep -rn 'rust_proto_library' --include='BUILD*' --include='*.bzl' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/BUILD*' ':(glob)**/*.bzl' | xargs -0 -r grep -H -n -e 'rust_proto_library' --
 ```
 
 **Empty = pass.** Any hit names a rule that does not exist on the current ruleset.
@@ -184,7 +184,7 @@ If the generator is adopted anyway, four things bind:
 - Point it at the bzlmod-produced crate_universe lockfile, never a raw
   `Cargo.lock`, whose transitive entries both break unused-dependency reporting
   and can add a `deps` entry for a crate with no top-level target (BZL-RUST-34).
-  `grep -rn 'rust_cargo_lockfile'` — **empty = pass.**
+  `git ls-files -z --cached --others --exclude-standard | xargs -0 -r grep -H -n -e 'rust_cargo_lockfile' --` — **empty = pass.**
 - A `use` behind a `#[cfg(...)]` resolving through a `select()` needs both an
   explicit ignore attribute on the `use` and a `# keep` comment on the BUILD
   `deps` line, or the generator rewrites the `select()` away (BZL-RUST-35).

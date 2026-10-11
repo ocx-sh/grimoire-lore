@@ -64,9 +64,15 @@ of the breaks below as binary-compatible and will not fail the build on them.
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
 | JAVA-API-01 | Never change a published method's parameter type or return type in place. Add an overload and leave the original signature untouched. | Widening a parameter and narrowing a return type both recompile cleanly, and both are a delete-plus-add at the bytecode level (JLS SE 25 §13.4.14 and §13.4.15). Un-recompiled callers get `NoSuchMethodError`. | The gate, with `oldVersion` set as above. Any binary-incompatible entry that is not in the allowlist fails the build, and an empty finding list is the pass. | MUST |
-| JAVA-API-02 | Bind the japicmp task to `check` or `verify`, make every publish task depend on it, and keep accepted breaks in a version-controlled allowlist carrying a reason string per entry. Never a bare skip flag and never `ignoreMissingClasses`. **Pinned.** | A published coordinate is immutable, so the only remedy after upload is a new version number, which is exactly the cost the gate exists to make deliberate. A gate that runs only on a release branch reports the break after the decision that caused it has shipped. | The `--dry-run` line above lists the japicmp task ahead of every upload task, and its absence there is the finding. Then `grep -rn --include='*.gradle.kts' --include='pom.xml' -e 'ignoreMissingClasses' -e 'skip>true' .` (the second pattern matches the Maven `<skip>true</skip>` element): any hit with no accompanying allowlist file is the finding, and empty output is the pass. | MUST |
+| JAVA-API-02 | Bind the japicmp task to `check` or `verify`, make every publish task depend on it, and keep accepted breaks in a version-controlled allowlist carrying a reason string per entry. Never a bare skip flag and never `ignoreMissingClasses`. **Pinned.** | A published coordinate is immutable, so the only remedy after upload is a new version number, which is exactly the cost the gate exists to make deliberate. A gate that runs only on a release branch reports the break after the decision that caused it has shipped. | The `--dry-run` line above lists the japicmp task ahead of every upload task, and its absence there is the finding. Then see block JAVA-API-02 (the second pattern matches the Maven `<skip>true</skip>` element): any hit with no accompanying allowlist file is the finding, and empty output is the pass. | MUST |
 | JAVA-API-03 | A published interface never gains an abstract method without a `default` body. Where the implementation set must stay closed, seal the interface instead. | Linkage survives (JLS SE 25 §13.5.3), but invoking the new method on a pre-existing implementation throws `AbstractMethodError`, and every direct implementer fails to compile. A compatibility table that calls this change binary-compatible is right about linkage and misleading about consequence. | The gate reports the added interface method, classified binary-compatible, so read the report rather than the exit status. In the diff, every member added to a `public interface` carries `default` or the interface is `sealed`. An empty report section is the pass. | MUST |
 | JAVA-API-04 | Never change the value of a published `public static final` constant. | Callers keep the old inlined value until they are recompiled (JLS SE 25 §13.4.9). No `LinkageError`, no diagnostic, a silently wrong answer. It is the most dangerous row in this table because nothing signals it. | The gate lists the field change and classifies it binary-compatible. Treat any entry in that section as a break, and an empty section as the pass. | SHOULD |
+
+```sh
+# JAVA-API-02
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.gradle.kts' ':(glob)**/pom.xml' |
+  xargs -0 -r grep -H -n -e 'ignoreMissingClasses' -e 'skip>true' --
+```
 
 ## Nullness on the Published Surface
 
@@ -76,16 +82,24 @@ wiring that turns NullAway on is `JAVA-LINT-05`'s. Neither is restated here.
 
 ```bash
 ./gradlew :sdk:compileJava   # NullAway runs inside javac: onlyNullMarked = true, jspecifyMode = true
-grep -rl --include='*.java' -e 'org.jspecify' src \
-  | xargs -r grep -n -e 'javax.annotation.Nullable' -e 'org.checkerframework' \
-      -e 'androidx.annotation' -e 'org.jetbrains.annotations'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)src/**/*.java' |
+  xargs -0 -r grep -l -e 'org.jspecify' -- |
+  tr '\n' '\0' |
+  xargs -0 -r grep -H -n -e 'javax.annotation.Nullable' -e 'org.checkerframework' \
+    -e 'androidx.annotation' -e 'org.jetbrains.annotations' --
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
 | JAVA-API-09 | Annotate the published surface with JSpecify and declare `@NullMarked` once, in `module-info.java`. | At module scope `@NullMarked` cascades to every package the module declares. At package scope it does not cascade to subpackages, so a per-package declaration is 1:1 maintenance forever. JSpecify's four annotations are frozen for life (1.0.0), and Kotlin 2.1.0 and later report JSpecify violations as compile errors by default, which is the strict boundary jsr305's warn-only default never reached. jsr305 was still declared in 13 of 32 corpus repositories against JSpecify's 9, which is why an existing surface gets the lower severity. NullAway 0.12.3 or later, verified 2026-09-12. | `grep -c -e '@NullMarked' src/main/java/module-info.java` reads 1. A count of 0 is the finding, and a count above 1 means the declaration was copied to package scope as well. | MUST (new published surface) / SHOULD (existing surface, with a migration note) |
 | JAVA-API-10 | Never mix nullness flavours in one file. A file importing `org.jspecify` imports no `javax.annotation`, no `org.checkerframework`, no `androidx.annotation` and no JetBrains `@Nullable`. Migrate a package, do not layer. | Four incompatible systems are live in the corpus at once, with different retention, different defaults and different severity on the Kotlin side, so a mixed file leaves nobody able to state what the contract is. This is the half that is MUST at every severity, because it contradicts no installed base. | The second gate command above. Any hit is the finding, and empty output is the pass. | MUST |
-| JAVA-API-11 | JSpecify annotations are `TYPE_USE`. Write `Type @Nullable []` for a nullable array and `<T extends @Nullable Object>` for a type parameter that may be instantiated with a nullable type. | `@Nullable Object[]` means an array of nullable `Object`, which is the opposite of the usual intent, and a bare `<T>` under `@NullMarked` cannot be instantiated nullable at all. Both spellings compile. JSpecify 1.0.0, verified 2026-09-12. | `grep -rnE --include='*.java' '@Nullable +\w+(<[^>]*>)?\[\]' src` : any hit is a misplaced array annotation, and empty output is the pass. NullAway's `jspecifyMode` reports the generic-bound half at compile time. | MUST |
+| JAVA-API-11 | JSpecify annotations are `TYPE_USE`. Write `Type @Nullable []` for a nullable array and `<T extends @Nullable Object>` for a type parameter that may be instantiated with a nullable type. | `@Nullable Object[]` means an array of nullable `Object`, which is the opposite of the usual intent, and a bare `<T>` under `@NullMarked` cannot be instantiated nullable at all. Both spellings compile. JSpecify 1.0.0, verified 2026-09-12. | see block JAVA-API-11 : any hit is a misplaced array annotation, and empty output is the pass. NullAway's `jspecifyMode` reports the generic-bound half at compile time. | MUST |
+
+```sh
+# JAVA-API-11
+git ls-files -z --cached --others --exclude-standard -- ':(glob)src/**/*.java' |
+  xargs -0 -r grep -H -n -E -e '@Nullable +[[:alnum:]_]+(<[^>]*>)?\[\]' --
+```
 
 ```java
 // wrong: reads as "array of nullable String", and the type parameter cannot take null
@@ -116,13 +130,22 @@ it, so a one-off `-Xlint:deprecation` run is a diagnostic, never a gate key.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| JAVA-API-05 | Every `@Deprecated` element carries a `since` value and a Javadoc `@deprecated` tag, both present or both absent. `forRemoval = true` appears only where the Javadoc body already names the removal version. Omit `forRemoval` for an ordinary deprecation. | JEP 277 calls the tag-and-annotation mismatch a mistake, and gates `forRemoval` on a clear and definite plan for removing the API. It is not a synonym for wanting to remove something eventually, and a consumer reading it that way schedules work that never comes. JDK 9 and later. | The gate compile catches the tag-without-annotation half only. For the other half, `grep -rn -A2 --include='*.java' -e '@Deprecated' src` and read each hit: an annotation with no `since` is the finding, and an empty listing means nothing is deprecated. No compiler check exists for the annotation-without-tag direction. | MUST |
-| JAVA-API-06 | `Optional` is a return type only, never a field, a constructor parameter or a method parameter, and a public method returns an empty collection rather than `null` for "no result". | It is the stated design intent of the type, and still one of the most-violated API rules in current retrospectives. The parameter form forces every caller to wrap a value it already holds, and it is one of the four pinned constraints on a Kotlin-friendly surface. | `grep -rnE --include='*.java' 'Optional<[^>]*>\s+\w+\s*[;,)]' src` matches the field and parameter shapes: empty output is the pass. NullAway reports the null-return half once the surface is `@NullMarked`. | SHOULD |
+| JAVA-API-05 | Every `@Deprecated` element carries a `since` value and a Javadoc `@deprecated` tag, both present or both absent. `forRemoval = true` appears only where the Javadoc body already names the removal version. Omit `forRemoval` for an ordinary deprecation. | JEP 277 calls the tag-and-annotation mismatch a mistake, and gates `forRemoval` on a clear and definite plan for removing the API. It is not a synonym for wanting to remove something eventually, and a consumer reading it that way schedules work that never comes. JDK 9 and later. | The gate compile catches the tag-without-annotation half only. For the other half, see block JAVA-API-05 and read each hit: an annotation with no `since` is the finding, and an empty listing means nothing is deprecated. No compiler check exists for the annotation-without-tag direction. | MUST |
+| JAVA-API-06 | `Optional` is a return type only, never a field, a constructor parameter or a method parameter, and a public method returns an empty collection rather than `null` for "no result". | It is the stated design intent of the type, and still one of the most-violated API rules in current retrospectives. The parameter form forces every caller to wrap a value it already holds, and it is one of the four pinned constraints on a Kotlin-friendly surface. | see block JAVA-API-06 matches the field and parameter shapes: empty output is the pass. NullAway reports the null-return half once the surface is `@NullMarked`. | SHOULD |
+
+```sh
+# JAVA-API-05
+git ls-files -z --cached --others --exclude-standard -- ':(glob)src/**/*.java' |
+  xargs -0 -r grep -H -n -A 2 -e '@Deprecated' --
+# JAVA-API-06
+git ls-files -z --cached --others --exclude-standard -- ':(glob)src/**/*.java' |
+  xargs -0 -r grep -H -n -E -e 'Optional<[^>]*>[[:space:]]+[[:alnum:]_]+[[:space:]]*[;,)]' --
+```
 
 ## Sealed Hierarchies
 
 No producer-side mechanical gate exists, because the entire effect lands on the
-consumer. `grep -rln --include='*.java' -e 'sealed interface' -e 'sealed class' src`
+consumer. `git ls-files -z --cached --others --exclude-standard -- ':(glob)src/**/*.java' | xargs -0 -r grep -l -e 'sealed interface' -e 'sealed class' --`
 lists the hierarchies this codebase owns, and empty output means neither rule can
 fire here. Sealed types are JDK 17 (JEP 409), pattern-switch exhaustiveness is
 JDK 21 (JEP 441).
@@ -154,8 +177,14 @@ mvn dependency:list -DincludeScope=runtime
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| JAVA-API-14 | Map the process exit status onto a typed exception hierarchy through one enum of 16 sysexit members, and never parse stderr text to decide what failed. **Pinned:** the member set is agreed across sibling SDKs, so an adopter names their own table once and every implementation diffs against it. | The value is that the table is agreed, not that it is derivable. A second implementation that invents its own numbering disagrees with the first silently, and in only one direction. Stderr text is not a contract in any tool that localises or reformats its messages. | Diff the enum's members against the table the sibling implementations ship: any divergence is a finding, an empty diff is the pass. Then `grep -rn --include='*.java' -e 'getErrorStream' src` and read each hit: stderr text driving control flow is the finding, stderr text logged or attached to an exception message is not. Where the temporary-failure code is retried, the placement of that retry is `JAVA-CONC-14`'s and the concurrency file owns it. | MUST (SDK, build plugin) |
+| JAVA-API-14 | Map the process exit status onto a typed exception hierarchy through one enum of 16 sysexit members, and never parse stderr text to decide what failed. **Pinned:** the member set is agreed across sibling SDKs, so an adopter names their own table once and every implementation diffs against it. | The value is that the table is agreed, not that it is derivable. A second implementation that invents its own numbering disagrees with the first silently, and in only one direction. Stderr text is not a contract in any tool that localises or reformats its messages. | Diff the enum's members against the table the sibling implementations ship: any divergence is a finding, an empty diff is the pass. Then see block JAVA-API-14 and read each hit: stderr text driving control flow is the finding, stderr text logged or attached to an exception message is not. Where the temporary-failure code is retried, the placement of that retry is `JAVA-CONC-14`'s and the concurrency file owns it. | MUST (SDK, build plugin) |
 | JAVA-API-15 | Hold the zero-runtime-dependency commitment on a published SDK: the JDK's own HTTP client plus a hand-rolled reader over the tool's JSON output. JSpecify is `compileOnly` or `provided` (CLASS retention), so it does not break the commitment. **Pinned.** | It is reachable in Java precisely because the JDK ships `java.net.http`, and it stops being reachable the moment a serialization or coroutines runtime enters the graph, which is the other half of the language decision above. Every runtime dependency is a version the consumer has to reconcile with their own. | The gate commands: the published POM's runtime-scope dependency list is empty, and any entry is the finding. A compile-only annotation artifact appearing there means its scope was declared wrong. | MUST (SDK) |
+
+```sh
+# JAVA-API-14
+git ls-files -z --cached --others --exclude-standard -- ':(glob)src/**/*.java' |
+  xargs -0 -r grep -H -n -e 'getErrorStream' --
+```
 
 ## What Agents Get Wrong Here
 

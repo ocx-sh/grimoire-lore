@@ -41,13 +41,13 @@ still read shell scripts, so never narrow them to YAML.
 ```sh
 CI_DIR=.github
 # 1. CMK-TEST-06: files that run tests with no zero-test guard. Empty output passes.
-grep -rlw --exclude='*.md' -e 'ctest' -e '--target test' "$CI_DIR" | xargs -r grep -L -e 'no-tests=error' -e 'CTEST_NO_TESTS_ACTION' -e 'CMAKE_CTEST_ARGUMENTS' -e 'noTestsAction'
+git ls-files -z --cached --others --exclude-standard -- ":(glob)$CI_DIR/**" ":(exclude,glob)$CI_DIR/**/*.md" | xargs -0 -r grep -l -w -e 'ctest' -e '--target test' -- | tr '\n' '\0' | xargs -0 -r grep -L -e 'no-tests=error' -e 'CTEST_NO_TESTS_ACTION' -e 'CMAKE_CTEST_ARGUMENTS' -e 'noTestsAction' --
 # 2. CMK-TEST-07: files that run tests with no suite bound. Empty output passes.
-grep -rlw --exclude='*.md' -e 'ctest' -e '--target test' "$CI_DIR" | xargs -r grep -L -e '--timeout' -e '"timeout"'
+git ls-files -z --cached --others --exclude-standard -- ":(glob)$CI_DIR/**" ":(exclude,glob)$CI_DIR/**/*.md" | xargs -0 -r grep -l -w -e 'ctest' -e '--target test' -- | tr '\n' '\0' | xargs -0 -r grep -L -e '--timeout' -e '"timeout"' --
 # 3. CMK-TEST-07 fallback, only for a file command 2 printed. Empty output is the finding.
-grep -rn --include='CMakeLists.txt' --include='*.cmake' -e 'TIMEOUT' -e 'include(CTest)' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' | xargs -0 -r grep -H -n -e 'TIMEOUT' -e 'include(CTest)' --
 # 4. CMK-TEST-08: retry-until-green on a gate. Empty output passes.
-grep -rn -e 'until-pass' -e 'after-timeout' "$CI_DIR"
+git ls-files -z --cached --others --exclude-standard -- ":(glob)$CI_DIR/**" | xargs -0 -r grep -H -n -e 'until-pass' -e 'after-timeout' --
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
@@ -63,11 +63,12 @@ that passes because something failed or printed a diagnostic. The `cmake-build`
 index cites `CMK-TEST-03` as a non-negotiable.
 
 ```sh
+CHECKS=.claude/rules/cmake-build/checks    # where this checks/ directory is installed
 TEST_DIR=.
 # 1. Every hit is a finding. Empty output passes.
-grep -rn --include='*.cmake' --include='CMakeLists.txt' -e 'WILL_FAIL' "$TEST_DIR"
+git ls-files -z --cached --others --exclude-standard -- ":(glob)$TEST_DIR/**/*.cmake" ":(glob)$TEST_DIR/**/CMakeLists.txt" | xargs -0 -r grep -H -n -e 'WILL_FAIL' --
 # 2. Regexes with no severity header, across line breaks. Empty output passes.
-grep -rPzo --include='*.cmake' --include='CMakeLists.txt' 'PASS_REGULAR_EXPRESSION\s+"(?![^"]*CMake Error)[^"]*"' "$TEST_DIR" | tr '\0' '\n'
+git ls-files -z --cached --others --exclude-standard -- ":(glob)$TEST_DIR/**/*.cmake" ":(glob)$TEST_DIR/**/CMakeLists.txt" | LC_ALL=C xargs -0 -r awk -v cs=1 -v end='"' -v head='PASS_REGULAR_EXPRESSION[[:space:]]+"' -v lack='CMake Error' -f "$CHECKS/call-lacks.awk" --
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
@@ -98,7 +99,14 @@ subtree, the smoke build proves the gate.
 
 ```sh
 # 1. Each hit must sit inside a project-prefixed gate. Empty output means there is no test, example, demo or benchmark tree to gate.
-grep -rn --include='CMakeLists.txt' -e 'add_subdirectory(test' -e 'add_subdirectory (test' -e 'add_subdirectory(unittest' -e 'add_subdirectory(example' -e 'add_subdirectory(demo' -e 'add_subdirectory(bench' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' \
+  | xargs -0 -r grep -H -n \
+    -e 'add_subdirectory(test' \
+    -e 'add_subdirectory (test' \
+    -e 'add_subdirectory(unittest' \
+    -e 'add_subdirectory(example' \
+    -e 'add_subdirectory(demo' \
+    -e 'add_subdirectory(bench' --
 # 2. The as-subproject smoke. SRC: the library's absolute source directory. W: a fresh, empty scratch
 #    directory outside the tree. GATE: -Werror=author on CMake 4.4 and later, -Werror=dev
 #    on 4.3 and older (CMK-CORE-01).
@@ -138,14 +146,14 @@ CMake diagnostics. Read the CI matrix and the test driver.
 CI_DIR=.github
 TEST_DIR=tests
 # 1. CMK-TEST-01: the CMake lines CI provisions. Empty output is the finding.
-grep -rn --include='*.yml' --include='*.yaml' -e 'cmake_version' -e 'cmake-version' -e 'cmakeVersion' "$CI_DIR"
+git ls-files -z --cached --others --exclude-standard -- ":(glob)$CI_DIR/**/*.yml" ":(glob)$CI_DIR/**/*.yaml" | xargs -0 -r grep -H -n -e 'cmake_version' -e 'cmake-version' -e 'cmakeVersion' --
 # 2. CMK-TEST-02: configure-mode inner configures with no gate on the line. Empty output passes.
-grep -rn --include='*.cmake' --include='CMakeLists.txt' -e 'build-and-test' -e ' -S ' "$TEST_DIR" | grep -v -e '-Werror='
+git ls-files -z --cached --others --exclude-standard -- ":(glob)$TEST_DIR/**/*.cmake" ":(glob)$TEST_DIR/**/CMakeLists.txt" | xargs -0 -r grep -H -n -e 'build-and-test' -e ' -S ' -- | grep -v -e '-Werror='
 # 3. CMK-TEST-02: script-mode cases and their substitutes, for reading.
-grep -rn --include='*.cmake' --include='CMakeLists.txt' -e ' -P ' -e 'FAIL_REGULAR_EXPRESSION' "$TEST_DIR"
+git ls-files -z --cached --others --exclude-standard -- ":(glob)$TEST_DIR/**/*.cmake" ":(glob)$TEST_DIR/**/CMakeLists.txt" | xargs -0 -r grep -H -n -e ' -P ' -e 'FAIL_REGULAR_EXPRESSION' --
 # 4. CMK-TEST-05: tests that load one shipped file. Empty output is the finding.
 SHIPPED=MyTool
-grep -rn --include='*.cmake' --include='CMakeLists.txt' -e "$SHIPPED" "$TEST_DIR"
+git ls-files -z --cached --others --exclude-standard -- ":(glob)$TEST_DIR/**/*.cmake" ":(glob)$TEST_DIR/**/CMakeLists.txt" | xargs -0 -r grep -H -n -e "$SHIPPED" --
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
@@ -173,7 +181,12 @@ stays an acceptable default: googletest and Catch2 use it for their own suites.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| CMK-TEST-10 | On a cross-compiling leg, give every `gtest_discover_tests` or `catch_discover_tests` a `CROSSCOMPILING_EMULATOR` on the test target, or use `DISCOVERY_MODE PRE_TEST` with ctest running in the target environment. Call 4.4's generic `discover_tests()` only under `CMAKE_VERSION VERSION_GREATER_EQUAL 4.4`. | The default `POST_BUILD` discovery runs the built binary on the build host, and the GoogleTest module (4.4.2) says discovery requires a properly set `CROSSCOMPILING_EMULATOR` when cross-compiling. The failure is loud, hence SHOULD. `discover_tests()` has no adopters outside Kitware (as of 2026-09-26). Floor: `gtest_discover_tests`' `DISCOVERY_MODE` 3.18, `catch_discover_tests`' `DISCOVERY_MODE` Catch2 3.4.0, `discover_tests()` 4.4. | `grep -rn --include='CMakeLists.txt' --include='*.cmake' -e 'gtest_discover_tests' -e 'catch_discover_tests' -e 'discover_tests(' .` Empty output means the rule does not apply. On a tree with a cross leg, a hit with neither an emulator nor `PRE_TEST` is the finding. | SHOULD |
+| CMK-TEST-10 | On a cross-compiling leg, give every `gtest_discover_tests` or `catch_discover_tests` a `CROSSCOMPILING_EMULATOR` on the test target, or use `DISCOVERY_MODE PRE_TEST` with ctest running in the target environment. Call 4.4's generic `discover_tests()` only under `CMAKE_VERSION VERSION_GREATER_EQUAL 4.4`. | The default `POST_BUILD` discovery runs the built binary on the build host, and the GoogleTest module (4.4.2) says discovery requires a properly set `CROSSCOMPILING_EMULATOR` when cross-compiling. The failure is loud, hence SHOULD. `discover_tests()` has no adopters outside Kitware (as of 2026-09-26). Floor: `gtest_discover_tests`' `DISCOVERY_MODE` 3.18, `catch_discover_tests`' `DISCOVERY_MODE` Catch2 3.4.0, `discover_tests()` 4.4. | See block CMK-TEST-10. Empty output means the rule does not apply. On a tree with a cross leg, a hit with neither an emulator nor `PRE_TEST` is the finding. | SHOULD |
+
+```sh
+# CMK-TEST-10
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' | xargs -0 -r grep -H -n -e 'gtest_discover_tests' -e 'catch_discover_tests' -e 'discover_tests(' --
+```
 
 ## What Agents Get Wrong Here
 

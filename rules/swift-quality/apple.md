@@ -30,6 +30,8 @@ Contents: [Dates and Floors](#dates-and-floors) · [Build Configuration](#build-
 [The Deployment Floor](#the-deployment-floor) · [SwiftUI and Observation Sources](#swiftui-and-observation-sources) ·
 [Reading Heuristics](#reading-heuristics) · [What Agents Get Wrong Here](#what-agents-get-wrong-here)
 
+Commands in this file were translated 2026-10-11 to the portable dialect (git-fed file lists, POSIX grep and awk) and each was re-watched red on a plant and green on a twin under GNU and busybox; a "measured 2026-10-10" date below dates the original form.
+
 ## Dates and Floors
 
 - **Language mode.** An unset or blank `SWIFT_VERSION` is Swift 5 mode, and a racy global then exits 0
@@ -76,32 +78,32 @@ Take every guard number from this table or the SDK, never from memory.
 
 `CHECKS` is where this rule's `checks/` directory is installed (**pinned default**, the adopter adjusts the
 path). Run from the repository root. Every command prints the violation, so empty output is the pass.
-`xargs -r` exits 0 or 123, so judge by printed output. Path lists are NUL-separated (`grep -rlZ`, `xargs -0`)
+`xargs -r` exits 0 or 123, so judge by printed output. Path lists are NUL-separated (`git ls-files -z`, `xargs -0`, and `tr '\n' '\0'` after a `grep -l`)
 because a project path may hold a space. A `BASE ... not found` line is a failure, never a pass.
 
 ```sh
 # apple-config
 CHECKS=.claude/rules/swift-quality/checks
 # 01a names outside the oracle
-grep -Rhow --exclude-dir='.build' -e 'SWIFT_[A-Z0-9_]*' --include='*.pbxproj' --include='*.xcconfig' --include='project.yml' --include='target.yml' . | sort -u | grep -v -x -F -f "$CHECKS/swift-settings-oracle.txt"
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.pbxproj' ':(glob)**/*.xcconfig' ':(glob)**/project.yml' ':(glob)**/target.yml' ':(exclude,glob)**/.build/**' | xargs -0 -r cat -- | grep -o -E -e '[A-Za-z0-9_]*SWIFT_[A-Za-z0-9_]*' | grep -E -e '^SWIFT_[A-Z0-9_]*$' | sort -u | awk 'NR == FNR { ok[$0] = 1; next } !($0 in ok)' "$CHECKS/swift-settings-oracle.txt" -
 # 01b isolation values other than MainActor and nonisolated (a conditional key such as SWIFT_DEFAULT_ACTOR_ISOLATION[sdk=iphoneos*] counts)
-grep -RnE --exclude-dir='.build' -e 'SWIFT_DEFAULT_ACTOR_ISOLATION(\[[^]]*\])? *[=:]' --include='*.pbxproj' --include='*.xcconfig' --include='project.yml' --include='target.yml' . | grep -vE -e '[=:] *"?MainActor"?[[:space:];]*(//.*)?$' -e '[=:] *"?nonisolated"?[[:space:];]*(//.*)?$' -e '[=:] *"?\$\(inherited\)"?[[:space:];]*(//.*)?$'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.pbxproj' ':(glob)**/*.xcconfig' ':(glob)**/project.yml' ':(glob)**/target.yml' ':(exclude,glob)**/.build/**' | xargs -0 -r grep -H -n -E -e 'SWIFT_DEFAULT_ACTOR_ISOLATION(\[[^]]*\])? *[=:]' -- | grep -vE -e '[=:] *"?MainActor"?[[:space:];]*(//.*)?$' -e '[=:] *"?nonisolated"?[[:space:];]*(//.*)?$' -e '[=:] *"?\$\(inherited\)"?[[:space:];]*(//.*)?$'
 # 01c approachable values other than YES and NO
-grep -RnE --exclude-dir='.build' -e 'SWIFT_APPROACHABLE_CONCURRENCY(\[[^]]*\])? *[=:]' --include='*.pbxproj' --include='*.xcconfig' --include='project.yml' --include='target.yml' . | grep -vE -e '[=:] *"?YES"?[[:space:];]*(//.*)?$' -e '[=:] *"?NO"?[[:space:];]*(//.*)?$' -e '[=:] *"?\$\(inherited\)"?[[:space:];]*(//.*)?$'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.pbxproj' ':(glob)**/*.xcconfig' ':(glob)**/project.yml' ':(glob)**/target.yml' ':(exclude,glob)**/.build/**' | xargs -0 -r grep -H -n -E -e 'SWIFT_APPROACHABLE_CONCURRENCY(\[[^]]*\])? *[=:]' -- | grep -vE -e '[=:] *"?YES"?[[:space:];]*(//.*)?$' -e '[=:] *"?NO"?[[:space:];]*(//.*)?$' -e '[=:] *"?\$\(inherited\)"?[[:space:];]*(//.*)?$'
 # 02a pbxproj: a MainActor default in a build-configuration block whose SWIFT_VERSION is not 6
-grep -RlZ --exclude-dir='.build' -e 'SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor' --include='*.pbxproj' . | xargs -0 -r awk '/isa = XCBuildConfiguration;/ {b=1; iso=0; ver=""} b && /SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor/ {iso=1} b && /SWIFT_VERSION = / {ver=$3} b && /^\t\t\t\};$/ {if (iso && ver !~ /^"?6(\.0)?"?;$/) print FILENAME ": MainActor default without SWIFT_VERSION 6, block ends line " FNR " (ver=" ver ")"; b=0}'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.pbxproj' ':(exclude,glob)**/.build/**' | xargs -0 -r grep -l -e 'SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor' -- | tr '\n' '\0' | xargs -0 -r awk '/isa = XCBuildConfiguration;/ {b=1; iso=0; ver=""} b && /SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor/ {iso=1} b && /SWIFT_VERSION = / {ver=$3} b && /^\t\t\t\};$/ {if (iso && ver !~ /^"?6(\.0)?"?;$/) print FILENAME ": MainActor default without SWIFT_VERSION 6, block ends line " FNR " (ver=" ver ")"; b=0}'
 # 02b xcconfig: a MainActor default in a file with no SWIFT_VERSION 6 (a listed file is the violation)
-grep -RlZ --exclude-dir='.build' -e 'SWIFT_DEFAULT_ACTOR_ISOLATION *= *MainActor' --include='*.xcconfig' . | xargs -0 -r grep -L -e 'SWIFT_VERSION *= *6'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.xcconfig' ':(exclude,glob)**/.build/**' | xargs -0 -r grep -l -e 'SWIFT_DEFAULT_ACTOR_ISOLATION *= *MainActor' -- | tr '\n' '\0' | xargs -0 -r grep -L -e 'SWIFT_VERSION *= *6' --
 # 02c the language mode forced through extra flags (single-line, pbxproj array and YAML list forms)
-grep -Rn --exclude-dir='.build' -e 'OTHER_SWIFT_FLAGS' -e '"-swift-version"' -e '"-language-mode"' --include='*.pbxproj' --include='*.xcconfig' --include='project.yml' --include='target.yml' . | grep -e '-swift-version' -e '-language-mode'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.pbxproj' ':(glob)**/*.xcconfig' ':(glob)**/project.yml' ':(glob)**/target.yml' ':(exclude,glob)**/.build/**' | xargs -0 -r grep -H -n -e 'OTHER_SWIFT_FLAGS' -e '"-swift-version"' -e '"-language-mode"' -- | grep -e '-swift-version' -e '-language-mode'
 # 02d manifests (SHOULD): defaultIsolation without an explicit Swift 6 mode
-grep -RlZ --exclude-dir='.build' -e 'defaultIsolation' --include='Package*.swift' . | xargs -0 -r grep -L -e 'swiftLanguageMode(.v6)' -e 'swiftLanguageModes: \[.v6\]'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/Package*.swift' ':(exclude,glob)**/.build/**' | xargs -0 -r grep -l -e 'defaultIsolation' -- | tr '\n' '\0' | xargs -0 -r grep -L -e 'swiftLanguageMode(.v6)' -e 'swiftLanguageModes: \[.v6\]' --
 # 03 generator: set BASE to the merge base. Each changed pbxproj is paired with a generator file in its own parent directory
 BASE=origin/main
 git rev-parse --verify -q "$BASE" >/dev/null || echo "BASE $BASE not found: a failure, not a pass"
 git diff --name-only "$BASE" | awk '{n = split($0, s, "/"); b = s[n]; d = substr($0, 1, length($0) - length(b) - 1); if (d == "") d = "."; if (b == "project.pbxproj") {sub(/(^|\/)[^\/]*\.xcodeproj$/, "", d); if (d == "") d = "."; p[d] = 1} else if (b == "project.yml" || b == "target.yml" || b == "Project.swift") g[d] = 1} END {for (d in p) if (!(d in g)) print d}' | while IFS= read -r d; do for f in project.yml target.yml Project.swift; do [ -e "$d/$f" ] && echo "pbxproj changed without a generator change in $d"; done; done
 # 05a each app target should list YES here (a reading aid, not a violation locator)
-grep -Rn --exclude-dir='.build' -e 'SWIFT_APPROACHABLE_CONCURRENCY' --include='*.pbxproj' --include='*.xcconfig' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.pbxproj' ':(glob)**/*.xcconfig' ':(exclude,glob)**/.build/**' | xargs -0 -r grep -H -n -e 'SWIFT_APPROACHABLE_CONCURRENCY' --
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
@@ -135,22 +137,23 @@ watchOS and visionOS, compare the floor to the availability table by reading.
 
 ```sh
 # apple-floor
-NOSHIP=(--exclude-dir='Demo*' --exclude-dir='Example*' --exclude-dir='*Example' --exclude-dir='Sample*' --exclude-dir='Docs' --exclude-dir='Fixtures' --exclude-dir='*TestUtils' --exclude-dir='*.playground')    # sample, doc, golden-fixture and test-support projects ship no target: add the repository's sample app directory, for example TerminalApp
+CHECKS=.claude/rules/swift-quality/checks
+NOSHIP=(':(exclude,glob)**/Demo*/**' ':(exclude,glob)**/Example*/**' ':(exclude,glob)**/*Example/**' ':(exclude,glob)**/Sample*/**' ':(exclude,glob)**/Docs/**' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/*TestUtils/**' ':(exclude,glob)**/*.playground/**')    # sample, doc, golden-fixture and test-support projects ship no target: add the repository's sample app directory, for example TerminalApp
 # the floor: the lowest value over targets that ship
-grep -Rn --exclude-dir='.build' "${NOSHIP[@]}" -e 'IPHONEOS_DEPLOYMENT_TARGET' --include='*.pbxproj' --include='*.xcconfig' .
-grep -Rn "${NOSHIP[@]}" -e 'platforms' --include='Package*.swift' --exclude-dir='.build' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.pbxproj' ':(glob)**/*.xcconfig' ':(exclude,glob)**/.build/**' "${NOSHIP[@]}" | xargs -0 -r grep -H -n -e 'IPHONEOS_DEPLOYMENT_TARGET' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/Package*.swift' ':(exclude,glob)**/.build/**' "${NOSHIP[@]}" | xargs -0 -r grep -H -n -e 'platforms' --
 # a generator keeps the floor in YAML, and a gitignored pbxproj makes the YAML the only source
-grep -Rn "${NOSHIP[@]}" -A3 -e 'deploymentTarget' --include='project.yml' --include='target.yml' --include='Project.swift' --exclude-dir='.build' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/project.yml' ':(glob)**/target.yml' ':(glob)**/Project.swift' ':(exclude,glob)**/.build/**' "${NOSHIP[@]}" | PAT='deploymentTarget' A=3 xargs -0 -r awk -f "$CHECKS/context.awk" --
 # 04a Mutex below iOS 18: run only in a tree that imports Synchronization
-if grep -Rq "${NOSHIP[@]}" --include='*.swift' --exclude-dir='.build' -e 'import Synchronization' . ; then
-  grep -Rn --exclude-dir='.build' "${NOSHIP[@]}" -e 'IPHONEOS_DEPLOYMENT_TARGET = [0-9][.;]' -e 'IPHONEOS_DEPLOYMENT_TARGET = 1[0-7][.;]' --include='*.pbxproj' --include='*.xcconfig' .
-  grep -Rn "${NOSHIP[@]}" -e '\.iOS(\.v[0-9])' -e '\.iOS(\.v1[0-7])' -e '\.iOS("[0-9][."]' -e '\.iOS("1[0-7][."]' --include='Package*.swift' --exclude-dir='.build' .
-  grep -Rn "${NOSHIP[@]}" -A3 -e 'deploymentTarget' --include='project.yml' --include='target.yml' --include='Project.swift' --exclude-dir='.build' . | grep -E -e 'iOS[^0-9]{0,6}([0-9]|1[0-7])([^0-9]|$)'
+if git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' "${NOSHIP[@]}" | xargs -0 -r grep -l -e 'import Synchronization' -- | awk 'END { exit (NR == 0) }'; then
+  git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.pbxproj' ':(glob)**/*.xcconfig' ':(exclude,glob)**/.build/**' "${NOSHIP[@]}" | xargs -0 -r grep -H -n -e 'IPHONEOS_DEPLOYMENT_TARGET = [0-9][.;]' -e 'IPHONEOS_DEPLOYMENT_TARGET = 1[0-7][.;]' --
+  git ls-files -z --cached --others --exclude-standard -- ':(glob)**/Package*.swift' ':(exclude,glob)**/.build/**' "${NOSHIP[@]}" | xargs -0 -r grep -H -n -e '\.iOS(\.v[0-9])' -e '\.iOS(\.v1[0-7])' -e '\.iOS("[0-9][."]' -e '\.iOS("1[0-7][."]' --
+  git ls-files -z --cached --others --exclude-standard -- ':(glob)**/project.yml' ':(glob)**/target.yml' ':(glob)**/Project.swift' ':(exclude,glob)**/.build/**' "${NOSHIP[@]}" | PAT='deploymentTarget' A=3 xargs -0 -r awk -f "$CHECKS/context.awk" -- | grep -E -e 'iOS[^0-9]{0,6}([0-9]|1[0-7])([^0-9]|$)'
 fi
 # 04b every OSAllocatedUnfairLock site, read for lock() and unlock() around an await
-grep -Rn "${NOSHIP[@]}" -e 'OSAllocatedUnfairLock' --include='*.swift' --exclude-dir='.build' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' "${NOSHIP[@]}" | xargs -0 -r grep -H -n -e 'OSAllocatedUnfairLock' --
 # 11 guards at or below the floor: set floor to the lowest shipped iOS value with its minor (17.0), list generated directories to skip
-grep -Rn "${NOSHIP[@]}" -e 'available([^)]*iOS [0-9]' --include='*.swift' --exclude-dir='.build' --exclude-dir='Generated' . | awk -v floor=17.0 'BEGIN {split(floor, f, "."); fm = f[1] + 0; fn = f[2] + 0} match($0, /available\([^)]*iOS [0-9]+(\.[0-9]+)?/) {s = substr($0, RSTART, RLENGTH); sub(/.*iOS /, "", s); split(s, a, "."); if (a[1] + 0 < fm || (a[1] + 0 == fm && a[2] + 0 <= fn)) print}'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' ':(exclude,glob)**/Generated/**' "${NOSHIP[@]}" | xargs -0 -r grep -H -n -e 'available([^)]*iOS [0-9]' -- | awk -v floor=17.0 'BEGIN {split(floor, f, "."); fm = f[1] + 0; fn = f[2] + 0} match($0, /available\([^)]*iOS [0-9]+(\.[0-9]+)?/) {s = substr($0, RSTART, RLENGTH); sub(/.*iOS /, "", s); split(s, a, "."); if (a[1] + 0 < fm || (a[1] + 0 == fm && a[2] + 0 <= fn)) print}'
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
@@ -165,32 +168,32 @@ hit, so empty output is the pass, except where a row says the output is a work l
 
 ```sh
 # apple-swiftui
-NOSHIP=(--exclude-dir='Demo*' --exclude-dir='Example*' --exclude-dir='*Example' --exclude-dir='Sample*' --exclude-dir='Docs' --exclude-dir='Fixtures' --exclude-dir='*TestUtils' --exclude-dir='*.playground')    # sample, doc, golden-fixture and test-support projects ship no target: add the repository's sample app directory, for example TerminalApp
+NOSHIP=(':(exclude,glob)**/Demo*/**' ':(exclude,glob)**/Example*/**' ':(exclude,glob)**/*Example/**' ':(exclude,glob)**/Sample*/**' ':(exclude,glob)**/Docs/**' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/*TestUtils/**' ':(exclude,glob)**/*.playground/**')    # sample, doc, golden-fixture and test-support projects ship no target: add the repository's sample app directory, for example TerminalApp
 CHECKS=.claude/rules/swift-quality/checks
 BASE=origin/main
 git rev-parse --verify -q "$BASE" >/dev/null || echo "BASE $BASE not found: a failure, not a pass"
 # 06a observable-object tells in new and touched files (SW-GATE-10 E12 on the diff)
 git diff -z --name-only --diff-filter=AM "$BASE" -- '*.swift' ':(exclude)Tests' | xargs -0 -r grep -n -F -e 'ObservableObject' -e '@Published' -e '@StateObject' -e '@ObservedObject' -e '@EnvironmentObject'
 # 06b the same census over the whole tree
-grep -Rn "${NOSHIP[@]}" --include='*.swift' --exclude-dir='.build' --exclude-dir='Tests' -F -e 'ObservableObject' -e '@Published' -e '@StateObject' -e '@ObservedObject' -e '@EnvironmentObject' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' ':(exclude,glob)**/Tests/**' "${NOSHIP[@]}" | xargs -0 -r grep -H -n -F -e 'ObservableObject' -e '@Published' -e '@StateObject' -e '@ObservedObject' -e '@EnvironmentObject' --
 # 07 an initial value on an observed object (misses the attribute on its own line)
-grep -Rn "${NOSHIP[@]}" -e '@ObservedObject[^=]*= ' --include='*.swift' --exclude-dir='.build' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' "${NOSHIP[@]}" | xargs -0 -r grep -H -n -e '@ObservedObject[^=]*= ' --
 # 08a non-private state
-grep -Rn "${NOSHIP[@]}" -e '@State var' -e '@State public var' -e '@State internal var' --include='*.swift' --exclude-dir='.build' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' "${NOSHIP[@]}" | xargs -0 -r grep -H -n -e '@State var' -e '@State public var' -e '@State internal var' --
 # 08b a Task opened inside onAppear (misses Task(priority:) split across lines)
-grep -Rn "${NOSHIP[@]}" -A1 -e '\.onAppear' --include='*.swift' --exclude-dir='.build' . | grep -e 'Task[[:space:]]*{'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' "${NOSHIP[@]}" | PAT='\.onAppear' A=1 xargs -0 -r awk -f "$CHECKS/context.awk" -- | grep -e 'Task[[:space:]]*{'
 # 09 an @Observable without @MainActor on its line, the line before or the line after: rename Packages/DataKit/Sources to each nonisolated-default target directory
-for d in Packages/DataKit/Sources; do [ -d "$d" ] || { echo "MISSING $d"; continue; }; grep -RlZ -e '@Observable' --include='*.swift' "$d" | xargs -0 -r awk 'FNR == 1 {if (pend != "") print pend; pend = ""; prev = ""} pend != "" {if ($0 !~ /@MainActor/) print pend; pend = ""} /@Observable([^A-Za-z0-9_]|$)/ && !/@MainActor/ && prev !~ /@MainActor/ {pend = FILENAME ":" FNR ": " $0} {prev = $0} END {if (pend != "") print pend}'; done
+for d in Packages/DataKit/Sources; do [ -d "$d" ] || { echo "MISSING $d"; continue; }; git ls-files -z --cached --others --exclude-standard -- ":(glob)$d/**/*.swift" | xargs -0 -r grep -l -e '@Observable' -- | tr '\n' '\0' | xargs -0 -r awk 'FNR == 1 {if (pend != "") print pend; pend = ""; prev = ""} pend != "" {if ($0 !~ /@MainActor/) print pend; pend = ""} /@Observable([^A-Za-z0-9_]|$)/ && !/@MainActor/ && prev !~ /@MainActor/ {pend = FILENAME ":" FNR ": " $0} {prev = $0} END {if (pend != "") print pend}'; done
 # 10a superseded SwiftUI API in new and touched files
 git diff -z --name-only --diff-filter=AM "$BASE" -- '*.swift' | xargs -0 -r grep -n -e 'NavigationView' -e '\.foregroundColor(' -e '\.cornerRadius(' -e '\.tabItem' -e '\.navigationBarItems' -e 'edgesIgnoringSafeArea' -e '\.accentColor(' -e 'UIScreen\.main'
 # 10b the one-parameter and perform: forms of onChange, in new and touched files
 git diff -z --name-only --diff-filter=AM "$BASE" -- '*.swift' | xargs -0 -r grep -n -E -e '\.onChange\(of:[^{]*\{[[:space:]]*[A-Za-z_][A-Za-z0-9_]*[[:space:]]+in([[:space:]]|$)' -e 'onChange\(of:[^)]*perform:'
 # 10c the 10a patterns over the whole tree, a labelled census that is never empty on a mature app
-grep -Rn "${NOSHIP[@]}" --include='*.swift' --exclude-dir='.build' -e 'NavigationView' -e '\.foregroundColor(' -e '\.cornerRadius(' -e '\.tabItem' -e '\.navigationBarItems' -e 'edgesIgnoringSafeArea' -e '\.accentColor(' -e 'UIScreen\.main' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' "${NOSHIP[@]}" | xargs -0 -r grep -H -n -e 'NavigationView' -e '\.foregroundColor(' -e '\.cornerRadius(' -e '\.tabItem' -e '\.navigationBarItems' -e 'edgesIgnoringSafeArea' -e '\.accentColor(' -e 'UIScreen\.main' --
 # 12a AnyView sites, a work list
-grep -Rn "${NOSHIP[@]}" -F -e 'AnyView' --include='*.swift' --exclude-dir='.build' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' "${NOSHIP[@]}" | xargs -0 -r grep -H -n -F -e 'AnyView' --
 # 12b body blocks over 100 lines, printed as file:line count
-find -L . -name '*.swift' -not -path './.build/*' -print0 | xargs -0 -r awk -f "$CHECKS/body-len.awk" | awk '$2 > 100'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' | xargs -0 -r awk -f "$CHECKS/body-len.awk" | awk '$2 > 100'
 # 13 Combine census on new and touched files, a work list
 git diff -z --name-only --diff-filter=AM "$BASE" -- '*.swift' | xargs -0 -r grep -n -e '\.sink' -e 'AnyCancellable' -e 'PassthroughSubject' -e 'CurrentValueSubject'
 ```
@@ -200,10 +203,15 @@ git diff -z --name-only --diff-filter=AM "$BASE" -- '*.swift' | xargs -0 -r grep
 | SW-APPLE-06 | New observable model types are `@Observable`, held by `@State private` or injected with `.environment(_:)` and read with `@Environment(Type.self)`, with `@Bindable` for bindings. `ObservableObject`, `@Published`, `@StateObject`, `@ObservedObject` and `@EnvironmentObject` appear only where the deployment floor is below iOS 17, macOS 14, watchOS 10 and visionOS 1, or in a documented incremental migration that names the type being migrated. | `@Observable` invalidates a view only for properties its `body` reads, while `ObservableObject` needs Combine and `@Published` on every observed property (SE-0395, Swift 5.9). `ObservableObject` carries no `deprecatedAt` in DocC (read 2026-10-10), so the exemption is a floor test and never a deprecation test. "Superseded for new code" is the true statement. | Block `apple-swiftui`, command 06a on the diff, 06b as the census. Empty output = pass. The exemption test is the floor from block `apple-floor`. 06a and 06b are `-F` substring matches, so an identifier such as `TypingMembersObservableObject` is noise. Watched red (measured 2026-10-10): a plant with all five tells printed five lines, the twin was empty, and a changed file under a path with a space printed. Default: new types and new files are MUST, touched legacy files are SHOULD. | MUST (new) · SHOULD (touched) |
 | SW-APPLE-07 | `@ObservedObject` never carries an initial or default value. It marks an input the view is handed. | Apple: "Don't specify a default or initial value for the observed object". The view re-creates the object on every parent redraw and loses state. Low value: only reachable under the `SW-APPLE-06` exemptions, where agents copy the old tutorial shape, and Apple's own text already forbids it (read 2026-10-10). Kept for its grep. | Block `apple-swiftui`, command 07. Empty output = pass, with the known miss of an attribute on its own line. Watched red (measured 2026-10-10): one plant printed, the twin was empty. | MUST |
 | SW-APPLE-08 | `@State` is `private`, and async work a view starts is `.task { }`, never `.onAppear { Task { } }`. | Apple: "Declare state as private to prevent setting it in a memberwise initializer". `.task` is cancelled with the view's lifetime, an `.onAppear` task is not. | Block `apple-swiftui`, commands 08a and 08b. Empty output = pass. Watched red (measured 2026-10-10): one plant each printed, twins empty. The greps fire on real code, with 26 non-private `@State` in one strict app (measured 2026-10-10), so SHOULD matches the measured debt. | SHOULD |
-| SW-APPLE-09 | In a target whose default isolation is `nonisolated`, a UI `@Observable` model and the functions that observe it carry `@MainActor`. In a MainActor-default target they carry no attribute (a style preference, not a defect). | Moving code from the app target into a nonisolated-default package flips the compile result. An unannotated `@Observable` class read through `Observations { }` exits 1 (`SendableClosureCaptures`) under `-swift-version 6` and exits 0 under `-default-isolation MainActor`. A `@MainActor` model read from a nonisolated function exits 1, the `@MainActor` reader exits 0 (Swift 6.4.0 and 6.3.3, measured 2026-10-10). The SwiftUI view path is `unverified: read only`. Under a MainActor default the attribute is redundant (element-hq/element-x-ios@14e33866ced2:AGENTS.md:286). | Block `apple-swiftui`, command 09, with the `for` list set to each nonisolated-default target's source directory. A missing directory prints `MISSING`, which is an error and never a pass. Output is a work list: not every `@Observable` is UI-bound, so read each hit. `@ObservableState` is not a hit. Watched red (measured 2026-10-10): a plant printed the bare `@Observable` and the same-line miss, and the twin with `@MainActor` on the line, before or after was empty, under a path with a space. Census for the second clause: `grep -Rn --exclude-dir='.build' -e '@MainActor' --include='*.swift' .` run inside a MainActor-default target, where a hit is a style choice. | SHOULD |
+| SW-APPLE-09 | In a target whose default isolation is `nonisolated`, a UI `@Observable` model and the functions that observe it carry `@MainActor`. In a MainActor-default target they carry no attribute (a style preference, not a defect). | Moving code from the app target into a nonisolated-default package flips the compile result. An unannotated `@Observable` class read through `Observations { }` exits 1 (`SendableClosureCaptures`) under `-swift-version 6` and exits 0 under `-default-isolation MainActor`. A `@MainActor` model read from a nonisolated function exits 1, the `@MainActor` reader exits 0 (Swift 6.4.0 and 6.3.3, measured 2026-10-10). The SwiftUI view path is `unverified: read only`. Under a MainActor default the attribute is redundant (element-hq/element-x-ios@14e33866ced2:AGENTS.md:286). | Block `apple-swiftui`, command 09, with the `for` list set to each nonisolated-default target's source directory. A missing directory prints `MISSING`, which is an error and never a pass. Output is a work list: not every `@Observable` is UI-bound, so read each hit. `@ObservableState` is not a hit. Watched red (measured 2026-10-10): a plant printed the bare `@Observable` and the same-line miss, and the twin with `@MainActor` on the line, before or after was empty, under a path with a space. Census for the second clause: see block SW-APPLE-09 run inside a MainActor-default target, where a hit is a style choice. | SHOULD |
 | SW-APPLE-10 | New and touched code does not use superseded SwiftUI API: `NavigationView`, `.foregroundColor(`, `.cornerRadius(`, `.tabItem`, `.navigationBarItems`, `edgesIgnoringSafeArea`, `.accentColor(`, `UIScreen.main`, and the one-parameter or `perform:` form of `.onChange(of:)`. Use `NavigationStack` or `NavigationSplitView`, `.foregroundStyle`, `.clipShape(.rect(cornerRadius:))`, `Tab`, `.toolbar`, `ignoresSafeArea`, `.tint`, a trait or context screen, and `{ old, new in }`. A floor below the replacement's introduction exempts the line (`NavigationStack` 16, `.foregroundStyle` 15, `Tab` 18). | DocC lists most of these at `deprecatedAt` 27.2 and `UIScreen.main` at 26.0, all still `deprecated: false` (read 2026-10-10), so these greps are agent hygiene and never a mirror of a compiler warning. `.onChange(of:perform:)` is deprecated at iOS 17. Two strict apps still carry 277 and 76 `.foregroundColor(` calls (measured 2026-10-10), so existing code is not rewritten wholesale. | Block `apple-swiftui`, commands 10a and 10b run on the diff, 10c is the whole-tree census to read. Empty output = pass for 10a and 10b. Watched red (measured 2026-10-10): four planted lines and the one-parameter, `_ in` and `perform:` `onChange` forms printed, and the twin with zero-parameter closures (`{ isLoading = false }`, `{ updateString() }`), a two-parameter closure and `{ isSearching = $1 }` was empty. Whether the iOS 27.2 SDK warns on these is `unverified: read only`. | SHOULD |
 | SW-APPLE-12 | `AnyView` appears only at type-erasure boundaries (a coordinator handing a view to UIKit hosting, `ImageRenderer<AnyView>`, stored erased content), never inside `body`, `ForEach` content or conditional builders. A `body` over 100 lines is a review prompt to extract subviews and is never a violation by itself. | Apple: "Whenever the type of view used with an `AnyView` changes, the old hierarchy is destroyed and a new hierarchy is created". Measured `body` blocks (2026-10-10): one strict app has median 13, p99 75 and 6 over 100, another has median 29, p99 171 and 16 over 100. | Block `apple-swiftui`, command 12a is a work list (read each hit, since most are the one boundary, and expect noise from coordinator `toPresentable` boundaries and generated mocks) and 12b prints `file:line count` over 100. Empty output from 12b = pass, and 12b reads only `var body` with an optional `public`, `package`, `private` or `fileprivate` modifier, so a `static` or one-line `@ViewBuilder` spelling is missed. Watched red (measured 2026-10-10): a 122-line body printed, a 10-row twin was empty. | SHOULD |
 | SW-APPLE-13 | New in-process state flow uses Observation (`Observations { }`, iOS 26) or `AsyncSequence` and `AsyncStream`, not Combine pipelines. Combine stays where an Apple API vends a `Publisher` (`NotificationCenter.publisher`, `URLSession.dataTaskPublisher`, KVO `publisher(for:)`), bridged with `.values` (iOS 15, read 2026-10-10). Existing Combine code is not migrated wholesale. | Combine is not deprecated (no `deprecatedAt`, read 2026-10-10). SE-0395 designed Observation to replace the `ObservableObject` use of Combine. A large production app has 468 files importing Combine (all `.swift`, measured 2026-10-10 at element-hq/element-x-ios@14e33866ced2), 378 outside Mocks, Preview and Tests paths, beside a newer Observation-based store, so migrate one store at a time. `sink` closures in a Swift 6 target are an isolation hazard whose specifics are `unverified: read only`. | Block `apple-swiftui`, command 13. A census to read ("is this a framework seam?"), never an automatic failure. The grep was watched red on three planted lines with the twin empty (measured 2026-10-10), the seam judgement is a reading heuristic. | SHOULD |
+
+```sh
+# SW-APPLE-09
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' | xargs -0 -r grep -H -n -e '@MainActor' --
+```
 
 ```swift
 // wrong: the pre-iOS-17 tutorial shape, with an initial value on the observed object
@@ -243,9 +251,9 @@ heuristics with aids. The aids print what to read and never a verdict.
 # apple-read
 CHECKS=.claude/rules/swift-quality/checks
 # 14a every concurrency setting in the tree, with file and line
-grep -Rn --exclude-dir='.build' -e 'SWIFT_VERSION' -e 'SWIFT_STRICT_CONCURRENCY' -e 'SWIFT_DEFAULT_ACTOR_ISOLATION' -e 'SWIFT_APPROACHABLE_CONCURRENCY' --include='*.pbxproj' --include='*.xcconfig' --include='project.yml' --include='target.yml' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.pbxproj' ':(glob)**/*.xcconfig' ':(glob)**/project.yml' ':(glob)**/target.yml' ':(exclude,glob)**/.build/**' | xargs -0 -r grep -H -n -e 'SWIFT_VERSION' -e 'SWIFT_STRICT_CONCURRENCY' -e 'SWIFT_DEFAULT_ACTOR_ISOLATION' -e 'SWIFT_APPROACHABLE_CONCURRENCY' --
 # 14b one line per build-configuration block: id, name, bundle, ver, iso, appr, strict, ios
-find . -name project.pbxproj -not -path './.build/*' -not -path '*/Demo*/*' -not -path '*/Example*/*' -not -path '*/Sample*/*' -print0 | xargs -0 -r awk -f "$CHECKS/pbx-blocks.awk"
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/project.pbxproj' ':(exclude,glob)**/.build/**' ':(exclude,glob)**/Demo*/**' ':(exclude,glob)**/Example*/**' ':(exclude,glob)**/Sample*/**' | xargs -0 -r awk -f "$CHECKS/pbx-blocks.awk"
 ```
 
 | ID | Rule | Rationale | Verification | Severity |

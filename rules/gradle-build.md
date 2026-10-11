@@ -72,6 +72,8 @@ invokes it, so it runs as its own CI step whose exit code gates the job
 A task is done when a command, its exit code, and the tree it ran against are
 all named. Narration is not evidence.
 
+Every search command in this set lists its files with `git ls-files`, so run it from the root of a git work tree. It reads tracked files and untracked files that are not ignored; a path matched by `.gitignore` is not searched.
+
 ## Non-Negotiables
 
 Every line below blocks a merge. IDs resolve to the depth files in
@@ -106,9 +108,17 @@ is defined in a depth file and only cited here.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| GRADLE-CORE-01 | Never reach green by weakening the check: no new `ignoreFailures = true`, no `enabled = false` on a gate task, no new `-PskipX` or `-x` exclusion on the CI invocation, no widened test `exclude` or lint baseline, no lowered JaCoCo or Kover floor, no new `@Suppress` or `@SuppressWarnings`, and no edit to the convention plugin that owns the gate as part of a functional change. | The gate's whole value is that it can go red. A change that edits both the build and the logic that judges it reports nothing and looks identical to a passing change. Gradle makes this cheap, because every gate in the build is one property or one `configureEach` block away from being a silent no-op. | `git diff --stat -- gradle.properties build-logic buildSrc '*.versions.toml'` in a change that is not itself a gate change: any hit is the violation. Then, for the build files the change touches, `grep -rn --include='*.gradle.kts' --include='*.gradle' -e 'ignoreFailures' -e 'enabled = false' -e 'onlyIf' -e 'Suppress' -e 'exclude(' .` and read which lines this change added. A line added by this change is the finding, and empty output is the pass. | MUST |
+| GRADLE-CORE-01 | Never reach green by weakening the check: no new `ignoreFailures = true`, no `enabled = false` on a gate task, no new `-PskipX` or `-x` exclusion on the CI invocation, no widened test `exclude` or lint baseline, no lowered JaCoCo or Kover floor, no new `@Suppress` or `@SuppressWarnings`, and no edit to the convention plugin that owns the gate as part of a functional change. | The gate's whole value is that it can go red. A change that edits both the build and the logic that judges it reports nothing and looks identical to a passing change. Gradle makes this cheap, because every gate in the build is one property or one `configureEach` block away from being a silent no-op. | `git diff --stat -- gradle.properties build-logic buildSrc '*.versions.toml'` in a change that is not itself a gate change: any hit is the violation. Then, for the build files the change touches, see block GRADLE-CORE-01 and read which lines this change added. A line added by this change is the finding, and empty output is the pass. | MUST |
 | GRADLE-CORE-02 | A verification enters a rule table, a CI job, or a review only after it has been watched go red against a deliberately planted violation. | A check that cannot fail launders an unchecked change as a checked one, and reads exactly like a passing one forever. Gradle's failure modes here are specific and all silent: a task whose configuration cache Gradle disabled rather than failing, a `validatePlugins` that no lifecycle task invokes, an `org.gradle.*` key in a `gradle.properties` that is not a build root, and a `verification-metadata.xml` whose entries a hand edit emptied. | Copy the subject, break the thing the rule forbids, run the verification. A pass on the broken copy is the violation. Planting a violation is cheap in a build script: read a file at configuration time, drop the `@PathSensitive`, or blank the `distributionSha256Sum`. | MUST |
 | GRADLE-CORE-03 | State whether empty output means a pass or means the finding, in every verification that is not self-evidently one or the other. | Most checks in this rule set are inverted. An absent `distributionSha256Sum`, an absent `gradle.lockfile`, an absent toolchain block, an absent `options.encoding`, an absent `permissions:` root and an absent `exclusiveContent` are each *the finding*, not the pass. | Read each verification cell: one whose empty output is ambiguous is the violation. | SHOULD |
+
+```sh
+# GRADLE-CORE-01
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.gradle.kts' \
+  ':(glob)**/*.gradle' |
+  xargs -0 -r grep -H -n -e 'ignoreFailures' -e 'enabled = false' -e 'onlyIf' -e 'Suppress' \
+    -e 'exclude(' --
+```
 
 ## Where the Depth Is
 

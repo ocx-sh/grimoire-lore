@@ -19,13 +19,11 @@ and only a check run from outside the flake, at the tag, proves it.
 
 A consumer who pins `github:OWNER/REPO/vX.Y.Z` records the resolved `rev` and
 `narHash` in their own `flake.lock`. Moving the tag later changes no lock
-already written, and it makes one reference name two different trees. Two
-consequences bind everything below.
+already written, and it makes one reference name two different trees. Two consequences bind everything below.
 
 - **Every gate runs before `git push origin "$TAG"`.** A defect found before
   the push costs a commit. After it, it costs a version number.
-- **A bad release is followed by a new version**, never by a moved or deleted
-  tag.
+- **A bad release is followed by a new version**, never by a moved or deleted tag.
 
 Contents: [Scope](#scope) · [Pinned defaults](#pinned-defaults) · [The runbook](#the-runbook) · [The D branch](#the-d-branch-a-generated-flake-cuts-no-tags) ·
 [The MUST rows](#the-must-rows-this-procedure-enforces) · [What agents get wrong here](#what-agents-get-wrong-here)
@@ -47,14 +45,12 @@ Measured 2026-09-27 on CppNix 2.35.2 with nixpkgs 26.11pre `8d5d2709`, floor
 0.2.15 and nix-update 1.16.0. Determinate Nix is untested: nixpkgs packages no
 Determinate Nix, so no leg below can run it (re-check when nixpkgs adds one).
 The rules cited by ID live in the `nix-quality` rule and its depth files
-(`release.md` owns NIX-REL, `gates.md` owns NIX-GATE). Run every command from
-the repository root.
+(`release.md` owns NIX-REL, `gates.md` owns NIX-GATE). Run every command from the repository root.
 
 ## Pinned defaults
 
 These encode an agreed decision, not a derived fact. Each is a default the
-adopter may override once, for the whole repository. Marked **pinned** so a
-later reader does not re-litigate them.
+adopter may override once, for the whole repository. Marked **pinned** so a later reader does not re-litigate them.
 
 | Decision | Default (pinned) | Override looks like |
 |---|---|---|
@@ -78,8 +74,7 @@ jq -r '.nodes[.nodes.root.inputs.nixpkgs // "nixpkgs"] | .original.ref // .origi
 ```
 
 `nix (Lix, like Nix) 2.95.2` is Lix. `nix (Nix) 2.35.2` is CppNix. Choose the
-branch of this procedure by shape (see Scope). A D flake leaves the runbook
-here.
+branch of this procedure by shape (see Scope). A D flake leaves the runbook here.
 
 ### 2. Settle the lock before the release commit
 
@@ -94,8 +89,15 @@ one entry with `nix flake update nixpkgs`, never with
 |---|---|---|---|
 | No untracked file the flake reads | `git ls-files --others --exclude-standard .` | empty output. Any path is the finding: `git add` it | NIX-FLK-16 |
 | No local input in the committed lock | the jq program below the table | prints `[]`. Any key is the finding | NIX-INP-04 |
-| No cross-tree relative input | `grep -rn -e 'path:\.\./' --include='*.nix' .` | empty output (exit 1). A hit is a candidate to read. A sub-flake's `path:../..` that stays inside the git tree passes (numtide/flake-utils `examples/`), and the parent form `path:..` never matches | NIX-INP-04 |
-| No deprecated lock flag in scripts | `grep -rn --exclude-dir=.git --exclude-dir=.claude --exclude='CHANGELOG*' -e 'nix .*--update-[i]nput' -e 'nix .*--recreate-[l]ock-file' .` | empty output (exit 1). A line in a script or workflow that runs `nix` is the finding. A hit in code that forwards a user's flags (shell completions, an argument parser) is not | NIX-INP-07 |
+| No cross-tree relative input | see block NIX-INP-04 | empty output. A hit is a candidate to read. A sub-flake's `path:../..` that stays inside the git tree passes (numtide/flake-utils `examples/`), and the parent form `path:..` never matches | NIX-INP-04 |
+| No deprecated lock flag in scripts | see block NIX-INP-07 | empty output. A line in a script or workflow that runs `nix` is the finding. A hit in code that forwards a user's flags (shell completions, an argument parser) is not | NIX-INP-07 |
+
+```sh
+# NIX-INP-04
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.nix' | xargs -0 -r grep -H -n -e 'path:\.\./' --
+# NIX-INP-07
+git ls-files -z --cached --others --exclude-standard -- ':(exclude,glob)**/.claude/**' ':(exclude,glob)**/CHANGELOG*' | xargs -0 -r grep -H -n -e 'nix .*--update-[i]nput' -e 'nix .*--recreate-[l]ock-file' --
+```
 
 ```sh
 # NIX-INP-04. Prints [] when the lock holds no absolute path: or git+file: input.
@@ -128,15 +130,14 @@ a manifest at `1.2.3` fails it, and so does `1.2.3pre20260927_d960db0`, because
 `version =` line must sit under `[package]` or `[workspace.package]`; when the
 root has neither, grep the member crate's `Cargo.toml`.
 
-**Check (NIX-REL-03):** `grep -rn -e 'self[.]rev[^[:alpha:]]' -e 'self[.]rev$' -e 'self[.]dirtyRev' -e 'self[.]shortRev' -e 'self[.]dirtyShortRev' -e 'self[.]lastModified' -e 'self[.]revCount' --include='*.nix' .`
-prints nothing (exit 1). A hit in an exported derivation rebuilds it on every
+**Check (NIX-REL-03):** `git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.nix' | xargs -0 -r grep -H -n -e 'self[.]rev[^[:alpha:]]' -e 'self[.]rev$' -e 'self[.]dirtyRev' -e 'self[.]shortRev' -e 'self[.]dirtyShortRev' -e 'self[.]lastModified' -e 'self[.]revCount' --`
+prints nothing. A hit in an exported derivation rebuilds it on every
 commit, README commits included. A hit in an app or banner is NIX-REL-04's.
 
 ### 4. Deprecate a renamed or removed output, never delete it
 
 Compare the outputs the last release published with the ones this commit
-publishes. Write the lists outside the checkout: a file inside it makes the
-tree dirty.
+publishes. Write the lists outside the checkout: a file inside it makes the tree dirty.
 
 ```sh
 PREV=v1.2.2 # rename: the last published tag
@@ -197,10 +198,9 @@ Watched 2026-09-27 on a shimmed flake: `default` and `new-name` exit 0,
 `nix flake check --no-build --option abort-on-warn true` exits 1. Do not verify
 with `nix flake show`: it swallows the abort and exits 0.
 
-**Check (NIX-REL-11):** `grep -rn -e 'abort-on-warn' .github/workflows`. Every
+**Check (NIX-REL-11):** `git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' | xargs -0 -r grep -H -n -e 'abort-on-warn' --`. Every
 line printed must name a single attribute or a shim-free `packages.x86_64-linux`
-set. A hit on a `flake check` line is the finding. Empty output passes. A
-reading heuristic.
+set. A hit on a `flake check` line is the finding. Empty output passes. A reading heuristic.
 
 ### 5. Run the gate at the exact commit, on every system and every leg
 
@@ -208,16 +208,14 @@ Run the `nix-quality` gate block in order, from a clean local checkout of the
 commit you will tag, never by remote ref (NIX-GATE-09). `git status --porcelain`
 must print nothing first. Steps 1 to 6 of the block must pass. Never make a
 step pass by weakening it: no disabled lint, no dropped system, no
-`doInstallCheck = false` (NIX-CORE-01). Three parts of the block carry the
-release.
+`doInstallCheck = false` (NIX-CORE-01). Three parts of the block carry the release.
 
 **`--all-systems` (NIX-GATE-09).** `nix flake check --all-systems --no-build`
 evaluates every declared system, including the ones CI has no runner for. A red
 result is triaged against the GATE-09 cause table before the systems list or
 the flake is touched. Only one row there makes dropping a system the author's
 fix: `Nixpkgs 26.11 has dropped support for x86_64-darwin` (NIX-FLK-09). A
-red that is a nixpkgs bug, a platform-restricted dependency or a toolchain
-limit is not fixed by deleting the system.
+red that is a nixpkgs bug, a platform-restricted dependency or a toolchain limit is not fixed by deleting the system.
 
 **Build every package the flake defines (NIX-GATE-10).** `nix flake check`
 skips substitutable checks since Nix 2.32, and runs no binary.
@@ -262,10 +260,17 @@ nix shell --inputs-from . nixpkgs#lix --command nix flake check --no-build
 
 | Check | Command | Pass | Rule |
 |---|---|---|---|
-| No FlakeHub (pinned) | `grep -rn -e 'flakehub.com/f/' -e 'flakehub-push' -e 'flakehub-cache-action' --include='*.nix' --include='*.yml' --include='*.yaml' .` | empty output (exit 1). Any line is the finding | NIX-REL-06 |
-| No accepted flake config | `grep -rn --exclude-dir=.git --exclude-dir=.claude -e 'accept-flake-[c]onfig' .` | empty output (exit 1). Any line is the finding | NIX-SEC-02 |
-| No `nix-env` install line | `grep -n -e 'nix-env -i' -e 'nix-env --install' README.md` | empty output (exit 1). Any line is the finding. Exit 2 means no root `README.md`: name the file that carries the install section. Nested READMEs of vendored or example code are out of scope | NIX-REL-09 |
-| `nix profile install` only as the Lix fallback comment | `grep -c -e '^ *nix profile install' README.md` | prints `0` with exit 1. A higher count (exit 0) means a README line Lix accepts and CppNix warns on | NIX-REL-09 |
+| No FlakeHub (pinned) | see block NIX-REL-06 | empty output. Any line is the finding | NIX-REL-06 |
+| No accepted flake config | see block NIX-SEC-02 | empty output. Any line is the finding | NIX-SEC-02 |
+| No `nix-env` install line | `grep -n -e 'nix-env -i' -e 'nix-env --install' -- README.md` | empty output. Any line is the finding. Exit 2 means no root `README.md`: name the file that carries the install section. Nested READMEs of vendored or example code are out of scope | NIX-REL-09 |
+| `nix profile install` only as the Lix fallback comment | `grep -c -e '^ *nix profile install' -- README.md` | prints `0` with exit 1. A higher count (exit 0) means a README line Lix accepts and CppNix warns on | NIX-REL-09 |
+
+```sh
+# NIX-REL-06
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.nix' ':(glob)**/*.yml' ':(glob)**/*.yaml' | xargs -0 -r grep -H -n -e 'flakehub.com/f/' -e 'flakehub-push' -e 'flakehub-cache-action' --
+# NIX-SEC-02
+git ls-files -z --cached --others --exclude-standard -- ':(exclude,glob)**/.claude/**' | xargs -0 -r grep -H -n -e 'accept-flake-[c]onfig' --
+```
 
 Bracketed letters keep a workflow from matching its own grep line. Installed
 copies of these rules and skills name every banned string, so the greps exclude
@@ -295,13 +300,11 @@ Pass the version entry point NIX-PKG-19 names: `-- --version` by default, and
 `reltool 1.2.2` and exited 1, and so did `reltool 1.2.3pre20260927_d960db0`,
 `reltool 1.2.3-1ccb0bf` and `reltool 1.2.3+dirty`: the version must end the line,
 alone or after a space or `v` (`grep -F -w` passed the last two). A CLI that
-prints text after the version needs its own anchor. A tag commit that also
-added `flake.lock` made `git diff` exit 1.
+prints text after the version needs its own anchor. A tag commit that also added `flake.lock` made `git diff` exit 1.
 
 The local run proves that the tag commit builds and reports its version. It is
 not NIX-REL-16's proof, which needs the pushed tag. Until the push, a failed
-line is fixed in a new commit: delete the local tag with `git tag -d "$TAG"`
-and start again from step 3.
+line is fixed in a new commit: delete the local tag with `git tag -d "$TAG"` and start again from step 3.
 
 ### 7. Push, then prove the pushed tag from a clean store
 
@@ -315,15 +318,13 @@ nix run --no-write-lock-file "github:$OWNER/$REPO/$TAG" -- --version 2>/dev/null
 
 - The metadata line prints `true` and exits 0 when the tag resolves
   (NIX-REL-07). An unknown tag exits 4 with GitHub's `"status": "422"`
-  (watched 2026-09-27 on `github:numtide/flake-utils/v1.0.0` and
-  `/v99.99.99`).
+  (watched 2026-09-27 on `github:numtide/flake-utils/v1.0.0` and `/v99.99.99`).
 - The `nix run` line passes with exit 0 (NIX-REL-16). It is the only check that
   proves together that the tag resolves, the package builds, `mainProgram` is
   right and the version equals the tag. Watched on a real pushed tag:
   `github:Mic92/nixpkgs-review/4.0.0` printed `nixpkgs-review 4.0.0`, exit 0,
   on CppNix 2.35.2. A `nix run` of a tag also exits 0 on CppNix 2.31.5 and
-  Lix 2.95.2. A bare-semver tag drops the `v` from `TAG`, and `VERSION` equals
-  it.
+  Lix 2.95.2. A bare-semver tag drops the `v` from `TAG`, and `VERSION` equals it.
 - Run it where the store has not built this commit: a fresh CI runner with no
   store cache restored. Never substitute a `path:` or local-clone run, and
   never announce the release before it passes.
@@ -332,8 +333,7 @@ nix run --no-write-lock-file "github:$OWNER/$REPO/$TAG" -- --version 2>/dev/null
 State the promise in the release notes in NIX-REL-12's terms: gated on CppNix
 at the version CI pins (2.35.2 on 2026-09-27), minimum the computed floor
 (`nixVersions.nix_2_31` = 2.31.5), Lix advisory, Determinate Nix untested, and
-flakes experimental per RFC 136. Update both numbers from steps 1 and 5 at
-each release. Never write "works with Nix".
+flakes experimental per RFC 136. Update both numbers from steps 1 and 5 at each release. Never write "works with Nix".
 
 ### 8. A `package.nix` with a fetcher `src`: the nix-update contract
 
@@ -342,8 +342,7 @@ copy of an A package (pinned: not yet submitted) and hand-written packages. An
 in-repository flake that reads `src` from its own tree skips it.
 
 Before the bump, the ref interpolates the version and the hash is literal SRI
-text (NIX-REL-13, NIX-REL-17). `tag` and `rev` behave the same here, and
-NIX-PKG-02 owns the choice between them.
+text (NIX-REL-13, NIX-REL-17). `tag` and `rev` behave the same here, and NIX-PKG-02 owns the choice between them.
 
 ```nix
 {
@@ -372,16 +371,16 @@ and confirm it with NIX-PKG-04's `--rebuild` of the changed fetch.
 ```sh
 VERSION=0.2.15 # rename
 nix-update -F --version="$VERSION" --src-only default
-grep -rn -e '^[^#]*lib\.fakeHash' -e '^[^#]*lib\.fakeSha256' -e '^[^#]*lib\.fakeSha512' --include='*.nix' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.nix' | xargs -0 -r grep -H -n -e '^[^#]*lib\.fakeHash' -e '^[^#]*lib\.fakeSha256' -e '^[^#]*lib\.fakeSha512' --
 nix eval --json .#packages.x86_64-linux.default --apply 'p: let s = p.src.rev or p.src.url; in assert builtins.replaceStrings [ p.version ] [ "" ] s != s; true'
-grep -rn -E -e 'rev = "v?[0-9]+\.[0-9]' -e 'tag = "v?[0-9]+\.[0-9]' --include='*.nix' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.nix' | xargs -0 -r grep -H -n -E -e 'rev = "v?[0-9]+\.[0-9]' -e 'tag = "v?[0-9]+\.[0-9]' --
 ```
 
 | Line | Pass | Finding | Rule |
 |---|---|---|---|
-| the fake-hash grep | empty output (exit 1). A commented-out line never matches | a line: `nix-update` never replaces the `lib.fakeHash` symbol, and still exits 0. Obtain the hash by hand (NIX-PKG-03) | NIX-REL-17 |
+| the fake-hash grep | empty output. A commented-out line never matches | a line: `nix-update` never replaces the `lib.fakeHash` symbol, and still exits 0. Obtain the hash by hand (NIX-PKG-03) | NIX-REL-17 |
 | the `nix eval` (authoritative) | prints `true`, exit 0: the fetched ref contains the version | `assertion … failed`, exit 1: the ref is a literal, so the new version builds the old release's bytes. `attribute 'url' missing` means `src` is no fetcher: the row does not apply | NIX-REL-13 |
-| the ref pre-screen grep | empty output (exit 1) | a line needs reading. A literal pin of a *different* source (a flake-compat `default.nix`) is allowed, and the eval decides | NIX-REL-13 |
+| the ref pre-screen grep | empty output | a line needs reading. A literal pin of a *different* source (a flake-compat `default.nix`) is allowed, and the eval decides | NIX-REL-13 |
 
 Watched 2026-09-27 on planted packages at version `0.2.15`: the interpolated
 `tag` printed `true` and matched no grep. `tag = "v0.2.14"`, `rev = "v0.2.14"`
@@ -440,7 +439,7 @@ list, run on every update PR before merge.
    its PR with `gh pr create` is printed too, and is read by hand.
 
 ```sh
-grep -rl -e 'git push' -e 'github-push-action' -e 'git-auto-commit-action' -e 'add-and-commit' .github/workflows | xargs -r grep -L -e 'create-pull-request' -e 'create-pr'
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' | xargs -0 -r grep -l -e 'git push' -e 'github-push-action' -e 'git-auto-commit-action' -e 'add-and-commit' -- | tr '\n' '\0' | xargs -0 -r grep -L -e 'create-pull-request' -e 'create-pr' --
 ```
 
 Deprecation in a D flake follows NIX-GEN-18: once the index populates a

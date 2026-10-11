@@ -8,6 +8,8 @@ compliant twin (measured 2026-10-10, Swift 6.4.0 and 6.3.3).
 Contents: [The scan](#the-scan) · [What each output means](#what-each-output-means) ·
 [The permitted fallback line](#the-permitted-fallback-line)
 
+Commands in this file were translated 2026-10-11 to the portable dialect (git-fed file lists, POSIX grep and awk) and each was re-watched red on a plant and green on a twin under GNU and busybox; a "measured 2026-10-10" date below dates the original form.
+
 ## The scan
 
 Any output line is a finding, and empty output is the pass. Run it from the
@@ -18,17 +20,17 @@ findings: P2 reads only shipped Dockerfiles and the release workflow.
 
 ```sh
 V=$(cat .swift-version 2>/dev/null); VS=${V%.0}
-scan() { grep -rn --exclude-dir=.build --exclude-dir=.git --include='Dockerfile*' --include='*.yml' --include='*.yaml' --include='*.sh' --include='Makefile' --include='*.mk' --include='*.ps1' "$@" .; }
+scan() { git ls-files -z --cached --others --exclude-standard -- ':(glob)**/Dockerfile*' ':(glob)**/*.yml' ':(glob)**/*.yaml' ':(glob)**/*.sh' ':(glob)**/Makefile' ':(glob)**/*.mk' ':(glob)**/*.ps1' ':(exclude,glob)**/.build/**' | xargs -0 -r grep -H -n "$@" --; }
 
 # P1 SW-REL-01: the pin is exactly X.Y.Z. An absent or empty file prints FAIL, and P2, P3 and P5 then print `pin missing, see P1` and no result
 printf '%s\n' "$V" | grep -q -x -E -e '[0-9]+\.[0-9]+\.[0-9]+' || echo "FAIL P1: .swift-version is absent, empty or not X.Y.Z (got '$V')"
 # P2 SW-REL-01: every swift: tag in a shipped Dockerfile and the release workflow is that literal version (an ARG-built tag is flagged: write the literal; rename the workflow path). No Dockerfile and no release.yml print nothing here
-{ grep -rn --include='Dockerfile*' --exclude-dir=.build --exclude-dir=.git -e 'swift:' . ; [ -f .github/workflows/release.yml ] && grep -n -e 'swift:' .github/workflows/release.yml ; } | grep -v -F -e "swift:${V:?pin missing, see P1}"
+{ git ls-files -z --cached --others --exclude-standard -- ':(glob)**/Dockerfile*' ':(exclude,glob)**/.build/**' | xargs -0 -r grep -H -n -e 'swift:' -- ; [ -f .github/workflows/release.yml ] && grep -n -e 'swift:' .github/workflows/release.yml ; } | grep -v -F -e "swift:${V:?pin missing, see P1}"
 # P3 SW-REL-01: the compiler reports the pin, and 6.4.0 prints as "6.4"
 swift --version | grep -F -e 'Swift version' | grep -v -F -e "Swift version ${VS:?pin missing, see P1} ("
 
 # P4 SW-REL-02: a swift sdk install without --checksum, backslash continuations joined
-find . -type f \( -name 'Dockerfile*' -o -name '*.yml' -o -name '*.yaml' -o -name '*.sh' -o -name 'Makefile' \) -not -path './.build/*' -print0 | xargs -0 -r -n1 sh -c 'sed -e ":a" -e "/\\\\\$/N; s/\\\\\n//; ta" "$0" | grep -n -e "swift sdk install" | grep -v -e "--checksum" | sed "s|^|$0:|"'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/Dockerfile*' ':(glob)**/*.yml' ':(glob)**/*.yaml' ':(glob)**/*.sh' ':(glob)**/Makefile' ':(exclude,glob)**/.build/**' | xargs -0 -r -n1 sh -c 'sed -e ":a" -e "/\\\\\$/N; s/\\\\\n//; ta" "$0" | grep -n -e "swift sdk install" | grep -v -e "--checksum" | sed "s|^|$0:|"'
 # P5 SW-REL-02: an SDK bundle whose version differs from the pin
 scan -E -e 'static-linux-[0-9.]+\.artifactbundle' | grep -v -F -e "swift-${V:?pin missing, see P1}-RELEASE_static-linux"
 
@@ -43,9 +45,9 @@ scan -e 'generate-sbom'
 scan -e '--sbom-spec' | grep -e 'build-system native'
 
 # P10 SW-REL-17: a root manifest reachable from a tag with path:, branch: or revision: (a root consumer may use path: locally). Root manifests only, as SW-PKG-20: a nested Benchmarks or Tests manifest is no product. The last grep drops commented lines
-find . -maxdepth 1 -name 'Package*.swift' -exec grep -Hn -e '\.package(path:' -e '\.package(name:[^)]*path:' -e 'branch:' -e 'revision:' {} + | grep -v -E -e ':[0-9]+:[[:space:]]*//'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Package*.swift' | xargs -0 -r grep -H -n -e '\.package(path:' -e '\.package(name:[^)]*path:' -e 'branch:' -e 'revision:' -- | grep -v -E -e ':[0-9]+:[[:space:]]*//'
 # P11 SW-REL-22 (CONSIDER): an exact: prerelease swift-syntax pin defeats the prebuilt artifact
-grep -rn --exclude-dir=.build --exclude-dir=.git --include='Package.swift' --include='Package@swift-*.swift' -e 'swift-syntax.*exact' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/Package.swift' ':(glob)**/Package@swift-*.swift' ':(exclude,glob)**/.build/**' | xargs -0 -r grep -H -n -e 'swift-syntax.*exact' --
 ```
 
 ## What each output means

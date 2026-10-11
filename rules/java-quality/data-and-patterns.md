@@ -52,8 +52,17 @@ where SpotBugs runs at all, so the grep is the floor.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| JAVA-DATA-01 | A record component typed as an array, `Collection`, `List`, `Set`, `Map` or `Date` is copied in the compact constructor. Use `List.copyOf`/`Set.copyOf`/`Map.copyOf`, which return an immutable copy and so also make the generated accessor safe, or `.clone()` for an array, which does not (see JAVA-DATA-02). | The record declaration promises immutability and delivers a final reference to a mutable object. A caller that kept the list it passed in, or that mutates the array the accessor returned, changes the record after construction. Oracle Secure Coding `MUTABLE-2`/`MUTABLE-3`/`MUTABLE-12` and Effective Java Item 50 both predate records and both still describe the bug exactly. | `grep -rnE --include='*.java' -e 'record [A-Za-z0-9_]+\(' src` lists every record. Read each component list: a mutable component type with no compact constructor assigning a copy is the finding. Empty output means the tree declares no records, which is a pass. | MUST |
-| JAVA-DATA-02 | No record component is an array. Use `List<T>`, or a wrapper type that defines `equals`/`hashCode` over the contents. | The generated `equals` calls `Object.equals` on each component, which for an array is reference identity, and the generated `hashCode` mixes the identity hash. Two records built from equal byte contents compare unequal and land in different `HashMap` buckets, run to run. `.clone()` in the compact constructor fixes exposure and makes this worse, because now no two instances can ever be equal. | `grep -rnE --include='*.java' -e 'record [A-Za-z0-9_]+\([^)]*\[\]' src`. Any hit is the finding unless the record also declares `equals`, `hashCode` and the affected accessor by hand. Empty output is the pass. | MUST |
+| JAVA-DATA-01 | A record component typed as an array, `Collection`, `List`, `Set`, `Map` or `Date` is copied in the compact constructor. Use `List.copyOf`/`Set.copyOf`/`Map.copyOf`, which return an immutable copy and so also make the generated accessor safe, or `.clone()` for an array, which does not (see JAVA-DATA-02). | The record declaration promises immutability and delivers a final reference to a mutable object. A caller that kept the list it passed in, or that mutates the array the accessor returned, changes the record after construction. Oracle Secure Coding `MUTABLE-2`/`MUTABLE-3`/`MUTABLE-12` and Effective Java Item 50 both predate records and both still describe the bug exactly. | see block JAVA-DATA-01 lists every record. Read each component list: a mutable component type with no compact constructor assigning a copy is the finding. Empty output means the tree declares no records, which is a pass. | MUST |
+| JAVA-DATA-02 | No record component is an array. Use `List<T>`, or a wrapper type that defines `equals`/`hashCode` over the contents. | The generated `equals` calls `Object.equals` on each component, which for an array is reference identity, and the generated `hashCode` mixes the identity hash. Two records built from equal byte contents compare unequal and land in different `HashMap` buckets, run to run. `.clone()` in the compact constructor fixes exposure and makes this worse, because now no two instances can ever be equal. | see block JAVA-DATA-02. Any hit is the finding unless the record also declares `equals`, `hashCode` and the affected accessor by hand. Empty output is the pass. | MUST |
+
+```sh
+# JAVA-DATA-01
+git ls-files -z --cached --others --exclude-standard -- ':(glob)src/**/*.java' |
+  xargs -0 -r grep -H -n -E -e 'record [A-Za-z0-9_]+\(' --
+# JAVA-DATA-02
+git ls-files -z --cached --others --exclude-standard -- ':(glob)src/**/*.java' |
+  xargs -0 -r grep -H -n -E -e 'record [A-Za-z0-9_]+\([^)]*\[\]' --
+```
 
 ```java
 // wrong: immutable by declaration only, and never equal to itself-by-value
@@ -78,9 +87,20 @@ check at any promotion level.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| JAVA-DATA-03 | A type that overrides `equals` overrides `hashCode` in the same class, and a type whose identity is its state is declared a `record` instead of carrying a hand-written pair. | A hand-written pair drifts on the next field addition, and the drift is silent: the object simply stops being found in the `HashSet` it was put into. A record regenerates both from the component list, so the class of bug cannot recur. | Error Prone `EqualsHashCode` where Error Prone runs. Tool-free floor: `grep -rl --include='*.java' -e 'boolean equals(Object' src \| xargs -r grep -L -e 'int hashCode()'`. Every file printed is the finding, and empty output is the pass. | MUST |
+| JAVA-DATA-03 | A type that overrides `equals` overrides `hashCode` in the same class, and a type whose identity is its state is declared a `record` instead of carrying a hand-written pair. | A hand-written pair drifts on the next field addition, and the drift is silent: the object simply stops being found in the `HashSet` it was put into. A record regenerates both from the component list, so the class of bug cannot recur. | Error Prone `EqualsHashCode` where Error Prone runs. Tool-free floor: see block JAVA-DATA-03. Every file printed is the finding, and empty output is the pass. | MUST |
 | JAVA-DATA-04 | Every instance field that `equals` reads is `final`, and no field of a mutable type is read by `equals` at all. | A key mutated after insertion is unreachable in its own `HashMap`. It is not removed, not found, and not reported. This is the failure that makes a record with an array component (JAVA-DATA-02) dangerous rather than merely wrong. | Reading check, no lint exists. The files JAVA-DATA-03's grep lists are the candidate set. In each, a non-`final` field read by `equals`, or a `final` field of an array, `Collection` or `Date` type, is the finding. | SHOULD |
-| JAVA-DATA-05 | `compareTo` reads exactly the fields `equals` reads, or the class Javadoc states the inconsistency in the `Comparable` contract's own words. | `TreeSet` and `TreeMap` decide membership with `compareTo`, not `equals`. A `compareTo` over one field of a three-field type silently discards every element that ties on that field, and the same collection under a `HashSet` keeps them. Effective Java Item 14. | `grep -rn --include='*.java' -e 'implements Comparable' -e 'Comparator.comparing' src`. For each hit, compare the fields `compareTo` reads against the fields `equals` reads. A difference with no Javadoc statement is the finding. Empty output is the pass. | SHOULD |
+| JAVA-DATA-05 | `compareTo` reads exactly the fields `equals` reads, or the class Javadoc states the inconsistency in the `Comparable` contract's own words. | `TreeSet` and `TreeMap` decide membership with `compareTo`, not `equals`. A `compareTo` over one field of a three-field type silently discards every element that ties on that field, and the same collection under a `HashSet` keeps them. Effective Java Item 14. | see block JAVA-DATA-05. For each hit, compare the fields `compareTo` reads against the fields `equals` reads. A difference with no Javadoc statement is the finding. Empty output is the pass. | SHOULD |
+
+```sh
+# JAVA-DATA-03
+git ls-files -z --cached --others --exclude-standard -- ':(glob)src/**/*.java' |
+  xargs -0 -r grep -l -e 'boolean equals(Object' -- |
+  tr '\n' '\0' |
+  xargs -0 -r grep -L -e 'int hashCode()' --
+# JAVA-DATA-05
+git ls-files -z --cached --others --exclude-standard -- ':(glob)src/**/*.java' |
+  xargs -0 -r grep -H -n -e 'implements Comparable' -e 'Comparator.comparing' --
+```
 
 ## Closed Types and Switches
 
@@ -94,9 +114,27 @@ rule reaches. Error Prone's `UnnecessaryDefaultInEnumSwitch` ships in
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| JAVA-DATA-06 | Model a closed set of alternatives as a `sealed interface` with one `record` per variant, consumed by a pattern `switch`. Not a tagged class (one type or kind field beside per-variant nullable fields), not an `instanceof` cascade, not an abstract class plus a visitor. | Under a sealed hierarchy the compiler forces every consumer to be revisited when a variant is added. Under a tag field it forces nothing, and every variant's fields are nullable for every other variant, which is the illegal-state problem Data-Oriented Programming v1.1 (2024) names. Effective Java Item 23 recommends the class hierarchy and predates sealed types by three years, so this is the shape a model reproduces unaided. | `grep -rn --include='*.java' -e 'String kind;' -e 'String type;' -e 'int tag;' src` finds the tagged-class shape, and `grep -rcE --include='*.java' -e 'instanceof [A-Z]' src` counts the cascade per file. Any hit from the first, or a file whose count is three or more over types in one package, is the finding. Empty output from the first and counts of zero or one from the second are the pass. | SHOULD |
-| JAVA-DATA-07 | A pattern `switch` carries a `case null` label, or the enclosing code has already proven the selector non-null. | [JEP 441](https://openjdk.org/jeps/441) kept the pre-21 behaviour deliberately: without `case null` the switch throws `NullPointerException` on a null selector exactly as an old one did. "Pattern matching handles null" is the natural inference and it is false. The fix is a `case null ->` arm of its own. Writing `case null, default ->` instead reintroduces the `default` that JAVA-DATA-08 and `JAVA-API-07` forbid over a type this repository owns. | `grep -rn --include='*.java' -e 'case null' src` and `grep -rnE --include='*.java' -e 'case [A-Z][A-Za-z0-9_]* [a-z]' src`. Every file in the second list that is absent from the first is the finding unless its selector is provably non-null. Empty output from the second grep means there are no pattern switches, which is a pass. | MUST |
-| JAVA-DATA-08 | A `switch` over an enum this repository declares lists every constant and carries no `default` label. Keep `default` only over an enum the repository does not own, whose owner can add a constant in a patch release. | The constant added next month routes to the catch-all at every call site, with no diagnostic anywhere. Writing it as `default -> throw new IllegalStateException("unreachable")` is the same defect wearing a safety costume, because it moves a failure the compiler would have shown at build time into production. | `grep -rn --include='*.java' -e 'default:' -e 'default ->' src`. A hit whose selector is an enum declared in this repository is the finding, and a hit over a third-party enum, a `String` or an `int` is correct and stays. Empty output is the pass. Error Prone `UnnecessaryDefaultInEnumSwitch` reports the same finding once promoted to `ERROR`, and reports nothing at all before that. | MUST |
+| JAVA-DATA-06 | Model a closed set of alternatives as a `sealed interface` with one `record` per variant, consumed by a pattern `switch`. Not a tagged class (one type or kind field beside per-variant nullable fields), not an `instanceof` cascade, not an abstract class plus a visitor. | Under a sealed hierarchy the compiler forces every consumer to be revisited when a variant is added. Under a tag field it forces nothing, and every variant's fields are nullable for every other variant, which is the illegal-state problem Data-Oriented Programming v1.1 (2024) names. Effective Java Item 23 recommends the class hierarchy and predates sealed types by three years, so this is the shape a model reproduces unaided. | see block JAVA-DATA-06 (1 of 2) finds the tagged-class shape, and see block JAVA-DATA-06 (2 of 2) counts the cascade per file. Any hit from the first, or a file whose count is three or more over types in one package, is the finding. Empty output from the first and counts of zero or one from the second are the pass. | SHOULD |
+| JAVA-DATA-07 | A pattern `switch` carries a `case null` label, or the enclosing code has already proven the selector non-null. | [JEP 441](https://openjdk.org/jeps/441) kept the pre-21 behaviour deliberately: without `case null` the switch throws `NullPointerException` on a null selector exactly as an old one did. "Pattern matching handles null" is the natural inference and it is false. The fix is a `case null ->` arm of its own. Writing `case null, default ->` instead reintroduces the `default` that JAVA-DATA-08 and `JAVA-API-07` forbid over a type this repository owns. | see block JAVA-DATA-07 (1 of 2) and see block JAVA-DATA-07 (2 of 2). Every file in the second list that is absent from the first is the finding unless its selector is provably non-null. Empty output from the second grep means there are no pattern switches, which is a pass. | MUST |
+| JAVA-DATA-08 | A `switch` over an enum this repository declares lists every constant and carries no `default` label. Keep `default` only over an enum the repository does not own, whose owner can add a constant in a patch release. | The constant added next month routes to the catch-all at every call site, with no diagnostic anywhere. Writing it as `default -> throw new IllegalStateException("unreachable")` is the same defect wearing a safety costume, because it moves a failure the compiler would have shown at build time into production. | see block JAVA-DATA-08. A hit whose selector is an enum declared in this repository is the finding, and a hit over a third-party enum, a `String` or an `int` is correct and stays. Empty output is the pass. Error Prone `UnnecessaryDefaultInEnumSwitch` reports the same finding once promoted to `ERROR`, and reports nothing at all before that. | MUST |
+
+```sh
+# JAVA-DATA-06 (1 of 2)
+git ls-files -z --cached --others --exclude-standard -- ':(glob)src/**/*.java' |
+  xargs -0 -r grep -H -n -e 'String kind;' -e 'String type;' -e 'int tag;' --
+# JAVA-DATA-06 (2 of 2)
+git ls-files -z --cached --others --exclude-standard -- ':(glob)src/**/*.java' |
+  xargs -0 -r grep -H -c -E -e 'instanceof [A-Z]' --
+# JAVA-DATA-07 (1 of 2)
+git ls-files -z --cached --others --exclude-standard -- ':(glob)src/**/*.java' |
+  xargs -0 -r grep -H -n -e 'case null' --
+# JAVA-DATA-07 (2 of 2)
+git ls-files -z --cached --others --exclude-standard -- ':(glob)src/**/*.java' |
+  xargs -0 -r grep -H -n -E -e 'case [A-Z][A-Za-z0-9_]* [a-z]' --
+# JAVA-DATA-08
+git ls-files -z --cached --others --exclude-standard -- ':(glob)src/**/*.java' |
+  xargs -0 -r grep -H -n -e 'default:' -e 'default ->' --
+```
 
 ```java
 // wrong: exhaustive over every permitted subtype, and still throws on null
@@ -116,7 +154,16 @@ so that row governs it. What is left is the value itself.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| JAVA-DATA-09 | A method whose return type is `Optional` never returns `null`, and `Optional.of(x)` is written only where `x` is provably non-null. Use `Optional.ofNullable` everywhere else. | Both halves throw. `Optional.of(null)` throws `NullPointerException` at the producer, and a `null` returned in place of `Optional.empty()` throws at the consumer's first `.map`, one stack frame removed from the code that caused it. The type's only contract is that the reference is never null, so an implementation that breaks it is worse than the bare nullable return it replaced. | `grep -rn --include='*.java' -e 'Optional.of(' src`. An argument that is a map lookup, a field read or an unannotated parameter is the finding, and a literal, a `new` or a `@NonNull`-annotated value is the pass. Then `grep -rn --include='*.java' -e 'return null' src` and confirm no hit sits in a method returning `Optional`. NullAway's `CheckOptionalEmptiness` covers the `.get()` half only and is off by default. | MUST |
+| JAVA-DATA-09 | A method whose return type is `Optional` never returns `null`, and `Optional.of(x)` is written only where `x` is provably non-null. Use `Optional.ofNullable` everywhere else. | Both halves throw. `Optional.of(null)` throws `NullPointerException` at the producer, and a `null` returned in place of `Optional.empty()` throws at the consumer's first `.map`, one stack frame removed from the code that caused it. The type's only contract is that the reference is never null, so an implementation that breaks it is worse than the bare nullable return it replaced. | see block JAVA-DATA-09 (1 of 2). An argument that is a map lookup, a field read or an unannotated parameter is the finding, and a literal, a `new` or a `@NonNull`-annotated value is the pass. Then see block JAVA-DATA-09 (2 of 2) and confirm no hit sits in a method returning `Optional`. NullAway's `CheckOptionalEmptiness` covers the `.get()` half only and is off by default. | MUST |
+
+```sh
+# JAVA-DATA-09 (1 of 2)
+git ls-files -z --cached --others --exclude-standard -- ':(glob)src/**/*.java' |
+  xargs -0 -r grep -H -n -e 'Optional.of(' --
+# JAVA-DATA-09 (2 of 2)
+git ls-files -z --cached --others --exclude-standard -- ':(glob)src/**/*.java' |
+  xargs -0 -r grep -H -n -e 'return null' --
+```
 
 ## What Agents Get Wrong Here
 

@@ -57,6 +57,8 @@ one reports nothing and reads exactly like a passing gate.
 A task is done when a command, its exit code, and the tree it ran against are
 all named. Narration is not evidence.
 
+Every search command in this set lists its files with `git ls-files`, so run it from the root of a git work tree. It reads tracked files and untracked files that are not ignored; a path matched by `.gitignore` is not searched.
+
 ## Non-Negotiables
 
 Every line below blocks a merge. IDs resolve to the depth files in

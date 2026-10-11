@@ -77,8 +77,8 @@ uses the configure gate spelled for its binary (`CMK-CORE-01`):
 plan file: an exit code, a grep's lines, the round trip's last `_DIR` line.
 Never from a green build or install, and never from reading the diff. Read the
 exit code first (`C8`). A configure that did not exit 0 voids every grep of its
-build tree. A grep that exits 2 on a missing operand is neither a pass nor a
-hit. A gate is live on a leg only when the canary exits 1 through that leg's own
+build tree. A grep over a pathspec that lists no file prints nothing, which is neither a
+pass nor a hit. A gate is live on a leg only when the canary exits 1 through that leg's own
 binary, preset or script. Where a pass grep cannot see a spelling, read its list
 command too (`F1b` beside `F1`, the option lister beside the smoke).
 
@@ -209,7 +209,7 @@ installed headers. List them:
 # NAME = the definition, the operand = the directory the library installs headers from, when it
 # holds only installed headers. Otherwise name each installed header file, generated ones from the build tree.
 NAME=JSONCPP_USE_SECURE_MEMORY
-grep -rn -e "$NAME" include
+find include -type f -print0 | xargs -0 -r grep -H -n -e "$NAME" --
 ```
 
 Empty output = `PRIVATE`. Any line = `PUBLIC`, or a configured header that

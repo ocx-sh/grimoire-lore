@@ -3,8 +3,9 @@
 Read this when running step 0, or when re-running one command as the exit check
 of steps 1 to 4. Every command runs from the repository root and was run
 against a planted violating and a planted compliant tree on CMake 3.31.12 and
-4.4.2 (2026-09-26). Each `I` command is a `grep -r` with an explicit directory
-operand and no early-exiting reader (`CMK-CORE-05`).
+4.4.2 (2026-09-26). Each `I` command is a `grep` over the git-fed file list
+(`git ls-files -z ... | xargs -0 -r grep ... --`) with quoted pathspecs and no early-exiting reader (`CMK-CORE-05`).
+Translated to that form 2026-10-11 and re-run red on a planted tree and green on a compliant twin, under GNU grep and busybox.
 
 Contents: [How to read the output](#how-to-read-the-output) · [Links, scope and flags](#links-scope-and-flags) ·
 [Parses and reserved names](#parses-and-reserved-names) ·
@@ -29,8 +30,8 @@ target name is not `PUBLIC`, `PRIVATE` or `INTERFACE` is the finding (`-A2`
 shows a split call's continuation).
 
 ```sh
-grep -rni -A2 --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_deps' --exclude-dir='build*' \
-  -e 'target_link_libraries[[:space:]]*(' .
+CHECKS=.claude/skills/cmake-modernize/checks    # where this checks/ directory is installed
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' ':(exclude,glob)**/_deps/**' ':(exclude,glob)**/build*/**' | xargs -0 -r awk -v re='target_link_libraries[[:space:]]*[(]' -v A=2 -v icase=1 -f "$CHECKS/context.awk" --
 ```
 
 `I2`, directory scope (`CMK-TGT-03`, SHOULD, never auto-rewrite). Empty output
@@ -38,10 +39,14 @@ grep -rni -A2 --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_dep
 is usually a dead twin of a live call, so record both (jsoncpp, three pairs).
 
 ```sh
-grep -rniE --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_deps' --exclude-dir='build*' \
-  -e '^[[:space:]]*include_directories[[:space:]]*\(' -e '^[[:space:]]*add_definitions[[:space:]]*\(' \
-  -e '^[[:space:]]*add_compile_options[[:space:]]*\(' -e '^[[:space:]]*link_directories[[:space:]]*\(' \
-  -e '^[[:space:]]*link_libraries[[:space:]]*\(' -e '^[[:space:]]*add_compile_definitions[[:space:]]*\(' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' ':(exclude,glob)**/_deps/**' ':(exclude,glob)**/build*/**' \
+  | xargs -0 -r grep -H -n -i -E \
+    -e '^[[:space:]]*include_directories[[:space:]]*\(' \
+    -e '^[[:space:]]*add_definitions[[:space:]]*\(' \
+    -e '^[[:space:]]*add_compile_options[[:space:]]*\(' \
+    -e '^[[:space:]]*link_directories[[:space:]]*\(' \
+    -e '^[[:space:]]*link_libraries[[:space:]]*\(' \
+    -e '^[[:space:]]*add_compile_definitions[[:space:]]*\(' --
 ```
 
 `I2b`, definitions set as a target, source or directory property
@@ -49,8 +54,10 @@ grep -rniE --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_deps' 
 reader grep of SKILL.md steps 2 to 4 (cmark's `COMPILE_FLAGS -DCMARK_STATIC_DEFINE`).
 
 ```sh
-grep -rniE --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_deps' --exclude-dir='build*' \
-  -e '(^|[[:space:]])COMPILE_FLAGS([[:space:]]|$)' -e '(^|[[:space:]])COMPILE_DEFINITIONS([[:space:]]|$)' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' ':(exclude,glob)**/_deps/**' ':(exclude,glob)**/build*/**' \
+  | xargs -0 -r grep -H -n -i -E \
+    -e '(^|[[:space:]])COMPILE_FLAGS([[:space:]]|$)' \
+    -e '(^|[[:space:]])COMPILE_DEFINITIONS([[:space:]]|$)' --
 ```
 
 `I3`, global flag writes (`CMK-TGT-04`). Empty output = pass. A value that does
@@ -60,12 +67,16 @@ drops a toolchain's `_INIT` `-fPIC` and the shared link fails. A
 SHOULD. A `..._FLAGS_INIT` hit inside a toolchain file is no finding.
 
 ```sh
-grep -rniE --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_deps' --exclude-dir='build*' \
-  -e 'set[[:space:]]*\([[:space:]]*CMAKE_C_FLAGS' -e 'set[[:space:]]*\([[:space:]]*CMAKE_CXX_FLAGS' \
-  -e 'set[[:space:]]*\([[:space:]]*CMAKE_EXE_LINKER_FLAGS' -e 'set[[:space:]]*\([[:space:]]*CMAKE_SHARED_LINKER_FLAGS' \
-  -e 'set[[:space:]]*\([[:space:]]*CMAKE_STATIC_LINKER_FLAGS' -e 'set[[:space:]]*\([[:space:]]*CMAKE_MODULE_LINKER_FLAGS' \
-  -e 'string[[:space:]]*\([[:space:]]*APPEND[[:space:]]+CMAKE_C_FLAGS' \
-  -e 'string[[:space:]]*\([[:space:]]*APPEND[[:space:]]+CMAKE_CXX_FLAGS' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' ':(exclude,glob)**/_deps/**' ':(exclude,glob)**/build*/**' \
+  | xargs -0 -r grep -H -n -i -E \
+    -e 'set[[:space:]]*\([[:space:]]*CMAKE_C_FLAGS' \
+    -e 'set[[:space:]]*\([[:space:]]*CMAKE_CXX_FLAGS' \
+    -e 'set[[:space:]]*\([[:space:]]*CMAKE_EXE_LINKER_FLAGS' \
+    -e 'set[[:space:]]*\([[:space:]]*CMAKE_SHARED_LINKER_FLAGS' \
+    -e 'set[[:space:]]*\([[:space:]]*CMAKE_STATIC_LINKER_FLAGS' \
+    -e 'set[[:space:]]*\([[:space:]]*CMAKE_MODULE_LINKER_FLAGS' \
+    -e 'string[[:space:]]*\([[:space:]]*APPEND[[:space:]]+CMAKE_C_FLAGS' \
+    -e 'string[[:space:]]*\([[:space:]]*APPEND[[:space:]]+CMAKE_CXX_FLAGS' --
 ```
 
 ## Parses and reserved names
@@ -77,8 +88,7 @@ hit's row names the command, public (another project calls it) or private, and
 each multi-value keyword that takes lists of files, targets or paths.
 
 ```sh
-grep -rniE --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_deps' --exclude-dir='build*' \
-  -e 'cmake_parse_arguments[[:space:]]*\(' . | grep -v -e 'PARSE_ARGV' -e 'PARSE_ARGN'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' ':(exclude,glob)**/_deps/**' ':(exclude,glob)**/build*/**' | xargs -0 -r grep -H -n -i -E -e 'cmake_parse_arguments[[:space:]]*\(' -- | grep -v -e 'PARSE_ARGV' -e 'PARSE_ARGN'
 ```
 
 ### Migrating a parse
@@ -112,9 +122,10 @@ a `set(<name> ... CACHE ...)` named `CMAKE_*`, run
 [the variable-existence check](#the-variable-existence-check).
 
 ```sh
-grep -rnE --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_deps' --exclude-dir='build*' \
-  -e '^[[:space:]]*option[[:space:]]*\([[:space:]]*"?[Cc][Mm][Aa][Kk][Ee]_' \
-  -e '^[[:space:]]*option[[:space:]]*\([[:space:]]*"?_[Cc][Mm][Aa][Kk][Ee]_' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' ':(exclude,glob)**/_deps/**' ':(exclude,glob)**/build*/**' \
+  | xargs -0 -r grep -H -n -E \
+    -e '^[[:space:]]*option[[:space:]]*\([[:space:]]*"?[Cc][Mm][Aa][Kk][Ee]_' \
+    -e '^[[:space:]]*option[[:space:]]*\([[:space:]]*"?_[Cc][Mm][Aa][Kk][Ee]_' --
 ```
 
 ## Build type, fetches and policy knobs
@@ -125,8 +136,7 @@ in a library's files outside a `PROJECT_IS_TOP_LEVEL` guard, a `CACHE` hit after
 multi-config test is `CMAKE_CONFIGURATION_TYPES` are findings.
 
 ```sh
-grep -rniE --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_deps' --exclude-dir='build*' \
-  -e 'set[[:space:]]*\([[:space:]]*CMAKE_BUILD_TYPE' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' ':(exclude,glob)**/_deps/**' ':(exclude,glob)**/build*/**' | xargs -0 -r grep -H -n -i -E -e 'set[[:space:]]*\([[:space:]]*CMAKE_BUILD_TYPE' --
 ```
 
 `I7`, forced acquisition (`CMK-DEP-07`). Empty output = not applicable. A hit
@@ -135,8 +145,7 @@ under a test, example, benchmark, docs or tool directory, or behind
 other hit is a step-5 row, settled by the offline subproject probe.
 
 ```sh
-grep -rniE --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_deps' --exclude-dir='build*' \
-  -e 'FetchContent_MakeAvailable' -e 'CPMAddPackage' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' ':(exclude,glob)**/_deps/**' ':(exclude,glob)**/build*/**' | xargs -0 -r grep -H -n -i -E -e 'FetchContent_MakeAvailable' -e 'CPMAddPackage' --
 ```
 
 `I8`, policy knobs (`CMK-DEP-15`). Empty output = pass. A hit in a preset's
@@ -144,28 +153,32 @@ grep -rniE --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_deps' 
 exactly one add is the finding, and so is 3.5 in an application build.
 
 ```sh
-grep -rn --include='CMakeLists.txt' --include='*.cmake' --include='CMakePresets.json' --include='*.yml' --include='*.yaml' \
-  -e 'CMAKE_POLICY_VERSION_MINIMUM' -e 'CMAKE_POLICY_DEFAULT_CMP' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' ':(glob)**/CMakePresets.json' ':(glob)**/*.yml' ':(glob)**/*.yaml' \
+  | xargs -0 -r grep -H -n \
+    -e 'CMAKE_POLICY_VERSION_MINIMUM' \
+    -e 'CMAKE_POLICY_DEFAULT_CMP' --
 ```
 
 ## Floors and hand-off tokens
 
 `I9`, dependency floors (`CMK-VER-05`), over the fetched and vendored trees
-that exist (a missing operand exits 2, not a pass), else `vacuous`. Empty
+that exist (`find` prints an error for an absent one and the grep prints
+nothing, which is not a pass), else `vacuous`. Empty
 output = pass. A live line with no `...<max>` of 3.10 or above is the finding:
 below 3.5 a hard error on 4.x, 3.5 to 3.9 a gate failure on 3.31 and 4.4.
 
 ```sh
-grep -rniE --include='CMakeLists.txt' --include='*.cmake' \
-  -e 'cmake_minimum_required[[:space:]]*\([[:space:]]*VERSION[[:space:]]+(2\.|3\.[0-9]([^0-9]|$))' \
-  -e 'cmake_policy[[:space:]]*\([[:space:]]*VERSION[[:space:]]+(2\.|3\.[0-9]([^0-9]|$))' build/_deps third_party
+find build/_deps third_party -type f \( -name 'CMakeLists.txt' -o -name '*.cmake' \) -print0 \
+  | xargs -0 -r grep -H -n -i -E \
+    -e 'cmake_minimum_required[[:space:]]*\([[:space:]]*VERSION[[:space:]]+(2\.|3\.[0-9]([^0-9]|$))' \
+    -e 'cmake_policy[[:space:]]*\([[:space:]]*VERSION[[:space:]]+(2\.|3\.[0-9]([^0-9]|$))' --
 ```
 
 `I10`, Conan 1 tokens. Empty output = continue. Any hit stops the skill and
 hands off to `cpp-packaging` for a manager migration.
 
 ```sh
-grep -rni --include='CMakeLists.txt' --include='*.cmake' -e 'conan_basic_setup' -e 'conanbuildinfo' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' | xargs -0 -r grep -H -n -i -e 'conan_basic_setup' -e 'conanbuildinfo' --
 ```
 
 `I13`, policy-removed Find modules (`CMK-DEP-19`), a step-1 row: a finding once
@@ -175,11 +188,16 @@ floor's second diff (cmark's `PythonInterp`). `I14`, `export(PACKAGE)`
 registry entry a later `find_package` can resolve (libssh2). Empty = pass.
 
 ```sh
-grep -rniE --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_deps' --exclude-dir='build*' \
-  -e 'find_package[[:space:]]*\([[:space:]]*CUDA([[:space:])]|$)' -e 'find_package[[:space:]]*\([[:space:]]*PythonInterp' \
-  -e 'find_package[[:space:]]*\([[:space:]]*PythonLibs' -e 'find_package[[:space:]]*\([[:space:]]*GCCXML' -e 'find_package[[:space:]]*\([[:space:]]*CABLE' .
-grep -rniE --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_deps' --exclude-dir='build*' \
-  -e 'export[[:space:]]*\([[:space:]]*package([[:space:])]|$)' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' ':(exclude,glob)**/_deps/**' ':(exclude,glob)**/build*/**' \
+  | xargs -0 -r grep -H -n -i -E \
+    -e 'find_package[[:space:]]*\([[:space:]]*CUDA([[:space:])]|$)' \
+    -e 'find_package[[:space:]]*\([[:space:]]*PythonInterp' \
+    -e 'find_package[[:space:]]*\([[:space:]]*PythonLibs' \
+    -e 'find_package[[:space:]]*\([[:space:]]*GCCXML' \
+    -e 'find_package[[:space:]]*\([[:space:]]*CABLE' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' ':(exclude,glob)**/_deps/**' ':(exclude,glob)**/build*/**' \
+  | xargs -0 -r grep -H -n -i -E \
+    -e 'export[[:space:]]*\([[:space:]]*package([[:space:])]|$)' --
 ```
 
 `F1`, the own-code floor, and `F1b`, every variable floor, policy pin and range.
@@ -188,14 +206,16 @@ SKILL.md step 1 settles each `F1b` line. Empty `F1b` output = nothing to check.
 ```sh
 # F1: every own-code floor carries a three-dot max. Empty output = pass. Lists a bare floor (3.10, 3.10 FATAL_ERROR,
 # upper case, a space before the paren) and a two-dot 3.15..4.3. A split or variable floor is not seen: F1b lists those.
-grep -rniE --include='CMakeLists.txt' --exclude-dir='_deps' --exclude-dir='build*' \
-  -e 'cmake_minimum_required[[:space:]]*\([[:space:]]*VERSION[[:space:]]+[0-9]+(\.[0-9]+)*[[:space:]]*(FATAL_ERROR)?[[:space:]]*\)' \
-  -e 'cmake_minimum_required[[:space:]]*\([[:space:]]*VERSION[[:space:]]+[0-9]+(\.[0-9]+)*\.\.[0-9]' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(exclude,glob)**/_deps/**' ':(exclude,glob)**/build*/**' \
+  | xargs -0 -r grep -H -n -i -E \
+    -e 'cmake_minimum_required[[:space:]]*\([[:space:]]*VERSION[[:space:]]+[0-9]+(\.[0-9]+)*[[:space:]]*(FATAL_ERROR)?[[:space:]]*\)' \
+    -e 'cmake_minimum_required[[:space:]]*\([[:space:]]*VERSION[[:space:]]+[0-9]+(\.[0-9]+)*\.\.[0-9]' --
 # F1b: floors through a variable, own-code policy pins, and every existing range. A list to read, never a pass.
-grep -rniE --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_deps' --exclude-dir='build*' \
-  -e 'cmake_minimum_required[[:space:]]*\([[:space:]]*VERSION[[:space:]]+[$]' \
-  -e 'cmake_policy[[:space:]]*\([[:space:]]*VERSION' \
-  -e 'cmake_minimum_required[[:space:]]*\([[:space:]]*VERSION[[:space:]]+[0-9.]+\.\.\.[0-9]' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' ':(exclude,glob)**/_deps/**' ':(exclude,glob)**/build*/**' \
+  | xargs -0 -r grep -H -n -i -E \
+    -e 'cmake_minimum_required[[:space:]]*\([[:space:]]*VERSION[[:space:]]+[$]' \
+    -e 'cmake_policy[[:space:]]*\([[:space:]]*VERSION' \
+    -e 'cmake_minimum_required[[:space:]]*\([[:space:]]*VERSION[[:space:]]+[0-9.]+\.\.\.[0-9]' --
 ```
 
 ## Standards and warnings-as-errors
@@ -208,8 +228,10 @@ policy version 3.21 or later (cmark's bare `set(CMAKE_C_STANDARD 99)` ignored
 (`CMK-TGT-06`) and `CMAKE_<LANG>_EXTENSIONS OFF` (`CMK-TGT-07`).
 
 ```sh
-grep -rniE --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_deps' --exclude-dir='build*' \
-  -e 'set[[:space:]]*\([[:space:]]*CMAKE_CXX_STANDARD[[:space:]]' -e 'set[[:space:]]*\([[:space:]]*CMAKE_C_STANDARD[[:space:]]' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' ':(exclude,glob)**/_deps/**' ':(exclude,glob)**/build*/**' \
+  | xargs -0 -r grep -H -n -i -E \
+    -e 'set[[:space:]]*\([[:space:]]*CMAKE_CXX_STANDARD[[:space:]]' \
+    -e 'set[[:space:]]*\([[:space:]]*CMAKE_C_STANDARD[[:space:]]' --
 ```
 
 `I12`, literal warnings-as-errors (`CMK-TGT-09`). Empty output = pass. A hit
@@ -219,7 +241,7 @@ turns the error off: both are `vacuous`. A `-Werror=<category>` hit is
 `flagged-not-converted` with a `CMK-TGT-09` note, and does not hold step 4.
 
 ```sh
-grep -rn --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_deps' --exclude-dir='build*' -e '-Werror' -e '/WX' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' ':(exclude,glob)**/_deps/**' ':(exclude,glob)**/build*/**' | xargs -0 -r grep -H -n -e '-Werror' -e '/WX' --
 ```
 
 ## The flag-set check
@@ -250,8 +272,11 @@ definition passed cmark's Release diff and printed `< -DCMARK_DEBUG_NODES` in De
 
 ```sh
 # A list to read: each configuration name is one more flag-set run.
-grep -rnoiE --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_deps' --exclude-dir='build*' \
-  -e 'CONFIG:[A-Za-z]+' -e 'CMAKE_BUILD_TYPE[[:space:]]+(STREQUAL|MATCHES)[[:space:]]+"?[A-Za-z]+' -e 'CMAKE_[A-Z]+_FLAGS_[A-Z]+' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' ':(exclude,glob)**/_deps/**' ':(exclude,glob)**/build*/**' \
+  | xargs -0 -r grep -H -n -o -i -E \
+    -e 'CONFIG:[A-Za-z]+' \
+    -e 'CMAKE_BUILD_TYPE[[:space:]]+(STREQUAL|MATCHES)[[:space:]]+"?[A-Za-z]+' \
+    -e 'CMAKE_[A-Z]+_FLAGS_[A-Z]+' --
 ```
 
 A diff that moves a linker flag (an `I3` `_LINKER_FLAGS` hit, `LINK_FLAGS`,
@@ -274,7 +299,7 @@ into two build directories. List the configured outputs first:
 
 ```sh
 # The configure_file() calls, any case. A list to read: each output path goes into CONFIGURED.
-grep -rni --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_deps' --exclude-dir='build*' -e 'configure_file' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' ':(exclude,glob)**/_deps/**' ':(exclude,glob)**/build*/**' | xargs -0 -r grep -H -n -i -e 'configure_file' --
 ```
 
 ```sh

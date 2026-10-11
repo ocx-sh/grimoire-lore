@@ -36,7 +36,7 @@ Contents: [Where This Fires](#where-this-fires) ·
 - **`maven-antrun-plugin` is the second named gap.** An Ant `<target>` block
   embedded in a POM is the one Ant surface that appears in live Maven builds,
   and it is unmeasured as of 2026-09-12. Find it with
-  `grep -rn --include='pom.xml' -e 'maven-antrun-plugin' .` before concluding a
+  `git ls-files -z --cached --others --exclude-standard -- ':(glob)**/pom.xml' | xargs -0 -r grep -H -n -e 'maven-antrun-plugin' --` before concluding a
   repository has no Ant in it. Empty output is the pass. A hit means Ant
   semantics apply to code no row below greps for.
 
@@ -45,10 +45,15 @@ Contents: [Where This Fires](#where-this-fires) ·
 Three greps over the Ant file, run before any other edit to it:
 
 ```bash
-grep -rn -A4 --include='build.xml' -e '<javac' .      # MVN-ANT-01
-grep -rn -A8 --include='build.xml' -e '<signjar' .    # MVN-ANT-06
-grep -rh --include='build.xml' -e '<property name=' . \
-  | sed 's/.*name="\([^"]*\)".*/\1/' | sort | uniq -d # MVN-ANT-03
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/build.xml' |
+  xargs -0 -r grep -H -n -A 4 -e '<javac' --  # MVN-ANT-01
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/build.xml' |
+  xargs -0 -r grep -H -n -A 8 -e '<signjar' --  # MVN-ANT-06
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/build.xml' |
+  xargs -0 -r grep -H -e '<property name=' -- |
+  sed 's/.*name="\([^"]*\)".*/\1/' |
+  sort |
+  uniq -d  # MVN-ANT-03
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
@@ -87,7 +92,9 @@ TARGET=dist; ant -v "$TARGET"    # prints each target's if/unless skip decision
 One grep over the Gradle side, then one repeated build to confirm the cost:
 
 ```bash
-grep -rn --include='*.gradle' --include='*.gradle.kts' -e 'importBuild' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.gradle' \
+  ':(glob)**/*.gradle.kts' |
+  xargs -0 -r grep -H -n -e 'importBuild' --
 ```
 
 | ID | Rule | Rationale | Verification | Severity |

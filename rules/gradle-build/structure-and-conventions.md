@@ -49,9 +49,10 @@ Contents: [Scope](#scope) · [Where Build Logic Lives](#where-build-logic-lives)
 
 ```bash
 # Read the root settings file end to end first, then:
-grep -rn --include='settings.gradle.kts' --include='settings.gradle' \
-  -e 'includeBuild' -e 'pluginManagement' -e 'rootProject.name' .
-ls -d build-logic buildSrc 2>/dev/null
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/settings.gradle.kts' \
+  ':(glob)**/settings.gradle' |
+  xargs -0 -r grep -H -n -e 'includeBuild' -e 'pluginManagement' -e 'rootProject.name' --
+git ls-files --cached --others --exclude-standard -- ':(glob)build-logic/**' ':(glob)buildSrc/**' | awk -F/ '!seen[$1]++ { print $1 }'
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
@@ -69,17 +70,33 @@ has been open since 2020-12-01 and is still open as of 2026-09-12. Nothing in
 the plausible completion. One grep set catches all four rows.
 
 ```bash
-grep -rn --include='*.gradle.kts' -e 'libs\.' -e 'org.gradle.accessors.dm' \
-  -e 'alias(libs.plugins' build-logic buildSrc 2>/dev/null
-grep -n -e 'versionCatalogs' buildSrc/settings.gradle.kts 2>/dev/null
+git ls-files -z --cached --others --exclude-standard -- ':(glob)build-logic/**/*.gradle.kts' \
+  ':(glob)buildSrc/**/*.gradle.kts' |
+  xargs -0 -r grep -H -n -e 'libs\.' -e 'org.gradle.accessors.dm' -e 'alias(libs.plugins' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)buildSrc/settings.gradle.kts' |
+  xargs -0 -r grep -H -n -e 'versionCatalogs' --
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| GRADLE-STRUCT-03 | Never write a dot-notation catalog accessor (`libs.guava`, `libs.versions.jacoco`) inside a precompiled script plugin. Bind the catalog locally with `extensions.getByType<VersionCatalogsExtension>().named("libs")`, then call `findLibrary(...)`, `findVersion(...)` or `findPlugin(...)`. | The accessors do not exist in that compilation unit, so the plugin fails to compile, and the error surfaces at the consuming build rather than at the edit. | `grep -rn --include='*.gradle.kts' -e 'libs\.' build-logic buildSrc 2>/dev/null` and open each hit. A hit in a file that does not itself bind `libs` from `VersionCatalogsExtension` is the finding. Empty output is the pass. A repo with neither directory prints nothing and passes vacuously. | MUST |
-| GRADLE-STRUCT-04 | Never import `org.gradle.accessors.dm.LibrariesForLibs`, or a per-catalog `LibrariesForX`, to restore dot notation. | It is a Gradle-internal generated class. It breaks across Gradle upgrades, breaks when one precompiled plugin applies another, and has a known classloading failure under `buildSrc` test source sets. Pre-documentation blog answers present it as *the* fix, so models reach for it. 0 of 32 surveyed repos use it. | `grep -rn -e 'org.gradle.accessors.dm' build-logic buildSrc 2>/dev/null`. Any hit is the finding, empty output is the pass. | MUST |
-| GRADLE-STRUCT-05 | Never write `alias(libs.plugins.x)` inside a precompiled script plugin's `plugins {}` block. Declare the plugin's marker artifact in the build-logic module's own `dependencies {}` and apply it by `id("...")` in the script body. | The `plugins {}` block is extracted and evaluated against a dummy project before any catalog exists. There is no workaround, supported or otherwise, for this one case, and no Gradle version has ever accepted it. | `grep -rn --include='*.gradle.kts' -e 'alias(libs.plugins' build-logic buildSrc 2>/dev/null`. A hit inside a precompiled *script plugin* is the finding. A hit in `build-logic/build.gradle.kts` itself is correct and is the pass. | MUST |
+| GRADLE-STRUCT-03 | Never write a dot-notation catalog accessor (`libs.guava`, `libs.versions.jacoco`) inside a precompiled script plugin. Bind the catalog locally with `extensions.getByType<VersionCatalogsExtension>().named("libs")`, then call `findLibrary(...)`, `findVersion(...)` or `findPlugin(...)`. | The accessors do not exist in that compilation unit, so the plugin fails to compile, and the error surfaces at the consuming build rather than at the edit. | see block GRADLE-STRUCT-03 and open each hit. A hit in a file that does not itself bind `libs` from `VersionCatalogsExtension` is the finding. Empty output is the pass. A repo with neither directory prints nothing and passes vacuously. | MUST |
+| GRADLE-STRUCT-04 | Never import `org.gradle.accessors.dm.LibrariesForLibs`, or a per-catalog `LibrariesForX`, to restore dot notation. | It is a Gradle-internal generated class. It breaks across Gradle upgrades, breaks when one precompiled plugin applies another, and has a known classloading failure under `buildSrc` test source sets. Pre-documentation blog answers present it as *the* fix, so models reach for it. 0 of 32 surveyed repos use it. | see block GRADLE-STRUCT-04. Any hit is the finding, empty output is the pass. | MUST |
+| GRADLE-STRUCT-05 | Never write `alias(libs.plugins.x)` inside a precompiled script plugin's `plugins {}` block. Declare the plugin's marker artifact in the build-logic module's own `dependencies {}` and apply it by `id("...")` in the script body. | The `plugins {}` block is extracted and evaluated against a dummy project before any catalog exists. There is no workaround, supported or otherwise, for this one case, and no Gradle version has ever accepted it. | see block GRADLE-STRUCT-05. A hit inside a precompiled *script plugin* is the finding. A hit in `build-logic/build.gradle.kts` itself is correct and is the pass. | MUST |
 | GRADLE-STRUCT-06 | If anything under `buildSrc` reads the main build's version catalog, `buildSrc/settings.gradle.kts` must re-declare it through `dependencyResolutionManagement { versionCatalogs { create("libs") { from(files("../gradle/libs.versions.toml")) } } }`. | `buildSrc` is an independent Gradle build and inherits no `dependencyResolutionManagement` from the root. Without the re-declaration the build fails at `buildSrc` configuration time with an unresolved catalog. | When the gate's first grep shows `libs.` or `versionCatalogs.named(` under `buildSrc`, the gate's second grep must be non-empty. Empty output there is the finding. | MUST |
+
+```sh
+# GRADLE-STRUCT-03
+git ls-files -z --cached --others --exclude-standard -- ':(glob)build-logic/**/*.gradle.kts' \
+  ':(glob)buildSrc/**/*.gradle.kts' |
+  xargs -0 -r grep -H -n -e 'libs\.' --
+# GRADLE-STRUCT-04
+git ls-files -z --cached --others --exclude-standard -- ':(glob)build-logic/**' ':(glob)buildSrc/**' |
+  xargs -0 -r grep -H -n -e 'org.gradle.accessors.dm' --
+# GRADLE-STRUCT-05
+git ls-files -z --cached --others --exclude-standard -- ':(glob)build-logic/**/*.gradle.kts' \
+  ':(glob)buildSrc/**/*.gradle.kts' |
+  xargs -0 -r grep -H -n -e 'alias(libs.plugins' --
+```
 
 The marker artifact is the plugin id, plus the suffix `.gradle.plugin`, under the
 plugin id as group. Both halves of the fix are needed, and the wrong half alone
@@ -101,9 +118,10 @@ dependencies { implementation(libs.findLibrary("guava").get()) }
 ## The Root Build File and the Module List
 
 ```bash
-grep -n -e 'allprojects' -e 'subprojects' -e 'project(":' build.gradle.kts build.gradle 2>/dev/null
-grep -n -e 'rootProject.name' -e 'include' -e 'fileTree' -e 'listFiles' -e 'walk' \
-  settings.gradle.kts settings.gradle 2>/dev/null
+git ls-files -z --cached --others --exclude-standard -- ':(glob)build.gradle.kts' ':(glob)build.gradle' |
+  xargs -0 -r grep -H -n -e 'allprojects' -e 'subprojects' -e 'project(":' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)settings.gradle.kts' ':(glob)settings.gradle' |
+  xargs -0 -r grep -H -n -e 'rootProject.name' -e 'include' -e 'fileTree' -e 'listFiles' -e 'walk' --
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
@@ -122,7 +140,14 @@ grep -n -e 'rootProject.name' -e 'include' -e 'fileTree' -e 'listFiles' -e 'walk
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| GRADLE-STRUCT-10 | Never create two projects whose path's last segment is identical **in a build that also assigns a uniform explicit `group`** (a root `allprojects`/`subprojects { group = ... }`, or a publishing plugin driving `group` from one property). Give the colliding projects distinct groups, or rename one. | Gradle identifies dependency-graph nodes by group and name, so both projects resolve to the same coordinates with an unspecified version, and ordinary conflict resolution silently keeps one and drops the other. No failure, no warning, just a classpath missing classes ([gradle/gradle#847](https://github.com/gradle/gradle/issues/847), open since 2016-11-12, reproduced on 8.12.1 on 2025-06-30, still unfixed through 9.x as of 2026-09-12). The group conjunct is load-bearing: Gradle's default group is the project path with dots for separators, which already disambiguates nested duplicates, and a rule without the conjunct condemns Google's own modularisation sample. | Gate block above, then `grep -rn -e 'group =' -e 'group=' build.gradle.kts build.gradle gradle.properties 2>/dev/null`. Non-empty output from **both** is the violation. Either one empty is the pass. The rule is preventive: 3 of 32 repos carry duplicate leaf segments and 2 of those also assign a uniform group, but whether the collision enters one resolution graph is not detectable from the sources. | MUST |
+| GRADLE-STRUCT-10 | Never create two projects whose path's last segment is identical **in a build that also assigns a uniform explicit `group`** (a root `allprojects`/`subprojects { group = ... }`, or a publishing plugin driving `group` from one property). Give the colliding projects distinct groups, or rename one. | Gradle identifies dependency-graph nodes by group and name, so both projects resolve to the same coordinates with an unspecified version, and ordinary conflict resolution silently keeps one and drops the other. No failure, no warning, just a classpath missing classes ([gradle/gradle#847](https://github.com/gradle/gradle/issues/847), open since 2016-11-12, reproduced on 8.12.1 on 2025-06-30, still unfixed through 9.x as of 2026-09-12). The group conjunct is load-bearing: Gradle's default group is the project path with dots for separators, which already disambiguates nested duplicates, and a rule without the conjunct condemns Google's own modularisation sample. | Gate block above, then see block GRADLE-STRUCT-10. Non-empty output from **both** is the violation. Either one empty is the pass. The rule is preventive: 3 of 32 repos carry duplicate leaf segments and 2 of those also assign a uniform group, but whether the collision enters one resolution graph is not detectable from the sources. | MUST |
+
+```sh
+# GRADLE-STRUCT-10
+git ls-files -z --cached --others --exclude-standard -- 'build.gradle.kts' 'build.gradle' \
+  'gradle.properties' |
+  xargs -0 -r grep -H -n -e 'group =' -e 'group=' --
+```
 
 ## Every gradle.properties in the Tree
 
@@ -138,7 +163,14 @@ find . -path ./.git -prune -o -name gradle.properties -print | sort
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| GRADLE-STRUCT-12 | Gate remote build-cache push on possession of a write credential, read through `providers.environmentVariable("TOKEN_NAME").isPresent`. Never on CI-ness, a CI-vendor marker, or a branch name, and never through a raw `System.getenv`. | A fork pull request's run is "CI" too, and hosted CI strips repository secrets from it by design, so a credential the platform withholds from untrusted runs is the only predicate that distinguishes a trusted build from anyone's PR. A poisoned entry pushed once is then read by every trusted build afterwards. The `providers` half keeps the settings-time read a declared configuration-cache input. Floor: Gradle 7.0 for `providers.environmentVariable` (verified 2026-09-12). | `grep -rnE -e 'isPush' -e 'push[[:space:]]*=' --include='settings.gradle' --include='settings.gradle.kts' --include='*.settings.gradle.kts' .`. Every hit's right-hand side must contain a credential-presence conjunct. A bare CI marker is the violation, and so is a correct predicate read with `System.getenv`. **Empty output is the pass only when no `remote(` build-cache block exists**, so grep for that too before concluding. The `*.settings.gradle.kts` include is not optional: the repos that factored settings logic into precompiled plugins are exactly the ones a narrow grep misses. | MUST |
+| GRADLE-STRUCT-12 | Gate remote build-cache push on possession of a write credential, read through `providers.environmentVariable("TOKEN_NAME").isPresent`. Never on CI-ness, a CI-vendor marker, or a branch name, and never through a raw `System.getenv`. | A fork pull request's run is "CI" too, and hosted CI strips repository secrets from it by design, so a credential the platform withholds from untrusted runs is the only predicate that distinguishes a trusted build from anyone's PR. A poisoned entry pushed once is then read by every trusted build afterwards. The `providers` half keeps the settings-time read a declared configuration-cache input. Floor: Gradle 7.0 for `providers.environmentVariable` (verified 2026-09-12). | see block GRADLE-STRUCT-12. Every hit's right-hand side must contain a credential-presence conjunct. A bare CI marker is the violation, and so is a correct predicate read with `System.getenv`. **Empty output is the pass only when no `remote(` build-cache block exists**, so grep for that too before concluding. The `*.settings.gradle.kts` include is not optional: the repos that factored settings logic into precompiled plugins are exactly the ones a narrow grep misses. | MUST |
+
+```sh
+# GRADLE-STRUCT-12
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/settings.gradle' \
+  ':(glob)**/settings.gradle.kts' ':(glob)**/*.settings.gradle.kts' |
+  xargs -0 -r grep -H -n -E -e 'isPush' -e 'push[[:space:]]*=' --
+```
 
 ```kotlin
 // wrong: a fork PR is "CI" too, and its run has no secret to push with

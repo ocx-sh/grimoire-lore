@@ -95,7 +95,7 @@ Python-heavy monorepo is steered toward Pants before Bazel, and the comparison
 consensus holds Nx and Turborepo sufficient for a JS-only team permanently.
 
 ```sh
-grep -rln 'actions/cache\|rust-cache\|sccache\|cache:' .github/workflows/
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' | xargs -0 -r grep -E -l -e 'actions/cache' -e 'rust-cache' -e 'sccache' -e 'cache:' --
 ```
 
 A non-empty list means some caching is already in place and you can state what
@@ -146,7 +146,7 @@ carrying its measured value and the command that produced it. Then write the
 verdict as a sentence naming which signal decided it.
 
 ```sh
-grep -nE '^\| [^|]+ \| *\|' <decision-file>
+DECISION_FILE=path/to/decision-file; grep -n -E -e '^\| [^|]+ \| *\|' -- "${DECISION_FILE}"
 ```
 
 **Empty output = every row carries a value = the decision is complete.** Any
@@ -164,8 +164,7 @@ and fixing hermeticity first is the sequencing every case study that succeeded
 actually followed.
 
 ```sh
-git grep -lE 'sqlx::query!|DATABASE_URL|localstack|testcontainers' -- \
-  ':!*.md' ':!*.lock'
+git grep -l -e 'sqlx::query!' -e DATABASE_URL -e localstack -e testcontainers -- ':!*.md' ':!*.lock'
 ```
 
 Any hit names a candidate that needs its offline cache or its container
@@ -232,7 +231,7 @@ so a personal-override import placed anywhere else is silently defeated
 (BZL-FLAG-19).
 
 ```sh
-grep -vE '^\s*(#|$)' .bazelrc | tail -1
+grep -v -E -e '^[[:space:]]*(#|$)' -- .bazelrc | tail -n 1
 ```
 
 The printed line must be the `try-import`. **Empty output means `.bazelrc` has no
@@ -274,7 +273,7 @@ the remote-execution readiness gate are in
    rather than left as tribal knowledge.
 
 ```sh
-grep -n 'remote_cache=\|remote_executor=\|credential_helper' .bazelrc*
+git ls-files -z --cached --others --exclude-standard -- ':(glob).bazelrc*' | xargs -0 -r grep -H -n -E -e 'remote_cache=' -e 'remote_executor=' -e 'credential_helper' --
 ```
 
 **Empty output = nothing remote is configured yet = stage 1 only**, which is the
@@ -286,7 +285,7 @@ The minimum is a lint gate and a test matrix, both required checks (BZL-CI-05).
 Whole-repo `bazel test //...` is the default and stays the default (BZL-CI-01).
 
 ```sh
-grep -rn 'bazel\|bazelisk' .github/workflows/
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' | xargs -0 -r grep -H -n -E -e 'bazel' -e 'bazelisk' --
 ```
 
 At least one hit must sit in a `run:`/`script:` step of a lane that gates a merge.
@@ -357,7 +356,7 @@ Name, trigger, exact command, and the exit code it gates on.
 Verify it before calling the run finished:
 
 ```sh
-grep -cE '^\| Bazel \||^### Order|^### Lock mechanism|^### First CI lane' <plan-file>
+PLAN_FILE=path/to/plan-file; grep -E -c -e '^\| Bazel \|' -e '^### Order' -e '^### Lock mechanism' -e '^### First CI lane' -- "${PLAN_FILE}"
 ```
 
 The count must be at least 4. **A lower count means a required section is missing

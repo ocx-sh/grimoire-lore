@@ -28,6 +28,8 @@ Contents: [Dates and Defaults](#dates-and-defaults) · [The Compiler](#the-compi
 [Run the Binary or the Test](#run-the-binary-or-the-test) · [Error Shape and Text](#error-shape-and-text) ·
 [What Agents Get Wrong Here](#what-agents-get-wrong-here)
 
+Commands in this file were translated 2026-10-11 to the portable dialect (git-fed file lists, POSIX grep and awk) and each was re-watched red on a plant and green on a twin under GNU and busybox; a "measured 2026-10-10" date below dates the original form.
+
 ## Dates and Defaults
 
 - Floors: typed throws is Swift 6.0. `@nonexhaustive` is SE-0487 and compiler-gated at 6.2.3 (a consumer on
@@ -44,10 +46,10 @@ Contents: [Dates and Defaults](#dates-and-defaults) · [The Compiler](#the-compi
     and each listed type is also `@frozen`.
 - The greps are the gate. The static Linux SwiftLint skips `custom_rules` silently and exits 0, so a `custom_rules`
   mirror counts only after a planted violation turns it red on the SourceKit image (`SW-GATE-11`).
-- Source trees may be symlinks (RxSwift's `Sources/` is a symlink farm of 412 files): every scan here uses `grep -R` and `find -L`, because `grep -r` skips symlinked files and `find` without `-L` skips a symlinked directory, so the scan and the `SW-CORE-03` canary must count the same files (measured 2026-10-10: `find` 412 files, `grep -r` 1, `grep -R` 412).
+- Source trees may be symlinks (RxSwift's `Sources/` is a symlink farm of 412 files): every grep here reads the `git ls-files` list, where a symlinked file is one entry that grep reads and a symlinked directory is one entry the list does not descend (name its real directory), so the scan and the `SW-CORE-03` canary count the same files (measured 2026-10-10: `find` 412 files, the old recursive grep 1; the git-fed form translated 2026-10-11).
 - Every grep prints the violation, so empty output is the pass (grep exits 1). Run `bash "$CHECKS/canary.sh"`
   first (`SW-CORE-03`, `CHECKS` as in the index gate block): it exits 1 on an empty tree, and a failed canary
-  stops the gate. Cells assume GNU grep with `-P` and `jq`; on macOS use `ggrep` or the perl form.
+  stops the gate. Cells use POSIX grep and awk (GNU or BSD or busybox), `jq` where a cell reads `dump-package`, and `perl` for the two scans N1 and N2.
 
 ## The Compiler
 
@@ -91,15 +93,23 @@ if test -f .swiftlint.yml; then bash "$CHECKS/swiftlint-gate.sh" Sources; else e
 # G7: each config that does NOT enable all three rules is printed. Prerequisite: the config exists
 test -f .swift-format || echo "MISSING .swift-format"
 for r in NeverForceUnwrap NeverUseForceTry NeverUseImplicitlyUnwrappedOptionals; do
-  grep -RL --include='.swift-format*' --exclude-dir='.build*' --exclude-dir=.git -e "\"$r\" *: *true" .
+  git ls-files -z --cached --others --exclude-standard -- ':(glob)**/.swift-format*' ':(exclude,glob)**/.build*/**' | xargs -0 -r grep -L -e "\"$r\" *: *true" --
 done
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| SW-ERR-05 | Non-test code you write or touch has no `!` force unwrap, `try!`, `as!` or `T!` declaration. The only carve-outs are (a) a static-literal initialiser or compile-proven value and (b) the one provable shim `do { return try erasingAPI(…) } catch { throw error as! E }` (`SW-ERR-02`). Each carries `// swift-format-ignore: <Rule>` and an adjacent comment stating the invariant. Prefer a regex literal (`/^[a-z]+$/`) over `try! NSRegularExpression(pattern:)`. A repository whose `.swift-format` keeps the three rules off cites `SW-GATE-28`. | A trap on a value the compiler could not prove is a remote crash when a peer supplied it. The corpus had 3,364 `!`, 620 `try!`, 378 `as!` and 209 IUO in production code. The rules are off by default and lint-only, and `swift format lint` without `--strict` exits 0 with findings (12 of 12 runs). swift-log keeps the one allowed `error as! Failure` shape (swift-log@4038b6a4f74a:Sources/Logging/Logger+With.swift:60) with its own `NeverForceUnwrap` off, so it is precedent for the shim and not for an unannotated cast. | The `SW-GATE-02` step: exit 1 on a finding. Watched red: `--strict` red exit 1, green exit 0, non-strict red exit 0 (measured 2026-10-10). Cheap fallback: `bash "$CHECKS/k07.sh" e09 e15`, empty output = pass. A justified carve-out still prints under K-07 E09 and E15 (`swift-format-ignore`), so quote it in the pull request (`SW-GATE-10`). SwiftLint exits 2 on a finding with `force_unwrapping` at error severity (default severity exits 0 without `--strict`) and silently ignores `URL(string: "literal")!` and four sibling literal initialisers. Reason check, a reading heuristic because neither tool checks that a reason exists: `grep -Rn --exclude-dir=Fixtures --exclude-dir=TestUtils --exclude-dir='*.playground' -B1 -A1 --include='*.swift' -e 'swift-format-ignore: Never' -e 'swiftlint:disable:next force_' Sources`, then confirm each hit's neighbour says why it cannot fail. Counter-example: swift-argument-parser@efd239f0055b:Sources/ArgumentParser/Parsing/SplitArguments.swift:331 ("I don't know why this is safe"). | MUST |
+| SW-ERR-05 | Non-test code you write or touch has no `!` force unwrap, `try!`, `as!` or `T!` declaration. The only carve-outs are (a) a static-literal initialiser or compile-proven value and (b) the one provable shim `do { return try erasingAPI(…) } catch { throw error as! E }` (`SW-ERR-02`). Each carries `// swift-format-ignore: <Rule>` and an adjacent comment stating the invariant. Prefer a regex literal (`/^[a-z]+$/`) over `try! NSRegularExpression(pattern:)`. A repository whose `.swift-format` keeps the three rules off cites `SW-GATE-28`. | A trap on a value the compiler could not prove is a remote crash when a peer supplied it. The corpus had 3,364 `!`, 620 `try!`, 378 `as!` and 209 IUO in production code. The rules are off by default and lint-only, and `swift format lint` without `--strict` exits 0 with findings (12 of 12 runs). swift-log keeps the one allowed `error as! Failure` shape (swift-log@4038b6a4f74a:Sources/Logging/Logger+With.swift:60) with its own `NeverForceUnwrap` off, so it is precedent for the shim and not for an unannotated cast. | The `SW-GATE-02` step: exit 1 on a finding. Watched red: `--strict` red exit 1, green exit 0, non-strict red exit 0 (measured 2026-10-10). Cheap fallback: `bash "$CHECKS/k07.sh" e09 e15`, empty output = pass. A justified carve-out still prints under K-07 E09 and E15 (`swift-format-ignore`), so quote it in the pull request (`SW-GATE-10`). SwiftLint exits 2 on a finding with `force_unwrapping` at error severity (default severity exits 0 without `--strict`) and silently ignores `URL(string: "literal")!` and four sibling literal initialisers. Reason check, a reading heuristic because neither tool checks that a reason exists: see block SW-ERR-05, then confirm each hit's neighbour says why it cannot fail. Counter-example: swift-argument-parser@efd239f0055b:Sources/ArgumentParser/Parsing/SplitArguments.swift:331 ("I don't know why this is safe"). | MUST |
 | SW-ERR-06 | The config file that enables the three rules is the file the gate command reads. | apple/containerization enables them in `.swift-format` but lints with `.swift-format-nolint`, where all three are `false` (containerization@3e7bc39e66b3:Makefile:505, `.swift-format-nolint:35-37`). Against its own `.swift-format` its Sources have 57 `NeverForceUnwrap`, 5 `NeverUseForceTry` and 1 IUO finding. 18 of 24 corpus `.swift-format` files keep the rules off. | G7 above: each printed line is a config that does not enable a rule, empty output = pass. With no config at all the three greps print nothing, so the `test -f` prerequisite is part of the check. Then read the gate command (Makefile or CI) and confirm it passes the listed-clean file. Watched red: 3 lines on the plant, 0 on the twin, and the absent-config false green caught (measured 2026-10-10). | MUST |
-| SW-ERR-07 | Test code uses `try #require(x)` (Swift Testing) or `try XCTUnwrap(x)`, never `!`. `try!` is for literal fixtures only. | swift-format exempts any file that imports `XCTest` or `Testing`, and SwiftLint exempts nothing without a nested config. A `!` on nil inside a Swift Testing test crashes the process (`Program crashed: Illegal instruction`) and the run summary is never printed, while `#require` records one issue and the run finishes. A production file that merely imports `Testing` is also exempt from the swift-format rule. | Review list, not a gate: `grep -Rn --include='*.swift' -e 'try!' -e ' as! ' Tests`. Empty output = nothing to review. The behaviour was watched (`#require` on nil exits 1 with a summary, `!` on nil crashes with none, both toolchains). The grep is an inventory and was not run on a real Tests tree. | SHOULD |
+| SW-ERR-07 | Test code uses `try #require(x)` (Swift Testing) or `try XCTUnwrap(x)`, never `!`. `try!` is for literal fixtures only. | swift-format exempts any file that imports `XCTest` or `Testing`, and SwiftLint exempts nothing without a nested config. A `!` on nil inside a Swift Testing test crashes the process (`Program crashed: Illegal instruction`) and the run summary is never printed, while `#require` records one issue and the run finishes. A production file that merely imports `Testing` is also exempt from the swift-format rule. | Review list, not a gate: see block SW-ERR-07. Empty output = nothing to review. The behaviour was watched (`#require` on nil exits 1 with a summary, `!` on nil crashes with none, both toolchains). The grep is an inventory and was not run on a real Tests tree. | SHOULD |
+
+```sh
+# SW-ERR-07
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Tests/**/*.swift' | xargs -0 -r grep -H -n -e 'try!' -e ' as! ' --
+# SW-ERR-05
+CHECKS=.claude/rules/swift-quality/checks    # pinned default: where the swift-quality rule's checks/ directory is installed
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.swift' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/TestUtils/**' ':(exclude,glob)**/*.playground/**' | PAT='swift-format-ignore: Never|swiftlint:disable:next force_' A=1 B=1 xargs -0 -r awk -f "$CHECKS/context.awk" --
+```
 
 ## Greps With a Directory Operand
 
@@ -108,26 +118,27 @@ Run these over `Sources`, and empty output is the pass. G4 is an inventory for c
 
 ```sh
 # K6: public API with a concrete typed throws, multi-line signatures included. Limit: misses a member of a public extension
-grep -RPzo --exclude-dir=Fixtures --exclude-dir=TestUtils --exclude-dir='*.playground' --include='*.swift' -e 'public[^{};]*throws\((?![A-Z]\))(?!Failure\))(?!ErrorType\))[A-Z][A-Za-z]*\)' Sources
+CHECKS=.claude/rules/swift-quality/checks    # pinned default: where the swift-quality rule's checks/ directory is installed
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.swift' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/TestUtils/**' ':(exclude,glob)**/*.playground/**' | RE='public[^{};]*throws\([A-Z][A-Za-z]*\)' WHOLE='1' xargs -0 -r awk -f "$CHECKS/span.awk" -- | grep -v -E -e 'throws\(([A-Z]|Failure|ErrorType)\)$'
 
 # K4: control flow by matching error text
-grep -RnE --exclude-dir=Fixtures --exclude-dir=TestUtils --exclude-dir='*.playground' --include='*.swift' -e '[eE]rror[A-Za-z]*(: String)? = String\(describing: ' -e 'localizedDescription\.contains\(' \
-  -e 'localizedDescription\.hasPrefix\(' -e 'localizedDescription\.hasSuffix\(' -e 'localizedDescription ==' \
-  -e 'String\(describing: [A-Za-z.]*[eE]rr[A-Za-z]*\)\.contains\(' -e 'String\(describing: [A-Za-z.]*[eE]rr[A-Za-z]*\)\.hasPrefix\(' Sources
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.swift' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/TestUtils/**' ':(exclude,glob)**/*.playground/**' \
+  | xargs -0 -r grep -H -n -E -e '[eE]rror[A-Za-z]*(: String)? = String\(describing: ' -e 'localizedDescription\.contains\(' -e 'localizedDescription\.hasPrefix\(' -e 'localizedDescription\.hasSuffix\(' \
+  -e 'localizedDescription ==' -e 'String\(describing: [A-Za-z.]*[eE]rr[A-Za-z]*\)\.contains\(' -e 'String\(describing: [A-Za-z.]*[eE]rr[A-Za-z]*\)\.hasPrefix\(' --
 
 # K1: empty catch, any layout and any pattern (a comment line in the body counts as non-empty). The catch starts a statement or follows a `}`, so the word in a doc comment or a protocol body is no hit (the unanchored form printed Catchable.swift on PromiseKit, 2026-10-10)
-grep -RPzo --exclude-dir=Fixtures --exclude-dir=TestUtils --exclude-dir='*.playground' --include='*.swift' -e '(?m)(^[ \t]*|\}[ \t]*)catch\b[^{};]*\{\s*\}' Sources
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.swift' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/TestUtils/**' ':(exclude,glob)**/*.playground/**' | RE='(^|\n|\})[[:blank:]]*catch([^[:alnum:]_][^{};]*)?\{[[:space:]]*\}' WHOLE='1' xargs -0 -r awk -f "$CHECKS/span.awk" --
 
 # K3: try? on a mutating or decoding call, minus lines carrying the marker and the `if let x = try? container.decode(T.self)` type-probe of a single-value decoder
-grep -RnE --exclude-dir=Fixtures --exclude-dir=TestUtils --exclude-dir='*.playground' --include='*.swift' -e 'try\? [^/]*\.write\(' -e 'try\? [^/]*\.removeItem\(' -e 'try\? [^/]*\.moveItem\(' \
-  -e 'try\? [^/]*\.copyItem\(' -e 'try\? [^/]*\.createDirectory\(' -e 'try\? [^/]*\.decode\(' Sources \
-  | grep -v -e 'swallow-ok:' -e 'if let .* = try? [A-Za-z]*[cC]ontainer\.decode('
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.swift' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/TestUtils/**' ':(exclude,glob)**/*.playground/**' \
+  | xargs -0 -r grep -H -n -E -e 'try\? [^/]*\.write\(' -e 'try\? [^/]*\.removeItem\(' -e 'try\? [^/]*\.moveItem\(' -e 'try\? [^/]*\.copyItem\(' -e 'try\? [^/]*\.createDirectory\(' \
+  -e 'try\? [^/]*\.decode\(' -- | grep -v -e 'swallow-ok:' -e 'if let .* = try? [A-Za-z]*[cC]ontainer\.decode('
 
 # K7: error text interpolated into a new error, cause lost. Single-line form only
-grep -RnE --exclude-dir=Fixtures --exclude-dir=TestUtils --exclude-dir='*.playground' --include='*.swift' -e 'throw .*\\\(error\)' -e 'throw .*\\\(err\)' -e 'throw .*\\\(e\)' Sources
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.swift' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/TestUtils/**' ':(exclude,glob)**/*.playground/**' | xargs -0 -r grep -H -n -E -e 'throw .*\\\(error\)' -e 'throw .*\\\(err\)' -e 'throw .*\\\(e\)' --
 
 # G4: trap as validation. Scope to changed boundary files. Golden-output, test-support and playground directories are not shipped code (SwiftGen: 455 of 459 `fatalError` hits sat in `Sources/TestUtils/Fixtures`, measured 2026-10-10): the excludes name them, and a tree with others (`Snapshots`, `Golden`) adds its own
-grep -RlZ --include='*.swift' --exclude-dir=Fixtures --exclude-dir=TestUtils --exclude-dir='*.playground' -e 'precondition' -e 'fatalError(' -e 'assert(' Sources | xargs -0 -r awk '
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.swift' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/TestUtils/**' ':(exclude,glob)**/*.playground/**' | xargs -0 -r grep -l -e 'precondition' -e 'fatalError(' -e 'assert(' -- | tr '\n' '\0' | xargs -0 -r awk '
   FNR == 1 { doc = 0; seen = 0 }
   /^[ \t]*\/\/\// { if ($0 ~ /- Precondition:/) { doc = 1; seen = 0 }; next }
   /^[ \t]*\/\// { next }
@@ -136,8 +147,8 @@ grep -RlZ --include='*.swift' --exclude-dir=Fixtures --exclude-dir=TestUtils --e
   /precondition|fatalError\(|assert\(/ { if (doc && $0 ~ /precondition/) next; print FILENAME ":" FNR ":" $0 }'
 
 # G6: -Ounchecked anywhere in manifests, CI or scripts
-grep -Rn --exclude-dir='.build*' --exclude-dir=.git --include='Package*.swift' --include='*.yml' --include='*.yaml' \
-  --include='*.sh' --include='*.bzl' --include='BUILD.bazel' --include='*.bazelrc' -e 'Ounchecked' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/Package*.swift' ':(glob)**/*.yml' ':(glob)**/*.yaml' ':(glob)**/*.sh' ':(glob)**/*.bzl' ':(glob)**/BUILD.bazel' ':(glob)**/*.bazelrc' ':(exclude,glob)**/.build*/**' \
+  | xargs -0 -r grep -H -n -e 'Ounchecked' --
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
@@ -165,17 +176,12 @@ try? FileManager.default.removeItem(at: tmp)  // swallow-ok: best-effort temp cl
 These rows have no mechanical verdict. K2 and K8 build a work list that is read. Empty output = empty list.
 
 ```sh
+CHECKS=.claude/rules/swift-quality/checks    # pinned default: where the swift-quality rule's checks/ directory is installed
 # K2: log-only or drop-only catch
-grep -REzo --exclude-dir=Fixtures --exclude-dir=TestUtils --exclude-dir='*.playground' --include='*.swift' \
-  -e 'catch[[:space:]]*(let [A-Za-z_]+[[:space:]]*)?\{[[:space:]]*print\([^{}]*\)[[:space:]]*\}' \
-  -e 'catch[[:space:]]*(let [A-Za-z_]+[[:space:]]*)?\{[[:space:]]*debugPrint\([^{}]*\)[[:space:]]*\}' \
-  -e 'catch[[:space:]]*(let [A-Za-z_]+[[:space:]]*)?\{[[:space:]]*NSLog\([^{}]*\)[[:space:]]*\}' \
-  -e 'catch[[:space:]]*(let [A-Za-z_]+[[:space:]]*)?\{[[:space:]]*log(ger)?\.[a-z]+\([^{}]*\)[[:space:]]*\}' \
-  -e 'catch[[:space:]]*(let [A-Za-z_]+[[:space:]]*)?\{[[:space:]]*return( nil)?[[:space:]]*\}' \
-  -e 'catch[[:space:]]*(let [A-Za-z_]+[[:space:]]*)?\{[[:space:]]*continue[[:space:]]*\}' Sources
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.swift' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/TestUtils/**' ':(exclude,glob)**/*.playground/**' | RE='catch[[:space:]]*(let [A-Za-z_]+[[:space:]]*)?\{[[:space:]]*(print\([^{}]*\)|debugPrint\([^{}]*\)|NSLog\([^{}]*\)|log(ger)?\.[a-z]+\([^{}]*\)|return( nil)?|continue)[[:space:]]*\}' WHOLE=1 xargs -0 -r awk -f "$CHECKS/span.awk" --
 
 # K8: log then throw in one catch
-grep -RPzo --exclude-dir=Fixtures --exclude-dir=TestUtils --exclude-dir='*.playground' --include='*.swift' -e 'catch[^{}]*\{[^{}]*\blog(ger)?\.[a-z]+\([^{}]*\)[^{}]*throw ' Sources
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.swift' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/TestUtils/**' ':(exclude,glob)**/*.playground/**' | RE='catch[^{}]*\{([^{}]*[^[:alnum:]_])?log(ger)?\.[a-z]+\([^{}]*\)[^{}]*throw ' WHOLE='1' xargs -0 -r awk -f "$CHECKS/span.awk" --
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
@@ -197,7 +203,12 @@ timeout 30 .build/debug/mytool --file /nonexistent 2>err.txt >/dev/null; echo "e
 |---|---|---|---|---|
 | SW-ERR-17 | A CLI throws a typed error for operational failure and never traps. Bad invocation is a thrown `ValidationError`, bad data is a thrown typed error, and the statuses are the `SW-CLI-01` table. A trap (132, 134 or 139 on x86_64 Linux, measured 2026-10-10) is never a documented status. An integration test runs the built binary on the bad input and asserts the status, empty stdout, an `Error:` or `error:` line on stderr (case-insensitive) and no `Fatal error`. For an SDK, map the child's exit code to a `Code`, never to text. | `precondition` on a bad `--port` exits 132 in `-O` with a 47-line backtrace on stderr under the default backtracer (the same exit 132 with `SWIFT_BACKTRACE=enable=no`, which prints nothing) and loses buffered stdout. The throwing twin prints `Error: port out of range: 70000 (expected 1...65535)` through ArgumentParser (`error: ...` through the `SW-CLI-23` root hook) and exits with the usage status. | The first line of the block: `exit=` must equal the `SW-CLI-01` usage status (64 on Unix, measured 2026-10-10). This is a test and not a grep. Watched red: trap exit 132 against throw exit 64, both toolchains and `SWIFT_BACKTRACE=enable=no`, and `ValidationError` exit 64 against `ExitCode(3)` exit 3. | MUST |
 | SW-ERR-18 | No Foundation error dump reaches a person: the stderr of a failing run contains no `Error Domain=`. Wrap an error thrown by Foundation (`CocoaError`, `POSIXError`) at the catch site with operation and path context, keep it as `cause`, and render a foreign Foundation cause with `localizedDescription`, never by interpolation. Render your own errors with their description. A network error type is `SW-NET-14`'s. | A raw `Data(contentsOf:)` failure through ArgumentParser prints `Error: Error Domain=NSCocoaErrorDomain Code=260 "The file doesn’t exist."UserInfo={...}` (6.4.0 and 6.3.3). `localizedDescription` gives the readable `The operation could not be completed. The file doesn’t exist.` Apple-platform wording differs: `unverified: read only`. | The second line of the block must print `0`, once per Foundation failure path the CLI documents (the first line's `--port` path never raises a Foundation error). Watched red: the raw `CocoaError`, raw `POSIXError` and interpolated-wrapper cases print 1, the `localizedDescription`, `render` and chained-cause cases print 0 (measured 2026-10-10). | SHOULD |
-| SW-ERR-19 | Every documented trap and every documented throw is covered by a test. A throw: `#expect(throws: E.case) { try f(bad) }`. A trap uses an exit test, whose form is `SW-TEST-11`'s (Swift 6.2, XCTest has no equivalent). Below a 6.2 toolchain floor there is no exit test: run the built binary or a `Process` child through the `SW-TEST-15` harness and assert the trap's status (132) as its own fact, and read the `SW-TEST-15` tests where this row's grep reads `processExitsWith`. | "You cannot test a trap" is pre-6.2 knowledge. The exit test passed against the trapping function and went red when pointed at the throwing one. Binds the test code of libraries with documented preconditions. | `grep -Rn --include='*.swift' -e 'processExitsWith' Tests` must be non-empty for every module that documents a `- Precondition:`. Empty output = fail for such a module. The count of documented traps equalling the count of exit tests is a reading heuristic. The mechanism was watched (green exit 0, red control exit 1 with `expected exit status ".failure", but ".exitCode(EXIT_SUCCESS)" was reported instead`, both toolchains). | SHOULD |
+| SW-ERR-19 | Every documented trap and every documented throw is covered by a test. A throw: `#expect(throws: E.case) { try f(bad) }`. A trap uses an exit test, whose form is `SW-TEST-11`'s (Swift 6.2, XCTest has no equivalent). Below a 6.2 toolchain floor there is no exit test: run the built binary or a `Process` child through the `SW-TEST-15` harness and assert the trap's status (132) as its own fact, and read the `SW-TEST-15` tests where this row's grep reads `processExitsWith`. | "You cannot test a trap" is pre-6.2 knowledge. The exit test passed against the trapping function and went red when pointed at the throwing one. Binds the test code of libraries with documented preconditions. | see block SW-ERR-19 must be non-empty for every module that documents a `- Precondition:`. Empty output = fail for such a module. The count of documented traps equalling the count of exit tests is a reading heuristic. The mechanism was watched (green exit 0, red control exit 1 with `expected exit status ".failure", but ".exitCode(EXIT_SUCCESS)" was reported instead`, both toolchains). | SHOULD |
+
+```sh
+# SW-ERR-19
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Tests/**/*.swift' | xargs -0 -r grep -H -n -e 'processExitsWith' --
+```
 
 ```swift
 // wrong: a bad --port traps, exits 132 and prints a backtrace instead of a message
@@ -218,12 +229,12 @@ lowercase or bare `Error` name); skip it on reading.
 
 ```sh
 # N1: public error enums without @nonexhaustive or @frozen
-find -L Sources -name '*.swift' -not -path '*/Fixtures/*' -not -path '*/TestUtils/*' -not -path '*.playground/*' -print0 | xargs -0 -r perl -0777 -ne \
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.swift' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/TestUtils/**' ':(exclude,glob)**/*.playground/**' | xargs -0 -r perl -0777 -ne \
   'while (/((?:(?:\@\w+(?:\([^)]*\))?|\#(?:if|else|endif)[^\n]*)\s+)*)public\s+enum\s+(\w+)[^{]*?:[^{]*\b(?:Localized)?Error\b/g) { print "$ARGV: public enum $2 lacks \@nonexhaustive/\@frozen\n" unless $1 =~ /nonexhaustive|frozen/ }'
 ```
 
 ```perl
-# N2: usage  find -L Sources -name '*.swift' -not -path '*/Fixtures/*' -not -path '*/TestUtils/*' -not -path '*.playground/*' -print0 | xargs -0 -r perl check.pl
+# N2: usage  git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.swift' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/TestUtils/**' ':(exclude,glob)**/*.playground/**' | xargs -0 -r perl check.pl
 my %src; for my $f (@ARGV) { open my $h, '<', $f or next; local $/; $src{$f} = <$h>; }
 my $all = join "\n", values %src;
 for my $f (sort keys %src) {
@@ -240,7 +251,12 @@ for my $f (sort keys %src) {
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
 | SW-ERR-20 | The public error domain is one `struct XError: Error, Sendable` with an open `struct Code: RawRepresentable, Hashable, Sendable` (static members), a one-sentence `message` (no `Error:` prefix, no trailing period) and `cause: (any Error)?`. A new failure is a new `Code`. The public API stays plain `throws` and documents the type it throws. A public `enum` error exists only as `@nonexhaustive` from its first release (stated floor 6.2.3, guard `SW-API-05`) or as a `@frozen` registered closed domain. Binds library and SDK public API. CLI, server and app-internal enums are fine. | A new case on a public error enum breaks every exhaustive consumer, typed or not (a consumer built against the enum exits 1 on the added case), while a struct cannot be switched exhaustively (exit 0). Adding `@nonexhaustive` later is itself source-breaking, and it needs Swift 6.2.3, so the struct is the floor-safe default. For an SDK wrapping a CLI, a `Code` keyed on the CLI's exit status can represent a status the SDK does not know yet and an enum cannot (a design implication, not run). Precedent: apple/containerization@3e7bc39e66b3:Sources/ContainerizationError/ContainerizationError.swift:23-29 (struct) and `:94` (`Code` over a private enum). Closed domain: swift-system@486d48c80fce:Sources/System/Errno.swift:12-14. | N1 prints each `public enum … : Error` lacking `@nonexhaustive` or `@frozen`. Watched red: 2 lines on the plant (`LoadError`, and `ParseFailure` with an intervening `@available`), 0 on the twin (`@nonexhaustive`, `@frozen`, struct, internal enum, non-Error enum untouched). Both plants typecheck with exit 0 on 6.4.0 and 6.3.3 (measured 2026-10-10). | MUST (library and SDK public API) · SHOULD (elsewhere) |
-| SW-ERR-21 | Every error type has a description a person can read: `CustomStringConvertible` always, plus `LocalizedError` returning the same text (`errorDescription = description`) when Foundation or an Apple UI may read it. `localizedDescription` on your own or a third-party plain `Error` is never used for text. On a Foundation-thrown error it is the readable choice (`SW-ERR-18`). | ArgumentParser prints `Error: <errorDescription, else String(describing:)>`. A bare `enum` prints `Error: missing`, an opaque struct prints a type dump, and a `LocalizedError` with only `failureReason` prints `Error: ReasonOnly()`. Only the both-conformances shape prints one sentence through ArgumentParser, swift-log interpolation, Swift Testing output and `localizedDescription`. A plain error's `localizedDescription` is `The operation could not be completed. (main.D error 1.)`. | N2 prints each `struct`, `enum`, `class` or `actor` conforming to `Error` with no description conformance in the scanned files. K5 is a review list: `grep -Rn --exclude-dir=Fixtures --exclude-dir=TestUtils --exclude-dir='*.playground' --include='*.swift' -e 'localizedDescription' Sources`, where every hit must be a `LocalizedError`-conforming own type or a Foundation-domain error (add `--exclude-dir=UI` for a UI layer). Watched red: N2 2 lines on the plant (bare enum, opaque struct), 0 on the twin (header conformances and an extension). A qualified `extension Outer.ClientError: CustomStringConvertible` is matched too: the old pattern printed the plant and the twin, this one the plant only, and soto-core stopped listing `AWSClient.ClientError` (measured 2026-10-10). K5 exit 0 with hits, green exit 1 (measured 2026-10-10). | SHOULD |
+| SW-ERR-21 | Every error type has a description a person can read: `CustomStringConvertible` always, plus `LocalizedError` returning the same text (`errorDescription = description`) when Foundation or an Apple UI may read it. `localizedDescription` on your own or a third-party plain `Error` is never used for text. On a Foundation-thrown error it is the readable choice (`SW-ERR-18`). | ArgumentParser prints `Error: <errorDescription, else String(describing:)>`. A bare `enum` prints `Error: missing`, an opaque struct prints a type dump, and a `LocalizedError` with only `failureReason` prints `Error: ReasonOnly()`. Only the both-conformances shape prints one sentence through ArgumentParser, swift-log interpolation, Swift Testing output and `localizedDescription`. A plain error's `localizedDescription` is `The operation could not be completed. (main.D error 1.)`. | N2 prints each `struct`, `enum`, `class` or `actor` conforming to `Error` with no description conformance in the scanned files. K5 is a review list: see block SW-ERR-21, where every hit must be a `LocalizedError`-conforming own type or a Foundation-domain error (add `':(exclude,glob)**/UI/**'` to the pathspecs for a UI layer). Watched red: N2 2 lines on the plant (bare enum, opaque struct), 0 on the twin (header conformances and an extension). A qualified `extension Outer.ClientError: CustomStringConvertible` is matched too: the old pattern printed the plant and the twin, this one the plant only, and soto-core stopped listing `AWSClient.ClientError` (measured 2026-10-10). K5 exit 0 with hits, green exit 1 (measured 2026-10-10). | SHOULD |
+
+```sh
+# SW-ERR-21
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.swift' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/TestUtils/**' ':(exclude,glob)**/*.playground/**' | xargs -0 -r grep -H -n -e 'localizedDescription' --
+```
 
 Template, compiled with `-warnings-as-errors` on 6.4.0 and 6.3.3 (measured 2026-10-10). `render` prints the
 outermost context first and replaces `"\(message): \(cause)"`, which dumps every Foundation cause.

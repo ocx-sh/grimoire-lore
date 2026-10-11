@@ -54,10 +54,12 @@ v2.14.0 (sloglint, gosec, depguard, perfsprint, prealloc), unless a row says oth
 ## Logging, Debug Endpoints and Container Sizing
 
 ```bash
+# checks/ is this rule's own go-quality/checks/ directory, wherever the rule is installed
 golangci-lint run ./...   # depguard logging + superseded, gosec G108, sloglint no-global (library/SDK overlay)
 go vet ./...              # the slog analyzer: matched key/value pairs, string keys
 # the global-logging grep: empty output is the pass
-grep -rl -e 'slog\.SetDefault(' -e 'log\.SetOutput(' -e 'log\.SetFlags(' -e 'log\.SetPrefix(' --include='*.go' . | xargs -r grep -L -e '^package main$'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | HAS='slog\.SetDefault\(|log\.SetOutput\(|log\.SetFlags\(|log\.SetPrefix\(' LACKS='^package main$' xargs -0 -r awk -f checks/file_gate.awk --
 ```
 
 golangci-lint and vet exit 1 with the finding named below, and 0 with `0 issues.` on the pass.
@@ -69,7 +71,13 @@ golangci-lint and vet exit 1 with the finding named below, and 0 with `0 issues.
 | GO-OBS-03 | In library and SDK code, route every log call through an injected `*slog.Logger` held on a struct. Never call package-level `slog.Info` and friends, and never keep a package-level logger variable. Set `linters.settings.sloglint.no-global: "all"` in the library/SDK overlay. The shared baseline enables sloglint without it, so a CLI's `main` may use the default logger. **pinned** placement | A package-level call resolves through whatever `SetDefault` last installed, the hazard `GO-OBS-02` removes. The value `"default"` misses a package-level `var logger`, and only `"all"` catches it. | `golangci-lint run ./...` under the overlay. The finding is `default logger should not be used` or `global logger should not be used (sloglint)`. | MUST (library, SDK) |
 | GO-OBS-04 | Never count sloglint's bare enablement as slog coverage, and never label it "self-gating". Its settings are explicit (`GO-OBS-03`), and matched key/value pairs and string keys belong to vet's `slog` analyzer, which runs under `go vet ./...` (`GO-GATE-02`) and inside `go test`'s default vet subset. | Bare sloglint reported `0 issues.` on both a global-logger fixture and a mismatched-pair fixture. An unmatched final argument is logged silently under the key `!BADKEY`. | `go vet ./...`. The finding is `missing a final value` or `should be a string or a slog.Attr`. | SHOULD |
 | GO-OBS-05 | Never blank-import `net/http/pprof`. A binary that serves HTTP registers `pprof.Index`, `Cmdline`, `Profile`, `Symbol` and `Trace` explicitly on its own `http.ServeMux`, served on a separate operator-only listener (loopback or an admin address) behind a flag that defaults to off. | The blank import mounts `/debug/pprof/*` on `http.DefaultServeMux`, so any later `ListenAndServe(addr, nil)` publishes it: CPU profiling a remote caller can trigger, `cmdline`, and since 1.27 `goroutineleak`. A flag-gated blank import is safe today and one refactor from public. | `golangci-lint run ./...` with gosec on, as in the baseline (`GO-GATE-14` excludes only G104, G115 and G304). The finding is `G108: Profiling endpoint is automatically exposed on /debug/pprof`. Reading heuristic for what remains: explicit pprof handlers registered on `DefaultServeMux` or on the public mux. | MUST (any binary that serves HTTP) |
-| GO-OBS-06 | In a module whose `go` line is 1.25 or later (every module under the pinned floors), never import `go.uber.org/automaxprocs`. Size worker pools from `runtime.GOMAXPROCS(0)`. Never call `runtime.GOMAXPROCS(n)` with n > 0 and never set a `GOMAXPROCS` env default in an image: either freezes the value and turns off the runtime's re-check. Under a `go 1.24` line the runtime is not container-aware, so keep automaxprocs there (`GO-MOD-09`). | automaxprocs v1.6.0 floors the quota (1.5 CPUs gives 1) where the runtime rounds up to at least 2, prints `maxprocs: Updating GOMAXPROCS=…` to stderr, and disables the periodic update. Only `runtime.SetDefaultGOMAXPROCS()` restores it. | `golangci-lint run ./...` with `GO-MOD-08`'s `superseded` list. The finding is `import 'go.uber.org/automaxprocs' is not allowed from list 'superseded'`. Then `grep -rn --include='*.go' -e 'runtime\.GOMAXPROCS([^0)]' .`: empty output is the pass. The image half is a reading check of each `Dockerfile` `ENV`. | MUST |
+| GO-OBS-06 | In a module whose `go` line is 1.25 or later (every module under the pinned floors), never import `go.uber.org/automaxprocs`. Size worker pools from `runtime.GOMAXPROCS(0)`. Never call `runtime.GOMAXPROCS(n)` with n > 0 and never set a `GOMAXPROCS` env default in an image: either freezes the value and turns off the runtime's re-check. Under a `go 1.24` line the runtime is not container-aware, so keep automaxprocs there (`GO-MOD-09`). | automaxprocs v1.6.0 floors the quota (1.5 CPUs gives 1) where the runtime rounds up to at least 2, prints `maxprocs: Updating GOMAXPROCS=…` to stderr, and disables the periodic update. Only `runtime.SetDefaultGOMAXPROCS()` restores it. | `golangci-lint run ./...` with `GO-MOD-08`'s `superseded` list. The finding is `import 'go.uber.org/automaxprocs' is not allowed from list 'superseded'`. Then see block GO-OBS-06: empty output is the pass. The image half is a reading check of each `Dockerfile` `ENV`. | MUST |
+
+```sh
+# GO-OBS-06
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | xargs -0 -r grep -H -n -e 'runtime\.GOMAXPROCS([^0)]' --
+```
 
 ```go
 // wrong: rewires logging for every package in the host process
@@ -93,17 +101,29 @@ func (c *Client) Pull(ref string) { c.log.Info("pull", "ref", ref) }
 ## Settings That Must Not Ship
 
 ```bash
-grep -rn --exclude-dir=.git --exclude-dir=.github --exclude='*_test.go' --exclude='*.md' -e 'execwait=' .
-grep -rn -E -e 'signal\.Notify\([^,]*\)' --include='*.go' .
+git ls-files -z --cached --others --exclude-standard -- ':(exclude,glob)**/*_test.go' ':(exclude,glob)**/*.md' ':(exclude,glob)**/.github/**' \
+  | xargs -0 -r grep -H -n -e 'execwait=' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | xargs -0 -r grep -H -n -E -e 'signal\.Notify\([^,]*\)' --
 # the GC-tuning grep: a work list of non-main files to read
-grep -rl -e 'debug\.SetMemoryLimit(' -e 'debug\.SetGCPercent(' --include='*.go' . | xargs -r grep -L -e '^package main$'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | HAS='debug\.SetMemoryLimit\(|debug\.SetGCPercent\(' LACKS='^package main$' xargs -0 -r awk -f checks/file_gate.awk --
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| GO-OBS-07 | Set `GODEBUG=execwait=2` only in a CI job's env or a manual repro. Never bake it into a Dockerfile, a systemd unit, a launcher script or a `.env` file. | It panics the process on the first collected `exec.Cmd` that was never `Wait`ed: a diagnosis aid with blind spots (`GO-TEST-12`) and a crash loop in production. It is an undocumented setting, so `//go:debug` cannot carry it and only the environment can. | `grep -rn --exclude-dir=.git --exclude-dir=.github --exclude='*_test.go' --exclude='*.md' -e 'execwait=' .`. Empty output is the pass. Markdown is excluded because installed rule files and docs name the setting. A CI directory other than `.github` needs its own `--exclude-dir`. | MUST |
-| GO-OBS-08 | Name the signals: `signal.Notify(c, os.Interrupt, syscall.SIGTERM)` (`GO-CLI-08`). Never write `signal.Notify(c)` with no signal list, unless the program forwards every signal to a child and says so in a comment. | A catch-all subscription swallows SIGQUIT: the process exits 0 and the goroutine dump `GO-OBS-10` depends on never prints. | `grep -rn -E -e 'signal\.Notify\([^,]*\)' --include='*.go' .`. Empty output is the pass. | SHOULD |
+| GO-OBS-07 | Set `GODEBUG=execwait=2` only in a CI job's env or a manual repro. Never bake it into a Dockerfile, a systemd unit, a launcher script or a `.env` file. | It panics the process on the first collected `exec.Cmd` that was never `Wait`ed: a diagnosis aid with blind spots (`GO-TEST-12`) and a crash loop in production. It is an undocumented setting, so `//go:debug` cannot carry it and only the environment can. | see block GO-OBS-07. Empty output is the pass. Markdown is excluded because installed rule files and docs name the setting. A CI directory other than `.github` needs its own `:(exclude,glob)` pathspec. | MUST |
+| GO-OBS-08 | Name the signals: `signal.Notify(c, os.Interrupt, syscall.SIGTERM)` (`GO-CLI-08`). Never write `signal.Notify(c)` with no signal list, unless the program forwards every signal to a child and says so in a comment. | A catch-all subscription swallows SIGQUIT: the process exits 0 and the goroutine dump `GO-OBS-10` depends on never prints. | see block GO-OBS-08. Empty output is the pass. | SHOULD |
 | GO-OBS-09 | Tune `GOGC`, `GOMEMLIMIT`, `debug.SetGCPercent` or `debug.SetMemoryLimit` only in a long-lived service's `main`, and only against a measured steady-state heap. Libraries never call them and CLIs never set them. | A soft memory limit on a CLI that reads input of unbounded size turns a fast OOM into a slow GC-thrash hang. A library that sets one overrides its host process ([go.dev/doc/gc-guide](https://go.dev/doc/gc-guide)). | Reading heuristic: the GC-tuning grep above lists the non-`main` files to read. Empty output is the pass for libraries. The grep drops `package main` files, so check a CLI by reading its `main` for `debug.SetMemoryLimit(`, `debug.SetGCPercent(` or a `GOGC` or `GOMEMLIMIT` env default. | SHOULD |
+
+```sh
+# GO-OBS-07
+git ls-files -z --cached --others --exclude-standard -- ':(exclude,glob)**/*_test.go' ':(exclude,glob)**/*.md' ':(exclude,glob)**/.github/**' \
+  | xargs -0 -r grep -H -n -e 'execwait=' --
+# GO-OBS-08
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | xargs -0 -r grep -H -n -E -e 'signal\.Notify\([^,]*\)' --
+```
 
 ## Diagnosing a Hang, Race or Leak
 
@@ -141,7 +161,8 @@ benchstat plain.txt candidate.txt
 go test -run 'Allocs$' ./...
 golangci-lint run --enable-only perfsprint ./...   # one-off, never in a config file
 golangci-lint run --enable-only prealloc ./...     # one-off, never in a config file
-grep -rn -E -e 'fmt\.Sprintf\("[^"]*%[a-zA-Z][^"]*%[a-zA-Z]' --include='*.go' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | xargs -0 -r grep -H -n -E -e 'fmt\.Sprintf\("[^"]*%[a-zA-Z][^"]*%[a-zA-Z]' --
 find . -name default.pgo
 # the PGO pickup check: a build -pgo= line means the profile was applied
 go version -m ./dist/app | grep -e '-pgo='
@@ -151,11 +172,17 @@ go version -m ./dist/app | grep -e '-pgo='
 |---|---|---|---|---|
 | GO-OBS-15 | Optimize only a function a CPU or allocation profile (`GO-OBS-13`, `go test -memprofile`) or a benchmark has named. Work in this order: do less, do it less often, then do it faster. `sync.Pool`, preallocation, `strconv`-for-`fmt` swaps and PGO come last. | Agents skip to the third step because it looks like expertise. Every fixture that "optimized" without a measurement either regressed or did nothing. | Reading heuristic: the change names the profile or benchmark that picked the function and quotes a `benchstat` table (`GO-TEST-20`). | SHOULD |
 | GO-OBS-16 | Add a `sync.Pool` only when the un-pooled path measures at least 1 `allocs/op` under `-benchmem` or `testing.AllocsPerRun`, and `benchstat` shows the pooled version winning. Treat `-gcflags=-m`'s `does not escape` as a hint about where to look, never as proof of no heap allocation. | Pooling a value that never reaches the heap only adds bookkeeping: a small struct went from 0.39 to 6.81 ns/op. A 64 KiB buffer escaping through an `io.Writer` went from 1 allocation to 0 and ran 56.55% faster. On 1.27.1 a runtime-sized `make([]byte, n)` prints `does not escape` and still heap-allocates for every n above 32 bytes. | The benchmark command in the block above, on the **un-pooled** code. `0 allocs/op` means a pool can only cost. At least 1 means it may pay, and `benchstat plain.txt pooled.txt` decides. | SHOULD |
-| GO-OBS-17 | Never read a clean perfsprint run as "`Sprintf` is fine". perfsprint rewrites single-verb calls (`%d` to `strconv.Itoa`, `"id-%s"` to concatenation) and is silent on two or more verbs. In a function a profile named hot, list the multi-verb calls and read each. perfsprint joins no config file (`GO-GATE-16`). | The missed `Sprintf("%s%s", a, b)` shape measured 67.80% faster as `a+b`. An agent that reads `0 issues.` as "no Sprintf left" leaves it. | `golangci-lint run --enable-only perfsprint ./...` reports `integer-format:` or `string-format:` (exit 1). Then the multi-verb grep: `grep -rn -E -e 'fmt\.Sprintf\("[^"]*%[a-zA-Z][^"]*%[a-zA-Z]' --include='*.go' .`, whose hits inside a hot function are read. Empty output is the pass. | SHOULD (hot paths only) |
+| GO-OBS-17 | Never read a clean perfsprint run as "`Sprintf` is fine". perfsprint rewrites single-verb calls (`%d` to `strconv.Itoa`, `"id-%s"` to concatenation) and is silent on two or more verbs. In a function a profile named hot, list the multi-verb calls and read each. perfsprint joins no config file (`GO-GATE-16`). | The missed `Sprintf("%s%s", a, b)` shape measured 67.80% faster as `a+b`. An agent that reads `0 issues.` as "no Sprintf left" leaves it. | `golangci-lint run --enable-only perfsprint ./...` reports `integer-format:` or `string-format:` (exit 1). Then the multi-verb grep: see block GO-OBS-17, whose hits inside a hot function are read. Empty output is the pass. | SHOULD (hot paths only) |
 | GO-OBS-18 | Treat each prealloc finding as a question. Read the loop, and rewrite only one that runs per request or per item. Never mass-apply its suggestions, and never let it block a merge. prealloc joins no config file (`GO-GATE-16`). | Across 8 exemplar repositories it fired 31 times in 123,632 lines, and every hit was a test table or a once-per-process flag slice. Mass-applied `make([]T, 0, n)` is churn with no measured gain. | `golangci-lint run --enable-only prealloc ./...` lists `Consider preallocating` sites (exit 1 with findings). Reading heuristic: each site's loop is read for how often it runs. | CONSIDER |
 | GO-OBS-19 | Give a function whose allocation count is part of its contract (documented, or on a path `GO-OBS-15`'s profile named) a `testing.AllocsPerRun` test with an explicit numeric budget, `if got > want { t.Fatalf(…) }`. Run it in the normal and `-race` jobs, never under `-gcflags=all=-N -l`. A CLI-wrapping SDK's cost is the spawn, so it carries a guard only where it documents an allocation contract. | The guard went red at 10 allocs/op against a budget of 1 the moment a `strings.Builder` join became `+=`. It stays green under `-race` and `-cover`. With optimizations off counts rise (0 to 1 for a stack slice), so a debug job reports a false regression. `b.Loop` shape: `GO-TEST-19`. | `go test -run 'Allocs$' ./...`. The finding is a `t.Fatalf` naming `allocs/op`. | SHOULD |
 | GO-OBS-20 | Never add or keep a `default.pgo`, or claim a PGO win, without a `benchstat` comparison on the target binary's own workload built with `-pgo=off` and with the profile. Confirm the shipped binary used the profile. | `-pgo=auto` means a file in the right directory silently changes the binary. The payoff belongs to the program: one small dispatcher got 6.83% slower, against the Go team's 2-14% for large services ([go.dev/blog/pgo](https://go.dev/blog/pgo)). | The PGO pickup check in the block above. A `build -pgo=` line means the profile was applied, and empty output means it was not. Pair it with `benchstat off.txt pgo.txt`. | SHOULD |
 | GO-OBS-21 | Put a `default.pgo` only in a `main` package's directory, one profile per binary. Never pass one `-pgo=` file to a build of several unrelated `cmd/` binaries. Libraries and the SDK never ship a `default.pgo`. | A library-directory profile is inert for every consumer's binary, yet reshapes the library's own benchmarks so they stop matching what consumers get. PGO rebuilds the whole program for one binary's profile ([go.dev/doc/pgo](https://go.dev/doc/pgo)). | `find . -name default.pgo` lists the work. Empty output passes. Each hit's directory must hold `package main`, and the PGO pickup check on that binary must print its `-pgo=` line. | SHOULD (MUST NOT in the SDK) |
+
+```sh
+# GO-OBS-17
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | xargs -0 -r grep -H -n -E -e 'fmt\.Sprintf\("[^"]*%[a-zA-Z][^"]*%[a-zA-Z]' --
+```
 
 ```go
 // wrong: the contract lives in a comment, so a += refactor ships green

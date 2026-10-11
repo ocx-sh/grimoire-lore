@@ -12,7 +12,7 @@ metadata:
 ## The order is the product. Read this before U0
 
 Five facts make the order below load-bearing. An agent that runs the steps in a
-convenient order gets a green build that is quietly wrong.
+convenient order gets a green build that is quietly wrong. Commands in this file were translated 2026-10-11 to the portable dialect (git-fed file lists, POSIX grep and awk) and each was re-watched red on a plant and green on a twin under GNU and busybox; a "measured 2026-10-10" date below dates the original form.
 
 - **Probe with flags, change through the manifest.** `-Xswiftc -swift-version
   -Xswiftc 6` and `-strict-concurrency=complete` reach dependencies. The
@@ -72,7 +72,7 @@ Each row is an agreed default an adopter overrides once, in their own repository
 
 ## Before U0
 
-1. **Find every package root.** `find . -name 'Package*.swift' -not -path '*/.build/*' -not -path '*/Tests/*' -not -path '*/Benchmarks/*'`
+1. **Find every package root.** `git ls-files --cached --others --exclude-standard -- ':(glob)**/Package*.swift' ':(exclude,glob)**/.build/**' ':(exclude,glob)**/Tests/**' ':(exclude,glob)**/Benchmarks/**'`
    lists the manifests. A `Tests/` consumer smoke package (`.package(path: "../..")`) and a
    `Benchmarks/` package are fixtures, not roots, and a tool package elsewhere (`Tools/`) is a
    root only when it ships a product. Empty output means the tree is not a Swift package. Run
@@ -155,7 +155,7 @@ Read the effective mode from the U0 output before U1:
 
 ```sh
 swift package tools-version
-swift package dump-package | grep -n -A2 -e '"swiftLanguageVersions"' -e '"swiftLanguageMode"'
+swift package dump-package | awk '/"swiftLanguageVersions"|"swiftLanguageMode"/ { print NR ":" $0; n = 2; next } n > 0 { print NR "-" $0; n-- }'
 ```
 
 | U0 shows | Do |
@@ -192,7 +192,7 @@ before U2 relies on them:
    (SwiftTerm) does both.
 
 ```sh
-grep -rn -E -e 'swift:[0-9]' -e 'matrix\.swift' -e '^[[:space:]]*swift:[[:space:]]*(\[|-)?[[:space:]]*["'"'"']?[0-9]' -e '^[[:space:]]*swift:[[:space:]]*$' -e 'swift_versions?:' --include='*.yml' --include='*.yaml' --include='Dockerfile*' --include='Makefile' --exclude-dir=.build --exclude-dir=.git --exclude-dir=.claude --exclude-dir=.agents .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.yml' ':(glob)**/*.yaml' ':(glob)**/Dockerfile*' ':(glob)**/Makefile' ':(exclude,glob)**/.build/**' ':(exclude,glob)**/.claude/**' ':(exclude,glob)**/.agents/**' | xargs -0 -r grep -H -n -E -e 'swift:[0-9]' -e 'matrix\.swift' -e '^[[:space:]]*swift:[[:space:]]*(\[|-)?[[:space:]]*["'"'"']?[0-9]' -e '^[[:space:]]*swift:[[:space:]]*$' -e 'swift_versions?:' --
 ```
 
 Empty output means no literal tag. A `matrix.swift` or bare `swift:` hit means a
@@ -305,8 +305,8 @@ per-target `.swiftLanguageMode(.v5)` with a dated reason and a removal condition
 (SW-PKG-15), and that is stop condition S1.
 
 ```sh
-grep -Rn -e 'swiftLanguageModes: \[.v5\]' -e 'swiftLanguageVersions: \[.v5\]' -e 'swiftLanguageMode(.v5)' -e 'enableUpcomingFeature("StrictConcurrency")' --include='Package*.swift' --exclude-dir=.build .
-grep -Rn -e 'defaultIsolation' --include='Package*.swift' --exclude-dir=.build .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/Package*.swift' ':(exclude,glob)**/.build/**' | xargs -0 -r grep -H -n -e 'swiftLanguageModes: \[.v5\]' -e 'swiftLanguageVersions: \[.v5\]' -e 'swiftLanguageMode(.v5)' -e 'enableUpcomingFeature("StrictConcurrency")' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/Package*.swift' ':(exclude,glob)**/.build/**' | xargs -0 -r grep -H -n -e 'defaultIsolation' --
 ```
 
 The first command prints nothing when flipped, except a target held under S1 or S2
@@ -336,7 +336,7 @@ Done is exit 0 on both toolchains, tests included. `FLOOR` is the floor leg's pa
 . "${TMPDIR:-/tmp}/swift-upgrade/env.sh"; FLOOR=6.2.0
 swift build --build-tests --scratch-path "$S/u7" -Xswiftc -warnings-as-errors; echo "current exit $?"
 dk swift build --build-tests --scratch-path /tmp/u7 -Xswiftc -warnings-as-errors; echo "floor exit $?"
-dk swift package dump-package --scratch-path /tmp/u7 | grep -n -A2 -e '"swiftLanguageVersions"' -e '"toolsVersion"'
+dk swift package dump-package --scratch-path /tmp/u7 | awk '/"swiftLanguageVersions"|"toolsVersion"/ { print NR ":" $0; n = 2; next } n > 0 { print NR "-" $0; n-- }'
 ```
 
 Every container run is `dk`: as your user, with its own scratch path. A root build in the mounted

@@ -61,8 +61,13 @@ find wrap-prefix -type f -o -type l | sort >wrap-listing.txt
 | CMK-BZL-02 | Owned by `CMK-TC-01`. This ID keeps only the wrap probe: the caller's toolchain file must be the one that loads. | Passing `CMAKE_TOOLCHAIN_FILE` suppresses the wrapper's crosstool synthesis, so the caller's file carries the whole compiler setup. A project `set(CMAKE_TOOLCHAIN_FILE …)` before `project()` beats it with no warning (measured on 3.31.12 and 4.4.2). | After the simulation, `grep -c -e 'CALLER_TOOLCHAIN_LOADED' wrap-configure.log`. `0` is the finding. Any higher count is the pass. | MUST |
 | CMK-BZL-03 | Owned by `CMK-TGT-04` (never overwrite the flags variables) and `CMK-TGT-12` (PIC). This ID keeps the wrap probe and one clause: never make PIC depend on `CMAKE_POSITION_INDEPENDENT_CODE`, because the wrapper delivers `-fPIC` as a flag. | Since rules_foreign_cc 0.16.0 PIC arrives inside the `_INIT` seed. `set(CMAKE_C_FLAGS "-O2")` discards the seed, and the shared link fails with `relocation R_X86_64_32 … recompile with -fPIC`. A hard-coded `CMAKE_POSITION_INDEPENDENT_CODE OFF` does not block the flag (both measured on 3.31.12 and 4.4.2). So the fix for a wrapped PIC failure is the flags write, never the variable. In a real wrap on Bazel 9.2.0 the seed carries `-fPIC`, and the write removes it from the compile line (measured 2026-09-26). | After the simulation, `grep -c -e 'WRAP_SEED' build-wrap/compile_commands.json`. `0` is the finding (the seed was dropped). Any higher count is the pass. Makefile and Ninja generators only. A successful link is not a pass: a compiler that always emits PIC links either way. | MUST |
 | CMK-BZL-04 | Owned by `CMK-INST-10` (no absolute install `DESTINATION`). This ID keeps only the wrap consequence. | The wrap installs into a Bazel-managed output tree. A declared `out_*` file sent elsewhere fails the build with `missing expected installed output`. An undeclared file sent to a path the sandbox can write lands on the host outside every Bazel output, and the build passes (measured 2026-09-26, rules_foreign_cc 0.16.0 on Bazel 9.2.0). | `CMK-INST-10`'s grep, or its CMake 4.4 diagnostic. This ID adds no command. | MUST |
-| CMK-BZL-05 | Install to a fresh prefix and check two things. Every file sits at a stable name under `include/`, `lib/` or `bin/` that the wrapping target's `out_*` attributes can name. No installed file contains the source, build or install path: a `*Config.cmake`, `*Targets*.cmake` or `.pc` file, or a header `configure_file()` wrote. | A produced file that no attribute names never becomes a Bazel output, and nothing reports it (`BZL-CC-23` owns that side). The sandbox path disappears after the action, so an embedded absolute path breaks every consumer. A real wrap on Bazel 9.2.0 wrote the per-action sandbox path into a configured header (measured 2026-09-26). Relocation in general is `CMK-INST-01` and `CMK-INST-02`. This row adds only the diff against the declared names. | After the simulation, `grep -rn -e "$PWD" wrap-prefix`. Empty output is the pass. Any line is the finding. Then diff `wrap-listing.txt` by hand against the `out_*` names the wrapping `BUILD.bazel` declares or would need to declare. A name in only one list is the finding. | MUST |
+| CMK-BZL-05 | Install to a fresh prefix and check two things. Every file sits at a stable name under `include/`, `lib/` or `bin/` that the wrapping target's `out_*` attributes can name. No installed file contains the source, build or install path: a `*Config.cmake`, `*Targets*.cmake` or `.pc` file, or a header `configure_file()` wrote. | A produced file that no attribute names never becomes a Bazel output, and nothing reports it (`BZL-CC-23` owns that side). The sandbox path disappears after the action, so an embedded absolute path breaks every consumer. A real wrap on Bazel 9.2.0 wrote the per-action sandbox path into a configured header (measured 2026-09-26). Relocation in general is `CMK-INST-01` and `CMK-INST-02`. This row adds only the diff against the declared names. | After the simulation, see block CMK-BZL-05. Empty output is the pass. Any line is the finding. Then diff `wrap-listing.txt` by hand against the `out_*` names the wrapping `BUILD.bazel` declares or would need to declare. A name in only one list is the finding. | MUST |
 | CMK-BZL-07 | Owned by `CMK-TGT-11` (library type from a cache entry). This ID keeps only the wrap consequence. | `cache_entries` is the only channel the wrapper has into the project, so a hard-coded `STATIC` or `SHARED` turns the choice between `out_static_libs` and `out_shared_libs` into source-reading. In a real wrap a hard-coded `STATIC` under `BUILD_SHARED_LIBS=ON` fails with `missing expected installed output: lib/libmylib.so` (measured 2026-09-26 on Bazel 9.2.0). | `CMK-TGT-11`'s verification. This ID adds no command. | SHOULD |
+
+```sh
+# CMK-BZL-05
+find wrap-prefix -type f -print0 | xargs -0 -r grep -H -n -e "$PWD" --
+```
 
 ## The CMake the Wrapper Runs
 
@@ -73,8 +78,8 @@ The CMake inside the wrap is the wrapper's, never the host's. At rules_foreign_c
 line a consumer picked (empty output: the default). Floor: CMake 3.25, 4.3 for CPS.
 
 ```sh
-grep -rn -e 'tools.cmake' -e 'cmake_version' --include='MODULE.bazel' --include='WORKSPACE*' .
-grep -rn -e 'install(PACKAGE_INFO' -e 'export(PACKAGE_INFO' --include='*.cmake' --include='CMakeLists.txt' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/MODULE.bazel' ':(glob)**/WORKSPACE*' | xargs -0 -r grep -H -n -e 'tools.cmake' -e 'cmake_version' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.cmake' ':(glob)**/CMakeLists.txt' | xargs -0 -r grep -H -n -e 'install(PACKAGE_INFO' -e 'export(PACKAGE_INFO' --
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
@@ -117,15 +122,15 @@ find ../wrap-farm-prefix -type l -lname '/*'
 
 Binds a project that keeps both a CMake and a Bazel description of one codebase,
 and every agent that reports on one. abseil, googletest and grpc test Bazel from
-scripts under `ci/` or `tools/internal_ci/`, so read those too (`-s` silences a
-missing directory). Set `FILE` to each file you will edit or report on. Floor: any CMake.
+scripts under `ci/` or `tools/internal_ci/`, so read those too (an absent directory
+lists nothing). Set `FILE` to each file you will edit or report on. Floor: any CMake.
 
 ```sh
-grep -rls -e 'bazel test' -e 'bazelisk test' .github ci tools/internal_ci
-grep -rls -e 'ctest' -e 'cmake --build' .github ci tools/internal_ci
-grep -rln -i -e 'auto-generated' -e 'automatically generated' -e 'do not edit' --include='*.cmake' --include='CMakeLists.txt' --include='BUILD.bazel' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/**' ':(glob)ci/**' ':(glob)tools/internal_ci/**' | xargs -0 -r grep -l -s -e 'bazel test' -e 'bazelisk test' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/**' ':(glob)ci/**' ':(glob)tools/internal_ci/**' | xargs -0 -r grep -l -s -e 'ctest' -e 'cmake --build' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.cmake' ':(glob)**/CMakeLists.txt' ':(glob)**/BUILD.bazel' | xargs -0 -r grep -l -i -e 'auto-generated' -e 'automatically generated' -e 'do not edit' --
 FILE=BUILD.bazel
-grep -rl -F -e "$FILE" --include='*.yml' --include='*.yaml' --include='*.sh' --include='*.py' --include='*.cmake' --include='Makefile' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.yml' ':(glob)**/*.yaml' ':(glob)**/*.sh' ':(glob)**/*.py' ':(glob)**/*.cmake' ':(glob)**/Makefile' | xargs -0 -r grep -l -F -e "$FILE" --
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
@@ -142,14 +147,15 @@ package names usually differ (`abseil-cpp` against `absl`), so set both, taking
 bare `$BZL_NAME` alternative catches a vendored directory (`googletest-1.16.0`). Floor: any CMake.
 
 ```sh
+CHECKS=.claude/rules/cmake-build/checks    # where this checks/ directory is installed
 BZL_NAME=abseil-cpp
 CMAKE_NAME=absl
-grep -rn -e "bazel_dep(name = \"$BZL_NAME\"" --include='MODULE.bazel' .
-grep -rn -i -e "find_package($CMAKE_NAME" -e "FetchContent_Declare($CMAKE_NAME" -e "ExternalProject_Add($CMAKE_NAME" -e "$BZL_NAME" --include='*.cmake' --include='CMakeLists.txt' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/MODULE.bazel' | xargs -0 -r grep -H -n -e "bazel_dep(name = \"$BZL_NAME\"" --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.cmake' ':(glob)**/CMakeLists.txt' | xargs -0 -r grep -H -n -i -e "find_package($CMAKE_NAME" -e "FetchContent_Declare($CMAKE_NAME" -e "ExternalProject_Add($CMAKE_NAME" -e "$BZL_NAME" --
 git ls-tree -r HEAD | grep -e '^160000'
-grep -rn -e 'NAMESPACE' -e 'ALIAS' --include='*.cmake' --include='CMakeLists.txt' .
-grep -rn -A2 -e 'cc_library(' --include='BUILD.bazel' --include='BUILD' .
-grep -rn -e 'module(' --include='MODULE.bazel' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.cmake' ':(glob)**/CMakeLists.txt' | xargs -0 -r grep -H -n -e 'NAMESPACE' -e 'ALIAS' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/BUILD.bazel' ':(glob)**/BUILD' | xargs -0 -r awk -v re='cc_library[(]' -v A=2 -f "$CHECKS/context.awk" --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/MODULE.bazel' | xargs -0 -r grep -H -n -e 'module(' --
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
@@ -165,9 +171,9 @@ vcpkg 2026.07.29 and vcpkg-tool 2026-07-27. CMK-BZL-14 was measured end to end o
 Conan 2.32.0 and Bazel 9.2.0 (2026-09-26). Floor: Conan 2.30.0 and Bazel 7.2.0 for CMK-BZL-14, any vcpkg for CMK-BZL-15.
 
 ```sh
-grep -rn -e 'BazelDeps' --include='conanfile.py' --include='conanfile.txt' .
-grep -rn -e 'conan_deps.MODULE.bazel' --include='MODULE.bazel' .
-grep -rln -i -e 'bazel' "$VCPKG_ROOT/scripts"
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/conanfile.py' ':(glob)**/conanfile.txt' | xargs -0 -r grep -H -n -e 'BazelDeps' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/MODULE.bazel' | xargs -0 -r grep -H -n -e 'conan_deps.MODULE.bazel' --
+find "$VCPKG_ROOT/scripts" -type f -print0 | xargs -0 -r grep -l -i -e 'bazel' --
 grep -n -e 'bazel_dep(name = "rules_cc"' MODULE.bazel
 ```
 

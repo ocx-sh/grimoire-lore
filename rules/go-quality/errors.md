@@ -99,7 +99,8 @@ func check(b []byte) error { return nil }
 
 ```bash
 golangci-lint run --enable-only=errcheck ./...
-grep -rn --include='*golangci*' -E -e '^[^#]*std-error-handling' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*golangci*' \
+  | xargs -0 -r grep -H -n -E -e '^[^#]*std-error-handling' --
 ```
 
 The lint passes with `0 issues.`, and the grep passes with empty output.
@@ -159,10 +160,10 @@ overlay, where `func main` lives (GO-GATE-15, GO-GATE-18). `0 issues.` is the pa
 Both greps locate sites to read, and empty output is the pass.
 
 ```bash
-grep -rn --include='*.go' -e 'strings\.Contains(.*\.Error()' -e 'strings\.HasPrefix(.*\.Error()' \
-  -e 'strings\.HasSuffix(.*\.Error()' -e 'strings\.EqualFold(.*\.Error()' \
-  -e 'strings\.Index(.*\.Error()' -e 'MatchString(.*\.Error()' .
-grep -rn --include='*.go' --exclude='*_test.go' -e 'panic(' -e 'func must(' -e 'func try(' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
+  | xargs -0 -r grep -H -n -e 'strings\.Contains(.*\.Error()' -e 'strings\.HasPrefix(.*\.Error()' -e 'strings\.HasSuffix(.*\.Error()' -e 'strings\.EqualFold(.*\.Error()' -e 'strings\.Index(.*\.Error()' -e 'MatchString(.*\.Error()' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' ':(exclude,glob)**/*_test.go' \
+  | xargs -0 -r grep -H -n -e 'panic(' -e 'func must(' -e 'func try(' --
 ```
 
 | ID | Rule | Rationale | Verification | Severity |

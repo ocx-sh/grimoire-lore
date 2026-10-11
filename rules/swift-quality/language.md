@@ -22,6 +22,8 @@ Contents: [Dates and Floors](#dates-and-floors) · [The Linux Build](#the-linux-
 [The Ownership Test](#the-ownership-test) · [Grep Prompts and Readings](#grep-prompts-and-readings) ·
 [What Agents Get Wrong Here](#what-agents-get-wrong-here)
 
+Commands in this file were translated 2026-10-11 to the portable dialect (git-fed file lists, POSIX grep and awk) and each was re-watched red on a plant and green on a twin under GNU and busybox; a "measured 2026-10-10" date below dates the original form.
+
 ## Dates and Floors
 
 - Measured 2026-10-10 against Swift 6.4.0, 6.3.3, 6.2.0 to 6.2.4 and 6.1.3. Apple, Windows, Android and Wasm behaviour
@@ -46,19 +48,19 @@ signal is no hit outside a guard. Libc imports are L02's, not T03's. `xargs` exi
 
 ```sh
 # linux-tells: T00 hint, a Linux leg or a Linux claim in CI text. The Linux build above decides; empty output here proves nothing about the build
-grep -Rl -i -E -e 'ubuntu|linux|swift:[0-9]|swiftlang/swift' --include='*.yml' --include='*.yaml' --include='Dockerfile*' --exclude-dir='.build' --exclude-dir='.git' --exclude-dir='.claude' --exclude-dir='.agents' .
-grep -Rl -F -e '.linux' --include='Package*.swift' --exclude-dir='.build' .
-NOSHIP=(--exclude-dir='Demo*' --exclude-dir='Example*' --exclude-dir='*Example' --exclude-dir='Sample*' --exclude-dir='Docs' --exclude-dir='Documentation' --exclude-dir='Fixtures' --exclude-dir='*TestUtils' --exclude-dir='*TestSupport' --exclude-dir='*.playground')    # sample projects, golden fixtures, test-support targets and playgrounds are not Linux targets: add the repository's sample app directory
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.yml' ':(glob)**/*.yaml' ':(glob)**/Dockerfile*' ':(exclude,glob)**/.build/**' ':(exclude,glob)**/.claude/**' ':(exclude,glob)**/.agents/**' | xargs -0 -r grep -l -i -E -e 'ubuntu' -e 'linux' -e 'swift:[0-9]' -e 'swiftlang/swift' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/Package*.swift' ':(exclude,glob)**/.build/**' | xargs -0 -r grep -l -F -e '.linux' --
+NOSHIP=(':(exclude,glob)**/Demo*/**' ':(exclude,glob)**/Example*/**' ':(exclude,glob)**/*Example/**' ':(exclude,glob)**/Sample*/**' ':(exclude,glob)**/Docs/**' ':(exclude,glob)**/Documentation/**' ':(exclude,glob)**/Fixtures/**' ':(exclude,glob)**/*TestUtils/**' ':(exclude,glob)**/*TestSupport/**' ':(exclude,glob)**/*.playground/**')    # sample projects, golden fixtures, test-support targets and playgrounds are not Linux targets: add the repository's sample app directory
 # T03 Apple-only imports
-grep -Rn "${NOSHIP[@]}" --include='*.swift' --exclude-dir='.build' --exclude-dir='Tests' -F -e 'import Combine' -e 'import SwiftUI' -e 'import UIKit' -e 'import AppKit' -e 'import Cocoa' -e 'import CoreData' -e 'import CoreGraphics' -e 'import OSLog' -e 'import CryptoKit' -e 'import Security' -e 'import Network' -e 'import simd' -e 'import Accelerate' -e 'import UniformTypeIdentifiers' -e 'import ObjectiveC' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' ':(exclude,glob)**/Tests/**' "${NOSHIP[@]}" | xargs -0 -r grep -H -n -F -e 'import Combine' -e 'import SwiftUI' -e 'import UIKit' -e 'import AppKit' -e 'import Cocoa' -e 'import CoreData' -e 'import CoreGraphics' -e 'import OSLog' -e 'import CryptoKit' -e 'import Security' -e 'import Network' -e 'import simd' -e 'import Accelerate' -e 'import UniformTypeIdentifiers' -e 'import ObjectiveC' --
 # T04 Objective-C runtime
-grep -Rn "${NOSHIP[@]}" --include='*.swift' --exclude-dir='.build' --exclude-dir='Tests' -F -e '@objc' -e '#selector' -e 'NSObject' -e 'autoreleasepool' . | grep -v -E '^[^:]+:[0-9]+:[[:space:]]*//'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' ':(exclude,glob)**/Tests/**' "${NOSHIP[@]}" | xargs -0 -r grep -H -n -F -e '@objc' -e '#selector' -e 'NSObject' -e 'autoreleasepool' -- | grep -v -E '^[^:]+:[0-9]+:[[:space:]]*//'
 # T05 Darwin-only APIs
-grep -Rn "${NOSHIP[@]}" --include='*.swift' --exclude-dir='.build' --exclude-dir='Tests' -F -e 'OSAllocatedUnfairLock' -e 'Logger(subsystem' -e 'os_log(' -e 'mach_absolute_time' -e 'OSSignposter' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' ':(exclude,glob)**/Tests/**' "${NOSHIP[@]}" | xargs -0 -r grep -H -n -F -e 'OSAllocatedUnfairLock' -e 'Logger(subsystem' -e 'os_log(' -e 'mach_absolute_time' -e 'OSSignposter' --
 # T06 cross-check only (SW-IO-02 owns the rule): URLSession in a file that never mentions FoundationNetworking
-grep -RLZ "${NOSHIP[@]}" --include='*.swift' --exclude-dir='.build' --exclude-dir='Tests' -F -e 'FoundationNetworking' . | xargs -r -0 grep -n -H -F -e 'URLSession' -e 'URLRequest' | grep -v -E '^[^:]+:[0-9]+:[[:space:]]*//'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' ':(exclude,glob)**/Tests/**' "${NOSHIP[@]}" | xargs -0 -r grep -L -F -e 'FoundationNetworking' -- | tr '\n' '\0' | xargs -0 -r grep -n -H -F -e 'URLSession' -e 'URLRequest' -- | grep -v -E '^[^:]+:[0-9]+:[[:space:]]*//'
 # L02 a file with an unguarded libc import. Known miss: a file that uses canImport for another module hides an unguarded libc import, the musl SDK build is the gate.
-grep -RlEZ --include='*.swift' '^[[:space:]]*(@[A-Za-z_]+ +)*(public +|package +|internal +)?import +(Glibc|Musl|Darwin)\b' Sources | xargs -0 -r grep -L 'canImport'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.swift' | xargs -0 -r grep -l -E -e '^[[:space:]]*(@[A-Za-z_]+ +)*(public +|package +|internal +)?import +(Glibc|Musl|Darwin)\b' -- | tr '\n' '\0' | xargs -0 -r grep -L -e 'canImport' --
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
@@ -114,15 +116,15 @@ read every hit: each must sit inside a guard or the floor must have been raised.
 
 ```sh
 # floor-bands: F62 introduced in 6.2
-grep -RnE --include='*.swift' --exclude-dir='.build' --exclude-dir='Tests' -e 'InlineArray' -e '\[[0-9_]+ of [A-Za-z]' -e 'nonisolated\(nonsending\)' -e '@concurrent' -e 'Task\.immediate' -e 'isolated deinit' -e 'Observations *\{' -e '[^A-Za-z]MutableSpan' -e '[^A-Za-z]Span<' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' ':(exclude,glob)**/Tests/**' | xargs -0 -r grep -H -n -E -e 'InlineArray' -e '\[[0-9_]+ of [A-Za-z]' -e 'nonisolated\(nonsending\)' -e '@concurrent' -e 'Task\.immediate' -e 'isolated deinit' -e 'Observations *\{' -e '[^A-Za-z]MutableSpan' -e '[^A-Za-z]Span<' --
 # F62b raw identifiers (6.2): a backtick name with a space
-grep -RnE --include='*.swift' --exclude-dir='.build' --exclude-dir='Tests' -e 'func `[A-Za-z0-9_]+ [^`]*`' -e '(let|var) `[A-Za-z0-9_]+ [^`]*`' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' ':(exclude,glob)**/Tests/**' | xargs -0 -r grep -H -n -E -e 'func `[A-Za-z0-9_]+ [^`]*`' -e '(let|var) `[A-Za-z0-9_]+ [^`]*`' --
 # F63 declared floor 6.3 (weak let and @nonexhaustive compile from 6.2.3)
-grep -Rn --include='*.swift' --exclude-dir='.build' --exclude-dir='Tests' -F -e 'weak let' -e '@nonexhaustive' -e '@export(' -e '@specialized(' -e '@inline(always)' -e 'Swift::' -e '@c(' -e '@c func' -e '@c enum' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' ':(exclude,glob)**/Tests/**' | xargs -0 -r grep -H -n -F -e 'weak let' -e '@nonexhaustive' -e '@export(' -e '@specialized(' -e '@inline(always)' -e 'Swift::' -e '@c(' -e '@c func' -e '@c enum' --
 # F64 introduced in 6.4
-grep -Rn --include='*.swift' --exclude-dir='.build' --exclude-dir='Tests' -F -e '~Sendable' -e '@diagnose(' -e 'withTaskCancellationShield' -e 'UniqueBox' -e 'UniqueArray' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' ':(exclude,glob)**/Tests/**' | xargs -0 -r grep -H -n -F -e '~Sendable' -e '@diagnose(' -e 'withTaskCancellationShield' -e 'UniqueBox' -e 'UniqueArray' --
 # F64b 6.4 single-line forms: optional opaque without parentheses, await inside defer
-grep -RnE --include='*.swift' --exclude-dir='.build' --exclude-dir='Tests' -e 'some [A-Za-z_.]+\?' -e 'defer *\{.*await ' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' ':(exclude,glob)**/Tests/**' | xargs -0 -r grep -H -n -E -e 'some [A-Za-z_.]+\?' -e 'defer *\{.*await ' --
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
@@ -208,7 +210,7 @@ exercises). T11 is the cheap prompt: read every hit, and empty output = no `[wea
 
 ```sh
 # T11 weak or unowned self in a Task
-grep -RnE --include='*.swift' --exclude-dir='.build' --exclude-dir='Tests' -e 'Task *\{ *\[weak self\]' -e 'Task\.detached *\{ *\[weak self\]' -e '\[unowned self\]' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' ':(exclude,glob)**/Tests/**' | xargs -0 -r grep -H -n -E -e 'Task *\{ *\[weak self\]' -e 'Task\.detached *\{ *\[weak self\]' -e '\[unowned self\]' --
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
@@ -254,27 +256,27 @@ and `SW-GATE-10` runs T01 and T02 as the K-07 E04, E12 and E13 greps.
 ```sh
 # prompts: on a tree whose tools version is below 6.0 (SW-PKG-06), T09, T10, T12 and T13 print Swift 5 compatibility idioms (@_implementationOnly, public class, [String: Any]): advisory, and the receipt carries one migrate or keep line per hit
 # T01 legacy threading
-grep -Rn --include='*.swift' --exclude-dir='.build' --exclude-dir='Tests' -F -e 'OperationQueue' -e 'Thread.detachNewThread' -e 'Thread(block' -e 'NSThread' -e 'performSelector' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' ':(exclude,glob)**/Tests/**' | xargs -0 -r grep -H -n -F -e 'OperationQueue' -e 'Thread.detachNewThread' -e 'Thread(block' -e 'NSThread' -e 'performSelector' --
 # T02 Combine types
-grep -Rn --include='*.swift' --exclude-dir='.build' --exclude-dir='Tests' -F -e 'AnyCancellable' -e 'PassthroughSubject' -e 'CurrentValueSubject' -e 'AnyPublisher' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' ':(exclude,glob)**/Tests/**' | xargs -0 -r grep -H -n -F -e 'AnyCancellable' -e 'PassthroughSubject' -e 'CurrentValueSubject' -e 'AnyPublisher' --
 # T07 redundant optional binding
-grep -Rn --include='*.swift' --exclude-dir='.build' --exclude-dir='Tests' -e 'if let \([A-Za-z_][A-Za-z0-9_]*\) = \1 *\({\|,\|else\b\|$\)' -e 'guard let \([A-Za-z_][A-Za-z0-9_]*\) = \1 *\({\|,\|else\b\|$\)' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' ':(exclude,glob)**/Tests/**' | xargs -0 -r grep -H -n -e 'if let \([A-Za-z_][A-Za-z0-9_]*\) = \1[^A-Za-z0-9_]' -e 'if let \([A-Za-z_][A-Za-z0-9_]*\) = \1$' -e 'guard let \([A-Za-z_][A-Za-z0-9_]*\) = \1[^A-Za-z0-9_]' -e 'guard let \([A-Za-z_][A-Za-z0-9_]*\) = \1$' -- | grep -E -e '(if|guard) let [A-Za-z_][A-Za-z0-9_]* = [A-Za-z_][A-Za-z0-9_]* *(\{|,|else([^[:alnum:]_]|$)|$)'    # busybox -E has no backreference: BRE finds the repeated name, -E checks what follows it
 # T08 filter then count
-grep -Rn --include='*.swift' --exclude-dir='.build' --exclude-dir='Tests' -e '\.filter *{[^}]*} *\.count\b' -e '\.filter *{[^}]*} *\.isEmpty\b' -e '\.filter([^)]*)\.count\b' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' ':(exclude,glob)**/Tests/**' | xargs -0 -r grep -H -n -e '\.filter *{[^}]*} *\.count\b' -e '\.filter *{[^}]*} *\.isEmpty\b' -e '\.filter([^)]*)\.count\b' --
 # T09 class-constrained protocol spelled with the class keyword
-grep -RnE --include='*.swift' --exclude-dir='.build' --exclude-dir='Tests' -e 'protocol +[A-Za-z_]+ *: *class\b' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' ':(exclude,glob)**/Tests/**' | xargs -0 -r grep -H -n -E -e 'protocol +[A-Za-z_]+ *: *class\b' --
 # T10 @_implementationOnly, replaced by internal import (6.0)
-grep -Rn --include='*.swift' --exclude-dir='.build' --exclude-dir='Tests' -F -e '@_implementationOnly' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' ':(exclude,glob)**/Tests/**' | xargs -0 -r grep -H -n -F -e '@_implementationOnly' --
 # T10b only when the declared floor is 6.3 or newer: underscored attributes whose shipped spelling is 6.3
-grep -Rn --include='*.swift' --exclude-dir='.build' --exclude-dir='Tests' -F -e '@_cdecl' -e '@inline(__always)' -e '@_specialize' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' ':(exclude,glob)**/Tests/**' | xargs -0 -r grep -H -n -F -e '@_cdecl' -e '@inline(__always)' -e '@_specialize' --
 # T12 a class that is neither final nor open
-grep -RnE --include='*.swift' --exclude-dir='.build' --exclude-dir='Tests' -e '^[[:space:]]*((@[A-Za-z]+|public|package|internal|private|fileprivate) +)*class +[A-Z]' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' ':(exclude,glob)**/Tests/**' | xargs -0 -r grep -H -n -E -e '^[[:space:]]*((@[A-Za-z]+|public|package|internal|private|fileprivate) +)*class +[A-Z]' --
 # T13 untyped dictionaries as models
-grep -RnE --include='*.swift' --exclude-dir='.build' --exclude-dir='Tests' -e '\[String: *Any\]' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' ':(exclude,glob)**/Tests/**' | xargs -0 -r grep -H -n -E -e '\[String: *Any\]' --
 # T16 arrays of existentials
-grep -Rn --include='*.swift' --exclude-dir='.build' --exclude-dir='Tests' -e '\[any [A-Za-z]' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' ':(exclude,glob)**/Tests/**' | xargs -0 -r grep -H -n -e '\[any [A-Za-z]' --
 # T17 ownership tokens with no multi-word reason (output = unjustified)
-find -L . -name '*.swift' -not -path './.build/*' -not -path './Tests/*' -print0 | xargs -r -0 awk '
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(exclude,glob)**/.build/**' ':(exclude,glob)Tests/**' | xargs -0 -r awk '
   FNR == 1 { prev = "" }
   /~Copyable|~Escapable|InlineArray/ {
     if ($0 !~ /\/\/[[:space:]]*[^[:space:]]+[[:space:]]+[^[:space:]]+[[:space:]]+[^[:space:]]+/ &&
