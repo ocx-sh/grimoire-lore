@@ -204,23 +204,23 @@ description = { readme = "docs/typescript-essentials.md", logo = "assets/lore-ty
 # and the repository's own CI runner. `docs-review` is the on-demand trigger:
 # a rule only loads on an edit, so grading an untouched page needs a name.
 [rules.docs-quality]
-version = "0.3.0"
+version = "0.3.1"
 description = { readme = "docs/docs-quality.md", logo = "assets/lore-docs.svg" }
 
 [skills.docs-plan]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/docs-plan.md", logo = "assets/lore-docs.svg" }
 
 [skills.docs-instrument]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/docs-instrument.md", logo = "assets/lore-docs.svg" }
 
 [skills.docs-review]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/docs-review.md", logo = "assets/lore-docs.svg" }
 
 [bundles.docs-essentials]
-version = "0.1.1"
+version = "0.1.2"
 description = { readme = "docs/docs-essentials.md", logo = "assets/lore-docs.svg" }
 
 # The code-comments set: one rule plus one skill. `code-docs` is the index rule;
