@@ -1,5 +1,5 @@
 {
-  "created": "2026-09-06T11:47:40+02:00",
+  "created": "2026-10-11T15:14:40+02:00",
   "description": "Go/no-go gate and staged migration procedure for moving a repository onto Bazel, covering the measured adoption signals, the pilot choice, MODULE.bazel and lockfile setup, the .bazelversion pin and the 8.x-versus-9.x call, rc-file layering, cache wiring order, CI lanes, and one branch per language for Rust, Python, TypeScript and C++. Use when someone asks whether a repo should move to Bazel, wants a Bazel migration plan or adoption plan, asks how to start with Bazel, how to add a MODULE.bazel, which Bazel version to pin, how to set up a remote cache or remote execution for the first time, what to migrate first, or whether Bazel is worth it against Nx, Turborepo, Pants, sccache or plain cargo and uv caching. Not for diagnosing or speeding up a build that is already on Bazel, which is bazel-diagnose, and not for the standards themselves, which are the bazel-quality rules.",
   "keywords": [
     "bazel",

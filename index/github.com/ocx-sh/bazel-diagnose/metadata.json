@@ -1,5 +1,5 @@
 {
-  "created": "2026-09-06T11:47:40+02:00",
+  "created": "2026-10-11T15:14:40+02:00",
   "description": "Symptom-routed diagnosis procedure for a Bazel build that is already wrong, covering slow builds and slow analysis, unexpected cache misses, cache or BES outages, non-hermetic and nondeterministic actions, flaky tests, repository-rule and module-extension refetches, target-selection misses, and flags that appear not to exist. Use when someone says the build got slow, analysis takes forever, CI never hits the cache, this rebuilt for no reason, why did this action re-run, the remote cache is down, exit code 39, lost inputs, this test passes locally and fails in CI, the sandbox is not hermetic, Bazel keeps refetching an external repo, the diff tool skipped a target, or unrecognized option after a version bump. Not for deciding whether to adopt Bazel or for standing a workspace up, which is bazel-adopt, and not for the standards themselves, which the bazel-quality rules carry.",
   "keywords": [
     "bazel",

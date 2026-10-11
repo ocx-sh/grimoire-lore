@@ -1,5 +1,5 @@
 {
-  "created": "2026-09-05T18:35:49+02:00",
+  "created": "2026-10-11T15:14:40+02:00",
   "description": "Documentation verification gate for a repository that adopted the docs-quality rule set, covering the checks, configs, fixtures, harnesses and reader signals that make those rules enforceable. Use when someone asks to wire up docs checks or a docs CI gate, add doc_type and doc_tier declarations, retrofit a page declaration, set up markdownlint or Vale for prose, check docs links with lychee or a strict build, test documentation examples or code fences, add a doc-example harness, record terminal casts, capture zero-result searches, measure time to first working result, add a docs issue template, a feedback widget or privacy-preserving analytics, add a Lighthouse ratchet for a docs site, or land a new docs lint without turning every open pull request red. Not for deciding which pages to write or what the use-case tiers are, which is the docs-plan skill.",
   "keywords": [
     "docs",

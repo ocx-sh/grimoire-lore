@@ -1,5 +1,5 @@
 {
-  "created": "2026-10-10T21:42:16+02:00",
+  "created": "2026-10-11T15:14:40+02:00",
   "description": "Use when asked to move a Swift library, CLI or server package (not an app target) from Swift 5 to Swift 6 language mode or to fix its Swift 6 concurrency errors, to bump the toolchain, .swift-version or swift-tools-version, to enable an upcoming feature such as NonisolatedNonsendingByDefault, ExistentialAny or MemberImportVisibility, to run swift package migrate, or after errors such as \"is not concurrency-safe because\", \"this is an error in the Swift 6 language mode\", \"unknown warning group\", \"is not a recognized upcoming feature\" or \"Unknown option '--targets'\". Not for diagnosing a crash, hang or slow type-check (swift-diagnose) and not for cutting a release (swift-release).",
   "keywords": [
     "swift",

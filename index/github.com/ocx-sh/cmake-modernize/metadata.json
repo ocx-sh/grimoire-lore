@@ -1,5 +1,5 @@
 {
-  "created": "2026-09-26T22:14:05+02:00",
+  "created": "2026-10-11T15:14:40+02:00",
   "description": "Ordered, once-per-repository procedure that takes a legacy directory-scoped CMake tree to target-based, installable and find_package-consumable CMake, with one exit check per step, a gated install-move-consume round trip and an as-subproject smoke as the two end proofs. Use when someone asks to modernize, clean up or migrate an old CMake tree as a whole, meaning replace include_directories, add_definitions or global CMAKE_CXX_FLAGS with target_* commands across the tree, make a legacy library installable, exportable and consumable through a Config package or CPS, or bring a legacy tree under the configure gate. Not for a one-line edit such as a single target_link_libraries keyword or one cmake_parse_arguments call, which the cmake-build rules cover without a procedure. Not for a tree that does not configure or finds the wrong dependency copy, which is cmake-dependency-triage, not for Conan or vcpkg manifests, which is cpp-packaging, and not for the standards themselves, which are the cmake-build rules.",
   "keywords": [
     "cmake",
