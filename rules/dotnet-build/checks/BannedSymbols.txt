@@ -1,0 +1,217 @@
+// BannedSymbols.txt: repo-wide RS0030 bans (Microsoft.CodeAnalysis.BannedApiAnalyzers 5.6.0), CS-SEC-02.
+// Install at the repository root and register once from the root Directory.Build.props:
+//   <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" />
+// The file name must be BannedSymbols.txt or BannedSymbols.*.txt; any other name bans nothing (exit 0, measured 2026-10-11).
+// A documentation ID without a parameter list bans only the parameterless overload, so every overload has its own line.
+// Every symbol appears once across this file and BannedSymbols.Src.txt (a duplicate is RS0031, an error). Each message names one rule.
+// A deliberate use carries `#pragma warning disable RS0030 // <reason>` on the line; never delete a line (CS-CORE-01).
+// A legacy-TFM fallback (`#if NETFRAMEWORK`, `#if !NET8_0_OR_GREATER`, `#if NETSTANDARD2_0`) keeps the banned call inside the one seam of that
+// `#if` branch, under `#pragma warning disable RS0030 // <reason>` ... `#pragma warning restore RS0030`; this file is the greenfield posture.
+// Watched red on a canary and green on its twin, net8.0 and net10.0 (measured 2026-10-11).
+
+// --- CS-PROC
+P:System.Diagnostics.ProcessStartInfo.Arguments;CS-PROC-01: build argv with ArgumentList, the SDK owns no quoting code
+M:System.Diagnostics.ProcessStartInfo.#ctor(System.String,System.String);CS-PROC-01: use new ProcessStartInfo(exe) and fill ArgumentList
+M:System.Diagnostics.Process.Start(System.String);CS-PROC-02: launch only through the one engine launch site
+M:System.Diagnostics.Process.Start(System.String,System.String);CS-PROC-01: string argv; launch only through the one engine launch site
+M:System.Diagnostics.Process.Start(System.String,System.Collections.Generic.IEnumerable{System.String});CS-PROC-02: launch only through the one engine launch site
+M:System.Diagnostics.Process.Start(System.String,System.String,System.Security.SecureString,System.String);CS-PROC-02: launch only through the one engine launch site
+M:System.Environment.SetEnvironmentVariable(System.String,System.String);CS-PROC-06: mutate ProcessStartInfo.Environment, never the host process
+M:System.Environment.SetEnvironmentVariable(System.String,System.String,System.EnvironmentVariableTarget);CS-PROC-06: mutate ProcessStartInfo.Environment, never the host process
+M:System.Diagnostics.Process.BeginOutputReadLine;CS-PROC-09: event mode makes WaitForExitAsync wait for EOF (grandchild stall)
+M:System.Diagnostics.Process.BeginErrorReadLine;CS-PROC-09: event mode makes WaitForExitAsync wait for EOF (grandchild stall)
+M:System.Diagnostics.Process.WaitForExit;CS-PROC-09: sync wait blocks a thread and waits for EOF; use WaitForExitAsync and a bounded drain
+M:System.Diagnostics.Process.WaitForExit(System.Int32);CS-PROC-09: sync wait; use WaitForExitAsync and a bounded drain
+M:System.Diagnostics.Process.WaitForExit(System.TimeSpan);CS-PROC-09: sync wait; use WaitForExitAsync and a bounded drain
+P:System.Text.Encoding.Default;CS-PROC-11: host dependent; use new UTF8Encoding(false)
+M:System.Diagnostics.Process.Kill();CS-PROC-14: use Kill(entireProcessTree: true); a bare Kill() orphans grandchildren
+M:System.Diagnostics.Process.CloseMainWindow;CS-PROC-14: a GUI API, not a graceful stop for a console child
+E:System.Console.CancelKeyPress;CS-PROC-17: a library installs no process-wide signal handler
+E:System.AppDomain.ProcessExit;CS-PROC-17: not raised on SIGTERM since .NET 10; a library installs no exit handler
+M:System.Runtime.InteropServices.PosixSignalRegistration.Create(System.Runtime.InteropServices.PosixSignal,System.Action{System.Runtime.InteropServices.PosixSignalContext});CS-PROC-17: the host owns signals
+
+// --- CS-PROC-09 (launches-process only, not repo-wide): the four ReadToEnd lines are parked here, commented, because a repo-wide ban fired
+// on 86 test sites in CsvHelper, a parser that launches nothing. A repository that launches a child process (`[launches-process]`) appends them,
+// uncommented and once, to BannedSymbols.Src.txt (src projects only, never here: RS0031 on a second copy).
+// M:System.IO.StreamReader.ReadToEnd;CS-PROC-09: drain with the byte pump, never ReadToEnd
+// M:System.IO.TextReader.ReadToEnd;CS-PROC-09: drain with the byte pump, never ReadToEnd
+// M:System.IO.StreamReader.ReadToEndAsync;CS-PROC-09: drain with the byte pump (cap and bounded drain), never ReadToEndAsync
+// M:System.IO.StreamReader.ReadToEndAsync(System.Threading.CancellationToken);CS-PROC-09: drain with the byte pump (cap and bounded drain), never ReadToEndAsync
+
+// --- CS-JSON
+T:System.Text.Json.Serialization.JsonStringEnumConverter;CS-JSON-05: wire enums are open record structs, never a CLR enum
+T:System.Text.Json.Serialization.JsonStringEnumConverter`1;CS-JSON-05: wire enums are open record structs, never a CLR enum
+P:System.Text.Json.JsonSerializerOptions.Strict;CS-JSON-13: strictness is a test instrument; build it from the context options in the test project
+
+// --- CS-BIN
+M:System.Formats.Tar.TarFile.ExtractToDirectory(System.IO.Stream,System.String,System.Boolean);CS-BIN-10: stream one named member with TarReader, capped, never the whole archive
+M:System.Formats.Tar.TarFile.ExtractToDirectory(System.String,System.String,System.Boolean);CS-BIN-10: stream one named member with TarReader, capped, never the whole archive
+M:System.Formats.Tar.TarFile.ExtractToDirectoryAsync(System.IO.Stream,System.String,System.Boolean,System.Threading.CancellationToken);CS-BIN-10: stream one named member with TarReader, capped, never the whole archive
+M:System.Formats.Tar.TarFile.ExtractToDirectoryAsync(System.String,System.String,System.Boolean,System.Threading.CancellationToken);CS-BIN-10: stream one named member with TarReader, capped, never the whole archive
+M:System.IO.Compression.ZipFile.ExtractToDirectory(System.String,System.String);CS-BIN-10: stream one named member with ZipArchive, capped
+M:System.IO.Compression.ZipFile.ExtractToDirectory(System.String,System.String,System.Boolean);CS-BIN-10: stream one named member with ZipArchive, capped
+M:System.IO.Compression.ZipFile.ExtractToDirectory(System.String,System.String,System.Text.Encoding);CS-BIN-10: stream one named member with ZipArchive, capped
+M:System.IO.Compression.ZipFile.ExtractToDirectory(System.String,System.String,System.Text.Encoding,System.Boolean);CS-BIN-10: stream one named member with ZipArchive, capped
+M:System.IO.Compression.ZipFile.ExtractToDirectory(System.IO.Stream,System.String);CS-BIN-10: stream one named member with ZipArchive, capped
+M:System.IO.Compression.ZipFile.ExtractToDirectory(System.IO.Stream,System.String,System.Boolean);CS-BIN-10: stream one named member with ZipArchive, capped
+M:System.IO.Compression.ZipFile.ExtractToDirectory(System.IO.Stream,System.String,System.Text.Encoding);CS-BIN-10: stream one named member with ZipArchive, capped
+M:System.IO.Compression.ZipFile.ExtractToDirectory(System.IO.Stream,System.String,System.Text.Encoding,System.Boolean);CS-BIN-10: stream one named member with ZipArchive, capped
+M:System.IO.Compression.ZipFileExtensions.ExtractToDirectory(System.IO.Compression.ZipArchive,System.String);CS-BIN-10: stream one named member with ZipArchive, capped
+M:System.IO.Compression.ZipFileExtensions.ExtractToDirectory(System.IO.Compression.ZipArchive,System.String,System.Boolean);CS-BIN-10: stream one named member with ZipArchive, capped
+M:System.IO.Compression.ZipFile.ExtractToDirectoryAsync(System.IO.Stream,System.String,System.Boolean,System.Threading.CancellationToken);CS-BIN-10: stream one named member with ZipArchive, capped (net10.0 overload)
+M:System.IO.Compression.ZipFile.ExtractToDirectoryAsync(System.IO.Stream,System.String,System.Text.Encoding,System.Boolean,System.Threading.CancellationToken);CS-BIN-10: stream one named member with ZipArchive, capped (net10.0 overload)
+M:System.IO.Compression.ZipFile.ExtractToDirectoryAsync(System.IO.Stream,System.String,System.Text.Encoding,System.Threading.CancellationToken);CS-BIN-10: stream one named member with ZipArchive, capped (net10.0 overload)
+M:System.IO.Compression.ZipFile.ExtractToDirectoryAsync(System.IO.Stream,System.String,System.Threading.CancellationToken);CS-BIN-10: stream one named member with ZipArchive, capped (net10.0 overload)
+M:System.IO.Compression.ZipFile.ExtractToDirectoryAsync(System.String,System.String,System.Boolean,System.Threading.CancellationToken);CS-BIN-10: stream one named member with ZipArchive, capped (net10.0 overload)
+M:System.IO.Compression.ZipFile.ExtractToDirectoryAsync(System.String,System.String,System.Text.Encoding,System.Boolean,System.Threading.CancellationToken);CS-BIN-10: stream one named member with ZipArchive, capped (net10.0 overload)
+M:System.IO.Compression.ZipFile.ExtractToDirectoryAsync(System.String,System.String,System.Text.Encoding,System.Threading.CancellationToken);CS-BIN-10: stream one named member with ZipArchive, capped (net10.0 overload)
+M:System.IO.Compression.ZipFile.ExtractToDirectoryAsync(System.String,System.String,System.Threading.CancellationToken);CS-BIN-10: stream one named member with ZipArchive, capped (net10.0 overload)
+M:System.IO.Compression.ZipFileExtensions.ExtractToDirectoryAsync(System.IO.Compression.ZipArchive,System.String,System.Boolean,System.Threading.CancellationToken);CS-BIN-10: stream one named member with ZipArchive, capped (net10.0 overload)
+M:System.IO.Compression.ZipFileExtensions.ExtractToDirectoryAsync(System.IO.Compression.ZipArchive,System.String,System.Threading.CancellationToken);CS-BIN-10: stream one named member with ZipArchive, capped (net10.0 overload)
+M:System.Net.Http.HttpClient.GetByteArrayAsync(System.String);CS-BIN-11: uncapped buffer; stream with ResponseHeadersRead and count the bytes read
+M:System.Net.Http.HttpClient.GetByteArrayAsync(System.Uri);CS-BIN-11: uncapped buffer; stream with ResponseHeadersRead and count the bytes read
+M:System.Net.Http.HttpClient.GetByteArrayAsync(System.String,System.Threading.CancellationToken);CS-BIN-11: uncapped buffer; stream with ResponseHeadersRead and count the bytes read
+M:System.Net.Http.HttpClient.GetByteArrayAsync(System.Uri,System.Threading.CancellationToken);CS-BIN-11: uncapped buffer; stream with ResponseHeadersRead and count the bytes read
+M:System.Net.Http.HttpClient.GetStringAsync(System.String);CS-BIN-11: uncapped buffer; stream with ResponseHeadersRead and count the bytes read
+M:System.Net.Http.HttpClient.GetStringAsync(System.Uri);CS-BIN-11: uncapped buffer; stream with ResponseHeadersRead and count the bytes read
+M:System.Net.Http.HttpClient.GetStringAsync(System.String,System.Threading.CancellationToken);CS-BIN-11: uncapped buffer; stream with ResponseHeadersRead and count the bytes read
+M:System.Net.Http.HttpClient.GetStringAsync(System.Uri,System.Threading.CancellationToken);CS-BIN-11: uncapped buffer; stream with ResponseHeadersRead and count the bytes read
+M:System.Net.Http.HttpContent.ReadAsByteArrayAsync;CS-BIN-11: uncapped buffer; read the stream and count the bytes read
+M:System.Net.Http.HttpContent.ReadAsByteArrayAsync(System.Threading.CancellationToken);CS-BIN-11: uncapped buffer; read the stream and count the bytes read
+M:System.Net.Http.HttpContent.ReadAsStringAsync;CS-BIN-11: uncapped buffer; read the stream and count the bytes read
+M:System.Net.Http.HttpContent.ReadAsStringAsync(System.Threading.CancellationToken);CS-BIN-11: uncapped buffer; read the stream and count the bytes read
+M:System.Net.Http.HttpContent.LoadIntoBufferAsync;CS-BIN-11: buffers the body whole; read the stream and count the bytes read
+M:System.Net.Http.HttpContent.LoadIntoBufferAsync(System.Int64);CS-BIN-11: buffers the body whole; read the stream and count the bytes read
+M:System.Net.Http.HttpContent.LoadIntoBufferAsync(System.Int64,System.Threading.CancellationToken);CS-BIN-11: buffers the body whole; read the stream and count the bytes read
+M:System.Net.Http.HttpContent.LoadIntoBufferAsync(System.Threading.CancellationToken);CS-BIN-11: buffers the body whole; read the stream and count the bytes read
+M:System.Net.Http.Json.HttpClientJsonExtensions.GetFromJsonAsync(System.Net.Http.HttpClient,System.String,System.Type,System.Text.Json.JsonSerializerOptions,System.Threading.CancellationToken);CS-BIN-11: buffers the whole body, and the reflection overloads defeat the source-generated context; stream with ResponseHeadersRead, count the bytes read and bind from the capped stream
+M:System.Net.Http.Json.HttpClientJsonExtensions.GetFromJsonAsync(System.Net.Http.HttpClient,System.String,System.Type,System.Text.Json.Serialization.JsonSerializerContext,System.Threading.CancellationToken);CS-BIN-11: buffers the whole body, and the reflection overloads defeat the source-generated context; stream with ResponseHeadersRead, count the bytes read and bind from the capped stream
+M:System.Net.Http.Json.HttpClientJsonExtensions.GetFromJsonAsync(System.Net.Http.HttpClient,System.String,System.Type,System.Threading.CancellationToken);CS-BIN-11: buffers the whole body, and the reflection overloads defeat the source-generated context; stream with ResponseHeadersRead, count the bytes read and bind from the capped stream
+M:System.Net.Http.Json.HttpClientJsonExtensions.GetFromJsonAsync(System.Net.Http.HttpClient,System.Uri,System.Type,System.Text.Json.JsonSerializerOptions,System.Threading.CancellationToken);CS-BIN-11: buffers the whole body, and the reflection overloads defeat the source-generated context; stream with ResponseHeadersRead, count the bytes read and bind from the capped stream
+M:System.Net.Http.Json.HttpClientJsonExtensions.GetFromJsonAsync(System.Net.Http.HttpClient,System.Uri,System.Type,System.Text.Json.Serialization.JsonSerializerContext,System.Threading.CancellationToken);CS-BIN-11: buffers the whole body, and the reflection overloads defeat the source-generated context; stream with ResponseHeadersRead, count the bytes read and bind from the capped stream
+M:System.Net.Http.Json.HttpClientJsonExtensions.GetFromJsonAsync(System.Net.Http.HttpClient,System.Uri,System.Type,System.Threading.CancellationToken);CS-BIN-11: buffers the whole body, and the reflection overloads defeat the source-generated context; stream with ResponseHeadersRead, count the bytes read and bind from the capped stream
+M:System.Net.Http.Json.HttpClientJsonExtensions.GetFromJsonAsync``1(System.Net.Http.HttpClient,System.String,System.Text.Json.JsonSerializerOptions,System.Threading.CancellationToken);CS-BIN-11: buffers the whole body, and the reflection overloads defeat the source-generated context; stream with ResponseHeadersRead, count the bytes read and bind from the capped stream
+M:System.Net.Http.Json.HttpClientJsonExtensions.GetFromJsonAsync``1(System.Net.Http.HttpClient,System.String,System.Text.Json.Serialization.Metadata.JsonTypeInfo{``0},System.Threading.CancellationToken);CS-BIN-11: buffers the whole body, and the reflection overloads defeat the source-generated context; stream with ResponseHeadersRead, count the bytes read and bind from the capped stream
+M:System.Net.Http.Json.HttpClientJsonExtensions.GetFromJsonAsync``1(System.Net.Http.HttpClient,System.String,System.Threading.CancellationToken);CS-BIN-11: buffers the whole body, and the reflection overloads defeat the source-generated context; stream with ResponseHeadersRead, count the bytes read and bind from the capped stream
+M:System.Net.Http.Json.HttpClientJsonExtensions.GetFromJsonAsync``1(System.Net.Http.HttpClient,System.Uri,System.Text.Json.JsonSerializerOptions,System.Threading.CancellationToken);CS-BIN-11: buffers the whole body, and the reflection overloads defeat the source-generated context; stream with ResponseHeadersRead, count the bytes read and bind from the capped stream
+M:System.Net.Http.Json.HttpClientJsonExtensions.GetFromJsonAsync``1(System.Net.Http.HttpClient,System.Uri,System.Text.Json.Serialization.Metadata.JsonTypeInfo{``0},System.Threading.CancellationToken);CS-BIN-11: buffers the whole body, and the reflection overloads defeat the source-generated context; stream with ResponseHeadersRead, count the bytes read and bind from the capped stream
+M:System.Net.Http.Json.HttpClientJsonExtensions.GetFromJsonAsync``1(System.Net.Http.HttpClient,System.Uri,System.Threading.CancellationToken);CS-BIN-11: buffers the whole body, and the reflection overloads defeat the source-generated context; stream with ResponseHeadersRead, count the bytes read and bind from the capped stream
+M:System.Net.Http.Json.HttpContentJsonExtensions.ReadFromJsonAsync(System.Net.Http.HttpContent,System.Type,System.Text.Json.JsonSerializerOptions,System.Threading.CancellationToken);CS-BIN-11: buffers the whole body, and the reflection overloads defeat the source-generated context; read the stream, count the bytes read and bind from the capped copy
+M:System.Net.Http.Json.HttpContentJsonExtensions.ReadFromJsonAsync(System.Net.Http.HttpContent,System.Type,System.Text.Json.Serialization.JsonSerializerContext,System.Threading.CancellationToken);CS-BIN-11: buffers the whole body, and the reflection overloads defeat the source-generated context; read the stream, count the bytes read and bind from the capped copy
+M:System.Net.Http.Json.HttpContentJsonExtensions.ReadFromJsonAsync(System.Net.Http.HttpContent,System.Type,System.Threading.CancellationToken);CS-BIN-11: buffers the whole body, and the reflection overloads defeat the source-generated context; read the stream, count the bytes read and bind from the capped copy
+M:System.Net.Http.Json.HttpContentJsonExtensions.ReadFromJsonAsync``1(System.Net.Http.HttpContent,System.Text.Json.JsonSerializerOptions,System.Threading.CancellationToken);CS-BIN-11: buffers the whole body, and the reflection overloads defeat the source-generated context; read the stream, count the bytes read and bind from the capped copy
+M:System.Net.Http.Json.HttpContentJsonExtensions.ReadFromJsonAsync``1(System.Net.Http.HttpContent,System.Text.Json.Serialization.Metadata.JsonTypeInfo{``0},System.Threading.CancellationToken);CS-BIN-11: buffers the whole body, and the reflection overloads defeat the source-generated context; read the stream, count the bytes read and bind from the capped copy
+M:System.Net.Http.Json.HttpContentJsonExtensions.ReadFromJsonAsync``1(System.Net.Http.HttpContent,System.Threading.CancellationToken);CS-BIN-11: buffers the whole body, and the reflection overloads defeat the source-generated context; read the stream, count the bytes read and bind from the capped copy
+
+// --- CS-XP (portability)
+M:System.IO.Path.GetInvalidFileNameChars;CS-XP-03: 2 characters on Linux, 41 on Windows; use PathSafe.IsPortableFileName
+M:System.IO.Directory.SetCurrentDirectory(System.String);CS-XP-06: the working directory is process-global; pass absolute paths and ProcessStartInfo.WorkingDirectory
+M:System.IO.Directory.CreateSymbolicLink(System.String,System.String);CS-XP-05: Windows needs a privilege; the SDK reads links and never creates them
+M:System.IO.File.CreateSymbolicLink(System.String,System.String);CS-XP-05: Windows needs a privilege; the SDK reads links and never creates them
+M:System.IO.FileSystemInfo.CreateAsSymbolicLink(System.String);CS-XP-05: Windows needs a privilege; the SDK reads links and never creates them
+F:System.Environment.SpecialFolder.Personal;CS-XP-04: means ~/Documents on Unix since .NET 8; use the home resolver
+F:System.Environment.SpecialFolder.MyDocuments;CS-XP-04: means ~/Documents on Unix since .NET 8; use the home resolver
+P:System.Environment.OSVersion;CS-XP-09: not a CA1416 guard; use OperatingSystem.IsWindows(), IsLinux() or IsMacOS()
+P:System.Environment.Is64BitOperatingSystem;CS-XP-10: true on arm64; use RuntimeInformation.OSArchitecture
+P:System.Environment.Is64BitProcess;CS-XP-10: use RuntimeInformation.OSArchitecture
+P:System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture;CS-XP-10: x64 under emulation on an arm64 host; use OSArchitecture
+P:System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier;CS-XP-10: an opaque string (a distro build reports alpine.3.24-x64); never parse it
+P:System.StringComparer.InvariantCulture;CS-XP-07: linguistic, not invariant; use StringComparer.Ordinal
+P:System.StringComparer.InvariantCultureIgnoreCase;CS-XP-07: use StringComparer.OrdinalIgnoreCase
+F:System.StringComparison.InvariantCulture;CS-XP-07: use StringComparison.Ordinal
+F:System.StringComparison.InvariantCultureIgnoreCase;CS-XP-07: use StringComparison.OrdinalIgnoreCase
+
+// --- CS-SEC
+T:System.Xml.XmlUrlResolver;CS-SEC-05: external entity resolution (XXE); leave XmlResolver unset or null
+T:System.Xml.XmlSecureResolver;CS-SEC-05: an obsolete CAS-era resolver; leave XmlResolver unset or null
+F:System.Xml.DtdProcessing.Parse;CS-SEC-05: use DtdProcessing.Prohibit, the XmlReader.Create default
+P:System.Xml.Xsl.XsltSettings.EnableScript;CS-SEC-05: XSLT script blocks execute code
+P:System.Xml.Xsl.XsltSettings.EnableDocumentFunction;CS-SEC-05: document() reads arbitrary URLs
+M:System.Text.RegularExpressions.Regex.#ctor(System.String);CS-SEC-03: a literal pattern is a [GeneratedRegex] with a timeout; a runtime pattern passes a TimeSpan of at most 1 s
+M:System.Text.RegularExpressions.Regex.#ctor(System.String,System.Text.RegularExpressions.RegexOptions);CS-SEC-03: a literal pattern is a [GeneratedRegex] with a timeout; a runtime pattern passes a TimeSpan of at most 1 s
+M:System.Text.RegularExpressions.Regex.IsMatch(System.String,System.String);CS-SEC-03: use the overload with a TimeSpan matchTimeout
+M:System.Text.RegularExpressions.Regex.IsMatch(System.String,System.String,System.Text.RegularExpressions.RegexOptions);CS-SEC-03: use the overload with a TimeSpan matchTimeout
+M:System.Text.RegularExpressions.Regex.Match(System.String,System.String);CS-SEC-03: use the overload with a TimeSpan matchTimeout
+M:System.Text.RegularExpressions.Regex.Match(System.String,System.String,System.Text.RegularExpressions.RegexOptions);CS-SEC-03: use the overload with a TimeSpan matchTimeout
+M:System.Text.RegularExpressions.Regex.Matches(System.String,System.String);CS-SEC-03: use the overload with a TimeSpan matchTimeout
+M:System.Text.RegularExpressions.Regex.Matches(System.String,System.String,System.Text.RegularExpressions.RegexOptions);CS-SEC-03: use the overload with a TimeSpan matchTimeout
+M:System.Text.RegularExpressions.Regex.Replace(System.String,System.String,System.String);CS-SEC-03: use the overload with a TimeSpan matchTimeout
+M:System.Text.RegularExpressions.Regex.Replace(System.String,System.String,System.String,System.Text.RegularExpressions.RegexOptions);CS-SEC-03: use the overload with a TimeSpan matchTimeout
+M:System.Text.RegularExpressions.Regex.Split(System.String,System.String);CS-SEC-03: use the overload with a TimeSpan matchTimeout
+M:System.Text.RegularExpressions.Regex.Split(System.String,System.String,System.Text.RegularExpressions.RegexOptions);CS-SEC-03: use the overload with a TimeSpan matchTimeout
+M:System.Text.RegularExpressions.Regex.IsMatch(System.ReadOnlySpan{System.Char},System.String);CS-SEC-03: use the overload with a TimeSpan matchTimeout
+M:System.Text.RegularExpressions.Regex.IsMatch(System.ReadOnlySpan{System.Char},System.String,System.Text.RegularExpressions.RegexOptions);CS-SEC-03: use the overload with a TimeSpan matchTimeout
+M:System.Text.RegularExpressions.Regex.EnumerateMatches(System.ReadOnlySpan{System.Char},System.String);CS-SEC-03: use the overload with a TimeSpan matchTimeout
+M:System.Text.RegularExpressions.Regex.EnumerateMatches(System.ReadOnlySpan{System.Char},System.String,System.Text.RegularExpressions.RegexOptions);CS-SEC-03: use the overload with a TimeSpan matchTimeout
+M:System.Text.RegularExpressions.GeneratedRegexAttribute.#ctor(System.String);CS-SEC-03: use [GeneratedRegex(pattern, options, matchTimeoutMilliseconds: 1000)]
+M:System.Text.RegularExpressions.GeneratedRegexAttribute.#ctor(System.String,System.Text.RegularExpressions.RegexOptions);CS-SEC-03: use [GeneratedRegex(pattern, options, matchTimeoutMilliseconds: 1000)]
+M:System.Text.RegularExpressions.GeneratedRegexAttribute.#ctor(System.String,System.Text.RegularExpressions.RegexOptions,System.String);CS-SEC-03: use [GeneratedRegex(pattern, options, matchTimeoutMilliseconds: 1000)]
+M:System.Text.RegularExpressions.Regex.Count(System.ReadOnlySpan{System.Char},System.String);CS-SEC-03: use the overload with a TimeSpan matchTimeout
+M:System.Text.RegularExpressions.Regex.Count(System.ReadOnlySpan{System.Char},System.String,System.Text.RegularExpressions.RegexOptions);CS-SEC-03: use the overload with a TimeSpan matchTimeout
+M:System.Text.RegularExpressions.Regex.Count(System.String,System.String);CS-SEC-03: use the overload with a TimeSpan matchTimeout
+M:System.Text.RegularExpressions.Regex.Count(System.String,System.String,System.Text.RegularExpressions.RegexOptions);CS-SEC-03: use the overload with a TimeSpan matchTimeout
+M:System.Text.RegularExpressions.Regex.EnumerateSplits(System.ReadOnlySpan{System.Char},System.String);CS-SEC-03: use the overload with a TimeSpan matchTimeout
+M:System.Text.RegularExpressions.Regex.EnumerateSplits(System.ReadOnlySpan{System.Char},System.String,System.Text.RegularExpressions.RegexOptions);CS-SEC-03: use the overload with a TimeSpan matchTimeout
+M:System.Text.RegularExpressions.Regex.Replace(System.String,System.String,System.Text.RegularExpressions.MatchEvaluator);CS-SEC-03: use the overload with a TimeSpan matchTimeout
+M:System.Text.RegularExpressions.Regex.Replace(System.String,System.String,System.Text.RegularExpressions.MatchEvaluator,System.Text.RegularExpressions.RegexOptions);CS-SEC-03: use the overload with a TimeSpan matchTimeout
+M:System.Type.GetType(System.String);CS-SEC-04: never resolve a type from a string; switch on a closed tag table
+M:System.Type.GetType(System.String,System.Boolean);CS-SEC-04: never resolve a type from a string; switch on a closed tag table
+M:System.Type.GetType(System.String,System.Boolean,System.Boolean);CS-SEC-04: never resolve a type from a string; switch on a closed tag table
+M:System.Activator.CreateInstance(System.String,System.String);CS-SEC-04: never instantiate a type named by a string
+M:System.Reflection.Assembly.LoadFrom(System.String);CS-SEC-04: the SDK loads no assemblies
+M:System.Reflection.Assembly.LoadFile(System.String);CS-SEC-04: the SDK loads no assemblies
+M:System.Reflection.Assembly.UnsafeLoadFrom(System.String);CS-SEC-04: the SDK loads no assemblies
+M:System.Activator.CreateInstance(System.String,System.String,System.Boolean,System.Reflection.BindingFlags,System.Reflection.Binder,System.Object[],System.Globalization.CultureInfo,System.Object[]);CS-SEC-04: never instantiate a type named by a string
+M:System.Activator.CreateInstance(System.String,System.String,System.Object[]);CS-SEC-04: never instantiate a type named by a string
+M:System.Activator.CreateInstanceFrom(System.String,System.String);CS-SEC-04: never instantiate a type named by a string
+M:System.Activator.CreateInstanceFrom(System.String,System.String,System.Boolean,System.Reflection.BindingFlags,System.Reflection.Binder,System.Object[],System.Globalization.CultureInfo,System.Object[]);CS-SEC-04: never instantiate a type named by a string
+M:System.Activator.CreateInstanceFrom(System.String,System.String,System.Object[]);CS-SEC-04: never instantiate a type named by a string
+M:System.AppDomain.CreateInstance(System.String,System.String);CS-SEC-04: never instantiate a type named by a string
+M:System.AppDomain.CreateInstance(System.String,System.String,System.Boolean,System.Reflection.BindingFlags,System.Reflection.Binder,System.Object[],System.Globalization.CultureInfo,System.Object[]);CS-SEC-04: never instantiate a type named by a string
+M:System.AppDomain.CreateInstance(System.String,System.String,System.Object[]);CS-SEC-04: never instantiate a type named by a string
+M:System.AppDomain.CreateInstanceAndUnwrap(System.String,System.String);CS-SEC-04: never instantiate a type named by a string
+M:System.AppDomain.CreateInstanceAndUnwrap(System.String,System.String,System.Boolean,System.Reflection.BindingFlags,System.Reflection.Binder,System.Object[],System.Globalization.CultureInfo,System.Object[]);CS-SEC-04: never instantiate a type named by a string
+M:System.AppDomain.CreateInstanceAndUnwrap(System.String,System.String,System.Object[]);CS-SEC-04: never instantiate a type named by a string
+M:System.AppDomain.CreateInstanceFrom(System.String,System.String);CS-SEC-04: never instantiate a type named by a string
+M:System.AppDomain.CreateInstanceFrom(System.String,System.String,System.Boolean,System.Reflection.BindingFlags,System.Reflection.Binder,System.Object[],System.Globalization.CultureInfo,System.Object[]);CS-SEC-04: never instantiate a type named by a string
+M:System.AppDomain.CreateInstanceFrom(System.String,System.String,System.Object[]);CS-SEC-04: never instantiate a type named by a string
+M:System.AppDomain.CreateInstanceFromAndUnwrap(System.String,System.String);CS-SEC-04: never instantiate a type named by a string
+M:System.AppDomain.CreateInstanceFromAndUnwrap(System.String,System.String,System.Boolean,System.Reflection.BindingFlags,System.Reflection.Binder,System.Object[],System.Globalization.CultureInfo,System.Object[]);CS-SEC-04: never instantiate a type named by a string
+M:System.AppDomain.CreateInstanceFromAndUnwrap(System.String,System.String,System.Object[]);CS-SEC-04: never instantiate a type named by a string
+M:System.AppDomain.ExecuteAssembly(System.String);CS-SEC-04: the SDK loads no assemblies
+M:System.AppDomain.ExecuteAssembly(System.String,System.String[]);CS-SEC-04: the SDK loads no assemblies
+M:System.AppDomain.ExecuteAssembly(System.String,System.String[],System.Byte[],System.Configuration.Assemblies.AssemblyHashAlgorithm);CS-SEC-04: the SDK loads no assemblies
+M:System.AppDomain.ExecuteAssemblyByName(System.Reflection.AssemblyName,System.String[]);CS-SEC-04: the SDK loads no assemblies
+M:System.AppDomain.ExecuteAssemblyByName(System.String);CS-SEC-04: the SDK loads no assemblies
+M:System.AppDomain.ExecuteAssemblyByName(System.String,System.String[]);CS-SEC-04: the SDK loads no assemblies
+M:System.AppDomain.Load(System.Byte[]);CS-SEC-04: the SDK loads no assemblies
+M:System.AppDomain.Load(System.Byte[],System.Byte[]);CS-SEC-04: the SDK loads no assemblies
+M:System.AppDomain.Load(System.Reflection.AssemblyName);CS-SEC-04: the SDK loads no assemblies
+M:System.AppDomain.Load(System.String);CS-SEC-04: the SDK loads no assemblies
+M:System.Reflection.Assembly.GetType(System.String);CS-SEC-04: never resolve a type from a string; switch on a closed tag table
+M:System.Reflection.Assembly.GetType(System.String,System.Boolean);CS-SEC-04: never resolve a type from a string; switch on a closed tag table
+M:System.Reflection.Assembly.GetType(System.String,System.Boolean,System.Boolean);CS-SEC-04: never resolve a type from a string; switch on a closed tag table
+M:System.Reflection.Assembly.Load(System.Byte[]);CS-SEC-04: the SDK loads no assemblies
+M:System.Reflection.Assembly.Load(System.Byte[],System.Byte[]);CS-SEC-04: the SDK loads no assemblies
+M:System.Reflection.Assembly.Load(System.Reflection.AssemblyName);CS-SEC-04: the SDK loads no assemblies
+M:System.Reflection.Assembly.Load(System.String);CS-SEC-04: the SDK loads no assemblies
+M:System.Reflection.Assembly.LoadFrom(System.String,System.Byte[],System.Configuration.Assemblies.AssemblyHashAlgorithm);CS-SEC-04: the SDK loads no assemblies
+M:System.Reflection.Assembly.LoadWithPartialName(System.String);CS-SEC-04: the SDK loads no assemblies
+M:System.Runtime.Loader.AssemblyLoadContext.LoadFromAssemblyName(System.Reflection.AssemblyName);CS-SEC-04: the SDK loads no assemblies
+M:System.Runtime.Loader.AssemblyLoadContext.LoadFromAssemblyPath(System.String);CS-SEC-04: the SDK loads no assemblies
+M:System.Runtime.Loader.AssemblyLoadContext.LoadFromNativeImagePath(System.String,System.String);CS-SEC-04: the SDK loads no assemblies
+M:System.Runtime.Loader.AssemblyLoadContext.LoadFromStream(System.IO.Stream);CS-SEC-04: the SDK loads no assemblies
+M:System.Runtime.Loader.AssemblyLoadContext.LoadFromStream(System.IO.Stream,System.IO.Stream);CS-SEC-04: the SDK loads no assemblies
+P:System.Net.Http.HttpClientHandler.ServerCertificateCustomValidationCallback;CS-BIN-16: never replace certificate validation; a custom root goes through SslOptions.CertificateChainPolicy
+P:System.Net.Http.HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;CS-BIN-16: disables certificate validation
+P:System.Net.Security.SslClientAuthenticationOptions.RemoteCertificateValidationCallback;CS-BIN-16: never replace certificate validation; use CertificateChainPolicy
+P:System.Net.ServicePointManager.ServerCertificateValidationCallback;CS-BIN-16: a legacy global hook; never replace certificate validation
+T:System.Security.SecureString;CS-SEC-05: secrets travel as UTF-8 bytes on stdin or in the child environment; a shipped public prompt API takes the reasoned pragma
+M:System.Security.Cryptography.ECDsa.VerifyData(System.Byte[],System.Byte[],System.Security.Cryptography.HashAlgorithmName);CS-SEC-08: pass DSASignatureFormat.Rfc3279DerSequence explicitly
+M:System.Security.Cryptography.ECDsa.VerifyData(System.ReadOnlySpan{System.Byte},System.ReadOnlySpan{System.Byte},System.Security.Cryptography.HashAlgorithmName);CS-SEC-08: pass DSASignatureFormat.Rfc3279DerSequence explicitly
+M:System.Security.Cryptography.ECDsa.VerifyData(System.IO.Stream,System.Byte[],System.Security.Cryptography.HashAlgorithmName);CS-SEC-08: pass DSASignatureFormat.Rfc3279DerSequence explicitly
+M:System.Security.Cryptography.ECDsa.VerifyHash(System.Byte[],System.Byte[]);CS-SEC-08: use VerifyData with a HashAlgorithmName and a DSASignatureFormat
+M:System.Security.Cryptography.ECDsa.VerifyHash(System.ReadOnlySpan{System.Byte},System.ReadOnlySpan{System.Byte});CS-SEC-08: use VerifyData with a HashAlgorithmName and a DSASignatureFormat
+
+// --- CS-LANG
+M:System.MemoryExtensions.Reverse``1(System.Span{``0});CS-LANG-08: in place and void; C# 14 binds arr.Reverse() here on net8.0. Use Array.Reverse (in place) or Enumerable.Reverse (copy)

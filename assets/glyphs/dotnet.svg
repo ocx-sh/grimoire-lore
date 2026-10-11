@@ -1,0 +1,14 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="28"
+  height="14"
+  viewBox="0 0 28 14"
+>
+  <title>.NET</title>
+  <!-- Original lettering drawn for this repo, not an official logo. White paint is
+       set on the paths: make-mark.py drops the root tag and the disc is dark. -->
+  <path fill="#FFFFFF" d="M2 10a2 2 0 1 0 0 4a2 2 0 1 0 0-4z" />
+  <path fill="#FFFFFF" d="M6 0h3l2 6V0h3v14h-3L9 8v6H6z" />
+  <path fill="#FFFFFF" d="M16 0h5v3h-2v2.5h1.5v3H19V11h2v3h-5z" />
+  <path fill="#FFFFFF" d="M22 0h6v3h-1.5v11h-3V3H22z" />
+</svg>

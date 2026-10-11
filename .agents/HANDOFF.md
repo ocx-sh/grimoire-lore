@@ -1,3 +1,51 @@
+# C# / .NET program (AUTHORED, ON BRANCH `csharp`)
+
+Started 2026-10-10, closed 2026-10-11 (`/research-lang C#`, ultracode). Purpose
+(owner): a C# SDK that wraps the ocx CLI (mirror `~/dev/ocx-sdk-python`), modern
+.NET on all platforms. Frame `.agents/research/csharp-frame.md`; map, authoring
+notes N-1..N-14, integration log, phase-8 review log and held-out rounds 1-3 in
+`.agents/research/csharp-topic-map.md`; 13 consolidations `csharp-*.md`; scripts
+and receipts in `csharp-topic-map/scratch/`.
+
+## What shipped (on the branch)
+
+- Rules `csharp-quality` (index + 12 depth files + `checks/`; globs `**/*.cs`,
+  `**/*.csx`, `**/*.cake`; 256 depth rules, 219 MUST) and `dotnet-build` (index +
+  `packaging.md` + `checks/`; 22 globs incl. workflows and build scripts; 27
+  CS-BUILD + 16 CS-PKG). Skills `dotnet-upgrade`, `dotnet-diagnose` (74-row
+  catalogue), `dotnet-release`. Bundle `dotnet-essentials` (untagged members +
+  code-docs, code-docs-cleanup). All 0.1.0. Docs pages, `assets/lore-dotnet.svg`,
+  taskfile `CSHARP_CONSUMER` step.
+- ocx-specific design kept out of published rules: ADR draft
+  `.agents/research/csharp-ocx-sdk/adr_ocx_csharp_sdk.md` (Status Proposed, for
+  ocx-sh/ocx).
+- Measured on SDK 10.0.401 / 8.0.425 / 11.0 RC1 over 35 exemplars; Windows rows on
+  host SDK 10.0.102; macOS and arm64 `unverified: read only`.
+
+## Validation and convergence
+
+- Phase 8: 14 review->fix units + consistency (297 findings, 251 + 43 fixed).
+- Held-out rounds on 15 fresh trees: round 1 (6) 4 new classes, round 2 (5) 1
+  (caused by round 1's own cleanup fix), round 3 (4) 0 new classes, 0 new MUST ->
+  converged. Receipts `heldout{1,2,3}-receipt.json`.
+- Gates at close: checker clean, `task ci CSHARP_CONSUMER=<testfx>` 0, ruff 0,
+  `grim publish --dry-run` lists exactly the 6 new packages.
+
+## Open, for the owner
+
+- Owner defaults applied, overridable: no netstandard2.0; net8.0;net10.0 until
+  2026-11-10 then net10.0; locate + opt-in sha256-verified download; SDK floor =
+  first ocx release carrying the machine contract (none released yet; ocx main
+  6daf9a164); package ID adopter-chosen (Ocx.Sdk example); no CliWrap; async-only v1.
+- macOS + arm64 verification needs a CI dispatch (no hardware here).
+- Phase-8 F15 deferred: edits published `code-docs-essentials` 0.1.1, needs own bump.
+- .NET 11 GA (Nov 2026) re-measures listed in the map's Wave 3 "dropped" list.
+- Exemplar and held-out clones deleted at close; re-fetch with
+  `csharp-audit/scratch/fetch-exemplars.sh` and `csharp-topic-map/scratch/fetch-heldout.sh`.
+  Toolchain kept at `~/.cache/research-lang/dotnet-tools`.
+
+---
+
 # Swift program (LANDED 2026-10-10)
 
 Started and finished 2026-10-10 (`/research-lang swift`, ultracode on).

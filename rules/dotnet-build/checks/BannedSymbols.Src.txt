@@ -1,0 +1,76 @@
+// BannedSymbols.Src.txt: RS0030 bans for src projects only (Microsoft.CodeAnalysis.BannedApiAnalyzers 5.6.0), CS-SEC-02.
+// Install at the repository root beside BannedSymbols.txt and register from src/Directory.Build.props only:
+//   <AdditionalFiles Include="$(MSBuildThisFileDirectory)../BannedSymbols.Src.txt" />
+// Tests keep real deadlines (Thread.Sleep, Task.Delay) and the fake CLI is a console app (Console), so none of this file reaches tests/. Path.Combine is here, not repo-wide, because a test builds fixture paths from literals.
+// Every symbol appears once across this file and BannedSymbols.txt (a duplicate is RS0031, an error). Each message names one rule.
+// A deliberate use carries `#pragma warning disable RS0030 // <reason>` on the line; never delete a line (CS-CORE-01).
+// Watched red on a canary and green on its twin, net8.0 and net10.0 (measured 2026-10-11).
+
+// --- CS-XP (time)
+P:System.DateTime.Now;CS-XP-11: inject TimeProvider; use GetLocalNow()
+P:System.DateTime.UtcNow;CS-XP-11: inject TimeProvider; use GetUtcNow()
+P:System.DateTime.Today;CS-XP-11: inject TimeProvider
+P:System.DateTimeOffset.Now;CS-XP-11: inject TimeProvider; use GetLocalNow()
+P:System.DateTimeOffset.UtcNow;CS-XP-11: inject TimeProvider; use GetUtcNow()
+M:System.Threading.Tasks.Task.Delay(System.TimeSpan);CS-XP-11: use Task.Delay(TimeSpan, TimeProvider, CancellationToken)
+M:System.Threading.Tasks.Task.Delay(System.TimeSpan,System.Threading.CancellationToken);CS-XP-11: use Task.Delay(TimeSpan, TimeProvider, CancellationToken)
+M:System.Threading.Tasks.Task.Delay(System.Int32);CS-XP-11: use Task.Delay(TimeSpan, TimeProvider, CancellationToken)
+M:System.Threading.Tasks.Task.Delay(System.Int32,System.Threading.CancellationToken);CS-XP-11: use Task.Delay(TimeSpan, TimeProvider, CancellationToken)
+M:System.Threading.CancellationTokenSource.#ctor(System.TimeSpan);CS-XP-11: use new CancellationTokenSource(TimeSpan, TimeProvider)
+M:System.Threading.CancellationTokenSource.#ctor(System.Int32);CS-XP-11: use new CancellationTokenSource(TimeSpan, TimeProvider)
+M:System.Threading.CancellationTokenSource.CancelAfter(System.TimeSpan);CS-XP-11: a system timer; create the source with new CancellationTokenSource(TimeSpan, TimeProvider)
+M:System.Threading.CancellationTokenSource.CancelAfter(System.Int32);CS-XP-11: a system timer; create the source with new CancellationTokenSource(TimeSpan, TimeProvider)
+M:System.Threading.Thread.Sleep(System.Int32);CS-XP-11: blocks; use Task.Delay(TimeSpan, TimeProvider, CancellationToken)
+M:System.Threading.Thread.Sleep(System.TimeSpan);CS-XP-11: blocks; use Task.Delay(TimeSpan, TimeProvider, CancellationToken)
+M:System.Threading.Tasks.Task.WaitAsync(System.TimeSpan);CS-XP-11: a system timer; use WaitAsync(TimeSpan, TimeProvider, CancellationToken)
+M:System.Threading.Tasks.Task.WaitAsync(System.TimeSpan,System.Threading.CancellationToken);CS-XP-11: a system timer; use WaitAsync(TimeSpan, TimeProvider, CancellationToken)
+M:System.Threading.Tasks.Task`1.WaitAsync(System.TimeSpan);CS-XP-11: a system timer; use WaitAsync(TimeSpan, TimeProvider, CancellationToken)
+M:System.Threading.Tasks.Task`1.WaitAsync(System.TimeSpan,System.Threading.CancellationToken);CS-XP-11: a system timer; use WaitAsync(TimeSpan, TimeProvider, CancellationToken)
+M:System.Threading.PeriodicTimer.#ctor(System.TimeSpan);CS-XP-11: a system timer; use new PeriodicTimer(TimeSpan, TimeProvider)
+
+// --- CS-XP (paths)
+M:System.IO.Path.Combine(System.String,System.String);CS-XP-01: a rooted later segment discards the root; use Path.Join or PathSafe.Combine
+M:System.IO.Path.Combine(System.String,System.String,System.String);CS-XP-01: a rooted later segment discards the root; use Path.Join or PathSafe.Combine
+M:System.IO.Path.Combine(System.String,System.String,System.String,System.String);CS-XP-01: a rooted later segment discards the root; use Path.Join or PathSafe.Combine
+M:System.IO.Path.Combine(System.String[]);CS-XP-01: a rooted later segment discards the root; use Path.Join or PathSafe.Combine
+M:System.IO.Path.Combine(System.ReadOnlySpan{System.String});CS-XP-01: the .NET 9 and later params-span overload; use Path.Join or PathSafe.Combine
+
+// --- CS-ASYNC
+M:System.Threading.Tasks.Task.Wait;CS-ASYNC-14: do not block on a Task; await it
+M:System.Threading.Tasks.Task.Wait(System.Int32);CS-ASYNC-14: do not block on a Task; await it
+M:System.Threading.Tasks.Task.Wait(System.TimeSpan);CS-ASYNC-14: do not block on a Task; await it
+M:System.Threading.Tasks.Task.Wait(System.Threading.CancellationToken);CS-ASYNC-14: do not block on a Task; await it
+M:System.Threading.Tasks.Task.Wait(System.Int32,System.Threading.CancellationToken);CS-ASYNC-14: do not block on a Task; await it
+M:System.Threading.Tasks.Task.Wait(System.TimeSpan,System.Threading.CancellationToken);CS-ASYNC-14: do not block on a Task; await it
+M:System.Threading.Tasks.Task.WaitAll(System.Threading.Tasks.Task[]);CS-ASYNC-14: do not block; await Task.WhenAll
+M:System.Threading.Tasks.Task.WaitAll(System.Threading.Tasks.Task[],System.Int32);CS-ASYNC-14: do not block; await Task.WhenAll
+M:System.Threading.Tasks.Task.WaitAll(System.Threading.Tasks.Task[],System.TimeSpan);CS-ASYNC-14: do not block; await Task.WhenAll
+M:System.Threading.Tasks.Task.WaitAll(System.Threading.Tasks.Task[],System.Threading.CancellationToken);CS-ASYNC-14: do not block; await Task.WhenAll
+M:System.Threading.Tasks.Task.WaitAll(System.Threading.Tasks.Task[],System.Int32,System.Threading.CancellationToken);CS-ASYNC-14: do not block; await Task.WhenAll
+M:System.Threading.Tasks.Task.WaitAll(System.ReadOnlySpan{System.Threading.Tasks.Task});CS-ASYNC-14: do not block; await Task.WhenAll (params ReadOnlySpan overload, .NET 9 and later)
+M:System.Threading.Tasks.Task.WaitAny(System.Threading.Tasks.Task[]);CS-ASYNC-14: do not block; await Task.WhenAny
+M:System.Threading.Tasks.Task.WaitAny(System.Threading.Tasks.Task[],System.Int32);CS-ASYNC-14: do not block; await Task.WhenAny
+M:System.Threading.Tasks.Task.WaitAny(System.Threading.Tasks.Task[],System.TimeSpan);CS-ASYNC-14: do not block; await Task.WhenAny
+M:System.Threading.Tasks.Task.WaitAny(System.Threading.Tasks.Task[],System.Threading.CancellationToken);CS-ASYNC-14: do not block; await Task.WhenAny
+M:System.Threading.Tasks.Task.WaitAny(System.Threading.Tasks.Task[],System.Int32,System.Threading.CancellationToken);CS-ASYNC-14: do not block; await Task.WhenAny
+P:System.Threading.Tasks.Task`1.Result;CS-ASYNC-14: do not block on Task<T>.Result; await it
+M:System.Runtime.CompilerServices.TaskAwaiter.GetResult;CS-ASYNC-14: no GetAwaiter().GetResult() in library code
+M:System.Runtime.CompilerServices.TaskAwaiter`1.GetResult;CS-ASYNC-14: no GetAwaiter().GetResult() in library code
+M:System.Runtime.CompilerServices.ConfiguredTaskAwaitable.ConfiguredTaskAwaiter.GetResult;CS-ASYNC-14: no GetAwaiter().GetResult() in library code
+M:System.Runtime.CompilerServices.ConfiguredTaskAwaitable`1.ConfiguredTaskAwaiter.GetResult;CS-ASYNC-14: no GetAwaiter().GetResult() in library code
+M:System.Runtime.CompilerServices.ValueTaskAwaiter.GetResult;CS-ASYNC-14: do not block on a ValueTask
+M:System.Runtime.CompilerServices.ValueTaskAwaiter`1.GetResult;CS-ASYNC-14: do not block on a ValueTask
+M:System.Runtime.CompilerServices.ConfiguredValueTaskAwaitable.ConfiguredValueTaskAwaiter.GetResult;CS-ASYNC-14: do not block on a ValueTask
+M:System.Runtime.CompilerServices.ConfiguredValueTaskAwaitable`1.ConfiguredValueTaskAwaiter.GetResult;CS-ASYNC-14: do not block on a ValueTask
+M:System.Threading.Tasks.Task.Yield;CS-ASYNC-06: use await Task.CompletedTask.ConfigureAwait(ConfigureAwaitOptions.ForceYielding)
+M:System.Threading.Channels.Channel.CreateBounded``1(System.Int32);CS-ASYNC-30: a bounded hand-off stalls the pump; invoke the callback inline
+M:System.Threading.Channels.Channel.CreateBounded``1(System.Threading.Channels.BoundedChannelOptions);CS-ASYNC-30: a bounded hand-off stalls the pump; invoke the callback inline
+M:System.Threading.Channels.ChannelWriter`1.WriteAsync(`0,System.Threading.CancellationToken);CS-ASYNC-30: awaiting a bounded hand-off stalls the pump; invoke the callback inline
+
+// --- CS-OBS
+T:System.Console;CS-OBS-16: a library never writes to the host console; return data or invoke OnStderrLine
+T:System.Diagnostics.Trace;CS-OBS-16: bypasses the consumer's listeners; use ActivitySource
+M:System.Diagnostics.Debug.Write(System.String);CS-OBS-16: ad-hoc diagnostics
+M:System.Diagnostics.Debug.WriteLine(System.String);CS-OBS-16: ad-hoc diagnostics
+M:System.Diagnostics.Debug.WriteLine(System.String,System.Object[]);CS-OBS-16: ad-hoc diagnostics
+T:System.Progress`1;CS-OBS-27: callbacks are inline Action<string>; Progress<T> posts to a captured context and reorders
