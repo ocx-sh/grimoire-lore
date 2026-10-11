@@ -1,0 +1,31 @@
+{
+  "created": "2026-10-11T14:58:36+02:00",
+  "description": "Symptom-routed diagnosis of a .NET restore, build, analyzer, trim or test run that is already failing with no SDK or target-framework migration in progress, from a missing SDK to a hung build. Use when someone reports \"A compatible .NET SDK was not found\" (exit 155), MSB1003 or MSB1011 (no project to build), MSB4242, MSB3202, NU1605, NU1102 or NU1301 on restore, NU1008, NETSDK1045, MSB3073, CS0246, CS9057, IL2026 or IL3050 outside a release run, a build error with no code (`error :`), \"Zero tests ran\" (exit code 5 or 8), a VSTest filter that ran nothing, a missing shared runtime at test time, \"Test Run Aborted\" on a net4x test module, \"All projects must use that test runner\", a failing test, or \"the build hangs\" or leaves dotnet processes behind. Not for writing new code (csharp-quality), the build standards (dotnet-build), a failure that follows an SDK, target-framework or AnalysisLevel change (dotnet-upgrade), or cutting a release (dotnet-release).",
+  "keywords": [
+    "dotnet",
+    "diagnose",
+    "debugging",
+    "msbuild",
+    "nuget",
+    "restore",
+    "sdk",
+    "global-json",
+    "analyzers",
+    "trim",
+    "aot",
+    "microsoft-testing-platform",
+    "exit-code",
+    "hang",
+    "build-server"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "dotnet-diagnose",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/dotnet-diagnose",
+  "schema": 1,
+  "summary": "Routes a failing dotnet command by stage (SDK, restore, project, compile, analyzers, trim, test, hang) to one catalogue row, code-less errors included, fixes the first diagnostic and proves it by a zero count, measured on SDK 10.0.401 and 8.0.425"
+}

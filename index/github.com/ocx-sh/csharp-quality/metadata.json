@@ -1,0 +1,37 @@
+{
+  "created": "2026-10-11T14:58:36+02:00",
+  "description": "C# Quality",
+  "keywords": [
+    "csharp",
+    "dotnet",
+    "quality",
+    "nullable",
+    "async",
+    "cancellation",
+    "process",
+    "subprocess",
+    "json",
+    "system-text-json",
+    "api-design",
+    "exceptions",
+    "testing",
+    "xunit",
+    "ci",
+    "cross-platform",
+    "security",
+    "logging",
+    "telemetry",
+    "performance"
+  ],
+  "kind": "rule",
+  "license": "Apache-2.0",
+  "name": "csharp-quality",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/csharp-quality",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "The C# and .NET quality index, holding the gate, the non-negotiables, the CS-CORE and DN-RULE rules, and where the depth lives"
+}
