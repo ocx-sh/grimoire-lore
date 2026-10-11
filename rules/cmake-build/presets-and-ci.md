@@ -24,8 +24,15 @@ rule.
 Measured on CMake 3.31.12, 4.3.4 and 4.4.2 on 2026-09-26. Rules assume the
 pinned 3.25 floor. `CI_DIR` names one directory of CI definitions or scripts,
 default `.github`. Run each command once per such directory (`CI_DIR=ci`, then
-`CI_DIR=.gitlab`), because one quoted variable holding two names is one missing
-path and grep exits 2. Run every command from the repository root.
+`CI_DIR=.gitlab`), because one quoted variable holding two names is one pathspec
+that matches no file. A pathspec that lists no file makes every command print
+nothing, which can read as a pass, so run the canary first: it prints when
+`CI_DIR` lists no file, and then nothing was checked. Run every command from
+the repository root.
+
+```sh
+git ls-files --cached --others --exclude-standard -- ":(glob)${CI_DIR:-.github}/**" | awk 'END { if (NR == 0) print "canary: no file under the CI directory" }'
+```
 
 Contents: [Caught by the Oldest CI CMake and by Git](#caught-by-the-oldest-ci-cmake-and-by-git) ·
 [Caught by Matching CI Steps Against Preset Names](#caught-by-matching-ci-steps-against-preset-names) ·
@@ -85,7 +92,7 @@ second lists the CI steps that call a preset. `condition` needs schema 3 (CMake
 
 ```sh
 find . -maxdepth 1 -name CMakePresets.json -print0 | xargs -0 -r jq -r '.configurePresets[] | select(.hidden != true) | .name'
-grep -rn -e 'cmake --preset' -e 'ctest --preset' -e '--preset=' "${CI_DIR:-.github}"
+git ls-files -z --cached --others --exclude-standard -- ":(glob)${CI_DIR:-.github}/**" | xargs -0 -r grep -H -n -e 'cmake --preset' -e 'ctest --preset' -e '--preset=' --
 ```
 
 ## Caught by One Grep for the Launcher
@@ -96,7 +103,12 @@ variable 3.17, both below the 3.25 floor.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| CMK-CI-04 | Set a compiler launcher only as the cache entry `CMAKE_<LANG>_COMPILER_LAUNCHER`, from one place: a preset's `cacheVariables`, a `-D`, or the environment variable of that name. Project code that offers a default wraps it in `if(NOT DEFINED CMAKE_<LANG>_COMPILER_LAUNCHER)`, or writes it as `set(... CACHE FILEPATH ...)` without `FORCE`, and picks one tool with `find_program(NAMES sccache ccache)`. Never use `RULE_LAUNCH_COMPILE`, and never set a chained list. | An unconditional `set()` in project code shadows the caller's `-D` and nothing reports it: `build.ninja` carries the project's launcher (measured on 3.31.12 and 4.4.2). A list that prepends the project's launcher to the caller's overrides their choice the same way. apache/arrow's guard is the reference shape. A `CACHE` write without `FORCE` is the same guard: a caller's `-D` and the environment variable both survive it into `CMakeCache.txt` and the build files (measured 2026-09-26 on 3.31.12 and 4.4.2, the shape of cpp-best-practices/cmake_template's `cmake/Cache.cmake`). Floor: CMake 3.4. | `grep -rn --include='CMakeLists.txt' --include='*.cmake' --include='CMakePresets.json' --include='*.yml' --include='*.yaml' -e 'COMPILER_LAUNCHER' -e 'RULE_LAUNCH_COMPILE' .` Every `RULE_LAUNCH_COMPILE` hit is a finding. A `set(CMAKE_<LANG>_COMPILER_LAUNCHER ...)` outside an `if(NOT DEFINED ...)` or `if(NOT CMAKE_<LANG>_COMPILER_LAUNCHER)` guard is a finding, unless it is a `CACHE` write without `FORCE`. A plain `set()` or a `CACHE ... FORCE` write outside the guard stays a finding. Empty output means no launcher, and the rule does not apply. | SHOULD |
+| CMK-CI-04 | Set a compiler launcher only as the cache entry `CMAKE_<LANG>_COMPILER_LAUNCHER`, from one place: a preset's `cacheVariables`, a `-D`, or the environment variable of that name. Project code that offers a default wraps it in `if(NOT DEFINED CMAKE_<LANG>_COMPILER_LAUNCHER)`, or writes it as `set(... CACHE FILEPATH ...)` without `FORCE`, and picks one tool with `find_program(NAMES sccache ccache)`. Never use `RULE_LAUNCH_COMPILE`, and never set a chained list. | An unconditional `set()` in project code shadows the caller's `-D` and nothing reports it: `build.ninja` carries the project's launcher (measured on 3.31.12 and 4.4.2). A list that prepends the project's launcher to the caller's overrides their choice the same way. apache/arrow's guard is the reference shape. A `CACHE` write without `FORCE` is the same guard: a caller's `-D` and the environment variable both survive it into `CMakeCache.txt` and the build files (measured 2026-09-26 on 3.31.12 and 4.4.2, the shape of cpp-best-practices/cmake_template's `cmake/Cache.cmake`). Floor: CMake 3.4. | See block CMK-CI-04. Every `RULE_LAUNCH_COMPILE` hit is a finding. A `set(CMAKE_<LANG>_COMPILER_LAUNCHER ...)` outside an `if(NOT DEFINED ...)` or `if(NOT CMAKE_<LANG>_COMPILER_LAUNCHER)` guard is a finding, unless it is a `CACHE` write without `FORCE`. A plain `set()` or a `CACHE ... FORCE` write outside the guard stays a finding. Empty output means no launcher, and the rule does not apply. | SHOULD |
+
+```sh
+# CMK-CI-04
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' ':(glob)**/CMakePresets.json' ':(glob)**/*.yml' ':(glob)**/*.yaml' | xargs -0 -r grep -H -n -e 'COMPILER_LAUNCHER' -e 'RULE_LAUNCH_COMPILE' --
+```
 
 ```cmake
 # wrong: shadows the caller's -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
@@ -119,7 +131,14 @@ that it is an unused variable, not an error.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| CMK-CI-05 | On a hosted `ubuntu-24.04` runner, run the offline probes of CMK-DEP-16 and CMK-BZL-01 inside a `--network none` container, never under bare `unshare -rn`. Mount the checkout, use an image that carries the pinned CMake and generator, keep `-DCMAKE_POLICY_DEFAULT_CMP0170=NEW` on the probe, and never discard its exit status. | Ubuntu 24.04 restricts unprivileged user namespaces (`kernel.apparmor_restrict_unprivileged_userns=1`), and `unshare` fails on the stock image ([actions/runner-images#10443](https://github.com/actions/runner-images/issues/10443)). The fix PR, actions/runner-images#11489, closed unmerged. A `--network none` container passes a clean tree and fails a fetch with `Could not resolve hostname` (4.4.2, 2026-09-26), and fails outright when the image lacks the generator. macOS runners ship no Docker, so the probe stays Linux-only there. SHOULD because no hosted runner was measured. Floor: none. | `grep -rn -e 'unshare -rn' -e 'unshare --net' "${CI_DIR:-.github}"`: empty output is the pass, and a hit in a job on `ubuntu-24.04` or `ubuntu-latest` is the finding. Then `grep -rn -e '--network none' -e '--network=none' "${CI_DIR:-.github}"` and read each hit: a step ending in `\|\| true` is the finding. Empty output from this second command means no container probe, which is a finding only for a project that owes one of the two probes. | SHOULD |
+| CMK-CI-05 | On a hosted `ubuntu-24.04` runner, run the offline probes of CMK-DEP-16 and CMK-BZL-01 inside a `--network none` container, never under bare `unshare -rn`. Mount the checkout, use an image that carries the pinned CMake and generator, keep `-DCMAKE_POLICY_DEFAULT_CMP0170=NEW` on the probe, and never discard its exit status. | Ubuntu 24.04 restricts unprivileged user namespaces (`kernel.apparmor_restrict_unprivileged_userns=1`), and `unshare` fails on the stock image ([actions/runner-images#10443](https://github.com/actions/runner-images/issues/10443)). The fix PR, actions/runner-images#11489, closed unmerged. A `--network none` container passes a clean tree and fails a fetch with `Could not resolve hostname` (4.4.2, 2026-09-26), and fails outright when the image lacks the generator. macOS runners ship no Docker, so the probe stays Linux-only there. SHOULD because no hosted runner was measured. Floor: none. | See block CMK-CI-05 (1): empty output is the pass, and a hit in a job on `ubuntu-24.04` or `ubuntu-latest` is the finding. Then see block CMK-CI-05 (2) and read each hit: a step ending in `\|\| true` is the finding. Empty output from this second command means no container probe, which is a finding only for a project that owes one of the two probes. | SHOULD |
+
+```sh
+# CMK-CI-05 (1)
+git ls-files -z --cached --others --exclude-standard -- ":(glob)${CI_DIR:-.github}/**" | xargs -0 -r grep -H -n -e 'unshare -rn' -e 'unshare --net' --
+# CMK-CI-05 (2)
+git ls-files -z --cached --others --exclude-standard -- ":(glob)${CI_DIR:-.github}/**" | xargs -0 -r grep -H -n -e '--network none' -e '--network=none' --
+```
 
 The probe below runs the CMK-DEP-16 form. For the CMK-BZL-01 probe, drop
 `-DFETCHCONTENT_FULLY_DISCONNECTED=ON`, because the wrapper passes none. The

@@ -37,11 +37,15 @@ own. Read the output of A2 and A3, not their exit codes.
 
 ```sh
 # A1: every toolchain source. Read per leg.
-grep -rn --include='CMakePresets.json' --include='CMakeUserPresets.json' --include='*.yml' --include='*.yaml' --include='CMakeLists.txt' -e 'CMAKE_TOOLCHAIN_FILE' -e 'toolchainFile' -e '--toolchain' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakePresets.json' ':(glob)**/CMakeUserPresets.json' ':(glob)**/*.yml' ':(glob)**/*.yaml' ':(glob)**/CMakeLists.txt' \
+  | xargs -0 -r grep -H -n \
+    -e 'CMAKE_TOOLCHAIN_FILE' \
+    -e 'toolchainFile' \
+    -e '--toolchain' --
 # A2: project code that sets the variable with no guard and no chainload. Empty = pass.
-grep -rliE --include='CMakeLists.txt' --include='*.cmake' -e 'set[[:space:]]*\([[:space:]]*CMAKE_TOOLCHAIN_FILE' . | xargs -r grep -L -e 'NOT DEFINED CMAKE_TOOLCHAIN_FILE' -e 'VCPKG_CHAINLOAD_TOOLCHAIN_FILE'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' | xargs -0 -r grep -l -i -E -e 'set[[:space:]]*\([[:space:]]*CMAKE_TOOLCHAIN_FILE' -- | tr '\n' '\0' | xargs -0 -r grep -L -e 'NOT DEFINED CMAKE_TOOLCHAIN_FILE' -e 'VCPKG_CHAINLOAD_TOOLCHAIN_FILE' --
 # A3: one file naming both managers' toolchains. Empty = pass.
-grep -rl --include='CMakePresets.json' --include='CMakeUserPresets.json' --include='*.yml' --include='*.yaml' --include='*.cmake' -e 'vcpkg.cmake' . | xargs -r grep -l -e 'conan_toolchain.cmake'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakePresets.json' ':(glob)**/CMakeUserPresets.json' ':(glob)**/*.yml' ':(glob)**/*.yaml' ':(glob)**/*.cmake' | xargs -0 -r grep -l -e 'vcpkg.cmake' -- | tr '\n' '\0' | xargs -0 -r grep -l -e 'conan_toolchain.cmake' --
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
@@ -69,12 +73,19 @@ all of which run after the first `project()`. Both are case-insensitive, because
 # B1: a toolchain or vcpkg write after the first project(). Empty = pass.
 awk 'tolower($0) ~ /^[[:space:]]*project[[:space:]]*\(/ { seen = 1 } seen && tolower($0) ~ /^[[:space:]]*(set|list)[[:space:]]*\([[:space:]]*(append[[:space:]]+)?(cmake_toolchain_file|vcpkg_)/ { print FILENAME ":" FNR ": " $0 }' CMakeLists.txt
 # B2: the same writes below the top level. Empty = pass.
-find . -mindepth 2 -name 'CMakeLists.txt' | xargs -r grep -HniE -e 'set[[:space:]]*\([[:space:]]*VCPKG_' -e 'list[[:space:]]*\([[:space:]]*APPEND[[:space:]]+VCPKG_' -e 'set[[:space:]]*\([[:space:]]*CMAKE_TOOLCHAIN_FILE'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)*/**/CMakeLists.txt' | xargs -0 -r grep -H -n -i -E -e 'set[[:space:]]*\([[:space:]]*VCPKG_' -e 'list[[:space:]]*\([[:space:]]*APPEND[[:space:]]+VCPKG_' -e 'set[[:space:]]*\([[:space:]]*CMAKE_TOOLCHAIN_FILE' --
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| CMK-TC-03 | Set everything the first `project()` reads before it runs, preferably in the configure preset's `cacheVariables`: `CMAKE_TOOLCHAIN_FILE` (under `CMK-TC-01`'s guard when it is in code), `CMAKE_PROJECT_TOP_LEVEL_INCLUDES` (preset or command line only, `CMK-TC-04`), and every `VCPKG_*` input (triplet, manifest mode and features, overlays, chainload). Give a build tree its toolchain on its first configure: to add or change `CMAKE_TOOLCHAIN_FILE` (a preset's `toolchainFile` included), configure a new tree or pass `--fresh`. Load a toolchain file only as the toolchain, never through `include()` after `project()`. | A later write is a silent no-op. `set(CMAKE_TOOLCHAIN_FILE … CACHE … FORCE)` after `project()` prints the new value while the file is never read (measured on 3.31.12). vcpkg's own docs say every vcpkg-affecting variable must be defined "before the first `project()` directive". A triplet set after it silently resolved the host triplet's package, and the configure exited 0 (measured for `CMK-VCPKG-04` on 3.31.12, 4.3.4 and 4.4.2). A toolchain given to an existing tree is recorded in the cache and never loaded, because `CMakeSystem.cmake` is written once: one `unused-cli` warning, exit 0 under `-Werror=dev` (3.31.12) and `-Werror=author` (4.4.2), silent on every later reconfigure, and `-U <Pkg>_DIR` finds the old copy again (measured 2026-09-26 with vcpkg-tool 2026-07-27). A `conan_toolchain.cmake` loaded by `include()` after `project()` compiled with the profile's clang while `CMAKE_C_COMPILER_ID` stayed `GNU`, exit 0 under the gate (measured 2026-09-26 on Conan 2.32.0 with 3.31.12 and 4.4.2). Floor: any. Preset `cacheVariables` 3.19, `toolchainFile` 3.21. | B1: empty output is the pass. Every printed line is a write after the first `project()` (finding). B2: empty output is the pass, any line is the finding. Reads such as `if(VCPKG_TARGET_TRIPLET MATCHES …)` are not matched. Printing the variable after the write proves nothing. Tree check: `grep -rn --include='CMakeSystem.cmake' -e 'include(' build/CMakeFiles` and `grep -rn --include='CMakeCache.txt' -e '^CMAKE_TOOLCHAIN_FILE:' build`. Empty output from both means not applicable. Empty output from the first while the second prints a line is the finding. Two different files is a finding by reading. For an `include()` of a generated toolchain, `CMK-CONAN-07`'s second grep: empty output = pass. | MUST |
+| CMK-TC-03 | Set everything the first `project()` reads before it runs, preferably in the configure preset's `cacheVariables`: `CMAKE_TOOLCHAIN_FILE` (under `CMK-TC-01`'s guard when it is in code), `CMAKE_PROJECT_TOP_LEVEL_INCLUDES` (preset or command line only, `CMK-TC-04`), and every `VCPKG_*` input (triplet, manifest mode and features, overlays, chainload). Give a build tree its toolchain on its first configure: to add or change `CMAKE_TOOLCHAIN_FILE` (a preset's `toolchainFile` included), configure a new tree or pass `--fresh`. Load a toolchain file only as the toolchain, never through `include()` after `project()`. | A later write is a silent no-op. `set(CMAKE_TOOLCHAIN_FILE … CACHE … FORCE)` after `project()` prints the new value while the file is never read (measured on 3.31.12). vcpkg's own docs say every vcpkg-affecting variable must be defined "before the first `project()` directive". A triplet set after it silently resolved the host triplet's package, and the configure exited 0 (measured for `CMK-VCPKG-04` on 3.31.12, 4.3.4 and 4.4.2). A toolchain given to an existing tree is recorded in the cache and never loaded, because `CMakeSystem.cmake` is written once: one `unused-cli` warning, exit 0 under `-Werror=dev` (3.31.12) and `-Werror=author` (4.4.2), silent on every later reconfigure, and `-U <Pkg>_DIR` finds the old copy again (measured 2026-09-26 with vcpkg-tool 2026-07-27). A `conan_toolchain.cmake` loaded by `include()` after `project()` compiled with the profile's clang while `CMAKE_C_COMPILER_ID` stayed `GNU`, exit 0 under the gate (measured 2026-09-26 on Conan 2.32.0 with 3.31.12 and 4.4.2). Floor: any. Preset `cacheVariables` 3.19, `toolchainFile` 3.21. | B1: empty output is the pass. Every printed line is a write after the first `project()` (finding). B2: empty output is the pass, any line is the finding. Reads such as `if(VCPKG_TARGET_TRIPLET MATCHES …)` are not matched. Printing the variable after the write proves nothing. Tree check: See block CMK-TC-03 (1) and block CMK-TC-03 (2). Empty output from both means not applicable. Empty output from the first while the second prints a line is the finding. Two different files is a finding by reading. For an `include()` of a generated toolchain, `CMK-CONAN-07`'s second grep: empty output = pass. | MUST |
+
+```sh
+# CMK-TC-03 (1)
+find build/CMakeFiles -type f -name 'CMakeSystem.cmake' -print0 | xargs -0 -r grep -H -n -e 'include(' --
+# CMK-TC-03 (2)
+find build -type f -name 'CMakeCache.txt' -print0 | xargs -0 -r grep -H -n -e '^CMAKE_TOOLCHAIN_FILE:' --
+```
 
 ## The Provider Slot
 
@@ -87,22 +98,25 @@ repository-wide.
 
 ```sh
 # C1: project or module code writing the include list. Empty = pass.
-grep -rniE --include='CMakeLists.txt' --include='*.cmake' -e 'set[[:space:]]*\([[:space:]]*CMAKE_PROJECT_TOP_LEVEL_INCLUDES' -e 'list[[:space:]]*\([[:space:]]*APPEND[[:space:]]+CMAKE_PROJECT_TOP_LEVEL_INCLUDES' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' \
+  | xargs -0 -r grep -H -n -i -E \
+    -e 'set[[:space:]]*\([[:space:]]*CMAKE_PROJECT_TOP_LEVEL_INCLUDES' \
+    -e 'list[[:space:]]*\([[:space:]]*APPEND[[:space:]]+CMAKE_PROJECT_TOP_LEVEL_INCLUDES' --
 # C2: every registration. Empty = pass. Read each hit's file.
-grep -rn --include='CMakeLists.txt' --include='*.cmake' -e 'SET_DEPENDENCY_PROVIDER' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' | xargs -0 -r grep -H -n -e 'SET_DEPENDENCY_PROVIDER' --
 # C3: the user's own provider must be the one called. MARKER holds the file shown below,
 # outside the source tree. Gate per CMK-CORE-01: -Werror=dev serves 3.31 and 4.4 on one
 # command line. A 4.4-only leg may use -Werror=author. Count 0 = finding.
 MARKER="$HOME/cmake-probes/user-marker.cmake"
 mkdir -p logs
 cmake -S . -B build-marker --fresh -Werror=dev -DCMAKE_PROJECT_TOP_LEVEL_INCLUDES="$MARKER" > logs/marker.log 2>&1
-grep -rc --include='marker.log' -e 'USER_PROVIDER_CALLED' logs
+find logs -type f -name 'marker.log' -print0 | xargs -0 -r grep -H -c -e 'USER_PROVIDER_CALLED' --
 # C4: does any committed preset or CI file load cmake-conan? Empty = CMK-TC-05 not applicable.
-grep -rn --include='CMakePresets.json' --include='CMakeUserPresets.json' --include='*.yml' --include='*.yaml' -e 'conan_provider' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakePresets.json' ':(glob)**/CMakeUserPresets.json' ':(glob)**/*.yml' ':(glob)**/*.yaml' | xargs -0 -r grep -H -n -e 'conan_provider' --
 # C5: find_* or add_subdirectory before the first find_package. Empty = pass.
 awk 'tolower($0) ~ /^[[:space:]]*find_package[[:space:]]*\(/ { exit } tolower($0) ~ /^[[:space:]]*(find_program|find_library|find_path|add_subdirectory)[[:space:]]*\(/ { print FILENAME ":" FNR ": " $0 }' CMakeLists.txt
 # C6: which generator the provider ran, from the saved configure console. Empty = CMakeDeps.
-grep -rn --include='*.log' -e 'Loading conan_cmakedeps_paths.cmake' logs
+find logs -type f -name '*.log' -print0 | xargs -0 -r grep -H -n -e 'Loading conan_cmakedeps_paths.cmake' --
 ```
 
 ```cmake
@@ -124,13 +138,13 @@ cmake_language(
 
 The name glob misses toolchains with other names. Repeat D1 for each file that a
 `VCPKG_CHAINLOAD_TOOLCHAIN_FILE` value or a `user_toolchain` entry names, binding
-its name first: `NAME=aarch64.cmake; grep -rniE --include="$NAME" -e 'execute_process' -e 'message[[:space:]]*\(FATAL_ERROR' -e 'project[[:space:]]*\(' -e 'enable_language' .`. Empty output = pass.
+its name first: `NAME=aarch64.cmake; git ls-files -z --cached --others --exclude-standard -- ":(glob)**/$NAME" | xargs -0 -r grep -H -n -i -E -e 'execute_process' -e 'message[[:space:]]*\(FATAL_ERROR' -e 'project[[:space:]]*\(' -e 'enable_language' --`. Empty output = pass.
 
 ```sh
 # D1: project-level commands in a toolchain file. Empty = pass.
-grep -rniE --include='*toolchain*.cmake' -e 'execute_process' -e 'message[[:space:]]*\(FATAL_ERROR' -e 'project[[:space:]]*\(' -e 'enable_language' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*toolchain*.cmake' | xargs -0 -r grep -H -n -i -E -e 'execute_process' -e 'message[[:space:]]*\(FATAL_ERROR' -e 'project[[:space:]]*\(' -e 'enable_language' --
 # D2: emulator use. Empty = pass.
-grep -rn --include='*.cmake' --include='CMakeLists.txt' -e 'CROSSCOMPILING_EMULATOR' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.cmake' ':(glob)**/CMakeLists.txt' | xargs -0 -r grep -H -n -e 'CROSSCOMPILING_EMULATOR' --
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
@@ -146,18 +160,25 @@ of E1 to E6, where it is expected to match (`CMK-TC-10`). Read the output of the
 
 ```sh
 # E1-E4: a cross toolchain that leaves a mode unset. Empty = pass for each.
-grep -rliE --include='*.cmake' --exclude='conan_toolchain.cmake' -e 'set[[:space:]]*\([[:space:]]*CMAKE_SYSROOT' -e 'set[[:space:]]*\([[:space:]]*CMAKE_SYSTEM_NAME' . | xargs -r grep -L -e 'CMAKE_FIND_ROOT_PATH_MODE_LIBRARY'
-grep -rliE --include='*.cmake' --exclude='conan_toolchain.cmake' -e 'set[[:space:]]*\([[:space:]]*CMAKE_SYSROOT' -e 'set[[:space:]]*\([[:space:]]*CMAKE_SYSTEM_NAME' . | xargs -r grep -L -e 'CMAKE_FIND_ROOT_PATH_MODE_INCLUDE'
-grep -rliE --include='*.cmake' --exclude='conan_toolchain.cmake' -e 'set[[:space:]]*\([[:space:]]*CMAKE_SYSROOT' -e 'set[[:space:]]*\([[:space:]]*CMAKE_SYSTEM_NAME' . | xargs -r grep -L -e 'CMAKE_FIND_ROOT_PATH_MODE_PACKAGE'
-grep -rliE --include='*.cmake' --exclude='conan_toolchain.cmake' -e 'set[[:space:]]*\([[:space:]]*CMAKE_SYSROOT' -e 'set[[:space:]]*\([[:space:]]*CMAKE_SYSTEM_NAME' . | xargs -r grep -L -e 'CMAKE_FIND_ROOT_PATH_MODE_PROGRAM'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.cmake' ':(exclude,glob)**/conan_toolchain.cmake' | xargs -0 -r grep -l -i -E -e 'set[[:space:]]*\([[:space:]]*CMAKE_SYSROOT' -e 'set[[:space:]]*\([[:space:]]*CMAKE_SYSTEM_NAME' -- | tr '\n' '\0' | xargs -0 -r grep -L -e 'CMAKE_FIND_ROOT_PATH_MODE_LIBRARY' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.cmake' ':(exclude,glob)**/conan_toolchain.cmake' | xargs -0 -r grep -l -i -E -e 'set[[:space:]]*\([[:space:]]*CMAKE_SYSROOT' -e 'set[[:space:]]*\([[:space:]]*CMAKE_SYSTEM_NAME' -- | tr '\n' '\0' | xargs -0 -r grep -L -e 'CMAKE_FIND_ROOT_PATH_MODE_INCLUDE' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.cmake' ':(exclude,glob)**/conan_toolchain.cmake' | xargs -0 -r grep -l -i -E -e 'set[[:space:]]*\([[:space:]]*CMAKE_SYSROOT' -e 'set[[:space:]]*\([[:space:]]*CMAKE_SYSTEM_NAME' -- | tr '\n' '\0' | xargs -0 -r grep -L -e 'CMAKE_FIND_ROOT_PATH_MODE_PACKAGE' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.cmake' ':(exclude,glob)**/conan_toolchain.cmake' | xargs -0 -r grep -l -i -E -e 'set[[:space:]]*\([[:space:]]*CMAKE_SYSROOT' -e 'set[[:space:]]*\([[:space:]]*CMAKE_SYSTEM_NAME' -- | tr '\n' '\0' | xargs -0 -r grep -L -e 'CMAKE_FIND_ROOT_PATH_MODE_PROGRAM' --
 # E5: a library, include or package mode set to anything but ONLY. Empty = pass.
-grep -rnE --include='*.cmake' --exclude='conan_toolchain.cmake' -e 'MODE_LIBRARY[[:space:]"]+BOTH' -e 'MODE_LIBRARY[[:space:]"]+NEVER' -e 'MODE_INCLUDE[[:space:]"]+BOTH' -e 'MODE_INCLUDE[[:space:]"]+NEVER' -e 'MODE_PACKAGE[[:space:]"]+BOTH' -e 'MODE_PACKAGE[[:space:]"]+NEVER' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.cmake' ':(exclude,glob)**/conan_toolchain.cmake' \
+  | xargs -0 -r grep -H -n -E \
+    -e 'MODE_LIBRARY[[:space:]"]+BOTH' \
+    -e 'MODE_LIBRARY[[:space:]"]+NEVER' \
+    -e 'MODE_INCLUDE[[:space:]"]+BOTH' \
+    -e 'MODE_INCLUDE[[:space:]"]+NEVER' \
+    -e 'MODE_PACKAGE[[:space:]"]+BOTH' \
+    -e 'MODE_PACKAGE[[:space:]"]+NEVER' --
 # E6: the program mode set to ONLY or BOTH. Empty = pass.
-grep -rnE --include='*.cmake' --exclude='conan_toolchain.cmake' -e 'MODE_PROGRAM[[:space:]"]+ONLY' -e 'MODE_PROGRAM[[:space:]"]+BOTH' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.cmake' ':(exclude,glob)**/conan_toolchain.cmake' | xargs -0 -r grep -H -n -E -e 'MODE_PROGRAM[[:space:]"]+ONLY' -e 'MODE_PROGRAM[[:space:]"]+BOTH' --
 # E7: a Conan cross build in the build tree. Empty = CMK-TC-10 not applicable.
-grep -rn --include='conan_toolchain.cmake' -e 'CMAKE_FIND_ROOT_PATH_MODE_PACKAGE "BOTH"' build
+find build -type f -name 'conan_toolchain.cmake' -print0 | xargs -0 -r grep -H -n -e 'CMAKE_FIND_ROOT_PATH_MODE_PACKAGE "BOTH"' --
 # E8: a sysroot toolchain that never names the multiarch triplet. Empty = pass.
-grep -rliE --include='*.cmake' --exclude='conan_toolchain.cmake' -e 'set[[:space:]]*\([[:space:]]*CMAKE_SYSROOT' . | xargs -r grep -L -e 'CMAKE_LIBRARY_ARCHITECTURE'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.cmake' ':(exclude,glob)**/conan_toolchain.cmake' | xargs -0 -r grep -l -i -E -e 'set[[:space:]]*\([[:space:]]*CMAKE_SYSROOT' -- | tr '\n' '\0' | xargs -0 -r grep -L -e 'CMAKE_LIBRARY_ARCHITECTURE' --
 ```
 
 | ID | Rule | Rationale | Verification | Severity |

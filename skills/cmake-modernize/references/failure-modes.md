@@ -244,10 +244,11 @@ round trip's anchored `_DIR` line.
   no binary to run it through, so its gate is spelled `-Werror=dev` (jsoncpp).
 - **A failed configure.** After smoke pass 1 failed, `ctest -N` still printed
   `Total Tests: 0` and every target grep was empty (tinyformat, both lines).
-- **A missing operand.** `I9` over absent `build/_deps` and `third_party`, and
-  the CI greps over an absent `.github/workflows`, exit 2 (Chipmunk2D,
-  tinyformat). The `CMK-CORE-05` grep over an absent `scripts` exits 2 while
-  `-s` hides the message and the hits in `.github` still print (jsoncpp, zlib).
+- **An empty file list.** `I9` over absent `build/_deps` and `third_party`
+  prints only `find`'s error, and the CI greps over an absent `.github/workflows`
+  print nothing at all (Chipmunk2D, tinyformat). Both read as a pass and are not
+  one. The `CMK-CORE-05` grep over an absent `scripts` lists nothing for it while
+  the hits in `.github` still print (jsoncpp, zlib).
 - **A pattern that misses a spelling.** `I2` once missed jsoncpp's three live
   `add_compile_definitions` calls and printed only their dead `add_definitions`
   twins. The `CMK-CORE-01` grep over `.github/workflows` reads "no gate" for

@@ -77,7 +77,8 @@ keeps the old copy for as long as it exists on disk. List modules with that
 shape:
 
 ```sh
-grep -rlzE --include='*.cmake' -e '_ROOT[^)]*CACHE' . | xargs -r grep -L -e '_DIR CACHE'
+CHECKS=.claude/skills/cmake-dependency-triage/checks    # where this checks/ directory is installed
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.cmake' | LC_ALL=C xargs -0 -r awk -v cs=1 -v files=1 -v nofile='_DIR CACHE' -v head='_ROOT[^)]*CACHE' -f "$CHECKS/call-lacks.awk" --
 ```
 
 Empty output passes. A listed file writes a `_ROOT` cache entry and never

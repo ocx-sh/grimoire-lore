@@ -17,8 +17,8 @@ is `CMK-DEP`, in `dependencies.md`.
 Written for a 3.25 floor, `cmake_minimum_required(VERSION 3.25...4.4)`
 (**pinned**, an adopter overrides it once). Measured 2026-09-26 on CMake 3.31.12,
 4.3.4 and 4.4.2. Every command runs from the repository root. In a tree that
-holds build directories or copied modules, add `--exclude-dir='build*'
---exclude-dir='_deps'` to each `grep -r`, or every copy repeats every hit.
+holds committed copies of build directories or modules, add the pathspecs
+`':(exclude,glob)**/build*/**' ':(exclude,glob)**/_deps/**'` to each `git ls-files` list, or every copy repeats every hit.
 Severity cells name who is bound: **all** (anyone writing `CMakeLists.txt` or
 `*.cmake`), **MOD** (a module author) or **LIB** (a library whose commands other
 projects call).
@@ -36,30 +36,63 @@ pass. No configure catches either defect: both configure cleanly on every line.
 |---|---|---|---|---|
 | CMK-LANG-01 | Quote every `${…}` operand of an `if()`, `elseif()` or `while()` comparison: `if("${X}" STREQUAL "y")`. For truthiness, name the variable bare: `if(X)`. | `if()` looks an unquoted operand's value up again as a variable name, on either side of the operator and for the numeric operators too. After `set(A B)` and `set(B x)`, `if(${A} STREQUAL "x")` is TRUE. An empty value turns into a hard syntax error. CMP0054, removed in 4.0, only ever covered quoted operands, so "CMP0054 made this safe" is false on 4.4.2. | The LANG-01 block below. Empty output passes. It reads single lines, so a condition split across lines needs a read. A composed name such as `if(${pkg}_FOUND)` does not match, by design. | **MUST** (all). Floor: any CMake |
 | CMK-LANG-02 | Iterate with `foreach(x IN LISTS var)` or `foreach(x IN ITEMS …)`, never bare `foreach(x ${var})`. In a macro, copy first: `set(args "${ARGN}")`, then `foreach(x IN LISTS args)`. | An unquoted list expansion drops empty elements. `a;;b` iterates twice, not three times, and a macro called as `mac(a "" b)` sees two arguments. | The LANG-02 block below, over the files the change touches, untracked files included and deleted files skipped. Set `BASE_REF` to the branch the change merges into. Empty output passes. | **MUST** (all) on lines written or touched. Untouched legacy loops are a `cmake-modernize` step, never a gate failure. Floor: 3.0 |
-| CMK-LANG-03 | Pass configuration-dependent text only to a consumer that evaluates generator expressions: target properties, `add_custom_command`, `install()` or `file(GENERATE)`. Never to `message()`, `if()`, `string()` or `file(WRITE)`. | `$<…>` is evaluated at generate time. At configure time it is still literal text: `message(STATUS "$<CONFIG>")` prints `$<CONFIG>`. | `grep -rnE --include='*.cmake' --include='CMakeLists.txt' -e 'message[[:space:]]*\(.*\$<' -e 'string[[:space:]]*\(.*\$<' -e 'file[[:space:]]*\([[:space:]]*WRITE.*\$<' -e '^[[:space:]]*(else)?if[[:space:]]*\(.*\$<' .` A hit is the finding unless the text is meant to reach a later `file(GENERATE)` input. Empty output passes. | SHOULD (all). Floor: any |
+| CMK-LANG-03 | Pass configuration-dependent text only to a consumer that evaluates generator expressions: target properties, `add_custom_command`, `install()` or `file(GENERATE)`. Never to `message()`, `if()`, `string()` or `file(WRITE)`. | `$<…>` is evaluated at generate time. At configure time it is still literal text: `message(STATUS "$<CONFIG>")` prints `$<CONFIG>`. | See block CMK-LANG-03. A hit is the finding unless the text is meant to reach a later `file(GENERATE)` input. Empty output passes. | SHOULD (all). Floor: any |
+
+```sh
+# CMK-LANG-03
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.cmake' ':(glob)**/CMakeLists.txt' \
+  | xargs -0 -r grep -H -n -E \
+    -e 'message[[:space:]]*\(.*\$<' \
+    -e 'string[[:space:]]*\(.*\$<' \
+    -e 'file[[:space:]]*\([[:space:]]*WRITE.*\$<' \
+    -e '^[[:space:]]*(else)?if[[:space:]]*\(.*\$<' --
+```
 
 ```sh
 # CMK-LANG-01: V is a bare left operand, W a bare right operand of EQUAL, LESS or GREATER
 V='\$\{[A-Za-z_][A-Za-z0-9_]*\}[[:space:]]+'
 W='[[:space:]]+\$\{[A-Za-z_][A-Za-z0-9_]*\}[[:space:])]'
-grep -rnE --include='*.cmake' --include='CMakeLists.txt' -e "[( ]${V}STREQUAL" -e "[( ]${V}MATCHES" -e "[( ]${V}EQUAL" -e "[( ]${V}VERSION_" -e "[( ]${V}IN_LIST" -e "[( ]${V}LESS" -e "[( ]${V}GREATER" -e "[( ]${V}STRLESS" -e "[( ]${V}STRGREATER" -e "[( ]${V}PATH_EQUAL" -e "EQUAL${W}" -e "LESS${W}" -e "GREATER${W}" . | grep -e 'if[[:space:]]*(' -e 'while[[:space:]]*('
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.cmake' ':(glob)**/CMakeLists.txt' \
+  | xargs -0 -r grep -H -n -E \
+    -e "[( ]${V}STREQUAL" \
+    -e "[( ]${V}MATCHES" \
+    -e "[( ]${V}EQUAL" \
+    -e "[( ]${V}VERSION_" \
+    -e "[( ]${V}IN_LIST" \
+    -e "[( ]${V}LESS" \
+    -e "[( ]${V}GREATER" \
+    -e "[( ]${V}STRLESS" \
+    -e "[( ]${V}STRGREATER" \
+    -e "[( ]${V}PATH_EQUAL" \
+    -e "EQUAL${W}" \
+    -e "LESS${W}" \
+    -e "GREATER${W}" -- | grep -e 'if[[:space:]]*(' -e 'while[[:space:]]*('
 
 # CMK-LANG-02: bare list expansions in the loops this change touches
-{ git diff --name-only --diff-filter=d "${BASE_REF:-origin/main}" -- '*.cmake' '*CMakeLists.txt'; git ls-files --others --exclude-standard -- '*.cmake' '*CMakeLists.txt'; } | xargs -r grep -nE -e 'foreach[[:space:]]*\([[:space:]]*[A-Za-z_][A-Za-z0-9_]*[[:space:]]+\$\{'
+{ git diff --name-only -z --diff-filter=d "${BASE_REF:-origin/main}" -- '*.cmake' '*CMakeLists.txt'; git ls-files -z --others --exclude-standard -- '*.cmake' '*CMakeLists.txt'; } | xargs -0 -r grep -H -n -E -e 'foreach[[:space:]]*\([[:space:]]*[A-Za-z_][A-Za-z0-9_]*[[:space:]]+\$\{' --
 ```
 
 ## Reading Each cmake_parse_arguments
 
-`grep -rn --include='*.cmake' --include='CMakeLists.txt' -e 'cmake_parse_arguments' .`
+`git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.cmake' ':(glob)**/CMakeLists.txt' | xargs -0 -r grep -H -n -e 'cmake_parse_arguments' --`
 lists every parse. Read each against the four rows, narrowed by the LANG-04 grep
 and the LANG-06 awk below. A parse inside a `macro()` belongs to LANG-08.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
 | CMK-LANG-04 | In a `function()`, parse with `cmake_parse_arguments(PARSE_ARGV N prefix …)`, where `N` is the number of named parameters. Never forward an unquoted `${ARGN}` into the parse. When migrating an existing public command, apply the migration clause below (**pinned**). | Through unquoted `${ARGN}`, `VALUE "a;b;c"` splits into `a` plus an unparsed `b;c`, and `VALUE ""` reads exactly like a bare `VALUE`. `PARSE_ARGV` keeps the list whole. The empty value stays distinct only where CMP0174 is NEW, which is LANG-07's case. CMake's own `find_dependency()` forwards `${ARGN}` unquoted, so training text shows the lossy form. | The LANG-04 block below. Each printed line is a legacy-form parse, and one inside a `function()` is the finding. A call with `PARSE_ARGV` on its next line prints too, so read it. Empty output passes. | **MUST** for a new public command (LIB, MOD). Migrating an existing public command: **MUST** with the flatten line, or with a changelog entry naming the behaviour change. SHOULD for a private helper. Floor: CMake 3.7 |
-| CMK-LANG-05 | Never write `cmake_parse_arguments(PARSE_ARGN …)` unless `cmake_minimum_required` is 4.4 or higher. Below 4.4, write `PARSE_ARGV <number of named parameters>`. | On 3.31.12 and 4.3.4 the call is read as the legacy form with the prefix `PARSE_ARGN`. It exits 0, leaves every keyword variable unset and prints nothing. The current docs mark it 4.4, but an agent copying the signature never sees an error, only an empty parse. | `grep -rn --include='*.cmake' --include='CMakeLists.txt' -e 'PARSE_ARGN' .` then `grep -rn --include='CMakeLists.txt' -e 'cmake_minimum_required' .` A `PARSE_ARGN` hit in a tree whose floor is below 4.4 is the finding. Empty first output passes. | **MUST** (all). Floor: the rule exists because of CMake 4.4 |
+| CMK-LANG-05 | Never write `cmake_parse_arguments(PARSE_ARGN …)` unless `cmake_minimum_required` is 4.4 or higher. Below 4.4, write `PARSE_ARGV <number of named parameters>`. | On 3.31.12 and 4.3.4 the call is read as the legacy form with the prefix `PARSE_ARGN`. It exits 0, leaves every keyword variable unset and prints nothing. The current docs mark it 4.4, but an agent copying the signature never sees an error, only an empty parse. | See block CMK-LANG-05 (1) then block CMK-LANG-05 (2). A `PARSE_ARGN` hit in a tree whose floor is below 4.4 is the finding. Empty first output passes. | **MUST** (all). Floor: the rule exists because of CMake 4.4 |
 | CMK-LANG-06 | After a full parse in a public command, read `<prefix>_UNPARSED_ARGUMENTS` and stop with `FATAL_ERROR` naming them. Use the same prefix in the parse, the condition and the message. | A misspelled keyword, or a value the `${ARGN}` form split, is absorbed without a word. Qt and Hunter each ship a module that parses one prefix and prints another's `_UNPARSED_ARGUMENTS`, so the guard fires and the message comes out empty. | The LANG-06 awk below. Empty output passes. A "never read" line is the finding unless the function deliberately parses one keyword and forwards the rest to another parser. A "message reads" line is the finding unless it is a nested sub-parse. | **MUST** for a public command (LIB, MOD), SHOULD for a private helper. Floor: any |
-| CMK-LANG-07 | When an optional one-value keyword may legitimately be empty, test it with `if(DEFINED <prefix>_<KW>)` only where CMP0174 is NEW, and there also check that `<prefix>_KEYWORDS_MISSING_VALUES` does not name the keyword. Below that, treat an empty value as absent. | Without CMP0174 NEW, `VALUE ""` and an omitted `VALUE` both leave the variable unset with an empty `KEYWORDS_MISSING_VALUES`, so nothing tells them apart. Under NEW a bare `VALUE` is also defined and empty, and only the missing-values list rejects it. The 3.25 floor predates CMP0174. Example, not a rule: a module may opt in with `if(POLICY CMP0174)` and `cmake_policy(SET CMP0174 NEW)` inside its pin. | Reading heuristic. For each `grep -rnE --include='*.cmake' --include='CMakeLists.txt' -e 'DEFINED[[:space:]]+[A-Za-z_]+_[A-Z][A-Z0-9_]*[[:space:]]*\)' .` hit that tests a parse result, confirm the floor is 3.31 or later, or that CMP0174 is set NEW in the pin. Empty output passes. | SHOULD (MOD, LIB). Floor: CMP0174 needs 3.31, `KEYWORDS_MISSING_VALUES` 3.15 |
+| CMK-LANG-07 | When an optional one-value keyword may legitimately be empty, test it with `if(DEFINED <prefix>_<KW>)` only where CMP0174 is NEW, and there also check that `<prefix>_KEYWORDS_MISSING_VALUES` does not name the keyword. Below that, treat an empty value as absent. | Without CMP0174 NEW, `VALUE ""` and an omitted `VALUE` both leave the variable unset with an empty `KEYWORDS_MISSING_VALUES`, so nothing tells them apart. Under NEW a bare `VALUE` is also defined and empty, and only the missing-values list rejects it. The 3.25 floor predates CMP0174. Example, not a rule: a module may opt in with `if(POLICY CMP0174)` and `cmake_policy(SET CMP0174 NEW)` inside its pin. | Reading heuristic. For each see block CMK-LANG-07 hit that tests a parse result, confirm the floor is 3.31 or later, or that CMP0174 is set NEW in the pin. Empty output passes. | SHOULD (MOD, LIB). Floor: CMP0174 needs 3.31, `KEYWORDS_MISSING_VALUES` 3.15 |
+
+```sh
+# CMK-LANG-05 (1)
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.cmake' ':(glob)**/CMakeLists.txt' | xargs -0 -r grep -H -n -e 'PARSE_ARGN' --
+# CMK-LANG-05 (2)
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' | xargs -0 -r grep -H -n -e 'cmake_minimum_required' --
+# CMK-LANG-07
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.cmake' ':(glob)**/CMakeLists.txt' | xargs -0 -r grep -H -n -E -e 'DEFINED[[:space:]]+[A-Za-z_]+_[A-Z][A-Z0-9_]*[[:space:]]*\)' --
+```
 
 **CMK-LANG-04 migration clause (pinned).** Migrating an existing public command
 from `${ARGN}` changes what its callers get (measured identically on 3.31.12,
@@ -72,10 +105,10 @@ prefix and keyword) directly after the parse. That keeps the old splitting.
 
 ```sh
 # CMK-LANG-04: legacy-form parses
-grep -rnE --include='*.cmake' --include='CMakeLists.txt' -e 'cmake_parse_arguments[[:space:]]*\(' . | grep -v -e 'PARSE_ARGV' -e 'PARSE_ARGN'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.cmake' ':(glob)**/CMakeLists.txt' | xargs -0 -r grep -H -n -E -e 'cmake_parse_arguments[[:space:]]*\(' -- | grep -v -e 'PARSE_ARGV' -e 'PARSE_ARGN'
 
 # CMK-LANG-06: parses whose _UNPARSED_ARGUMENTS is never read, or read under another prefix
-grep -rl --include='*.cmake' --include='CMakeLists.txt' -e 'cmake_parse_arguments' . | xargs -r awk '
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.cmake' ':(glob)**/CMakeLists.txt' | xargs -0 -r awk '
 function flush() { if (p != "") print f ":" ln ": " p "_UNPARSED_ARGUMENTS never read"; p = "" }
 function prefix(s,   t) { split(s, t, /[[:space:]()"]+/); if (t[1] == "") return ""; if (t[1] == "PARSE_ARGV") return t[3]; if (t[1] == "PARSE_ARGN") return t[2]; return t[1] }
 FNR == 1 { flush(); q = ""; want = 0 }
@@ -105,7 +138,7 @@ endfunction()
 
 ## Reading Each macro()
 
-`grep -rnE -B1 --include='*.cmake' --include='CMakeLists.txt' -e '^[[:space:]]*macro[[:space:]]*\(' .`
+`git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.cmake' ':(glob)**/CMakeLists.txt' | xargs -0 -r awk -v re='^[[:space:]]*macro[[:space:]]*[(]' -v B=1 -f "$CHECKS/context.awk" --`
 prints every macro with the line above it. Read each against both rows.
 
 | ID | Rule | Rationale | Verification | Severity |
@@ -115,7 +148,7 @@ prints every macro with the line above it. Read each against both rows.
 
 ```sh
 # CMK-LANG-09: PARENT_SCOPE writes inside a macro body
-grep -rl --include='*.cmake' --include='CMakeLists.txt' -e 'PARENT_SCOPE' . | xargs -r awk 'FNR==1{m=0} /^[[:space:]]*macro[[:space:]]*\(/{m=1} /^[[:space:]]*endmacro[[:space:]]*\(/{m=0} m && /PARENT_SCOPE/{print FILENAME":"FNR}'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.cmake' ':(glob)**/CMakeLists.txt' | xargs -0 -r awk 'FNR==1{m=0} /^[[:space:]]*macro[[:space:]]*\(/{m=1} /^[[:space:]]*endmacro[[:space:]]*\(/{m=0} m && /PARENT_SCOPE/{print FILENAME":"FNR}'
 ```
 
 ## Reading a return() Hand-off
@@ -134,11 +167,30 @@ Each grep runs over the whole tree. Empty output passes each one.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| CMK-LANG-11 | Never declare an option, cache entry or variable of your own whose name begins with `CMAKE_` or `_CMAKE_` (in any case), or with `_` followed by a CMake command name. Setting a variable CMake documents (`CMAKE_CXX_STANDARD`) is fine. Inventing one in that namespace is not. | `cmake-language(7)` reserves these names. A subproject's `option(CMAKE_UNITY_BUILD … ON)` does not override a consumer's `-D`. It leaks instead: the cache entry is global, so the setting switches on for the parent project that pulled the subproject in. | `grep -rnE --include='*.cmake' --include='CMakeLists.txt' -e '^[[:space:]]*option[[:space:]]*\([[:space:]]*"?[Cc][Mm][Aa][Kk][Ee]_' -e '^[[:space:]]*option[[:space:]]*\([[:space:]]*"?_[Cc][Mm][Aa][Kk][Ee]_' .` Empty output passes. For each `CMAKE_` name a change sets or caches, run the LANG-11 lookup below with the binary the project builds with. A count of 0 is an invented name (the finding). CMake's own repository is the one exception. | **MUST** (all). Floor: any |
-| CMK-LANG-12 | Prefix every `option()` and user-facing cache entry with the project's name. In a monorepo, use each sub-project's own prefix, and check per sub-project. | The cache is global. An unprefixed `BUILD_TESTS` collides with every project that pulls this one in with `add_subdirectory()` or FetchContent. A repo-wide single-prefix check misfires on legitimate sub-project prefixes. | Reading heuristic, once per sub-project: `SUBPROJECT_DIR=libs/core; grep -rnE --include='*.cmake' --include='CMakeLists.txt' -e '^[[:space:]]*option[[:space:]]*\(' "$SUBPROJECT_DIR"` A name without that sub-project's prefix is the finding, and a verb prefix such as `ENABLE_` counts as unprefixed. Empty output passes. | SHOULD (LIB, and any project consumed as a subproject). Floor: any |
-| CMK-LANG-13 | Never add `FORCE` to a cache entry a user is meant to set (an `option()`, a documented knob). Write computed results as `CACHE INTERNAL`, which already implies `FORCE`, or as normal variables. To make a changed default reach an existing build tree, say "reconfigure with `--fresh`". | Without `FORCE`, a cache write never updates an existing entry, and `CACHE INTERNAL` overwrites on every configure. A `FORCE` on a knob discards the user's `-D` on every configure. The one sanctioned `FORCE` hand-off is CMK-MOD-12's `<Name>_ROOT` (module-authoring). `CMAKE_TOOLCHAIN_FILE` is never forced (CMK-TC-01, toolchains-and-providers). | `grep -rnE --include='*.cmake' --include='CMakeLists.txt' -e 'CACHE[[:space:]]+[A-Z]+[^)]*FORCE' .` Reading heuristic: a hit whose name is a documented option or knob is the finding. Single-line. Empty output passes. | SHOULD (all). Floor: any |
+| CMK-LANG-11 | Never declare an option, cache entry or variable of your own whose name begins with `CMAKE_` or `_CMAKE_` (in any case), or with `_` followed by a CMake command name. Setting a variable CMake documents (`CMAKE_CXX_STANDARD`) is fine. Inventing one in that namespace is not. | `cmake-language(7)` reserves these names. A subproject's `option(CMAKE_UNITY_BUILD … ON)` does not override a consumer's `-D`. It leaks instead: the cache entry is global, so the setting switches on for the parent project that pulled the subproject in. | See block CMK-LANG-11. Empty output passes. For each `CMAKE_` name a change sets or caches, run the LANG-11 lookup below with the binary the project builds with. A count of 0 is an invented name (the finding). CMake's own repository is the one exception. | **MUST** (all). Floor: any |
+| CMK-LANG-12 | Prefix every `option()` and user-facing cache entry with the project's name. In a monorepo, use each sub-project's own prefix, and check per sub-project. | The cache is global. An unprefixed `BUILD_TESTS` collides with every project that pulls this one in with `add_subdirectory()` or FetchContent. A repo-wide single-prefix check misfires on legitimate sub-project prefixes. | Reading heuristic, once per sub-project: See block CMK-LANG-12. A name without that sub-project's prefix is the finding, and a verb prefix such as `ENABLE_` counts as unprefixed. Empty output passes. | SHOULD (LIB, and any project consumed as a subproject). Floor: any |
+| CMK-LANG-13 | Never add `FORCE` to a cache entry a user is meant to set (an `option()`, a documented knob). Write computed results as `CACHE INTERNAL`, which already implies `FORCE`, or as normal variables. To make a changed default reach an existing build tree, say "reconfigure with `--fresh`". | Without `FORCE`, a cache write never updates an existing entry, and `CACHE INTERNAL` overwrites on every configure. A `FORCE` on a knob discards the user's `-D` on every configure. The one sanctioned `FORCE` hand-off is CMK-MOD-12's `<Name>_ROOT` (module-authoring). `CMAKE_TOOLCHAIN_FILE` is never forced (CMK-TC-01, toolchains-and-providers). | See block CMK-LANG-13. Reading heuristic: a hit whose name is a documented option or knob is the finding. Single-line. Empty output passes. | SHOULD (all). Floor: any |
 | CMK-LANG-14 | In the project that declares an `option()` or cache knob, never `set()` a normal variable of the same name. Read the cache explicitly with `$CACHE{X}` where a normal variable may shadow it. | A later plain `set()` wins every read in that scope and leaves the cache entry untouched: the classic "my `-D` did not take". Under CMP0126 NEW a normal variable also survives a `set(… CACHE)` of the same name. The one sanctioned exception is a parent pre-seeding a child's option before `add_subdirectory` under CMP0077, with set/restore (CMK-DEP-15, dependencies). | The LANG-14 loop below. Each printed line is the finding unless it is that parent-to-child pre-seed. Empty output passes. | SHOULD (all). Floor: `$CACHE{}` 3.13, CMP0126 3.21 |
-| CMK-LANG-15 | Test an `option()` variable by truthiness, `if(X)`. Never compare it to `"ON"` or `"OFF"`. | `option()` claims the `BOOL` type but never coerces the value. After `-DX=yes` the cache holds `yes`, so `STREQUAL "ON"` misreads a true value. | `grep -rnE --include='*.cmake' --include='CMakeLists.txt' -e 'STREQUAL[[:space:]]*"ON"' -e 'STREQUAL[[:space:]]*"OFF"' -e 'STREQUAL[[:space:]]+ON[[:space:])]' -e 'STREQUAL[[:space:]]+OFF[[:space:])]' .` A hit on an `option()`-declared name is the finding. Empty output passes. | SHOULD (all). Floor: any |
+| CMK-LANG-15 | Test an `option()` variable by truthiness, `if(X)`. Never compare it to `"ON"` or `"OFF"`. | `option()` claims the `BOOL` type but never coerces the value. After `-DX=yes` the cache holds `yes`, so `STREQUAL "ON"` misreads a true value. | See block CMK-LANG-15. A hit on an `option()`-declared name is the finding. Empty output passes. | SHOULD (all). Floor: any |
+
+```sh
+# CMK-LANG-11
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.cmake' ':(glob)**/CMakeLists.txt' \
+  | xargs -0 -r grep -H -n -E \
+    -e '^[[:space:]]*option[[:space:]]*\([[:space:]]*"?[Cc][Mm][Aa][Kk][Ee]_' \
+    -e '^[[:space:]]*option[[:space:]]*\([[:space:]]*"?_[Cc][Mm][Aa][Kk][Ee]_' --
+# CMK-LANG-12
+SUBPROJECT_DIR=libs/core; git ls-files -z --cached --others --exclude-standard -- ":(glob)$SUBPROJECT_DIR/**/*.cmake" ":(glob)$SUBPROJECT_DIR/**/CMakeLists.txt" | xargs -0 -r grep -H -n -E -e '^[[:space:]]*option[[:space:]]*\(' --
+# CMK-LANG-13
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.cmake' ':(glob)**/CMakeLists.txt' | xargs -0 -r grep -H -n -E -e 'CACHE[[:space:]]+[A-Z]+[^)]*FORCE' --
+# CMK-LANG-15
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.cmake' ':(glob)**/CMakeLists.txt' \
+  | xargs -0 -r grep -H -n -E \
+    -e 'STREQUAL[[:space:]]*"ON"' \
+    -e 'STREQUAL[[:space:]]*"OFF"' \
+    -e 'STREQUAL[[:space:]]+ON[[:space:])]' \
+    -e 'STREQUAL[[:space:]]+OFF[[:space:])]' --
+```
 
 ```sh
 # CMK-LANG-11 lookup: expand <LANG> and <CONFIG> first, or CMAKE_CXX_FLAGS reads as invented. Keep only patterns that start with CMAKE_, or <PROJECT-NAME>_VERSION reads CMAKE_MYLIB_VERSION as documented.
@@ -152,10 +204,16 @@ sed -e 's/<LANG>/CXX/g' "$D/vars.txt" > "$D/cxx.txt"
 sed -e 's/<CONFIG>/[A-Z]+/g' -e 's/<[^>]*>/[A-Za-z0-9_]+/g' "$D/c.txt" "$D/cxx.txt" > "$D/all.txt"
 grep -e '^CMAKE_' -e '^_CMAKE_' "$D/all.txt" > "$D/patterns.txt"
 printf '%s\n' "$NAME" > "$D/name.txt"
-grep -rcxE --include='name.txt' -f "$D/patterns.txt" "$D"
+awk 'FNR == NR { pat[++n] = $0; next } { for (i = 1; i <= n; i++) if ($0 ~ "^(" pat[i] ")$") { c++; break } } END { print FILENAME ":" c + 0 }' "$D/patterns.txt" "$D/name.txt"
 
 # CMK-LANG-14: a plain set() of a name the tree declares with option()
-grep -rhoE --include='*.cmake' --include='CMakeLists.txt' -e '^[[:space:]]*option[[:space:]]*\([[:space:]]*[A-Za-z0-9_]+' . | sed -E 's/.*\([[:space:]]*//' | sort -u | while read -r NAME; do grep -rnE --include='*.cmake' --include='CMakeLists.txt' -e "^[[:space:]]*set[[:space:]]*\([[:space:]]*${NAME}[[:space:]]" . | grep -v -e 'CACHE' -e 'PARENT_SCOPE'; done
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.cmake' ':(glob)**/CMakeLists.txt' \
+  | xargs -0 -r grep -H -o -E -e '^[[:space:]]*option[[:space:]]*\([[:space:]]*[A-Za-z0-9_]+' -- \
+  | sed -E 's/.*\([[:space:]]*//' | sort -u | while read -r NAME; do
+    git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.cmake' ':(glob)**/CMakeLists.txt' \
+      | xargs -0 -r grep -H -n -E -e "^[[:space:]]*set[[:space:]]*\([[:space:]]*${NAME}[[:space:]]" -- \
+      | grep -v -e 'CACHE' -e 'PARENT_SCOPE'
+  done
 ```
 
 ```cmake

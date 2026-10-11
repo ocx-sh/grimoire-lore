@@ -49,12 +49,12 @@ mkdir -p "$W/asub"
 printf '%s\n' 'cmake_minimum_required(VERSION 3.25...4.4)' 'project(asub LANGUAGES C)' \
   'include(CTest)' "add_subdirectory($SRC lib-build)" 'message(STATUS "asub_bsl=[${BUILD_SHARED_LIBS}]")' > "$W/asub/CMakeLists.txt"
 cmake -S "$W/asub" -B "$W/asub-build" -G Ninja "$GATE" > "$W/asub-configure.txt"
-grep -r --include='asub-configure.txt' -e 'asub_bsl=\[ON\]' "$W"
+find "$W" -type f -name 'asub-configure.txt' -print0 | xargs -0 -r grep -H -e 'asub_bsl=\[ON\]' --
 ctest --test-dir "$W/asub-build" -N > "$W/asub-tests.txt"
-grep -r --include='asub-tests.txt' -e 'Total Tests: 0' "$W"
+find "$W" -type f -name 'asub-tests.txt' -print0 | xargs -0 -r grep -H -e 'Total Tests: 0' --
 cmake --build "$W/asub-build" --target help > "$W/asub-targets.txt"
 NAME=mylib_unit_tests
-grep -r --include='asub-targets.txt' -e "^$NAME: " "$W"
+find "$W" -type f -name 'asub-targets.txt' -print0 | xargs -0 -r grep -H -e "^$NAME: " --
 ```
 
 The configure must exit 0: after a failed one, `ctest -N` still prints
@@ -94,8 +94,11 @@ The second pass runs the same smoke under a parent that owns an option name the
 library also declares. List the library's options first:
 
 ```sh
-grep -rniE --include='CMakeLists.txt' --include='*.cmake' --exclude-dir='_deps' --exclude-dir='build*' \
-  -e '^[[:space:]]*option[[:space:]]*\(' -e 'CACHE[[:space:]]+(BOOL|STRING|PATH|FILEPATH)' -e 'CACHE[[:space:]]*$' "$SRC"
+git ls-files -z --cached --others --exclude-standard -- ":(glob)$SRC/**/CMakeLists.txt" ":(glob)$SRC/**/*.cmake" ":(exclude,glob)$SRC/**/_deps/**" ":(exclude,glob)$SRC/**/build*/**" \
+  | xargs -0 -r grep -H -n -i -E \
+    -e '^[[:space:]]*option[[:space:]]*\(' \
+    -e 'CACHE[[:space:]]+(BOOL|STRING|PATH|FILEPATH)' \
+    -e 'CACHE[[:space:]]*$' --
 ```
 
 Empty output = no second pass. The `CACHE` patterns list openjpeg's
@@ -111,7 +114,7 @@ printf '%s\n' 'cmake_minimum_required(VERSION 3.25...4.4)' 'project(asub2 LANGUA
   'include(CTest)' "option($OPT \"parent option\" ON)" "add_subdirectory($SRC lib-build)" > "$W/asub2/CMakeLists.txt"
 cmake -S "$W/asub2" -B "$W/asub2-build" -G Ninja "$GATE"
 cmake --build "$W/asub2-build" --target help > "$W/asub2-targets.txt"
-grep -r --include='asub2-targets.txt' -e "^$NAME: " "$W"
+find "$W" -type f -name 'asub2-targets.txt' -print0 | xargs -0 -r grep -H -e "^$NAME: " --
 ```
 
 A non-zero configure exit or any grep line is a finding. Empty output = pass.
@@ -172,11 +175,11 @@ W="$PWD"
 cmake -S "$SRC" -B "$W/build" "$GATE" ${CFG_ARGS:-}
 cmake --build "$W/build"
 cmake --install "$W/build" --prefix "$W/prefix"
-# (a) Text files in the prefix naming the source, build or install tree. Empty = pass.
-grep -rIl --exclude='*.pc' -e "$SRC" -e "$W/build" -e "$W/prefix" "$W/prefix" > "$W/leaks.txt" || true
+# (a) Text files in the prefix naming the source, build or install tree. Binary artifacts are skipped by extension. Empty = pass.
+find "$W/prefix" -type f ! -name '*.pc' ! -name '*.a' ! -name '*.so' ! -name '*.so.*' ! -name '*.lib' ! -name '*.dll' ! -name '*.dylib' ! -name '*.pdb' ! -name '*.exe' -print0 | xargs -0 -r grep -l -e "$SRC" -e "$W/build" -e "$W/prefix" -- > "$W/leaks.txt" || true
 test ! -s "$W/leaks.txt"
 # (b) An export file with a baked absolute import prefix. Empty = pass.
-grep -rn --include='*.cmake' -e 'set(_IMPORT_PREFIX "/' "$W/prefix" > "$W/abs-import.txt" || true
+find "$W/prefix" -type f -name '*.cmake' -print0 | xargs -0 -r grep -H -n -e 'set(_IMPORT_PREFIX "/' -- > "$W/abs-import.txt" || true
 test ! -s "$W/abs-import.txt"
 # (c) Move the prefix, then configure, build and link a separate compiled consumer.
 mv "$W/prefix" "$W/moved"
@@ -241,22 +244,21 @@ job (`CMK-INST-18`). A module project running gersemi commits a `.gersemirc`
 # CMK-CORE-01: a gate exists in the workflows. Empty output = no gate (finding), unless the leg's preset carries "errors": {"dev": true} and the preset canary exits 1.
 # A Werror=author hit on a leg that can resolve CMake below 4.4 is also a finding.
 # CI_SCRIPTS (optional) = a directory or script the workflows configure or install through (openjpeg: tools/ctest_scripts, a ctest -S script).
-grep -rn -e 'Werror=author' -e 'Werror=dev' .github/workflows ${CI_SCRIPTS:+"$CI_SCRIPTS"}
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' ":(glob)${CI_SCRIPTS:+"$CI_SCRIPTS"}/**" | xargs -0 -r grep -H -n -e 'Werror=author' -e 'Werror=dev' --
 # A preset that switches the gate off ("deprecated": false beat a command-line -Werror=dev on 3.31.12). Empty output = pass.
-grep -rn --include='CMakePresets.json' --include='CMakeUserPresets.json' -e '"dev"[[:space:]]*:[[:space:]]*false' -e '"deprecated"[[:space:]]*:[[:space:]]*false' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakePresets.json' ':(glob)**/CMakeUserPresets.json' | xargs -0 -r grep -H -n -e '"dev"[[:space:]]*:[[:space:]]*false' -e '"deprecated"[[:space:]]*:[[:space:]]*false' --
 # CMK-CORE-05: an early-exiting reader in a script. Empty output = pass. A hit in
 # a file that also sets pipefail is the finding. Name only operands that exist:
 # a missing scripts exits 2, and -s hides the message while the hits still print.
-grep -rsnE -e '[|] *grep( +-[a-zA-Z]+)* +-[a-zA-Z]*[qm]' -e '[|] *rg( +-[a-zA-Z]+)* +-[a-zA-Z]*[qm]' -e '[|] *head' scripts .github
+git ls-files -z --cached --others --exclude-standard -- ':(glob)scripts/**' ':(glob).github/**' | xargs -0 -r grep -H -s -n -E -e '[|] *grep( +-[a-zA-Z]+)* +-[a-zA-Z]*[qm]' -e '[|] *rg( +-[a-zA-Z]+)* +-[a-zA-Z]*[qm]' -e '[|] *head' --
 # CMK-CORE-04: a dead formatter. Empty output = pass. Any hit means migrate.
-grep -rn --include='*.yml' --include='*.yaml' --include='*.txt' --include='*.toml' \
-  -e 'cmake-format' -e 'cmake_format' -e 'cmake-lint' -e 'cmakelang' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.yml' ':(glob)**/*.yaml' ':(glob)**/*.txt' ':(glob)**/*.toml' | xargs -0 -r grep -H -n -e 'cmake-format' -e 'cmake_format' -e 'cmake-lint' -e 'cmakelang' --
 # CMK-CORE-02: schema 12 still carrying dev. "true" is the finding, "false" or no output passes.
 find . -name CMakePresets.json -not -path '*/_deps/*' -print0 \
   | xargs -0 -r -n1 jq -e '.version >= 12 and ([.configurePresets[]? | (.warnings // {}), (.errors // {}) | has("dev")] | any)'
 # CMK-INST-18: the install steps, a list to read, then a consumer configure after each. Hits from the first with empty output from the second is the finding.
-grep -rn -e 'cmake --install' -e '--target install' -e 'make .* install' .github/workflows ${CI_SCRIPTS:+"$CI_SCRIPTS"}
-grep -rn -e 'CMAKE_PREFIX_PATH' .github/workflows ${CI_SCRIPTS:+"$CI_SCRIPTS"}
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' ":(glob)${CI_SCRIPTS:+"$CI_SCRIPTS"}/**" | xargs -0 -r grep -H -n -e 'cmake --install' -e '--target install' -e 'make .* install' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' ":(glob)${CI_SCRIPTS:+"$CI_SCRIPTS"}/**" | xargs -0 -r grep -H -n -e 'CMAKE_PREFIX_PATH' --
 ```
 
 The formatting gate is the index's gate line,
@@ -267,8 +269,8 @@ pathspec per vendored directory the plan file records (openjpeg: 8 of 39). Never
 `gersemi --check .`, which descends into build trees, and never
 `gersemi --diff`, which exited 0 on both (2026-09-26, `CMK-CORE-04`).
 
-With no `.github/workflows` directory, the greps that name it exit 2, neither a
-pass nor a hit: step 8 is not applicable, and SKILL.md says what to report.
+With no `.github/workflows` file listed, the greps that name it print nothing,
+neither a pass nor a hit: step 8 is not applicable, and SKILL.md says what to report.
 libssh2 installs and consumes only in `tests/cmake/test.sh`, which the
 `CMK-INST-18` greps read only when `CI_SCRIPTS` names it.
 
@@ -284,17 +286,20 @@ output = pass.
 
 ```sh
 # CMK-INST-13: retired experimental gates and the distributor-only switch.
-grep -rn --include='CMakeLists.txt' --include='*.cmake' -e 'CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO' \
-  -e 'CMAKE_EXPERIMENTAL_FIND_CPS_PACKAGES' -e 'CMAKE_INSTALL_EXPORTS_AS_PACKAGE_INFO' .
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' \
+  | xargs -0 -r grep -H -n \
+    -e 'CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO' \
+    -e 'CMAKE_EXPERIMENTAL_FIND_CPS_PACKAGES' \
+    -e 'CMAKE_INSTALL_EXPORTS_AS_PACKAGE_INFO' --
 # CMK-INST-16: any schema other than simple. A hit is the finding.
-grep -rn --include='CMakeLists.txt' --include='*.cmake' -e 'VERSION_SCHEMA' . | grep -v -e 'VERSION_SCHEMA simple'
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' | xargs -0 -r grep -H -n -e 'VERSION_SCHEMA' -- | grep -v -e 'VERSION_SCHEMA simple'
 ```
 
 `CMK-INST-15` is a list to read:
-`grep -rn --include='CMakeLists.txt' --include='*.cmake' -e 'install(PACKAGE_INFO' -e 'NAMESPACE' .`
+`git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.txt' ':(glob)**/*.cmake' | xargs -0 -r grep -H -n -e 'install(PACKAGE_INFO' -e 'NAMESPACE' --`
 A `PACKAGE_INFO` name that differs in any character from its export's `NAMESPACE` prefix is the finding.
 `CMK-INST-17` is the configure exit code with CPS enabled: non-zero is the
 finding (a log grep misses the wrapped message). A pkg-config file writes
 `prefix=${pcfiledir}/<rel>` from `file(RELATIVE_PATH)`, never `../..`
-(`CMK-INST-12`, SHOULD): `grep -rnF --include='*.pc.in' -e 'prefix=@CMAKE_INSTALL_PREFIX@' .`
+(`CMK-INST-12`, SHOULD): `git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.pc.in' | xargs -0 -r grep -H -n -F -e 'prefix=@CMAKE_INSTALL_PREFIX@' --`
 prints nothing for new files.
