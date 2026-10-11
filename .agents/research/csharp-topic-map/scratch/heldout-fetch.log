@@ -1,0 +1,17 @@
+ok   ardalis/GuardClauses f96b823e4228 55 cs
+ok   restsharp/RestSharp 64ee12995b8d 256 cs
+ok   NLog/NLog a30527858474 708 cs
+ok   open-telemetry/opentelemetry-dotnet 508cc7fd1ee6 961 cs
+ok   reactiveui/refit 970bf3e9595c 1384 cs
+ok   JamesNK/Newtonsoft.Json 52fa3aef1f2c 951 cs
+ok   devlooped/moq 4a97e0718a69 155 cs
+ok   bchavez/Bogus 6ece18c5c226 209 cs
+ok   Cysharp/UniTask a77a1b4a8982 214 cs
+ok   microsoft/kiota-dotnet 48af29bafbb2 210 cs
+ok   scriban/scriban b916a431461e 221 cs
+ok   nsubstitute/NSubstitute f2b623d762fc 424 cs
+ok   grpc/grpc-dotnet 7db6c142a2dd 829 cs
+ok   dotnet/docker-tools ef7fe4504066 399 cs
+ok   jstedfast/MailKit c896b7d7f8fc 454 cs
+ok   Azure/bicep 5c15624d19a7 1851 cs
+DONE

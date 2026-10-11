@@ -1,0 +1,111 @@
+# analyzers.globalconfig: every CA, RS, MA, SYSLIB, VSTHRD, IDISP, xUnit and IL severity that is the same for src and tests (CS-BUILD-11).
+# Install as the repository-root .globalconfig and add no second layer: one root file, never a file that relaxes severities (CS-BUILD-17).
+# Each ID line ends with `# <rule ID>` naming its owning rule. Test relaxations live in analyzers.editorconfig, section CS-TEST-12.
+# IDE rules, editorconfig options and path-scoped differences live in analyzers.editorconfig, not here (CS-BUILD-11).
+# Packs: Directory.Packages.analyzers.props. Meziantou runs with MeziantouAnalysisMode None, so only the MA lines below fire.
+# The security category stays at All (CS-SEC-01): the only security IDs below are the two the binary-acquisition gate names.
+# Lowering, deleting or duplicating a line is a weaken (CS-CORE-01); posture-check.sh asserts the set.
+# Watched on a canary that fails on net8.0 and net10.0 and a green twin that builds (measured 2026-10-11).
+is_global = true
+
+# Ban gate: a ban must fail even when TreatWarningsAsErrors is flipped off locally (exit 0 without these lines, measured 2026-10-11).
+dotnet_diagnostic.RS0030.severity = error # CS-SEC-02
+dotnet_diagnostic.RS0031.severity = error # CS-SEC-02
+
+# Async and disposal gate, explicit so it does not depend on AnalysisLevel. VSTHRD011 is never set: it stays at its package default.
+dotnet_diagnostic.CA1068.severity = error # CS-ASYNC-19
+dotnet_diagnostic.CA2016.severity = error # CS-ASYNC-19
+dotnet_diagnostic.CA2012.severity = error # CS-ASYNC-19
+dotnet_diagnostic.CA2247.severity = error # CS-ASYNC-19
+dotnet_diagnostic.CA2261.severity = error # CS-ASYNC-19
+dotnet_diagnostic.CS8425.severity = error # CS-ASYNC-19
+dotnet_diagnostic.CS4014.severity = error # CS-ASYNC-19
+dotnet_diagnostic.CA2000.severity = error # CS-ASYNC-19
+dotnet_diagnostic.CA2213.severity = error # CS-ASYNC-19
+dotnet_diagnostic.CA1001.severity = error # CS-ASYNC-19
+dotnet_diagnostic.IDISP001.severity = error # CS-ASYNC-19
+dotnet_diagnostic.IDISP004.severity = error # CS-ASYNC-19
+dotnet_diagnostic.IDISP024.severity = error # CS-ASYNC-19
+dotnet_diagnostic.IDISP025.severity = error # CS-ASYNC-19
+dotnet_diagnostic.CA1849.severity = error # CS-ASYNC-19
+dotnet_diagnostic.VSTHRD002.severity = error # CS-ASYNC-19
+dotnet_diagnostic.VSTHRD103.severity = error # CS-ASYNC-19
+dotnet_diagnostic.VSTHRD100.severity = error # CS-ASYNC-19
+dotnet_diagnostic.VSTHRD101.severity = error # CS-ASYNC-19
+dotnet_diagnostic.VSTHRD110.severity = error # CS-ASYNC-19
+dotnet_diagnostic.VSTHRD105.severity = error # CS-ASYNC-19
+dotnet_diagnostic.VSTHRD114.severity = error # CS-ASYNC-19
+dotnet_diagnostic.VSTHRD200.severity = error # CS-ASYNC-19
+
+# Logging: verified as errors even at AnalysisLevel 10.0; SYSLIB1006 is Info, so the gate alone does not raise it.
+dotnet_diagnostic.CA2254.severity = error # CS-OBS-01
+dotnet_diagnostic.CA2253.severity = error # CS-OBS-01
+dotnet_diagnostic.CA2017.severity = error # CS-OBS-01
+dotnet_diagnostic.CA2023.severity = error # CS-OBS-01
+dotnet_diagnostic.CA1727.severity = error # CS-OBS-01
+dotnet_diagnostic.CA1848.severity = error # CS-OBS-02
+dotnet_diagnostic.CA1873.severity = error # CS-OBS-02
+dotnet_diagnostic.SYSLIB1002.severity = error # CS-OBS-03
+dotnet_diagnostic.SYSLIB1012.severity = error # CS-OBS-03
+dotnet_diagnostic.SYSLIB1013.severity = error # CS-OBS-03
+dotnet_diagnostic.SYSLIB1015.severity = error # CS-OBS-03
+dotnet_diagnostic.SYSLIB1018.severity = error # CS-OBS-03
+dotnet_diagnostic.SYSLIB1025.severity = error # CS-OBS-03
+dotnet_diagnostic.LOGGEN000.severity = error # CS-OBS-03
+dotnet_diagnostic.LOGGEN002.severity = error # CS-OBS-03
+dotnet_diagnostic.SYSLIB1006.severity = error # CS-OBS-04
+
+# Performance: SYSLIB1045 ships with the regex generator and is Info by default; CA1822 gates only the non-public surface.
+dotnet_diagnostic.SYSLIB1045.severity = warning # CS-PERF-02
+dotnet_code_quality.CA1822.api_surface = private, internal # CS-PERF-02
+
+# Language.
+dotnet_diagnostic.CA1062.severity = warning # CS-LANG-05
+dotnet_diagnostic.MA0143.severity = error # CS-LANG-19
+
+# Platform: culture, comparison and OS guards.
+dotnet_diagnostic.CA1304.severity = error # CS-XP-07
+dotnet_diagnostic.CA1305.severity = error # CS-XP-07
+dotnet_diagnostic.CA1307.severity = error # CS-XP-07
+dotnet_diagnostic.CA1309.severity = error # CS-XP-07
+dotnet_diagnostic.CA1310.severity = error # CS-XP-07
+dotnet_diagnostic.CA1311.severity = error # CS-XP-07
+dotnet_diagnostic.MA0076.severity = error # CS-XP-07
+dotnet_diagnostic.CA1416.severity = error # CS-XP-09
+
+# Public API surface: severities live here, never in .editorconfig (RS0017 ignores it); MeziantouAnalysisMode stays None, so only these MA lines fire.
+dotnet_diagnostic.RS0016.severity = error # CS-API-11
+dotnet_diagnostic.RS0017.severity = error # CS-API-11
+dotnet_diagnostic.RS0026.severity = error # CS-API-11
+dotnet_diagnostic.RS0027.severity = error # CS-API-11
+dotnet_diagnostic.RS0036.severity = error # CS-API-11
+dotnet_diagnostic.RS0037.severity = error # CS-API-11
+dotnet_diagnostic.MA0053.severity = error # CS-API-03
+MA0053.public_class_should_be_sealed = true # CS-API-03
+MA0053.exceptions_should_be_sealed = true # CS-API-03
+
+# JSON binding and trimming.
+dotnet_diagnostic.IL2026.severity = error # CS-JSON-01
+dotnet_diagnostic.IL3050.severity = error # CS-JSON-01
+dotnet_diagnostic.MA0222.severity = error # CS-JSON-02
+dotnet_diagnostic.MA0223.severity = error # CS-JSON-02
+
+# Binary acquisition: weak hashes, certificate validation and obsolete web clients.
+dotnet_diagnostic.CA5350.severity = error # CS-SEC-08
+dotnet_diagnostic.CA5359.severity = error # CS-BIN-16
+dotnet_diagnostic.SYSLIB0014.severity = error # CS-BIN-16
+
+# Tests: the token analyzer is a Warning by default.
+dotnet_diagnostic.xUnit1051.severity = error # CS-TEST-13
+
+# Repo-wide none, exactly these five. Each reason sits on the line above it (CS-BUILD-12).
+# Messages are English literals by design; nothing is localised.
+dotnet_diagnostic.CA1303.severity = none # CS-BUILD-12
+# Example reason, rename it: the tool's identifiers are lowercase by spec; upper-casing them changes data.
+dotnet_diagnostic.CA1308.severity = none # CS-BUILD-12
+# The VB keyword clash does not apply; this code base is C# only.
+dotnet_diagnostic.CA1716.severity = none # CS-BUILD-12
+# Fires on StartsWith("a", OrdinalIgnoreCase); its char-overload fix is case-sensitive and has no code fix.
+dotnet_diagnostic.CA1867.severity = none # CS-PERF-02
+# A JoinableTaskFactory heuristic; it flags every await of a caller-supplied Task.
+dotnet_diagnostic.VSTHRD003.severity = none # CS-BUILD-12

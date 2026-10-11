@@ -1,0 +1,1100 @@
+[
+ {
+  "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/csharp/.agents/research/csharp-build.md",
+  "rules": [
+   {
+    "id": "CS-BUILD-01",
+    "severity": "MUST",
+    "rule": "Declare the TFM list only in Directory.Build.props; no csproj sets TargetFramework(s)."
+   },
+   {
+    "id": "CS-BUILD-02",
+    "severity": "MUST",
+    "rule": "Ship only TFMs on the allow-list: net8.0, net10.0, and netstandard2.0 under CS-BUILD-03. Never netstandard2.1, netstandard1.x, net5/6/7/9 or net461/462. Enforce with a repo TFM gate script."
+   },
+   {
+    "id": "CS-BUILD-03",
+    "severity": "MUST",
+    "rule": "Add netstandard2.0 only for a named consumer class listed in the README, and only with a net472 test leg on Windows. Every shipped TFM needs a test leg."
+   },
+   {
+    "id": "CS-BUILD-04",
+    "severity": "MUST",
+    "rule": "Pin <LangVersion>14</LangVersion> (never latest, preview, latestMajor or default) and build with SDK >= 10. C# 14 on net8.0 is a recorded decision limited to compile-only features."
+   },
+   {
+    "id": "CS-BUILD-05",
+    "severity": "MUST",
+    "rule": "Write #if NET8_0_OR_GREATER, never #if NET8_0. Never #if away behaviour."
+   },
+   {
+    "id": "CS-BUILD-06",
+    "severity": "MUST (only if ns2.0 ships)",
+    "rule": "Use Polyfill with PrivateAssets=all and keep polyfills internal. Condition compat packages and the IsAotCompatible/IsTrimmable properties on the TFM. Design around StandardInputEncoding, System.Formats.Tar and array ranges, which no polyfill clears."
+   },
+   {
+    "id": "CS-BUILD-07",
+    "severity": "MUST",
+    "rule": "Select the ocx binary by RuntimeInformation.OSArchitecture plus the OS, never by ProcessArchitecture, Is64BitProcess or IntPtr.Size. Any other OS/arch throws a typed unsupported-platform error."
+   },
+   {
+    "id": "CS-BUILD-08",
+    "severity": "SHOULD",
+    "rule": "Remove a TFM only at a major version after its end-of-support date, and prove the removal with an NU1202 consumer probe. Add each new LTS when it ships."
+   },
+   {
+    "id": "CS-BUILD-10",
+    "severity": "MUST",
+    "rule": "Pin <AnalysisLevel>10.0-all</AnalysisLevel> once in the root props, with no AnalysisMode alongside. Bump it only in a dedicated commit."
+   },
+   {
+    "id": "CS-BUILD-11",
+    "severity": "MUST",
+    "rule": "Set severities only per rule (dotnet_diagnostic.ID.severity). No dotnet_analyzer_diagnostic bulk or category lines."
+   },
+   {
+    "id": "CS-BUILD-12",
+    "severity": "MUST",
+    "rule": "No analyzer IDs in NoWarn. Repo-wide none only for CA1062, CA1308, CA1716, CA1303 and VSTHRD003, each with a # reason line. All other suppressions are site pragmas with // reason."
+   },
+   {
+    "id": "CS-BUILD-13",
+    "severity": "MUST",
+    "rule": "Set TreatWarningsAsErrors=true unconditionally (Debug too). The only WarningsNotAsErrors entries are NU1900-NU1905. Never -warnaserror, TreatWarningsAsErrors=false or CodeAnalysisTreatWarningsAsErrors=false."
+   },
+   {
+    "id": "CS-BUILD-14",
+    "severity": "MUST",
+    "rule": "Set Nullable=enable, GenerateDocumentationFile=true and EnforceCodeStyleInBuild=true, with IDE0005/0055/0161 at warning. CS1591 stays an error in src; tests set GenerateDocumentationFile=false."
+   },
+   {
+    "id": "CS-BUILD-15",
+    "severity": "MUST",
+    "rule": "Use exactly two third-party packs: BannedApiAnalyzers 5.6.0 and VS.Threading.Analyzers 18.7.23, as GlobalPackageReference with exact versions. BannedSymbols.txt bans DateTime.Now, DateTimeOffset.Now, Encoding.Default, Process.Start(string,string) and ProcessStartInfo.Arguments. No StyleCop, Roslynator, NetAnalyzers or FxCop."
+   },
+   {
+    "id": "CS-BUILD-16",
+    "severity": "MUST",
+    "rule": "CI runs dotnet build -c Release --no-incremental, then dotnet format --verify-no-changes --no-restore. Never use format alone as the gate."
+   },
+   {
+    "id": "CS-BUILD-17",
+    "severity": "SHOULD",
+    "rule": "A test-layer .globalconfig sets global_level = 101. Config files sit at or above every Compile item's directory."
+   },
+   {
+    "id": "CS-BUILD-18",
+    "severity": "SHOULD",
+    "rule": "Keep a canary project that must fail with error CA2007, and assert that failure in CI."
+   },
+   {
+    "id": "CS-BUILD-20",
+    "severity": "MUST",
+    "rule": "Ship a root global.json with an exact 3-part version (10.0.401), rollForward latestFeature (disable only with lock files), allowPrerelease false and an errorMessage."
+   },
+   {
+    "id": "CS-BUILD-21",
+    "severity": "MUST",
+    "rule": "Every entry point asserts jq empty global.json && dotnet --version matching ^10\\.0\\.[0-9]+$. CI installs the SDK via setup-dotnet global-json-file."
+   },
+   {
+    "id": "CS-BUILD-22",
+    "severity": "MUST",
+    "rule": "Never call dnx. Use dotnet tool run from the manifest, or dotnet tool exec id@exact-version."
+   },
+   {
+    "id": "CS-BUILD-23",
+    "severity": "MUST",
+    "rule": "Use CPM: every version lives in Directory.Packages.props, with no Version= on any PackageReference and no floating versions."
+   },
+   {
+    "id": "CS-BUILD-24",
+    "severity": "MUST",
+    "rule": "Never enable CentralPackageTransitivePinningEnabled for a packable project, and never condition it on IsPackable in Directory.Packages.props."
+   },
+   {
+    "id": "CS-BUILD-25",
+    "severity": "MUST",
+    "rule": "Commit no packages.lock.json for the library, unless a named flip condition holds. In that case adopt the full bundle: lock in every project, CI locked mode, rollForward disable, and same-commit regeneration."
+   },
+   {
+    "id": "CS-BUILD-26",
+    "severity": "MUST",
+    "rule": "Set NuGetAudit=true and NuGetAuditMode=all explicitly. Exempt NU1900-NU1905 from TWAE except under -p:AuditPipeline=true in a dedicated job. Assert RestoreProjectsAuditedCount. Accept advisories only via NuGetAuditSuppress with a reason."
+   },
+   {
+    "id": "CS-BUILD-27",
+    "severity": "MUST",
+    "rule": "Ship a root nuget.config with <clear/> sources, packageSourceMapping covering every source (* on exactly one) and cleared auditSources. CI restores into an empty packages folder."
+   },
+   {
+    "id": "CS-BUILD-28",
+    "severity": "SHOULD",
+    "rule": "Fix NU1510 by deleting the redundant PackageReference. Never mute it or disable pruning."
+   },
+   {
+    "id": "CS-BUILD-29",
+    "severity": "SHOULD",
+    "rule": "Keep exactly one solution file at the root, and make it .slnx."
+   },
+   {
+    "id": "CS-BUILD-30",
+    "severity": "SHOULD",
+    "rule": "Automation that parses dotnet output passes --tl:off and --interactive false."
+   }
+  ],
+  "conflicts_resolved": [
+   "TWAE scope: unconditional (analyzer-gate) beats Release/CI-only (simple-exec, exemplar audit). The same tree exits 0 with 83 warnings in Debug and exits 1 with 82 errors when TWAE is on (gate:V2).",
+   "WarningsNotAsErrors: analyzer-gate rule 7 banned it; pinning rule 16 required it. Decision: allowed with NU1900-NU1905 only, as an allow-list checked via getProperty (C5). Also corrected analyzer-gate's claim that the TWAE property affects only csc: NuGet restore honours it (pin:V13, V14, V22).",
+   "CI gate command: tfm-reach's 'dotnet build -warnaserror' is replaced by 'dotnet build -c Release --no-incremental'. Consolidation probe C2 measured -warnaserror overriding WarningsNotAsErrors, so NU1900/NU1905 fail the build (exit 1) on an audit-feed outage.",
+   "global.json rollForward: tfm-reach's latestPatch vs pinning's latestFeature. Decision: latestFeature (disable only with lock files). Both values stay on SDK 10 (pin:V3); latestPatch only adds exit 155 on a newer 10.0 feature band, and the pinned AnalysisLevel already decouples the rule set from the band.",
+   "Bulk dotnet_analyzer_diagnostic.severity line (simple-exec recipe, exemplar-audit pattern #2): forbidden. It is a no-op for CA rules under All, and it widens IDE rules on future SDKs (gate:V3).",
+   "Lock files with CI locked mode (exemplar-audit pattern #3, xunit, simple-exec) vs pinning's no-lock default for libraries. Decision: no lock. The SDK has zero runtime deps on net8+ and its dev versions are exact; there are named flip conditions.",
+   "BannedSymbols ban on ProcessStartInfo.Arguments (analyzer-gate) vs Polyfill building Arguments internally on ns2.0 (tfm-reach): measured compatible (C3). The ns2.0 build with ArgumentList is green; a hand-written Arguments= is RS0030 on all three TFMs.",
+   "TFM verdict stated conditionally on the owner's consumer answer. The default until the owner answers is net8.0;net10.0, the only row a one-line edit away from both alternatives. Timing fact added: no ocx release carries the contract, so the first SDK release likely lands after net8 EOS (2026-11-10), making net10.0 the probable end state."
+  ],
+  "another_round": [
+   "csharp-build-tfm-reach (ns2.0 branch only, if the owner keeps Framework/Unity): does Polyfill's Process.Kill(bool entireProcessTree)/WaitForExitAsync kill the tree and honour cancellation on net472/net48? Only compile success was measured. Also measure OSArchitecture for a .NET Framework process under x64 emulation on Windows-on-Arm64.",
+   "csharp-build-analyzer-gate at .NET 11 GA (Nov 2026): re-diff analysislevel_11_all against RC1 (CA1878/CA2026 have not been seen firing) before dotnet-upgrade encodes the 10.0-all -> 11.0-all bump. Also check whether a 10.0.x servicing band fixes the CA1034 false positive on C# 14 extension blocks.",
+   "csharp-build-sdk-and-restore-pinning: state leakage from the .NET 11 default MSBuild server and NativeAOT CLI across an agent session's repeated dotnet invocations (not exercised)."
+  ],
+  "owner_decisions": [
+   "Consumer reach: are .NET Framework 4.7.2+ or Unity hosts in scope? No -> net8.0;net10.0 or net10.0. Yes -> netstandard2.0;net8.0;net10.0 with a net472 Windows leg, where the ns2.0 build must be locate-only (no tar bootstrap); or the Models/Engine split if they need data types only.",
+   "Floor and timing: will SDK 0.1 publish before 2026-11-10, or does a named net8 consumer exist? If neither (likely, given the unreleased ocx contract), ship net10.0 only.",
+   "LangVersion 14 on net8.0: accept the Microsoft-unsupported but measured-working configuration (the default here), or pin LangVersion 12 repo-wide while net8 ships.",
+   "Unconditional TreatWarningsAsErrors is chosen for agent loops. Confirm it is acceptable if human contributors co-develop (there is no CI-only escape hatch by design)."
+  ]
+ },
+ {
+  "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/csharp/.agents/research/csharp-packaging.md",
+  "rules": [
+   {
+    "id": "CS-PKG-01",
+    "severity": "MUST",
+    "rule": "Declare Authors, non-default Description, SPDX PackageLicenseExpression, PackageReadmeFile, PackageProjectUrl, PackageTags, Copyright once in Directory.Build.props and pack the readme with <None Pack=\"true\" PackagePath=\"\"/>; verify the nuspec, not the pack exit code."
+   },
+   {
+    "id": "CS-PKG-02",
+    "severity": "MUST",
+    "rule": "Set PublishRepositoryUrl=true; never reference Microsoft.SourceLink.{GitHub,GitLab,AzureRepos.Git,Bitbucket.Git}, PackageLicenseUrl/PackageIconUrl, DeterministicTimestamp=true, or the pdb-in-nupkg AllowedOutputExtensions trick."
+   },
+   {
+    "id": "CS-PKG-03",
+    "severity": "MUST",
+    "rule": "Set ContinuousIntegrationBuild only under Condition=\"'$(GITHUB_ACTIONS)' == 'true'\"; never unconditional, never from CI, never assume the SDK sets it."
+   },
+   {
+    "id": "CS-PKG-04",
+    "severity": "MUST",
+    "rule": "Ship symbols as IncludeSymbols=true + SymbolPackageFormat=snupkg; no .symbols.nupkg."
+   },
+   {
+    "id": "CS-PKG-05",
+    "severity": "SHOULD",
+    "rule": "Pack releases with SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) on SDK >= 10.0.401 and prove reproducibility with a two-clone sha256sum."
+   },
+   {
+    "id": "CS-PKG-06",
+    "severity": "MUST",
+    "rule": "Version from git tags via MinVer (PrivateAssets=all, MinVerTagPrefix=v); no Version/VersionPrefix/PackageVersion/AssemblyVersion/FileVersion/InformationalVersion in project files."
+   },
+   {
+    "id": "CS-PKG-07",
+    "severity": "MUST",
+    "rule": "Release checkout uses fetch-depth: 0 and the job fails when the packed version is not the tag (or starts with 0.0.0)."
+   },
+   {
+    "id": "CS-PKG-08",
+    "severity": "MUST",
+    "rule": "Do not strong-name while every TFM is net8.0+ (no .snk, SignAssembly, AssemblyOriginatorKeyFile, PublicSign); flips to strong-name-all if netstandard2.0 is added."
+   },
+   {
+    "id": "CS-PKG-09",
+    "severity": "MUST",
+    "rule": "EnablePackageValidation=true; baseline unset until first stable then bumped right after each release; gate on pack exit code, never on nupkg existence."
+   },
+   {
+    "id": "CS-PKG-10",
+    "severity": "MUST",
+    "rule": "Every nupkg passes a pinned `dotnet tool run dotnet-validate package local` with exit 0 before push."
+   },
+   {
+    "id": "CS-PKG-11",
+    "severity": "MUST",
+    "rule": "Publish only through NuGet Trusted Publishing: NuGet/login pinned to a 40-hex SHA, user = profile name, id-token: write only on an environment-gated publish job, no NUGET_API_KEY secret."
+   },
+   {
+    "id": "CS-PKG-12",
+    "severity": "MUST",
+    "rule": "Publish only from a v*.*.* tag in a job that needs the verify job, downloads its exact artifacts, never rebuilds, and pushes with --skip-duplicate."
+   },
+   {
+    "id": "CS-PKG-13",
+    "severity": "SHOULD",
+    "rule": "Do not author-sign at v1; if ever, SHA-256+ fingerprints, always --timestamper, register a nuget.org cert only if every future push is signed."
+   },
+   {
+    "id": "CS-PKG-14",
+    "severity": "SHOULD",
+    "rule": "Packed README images use absolute https URLs on nuget.org allow-listed hosts."
+   },
+   {
+    "id": "CS-PKG-15",
+    "severity": "MUST",
+    "rule": "(Delivery models a/c) The SDK nupkg contains no ocx binary and no runtimes/*/native entry, and stays under 5 MiB."
+   },
+   {
+    "id": "CS-BIN-01",
+    "severity": "MUST",
+    "rule": "Resolve ocx once to a rooted path: explicit -> OCX_SDK_EXE -> OCX_BINARY_PIN -> PATH (rooted entries, exact ocx/ocx.exe, no PATHEXT, skip group/other-writable dirs) -> $OCX_HOME symlink -> (model c, opt-in) EnsureAsync; never start a bare \"ocx\"."
+   },
+   {
+    "id": "CS-BIN-02",
+    "severity": "MUST",
+    "rule": "Set OCX_BINARY_PIN in every spawned child's environment to the resolved path."
+   },
+   {
+    "id": "CS-BIN-03",
+    "severity": "MUST",
+    "rule": "Home = non-empty OCX_HOME from the env snapshot, else Environment.GetFolderPath(SpecialFolder.UserProfile)/.ocx; never GetEnvironmentVariable(\"HOME\")."
+   },
+   {
+    "id": "CS-BIN-04",
+    "severity": "MUST",
+    "rule": "Select the target with a pure (Host, OSArchitecture, Libc) -> triple function, table-tested >= 20 rows on arm64 legs too; never ProcessArchitecture, Is64Bit*, RuntimeIdentifier or a Rosetta probe; unsupported hosts throw PlatformNotSupportedException."
+   },
+   {
+    "id": "CS-BIN-05",
+    "severity": "MUST",
+    "rule": "Linux defaults to *-unknown-linux-musl on both arches, gnu only by explicit opt-in; never probe libc."
+   },
+   {
+    "id": "CS-BIN-06",
+    "severity": "MUST",
+    "rule": "EnsureAsync without a version installs the SDK's compiled-in TestedOcxVersion, never latest."
+   },
+   {
+    "id": "CS-BIN-07",
+    "severity": "MUST",
+    "rule": "SHA-256 the whole downloaded archive against the validated manifest digest before opening it; compare bytes with CryptographicOperations.FixedTimeEquals(hash, Convert.FromHexString(expected)); never hex-string ==, never ToHexStringLower."
+   },
+   {
+    "id": "CS-BIN-08",
+    "severity": "MUST",
+    "rule": "Treat dist.json as untrusted: STJ, integer schema == 1, 1 MiB streamed cap, \\A...\\z anchored regexes with a separate '..' test, https without userinfo, one bad row fails all."
+   },
+   {
+    "id": "CS-BIN-09",
+    "severity": "MUST",
+    "rule": "Require an explicit manifest digest off setup.ocx.sh or with a mirror, failing before any network I/O."
+   },
+   {
+    "id": "CS-BIN-10",
+    "severity": "MUST",
+    "rule": "Never call TarFile/ZipFile/ZipFileExtensions.ExtractToDirectory; stream one named regular-file member; ban every overload in a file named BannedSymbols*.txt with full parameter lists, RS0030 at error, and keep a Variant=Bad canary that must fail."
+   },
+   {
+    "id": "CS-BIN-11",
+    "severity": "MUST",
+    "rule": "Cap while streaming by bytes read (manifest 1 MiB, archive 256 MiB, member 256 MiB); ban GetByteArrayAsync/GetStringAsync/ReadAsByteArrayAsync/ReadAsStringAsync overloads."
+   },
+   {
+    "id": "CS-BIN-12",
+    "severity": "MUST",
+    "rule": "Install into <cache>/<ocx version>/<triple>/ via CreateNew temp (UnixCreateMode 0600), guarded SetUnixFileMode 0700, File.Move overwrite; never write into or over a possibly running final path; sidecar digest re-hashed on cache hits."
+   },
+   {
+    "id": "CS-BIN-13",
+    "severity": "MUST",
+    "rule": "Cache root per OS (LOCALAPPDATA / ~/Library/Caches / XDG_CACHE_HOME|~/.cache, not LocalApplicationData on Linux), created level by level with mode 0700; refuse symlinked root/levels and group/other-writable root; never check ancestors."
+   },
+   {
+    "id": "CS-BIN-14",
+    "severity": "MUST",
+    "rule": "One static HttpClient over SocketsHttpHandler{PooledConnectionLifetime, AllowAutoRedirect=false}, explicit User-Agent, per-attempt CancellationTokenSource; default proxy only."
+   },
+   {
+    "id": "CS-BIN-15",
+    "severity": "MUST",
+    "rule": "Follow redirects manually: <= 5 hops, https only, no userinfo, credentials only for the same scheme+host+port; no secrets in DefaultRequestHeaders."
+   },
+   {
+    "id": "CS-BIN-16",
+    "severity": "MUST",
+    "rule": "Never disable TLS validation or use WebClient/WebRequest/HttpWebRequest/ServicePointManager; custom CA via X509ChainPolicy CustomRootTrust; CA5359 and SYSLIB0014 at error."
+   },
+   {
+    "id": "CS-BIN-17",
+    "severity": "MUST",
+    "rule": "Never run a downloaded installer script and never shell out to chmod/curl/Invoke-WebRequest."
+   },
+   {
+    "id": "CS-BIN-18",
+    "severity": "SHOULD",
+    "rule": "Retry only transport failures (resets, timeouts, truncation, 429, 5xx); never 401/403/404, size-cap aborts or checksum mismatches; discard partial files per attempt."
+   },
+   {
+    "id": "CS-BIN-19",
+    "severity": "MUST",
+    "rule": "(Delivery model b only) One explicit item per file into 6 RID dirs with the static musl binary under runtimes/linux-{x64,arm64}/native (serves linux-musl-* by fallback); resolver probes AppContext.BaseDirectory then runtimes/<rid>/native; re-apply the exec bit."
+   }
+  ],
+  "conflicts_resolved": [
+   "Discovery order: BA/Python (explicit, OCX_SDK_EXE, PATH, OCX_HOME) vs ocx-cli-contract \u00a78.1 (explicit, OCX_BINARY_PIN, rooted PATH) -> merged order explicit, OCX_SDK_EXE, OCX_BINARY_PIN, rooted PATH, OCX_HOME, plus propagate the pin to children (CS-BIN-01/02).",
+   "PATHEXT: BA F3 + python-sdk-digest row 31 'honour PATHEXT' vs contract \u00a76 exact-name -> exact ocx/ocx.exe only; PATHEXT can resolve .cmd through cmd.exe (BatBadBut) and ocx ships only .exe.",
+   "Delivery model: contract \u00a78.13 'ship/locate per-RID binaries' vs BA F1 download recommendation -> (a)+(c) recommended on measured 91.6 MB/release and silent RID drop; all three written with trade-off table since owner decision 3 has not landed.",
+   "Linux RID in a bundled package: contract \u00a75 maps linux-x64 to the gnu triple, BA found musl-only layout vanishes from -r linux-x64 -> measured this round (ridfallback2): static musl under runtimes/linux-{x64,arm64}/native is PRESENT for linux-x64, linux-musl-x64, linux-arm64, linux-musl-arm64; gnu build never packaged.",
+   "BannedSymbols: BA said a parameterless M: line 'matched nothing' -> measured this round (banparams): it binds only the parameterless overload (ReadAsStringAsync() fired, ReadAsByteArrayAsync(CancellationToken) did not), leaving a hole in BA's own ban list; banname: a file not named BannedSymbols*.txt bans nothing (0 errors).",
+   "Bootstrap default version: Python ensure(version=None) takes latest vs contract exact-equality handshake -> default to TestedOcxVersion (CS-BIN-06).",
+   "Symbols: embedded (DotNet.ReproducibleBuilds, 16 corpus repos) vs snupkg (9, Polly/Serilog) -> snupkg for a nuget.org-only SDK (6.7 KB vs 21.2 KB, symbol-server indexed).",
+   "Version tool: Nerdbank.GitVersioning (7) / GitVersion (5) / MinVer (3) / Python tag==file check -> MinVer from tags plus version==tag guard.",
+   "CIB condition variable: CI (Polly) vs TF_BUILD (Microsoft docs) vs GITHUB_ACTIONS -> GITHUB_ACTIONS, since a developer shell exporting CI=true flips local builds.",
+   "Strong naming: 22/35 corpus repos ship .snk vs Microsoft 'no benefit on .NET 5+' -> no, conditional on owner decision 1 (netstandard2.0 flips it).",
+   "Rosetta: Python sysctl.proc_translated probe vs .NET 7+ OSArchitecture emulation-aware -> no probe.",
+   "User-Agent: Python claims CDN 403s default UA, BA could not reproduce -> send UA for identification, not as a workaround.",
+   "Cache ownership: Python uid check vs no managed .NET owner accessor -> skip and document; P/Invoke left as an open question."
+  ],
+  "another_round": [
+   "csharp-packaging-ocx-binary-acquisition (macOS + arm64 legs): measure OSArchitecture under Rosetta, exec bit after NuGet extraction and ~/Library/Caches on macos-latest; run the 20-row RID table on real windows-11-arm and ubuntu-24.04-arm runners.",
+   "csharp-packaging-nuget-release (first publish): can a Trusted Publishing policy scoped to a not-yet-existing package ID publish v0.1.0, and what is the current ID-prefix reservation channel?",
+   "Static musl ocx on glibc hosts: does musl's resolver diverge from glibc NSS (nsswitch, LDAP/sssd, corporate DNS) enough to need an exception to the musl default?",
+   "Cache-root ownership: is a geteuid()+stat P/Invoke worth it given per-OS stat layouts, or is the documented gap acceptable?",
+   ".NET 11 GA re-measure (Nov 2026): ZipArchive CRC verification, pack DeterministicTimestamp defaults, and TarExtractOptions/ZipExtractionOptions as a future relaxation of CS-BIN-10."
+  ],
+  "owner_decisions": [
+   "Delivery model (map owner decision 3): recommended locate + sha256-verified download; choosing per-RID bundling activates CS-BIN-19 and makes every ocx release an SDK release.",
+   "Consumer reach (owner decision 1): adding netstandard2.0 flips CS-PKG-08 to strong-name every TFM with a permanent key; must be decided before first publish.",
+   "Publishing identity (owner decision 5): package ID/root namespace (Ocx.Sdk assumed), nuget.org org, Trusted Publishing policy (repo, release.yml, environment nuget.org), ID-prefix application, author-signing yes/no (default no).",
+   "Contract baseline (owner decision 4): TestedOcxVersion needs an ocx release carrying `contract`; none exists, so CS-BIN-06's default currently points at a binary the handshake refuses.",
+   "Windows ARM64: native aarch64 ocx chosen over x64-under-emulation; one table row to flip."
+  ]
+ },
+ {
+  "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/csharp/.agents/research/csharp-json.md",
+  "rules": [
+   {
+    "id": "CS-JSON-01",
+    "severity": "MUST",
+    "rule": "Bind only through a source-generated JsonTypeInfo<T>. Do not use reflection or options overloads, or explicit-generic Deserialize<T>()/ReadFromJsonAsync<T>(). IL2026/IL3050 are errors and IsAotCompatible is set for TFMs >= net8.0."
+   },
+   {
+    "id": "CS-JSON-02",
+    "severity": "MUST",
+    "rule": "Use one internal sealed partial OcxJsonContext per assembly, configured only by the canonical [JsonSourceGenerationOptions] block (SnakeCaseLower, Skip, RespectNullableAnnotations, RespectRequiredConstructorParameters, AllowDuplicateProperties=false). src contains no runtime JsonSerializerOptions, TypeInfoResolver=, Combine, Web, Strict or Disallow."
+   },
+   {
+    "id": "CS-JSON-03",
+    "severity": "MUST",
+    "rule": "Run the test project with JsonSerializerIsReflectionEnabledByDefault=false, and give every registered root and every union arm a wire-fixture round-trip test."
+   },
+   {
+    "id": "CS-JSON-04",
+    "severity": "SHOULD",
+    "rule": "Keep a PublishAot smoke app that publishes with TreatWarningsAsErrors and runs the binary on a wire fixture per RID (at least linux-x64, win-x64, osx-arm64)."
+   },
+   {
+    "id": "CS-JSON-05",
+    "severity": "MUST",
+    "rule": "Make every x-ocx-enum an open readonly struct: Ordinal equality, IOpenEnum<T> plus a shared string-only OpenEnumConverter<T>, Known/IsKnown. Never use a CLR enum or JsonStringEnumConverter for wire values (RS0030 ban)."
+   },
+   {
+    "id": "CS-JSON-06",
+    "severity": "MUST",
+    "rule": "Write success predicates as allow-lists (IsOk => this == A || this == B). Never '!= Failed'. An unknown value is never success."
+   },
+   {
+    "id": "CS-JSON-07",
+    "severity": "MUST",
+    "rule": "Decode wire unions with a hand-written tag-first JsonConverter<TBase>. A missing or non-string tag, or a known tag with a bad payload, raises JsonException. An unseen tag becomes the Unknown arm with a cloned Raw. Arms are bound via options.GetTypeInfo(typeof(T)). Never use JsonPolymorphic, JsonDerivedType, UnknownDerivedTypeHandling or InferClosedTypePolymorphism for wire unions."
+   },
+   {
+    "id": "CS-JSON-08",
+    "severity": "MUST",
+    "rule": "Schema-required keys are 'required' init members. Schema-optional keys are nullable and never required. RespectNullableAnnotations stays on."
+   },
+   {
+    "id": "CS-JSON-09",
+    "severity": "MUST",
+    "rule": "Use one internal decode seam: JsonDocument.Parse, peek schema_version (mismatch or absent gives OcxVersionException before binding), Deserialize(info) ?? throw. Catch only JsonException and turn it into OcxParseException. NotSupportedException and InvalidOperationException propagate as SDK bugs."
+   },
+   {
+    "id": "CS-JSON-10",
+    "severity": "MUST",
+    "rule": "Handshake once per binary with ocx --format json version. No contract key gives OcxVersionException. Before spawning, compare errors/command/each root version by integer equality and accept additions. Never compare semver and never hard-code an unmeasured minimum."
+   },
+   {
+    "id": "CS-JSON-11",
+    "severity": "MUST",
+    "rule": "Keep a schema-diff test in CI. It reflects JsonTypeInfo.Properties against the vendored pinned reports.json for phantom, unsafe, lossy (waivable), missing-required, unmodelled-new, kind, enum values, union arms or closure, schema_version and unmapped types."
+   },
+   {
+    "id": "CS-JSON-12",
+    "severity": "SHOULD",
+    "rule": "Replay ocx's conformance corpus at the pinned commit by enumerating its directory. Unmodelled roots must sit on an explicit NotYetModelled list."
+   },
+   {
+    "id": "CS-JSON-13",
+    "severity": "MUST",
+    "rule": "Use strictness only as a test instrument, built as new OcxJsonContext(new JsonSerializerOptions(OcxJsonContext.Default.Options){UnmappedMemberHandling=Disallow}). Never use JsonSerializerOptions.Strict, Strict defaults with TypeInfoResolver=ctx, or strictness in src."
+   },
+   {
+    "id": "CS-JSON-14",
+    "severity": "MUST",
+    "rule": "Multi-target net8.0;net10.0 and add System.Text.Json 10.0.x to the net8.0 asset only. No #if around serializer options."
+   },
+   {
+    "id": "CS-JSON-15",
+    "severity": "MUST",
+    "rule": "Keep publisher OpaqueJson as JsonElement, and ocx timestamps, digests and paths as string. No object, Dictionary<string,object>, DateTimeOffset or Uri in models."
+   },
+   {
+    "id": "CS-JSON-16",
+    "severity": "MUST",
+    "rule": "No Newtonsoft.Json, DataContractJsonSerializer or JavaScriptSerializer in code or in the transitive dependency graph."
+   },
+   {
+    "id": "CS-JSON-17",
+    "severity": "SHOULD",
+    "rule": "Do not suppress IL2026, IL3050, IL2xxx or SYSLIB1034 without a one-line justification."
+   }
+  ],
+  "another_round": [
+   "csharp-json-union-converter-generalisation: can one generic TaggedUnionConverter<TBase> with a static-abstract arm table replace 13 hand-written union converters while staying AOT-clean and honouring the caller's options, and can the schema-diff test drive that table?",
+   "csharp-json-error-document-and-integer-enums: bind errors.json (an integer ExitCode x-ocx-enum and 505 ErrorDetail values) and report_then_fail partial reports. Only the string open enum was built this round.",
+   "csharp-crossplatform AOT smoke: run the consolidation policy app as Native AOT on win-x64, osx-arm64 and linux-arm64. Only linux-x64 was measured."
+  ],
+  "conflicts_resolved": [
+   "Unions: source-gen sub-artifact said use [JsonPolymorphic(IgnoreUnrecognizedTypeDiscriminators)] on a concrete base; forward-compat sub-artifact said use a custom converter. Chose the tag-first converter. The attribute turns unseen, missing, numeric and wrong-case tags into one silent base instance, and it needs net9 AllowOutOfOrderMetadataProperties. The converter was watched green on net8, net10 and Native AOT (CJ C3-C3e, V5). AllowOutOfOrderMetadataProperties drops out of the setup.",
+   "Which exceptions to catch: SG R13 treats NotSupportedException as an SDK bug; FB rule 16 wrapped it as a decode error. Chose to catch JsonException only. With the converter design a missing or numeric tag yields JsonException (watched), so NotSupportedException and InvalidOperationException only ever mean SDK bugs.",
+   "Exception names: FB invented OcxDecode, OcxContractMismatch and OcxUnsupportedBinary exceptions. Chose the csharp-api five-leaf hierarchy: OcxParseException for malformed or wrongly shaped output, and OcxVersionException for schema_version mismatch, contract mismatch and a binary without a contract key.",
+   "Strict test instrument: FB rule 17 used new JsonSerializerOptions(JsonSerializerDefaults.Strict){TypeInfoResolver=ctx}. Watched red: it drops SnakeCaseLower, so a valid payload fails with 'schema_version could not be mapped'. Replaced with a copy of Default.Options plus Disallow (watched green). Union arms must then bind via options.GetTypeInfo, because binding via Default bypasses strictness (ARM_DEFAULT red).",
+   "Duplicate keys: FB called refusal optional and low value. Decided to refuse with AllowDuplicateProperties=false via the STJ 10 package on net8. Watched: still caught after JsonDocument.Parse in the seam, on .NET 8.0.31 and 10.0.12.",
+   "Context visibility: FB fixture used a public context; SG said internal. Chose internal, with InternalsVisibleTo for the schema-diff test. The rg gate was watched red on the FB fixture and green on the consolidation fixture.",
+   "Open-enum shape: FB used readonly record struct(string Value); csharp-api-surface-shape uses a hand-written readonly struct with a null-normalised Value. Chose the surface-shape struct plus FB's IOpenEnum<T>/OpenEnumConverter<T>. The record struct exposes a public init setter, and default(T).Value is null.",
+   "JsonSerializerIsReflectionEnabledByDefault: FB put it on the SDK csproj, SG on tests. Chose the test project and smoke app, because the switch is a runtimeconfig setting of executables."
+  ],
+  "owner_decisions": [
+   "Minimum ocx: no released ocx carries the contract key (0.6.5 lacks it). Choose between taking the first contract release as the floor, and also supporting 0.6.5 with a frozen legacy model set.",
+   "Ask the ocx maintainers whether making a required key optional counts as a version bump. If it does not, CS-JSON-08 'required' members can break on a non-bumped release.",
+   "Hand-written models gated by the schema-diff test, versus scheduling an ocx-owned ocx_sdkgen C# backend (56 roots, about 970 properties).",
+   "Scope of the per-RID AOT smoke matrix for CS-JSON-04; only linux-x64 was measured.",
+   "csharp-api must add Document/Expected/Found integer properties to OcxVersionException, which today is shaped as semver Found/Minimum."
+  ]
+ },
+ {
+  "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/csharp/.agents/research/csharp-async.md",
+  "rules": [
+   {
+    "id": "CS-ASYNC-01",
+    "severity": "MUST",
+    "rule": "Every public async method that does I/O ends with exactly one `CancellationToken cancellationToken = default`: exact name, last position, the default on both interface and implementation, and no `params` before it (CA1068 at error, plus the name, two-token and params rg checks)."
+   },
+   {
+    "id": "CS-ASYNC-02",
+    "severity": "MUST",
+    "rule": "Forward the token to every callee (CA2016 at error). Write intentional non-forwarding as `CancellationToken.None` with a reason, never as `default`. Non-public async methods take the token without a default."
+   },
+   {
+    "id": "CS-ASYNC-03",
+    "severity": "MUST",
+    "rule": "Never add a token by editing a shipped signature, because that is binary-breaking (MissingMethodException). Add an overload that forwards instead."
+   },
+   {
+    "id": "CS-ASYNC-04",
+    "severity": "MUST",
+    "rule": "Public async methods return Task/Task<T>. Await every ValueTask exactly once (CA2012 at error). A public ValueTask needs a linked benchmark; [ocx] never, since a spawn costs about 5 ms."
+   },
+   {
+    "id": "CS-ASYNC-05",
+    "severity": "MUST",
+    "rule": "Name every method returning Task/ValueTask/IAsyncEnumerable with the Async suffix, private ones included, and never a sync method (VSTHRD200 at error; none in tests)."
+   },
+   {
+    "id": "CS-ASYNC-06",
+    "severity": "MUST",
+    "rule": "ConfigureAwait(false) on every await in library code, including await foreach and await using. No ConfigureAwait(true) and no Task.Yield (use ForceYielding). None in tests, samples or apps. Enforce with CA2007=error scoped to [src/**.cs], the gap rg, and a Task.Yield ban."
+   },
+   {
+    "id": "CS-ASYNC-07",
+    "severity": "MUST",
+    "rule": "Construct every TaskCompletionSource with TaskCreationOptions.RunContinuationsAsynchronously (rg check plus CA2247 at error)."
+   },
+   {
+    "id": "CS-ASYNC-08",
+    "severity": "MUST",
+    "rule": "Caller cancellation surfaces as an OCE with the caller's token. An SDK timeout uses a distinct non-OCE type ([ocx] OcxTimeoutException : OcxException). Classify with a linked CTS, `when (linked.IsCancellationRequested)` and the caller checked first. Never catch only TaskCanceledException."
+   },
+   {
+    "id": "CS-ASYNC-09",
+    "severity": "MUST",
+    "rule": "Timeouts cancel the work. Do not use Task.WaitAsync(timeout) or WhenAny(work, Task.Delay) as the timeout mechanism."
+   },
+   {
+    "id": "CS-ASYNC-10",
+    "severity": "SHOULD",
+    "rule": "Decorate the token of an async iterator with [EnumeratorCancellation] (CS8425 at error)."
+   },
+   {
+    "id": "CS-ASYNC-11",
+    "severity": "MUST",
+    "rule": "The creator of a Process, CTS, linked CTS or registration disposes it with using/await using, or transfers it into a handle. A bare token.Register(...) is a defect. Enforce with IDISP001/004 and CA2000 together, plus the registration rg."
+   },
+   {
+    "id": "CS-ASYNC-12",
+    "severity": "MUST",
+    "rule": "No finalizer, no Dispose(bool), no GC.SuppressFinalize. Seal the class instead of answering CA1063/CA1816; use SafeHandle for unmanaged handles (IDISP024/025 plus the ritual rg)."
+   },
+   {
+    "id": "CS-ASYNC-13",
+    "severity": "MUST",
+    "rule": "A stateless client implements neither disposal interface. A type owning a live resource is sealed and implements both IDisposable and IAsyncDisposable, is idempotent, and kills the process tree before releasing it. Async-only disposal only when no sync release exists (CA1001/CA2213 plus a runtime kill test)."
+   },
+   {
+    "id": "CS-ASYNC-14",
+    "severity": "MUST",
+    "rule": "No .Result, .Wait, GetAwaiter().GetResult() (configured awaiters included), WaitAll/WaitAny or Thread.Sleep in library code. Enforce with RS0030 BannedSymbols including the configured-awaiter and span lines, plus VSTHRD002/103 and CA1849 at error."
+   },
+   {
+    "id": "CS-ASYNC-15",
+    "severity": "MUST",
+    "rule": "[ocx] No sync API in v1. A later sync twin is a separate leaf (bool-async core or a genuine sync driver), never a GetAwaiter().GetResult() wrapper."
+   },
+   {
+    "id": "CS-ASYNC-16",
+    "severity": "MUST",
+    "rule": "No async void and no async lambda converted to a void delegate (VSTHRD100/101 at error)."
+   },
+   {
+    "id": "CS-ASYNC-17",
+    "severity": "MUST",
+    "rule": "No fire-and-forget; `_ = XAsync()` is not an observation. Store pump tasks and await them on every exit path, DisposeAsync included (VSTHRD110 and CS4014 at error, plus the discard rg)."
+   },
+   {
+    "id": "CS-ASYNC-18",
+    "severity": "SHOULD",
+    "rule": "Pass an explicit TaskScheduler to StartNew/ContinueWith, and never return a null Task (VSTHRD105/114 at error)."
+   },
+   {
+    "id": "CS-ASYNC-19",
+    "severity": "MUST",
+    "rule": "The async gate is 24 explicit per-rule `error` severities plus pinned VSTHRD 18.7.23, IDisposableAnalyzers 4.0.8 and BannedApi 5.6.0, with VSTHRD003=none. It fires identically at 10.0-default, 10.0-recommended and 10.0-all (watched: red exit 1, green exit 0)."
+   }
+  ],
+  "conflicts_resolved": [
+   "CA2007 on await using: measured that CA2007 flags `await using var x = new T()` but not `await using (existing)`, await foreach or Task.Yield. Both subtopics were right about different forms; the gaps are closed with an rg check and a Task.Yield ban.",
+   "AnalysisLevel (pinned 10.0-recommended vs AnalysisMode=All vs the build group's 10.0-all): explicit severities fire at every level (measured), so the async gate is level-independent and the level stays with csharp-build.",
+   "VSTHRD003, listed in the brief: three false positives on legitimate patterns (own field TCS, own pump in DisposeAsync, caller task), so it is set to none. VSTHRD101 is added.",
+   "Timeout type (BCL TimeoutException in both subtopics vs OcxTimeoutException : OcxException in csharp-process and csharp-api): took the process/api form so the contracts are identical.",
+   "Classification filter: `when (!ct.IsCancellationRequested)` replaced by `when (linked.IsCancellationRequested)` with the caller checked first, because the former misclassifies unrelated OCEs.",
+   "One token vs forceful+graceful tokens (wrappers audit:211, CliWrap): one token, because CA2016 goes blind on two-token methods; grace lives in options per command class.",
+   "Package versions (VSTHRD 17.14.15 vs 18.7.23; BannedApi 4.14.0 vs 5.6.0): pinned the versions the merged gate was watched with.",
+   "Meziantou MA0004 vs rg for the ConfigureAwait gaps: rg (no new dependency, watched 3/0); adopting Meziantou is deferred to the analyzer-gate group.",
+   "Correction for csharp-process: a token-less OCE also ends with Status=Canceled (measured), so the reason to carry the caller's token is caller-side filtering, not task status.",
+   "Cross-group naming: csharp-api-surface-shape.md:47 uses `CancellationToken ct` in CreateAsync; it must be `cancellationToken`."
+  ],
+  "another_round": [
+   "csharp-async / shared async state: how the version-compat single-flight (Lazy<Task>/SemaphoreSlim, python-sdk-digest row 30) avoids caching faulted or cancelled tasks, and avoids letting the first caller's token cancel shared initialisation.",
+   "csharp-async / callbacks and streaming (AS-05): the thread and context contract for IProgress<T> (which captures the context), Action<string> and IAsyncEnumerable stderr streaming, measured on a real pump.",
+   "csharp-crossplatform / real UI context: one WinForms/WPF deadlock run on the Windows host, to make the ConfigureAwait evidence first-hand (not load-bearing)."
+  ],
+  "owner_decisions": [
+   "Confirm async-only v1 with no sync twins, breaking Python parity (CS-ASYNC-15); the alternative is a pattern-C sync leaf for MSBuild/PowerShell consumers.",
+   "Pick the kill style jointly with csharp-process: catch-then-kill or a Register(TryKill) callback. Both satisfy this ruleset.",
+   "Decide in the analyzer-gate consolidation whether to adopt Meziantou.Analyzer, which would replace the CS-ASYNC-06 gap rg."
+  ]
+ },
+ {
+  "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/csharp/.agents/research/csharp-api.md",
+  "rules": [
+   {
+    "id": "CS-API-01",
+    "severity": "MUST",
+    "rule": "The public entry type is one sealed OcxClient with a private constructor and a single static async CreateAsync(options?, ct) factory. All I/O (discovery and the version handshake) runs in that factory. Commands live on sealed handles with internal constructors."
+   },
+   {
+    "id": "CS-API-02",
+    "severity": "MUST",
+    "rule": "No public interface or abstract class mirrors the client or a handle. Tests use a fake ocx executable. A later seam is an abstract class added in a minor release, never an interface."
+   },
+   {
+    "id": "CS-API-03",
+    "severity": "MUST",
+    "rule": "Seal every public class, record and leaf exception, and never seal a type that already shipped unsealed. Gate it with Meziantou MA0053 at error, with MeziantouAnalysisMode=None plus the public_class and exceptions options."
+   },
+   {
+    "id": "CS-API-04",
+    "severity": "MUST",
+    "rule": "Public options and results are sealed classes with get-only or init members, required for mandatory members, and IReadOnlyList or IReadOnlyDictionary collections. No setters, arrays or List<T>. A type with a collection member is never a record."
+   },
+   {
+    "id": "CS-API-05",
+    "severity": "MUST",
+    "rule": "No public positional record, record class or record struct. The only exception is a single-parameter Value wrapper."
+   },
+   {
+    "id": "CS-API-06",
+    "severity": "MUST",
+    "rule": "A type with a secret-named member is a class, or a sealed record whose private PrintMembers redacts the secret."
+   },
+   {
+    "id": "CS-API-07",
+    "severity": "MUST",
+    "rule": "Open wire sets are readonly record struct X(string Value) : IOpenEnum<X>, with ordinal equality and no implicit string conversion. Exit codes are OcxExitCode(int Value). C# enums are used only for sets the SDK produces or sends, each with a zero member. Never use JsonStringEnumConverter or Enum.Parse/TryParse on wire data."
+   },
+   {
+    "id": "CS-API-08",
+    "severity": "MUST",
+    "rule": "A tagged wire union is an abstract base with an internal constructor, sealed case classes and a sealed Unknown arm. No [JsonPolymorphic], and no C# 15 union or closed in the public API."
+   },
+   {
+    "id": "CS-API-09",
+    "severity": "MUST",
+    "rule": "After shipping, evolve only additively. Never add a parameter (optional or not), change a default, rename a parameter, seal a type, or add an abstract or interface member. Extend a method with an overload using the Roslyn optional-parameter pattern; add a CancellationToken as a new overload."
+   },
+   {
+    "id": "CS-API-10",
+    "severity": "MUST",
+    "rule": "required is fixed at a type's first release: never add required to a shipped type, whether on an existing or a new member. A wire key that becomes mandatory later uses [JsonRequired] on a non-required init property."
+   },
+   {
+    "id": "CS-API-11",
+    "severity": "MUST",
+    "rule": "Use PublicApiAnalyzers 5.6.0. Seed both PublicAPI files with #nullable enable and generate entries with dotnet format, never by hand. Set RS0016/17/26/27/36/37 to error in .globalconfig, not .editorconfig. Never set require_api_files. For multiple TFMs use a shared pair plus per-TFM delta directories."
+   },
+   {
+    "id": "CS-API-12",
+    "severity": "MUST",
+    "rule": "Run package validation at dotnet pack with the baseline set to the last published version (0.y.z included), and turn on ApiCompatEnableRuleAttributesMustMatch and ApiCompatEnableRuleCannotChangeParameterName. Never commit a suppression-file generation flag; never use ApiCompatVersion. The rule text lands in dotnet-build/packaging.md."
+   },
+   {
+    "id": "CS-API-13",
+    "severity": "MUST",
+    "rule": "From SDK 1.0, mark unfrozen ocx contract parts with [Experimental(\"OCXnnnn\", UrlFormat)], one ID per graduating family. Deprecate with [Obsolete] carrying DiagnosticId and UrlFormat. Both draw from one ID registry. Use no [Experimental] at all while the SDK is 0.y.z."
+   },
+   {
+    "id": "CS-API-14",
+    "severity": "MUST",
+    "rule": "Derive the version bump from mechanical signals. A *REMOVED* line, PKV006, or a baseline suppression on a non-[Experimental] type is major (minor while 0.y). Suppressions only on [Experimental] types are minor; check-exp-suppressions.sh enforces this."
+   },
+   {
+    "id": "CS-API-15",
+    "severity": "SHOULD",
+    "rule": "Release order: promote Unshipped into Shipped and delete accepted suppressions in the release commit. Pack from a clean checkout and publish only if pack exited 0. Bump the baseline in a later commit once the package is on the feed. Shipped.txt changes only in release commits."
+   },
+   {
+    "id": "CS-API-16",
+    "severity": "SHOULD",
+    "rule": "The core package has no DI dependency. Any AddOcx ships in a separate package, never in the Microsoft.Extensions.DependencyInjection namespace."
+   },
+   {
+    "id": "CS-ERR-01",
+    "severity": "MUST",
+    "rule": "Declare one public abstract OcxException with protected standard constructors and exactly five sealed leaves: OcxCommandException, OcxDecodeException, OcxContractException, OcxTimeoutException and OcxLaunchException (with a Reason). No per-exit-code subclasses; a sixth type needs an ADR."
+   },
+   {
+    "id": "CS-ERR-02",
+    "severity": "MUST",
+    "rule": "Map exit codes to OcxExitCode through one hand-written 13-row table file guarded by a conformance test against the vendored errors.json. An unknown code keeps its raw int. No numeric exit literals elsewhere, no casts, and never derive the code from error.kind, error.message or stderr text."
+   },
+   {
+    "id": "CS-ERR-03",
+    "severity": "MUST",
+    "rule": "Passthrough commands return a sealed ChildExit carrying the int code: no mapping, no throw, no retry. An exit status the SDK caused by killing the tree surfaces as cancellation or timeout."
+   },
+   {
+    "id": "CS-ERR-04",
+    "severity": "MUST",
+    "rule": "Decode JSON in one seam. JsonException, NotSupportedException and null results become OcxDecodeException with an InnerException and a bounded, redacted excerpt. No Deserialize<T>()!. Check schema_version before binding."
+   },
+   {
+    "id": "CS-ERR-05",
+    "severity": "MUST",
+    "rule": "Never wrap caller cancellation: it stays an OperationCanceledException with the caller's token. Only the SDK's own timer becomes OcxTimeoutException : OcxException. Every wrapping catch carries when (e is not OperationCanceledException)."
+   },
+   {
+    "id": "CS-ERR-06",
+    "severity": "MUST",
+    "rule": "No swallowing catch-all. Catch Exception only at the seam (filtered and wrapped), in justified best-effort cleanup, or before throw;. The R10 grep backs CA1031 because the analyzer misses the when-filter loophole."
+   },
+   {
+    "id": "CS-ERR-07",
+    "severity": "MUST",
+    "rule": "Exceptions are classes, never records, with get-only typed properties. No setters, no Exception.Data, no [Serializable], no serialization constructor or GetObjectData. Satisfy CA1032 with protected constructors on the root and one justified SuppressMessage per leaf; never add a public parameterless leaf constructor."
+   },
+   {
+    "id": "CS-ERR-08",
+    "severity": "MUST",
+    "rule": "Message is a fixed template plus one actionable hint, with no argv, env, stdout or stderr. Excerpts are bounded, redacted, opt-in properties, and ToString never prints the partial report. A canary test enforces it."
+   },
+   {
+    "id": "CS-ERR-09",
+    "severity": "SHOULD",
+    "rule": "No throw-or-not switches and no returned exceptions. Use two methods instead (RunAsync throws, ExecAsync returns ChildExit). Report-then-fail commands take an explicit accepted-exit-code set."
+   },
+   {
+    "id": "CS-ERR-10",
+    "severity": "SHOULD",
+    "rule": "IsTransient is ExitCode == TempFail (75) and nothing else. The retry policy is owned by the process group."
+   },
+   {
+    "id": "CS-ERR-11",
+    "severity": "CONSIDER",
+    "rule": "Never redeclare InnerException or Message with new, and never let an exception member or ToString throw."
+   }
+  ],
+  "conflicts_resolved": [
+   "Test seam. The wrapper audit recommended Pulumi's public abstract command seam; surface-shape and the fake-CLI harness argued for none. Decided: no public seam in 0.x/1.0, because the best process libraries test against dummy executables and a seam can be added later additively but never removed.",
+   "Sealing analyzer. analyzer-gate rated Meziantou optional (its default rules duplicate CA ids); surface-shape needs MA0053 because CA1852 skips public types. Decided: MeziantouAnalysisMode=None with MA0053 alone, watched red and green with zero extra MA diagnostics.",
+   "Open-enum shape. surface-shape proposed a hand-written readonly struct with an implicit string conversion; json proposed readonly record struct(string Value) : IOpenEnum<T>. Decided: json's form, without the implicit conversion. Single-Value wrappers are the one carve-out from the no-positional-record rule.",
+   "Package validation baseline. surface-shape said no baseline before a stable 1.0.0; evolution-gates and packaging baseline every release after the first. Decided: baseline from the second release on, 0.y.z included, since 0.1.0 is a stable NuGet version.",
+   "required evolution. surface-shape rule 18 allowed a required hit on a member added in the same diff; json binds every schema-required key with C# required. Decided: required is fixed at a type's first release and later mandatory keys use [JsonRequired]. Watched: a new required member gives CS9035, and [JsonRequired] refuses a missing key on net8 and net10.",
+   "Experimental timing. surface-shape marked all unfrozen reports now. Decided: no [Experimental] while the SDK is 0.y.z, because every type would need it and consumers would blanket-NoWarn. New finding: package validation treats Experimental members as frozen (watched CP0002), so the SemVer rule exempts suppressions on Experimental types, enforced by check-exp-suppressions.sh (watched red and green).",
+   "Diagnostic IDs. surface-shape used OCX0001 for Experimental; evolution-gates used separate PREFIXEXPnnn and PREFIXnnnn schemes. Decided: one OCXnnnn registry for both kinds, IDs never reused.",
+   "Parse exception name. exceptions used OcxParseException; json used OcxDecodeException. Decided: OcxDecodeException, as the brief requires matching json, whose seam also wraps NotSupportedException.",
+   "Version and contract exceptions. exceptions used OcxVersionException; json used OcxUnsupportedBinaryException and OcxContractMismatchException. Decided: merge into one OcxContractException with Part/Found/Expected, since all three share one remedy.",
+   "Launch and command exceptions. launch-and-argv proposed four launch types and process-exit proposed OcxSpawnException and OcxProcessException. Decided: one OcxLaunchException with a Reason enum, and OcxCommandException for ocx-reported failures, keeping five leaves.",
+   "Exit table. process-exit said generate it from errors.json and key it by ocx version; exceptions and json said hand-write it with a conformance test and set the floor at the contract-bearing release. Decided: one hand-written 13-row table plus the conformance test, with the contract floor. Supporting 0.6.5 is an owner decision.",
+   "Category type. exceptions used a closed OcxErrorCategory enum plus an int, against surface-shape's open-set rule. Decided: OcxExitCode(int Value) as an open struct, plus an OcxErrorKind open struct; enums only for SDK-produced sets.",
+   "Passthrough result type. process-exit proposed a positional ChildExit(int Code); decided a sealed class ChildExit with an int ExitCode, per the no-positional-record rule.",
+   "Analyzer severity files. exceptions put explicit severity lines in .editorconfig. Decided: rely on analyzer-gate's AnalysisLevel 10.0-all with TreatWarningsAsErrors, with all severity lines in .globalconfig (RS0017 ignores .editorconfig, and .editorconfig outranks .globalconfig).",
+   "Synchronous argument validation. exceptions R-EXC-23 depended on CA1062, which analyzer-gate suppresses repo-wide. Decided: drop the rule as generic.",
+   "Ownership split with dotnet-build. packaging.md owns every package-validation MSBuild property and the baseline lifecycle. analyzers.md owns the PublicApiAnalyzers and Meziantou package references and the .globalconfig lines. api-design.md owns the change rules, PublicAPI file discipline and the SemVer table. The dotnet-release skill owns the promote, suppression-delete and baseline-bump steps."
+  ],
+  "another_round": [
+   "csharp-api-result-construction: should result types be constructible by consumers (public required init, so they can fake results) or SDK-only (internal constructor plus source-generated STJ)? Fixture both on net8 and net10, including [JsonRequired] with an internal constructor.",
+   "csharp-api-behavioral-compat: no gate pins the failure-mode table (exception type per failure, exit mapping, parse tolerance). Specify the fake-CLI contract-test suite that pins it across releases, and decide whether a change to it is a major bump.",
+   "csharp-api-csharp15-unions (after .NET 11 GA, Nov 2026): can a closed hierarchy with a registered Unknown arm replace the internal-constructor union pattern, and what does ApiCompat report for union case changes? Never run so far."
+  ],
+  "owner_decisions": [
+   "ocx floor: the default rejects every released ocx (0.6.5 included) with OcxContractException until a contract-bearing release ships. The alternative is a degraded 0.6.5 mode with a second frozen table (82 = DirtyRcBlock). Topic-map decision 4.",
+   "Package identity and diagnostic prefix: Ocx.Sdk as package ID and namespace, OCX for Experimental and Obsolete IDs; ties to nuget.org prefix reservation (topic-map decision 5).",
+   "netstandard2.0 scope (topic-map decision 1): if it is in scope, IOpenEnum<T>'s static abstract member does not compile there and the open-enum design (CS-API-07) must change.",
+   "A sixth exception type (e.g. OcxAcquireException) for binary download and checksum failures needs an ADR under CS-ERR-01."
+  ]
+ },
+ {
+  "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/csharp/.agents/research/csharp-process.md",
+  "rules": [
+   {
+    "id": "CS-PROC-01",
+    "severity": "MUST",
+    "rule": "Build argv only with ProcessStartInfo.ArgumentList; never Arguments, the (string,string) ctor or Process.Start(string,string). RS0030 with the BannedSymbols file wired as AdditionalFiles."
+   },
+   {
+    "id": "CS-PROC-02",
+    "severity": "MUST",
+    "rule": "Exactly one file builds a ProcessStartInfo and calls Process.Start(ProcessStartInfo), with UseShellExecute=false, CreateNoWindow=true, an explicit WorkingDirectory and all three streams redirected."
+   },
+   {
+    "id": "CS-PROC-03",
+    "severity": "MUST",
+    "rule": "FileName is only the absolute path the resolver produced once. Order: explicit, then override, then PATH (absolute entries only, skip cwd on Windows, skip group/other-writable dirs on POSIX, exact ocx/ocx.exe, no PATHEXT), then the $OCX_HOME stable symlink. Home comes from GetFolderPath(UserProfile)."
+   },
+   {
+    "id": "CS-PROC-04",
+    "severity": "MUST",
+    "rule": "Refuse .cmd/.bat targets (case-insensitive) in the resolver and again at the seam, with no escape hatch."
+   },
+   {
+    "id": "CS-PROC-05",
+    "severity": "SHOULD",
+    "rule": "Catch only Process.Start as Win32Exception and map NativeErrorCode (2/3, 0/5/13, 8/193/216, 7/206) to one OcxLaunchException with an enum, keeping the inner exception. The message names the exe, never the argv."
+   },
+   {
+    "id": "CS-PROC-06",
+    "severity": "MUST",
+    "rule": "Inherit the environment, then scrub OCX_PROJECT/GLOBAL/QUIET/NO_VERIFY/NO_HOOK/NO_COMPLETIONS and CLICOLOR_FORCE with OrdinalIgnoreCase, then set OCX_NO_UPDATE_CHECK=1 and OCX_BINARY_PIN. Mutate only psi.Environment; never SetEnvironmentVariable or Environment.Clear."
+   },
+   {
+    "id": "CS-PROC-07",
+    "severity": "MUST",
+    "rule": "Typed argv starts with --format json --color never before the subcommand, never sends --quiet or uses OCX_LOG_LEVEL, refuses operands that start with '-', and puts -- before the child argv."
+   },
+   {
+    "id": "CS-PROC-08",
+    "severity": "MUST",
+    "rule": "Secrets travel only as stdin bytes or child env, never in ArgumentList. Records holding secrets or captured output override PrintMembers. Exceptions and logs carry the verb, not argv. One redactor covers every secret form."
+   },
+   {
+    "id": "CS-PROC-09",
+    "severity": "MUST",
+    "rule": "One BaseStream byte-pump task per output stream, started before stdin, then WaitForExitAsync(token). Ban ReadToEnd/ReadToEndAsync, Begin*ReadLine and all WaitForExit overloads (RS0030 + CA1849 + VSTHRD103)."
+   },
+   {
+    "id": "CS-PROC-10",
+    "severity": "MUST",
+    "rule": "Cap each capture (MaxOutputBytes, default 16 MiB) and discard-but-keep-reading past the cap. Stdout overflow on JSON commands fails closed; stderr keeps the head plus a flag. Passthrough output goes to a Stream sink."
+   },
+   {
+    "id": "CS-PROC-11",
+    "severity": "MUST",
+    "rule": "Set one shared UTF8Encoding(false) on all three Standard*Encoding properties. Ban Encoding.UTF8, Encoding.Default and per-chunk GetString(byte[],int,int). Decode once and parse JSON from bytes."
+   },
+   {
+    "id": "CS-PROC-12",
+    "severity": "MUST",
+    "rule": "Write stdin as exact bytes to StandardInput.BaseStream (no newline, no TextWriter) from a task started after the pumps, then flush, Close, and swallow IOException. Never StandardInput.Write*."
+   },
+   {
+    "id": "CS-PROC-13",
+    "severity": "MUST",
+    "rule": "After exit, bound the drain (DrainGrace, default 5 s). On expiry seal the captures, cancel and observe the pumps, and return DrainTimedOut=true. Do not throw and do not kill."
+   },
+   {
+    "id": "CS-PROC-14",
+    "severity": "MUST",
+    "rule": "Kill only with Kill(entireProcessTree: true) while the root is alive, with a filtered catch, then a bounded reap before returning or throwing. Never bare Kill(), CloseMainWindow, taskkill/pkill or extracted helper exes."
+   },
+   {
+    "id": "CS-PROC-15",
+    "severity": "MUST",
+    "rule": "One caller token plus a per-call linked CTS with CancelAfter, classified with catch-when(linked.IsCancellationRequested). The caller wins: OperationCanceledException(msg, e, ct). Otherwise throw OcxTimeoutException : OcxException with the redacted stderr tail."
+   },
+   {
+    "id": "CS-PROC-16",
+    "severity": "SHOULD",
+    "rule": "Validate Timeout once: InfiniteTimeSpan or (0, 24 days]. Call CancelAfter only for finite values."
+   },
+   {
+    "id": "CS-PROC-17",
+    "severity": "MUST",
+    "rule": "The SDK installs no process-wide handler: no CancelKeyPress, ProcessExit, PosixSignalRegistration or SIGCHLD/sigaction P/Invoke. Hosts cancel in-flight calls on SIGTERM."
+   },
+   {
+    "id": "CS-PROC-18",
+    "severity": "MUST",
+    "rule": "Default grace is 0 for every OS and command class: go straight to tree kill. A POSIX SIGTERM rung is opt-in per call for passthrough via one fenced LibraryImport libc kill. Windows never interrupts (no CTRL_BREAK, no CreateNewProcessGroup)."
+   },
+   {
+    "id": "CS-PROC-19",
+    "severity": "MUST",
+    "rule": "The engine returns RawResult(ExitCode, Stdout, Stderr, truncation flags, DrainTimedOut) for every exit code and never throws on exit status. The command layer parses stdout on non-zero exit only for the 17 report_then_fail modes and fails closed on unknown status."
+   },
+   {
+    "id": "CS-PROC-20",
+    "severity": "MUST",
+    "rule": "Generate exit numbers from errors.json x-ocx-enum at a pinned commit, keyed by ocx version and open (Unknown). Never use numeric literals. Branch exit_code, then kind, then detail; never message."
+   },
+   {
+    "id": "CS-PROC-21",
+    "severity": "MUST",
+    "rule": "Passthrough (exec, run, package exec, package test, launcher *) returns ChildExit(int): no mapping, no throw, no retry. SDK-caused 137/143/-1 never reach the mapper."
+   },
+   {
+    "id": "CS-PROC-22",
+    "severity": "MUST",
+    "rule": "Retry only exit 75, only for non-mutating ocx-owned commands, bounded (3 attempts, 1 s x2 cap 30 s, jitter, Task.Delay(d, ct)). Never retry passthrough, mutating commands, timeouts or cancellation."
+   },
+   {
+    "id": "CS-PROC-23",
+    "severity": "MUST",
+    "rule": ".NET 11 process APIs (Run/RunAsync, RunAndCaptureText, ReadAll*, Signal, ProcessExitStatus, KillOnParentExit, StartDetached, InheritedHandles, SafeProcessHandle.Start) appear only inside #if NET11_0_OR_GREATER and never as the default. Shipping TFMs stay net8.0;net10.0 with no RC SDK pin."
+   },
+   {
+    "id": "CS-PROC-24",
+    "severity": "SHOULD",
+    "rule": "Test every mechanism against a real dummy child on Linux and Windows legs, with the Windows encoding/stdin tests at a non-65001 console code page."
+   }
+  ],
+  "another_round": [
+   "csharp-process-macos-arm64: do CS-PROC-09/13/14/18 hold on macOS (x64+arm64), linux-arm64 and windows-arm64? Nothing ran there. Open points: pipe ReadAsync cancellation, the libc kill binding, Kill(true) tree discovery, the File.GetUnixFileMode resolver check, and the .NET 11 posix_spawn switch.",
+   "csharp-process-real-ocx: run the reference engine against a main-built ocx/ocx.exe. Check the error document on usage errors, the 17 report_then_fail modes end to end, whether Kill(true) fully reaps Windows `ocx exec` (spawn+wait, no job), and whether `ocx self update` repoints the pinned `current` symlink. So far only dummies, 0.6.5 (Linux) and 0.6.3 (Windows) were exercised.",
+   "Windows writable-PATH-dir check: is an ACL test (Users/Everyone write on a PATH hit's directory) worth adding to the resolver, given Windows has no mode bits?",
+   ".NET 11 GA re-measure (Nov 2026): RunAsync cancel semantics, KillOnParentExit platform support, and whether ReadAll* gained a size cap or held-pipe bound (would relax CS-PROC-23 for net11.0)."
+  ],
+  "conflicts_resolved": [
+   "PR-16 CliWrap vs owned engine -> owned 338-LOC engine, verified on net8/net10 Linux and Windows cp437. CliWrap breaks CS-PROC-01/03/04/10/13/18, and RS0030 cannot reach inside a dependency.",
+   "Passthrough SIGTERM grace: [C] wanted 5 s by default -> 0. Measured: a cooperative root's background child is orphaned and holds the pipe (5.5 s, orphan alive) vs 0.96 s with tree kill and no orphan.",
+   "Grandchild-held pipe: the contract/[C] said 'treat as timeout' and [S] said 'return with flag' -> return DrainTimedOut, and tree-kill only while the root is alive, because Linux cannot reach re-parented grandchildren after exit.",
+   "Stdin secret path: [L] used UTF8Encoding(false) + WriteAsync(string), [S] used raw bytes -> raw bytes to BaseStream, with the encoding still set. The string-writer form is dropped.",
+   "Python digest row 31 'honour PATHEXT' vs exact name -> exact ocx/ocx.exe, no PATHEXT (.NET ignores it, NativeErrorCode=2; batch means BatBadBut).",
+   "Python rows 15/16/18 (ReadToEndAsync or BeginOutputReadLine, CRLF normalisation, ct.Register kill) -> byte pump, no normalisation, catch-based classification matching CS-ASYNC-08.",
+   "BannedApiAnalyzers 4.14.0 vs 5.6.0 -> 5.6.0 per CS-BUILD-15.",
+   "Meziantou MA0161/162/163 vs csharp-build 'exactly two packs' -> no Meziantou. RS0030 now covers every Process.Start(string,...) overload, plus an rg check for UseShellExecute = true.",
+   "csharp-build bans Encoding.Default with the message 'use Encoding.UTF8' vs this group's Encoding.UTF8 ban -> Utf8NoBom; the build message must change.",
+   "Paren-less doc IDs (S's M:...WaitForExit, C's 'by analogy' WaitForExit(int)) -> measured to ban only the parameterless overload; explicit overload lines added.",
+   "[L]'s `rg -L` (= --follow) check for records without PrintMembers -> --files-without-match. The OcxTimeoutException base-type regex needed a possessive \\s*+.",
+   "[L]'s argv-length pre-check dropped (the typed 206/7 mapping covers it). Four launch exception types -> one OcxLaunchException + enum. NativeErrorCode 216 (non-PE/wrong-arch .exe, measured on Windows) added next to 193.",
+   "[C]'s Windows CTRL_BREAK opt-in vs the CreateNoWindow=true baseline -> no Windows interrupt in v1.",
+   "CS-ASYNC-09 (no WaitAsync as timeout) vs the engine's WaitAsync drain/reap bounds -> compatible: they bound waits after exit/kill only, and the work timeout is CancelAfter.",
+   "[C]'s open question 'OcxTimeoutException also derive TimeoutException' -> closed: single inheritance, the base is OcxException."
+  ],
+  "owner_decisions": [
+   "Confirm PR-16 (owned engine, no CliWrap) or override and accept the four rule exemptions.",
+   "Cap policy: 16 MiB per stream with stdout failing closed, vs Python's no-ceiling.",
+   "Env policy: 7-key deny-list (chosen) vs the Rust SDK's drop-all-OCX_* plus allow-list (must still pass the OCX_AUTH_* that CI exports); also whether to drop __OCX_* plumbing when the host itself runs under `ocx exec`.",
+   "Held-pipe outcome: return DrainTimedOut=true (chosen) vs the contract's 'treat as a timeout' exception.",
+   "Passthrough grace default 0 (tree kill) vs opt-in SIGTERM: trades tool cleanup for no orphans and no 5 s stall.",
+   "Approve merging the 25-line BannedSymbols fragment into the csharp-build posture, and change its Encoding.Default message from 'use Encoding.UTF8' to UTF8Encoding(false).",
+   "Host-death containment (PR-14): opt-in Windows Job Object and/or .NET 11 KillOnParentExit for long-lived exec. Neither is in v1."
+  ]
+ },
+ {
+  "path": "/home/mherwig/dev/grimoire-lore/.agents/worktrees/csharp/.agents/research/csharp-crossplatform.md",
+  "rules": [
+   {
+    "id": "CS-XP-01",
+    "severity": "MUST",
+    "rule": "Never call Path.Combine; use Path.Join for own literals and PathSafe.Combine (reject rooted/leading separator, GetFullPath, containment vs root+separator) for foreign segments; ban all five Combine overloads incl. the .NET 9 ReadOnlySpan one"
+   },
+   {
+    "id": "CS-XP-02",
+    "severity": "MUST",
+    "rule": "Compare paths with the runtime's OS rule (Ordinal, OrdinalIgnoreCase on Windows/macOS), never a culture comparer; writers refuse names differing only by case on every OS"
+   },
+   {
+    "id": "CS-XP-03",
+    "severity": "MUST",
+    "rule": "Every externally derived file/dir name passes PathSafe.IsPortableFileName (Win32 reserved chars/stems, trailing dot/space); ban GetInvalidFileNameChars"
+   },
+   {
+    "id": "CS-XP-04",
+    "severity": "MUST",
+    "rule": "Resolve ocx home as OCX_HOME, else USERPROFILE (Windows)/HOME from the env snapshot + .ocx, else GetFolderPath(UserProfile) + .ocx, else throw; never Personal/MyDocuments (supersedes CS-BIN-03)"
+   },
+   {
+    "id": "CS-XP-05",
+    "severity": "MUST",
+    "rule": "Read links via LinkTarget/ResolveLinkTarget(true); never create symlinks or junctions"
+   },
+   {
+    "id": "CS-XP-06",
+    "severity": "MUST",
+    "rule": "Never change the process cwd (ban Directory.SetCurrentDirectory); pass absolute paths and ProcessStartInfo.WorkingDirectory"
+   },
+   {
+    "id": "CS-XP-07",
+    "severity": "MUST",
+    "rule": "Boundary-crossing data is culture-free: InvariantCulture formatting/parsing, string.Create(InvariantCulture, $\"...\") for interpolation, Ordinal comparisons, ToUpperInvariant; ban InvariantCulture comparers; CA1304/1305/1307/1309/1310/1311 + MA0076 at error"
+   },
+   {
+    "id": "CS-XP-08",
+    "severity": "MUST",
+    "rule": "A UnitTests culture sweep (de-DE, fr-FR, tr-TR) asserts identical argv/parse results; no test project sets InvariantGlobalization"
+   },
+   {
+    "id": "CS-XP-09",
+    "severity": "MUST",
+    "rule": "Guard OS-specific calls with OperatingSystem.Is*() or [SupportedOSPlatformGuard] helpers; annotate P/Invoke wrappers [SupportedOSPlatform]; CA1416 error; ban Environment.OSVersion; no -windows TFM"
+   },
+   {
+    "id": "CS-XP-10",
+    "severity": "MUST",
+    "rule": "Platform identity comes only from OperatingSystem.Is*() + RuntimeInformation.OSArchitecture into a pure table-tested triple function; Linux defaults to musl with no libc probe; ban Is64Bit*, ProcessArchitecture, RuntimeIdentifier"
+   },
+   {
+    "id": "CS-XP-11",
+    "severity": "MUST",
+    "rule": "Every clock, delay and timeout in src takes the injected TimeProvider (Task.Delay(TimeSpan,TimeProvider,ct), new CancellationTokenSource(TimeSpan,TimeProvider)); ban DateTime/DateTimeOffset.Now/UtcNow, Task.Delay w/o provider, CTS(TimeSpan), CancelAfter, Thread.Sleep in src; FakeTimeProvider tests advance in a bounded loop"
+   },
+   {
+    "id": "CS-XP-12",
+    "severity": "SHOULD",
+    "rule": "Split child text with StringReader.ReadLine, never Split(Environment.NewLine/'\\n'/\"\\r\\n\")"
+   },
+   {
+    "id": "CS-TEST-01",
+    "severity": "MUST",
+    "rule": "Test side is exactly Ocx.Sdk.UnitTests, Ocx.Sdk.FakeCliTests, Ocx.Sdk.ContractTests plus the non-test exe tests/Ocx.Fake, TFMs inherited from Directory.Build.props"
+   },
+   {
+    "id": "CS-TEST-02",
+    "severity": "MUST",
+    "rule": "Ocx.Fake has one argv verb per hazard (exit, cat, flood-stderr, sleep, grandchild-wait, hold-pipe, ignore-sigterm, emit, echo-stdin), a self-exit watchdog and self-relaunch; FakeCliTests use no mocks or fake runners"
+   },
+   {
+    "id": "CS-TEST-03",
+    "severity": "MUST",
+    "rule": "Reference the dummy with a plain ProjectReference, locate it via Path.Join(AppContext.BaseDirectory, ...), launch as <dotnet> exec <dll> with host from DOTNET_HOST_PATH then the runtime dir; apphost only for resolution tests; never a file-based app"
+   },
+   {
+    "id": "CS-TEST-04",
+    "severity": "MUST",
+    "rule": "FakeCliTests carry E1/E3/E7, stdin-bytes and output-cap tests with own WaitAsync deadlines and finally cleanup, run on every PR leg; POSIX-only cases use Assert.SkipWhen with a reason, never a bare return"
+   },
+   {
+    "id": "CS-TEST-05",
+    "severity": "MUST",
+    "rule": "xUnit v3 on MTP only (xunit.v3.mtp-v2 4.0.2, UseMicrosoftTestingPlatformRunner, global.json test.runner); no Microsoft.NET.Test.Sdk/xunit v2/SkippableFact; no --logger/--collect/--blame*; xUnit1051 error"
+   },
+   {
+    "id": "CS-TEST-06",
+    "severity": "MUST",
+    "rule": "No run passes with zero tests: bake --minimum-expected-tests 1 into TestingPlatformCommandLineArguments (unconditional for Unit/FakeCli, CI-conditional for Contract); never ignore exit 8/9; filters are FQN or wildcard"
+   },
+   {
+    "id": "CS-TEST-07",
+    "severity": "MUST",
+    "rule": "Contract tier armed by OCX_SDK_CONTRACT=1 via SkipUnless public static bool with a reason; armed-but-missing throws; TestedOcxVersion constant mirrored in setup-ocx with drift test; hermetic env; asserts version-keyed exit rows, real output parsing, real mechanics; nightly latest canary"
+   },
+   {
+    "id": "CS-TEST-08",
+    "severity": "SHOULD",
+    "rule": "UnitTests test pure functions and retry via a delegate; declare no IProcessRunner interface, public or internal"
+   },
+   {
+    "id": "CS-CI-01",
+    "severity": "MUST",
+    "rule": "Every PR runs all three tiers (contract armed) on ubuntu-24.04, ubuntu-24.04-arm, windows-2025 (net8.0+net10.0) and windows-11-arm, macos-26 (net10.0), plus a musl FakeCliTests step on both Linux legs"
+   },
+   {
+    "id": "CS-CI-02",
+    "severity": "MUST",
+    "rule": "Versioned runner labels only (-latest only in a non-blocking canary); no macos-11..14, ubuntu-18/20/22.04, windows-2019; actionlint >=1.7.12 with actionlint.yaml declaring new GA labels"
+   },
+   {
+    "id": "CS-CI-03",
+    "severity": "MUST",
+    "rule": "fail-fast: false on every matrix, timeout-minutes on every job, exactly one required check ci-ok (if: always(), needs: [test], result == success)"
+   },
+   {
+    "id": "CS-CI-04",
+    "severity": "MUST",
+    "rule": "Each leg proves identity: EXPECTED_TRIPLE test (fails when unset), runtime major == TFM test with #error fallback; install 8.0 runtime via setup-dotnet; never DOTNET_ROLL_FORWARD/RollForward"
+   },
+   {
+    "id": "CS-CI-05",
+    "severity": "MUST",
+    "rule": "Run musl as a docker run step with the exact global.json SDK Alpine tag as the runner uid, never a container: job; Docker-dependent tests on Ubuntu legs only"
+   },
+   {
+    "id": "CS-CI-06",
+    "severity": "SHOULD",
+    "rule": "Nightly lane (never in ci-ok needs) for macos-26-intel, net8.0 on macOS/win-arm, ubuntu-26.04, -latest canary, OCX_TEST_VERSIONS=latest, .NET 11 RC"
+   },
+   {
+    "id": "CS-CI-07",
+    "severity": "MUST",
+    "rule": "Every workflow change passes check-ci-matrix.sh (R1-R12: legs, fail-fast, retired labels, roll-forward, EXPECTED_TRIPLE, permissions, SHA pins, always() gate, no VSTest/ignored exit codes, armed contract, exact Alpine tag, no NuGet cache) and actionlint"
+   }
+  ],
+  "conflicts_resolved": [
+   "Home directory: csharp-packaging CS-BIN-03 (GetFolderPath-only) vs paths-culture rule 9 (env first) -> env first (CS-XP-04); watched CS-BIN-03 return cwd-relative '.ocx' when HOME points at a missing dir (V4)",
+   "musl detection: ci-matrix rule 9 (probe /lib/ld-musl) vs CS-BIN-05 (musl default, never probe) -> musl default; installed ocx is static-pie musl running on glibc, so the probe is dead code; EXPECTED_TRIPLE on Linux legs is the musl triple",
+   "NuGet cache: ci-matrix rule 16 (actions/cache keyed on lock file) vs CS-BUILD-25/27 (no lock file, restore into empty folder) -> no cache; enforced as check-ci-matrix.sh R12",
+   "Runner: ci-matrix fixture on VSTest with --blame-hang-timeout vs harness MTP -> MTP everywhere; --blame-hang-timeout exits 5 under MTP (V5), so ci-matrix's musl step and test loop are rewritten",
+   "RS0030 default severity: harness said error by default, paths-culture said warning -> warning on both 4.14.0 and 5.6.0 (V3); harness had TreatWarningsAsErrors; explicit severity line required",
+   "BannedApiAnalyzers version 4.14.0 (harness) vs 5.6.0 (paths-culture, csharp-build) -> 5.6.0",
+   "Timers: CS-PROC-15 CancelAfter and CS-PROC-22 Task.Delay(d, ct) vs harness rule 13 TimeProvider everywhere -> TimeProvider; banned in src via BannedSymbols.Time.txt, replacement new CancellationTokenSource(TimeSpan, TimeProvider) builds on net8.0",
+   "Bounded drain: harness pumps.WaitAsync(grace) vs CS-ASYNC-09/CS-PROC-13 (cancel the work) -> cancel the pump token via a TimeProvider CTS; WaitAsync only for test deadlines",
+   "Zero-test gate: harness baked unconditional minimum makes local unarmed contract runs exit 9 -> CI-conditional for ContractTests (local 0, CI unarmed 9, armed 0; V5)",
+   "Contract tier placement: Python ubuntu-only, harness 'at least Linux + Windows' -> all five PR legs (S5/S6 is the failure this group prevents)",
+   "Culture evidence: paths-culture rule 18 (a LANG=de_DE CI leg) -> a deterministic culture-sweep unit test; runner locales are en-US",
+   "AnalysisModeGlobalization (paths-culture) vs csharp-build AnalysisLevel 10.0-all -> redundant under 10.0-all+TWAE (V3 shows CA1304/1305/1310/1311 errors), keep explicit per-rule lines",
+   "Meziantou: csharp-build's 'exactly two packs' vs paths-culture MA0076 -> Meziantou already admitted by csharp-api with MeziantouAnalysisMode=None; MA0076 fires in None mode (V1)",
+   "Path.Combine ban gap: string[] ban misses .NET 9+ params ReadOnlySpan overload on net10 (V2) -> span line added",
+   "Runner seam: harness internal IProcessRunner vs CS-API-02 and the harness's own delegate-based retry -> no interface (CS-TEST-08)",
+   "CS-PROC-24 'Linux and Windows leg' -> every PR leg (CS-TEST-04)",
+   "paths-culture rule 25 cited retired macos-13 -> macos-26 PR, macos-26-intel nightly"
+  ],
+  "another_round": [
+   "csharp-crossplatform-native-arm-macos: dispatch a verification workflow on macos-26, windows-11-arm, ubuntu-24.04-arm to confirm E1/E3/E7 and Kill(entireProcessTree:true), APFS case-insensitivity and /var->/private/var temp-path equality, RuntimeInformation.OSArchitecture under Rosetta and for x64 processes on Windows ARM, ocx-sh/setup-ocx support on the arm legs, and real per-leg minutes"
+  ],
+  "owner_decisions": [
+   "Keep or drop the net8.0 floor: .NET 8 reaches end of support 2026-11-10 and no ocx release has the machine contract yet (same question as csharp-build Verdict 1)",
+   "Repository visibility: in a private repo macos-26 is about 60% of PR cost; this program keeps the macOS PR leg either way",
+   "Configure branch protection on main with ci-ok as the sole required check",
+   "Contract-tier pin: TestedOcxVersion = 0.6.5 now (exit table keyed to 0.6.5) or wait for the first ocx release that carries contract"
+  ]
+ }
+]

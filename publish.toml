@@ -437,3 +437,46 @@ description = { readme = "docs/swift-release.md", logo = "assets/lore-swift.svg"
 [bundles.swift-essentials]
 version = "0.1.0"
 description = { readme = "docs/swift-essentials.md", logo = "assets/lore-swift.svg" }
+
+# The .NET set: two rules split by which file is under edit, not by language
+# family. `csharp-quality` loads on `**/*.cs`, `**/*.csx` and `**/*.cake` and
+# routes to twelve depth files by task: processes, binaries, async, API design,
+# errors, JSON, platform and paths, testing and CI, the language era, security,
+# observability and performance. `dotnet-build` loads on 22 globs, defined only
+# in its frontmatter: `**/*.csproj`, `**/*.props`, `**/*.targets`, `**/*.proj`,
+# `**/*.slnx`, `**/*.sln`, `**/global.json`, `nuget.config` in all three
+# spellings, `**/.globalconfig`, `**/*.globalconfig`, `**/BannedSymbols*.txt`,
+# `**/PublicAPI*.txt`, `**/PublicAPI/**/*.txt`, `**/packages.lock.json`,
+# `**/dotnet-tools.json`, `.github/**/*.y*ml` and the `**/*.ps1`, `**/*.sh`,
+# `**/*.cmd` and `**/[Bb]uild.*` scripts, the build, analyzer, package and CI
+# files whose weakening no compiler reports, and routes to one depth file,
+# packaging. `.editorconfig` is never globbed: it is not .NET-specific, so a
+# glob would load a .NET rule in every repo that carries one, and a `*.cs` edit
+# loads `csharp-quality`, whose CS-CORE-01 routes `.editorconfig` edits to
+# `dotnet-build`. Dockerfiles, `*.fsproj`, `*.vbproj`, `*.ruleset` and
+# `*.nuspec` are never globbed. The three skills are procedures run once per
+# upgrade, per incident or per release. The bundle also carries `code-docs` and
+# `code-docs-cleanup`, which are shared by every language set.
+[rules.csharp-quality]
+version = "0.1.0"
+description = { readme = "docs/csharp-quality.md", logo = "assets/lore-dotnet.svg" }
+
+[rules.dotnet-build]
+version = "0.1.0"
+description = { readme = "docs/dotnet-build.md", logo = "assets/lore-dotnet.svg" }
+
+[skills.dotnet-upgrade]
+version = "0.1.0"
+description = { readme = "docs/dotnet-upgrade.md", logo = "assets/lore-dotnet.svg" }
+
+[skills.dotnet-diagnose]
+version = "0.1.0"
+description = { readme = "docs/dotnet-diagnose.md", logo = "assets/lore-dotnet.svg" }
+
+[skills.dotnet-release]
+version = "0.1.0"
+description = { readme = "docs/dotnet-release.md", logo = "assets/lore-dotnet.svg" }
+
+[bundles.dotnet-essentials]
+version = "0.1.0"
+description = { readme = "docs/dotnet-essentials.md", logo = "assets/lore-dotnet.svg" }

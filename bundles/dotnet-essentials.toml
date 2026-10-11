@@ -1,0 +1,29 @@
+summary = "The OCX .NET set: C# source standards, the build, analyzer and package-file rule, and the upgrade, diagnosis and release procedures"
+keywords = "dotnet,csharp,msbuild,nuget,quality,review,standards,nullable,async,cancellation,subprocess,json,system-text-json,api-design,exceptions,xunit,ci,cross-platform,security,logging,telemetry,performance,analyzers,globalconfig,bannedsymbols,central-package-management,global-json,tfm,pack,nupkg,trusted-publishing,release,upgrade,diagnose"
+description = "Everything an agent needs to write, gate, ship and debug .NET 10 and .NET 8 code the way the OCX family does: the csharp-quality rule (the gate block, the non-negotiables and twelve depth files on processes, binaries, async, API design, errors, JSON, platform and paths, testing and CI, the language era, security, observability and performance), the dotnet-build rule (SDK pin, central package management, the warnings-as-errors posture, the analyzer packs with their banned-symbol and severity files, restore hygiene and pack properties, and the workflows and build scripts that run them), plus the dotnet-upgrade skill that moves a solution from net8.0 to net10.0, the dotnet-diagnose skill for a failing restore, build, analyzer, trim, test or hang, and the dotnet-release skill that cuts a NuGet library or an application release. The code-docs rule and the code-docs-cleanup skill cover comments in every language: short blocks that keep every guard."
+license = "Apache-2.0"
+repository = "https://github.com/ocx-sh/grimoire-lore"
+
+# Members are same-directory relative: this catalog publishes flat under
+# ghcr.io/ocx-sh/lore/<name>, so `./csharp-quality` resolves against wherever
+# the bundle itself was pulled from — a mirror keeps working.
+#
+# MEMBERS CARRY NO TAG. Not a digest, not an exact version, not a floating
+# major, not `latest` — `latest` is a tag like any other and naming it is still
+# a pin. A bundle is a *set*, not a snapshot: its job is to say "these belong
+# together", and the consumer's own `grimoire.lock` is what freezes them.
+#
+# Do not pass --pin when releasing this bundle.
+
+[rules]
+csharp-quality = "./csharp-quality"
+dotnet-build = "./dotnet-build"
+# code-docs globs every source extension, this set's included, and
+# code-docs-cleanup is its procedure, so both ride in this bundle.
+code-docs = "./code-docs"
+
+[skills]
+dotnet-upgrade = "./dotnet-upgrade"
+dotnet-diagnose = "./dotnet-diagnose"
+dotnet-release = "./dotnet-release"
+code-docs-cleanup = "./code-docs-cleanup"

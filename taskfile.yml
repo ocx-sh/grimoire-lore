@@ -174,6 +174,25 @@ tasks:
           {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' rules/swift-quality.md rules/swift-package.md skills/swift-upgrade skills/swift-diagnose skills/swift-release
         fi
       #
+      # The .NET set follows the Swift reasoning: the fleet holds no .NET tree,
+      # so glob liveness needs an outside one. It was grounded on an upstream
+      # exemplar corpus (see `.agents/research/csharp-frame.md`); microsoft/testfx
+      # carries every glob of the 25 across both rules but four. The allow-absent
+      # names are correct globs that tree lacks but other exemplars carry
+      # (`nuget.config` in DapperLib, coverlet and FluentValidation;
+      # `NuGet.Config` in BenchmarkDotNet, xunit and StackExchange.Redis;
+      # `*.cake` in cake-build), `*.csx`, the C# script extension, which no
+      # corpus tree carries, and the depth files' never-matching on-demand
+      # globs. Set CSHARP_CONSUMER to a .NET checkout with a `global.json` to
+      # also check glob liveness.
+      - |
+        if [ -n "{{.CSHARP_CONSUMER}}" ] && [ -f "{{.CSHARP_CONSUMER}}/global.json" ]; then
+          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --root {{.CSHARP_CONSUMER}} --forbid '/home/mherwig' --forbid '.agents/research' --allow-absent '**/nuget.config' --allow-absent '**/NuGet.Config' --allow-absent '**/*.csx' --allow-absent '**/*.cake' --allow-absent '**/.csharp-quality-depth-on-demand' --allow-absent '**/.dotnet-build-depth-on-demand' rules/csharp-quality.md rules/dotnet-build.md skills/dotnet-upgrade skills/dotnet-diagnose skills/dotnet-release
+        else
+          echo "note: CSHARP_CONSUMER unset — glob liveness NOT checked for dotnet; set it to a .NET checkout to include it"
+          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' rules/csharp-quality.md rules/dotnet-build.md skills/dotnet-upgrade skills/dotnet-diagnose skills/dotnet-release
+        fi
+      #
       # Every checks/*.py script carries its own fixtures and its own
       # --self-test mode. Run all eight here, so a broken check is caught next
       # to the artifact validation above, not only the first time a real page
@@ -247,6 +266,8 @@ tasks:
       NIX_CONSUMER: '{{.NIX_CONSUMER | default ""}}'
       # No default: the fleet has no SwiftPM package to point at.
       SWIFT_CONSUMER: '{{.SWIFT_CONSUMER | default ""}}'
+      # No default: the fleet has no .NET tree to point at.
+      CSHARP_CONSUMER: '{{.CSHARP_CONSUMER | default ""}}'
 
   build:
     desc: Build every publishable artifact without pushing anything

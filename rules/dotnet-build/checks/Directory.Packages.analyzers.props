@@ -1,0 +1,36 @@
+<Project>
+  <!--
+    Directory.Packages.analyzers.props: the analyzer packs and MinVer as GlobalPackageReference, exact versions (CS-BUILD-15, CS-SEC-10).
+    Install: import it from the root Directory.Packages.props (<Import Project="Directory.Packages.analyzers.props" />) or paste the
+    ItemGroup there. ManagePackageVersionsCentrally stays true in the root file; a Version= on a PackageReference is NU1008 under it.
+    A GlobalPackageReference never reaches the nuspec of a packed project (measured 2026-10-11, SDK 10.0.401).
+    Never add StyleCop.Analyzers, Roslynator or Microsoft.CodeAnalysis.NetAnalyzers (CS-BUILD-15).
+    PublicApiAnalyzers is conditional on IsPackable: without PublicAPI.Shipped.txt it still reports RS0016 and RS0037 for every public member
+    (12 RS0016 and 8 RS0037 on a project with no API files, measured 2026-10-11, SDK 10.0.401), so set <IsPackable>false</IsPackable> on every
+    project that is not shipped (tests, samples, canaries) and commit both API files in every packable one (CS-API-11).
+    Versions read 2026-10-11; a bump is its own commit that lists the new rule IDs (CS-BUILD-10).
+    Adopting this in an existing repository: delete every PackageReference to MinVer or to one of these five packs first (a second
+    declaration is NU1504); expect thousands of diagnostics on a mature tree (6,062 on a serializer library, 2,910 on an application,
+    measured 2026-10-11), so adopt one project at a time and seed PublicAPI.Shipped.txt from the current surface with the PublicApiAnalyzers
+    code fix instead of clearing RS0016 by hand. Nullable=enable is a migration of its own (csharp-quality Conventions, Nullable), not part
+    of this adoption. Console (CS-OBS-16), CA2007 and CA1515 are library rules: an application project drops them from its path section
+    of .editorconfig with a reason line, never with NoWarn (CS-CORE-01).
+    Three rules are breaking on an API that already shipped: MA0053 (seal the class), RS0026 (no new overloads with optional parameters) and
+    VSTHRD200 (the Async suffix renames a public method); on a mature library they count in the hundreds (150 MA0053 on one, 31 RS0026 on
+    another, measured 2026-10-11). Fix them on every type and member new since the last release; for one already published, opt out at the
+    site, never in the severity: [SuppressMessage("Design", "MA0053", Justification = "Published in 2.1.0; sealing breaks consumers (CS-API-09).")]
+    on the type (the same attribute with RS0026 or VSTHRD200 on the member), one line per symbol, so the debt is countable and a new
+    symbol cannot inherit it. The justification names the release that shipped the symbol.
+  -->
+  <PropertyGroup>
+    <MeziantouAnalysisMode>None</MeziantouAnalysisMode>
+  </PropertyGroup>
+  <ItemGroup>
+    <GlobalPackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="5.6.0" />
+    <GlobalPackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="5.6.0" Condition="'$(IsPackable)' == 'true'" />
+    <GlobalPackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="18.7.23" />
+    <GlobalPackageReference Include="IDisposableAnalyzers" Version="4.0.8" />
+    <GlobalPackageReference Include="Meziantou.Analyzer" Version="3.0.297" />
+    <GlobalPackageReference Include="MinVer" Version="8.0.0" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,59 @@
+# analyzers.editorconfig: the lines an adopter appends to the root .editorconfig (CS-CORE-01 covers edits to that file).
+# Only IDE rules, editorconfig options and path-scoped differences live here; every CA, RS, MA and VSTHRD severity that is the
+# same for src and tests lives in analyzers.globalconfig (CS-BUILD-11). Do not glob .editorconfig: it is not .NET specific.
+# Each dotnet_diagnostic line ends with `# <rule ID>`; each option line has its rule ID in the comment above it.
+# The generated_code sections are last on purpose (CS-LANG-24, CS-BUILD-14): the root .editorconfig ends with them.
+# Watched in a src project and a tests project, net8.0 and net10.0 (measured 2026-10-11, SDK 10.0.401); the test section and the
+# committed-generator-output section watched on src/Foo.Tests, src/Foo.UnitTests, UnitTests, Tests and *.generated.cs files.
+
+[*.cs]
+dotnet_diagnostic.IDE0005.severity = warning # CS-BUILD-14
+dotnet_diagnostic.IDE0055.severity = warning # CS-BUILD-14
+dotnet_diagnostic.IDE0161.severity = warning # CS-BUILD-14
+dotnet_diagnostic.IDE0370.severity = error # CS-LANG-03
+dotnet_diagnostic.IDE0010.severity = warning # CS-LANG-22
+dotnet_diagnostic.IDE0072.severity = warning # CS-LANG-22
+# CS-LANG-21
+dotnet_style_prefer_collection_expression = when_types_exactly_match
+
+# Library code configures every await; CS-ASYNC-06. Tests, samples and apps carry no ConfigureAwait.
+[src/**.cs]
+dotnet_diagnostic.CA2007.severity = error # CS-ASYNC-06
+dotnet_diagnostic.MA0004.severity = error # CS-ASYNC-06
+
+# CS-TEST-12: the one test-project relaxation, exactly these eight IDs and nothing else. The brace pattern is
+# .editorconfig section syntax, not a rule glob; it must match every test directory the repository has, so add the
+# repository's own test directory names (src/Foo.Tests is matched by **/*Tests*). There is no second .globalconfig for tests (CS-BUILD-17).
+[{test,tests,Test,Tests,samples,UnitTests,**/*Tests*,**/*Test}/**.cs]
+dotnet_diagnostic.CA2007.severity = none # CS-TEST-12
+dotnet_diagnostic.VSTHRD200.severity = none # CS-TEST-12
+dotnet_diagnostic.CA1707.severity = none # CS-TEST-12
+dotnet_diagnostic.CS1591.severity = none # CS-TEST-12
+dotnet_diagnostic.CA1062.severity = none # CS-TEST-12
+dotnet_diagnostic.CA1848.severity = none # CS-TEST-12
+dotnet_diagnostic.CA1873.severity = none # CS-TEST-12
+dotnet_diagnostic.CA1515.severity = none # CS-TEST-12
+
+# CS-LANG-24: the explicit key beats every header and name heuristic; never use a [*.g.cs] section for it.
+[*.cs]
+generated_code = false
+[**/obj/**.cs]
+generated_code = true
+
+# CS-LANG-24: committed generator output (*.generated.cs, *.Designer.cs) is generated code. A hand-written file never carries
+# these names (CS-LANG-23), so this section only ever covers files a tool wrote.
+[**/*.{Designer,designer,generated,Generated}.cs]
+generated_code = true
+
+# CS-BUILD-14: vendored code the repository does not own (copied-in sources such as JetBrains.Annotations.cs) is generated code, so
+# analyzers skip it (848 of 1,056 diagnostics on one library came from one vendored file). Add the repository's own vendor directory
+# names to both brace lists: a pattern that starts with **/ needs a parent directory, so the second section covers the repository root.
+# Code the team edits never goes under these names.
+[**/{ThirdParty,third_party,Third-Party,vendor,Vendor,vendored,External,external}/**.cs]
+generated_code = true
+[{ThirdParty,third_party,Third-Party,vendor,Vendor,vendored,External,external}/**.cs]
+generated_code = true
+
+# CS-LANG-24: MSBuild-written assembly attribute files that land outside obj/ (a generator that writes beside the project).
+[*_AssemblyInfo.cs]
+generated_code = true
