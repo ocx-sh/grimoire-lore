@@ -1,11 +1,12 @@
 # The Rust branch
 
 Read this when the pilot is Rust. It holds the ruleset and toolchain pins, the
-crate_universe lock gate and why it is the inverse of Bzlmod's, the
+crate_universe lock gate and why it is the inverse of Bzlmod's, the rules_rs,
 `crates_vendor` and prost sub-branches, and the first three rules to satisfy.
 
 Contents: [At a glance](#at-a-glance) · [Toolchain pin](#toolchain-pin) ·
 [The lock gate](#the-lock-gate) · [Repinning](#repinning) ·
+[Sub-branch: rules_rs](#sub-branch-rules_rs) ·
 [Sub-branch: crates_vendor](#sub-branch-crates_vendor) ·
 [Sub-branch: prost and tonic](#sub-branch-prost-and-tonic) ·
 [Generation](#generation) · [Build scripts](#build-scripts) ·
@@ -18,8 +19,9 @@ Contents: [At a glance](#at-a-glance) · [Toolchain pin](#toolchain-pin) ·
 |---|---|
 | Ruleset | `rules_rust` **0.74.0** (2026-09-06). Pre-1.0, so staleness is judged on the **second** component: `0.73 → 0.74` is a major bump (BZL-FLAG-29) |
 | Bazel floor | CI-tested at 7.4.1 exactly; the released module declares no `bazel_compatibility`, which reads as "undocumented", never "no floor" (BZL-FLAG-27) |
-| Toolchain pin | `rust.toolchain(versions = [...], edition = "…")`, explicit, in the root module |
-| Lock mechanism | `crate_universe` with an explicit `lockfile =`; the Bazel-side lock is generated, `Cargo.toml` stays authoritative |
+| Resolver | `crate_universe` (the sections below) **or** `rules_rs` **0.1.3**, which reads `Cargo.lock` itself — no generated lock, no repin, no `CARGO_BAZEL_*`. Choose first: [Sub-branch: rules_rs](#sub-branch-rules_rs) |
+| Toolchain pin | `rust.toolchain(versions = [...], edition = "…")` (`toolchains.toolchain(version = …)` under rules_rs), explicit, in the root module |
+| Lock mechanism | `crate_universe` with an explicit `lockfile =`; the Bazel-side lock is generated, `Cargo.toml` stays authoritative. Under rules_rs only `MODULE.bazel.lock` |
 | Freshness gate | Runs on **every ordinary build**; what must be absent is an environment variable |
 | Generator | `gazelle_rust` **0.1.0**, single maintainer, one tag — experimental. Coarse hand-written BUILD files are the default |
 | Platform note | The ruleset's own docs disclaim reliable Windows support in the maintainers' words; treat any Windows leg as measured-or-nothing |
@@ -30,10 +32,11 @@ Call `rust.toolchain(versions = [...], edition = "…")` explicitly and pin ever
 entry. The tag class's default is hermetic but **not pinned**, and it moves: the
 default Rust version changed in four of five consecutive ruleset releases. Give a
 `beta` or `nightly` entry its ISO date, and drop the channel you do not select
-(BZL-RUST-31).
+(BZL-RUST-31). Under rules_rs the call is `toolchains.toolchain(version = …, edition = …)`
+and omitting it is just as silent.
 
 ```sh
-grep -n -e 'rust.toolchain(' -- MODULE.bazel
+grep -n -e 'rust.toolchain(' -e 'toolchains.toolchain(' -- MODULE.bazel
 ```
 
 **Empty output on a repository that uses the `rust` extension is the finding** —
@@ -119,6 +122,47 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflow
 **Empty output = every ordinary lane is a drift gate = pass.** A hit outside a
 dedicated repin or private-registry job is the finding.
 
+## Sub-branch: rules_rs
+
+This is the one fork in the Rust branch, so choose before the first `MODULE.bazel`
+line. `rules_rs` (hermeticbuild; pre-1.0, roughly weekly releases) resolves crates
+from `Cargo.lock` inside Bazel, bundles its own fork of rules_rust and pairs with
+the `llvm` module's hermetic C and C++ toolchain. Take it for no generated
+lockfile or repin, no host `gcc` or `libstdc++` as an input, or every platform
+cross-built from one Linux host. Stay on crate_universe when another module
+consumes your crates by path — rules_rs
+[#181](https://github.com/hermeticbuild/rules_rs/issues/181) and
+[#273](https://github.com/hermeticbuild/rules_rs/issues/273) were open when this
+was measured — or when the official `bazelbuild/rules_rust` ruleset is required.
+The rows below come from one repository's migration (2026-10-21), not a survey.
+
+Under rules_rs the lock gate and the repin sections above are N/A:
+
+- `crate.from_cargo(cargo_lock = …, cargo_toml = …, platform_triples = […])` from
+  `@rules_rs//rs:extensions.bzl`. Pin `rules_rs` and `llvm` exactly and bump them
+  together. The only lockfile is `MODULE.bazel.lock`, gated by one
+  `--lockfile_mode=error` leg; no `CARGO_BAZEL_*`, no `lockfile =`, no repin job
+  (BZL-RUST-37).
+- Register `@llvm//toolchain:all` beside the Rust toolchains, and confirm the Linux
+  binary's `NEEDED` entries name no `libstdc++` (BZL-RUST-38).
+- Cross-build with `-c opt --platforms=@rules_rs//rs/platforms:<triple>`: a
+  fastbuild Windows binary overflows its 1 MiB main-thread stack at startup.
+  macOS needs an `osx.frameworks` tag that restates the llvm defaults before adding
+  its own. A `gnullvm` Windows leg is not the MSVC artefact a release ships
+  (BZL-RUST-39).
+- `all_crate_deps` already returns workspace path dependencies; a hand-written
+  duplicate fails analysis (BZL-RUST-18).
+- A doctest gates on its target's exit status. Never patch
+  `--discard-stdout-on-success` out of the action to count doctests (BZL-RUST-40).
+
+```sh
+git ls-files -z --cached --others --exclude-standard -- 'MODULE.bazel' | xargs -0 -r grep -H -n -e '@rules_rs//' -e '@llvm//' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob).bazelrc*' ':(glob)**/*.yml' | xargs -0 -r grep -H -n -e 'CARGO_BAZEL' --
+```
+
+**A `CARGO_BAZEL` hit in a module that names `@rules_rs//` is the finding**; empty
+output is the pass.
+
 ## Sub-branch: crates_vendor
 
 Default to `crate.from_cargo` for a repository nothing else builds against.
@@ -171,9 +215,10 @@ is a personal backlog issue. **Coarse, hand-maintained BUILD files at directory
 level are the correct default for Rust** (BZL-ARCH-11).
 
 Independently of the generator, every internal edge between first-party workspace
-crates is a hand-written `deps = ["//crates/<name>"]` entry. crate_universe filters
-every workspace-member node out before rendering, so there is no code path that
-could wire it (BZL-RUST-18). This is the migration's largest hand-authored surface
+crates is a hand-written `deps = ["//crates/<name>"]` entry under crate_universe,
+which filters every workspace-member node out before rendering, so there is no code
+path that could wire it. Under rules_rs `all_crate_deps` already returns them and a
+hand-written duplicate fails analysis (BZL-RUST-18). This is the migration's largest hand-authored surface
 and the number to estimate before committing to a date.
 
 If the generator is adopted anyway, four things bind:
@@ -222,7 +267,8 @@ an explicit target for each, and a missing one is a silent green.
   certifying migration parity, diff test names, not counts** (BZL-RUST-27).
 - Doc tests are the one Cargo test kind Bazel never auto-generates under any
   mechanism: every crate with runnable fenced blocks in doc comments needs an
-  explicit `rust_doc_test(crate = …)` (BZL-RUST-28).
+  explicit `rust_doc_test(crate = …)` (BZL-RUST-28). Under rules_rs a passing target
+  proves only its exit status (BZL-RUST-40).
 - A test-suite macro whose `srcs` glob matches nothing yields a target that
   exists, is empty, and passes green with zero tests run (BZL-RUST-30).
 - Every fixture a test reads at run time goes in `data`, never `compile_data` and
@@ -243,6 +289,9 @@ repository has a working build and no working IDE (BZL-RUST-20).
 Satisfy these before the pilot's first green build; everything else follows.
 
 1. **BZL-RUST-01** — an explicit `lockfile =` on every crate_universe instance.
+   Under rules_rs it is **BZL-RUST-37** instead: no `CARGO_BAZEL_*`, and
+   `--lockfile_mode=error` is the gate.
 2. **BZL-RUST-31** — `rust.toolchain(versions = [...], edition = …)` pinned
-   explicitly in the root module.
-3. **BZL-RUST-18** — every first-party internal edge hand-written in `deps`.
+   explicitly in the root module (`toolchains.toolchain(version = …)` under rules_rs).
+3. **BZL-RUST-18** — every first-party internal edge declared exactly once in
+   `deps`: by hand under crate_universe, by `all_crate_deps` under rules_rs.

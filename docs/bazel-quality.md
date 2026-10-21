@@ -49,7 +49,7 @@ the rules:
 ## What is in it
 
 The index carries the gate, nineteen non-negotiables, and three
-cross-cutting rules it owns outright. 390 further rules live in fifteen
+cross-cutting rules it owns outright. 394 further rules live in fifteen
 depth files — eight by concern (Starlark and BUILD shape, Bzlmod and
 repository rules, hermeticity, caching and remote execution, testing, CI and
 target selection, architecture, flags and versions) and seven by language

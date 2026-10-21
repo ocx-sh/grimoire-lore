@@ -17,7 +17,7 @@ paths:
   - "**/*.star"
   - "**/*.scl"
 summary: The Bazel quality index — the gate, the non-negotiables, and where the depth lives
-keywords: bazel,starlark,bzlmod,module-extension,repository-rule,lockfile,remote-cache,remote-execution,rbe,disk-cache,hermeticity,sandbox,determinism,buildifier,gazelle,rules_go,go_deps,nogo,x_defs,rules_swift,swift_library,swift_binary,swift_test,swift.toolchain,rules_swift_package_manager,bazel-diff,target-determinator,rules_rust,rules_python,rules_js,rules_ts,rules_cc,protobuf,monorepo,ci,bazelrc,bazelisk
+keywords: bazel,starlark,bzlmod,module-extension,repository-rule,lockfile,remote-cache,remote-execution,rbe,disk-cache,hermeticity,sandbox,determinism,buildifier,gazelle,rules_go,go_deps,nogo,x_defs,rules_swift,swift_library,swift_binary,swift_test,swift.toolchain,rules_swift_package_manager,bazel-diff,target-determinator,rules_rust,rules_rs,rules_python,rules_js,rules_ts,rules_cc,protobuf,monorepo,ci,bazelrc,bazelisk
 license: Apache-2.0
 repository: https://github.com/ocx-sh/grimoire-lore
 ---
@@ -95,7 +95,7 @@ rationale and verification.
 | 12 | Never set `default_visibility = ["//visibility:public"]` outside the package that is the module's API surface, and key every `config_setting` on `constraint_values`, never on `values = {"cpu": ...}` alone. | BZL-ARCH-04, BZL-MOD-34, BZL-ARCH-16, BZL-ARCH-35 |
 | 13 | The default pipeline is whole-repo `bazel test //...`; adopt a target-selection tool only after that job's median wall-clock is measured past roughly forty minutes, and list every legacy, worktree or parallel-checkout directory in `.bazelignore` — Bazel does not read `.gitignore`. | BZL-CI-01, BZL-CI-02, BZL-ARCH-26 |
 | 14 | Never key CI retry logic on exit code 39 and never claim a cache outage fails a cache-only build — both were measured false on 8.7.0 and 9.2.0; match the log's error text instead. | BZL-CACHE-12, BZL-CACHE-26 |
-| 15 | Rust: an explicit `lockfile =` on every crate-universe instance in every module, `rust.toolchain(versions = [...])` pinned in the root module, and repins through `CARGO_BAZEL_REPIN=1 bazel fetch --repo=@<repo>` — `bazel sync` was deleted at 9.0.0 and the ruleset's docs still print it. | BZL-RUST-01, BZL-RUST-31, BZL-RUST-03 |
+| 15 | Rust: pin the toolchain in the root module (`rust.toolchain(versions = [...])`, or `toolchains.toolchain(version = ...)` under rules_rs). Under crate_universe, an explicit `lockfile =` on every instance in every module and repins through `CARGO_BAZEL_REPIN=1 bazel fetch --repo=@<repo>` — `bazel sync` was deleted at 9.0.0 and the ruleset's docs still print it. Under rules_rs, no `CARGO_BAZEL_*` at all: `MODULE.bazel.lock` is the gate. | BZL-RUST-01, BZL-RUST-31, BZL-RUST-03, BZL-RUST-37 |
 | 16 | Python: pin the interpreter with `python.defaults` and `python.toolchain` and bind every `pip.parse` to it; never point a `py_test` at a pytest-style file without a pytest entrypoint — it passes forever having run zero tests. | BZL-PY-01, BZL-PY-03, BZL-PY-21 |
 | 17 | TypeScript: name a `transpiler` on every hand-written `ts_project`, never list one `.ts` path in two targets' `srcs` (`TS5033: EPERM` is that collision), and run the generated `_typecheck_test` under `bazel test`. | BZL-JS-13, BZL-JS-16, BZL-JS-11, BZL-JS-12 |
 | 18 | C++: confirm `layering_check` on the real compile command with `aquery`; a `.bazelrc` line, a green build and a clean IWYU report each prove nothing. | BZL-CC-12, BZL-CC-14 |

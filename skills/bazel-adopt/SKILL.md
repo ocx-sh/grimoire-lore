@@ -4,7 +4,7 @@ description: Go/no-go gate and staged migration procedure for moving a repositor
 license: Apache-2.0
 metadata:
   summary: Decides whether a repository should adopt Bazel from signals you measure, then migrates it in an order that keeps the tree green
-  keywords: bazel,adoption,migration,go-no-go,monorepo,bzlmod,module-bazel,lockfile,bazelversion,bazelrc,remote-cache,rbe,ci-lanes,gazelle,pilot,rules_rust,rules_python,rules_js,rules_ts,rules_cc
+  keywords: bazel,adoption,migration,go-no-go,monorepo,bzlmod,module-bazel,lockfile,bazelversion,bazelrc,remote-cache,rbe,ci-lanes,gazelle,pilot,rules_rust,rules_rs,rules_python,rules_js,rules_ts,rules_cc
 ---
 
 # bazel-adopt
@@ -411,5 +411,5 @@ Read one level down, on demand. These files do not link each other.
 | [references/go-no-go.md](references/go-no-go.md) | Running steps 1-3. Holds all five signals with their commands, the narrower-fix ladder per language, the evidence that no threshold exists, and the decision-file schema |
 | [references/workspace-setup.md](references/workspace-setup.md) | Running steps 5-7. Holds the 8.x-versus-9.x cost table, the MODULE.bazel and lockfile setup with its merge driver, rc-file layering and the flag-existence discipline |
 | [references/cache-and-ci.md](references/cache-and-ci.md) | Running steps 8-9. Holds the four cache stages with their verifications, the remote-execution readiness gate, the CI lane taxonomy and why target selection is deferred |
-| [references/branch-rust.md](references/branch-rust.md) | The pilot is Rust. Holds the ruleset and toolchain pins, the crate_universe lock gate, the crates_vendor and prost sub-branches, and the first three rules |
+| [references/branch-rust.md](references/branch-rust.md) | The pilot is Rust. Holds the ruleset and toolchain pins, the crate_universe lock gate, the rules_rs, crates_vendor and prost sub-branches, and the first three rules |
 | [references/branches-python-ts-cpp.md](references/branches-python-ts-cpp.md) | The pilot is Python, TypeScript or C++. Holds each branch's ruleset version, toolchain pin, lock mechanism, generator verdict and first three rules |
