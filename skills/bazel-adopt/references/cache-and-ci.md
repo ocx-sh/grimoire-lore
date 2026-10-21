@@ -90,12 +90,19 @@ cache (BZL-CACHE-24).
 
 ## Stage 3: writes
 
-Writes go only on lanes untrusted content cannot trigger — one lane or several,
-each holding the credential behind the same gate.
+Writes go on any lane that runs only code from actors with push access — one lane
+or several, same-repo pull-request lanes included.
 
-- The write credential is **absent from every other lane's environment**, not
-  merely unused. A write-capable untrusted lane can plant a backdoored tool that a
-  later trusted build downloads and executes instead of compiling (BZL-CACHE-01).
+- The write credential is **absent from every lane that runs anyone else's code**:
+  fork pull requests, and `pull_request_target` or `workflow_run` jobs that check
+  out a pull request's head. Not merely unused. A write-capable lane running
+  untrusted code can plant a backdoored tool that a later trusted build downloads
+  and executes instead of compiling (BZL-CACHE-01). GitHub already withholds
+  secrets from a fork's `pull_request` workflow; those two triggers are how they
+  leak back in.
+- A holder of push rights can still poison cache entries, so a release lane that
+  builds shipped bytes does not read the shared cache unless the repository accepts
+  that (BZL-CACHE-01).
 - Write access is strictly narrower than read access — never symmetric, never held
   by a developer machine's default config (BZL-CACHE-02).
 - The credential travels through `--credential_helper`, never a bare

@@ -71,7 +71,7 @@ may not have fired yet on a repository with no Bazel files in it.
 | 3 | A `.bazelversion` bump commit that does not carry the regenerated lock | BZL-MOD-06 |
 | 4 | A worktree or legacy build directory absent from `.bazelignore` — Bazel does not read `.gitignore` | BZL-ARCH-26 |
 | 5 | The Bazel-side lockfile hand-edited to fix a drift | BZL-ARCH-24 |
-| 6 | A pull-request lane holding the cache write credential | BZL-CACHE-01 |
+| 6 | A fork or `pull_request_target` lane holding the cache write credential | BZL-CACHE-01 |
 | 7 | `--credential_helper` configured from a committed `.bazelrc` | BZL-CACHE-04 |
 | 8 | Any `WORKSPACE*` file on a 9.x pin — a hard break, not a warning | BZL-FLAG-12 |
 
@@ -264,8 +264,8 @@ the remote-execution readiness gate are in
    `http://`/`https://` scheme — both remote flags default to `grpcs` when the
    URI carries none — measured on 8.7.0, 8.8.0 and 9.2.0 (2026-09-06);
    re-derive on your own pin per BZL-CACHE-23.
-3. **Writes, only on lanes untrusted content cannot trigger**, with the credential
-   absent from every other lane's environment rather than merely unused
+3. **Writes, on any lane that runs only code from actors with push access**, with the
+   credential absent from every lane that runs anyone else's rather than merely unused
    (BZL-CACHE-01, BZL-CACHE-02), carried by `--credential_helper` from a file the
    repository does not ship (BZL-CACHE-03, BZL-CACHE-04).
 4. **Remote execution last, and only after its readiness gate passes**
