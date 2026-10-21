@@ -90,8 +90,8 @@ cache (BZL-CACHE-24).
 
 ## Stage 3: writes
 
-Writes go on exactly one lane, and that lane is one untrusted content cannot
-trigger.
+Writes go only on lanes untrusted content cannot trigger — one lane or several,
+each holding the credential behind the same gate.
 
 - The write credential is **absent from every other lane's environment**, not
   merely unused. A write-capable untrusted lane can plant a backdoored tool that a

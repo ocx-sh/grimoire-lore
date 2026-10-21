@@ -264,7 +264,7 @@ the remote-execution readiness gate are in
    `http://`/`https://` scheme — both remote flags default to `grpcs` when the
    URI carries none — measured on 8.7.0, 8.8.0 and 9.2.0 (2026-09-06);
    re-derive on your own pin per BZL-CACHE-23.
-3. **Writes, on one lane untrusted content cannot trigger**, with the credential
+3. **Writes, only on lanes untrusted content cannot trigger**, with the credential
    absent from every other lane's environment rather than merely unused
    (BZL-CACHE-01, BZL-CACHE-02), carried by `--credential_helper` from a file the
    repository does not ship (BZL-CACHE-03, BZL-CACHE-04).
