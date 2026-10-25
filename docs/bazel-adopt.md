@@ -37,7 +37,7 @@ tracked rc file names, and remote execution last if at all; make whole-repo
 
 | Branch | What it settles |
 |---|---|
-| Rust | `rules_rust` 0.74.0, the explicit toolchain pin, `crate_universe` with a named lockfile and the repin command that survives Bazel 9, `build.rs` porting, prost |
+| Rust | `rules_rust` 0.74.0 or `rules_rs`, the explicit toolchain pin, `crate_universe` with a named lockfile and the repin command that survives Bazel 9 or `rules_rs` resolving from `Cargo.lock` with hermetic LLVM and Linux cross-builds, `build.rs` porting, prost |
 | Python | `rules_python` 2.3.3, the interpreter pin bound to every `pip.parse`, the pytest entrypoint trap, the requirements lock |
 | TypeScript | `rules_js` 3.4.1 and `rules_ts` 3.10.1, pnpm as the lockfile of record and the cost of converting to it, `ts_project` transpiler choice |
 | C++ | `rules_cc` 0.2.22, the toolchain choice, `layering_check` confirmed on the compile command — with no fleet example behind it, and it says so |

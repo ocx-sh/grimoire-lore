@@ -1,15 +1,20 @@
 ---
 title: Rust under Bazel
-summary: The BZL-RUST family — toolchain pinning, crate_universe lockfiles and repin, build scripts, test and doc-test targets, the lint aspects, gazelle_rust and prost
+summary: The BZL-RUST family — toolchain pinning, crate_universe lockfiles and repin, rules_rs resolution and cross-builds, build scripts, test and doc-test targets, the lint aspects, gazelle_rust and prost
 ---
 
 # Rust under Bazel
 
 Owns `BZL-RUST`: rules_rust toolchain registration and platform triples,
 crate_universe (`crates_repository`, `crates_vendor`, annotations, private
-registries), `cargo_build_script`, `rust_test`/`rust_doc_test` target parity,
-the clippy and rustfmt aspects, gazelle_rust, prost/tonic, and the Rust half of
-coverage. It does not own `Cargo.toml`, `Cargo.lock`, `rust-toolchain.toml`,
+registries), the rules_rs alternative to it (crates resolved from `Cargo.lock`,
+hermetic LLVM, cross-builds), `cargo_build_script`, `rust_test`/`rust_doc_test`
+target parity, the clippy and rustfmt aspects, gazelle_rust, prost/tonic, and
+the Rust half of coverage. Two resolvers put crates on a Rust target and every
+crate_universe block binds only the first: `MODULE.bazel` naming `@rules_rs//`
+makes [rules_rs Workspaces](#rules_rs-workspaces) the block that binds and
+leaves the crate_universe lockfile, repin and `CARGO_BAZEL_*` rows N/A. It does
+not own `Cargo.toml`, `Cargo.lock`, `rust-toolchain.toml`,
 `clippy.toml` or `rustfmt.toml` hygiene — the `rust-cargo` and `rust-quality`
 rule sets own those files, and a rule here touches one only where the edit is
 Bazel-specific. Sibling families, cited never restated: BZL-MOD owns
@@ -21,6 +26,7 @@ owns generator maturity and the `git_override`-versus-`bazel_dep` decision;
 BZL-PY owns reaching a Rust binary from a Python test (BZL-PY-25).
 
 Contents: [The crate_universe Freshness Gate](#the-crate_universe-freshness-gate) ·
+[rules_rs Workspaces](#rules_rs-workspaces) ·
 [Pinning the Toolchain](#pinning-the-toolchain) ·
 [Build Scripts and Crate Annotations](#build-scripts-and-crate-annotations) ·
 [Test and Dependency Targets](#test-and-dependency-targets) ·
@@ -35,9 +41,12 @@ property of the binary, not the host. Rows bind
 [rules_rust 0.74.0](https://github.com/bazelbuild/rules_rust/releases/tag/0.74.0)
 (2026-08-28), its separate `rules_rust_prost` module at the same version, and
 gazelle_rust 0.1.0; a few source facts were read at `main`@51f3042 (2026-09-02),
-strictly after the tag. crate_universe is under active repair — seven of roughly
-32 entries in the 0.74.0 changelog are crate_universe correctness fixes from the
-preceding six weeks — so re-read
+strictly after the tag. The rules_rs rows (BZL-RUST-37 to BZL-RUST-40) were
+measured 2026-10-21 on one repository — Bazel 9.2.0, rules_rs 0.1.3, llvm
+0.8.25, Rust 1.95.0, a Linux x86_64 host — and bind the hermeticbuild fork of
+rules_rust that rules_rs bundles, not the 0.74.0 tag. crate_universe is under
+active repair — seven of roughly 32 entries in the 0.74.0 changelog are
+crate_universe correctness fixes from the preceding six weeks — so re-read
 [`crate_universe/extensions.bzl`](https://github.com/bazelbuild/rules_rust/blob/0.74.0/crate_universe/extensions.bzl)
 at the tag you pin rather than trusting this as settled behaviour. Before citing
 any Bazel flag, confirm it on **both** help surfaces at your pinned version:
@@ -94,18 +103,54 @@ CARGO_BAZEL_REPIN=1 bazel sync --only=crates   # wrong — command deleted in Ba
 CARGO_BAZEL_REPIN=1 bazel fetch --repo=@crates # right — flag present on 8.7.0 and 9.2.0
 ```
 
+## rules_rs Workspaces
+
+rules_rs resolves crates from `Cargo.lock` inside Bazel, bundles a
+[hermeticbuild fork of rules_rust](https://github.com/hermeticbuild/rules_rust)
+— BUILD files keep loading `rust_library`, `rust_test` and `rust_doc_test` from
+`@rules_rust//rust:defs.bzl` — and builds C and C++ with the
+[`llvm` module](https://github.com/hermeticbuild/hermetic-llvm), a
+self-contained cross toolchain. Where `MODULE.bazel` names `@rules_rs//`, every
+crate_universe row above is N/A and these four bind. Two reads settle which
+resolver a module names and whether crate_universe configuration was carried
+across it:
+
+```bash
+git ls-files -z --cached --others --exclude-standard -- 'MODULE.bazel' | xargs -0 -r grep -H -n -e '@rules_rs//' -e '@llvm//' -e 'crate_universe' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob).bazelrc*' ':(glob)**/*.yml' | xargs -0 -r grep -H -n -e 'CARGO_BAZEL' -e 'lockfile_mode' --
+```
+
+Empty output from the first means this module declares no Rust resolver and the
+whole block is N/A.
+
+| ID | Rule | Rationale | Verification | Severity |
+|---|---|---|---|---|
+| BZL-RUST-37 | Where the root module names rules_rs, resolve crates with `crate.from_cargo(cargo_lock = ..., cargo_toml = ..., platform_triples = [...])` from `@rules_rs//rs:extensions.bzl`, pin `rules_rs` and `llvm` to exact versions and bump them as a pair, and keep `MODULE.bazel.lock` the only lockfile — gated by `--lockfile_mode=error` (BZL-MOD-02), with no `CARGO_BAZEL_*` variable, no crate_universe `lockfile =` and no repin job. | rules_rs reads `Cargo.lock` itself: the spike produced no `Cargo.bazel.lock.json`, needed no repin step, and resolved 24 workspace members plus 3 vendored forks. crate_universe configuration carried across is not an error but gates nothing — a `CARGO_BAZEL_REPIN` line reads as a freshness control and controls nothing. The ruleset is pre-1.0 with roughly weekly releases (BZL-FLAG-29 compares the second component), and rules_rs 0.1.3 itself depends on `llvm` 0.8.18 while the root pinned 0.8.25 and resolved without conflict, so exact pins on both are what keep a bump deliberate. Resolution is not feature-identical to Cargo's: 388 of 392 third-party crates matched `cargo metadata` and four carried Bazel-only extra features (none changed which crates were selected), so only a repository-owned parity gate keeps the difference visible. | The first block grep: an `@rules_rs//` hit puts the module under this block. Then the second: **any `CARGO_BAZEL` hit in a rules_rs module is the finding — a control for a mechanism that is absent. Exactly one `lockfile_mode=error` leg is the pass; its absence is BZL-MOD-02's finding, not a pass here.** Read both `bazel_dep` lines for an exact `version =`. The parity half has no grep: diff the resolved feature set against `cargo metadata --format-version 1` — **an unexplained extra feature is the finding, an extra recorded beside the gate is the pass.** | MUST where rules_rs resolves the crates; N/A otherwise |
+| BZL-RUST-38 | Register `@llvm//toolchain:all` beside the Rust toolchains and treat the host C and C++ toolchain as no input: no `gcc`, no unversioned `libstdc++.so`, no libstdc++ prerequisite for a Rust link. | Rust link actions and C-heavy `*-sys` build scripts otherwise take whatever the host has, so one runner's `gcc` and `libstdc++` decide the binary. With `@llvm` registered the measured Linux binary linked only libc, libm, libpthread, libdl and librt, with a highest GLIBC symbol of 2.28 and neither `libstdc++` nor `libgcc_s`. The same toolchain is what lets one Linux host link every other triple (BZL-RUST-39). | see block BZL-RUST-38 — **a rules_rs module whose grep shows no `register_toolchains` naming `@llvm//toolchain` is the finding: the host toolchain is silently an input.** Then `readelf -d` on the built Linux gnu binary: **`libstdc++` or `libgcc_s` among the `NEEDED` entries is the finding, libc-family entries only is the pass.** Measured on a Linux gnu output; musl, macOS and Windows outputs need their own link-line read. | SHOULD |
+| BZL-RUST-39 | Cross-build every shipped triple from one Linux host: keep `platform_triples` equal to the CI and release matrix, build with `-c opt --platforms=@rules_rs//rs/platforms:<triple>`, give macOS an `osx.frameworks` tag (extension `@llvm//extensions:osx.bzl`) that restates the llvm module's defaults before adding the graph's own frameworks, and write down that a `windows-gnullvm` leg is not the MSVC artefact a release ships. | Eight triples built green from one host — `x86_64` and `aarch64` for Linux gnu and musl, Apple Darwin and Windows gnullvm. A fastbuild (opt-level 0) Windows binary overflows the 1 MiB main-thread stack at startup, so `-c opt` is correctness there, not a size choice. The `osx.frameworks` tag REPLACES the llvm module's default sysroot set, so a tag listing only the additions drops the defaults. What CI executes is the gnullvm binary: a release shipped as MSVC is never run by that gate, which is a gap to record, not a pass. | see block BZL-RUST-39, then for every listed triple `bazel build -c opt --platforms=@rules_rs//rs/platforms:<triple> //<binary-target>` — **exit 0 is the pass for the build only, never for the binary: execute the Windows output once on a Windows host.** **A matrix triple absent from `platform_triples`, a listed triple nothing builds, or a non-host leg built without `-c opt` is the finding.** | MUST wherever a non-host triple is built; N/A on a single-platform build |
+| BZL-RUST-40 | Gate a rules_rs `rust_doc_test` on the target's exit status. Never count `test result:` lines out of its `test.log`, and never carry a `rules_rust.patch(...)` that deletes `--discard-stdout-on-success` to make them appear. | In the hermeticbuild fork `rust_doc_test` runs `rustdoc --test` in a build action and the test only replays its recorded exit code, stdout and stderr. The action passes `--discard-stdout-on-success` on purpose: libtest prints in completion order with wall-clock durations, so a passing run wrote different stdout every time and each change missed the replay cache ([hermeticbuild/rules_rust#87](https://github.com/hermeticbuild/rules_rust/pull/87), merged 2026-10-13, which rejected normalising the output). A passing target therefore writes an empty `test.log`, and the exit code is the only result there is. A patch that restores the output reintroduces that nondeterminism and must be re-checked on every rules_rs bump. Doctests stay build actions: a foreign-OS runner never executes them. | see block BZL-RUST-40 — **empty output is the pass; a `rules_rust.patch` hit sends you to read the patch it names, and a `discard-stdout-on-success` hit in a patch is the finding** unless the repository records why it carries the divergence. Then show it red and green: seed `assert_eq!(1, 2)` in a fenced example, confirm `bazel test //<pkg>:<crate>_doc_test` exits non-zero, revert, confirm exit 0. **A doctest gate that was never seen red proves nothing.** | SHOULD; N/A without rules_rs or doc examples |
+
+```sh
+# BZL-RUST-38
+git ls-files -z --cached --others --exclude-standard -- 'MODULE.bazel' | xargs -0 -r grep -H -n -e 'register_toolchains' -e '@llvm//toolchain' --
+# BZL-RUST-39
+git ls-files -z --cached --others --exclude-standard -- 'MODULE.bazel' ':(glob).github/workflows/**' ':(glob)**/*.yml' | xargs -0 -r grep -H -n -e 'platform_triples' -e 'osx.frameworks' -e '--platforms=@rules_rs' --
+# BZL-RUST-40
+git ls-files -z --cached --others --exclude-standard -- 'MODULE.bazel' ':(glob)**/*.patch' | xargs -0 -r grep -H -n -e 'discard-stdout-on-success' -e 'rules_rust.patch' --
+```
+
 ## Pinning the Toolchain
 
 The check for this block is one read of `MODULE.bazel` plus the CI matrix's
-platform list: `CHECKS=.claude/rules/bazel-quality/checks; PAT='rust\.toolchain\(' A=6 awk -f "$CHECKS/context.awk" -- MODULE.bazel`. Empty output in a
+platform list: `CHECKS=.claude/rules/bazel-quality/checks; PAT='rust\.toolchain\(|toolchains\.toolchain\(' A=6 awk -f "$CHECKS/context.awk" -- MODULE.bazel`. Empty output in a
 module that never uses the `rust` extension means no Rust toolchain here and
 nothing to check; empty output in a module that *does* `use_extension` it is
 BZL-RUST-31's finding, not a pass.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| BZL-RUST-31 | Call `rust.toolchain(versions = [...], edition = "...")` in the root module and pin every entry; give a `beta` or `nightly` entry its `/YYYY-MM-DD` ISO date, and drop the channel you do not select. | The default is hermetic but not pinned and it moves: `DEFAULT_RUST_VERSION` went 1.95.0 → 1.98.0 across tags 0.70.0–0.74.0, changing on four of five releases, so a `bazel_dep` bump alone re-pins your compiler. Worse, omitting the call is not an error — the extension selects `root.tags.toolchain or rules_rust.tags.toolchain` and rules_rust's own non-dev registration backstops it, so the build succeeds with nothing in your `MODULE.bazel` naming a version. The default list also registers and downloads a nightly toolchain that a `channel` setting defaulting `"stable"` will never pick. | The block grep. **A call with no `versions =` is the finding. No `rust.toolchain(` at all in a module that `use_extension`s rules_rust's `rust` extension is the same finding and the more dangerous one — the build works, so nothing else surfaces it.** A bare `"nightly"`/`"beta"` without an ISO date fails at load time on 8.7.0 and 9.2.0 (self-verifying). Empty grep with no `rust` extension anywhere = nothing to check. | MUST |
-| BZL-RUST-08 | Set `supported_platform_triples` to exactly the platforms your CI matrix and developer hosts build for: add the ones the curated default omits — Intel macOS (`x86_64-apple-darwin`) and ARM64 Windows (`aarch64-pc-windows-msvc`) — remove any entry no target resolves to, and never reason about this list from `rust.toolchain()`'s `extra_target_triples` or the reverse. | Splicing is `O(N²)` per added triple (the ruleset's own source comment), so a speculative entry is paid on every repin, while a missing one resolves a CI leg wrongly. The two curated lists live in different files with different members — `DEFAULT_EXTRA_TARGET_TRIPLES` carries three wasm triples and no Windows; `SUPPORTED_PLATFORM_TRIPLES` carries neither wasm nor Intel macOS — and adjacent prose calls both "the curated default seven", which is what makes substituting one for the other look safe. | Cross-reference the CI matrix's OS and `--platforms=` list against `supported_platform_triples` in `MODULE.bazel`. **A CI or developer platform absent from the list is the finding; a list entry nothing resolves to is the second; a claim about "the default triples" that does not name which of the two attributes was read is the third.** An unset attribute means the curated seven apply, which is the finding whenever the matrix names a platform outside them. This reads your configuration only — the generated crate-repository `.bzl` and BUILD text is out of a grep's reach. | MUST |
+| BZL-RUST-31 | Call `rust.toolchain(versions = [...], edition = "...")` in the root module and pin every entry; give a `beta` or `nightly` entry its `/YYYY-MM-DD` ISO date, and drop the channel you do not select. Under rules_rs the call is `toolchains.toolchain(version = "...", edition = "...")` on the extension from `@rules_rs//rs/toolchains:module_extension.bzl`, and omitting it is just as silent. | The default is hermetic but not pinned and it moves: `DEFAULT_RUST_VERSION` went 1.95.0 → 1.98.0 across tags 0.70.0–0.74.0, changing on four of five releases, so a `bazel_dep` bump alone re-pins your compiler. Worse, omitting the call is not an error — the extension selects `root.tags.toolchain or rules_rust.tags.toolchain` and rules_rust's own non-dev registration backstops it, so the build succeeds with nothing in your `MODULE.bazel` naming a version. The default list also registers and downloads a nightly toolchain that a `channel` setting defaulting `"stable"` will never pick. | The block grep. **A call with no `versions =` (`version =` under rules_rs) is the finding. No `rust.toolchain(` or `toolchains.toolchain(` at all in a module that `use_extension`s rules_rust's `rust` extension or rules_rs's `toolchains` extension is the same finding and the more dangerous one — the build works, so nothing else surfaces it.** A bare `"nightly"`/`"beta"` without an ISO date fails at load time on 8.7.0 and 9.2.0 (self-verifying). Empty grep with neither extension anywhere = nothing to check. | MUST |
+| BZL-RUST-08 | Set `supported_platform_triples` to exactly the platforms your CI matrix and developer hosts build for: add the ones the curated default omits — Intel macOS (`x86_64-apple-darwin`) and ARM64 Windows (`aarch64-pc-windows-msvc`) — remove any entry no target resolves to, and never reason about this list from `rust.toolchain()`'s `extra_target_triples` or the reverse. Under rules_rs the list is `platform_triples` on `crate.from_cargo`, owned by BZL-RUST-39. | Splicing is `O(N²)` per added triple (the ruleset's own source comment), so a speculative entry is paid on every repin, while a missing one resolves a CI leg wrongly. The two curated lists live in different files with different members — `DEFAULT_EXTRA_TARGET_TRIPLES` carries three wasm triples and no Windows; `SUPPORTED_PLATFORM_TRIPLES` carries neither wasm nor Intel macOS — and adjacent prose calls both "the curated default seven", which is what makes substituting one for the other look safe. | Cross-reference the CI matrix's OS and `--platforms=` list against `supported_platform_triples` in `MODULE.bazel`. **A CI or developer platform absent from the list is the finding; a list entry nothing resolves to is the second; a claim about "the default triples" that does not name which of the two attributes was read is the third.** An unset attribute means the curated seven apply, which is the finding whenever the matrix names a platform outside them. This reads your configuration only — the generated crate-repository `.bzl` and BUILD text is out of a grep's reach. | MUST |
 | BZL-RUST-15 | Express host-dependent exec-configuration rustc flags with `extra_exec_rustc_flags_triples` on the single `rust.toolchain()` tag; never combine it with `extra_exec_rustc_flags` on that tag, and never register a second `rust_toolchain` to give proc macros their own. | Setting both attributes on one tag is a hard `fail()` in the extension. And `rust_toolchain` bundles `rustc`, `rustc_lib`, `cargo`, `clippy_driver`, `rustfmt` and `rust_std` on one rule with no supported way to swap a component, so a second registration duplicates the entire asset bundle instead of fixing the layer that is actually wrong — an upstream discussion open since 2022 with no fix. | `grep -n -e 'extra_exec_rustc_flags' -e 'extra_exec_rustc_flags_triples' -- MODULE.bazel`. **Both attributes on one call already fail the build on 8.7.0 and 9.2.0 (self-verifying); empty output means no exec-flag customisation and is the pass.** The reviewable half is the design: a proposed cross-compilation fix that registers a new toolchain set rather than touching the triples attribute is the finding. | MUST once a second exec platform (Darwin or Windows) is in the matrix; N/A on a single-platform build |
 
 ## Build Scripts and Crate Annotations
@@ -161,9 +206,9 @@ bazel query 'kind(rust_doc_test, //<pkg>:*)'
 |---|---|---|---|---|
 | BZL-RUST-30 | Confirm every `rust_test_suite`'s resolved test list is non-empty before trusting its `srcs` glob. | `test_suite` special-cases an empty `tests` list as "run everything in the package", and `rust_test_suite`'s synthetic `restrict_<name>` tag exists purely to suppress that — so a glob matching nothing (a typo'd path, a renamed directory) yields a target that exists, runs zero tests and reports green. The ruleset ships a regression fixture for exactly this case. | `bazel query 'tests(//<pkg>:<suite>)'`. **Empty output for a suite whose `tests/` directory holds files is the finding — wrong glob path, renamed directory, or never wired to real sources. The expected target list is the pass.** | MUST |
 | BZL-RUST-27 | Give every `#[cfg(test)]` module a `rust_test(crate = ...)` and every file under a crate's `tests/` directory its own `rust_test` (direct or `rust_test_suite`-generated), setting `crate_root` explicitly whenever `srcs` holds more than one file; certify migration parity by diffing test **names**, never counts. | Cargo auto-discovers unit and integration tests from one crate layout while Bazel needs an explicit target for each, so a missing one is a permanent, silent coverage gap with no build error. `crate_root` inference covers only `lib.rs`, `main.rs` or a single-file `srcs`, so a test pulling in `tests/common/mod.rs` falls outside it. A generated `<suite>_<path>_test` name never matches Cargo's, so an equal or higher Bazel count can still hide a dropped test. | Per crate, see block BZL-RUST-27 against `bazel query 'kind(rust_test, //<pkg>:*)'`, and one target per `tests/*.rs` file. **A source pattern with no corresponding target is the finding; an empty grep for a crate holding no unit tests is nothing to check.** Then set-diff `cargo test -- --list` (or `cargo nextest list`) against the query output by normalized name — **a count comparison alone is not the check.** | MUST for any migration claiming test parity with Cargo |
-| BZL-RUST-28 | Give every crate whose public items carry runnable fenced doc examples a `rust_doc_test(crate = ...)` target. | `cargo test --doc` is the one Cargo test kind Bazel never generates under any mechanism — no glob, aspect or macro reads doc comments the way `rust_test_suite` reads `tests/`. `rust_doc_test`'s `crate` attribute is mandatory and there is no `srcs` or glob variant, so the examples stop being tested with nothing anywhere to say so. | see block BZL-RUST-28 per crate, against `bazel query 'kind(rust_doc_test, //<pkg>:*)'`. **A non-empty grep with an empty query is the finding; an empty grep is nothing to check.** | MUST when doc examples exist; N/A otherwise |
+| BZL-RUST-28 | Give every crate whose public items carry runnable fenced doc examples a `rust_doc_test(crate = ...)` target. | `cargo test --doc` is the one Cargo test kind Bazel never generates under any mechanism — no glob, aspect or macro reads doc comments the way `rust_test_suite` reads `tests/`. `rust_doc_test`'s `crate` attribute is mandatory and there is no `srcs` or glob variant, so the examples stop being tested with nothing anywhere to say so. | see block BZL-RUST-28 per crate, against `bazel query 'kind(rust_doc_test, //<pkg>:*)'`. **A non-empty grep with an empty query is the finding; an empty grep is nothing to check.** Under rules_rs what a passing target proves is BZL-RUST-40's. | MUST when doc examples exist; N/A otherwise |
 | BZL-RUST-29 | List every fixture a test reads at run time in `data` — never in `compile_data`, never as an ambient relative path. | `data` is what Bazel stages into the test's runfiles; `compile_data` exists for `include_str!()`-style compile-time inclusion only. A test reading a fixture with neither passes locally against the real filesystem and fails hermetically — in the sandbox, on a clean checkout, in CI — with a "file not found" that names nothing useful. | Grep the test sources for `std::fs::read`, `File::open` and relative path literals, and cross-check the owning target's `data` list. **A referenced path absent from `data` is the finding; no runtime file reads is the pass.** | MUST |
-| BZL-RUST-18 | Write every edge between first-party workspace crates as a hand-written `deps = ["//crates/<name>"]` entry on the BUILD target; never expect crate_universe to wire a Cargo `path = "..."` dependency. | cargo-bazel's metadata pass filters every workspace-member node out of the crate-rendering set before generating BUILD content, so no code path could wire this even in principle — a path dependency never appears in `Cargo.lock` at all. The failure reads as "crate_universe is broken" rather than "this edge needed declaring". | For each `path = "..."` dependency in a workspace member's `Cargo.toml`, confirm the sibling crate's own label in that target's `deps`, never a generated `@crate_index//` alias. **A path dependency with no matching hand-written entry is the finding; every edge declared is the pass.** Self-verifying at `bazel build` time, worth catching in review because the error misdirects. | MUST |
+| BZL-RUST-18 | Write every edge between first-party workspace crates as a hand-written `deps = ["//crates/<name>"]` entry on the BUILD target; never expect crate_universe to wire a Cargo `path = "..."` dependency. Under rules_rs the opposite holds: write only the edges `all_crate_deps` leaves out. | cargo-bazel's metadata pass filters every workspace-member node out of the crate-rendering set before generating BUILD content, so no code path could wire this even in principle — a path dependency never appears in `Cargo.lock` at all. The failure reads as "crate_universe is broken" rather than "this edge needed declaring". rules_rs reverses it: its `all_crate_deps` already returns the workspace path dependencies as `//crates/<name>`, so a hand-written duplicate fails analysis with `Label ... is duplicated`, and the function takes no `proc_macro*` arguments. A scripted BUILD port that stripped a `//crates/<name>:data` label from `data` lists broke four tests in the same migration — only bare or self-named labels may be removed. | For each `path = "..."` dependency in a workspace member's `Cargo.toml`, confirm the sibling crate's own label in that target's `deps`, never a generated `@crate_index//` alias. **A path dependency with no matching hand-written entry is the finding under crate_universe; under rules_rs a hand-written entry that duplicates `all_crate_deps` is. Every edge declared exactly once is the pass.** Self-verifying at `bazel build` time, worth catching in review because the error misdirects. | MUST |
 
 ```sh
 # BZL-RUST-27
@@ -238,6 +283,10 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)**/build.rs' | x
 
 ## Gaps
 
+- The rules_rs rows (BZL-RUST-37 to BZL-RUST-40) rest on one repository's migration
+  spike, not on a survey; rules_rs is pre-1.0 and a bump can move any of them.
+  Whether a changed `Cargo.lock` alone turns `--lockfile_mode=error` red was
+  not measured here.
 - Every measurement here ran on a Linux host. darwin and Windows sandbox, tag
   and runfiles behaviour is unmeasured, and rules_rust
   [disclaims Windows support](https://github.com/bazelbuild/rules_rust/blob/0.74.0/docs/src/index.md)
@@ -282,3 +331,10 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)**/build.rs' | x
 8. **Assuming `cargo test --doc` happens automatically and that an empty
    `rust_test_suite` glob fails loudly** — both produce green targets that test
    nothing (BZL-RUST-28, BZL-RUST-30).
+9. **Carrying crate_universe's lockfile, repin and hand-written-edge advice onto
+   a rules_rs workspace** — dead `CARGO_BAZEL_*` configuration that gates
+   nothing, and a duplicate `deps` entry that fails analysis (BZL-RUST-37,
+   BZL-RUST-18).
+10. **Patching `--discard-stdout-on-success` out of the doctest action to count
+    doctests**, which undoes a flag added on purpose for cache reproducibility
+    (BZL-RUST-40).

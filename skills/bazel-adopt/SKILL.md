@@ -4,7 +4,7 @@ description: Go/no-go gate and staged migration procedure for moving a repositor
 license: Apache-2.0
 metadata:
   summary: Decides whether a repository should adopt Bazel from signals you measure, then migrates it in an order that keeps the tree green
-  keywords: bazel,adoption,migration,go-no-go,monorepo,bzlmod,module-bazel,lockfile,bazelversion,bazelrc,remote-cache,rbe,ci-lanes,gazelle,pilot,rules_rust,rules_python,rules_js,rules_ts,rules_cc
+  keywords: bazel,adoption,migration,go-no-go,monorepo,bzlmod,module-bazel,lockfile,bazelversion,bazelrc,remote-cache,rbe,ci-lanes,gazelle,pilot,rules_rust,rules_rs,rules_python,rules_js,rules_ts,rules_cc
 ---
 
 # bazel-adopt
@@ -71,7 +71,7 @@ may not have fired yet on a repository with no Bazel files in it.
 | 3 | A `.bazelversion` bump commit that does not carry the regenerated lock | BZL-MOD-06 |
 | 4 | A worktree or legacy build directory absent from `.bazelignore` — Bazel does not read `.gitignore` | BZL-ARCH-26 |
 | 5 | The Bazel-side lockfile hand-edited to fix a drift | BZL-ARCH-24 |
-| 6 | A pull-request lane holding the cache write credential | BZL-CACHE-01 |
+| 6 | A fork or `pull_request_target` lane holding the cache write credential | BZL-CACHE-01 |
 | 7 | `--credential_helper` configured from a committed `.bazelrc` | BZL-CACHE-04 |
 | 8 | Any `WORKSPACE*` file on a 9.x pin — a hard break, not a warning | BZL-FLAG-12 |
 
@@ -264,8 +264,8 @@ the remote-execution readiness gate are in
    `http://`/`https://` scheme — both remote flags default to `grpcs` when the
    URI carries none — measured on 8.7.0, 8.8.0 and 9.2.0 (2026-09-06);
    re-derive on your own pin per BZL-CACHE-23.
-3. **Writes, on one lane untrusted content cannot trigger**, with the credential
-   absent from every other lane's environment rather than merely unused
+3. **Writes, on any lane that runs only code from actors with push access**, with the
+   credential absent from every lane that runs anyone else's rather than merely unused
    (BZL-CACHE-01, BZL-CACHE-02), carried by `--credential_helper` from a file the
    repository does not ship (BZL-CACHE-03, BZL-CACHE-04).
 4. **Remote execution last, and only after its readiness gate passes**
@@ -411,5 +411,5 @@ Read one level down, on demand. These files do not link each other.
 | [references/go-no-go.md](references/go-no-go.md) | Running steps 1-3. Holds all five signals with their commands, the narrower-fix ladder per language, the evidence that no threshold exists, and the decision-file schema |
 | [references/workspace-setup.md](references/workspace-setup.md) | Running steps 5-7. Holds the 8.x-versus-9.x cost table, the MODULE.bazel and lockfile setup with its merge driver, rc-file layering and the flag-existence discipline |
 | [references/cache-and-ci.md](references/cache-and-ci.md) | Running steps 8-9. Holds the four cache stages with their verifications, the remote-execution readiness gate, the CI lane taxonomy and why target selection is deferred |
-| [references/branch-rust.md](references/branch-rust.md) | The pilot is Rust. Holds the ruleset and toolchain pins, the crate_universe lock gate, the crates_vendor and prost sub-branches, and the first three rules |
+| [references/branch-rust.md](references/branch-rust.md) | The pilot is Rust. Holds the ruleset and toolchain pins, the crate_universe lock gate, the rules_rs, crates_vendor and prost sub-branches, and the first three rules |
 | [references/branches-python-ts-cpp.md](references/branches-python-ts-cpp.md) | The pilot is Python, TypeScript or C++. Holds each branch's ruleset version, toolchain pin, lock mechanism, generator verdict and first three rules |
