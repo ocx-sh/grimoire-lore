@@ -137,7 +137,7 @@ readme = "README.md"
 logo = "assets/lore-rust.svg"
 
 [rules.rust-quality]
-version = "0.2.1"
+version = "0.2.2"
 description = { readme = "docs/rust-quality.md", logo = "assets/lore-rust.svg" }
 
 [rules.rust-cargo]
