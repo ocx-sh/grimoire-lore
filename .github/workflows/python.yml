@@ -64,7 +64,10 @@ jobs:
       # Finding `ocx.toml`, the action runs `ocx pull` and activates the
       # project, so ruff, uv and task arrive at the versions in `ocx.lock` —
       # the same ones a contributor gets locally. No separate install step.
-      - uses: ocx-sh/setup-ocx@25fa771f8572572dc64528db89560de68a163a0e # v1.4.0
+      - uses: ocx-sh/setup-ocx@eaeb6788da6191868a1310cc2bba93233b586369 # v1.4.1
+        with:
+          # Pinned: ocx.lock is lock_version 4, which needs ocx >= 0.6.6.
+          version: 0.6.8
 
       - name: Verify
-        run: ocx run task -- task ci RUFF_FORMAT=github
+        run: ocx exec task -- task ci RUFF_FORMAT=github
