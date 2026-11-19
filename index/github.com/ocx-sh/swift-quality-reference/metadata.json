@@ -1,0 +1,27 @@
+{
+  "created": "2026-11-19T14:59:46+01:00",
+  "description": "Depth files and checks scripts behind the swift-quality rule, loaded on demand. Use when the swift-quality rule routes you to a depth file or a checks script, or when a task cites a rule ID the index only summarises.",
+  "keywords": [
+    "swift",
+    "swiftpm",
+    "quality",
+    "concurrency",
+    "sendable",
+    "errors",
+    "testing",
+    "cli",
+    "networking",
+    "security",
+    "reference"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "swift-quality-reference",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/swift-quality-reference",
+  "schema": 1,
+  "summary": "Depth files and checks scripts behind the swift-quality rule"
+}

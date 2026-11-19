@@ -1,0 +1,24 @@
+{
+  "created": "2026-11-19T14:59:46+01:00",
+  "description": "Depth files behind the kotlin-quality rule, loaded on demand. Use when the kotlin-quality rule routes you to a depth file, or when a task cites a rule ID the index only summarises.",
+  "keywords": [
+    "kotlin",
+    "jvm",
+    "quality",
+    "standards",
+    "coroutines",
+    "detekt",
+    "ktlint",
+    "reference"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "kotlin-quality-reference",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/kotlin-quality-reference",
+  "schema": 1,
+  "summary": "Depth files behind the kotlin-quality rule"
+}

@@ -1,0 +1,27 @@
+{
+  "created": "2026-11-19T14:59:46+01:00",
+  "description": "Depth files and checks scripts behind the csharp-quality rule, loaded on demand. Use when the csharp-quality rule routes you to a depth file or a checks script, or when a task cites a rule ID the index only summarises.",
+  "keywords": [
+    "csharp",
+    "dotnet",
+    "quality",
+    "nullable",
+    "async",
+    "process",
+    "json",
+    "api-design",
+    "testing",
+    "security",
+    "reference"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "csharp-quality-reference",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/csharp-quality-reference",
+  "schema": 1,
+  "summary": "Depth files and checks scripts behind the csharp-quality rule"
+}

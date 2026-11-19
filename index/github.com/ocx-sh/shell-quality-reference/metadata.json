@@ -1,0 +1,33 @@
+{
+  "created": "2026-11-19T14:59:46+01:00",
+  "description": "Depth files and checks scripts behind the shell-quality rule, loaded on demand. Use when the shell-quality rule routes you to a depth file or a checks script, or when a task cites a rule ID the index only summarises.",
+  "keywords": [
+    "shell",
+    "sh",
+    "posix",
+    "bash",
+    "zsh",
+    "ksh",
+    "fish",
+    "nushell",
+    "elvish",
+    "shellcheck",
+    "shfmt",
+    "bats",
+    "github-actions",
+    "taskfile",
+    "gitlab-ci",
+    "installer",
+    "reference"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "shell-quality-reference",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/shell-quality-reference",
+  "schema": 1,
+  "summary": "Depth files and checks scripts behind the shell-quality rule"
+}
