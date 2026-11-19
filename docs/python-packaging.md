@@ -13,6 +13,8 @@ build system genuinely guarantees, which is what makes a narrow glob safe
 here. It does not glob `.github/workflows/`: a workflow filename says
 nothing about its language.
 
+The checks script ships in the `python-packaging-reference` skill, which the rule requires and grim installs with it (grim 0.16.0 or later).
+
 ## The theme: metadata nothing executes
 
 A `pyproject.toml` is mostly claims, and almost nothing checks them. Every

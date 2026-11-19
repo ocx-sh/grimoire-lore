@@ -319,7 +319,7 @@ only the test names are compared.
 
 ## The variable-existence check
 
-Run the `CMK-LANG-11` lookup block in `cmake-build/language.md` with the pinned
+Run the `CMK-LANG-11` lookup block in `cmake-build-reference/language.md` with the pinned
 binary for every `CMAKE_*` name a diff introduces. It expands `<LANG>` and
 `<CONFIG>` first. A count of 0 is an invented name, the finding, and 1 is a
 documented name: `CMAKE_CXX_STANDARD_EXTENSIONS` reads 0 and `CMAKE_CXX_FLAGS`

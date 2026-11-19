@@ -11,6 +11,8 @@ summary: "The Maven build index: the gate, the non-negotiables, and where the de
 keywords: maven,pom,mvn,mvnw,enforcer,surefire,jacoco,toolchains,annotation-processing,central,sonatype,portal,gpg,reproducible-builds,ant,ivy,maven4
 license: Apache-2.0
 repository: https://github.com/ocx-sh/grimoire-lore
+metadata:
+  grim.requires.skills.maven-build-reference: "./maven-build-reference:0"
 ---
 
 # Maven Build
@@ -115,14 +117,17 @@ is defined in a depth file and only cited here.
 Read the file for the work you are about to do, not for the topic it is filed
 under. One level deep. These files do not point at each other.
 
+Depth files ship in the `maven-build-reference` skill this rule requires; load it, or read
+`.claude/skills/maven-build-reference/<file>` (`~/.claude/skills/` when installed globally).
+
 | Doing… | Read |
 |---|---|
-| Declaring a dependency or a BOM import, changing a scope, diagnosing why Maven resolved the version it did, or adding an enforcer rule | [maven-build/dependencies.md](maven-build/dependencies.md) |
-| Setting the compiler release or an annotation processor, binding a plugin to a phase, pinning Surefire or a toolchain, editing `.mvn` or the wrapper, or preparing a reactor for Maven 4 | [maven-build/lifecycle-and-plugins.md](maven-build/lifecycle-and-plugins.md) |
-| Publishing to Central: the Portal plugin and its floor, namespace and tag preconditions, credentials, signing, sources and javadoc jars, and what a green release job means | [maven-build/publishing.md](maven-build/publishing.md) |
-| Opening a `build.xml` or an Ivy file, bridging an Ant build into Gradle, or porting an Ant target to another build system | [maven-build/ant-legacy.md](maven-build/ant-legacy.md) |
-| Editing a CI workflow that invokes Maven: the job's last goal, a `.mvn/extensions.xml` injected by a workflow step, or a non-blocking Maven-4 leg | [maven-build/lifecycle-and-plugins.md](maven-build/lifecycle-and-plugins.md), read from here, because no glob in this rule reaches a workflow file, so `MVN-BUILD-15` and `MVN-BUILD-03` load only through this line |
-| Writing a `settings.xml` `<server>` entry, a committed `toolchains.xml`, or the `*.gradle.kts` line that would bridge an Ant build | [maven-build/publishing.md](maven-build/publishing.md), [maven-build/lifecycle-and-plugins.md](maven-build/lifecycle-and-plugins.md), [maven-build/ant-legacy.md](maven-build/ant-legacy.md), read from here, because no glob in this rule reaches those three files, so `MVN-PUB-06`, `MVN-BUILD-18`/`-19` and `MVN-ANT-02` load only through this line |
+| Declaring a dependency or a BOM import, changing a scope, diagnosing why Maven resolved the version it did, or adding an enforcer rule | [maven-build-reference/dependencies.md](../skills/maven-build-reference/dependencies.md) |
+| Setting the compiler release or an annotation processor, binding a plugin to a phase, pinning Surefire or a toolchain, editing `.mvn` or the wrapper, or preparing a reactor for Maven 4 | [maven-build-reference/lifecycle-and-plugins.md](../skills/maven-build-reference/lifecycle-and-plugins.md) |
+| Publishing to Central: the Portal plugin and its floor, namespace and tag preconditions, credentials, signing, sources and javadoc jars, and what a green release job means | [maven-build-reference/publishing.md](../skills/maven-build-reference/publishing.md) |
+| Opening a `build.xml` or an Ivy file, bridging an Ant build into Gradle, or porting an Ant target to another build system | [maven-build-reference/ant-legacy.md](../skills/maven-build-reference/ant-legacy.md) |
+| Editing a CI workflow that invokes Maven: the job's last goal, a `.mvn/extensions.xml` injected by a workflow step, or a non-blocking Maven-4 leg | [maven-build-reference/lifecycle-and-plugins.md](../skills/maven-build-reference/lifecycle-and-plugins.md), read from here, because no glob in this rule reaches a workflow file, so `MVN-BUILD-15` and `MVN-BUILD-03` load only through this line |
+| Writing a `settings.xml` `<server>` entry, a committed `toolchains.xml`, or the `*.gradle.kts` line that would bridge an Ant build | [maven-build-reference/publishing.md](../skills/maven-build-reference/publishing.md), [maven-build-reference/lifecycle-and-plugins.md](../skills/maven-build-reference/lifecycle-and-plugins.md), [maven-build-reference/ant-legacy.md](../skills/maven-build-reference/ant-legacy.md), read from here, because no glob in this rule reaches those three files, so `MVN-PUB-06`, `MVN-BUILD-18`/`-19` and `MVN-ANT-02` load only through this line |
 | Writing the Java or Kotlin sources this reactor compiles | `java-quality`, `kotlin-quality` (sibling sets, see below) |
 | Editing a `*.gradle.kts`, a version catalog, or a Gradle wrapper in the same repository | `gradle-build` (sibling set, see below) |
 
@@ -152,7 +157,7 @@ unrecoverable, because published coordinates are immutable.
   and the Gradle wrapper and verification files, so the two rules never load
   together. Where the two ecosystems genuinely disagree, this one says so:
   `MVN-BUILD-12` carries the contrast with `GRADLE-DEP-16` on what a checksum
-  is, and `maven-build/dependencies.md` states outright that Maven has no
+  is, and `maven-build-reference/dependencies.md` states outright that Maven has no
   analogue of `verification-metadata.xml` rather than inventing one.
 - **`java-quality`** and **`kotlin-quality`**, the sources this reactor
   compiles, on `**/*.java` and `**/*.kt`. Several decisions have a statement on

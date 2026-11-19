@@ -13,6 +13,8 @@ summary: "The C++ package-manager index: the gate, the non-negotiables, the mana
 keywords: cpp,c++,cmake,conan,conan2,conanfile,conan.lock,conandata,vcpkg,vcpkg.json,portfile,triplet,lockfile,baseline,tool-requires,binary-cache,fetchcontent,cpm,package-manager
 license: Apache-2.0
 repository: https://github.com/ocx-sh/grimoire-lore
+metadata:
+  grim.requires.skills.cpp-packaging-reference: "./cpp-packaging-reference:0"
 ---
 
 # C++ Packaging
@@ -149,7 +151,7 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.tx
 | CMK-PKG-04 | In CI, cache the manager's content-addressed store (vcpkg's binary cache or `files` provider directory, Conan's package cache) and run the install step on every job. Never skip `vcpkg install` or `conan install` on an `actions/cache` hit. A cached installed tree is keyed on a hash of the manifest or lock and the baseline. | vcpkg's binary cache is keyed by an ABI hash over port files, triplet, both compilers and the CMake version, so the store never serves a stale archive. A cached `installed/` tree with the install skipped on a hit freezes the dependency set at the first save, silently. Floor: any `actions/cache` version. | Block CMK-PKG-04 (1) lists guarded steps: one guarding a `vcpkg install` or `conan install` is the finding, and empty output is the pass. Block CMK-PKG-04 (2) lists cache steps: a `path:` naming `installed` or `vcpkg_installed` whose `key:` has no `hashFiles(` over `vcpkg.json` or `conan.lock` is the finding. | SHOULD |
 
 ```sh
-CHECKS=.claude/rules/cpp-packaging/checks    # where this checks/ directory is installed
+CHECKS=.claude/skills/cpp-packaging-reference/checks    # where this checks/ directory is installed
 # CMK-PKG-02
 git ls-files -z --cached --others --exclude-standard -- ':(glob).github/**' | xargs -0 -r grep -H -n -e VCPKG_INSTALLATION_ROOT -e 'C:\\vcpkg' --
 # CMK-PKG-04 (1)
@@ -163,16 +165,19 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob).github/**' | xa
 Read the file for the work you are about to do, not for the topic it is filed
 under. One level deep. These files do not point at each other.
 
+Depth files and checks scripts ship in the `cpp-packaging-reference` skill this rule requires; load it, or read
+`.claude/skills/cpp-packaging-reference/<file>` (`~/.claude/skills/` when installed globally).
+
 | Doing… | Read |
 |---|---|
-| Editing a `conanfile.py`, `conanfile.txt`, `conandata.yml` or `conan.lock`; choosing a generator; wiring Conan into CMake; running `conan install` in CI; publishing a Conan recipe | [cpp-packaging/conan.md](cpp-packaging/conan.md) |
-| Writing or changing a Conan profile, which has no fixed file name and so loads no rule by glob at all | [cpp-packaging/conan.md](cpp-packaging/conan.md), read from here, because this line is the only route |
-| Editing `vcpkg.json` or `vcpkg-configuration.json`, a triplet or a `portfile.cmake`; wiring vcpkg into CMake; caching its binaries or assets in CI | [cpp-packaging/vcpkg.md](cpp-packaging/vcpkg.md) |
-| Composing toolchain files, injecting a dependency provider, or ordering what the first `project()` reads | `cmake-build/toolchains-and-providers.md` (`CMK-TC`, sibling set) |
-| Adding or pinning a FetchContent, CPM, Hunter or `find_package` dependency beside a manager, or finding out which copy was used | `cmake-build/dependencies.md` (`CMK-DEP`, sibling set) |
-| Guarding the language standard or the MSVC runtime in `CMakeLists.txt` | `cmake-build/targets.md` (`CMK-TGT`, sibling set) |
-| Editing `CMakePresets.json` or a pipeline that runs CMake, or pinning the CMake it uses | `cmake-build/presets-and-ci.md` and `versions-and-policies.md` (sibling set) |
-| Feeding Conan or vcpkg packages to a Bazel build of the same code | `cmake-build/bazel-seam.md` (`CMK-BZL-14`, `CMK-BZL-15`, sibling set) |
+| Editing a `conanfile.py`, `conanfile.txt`, `conandata.yml` or `conan.lock`; choosing a generator; wiring Conan into CMake; running `conan install` in CI; publishing a Conan recipe | [cpp-packaging-reference/conan.md](../skills/cpp-packaging-reference/conan.md) |
+| Writing or changing a Conan profile, which has no fixed file name and so loads no rule by glob at all | [cpp-packaging-reference/conan.md](../skills/cpp-packaging-reference/conan.md), read from here, because this line is the only route |
+| Editing `vcpkg.json` or `vcpkg-configuration.json`, a triplet or a `portfile.cmake`; wiring vcpkg into CMake; caching its binaries or assets in CI | [cpp-packaging-reference/vcpkg.md](../skills/cpp-packaging-reference/vcpkg.md) |
+| Composing toolchain files, injecting a dependency provider, or ordering what the first `project()` reads | `cmake-build-reference/toolchains-and-providers.md` (`CMK-TC`, sibling set) |
+| Adding or pinning a FetchContent, CPM, Hunter or `find_package` dependency beside a manager, or finding out which copy was used | `cmake-build-reference/dependencies.md` (`CMK-DEP`, sibling set) |
+| Guarding the language standard or the MSVC runtime in `CMakeLists.txt` | `cmake-build-reference/targets.md` (`CMK-TGT`, sibling set) |
+| Editing `CMakePresets.json` or a pipeline that runs CMake, or pinning the CMake it uses | `cmake-build-reference/presets-and-ci.md` and `versions-and-policies.md` (sibling set) |
+| Feeding Conan or vcpkg packages to a Bazel build of the same code | `cmake-build-reference/bazel-seam.md` (`CMK-BZL-14`, `CMK-BZL-15`, sibling set) |
 
 ## Severity
 
@@ -197,7 +202,7 @@ unchecked change as a checked one.
   providers, FetchContent and CPM, targets, presets and CI, the configure gate
   and its `CMK-CORE` rows. Loads on `CMakeLists.txt`, `*.cmake` and presets.
   A `portfile.cmake` loads both rules on purpose, and a vcpkg triplet loads
-  only `cmake-build`, whose index routes it to `cpp-packaging/vcpkg.md`.
+  only `cmake-build`, whose index routes it to `cpp-packaging-reference/vcpkg.md`.
 - **`python-quality`**, which also loads on every `conanfile.py` and owns its
   Python style. The Conan API rules stay here.
 - **`bazel-quality`**, for a repository that also builds with Bazel. It owns

@@ -7,9 +7,9 @@ non-negotiables, and nine depth files routed to by task.
 grim add ghcr.io/ocx-sh/lore/nix-quality
 ```
 
-Loads on `**/*.nix`, `**/flake.lock` and `**/statix.toml`. The index is 198
+Loads on `**/*.nix`, `**/flake.lock` and `**/statix.toml`. The index is 202
 lines and always present. A depth file is read only when the work calls for
-it.
+it. The depth files ship in the `nix-quality-reference` skill, which the rule requires and grim installs with it (grim 0.16.0 or later).
 
 ## It starts by naming the flake before judging it
 

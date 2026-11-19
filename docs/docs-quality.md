@@ -42,6 +42,9 @@ rows in total, split across:
 - The observability signals a docs site usually has none of
 - What a site owes an agent reader
 
+The depth files and checks ship in the `docs-quality-reference` skill, which the
+rule requires and grim installs with it (grim 0.16.0 or later).
+
 Eight Python scripts back the checks above. Each is standard library only,
 each carries a passing and a failing fixture, and each runs its own
 `--self-test`.

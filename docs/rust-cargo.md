@@ -25,7 +25,7 @@ re-litigate them lint by lint.
 
 ## Crates of record
 
-The depth file `crates-of-record.md` carries `DEP-01…08` — the selection
+The depth files (`crates-of-record.md`, `gates.md`) and the checks script ship in the `rust-cargo-reference` skill, which the rule requires and grim installs with it (grim 0.16.0 or later). `crates-of-record.md` carries `DEP-01…08` — the selection
 rules — and a table of roughly fifty entries: the crate this family uses
 for each job, the superseded crate a model reaches for instead, and **what
 changed to make it wrong**.

@@ -1,10 +1,10 @@
 # Every tool this repository needs is pinned in `ocx.toml` and resolved through
-# `ocx run <tool> -- <argv>`, so a contributor and CI run the same version of
+# `ocx exec <tool> -- <argv>`, so a contributor and CI run the same version of
 # ruff and the same version of uv. Nothing here reaches for a floating release
 # or expects a tool to be on PATH already — that is the whole point of pinning.
 #
-#     ocx run task -- task            # list what is available
-#     ocx run task -- task verify     # everything the CI gate runs
+#     ocx exec task -- task            # list what is available
+#     ocx exec task -- task verify     # everything the CI gate runs
 version: "3"
 
 silent: true
@@ -19,27 +19,27 @@ tasks:
   default:
     desc: List the available tasks
     cmds:
-      - ocx run task -- task --list
+      - ocx exec task -- task --list
 
   lint:
     desc: Lint every Python file with the pinned ruff
     cmds:
-      - ocx run ruff -- ruff check --output-format {{.RUFF_FORMAT | default "concise"}} .
+      - ocx exec ruff -- ruff check --output-format {{.RUFF_FORMAT | default "concise"}} .
 
   lint:fix:
     desc: Apply ruff's safe fixes
     cmds:
-      - ocx run ruff -- ruff check --fix .
+      - ocx exec ruff -- ruff check --fix .
 
   format:
     desc: Format every Python file
     cmds:
-      - ocx run ruff -- ruff format .
+      - ocx exec ruff -- ruff format .
 
   format:check:
     desc: Fail when a Python file is not formatted
     cmds:
-      - ocx run ruff -- ruff format --check .
+      - ocx exec ruff -- ruff format --check .
 
   test:
     desc: Run the Python test suite (stdlib unittest, no runner to install)
@@ -95,7 +95,7 @@ tasks:
       # stylesheet dialect cannot be a typo. The residual risk is a mistyped
       # *convention* glob (`*.styles.ts` and friends); those are listed in the
       # rule's own glob rationale, so a reviewer can read them against the file.
-      - "{{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py rules/css-theming.md rules/css-theming"
+      - "{{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py rules/css-theming.md"
       #
       # The guard probes for CONTENT, not for the directory: `..` always
       # exists, so `-d` would never fall through and CI would report every
@@ -123,8 +123,8 @@ tasks:
       # as dead against `..` and every build-file glob against `../ocx`. The
       # set was grounded on an exemplar corpus of upstream JVM repositories
       # instead (see `.agents/research/jvm-frame.md`), and an extension glob
-      # for a language cannot be a typo. A rule .md path covers its support
-      # directory, so the four indexes are enough.
+      # for a language cannot be a typo. A rule .md path covers its sibling
+      # `skills/<stem>-reference` skill, so the four indexes are enough.
       - "{{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py rules/java-quality.md rules/kotlin-quality.md rules/gradle-build.md rules/maven-build.md skills/jvm-release skills/jvm-dependency-triage"
       #
       # The Go set follows the JVM reasoning: the fleet holds no Go, so there
@@ -163,12 +163,11 @@ tasks:
       # apple/containerization carries Package.swift, Package.resolved,
       # .swift-format, .swift-version and .spi.yml. The allow-absent names are
       # correct globs that tree lacks but other exemplars carry (swiftly,
-      # tuist, swift-async-algorithms), plus the depth files' never-matching
-      # on-demand globs. Set SWIFT_CONSUMER to a SwiftPM checkout to also check
-      # glob liveness.
+      # tuist, swift-async-algorithms). Set SWIFT_CONSUMER to a SwiftPM checkout
+      # to also check glob liveness.
       - |
         if [ -n "{{.SWIFT_CONSUMER}}" ] && [ -f "{{.SWIFT_CONSUMER}}/Package.swift" ]; then
-          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --root {{.SWIFT_CONSUMER}} --forbid '/home/mherwig' --forbid '.agents/research' --allow-absent '**/.swiftformat' --allow-absent '**/.swiftlint.yml' --allow-absent '**/Package@swift-*.swift' --allow-absent '**/.swift-quality-depth-on-demand' --allow-absent '**/.swift-package-depth-on-demand' rules/swift-quality.md rules/swift-package.md skills/swift-upgrade skills/swift-diagnose skills/swift-release
+          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --root {{.SWIFT_CONSUMER}} --forbid '/home/mherwig' --forbid '.agents/research' --allow-absent '**/.swiftformat' --allow-absent '**/.swiftlint.yml' --allow-absent '**/Package@swift-*.swift' rules/swift-quality.md rules/swift-package.md skills/swift-upgrade skills/swift-diagnose skills/swift-release
         else
           echo "note: SWIFT_CONSUMER unset — glob liveness NOT checked for swift; set it to a SwiftPM checkout to include it"
           {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' rules/swift-quality.md rules/swift-package.md skills/swift-upgrade skills/swift-diagnose skills/swift-release
@@ -182,12 +181,11 @@ tasks:
       # (`nuget.config` in DapperLib, coverlet and FluentValidation;
       # `NuGet.Config` in BenchmarkDotNet, xunit and StackExchange.Redis;
       # `*.cake` in cake-build), `*.csx`, the C# script extension, which no
-      # corpus tree carries, and the depth files' never-matching on-demand
-      # globs. Set CSHARP_CONSUMER to a .NET checkout with a `global.json` to
-      # also check glob liveness.
+      # corpus tree carries. Set CSHARP_CONSUMER to a .NET checkout with a
+      # `global.json` to also check glob liveness.
       - |
         if [ -n "{{.CSHARP_CONSUMER}}" ] && [ -f "{{.CSHARP_CONSUMER}}/global.json" ]; then
-          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --root {{.CSHARP_CONSUMER}} --forbid '/home/mherwig' --forbid '.agents/research' --allow-absent '**/nuget.config' --allow-absent '**/NuGet.Config' --allow-absent '**/*.csx' --allow-absent '**/*.cake' --allow-absent '**/.csharp-quality-depth-on-demand' --allow-absent '**/.dotnet-build-depth-on-demand' rules/csharp-quality.md rules/dotnet-build.md skills/dotnet-upgrade skills/dotnet-diagnose skills/dotnet-release
+          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --root {{.CSHARP_CONSUMER}} --forbid '/home/mherwig' --forbid '.agents/research' --allow-absent '**/nuget.config' --allow-absent '**/NuGet.Config' --allow-absent '**/*.csx' --allow-absent '**/*.cake' rules/csharp-quality.md rules/dotnet-build.md skills/dotnet-upgrade skills/dotnet-diagnose skills/dotnet-release
         else
           echo "note: CSHARP_CONSUMER unset — glob liveness NOT checked for dotnet; set it to a .NET checkout to include it"
           {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' rules/csharp-quality.md rules/dotnet-build.md skills/dotnet-upgrade skills/dotnet-diagnose skills/dotnet-release
@@ -196,16 +194,15 @@ tasks:
       # The shell set is checked against SHELL_CONSUMER (default ../www-setup),
       # a tree holding shell, PowerShell, workflow and Taskfile files. The
       # allow-absent names are correct globs that tree lacks (zsh, ksh, a
-      # shellcheckrc, composite actions, .yaml workflows, GitLab CI) plus the
-      # depth files' never-matching on-demand globs. The guard probes for
-      # shell CONTENT, so an adopter without that tree falls through to the
+      # shellcheckrc, composite actions, .yaml workflows, GitLab CI). The guard probes
+      # for shell CONTENT, so an adopter without that tree falls through to the
       # rootless check and CI never breaks on its absence.
       - |
         if [ -d "{{.SHELL_CONSUMER}}" ] && [ -n "$(find "{{.SHELL_CONSUMER}}" -name '*.sh' -not -path '*/node_modules/*' -not -path '*/.agents/*' -print -quit 2>/dev/null)" ]; then
-          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --root {{.SHELL_CONSUMER}} --forbid '/home/' --forbid '.cache/research-lang' --forbid 'matrix.sh' --allow-absent '**/*.zsh' --allow-absent '**/*.ksh' --allow-absent '**/.shellcheckrc' --allow-absent '**/action.yml' --allow-absent '**/action.yaml' --allow-absent '**/.github/workflows/*.yaml' --allow-absent '**/Taskfile.yml' --allow-absent '**/.gitlab-ci.yml' --allow-absent '**/.gitlab-ci/*.yml' --allow-absent '**/.shell-quality-depth-on-demand' --allow-absent '**/.powershell-quality-depth-on-demand' rules/shell-quality.md rules/shell-quality rules/powershell-quality.md rules/powershell-quality skills/shell-integration skills/installer-script skills/shell-port skills/shell-diagnose
+          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --root {{.SHELL_CONSUMER}} --forbid '/home/' --forbid '.cache/research-lang' --forbid 'matrix.sh' --allow-absent '**/*.zsh' --allow-absent '**/*.ksh' --allow-absent '**/.shellcheckrc' --allow-absent '**/action.yml' --allow-absent '**/action.yaml' --allow-absent '**/.github/workflows/*.yaml' --allow-absent '**/Taskfile.yml' --allow-absent '**/.gitlab-ci.yml' --allow-absent '**/.gitlab-ci/*.yml' rules/shell-quality.md rules/powershell-quality.md skills/shell-integration skills/installer-script skills/shell-port skills/shell-diagnose
         else
           echo "note: no shell tree under {{.SHELL_CONSUMER}} — glob liveness NOT checked for shell; set SHELL_CONSUMER to a tree with shell and PowerShell files to include it"
-          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --forbid '/home/' --forbid '.cache/research-lang' --forbid 'matrix.sh' rules/shell-quality.md rules/shell-quality rules/powershell-quality.md rules/powershell-quality skills/shell-integration skills/installer-script skills/shell-port skills/shell-diagnose
+          {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --forbid '/home/' --forbid '.cache/research-lang' --forbid 'matrix.sh' rules/shell-quality.md rules/powershell-quality.md skills/shell-integration skills/installer-script skills/shell-port skills/shell-diagnose
         fi
       #
       # Every checks/*.py script carries its own fixtures and its own
@@ -213,17 +210,17 @@ tasks:
       # to the artifact validation above, not only the first time a real page
       # hits it.
       - |
-        for s in rules/docs-quality/checks/*.py; do
+        for s in skills/docs-quality-reference/checks/*.py; do
           {{.PY}} "$s" --self-test || exit 1
         done
       #
       # Dogfood: this rule set is held to the plain-English limits it
       # prescribes, run over its own index, its depth files, both skills and
       # their own description companions. Findings fail the task.
-      # Named files, not the directory: `rules/docs-quality/checks/fixtures/`
+      # Named files, not the directory: `skills/docs-quality-reference/checks/fixtures/`
       # holds planted violations by design, and a directory walk would report
       # every one of them as a finding against the rule set.
-      - "{{.PY}} rules/docs-quality/checks/prose.py rules/docs-quality.md rules/docs-quality/*.md skills/docs-plan/SKILL.md skills/docs-plan/references/*.md skills/docs-instrument/SKILL.md skills/docs-instrument/references/*.md docs/docs-*.md"
+      - "{{.PY}} skills/docs-quality-reference/checks/prose.py rules/docs-quality.md skills/docs-quality-reference/*.md skills/docs-plan/SKILL.md skills/docs-plan/references/*.md skills/docs-instrument/SKILL.md skills/docs-instrument/references/*.md docs/docs-*.md"
       #
       # Bazel is checked against a single Bazel consumer (`../rules_ocx` by
       # default), the same way Rust is. The glob set is the fifteen names the
@@ -258,8 +255,8 @@ tasks:
       # The code-comments set is checked WITHOUT a root, for the CSS and JVM
       # reason: it globs one extension per language across a dozen languages,
       # an extension glob for a language cannot be a typo, and no single tree
-      # carries every one of them. The rule .md path covers its support
-      # directory, fixtures included. `--forbid` keeps workstation paths and
+      # carries every one of them. The rule .md path covers its sibling
+      # `skills/code-docs-reference` skill, fixtures included. `--forbid` keeps workstation paths and
       # the research corpus out of a shareable artifact.
       - "{{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' rules/code-docs.md skills/code-docs-cleanup"
       #
@@ -267,7 +264,7 @@ tasks:
       # above. The cleanup skill's gate is one of them, and a broken one passes
       # the cleanups it exists to fail.
       - |
-        for s in rules/code-docs/checks/*.py; do
+        for s in skills/code-docs-reference/checks/*.py; do
           {{.PY}} "$s" --self-test || exit 1
         done
     vars:

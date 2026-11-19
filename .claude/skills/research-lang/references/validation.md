@@ -56,7 +56,8 @@ read it.
 
 Exit 0 is clean, 1 is findings, 2 is a bad invocation. It needs python3
 and nothing else. It understands a skill directory (a directory holding
-`SKILL.md`), a rule file with an optional sibling support directory, and
+`SKILL.md`), a rule file (whose sibling `skills/<stem>-reference` support skill it
+also checks), and
 a directory containing either.
 
 Wire it into CI on every change to the artifacts. A structural check that

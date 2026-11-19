@@ -14,6 +14,8 @@ summary: The documentation quality index. The page declaration every check reads
 keywords: documentation,docs,technical-writing,diataxis,plain-english,readability,tested-examples,doctest,code-fences,asciinema,navigation,information-architecture,link-checking,anchors,changelog,readme,runbook,markdownlint,vale,mkdocs,vitepress,mdbook,docusaurus,starlight,sphinx,llms-txt,agent-readable
 license: Apache-2.0
 repository: https://github.com/ocx-sh/grimoire-lore
+metadata:
+  grim.requires.skills.docs-quality-reference: "./docs-quality-reference:0"
 ---
 
 # Documentation quality
@@ -96,7 +98,7 @@ resolves to the file the routing table names.
 
 ## The gate
 
-`checks/` is this rule's own directory of runnable files. Every script needs
+`checks/` is the `docs-quality-reference/checks/` directory of runnable files. Every script needs
 Python 3.11 at least, imports nothing outside the standard library, and reads
 source markdown only. Each exits 0 clean, 1 findings, 2 usage error. Run them in
 this order, because each later one reads the declaration the first one checks.
@@ -125,7 +127,7 @@ verification.
 **Dogfood.** This set is held to the rules it prescribes, by the same script.
 
 ```bash
-python3 rules/docs-quality/checks/prose.py rules/docs-quality.md rules/docs-quality/*.md
+python3 skills/docs-quality-reference/checks/prose.py rules/docs-quality.md skills/docs-quality-reference/*.md
 ```
 
 It reports nothing on the index, the depth files, both skills and their
@@ -135,17 +137,19 @@ violations by design.
 ## Where the depth is
 
 Read the file for the work you are about to do. One level deep, and these files
-never link each other.
+never link each other. Depth files and checks scripts ship in the `docs-quality-reference`
+skill this rule requires. Load it, or read `.claude/skills/docs-quality-reference/<file>`
+(`~/.claude/skills/` when installed globally).
 
 | Doing | Read |
 |---|---|
-| Deciding which page type this is, what it must contain, and how to declare it | [docs-quality/page-types.md](docs-quality/page-types.md) |
-| Writing or reviewing prose: sentence and paragraph limits, punctuation, readability, AI tells, headings, link style | [docs-quality/plain-english.md](docs-quality/plain-english.md) |
-| Adding a code fence, wiring a doc-example test, recording a terminal cast, or adding tabs, a tooltip or a sandbox | [docs-quality/examples.md](docs-quality/examples.md) |
-| Changing the sidebar, splitting a long page, adding an anchor, or fixing a query that finds nothing | [docs-quality/navigation.md](docs-quality/navigation.md) |
-| Standing up docs signals: link and drift gates, the runbook blocking split, the signal manifest, error identifiers | [docs-quality/observability.md](docs-quality/observability.md) |
-| Deciding what the site owes an agent reader: the Markdown twin, `llms.txt`, agent-directed callouts | [docs-quality/machine-readers.md](docs-quality/machine-readers.md) |
-| Running, extending or debugging a check, or reading what its fixtures prove | [docs-quality/checks.md](docs-quality/checks.md) |
+| Deciding which page type this is, what it must contain, and how to declare it | [docs-quality-reference/page-types.md](../skills/docs-quality-reference/page-types.md) |
+| Writing or reviewing prose: sentence and paragraph limits, punctuation, readability, AI tells, headings, link style | [docs-quality-reference/plain-english.md](../skills/docs-quality-reference/plain-english.md) |
+| Adding a code fence, wiring a doc-example test, recording a terminal cast, or adding tabs, a tooltip or a sandbox | [docs-quality-reference/examples.md](../skills/docs-quality-reference/examples.md) |
+| Changing the sidebar, splitting a long page, adding an anchor, or fixing a query that finds nothing | [docs-quality-reference/navigation.md](../skills/docs-quality-reference/navigation.md) |
+| Standing up docs signals: link and drift gates, the runbook blocking split, the signal manifest, error identifiers | [docs-quality-reference/observability.md](../skills/docs-quality-reference/observability.md) |
+| Deciding what the site owes an agent reader: the Markdown twin, `llms.txt`, agent-directed callouts | [docs-quality-reference/machine-readers.md](../skills/docs-quality-reference/machine-readers.md) |
+| Running, extending or debugging a check, or reading what its fixtures prove | [docs-quality-reference/checks.md](../skills/docs-quality-reference/checks.md) |
 
 ## Severity
 

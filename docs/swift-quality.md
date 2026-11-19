@@ -6,7 +6,7 @@ Standards for writing and reviewing Swift: the gate, twenty-four merge-blocking 
 grim add ghcr.io/ocx-sh/lore/swift-quality
 ```
 
-Loads on `**/*.swift`. The index is 206 lines and always present. A depth file is read only when the work calls for it. It ships beside `swift-package` in `swift-essentials`, and that rule owns the manifest, the lint and format configs and the release builds.
+Loads on `**/*.swift`. The index is 208 lines and always present. A depth file is read only when the work calls for it. It ships beside `swift-package` in `swift-essentials`, and that rule owns the manifest, the lint and format configs and the release builds. The depth files and `checks/` scripts ship in the `swift-quality-reference` skill, which the rule requires and grim installs with it (grim 0.16.0 or later).
 
 ## It starts by reading the manifest and compiling the claim
 

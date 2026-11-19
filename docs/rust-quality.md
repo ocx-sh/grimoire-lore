@@ -12,10 +12,10 @@ Loads on any `**/*.rs`.
 
 ## What loads, and when
 
-The rule itself is an **index**: about 110 lines carrying the verification
+The rule itself is an **index**: about 130 lines carrying the verification
 gate, twenty non-negotiables, and a routing table. Depth lives in 18
-sibling files that load only when the work calls for them, so writing a
-`Drop` impl never costs you the TUI rules.
+files that load only when the work calls for them, so writing a
+`Drop` impl never costs you the TUI rules. They ship in the `rust-quality-reference` skill, which the rule requires and grim installs with it (grim 0.16.0 or later).
 
 | Doing… | Read |
 |---|---|

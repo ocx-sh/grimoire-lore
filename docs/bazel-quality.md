@@ -7,11 +7,13 @@ merge-blocking non-negotiables, and fifteen depth files routed to by task.
 grim add ghcr.io/ocx-sh/lore/bazel-quality
 ```
 
+The depth files and checks scripts ship in the [`bazel-quality-reference`](bazel-quality-reference.md) skill, which the rule requires and grim installs with it (grim 0.16.0 or later).
+
 Loads on the files the build system itself names: `BUILD.bazel`, `BUILD`,
 `*.bzl`, `MODULE.bazel` and its lockfile, `REPO.bazel`, the rc files
 (`.bazelrc`, `*.bazelrc`, `.bazelrc.*`), `.bazelversion`, `.bazelignore`,
 `*.star`, `*.scl`, and the three legacy `WORKSPACE` names it exists to catch.
-The index is 169 lines and always present; a depth file is read only when
+The index is 175 lines and always present; a depth file is read only when
 the work calls for it. It deliberately never loads on `Cargo.toml`,
 `pyproject.toml`, `package.json` or a source file — the language sets own
 those.

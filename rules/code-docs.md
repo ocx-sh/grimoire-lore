@@ -60,6 +60,8 @@ summary: The code-comments index, holding the guard floor, where each clause goe
 keywords: comments,code-comments,doc-comments,docstrings,rustdoc,tsdoc,jsdoc,godoc,javadoc,kdoc,guards,comment-density,ratchet,decision-records,adr,plan-ids,process-ids,interface-text,clap,json-schema,mcp,ai-agents
 license: Apache-2.0
 repository: https://github.com/ocx-sh/grimoire-lore
+metadata:
+  grim.requires.skills.code-docs-reference: "./code-docs-reference:0"
 ---
 
 # Code comments
@@ -81,7 +83,7 @@ Contents: [The gate](#the-gate) · [Non-negotiables](#non-negotiables) ·
 
 ## The gate
 
-`checks/` below means this rule's own `code-docs/checks/` directory, wherever
+`checks/` below means the `code-docs-reference/checks/` directory, wherever
 it is installed. The scripts import only the standard library and each other,
 so keep the directory whole. Two awk filters in it, `file_gate.awk` and
 `hex_in_comment.awk`, back spot checks in the depth files and run on any POSIX
@@ -109,7 +111,7 @@ SCHEMAS=schemas; python3 checks/interface_leak.py "$SCHEMAS"                    
   files, and run the `--check` lines in CI. From then on `--update` only lowers
   keys; a raised key needs `--allow-regression` and a reviewer. The checks skip
   installed agent rules and skills (`.claude/rules/`, `.opencode/skills/`),
-  where this rule's own checks and fixtures sit.
+  where the checks and fixtures sit.
 - **Files.** The census rewrites its baseline whole; `ids` and `pointers`
   rewrite only their own keys and share one. Caps, library packages and
   `interface_files` (sources an unrecognised generator renders, SRF-01) live in
@@ -183,15 +185,17 @@ medians, about 0.12 for apps and 0.27 for libraries, are context beside
 ## Where the depth is
 
 Read the file for the work you are about to do. One level deep: these files
-never link each other.
+never link each other. Depth files and checks scripts ship in the `code-docs-reference`
+skill this rule requires. Load it, or read `.claude/skills/code-docs-reference/<file>`
+(`~/.claude/skills/` when installed globally).
 
 | Doing | Read |
 |---|---|
-| Writing, shortening or judging a comment that protects a line: what it must say, doc or plain register, whether a test, lint or type owns it, exhaustive matches, a named RAII binding, moving a guard into a type | [code-docs/guards.md](code-docs/guards.md) |
-| Deciding where a clause goes: splitting an essay, moving an argument to a decision record or an invariant to a path-scoped rule, keeping or dropping history, pointing at a test or a sibling function, naming a test after its guard | [code-docs/routing.md](code-docs/routing.md) |
-| Citing a decision record, removing a plan or process ID, switching the ID ban on in a repo, deleting or renaming a file that records cite, or repairing a stale citation | [code-docs/linkage.md](code-docs/linkage.md) |
-| Editing a doc comment or string that renders into help, a JSON Schema, an MCP tool list or published API docs, writing a doc summary line, or writing a module doc | [code-docs/surfaces.md](code-docs/surfaces.md) |
-| A block over its cap, adopting or updating the length baseline, declaring a library package, or reading the census report | [code-docs/length.md](code-docs/length.md) |
+| Writing, shortening or judging a comment that protects a line: what it must say, doc or plain register, whether a test, lint or type owns it, exhaustive matches, a named RAII binding, moving a guard into a type | [code-docs-reference/guards.md](../skills/code-docs-reference/guards.md) |
+| Deciding where a clause goes: splitting an essay, moving an argument to a decision record or an invariant to a path-scoped rule, keeping or dropping history, pointing at a test or a sibling function, naming a test after its guard | [code-docs-reference/routing.md](../skills/code-docs-reference/routing.md) |
+| Citing a decision record, removing a plan or process ID, switching the ID ban on in a repo, deleting or renaming a file that records cite, or repairing a stale citation | [code-docs-reference/linkage.md](../skills/code-docs-reference/linkage.md) |
+| Editing a doc comment or string that renders into help, a JSON Schema, an MCP tool list or published API docs, writing a doc summary line, or writing a module doc | [code-docs-reference/surfaces.md](../skills/code-docs-reference/surfaces.md) |
+| A block over its cap, adopting or updating the length baseline, declaring a library package, or reading the census report | [code-docs-reference/length.md](../skills/code-docs-reference/length.md) |
 | Shortening existing comments in bulk, cutting a file toward its baseline, or removing plan IDs across a tree | run the `code-docs-cleanup` skill; IDs in test files and test regions go in a separate test-only change |
 
 ## Severity

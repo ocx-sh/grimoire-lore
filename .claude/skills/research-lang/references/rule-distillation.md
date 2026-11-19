@@ -4,7 +4,7 @@ You loaded this file because the research is done and you are turning
 consolidated rulesets into artifacts an agent loads while it codes.
 
 Contents: [The Funnel](#the-funnel) · [Selection](#selection) ·
-[Placement](#placement) · [The Index + Support Directory Shape](#the-index--support-directory-shape) ·
+[Placement](#placement) · [The Index + Support Skill Shape](#the-index--support-skill-shape) ·
 [Rule Anatomy](#rule-anatomy) ·
 [Verification Commands](#verification-commands) · [Severity](#severity) ·
 [Writing for an Agent Reader](#writing-for-an-agent-reader) ·
@@ -54,7 +54,7 @@ these clearly; they are the ones a future reader must not re-litigate.
 | The content is… | Ships as |
 |---|---|
 | A standard that applies while editing files of one kind | Glob-scoped rule |
-| Depth behind that standard — tables, worked examples, decision trees | A file in the rule's **support directory**, loaded on demand |
+| Depth behind that standard — tables, worked examples, decision trees | A file in the rule's **support skill** (`skills/<set>-reference/`), loaded on demand |
 | A procedure with steps, run occasionally (a review, a refactor, a migration) | Skill |
 | A mechanical check that must happen every time | Script, hook, or CI job — never prose |
 | A pinned project decision (codes, taxonomies, layouts) | The scoped rule's index, so it is never missed |
@@ -88,7 +88,7 @@ safe where the test runner requires the suffix. A module *name* almost
 never is.
 
 The alternative costs one line. Widen the rule to the language extension,
-keep the depth in the support directory, and put a subject-worded pointer
+keep the depth in the support skill, and put a subject-worded pointer
 in the index — *"ending a process, choosing a status, or writing to
 stdout? read this"*. The index always loads, the pointer describes what
 the reader is doing rather than what the file is called, and the depth is
@@ -99,25 +99,44 @@ Fewer artifacts also means fewer things to install and version, and the
 opt-out granularity you give up matters only if a real adopter wants half
 the set. Do not carry that cost for a hypothetical one.
 
-## The Index + Support Directory Shape
+## The Index + Support Skill Shape
 
 A language's quality surface does not fit in 200 lines, and splitting it
 into eight sibling rules that all glob `**/*.<ext>` just rebuilds the
 monolith with extra steps — every one of them loads together.
 
-Use one index plus a support directory:
+Use one index rule plus a support skill. grim refuses a rule with a
+support directory, so the depth lives in a sibling skill the rule requires:
 
 ```
 rules/
   <lang>-quality.md        # the index: non-negotiables + routing table
-  <lang>-quality/          # depth, read on demand
+  <lang>-manifests.md      # separate rule: genuinely different glob
+skills/
+  <lang>-quality-reference/  # support skill: depth, read on demand
+    SKILL.md                 # thin file list, user-invocable: "false"
     architecture.md
     errors.md
     async.md
     testing.md
     security.md
-  <lang>-manifests.md      # separate rule: genuinely different glob
+    checks/                  # scripts the verification commands run
 ```
+
+- The rule requires its skill through
+  `metadata: grim.requires.skills.<lang>-quality-reference: "./<lang>-quality-reference:0"`
+  (`:0` claims `<1.0.0`, so a skill 1.0.0 is a deliberate break). The skill
+  name differs from the rule name because the namespace is flat.
+- `SKILL.md` is a thin file list with `claude.user-invocable: "false"`. Never
+  set `claude.disable-model-invocation`: the agent must be able to load it.
+- Index links are labelled `<set>-reference/x.md` and point at
+  `../skills/<set>-reference/x.md`.
+  The index also names the skill in one sentence and gives the literal path
+  `.claude/skills/<set>-reference/<file>`, because some agent workers read
+  rules but cannot discover skills.
+- Depth files carry no `paths` frontmatter. The old sentinel
+  (`paths: ["**/.<set>-depth-on-demand"]`) existed to keep files under
+  `rules/` from loading; they no longer live there.
 
 - The **index** holds only what must be true in every edit: the shortest
   possible non-negotiable list, the verification command, and a routing
@@ -183,9 +202,9 @@ matches nothing. Write every cell in this dialect.
   boundary, `-t TYPE` and `-g GLOB` become pathspecs, `--files-without-match`
   is `grep -L`.
 - **Multi-line, lookaround, backreference and `-P` matches, and "file has A
-  and lacks B", are a small POSIX awk script** in the set's own `checks/`
-  directory, run as the git-fed list piped to `xargs -0 -r awk -f
-  checks/NAME.awk --`. Pass patterns through the environment, not `-v`, which
+  and lacks B", are a small POSIX awk script** in the support skill's
+  `checks/` directory (the rule pins `CHECKS=.claude/skills/<set>-reference/checks`), run as the git-fed list piped to `xargs -0 -r awk -f
+  "$CHECKS"/NAME.awk --`. Pass patterns through the environment, not `-v`, which
   rewrites backslashes. Use `LC_ALL=C` where byte classes matter.
 - **No `$(...)`, no backticks and no angle-bracket placeholders** in a
   command. A subject the reader supplies is a quoted variable the prose
@@ -200,7 +219,7 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' ':(excl
   | xargs -0 -r grep -H -n -e 'exec\.Command(' --
 # RULE-08: files that spawn a child and never set a wait delay
 git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.go' \
-  | HAS='exec\.Command\(' LACKS='\.WaitDelay' xargs -0 -r awk -f checks/file_gate.awk --
+  | HAS='exec\.Command\(' LACKS='\.WaitDelay' xargs -0 -r awk -f "$CHECKS"/file_gate.awk --
 ```
 
 Watch each cell go red on a planted file and green on its clean twin under

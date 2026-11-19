@@ -6,6 +6,8 @@ summary: Python manifests and distribution — the version floor that must actua
 keywords: python,pyproject,packaging,uv,lockfile,requires-python,classifiers,py.typed,dependency-groups,trusted-publishing,hatchling,deptry
 license: Apache-2.0
 repository: https://github.com/ocx-sh/grimoire-lore
+metadata:
+  grim.requires.skills.python-packaging-reference: "./python-packaging-reference:0"
 ---
 
 # Python Packaging
@@ -44,9 +46,12 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)**/pyproject.tom
 | PY-PKG-06 | Declared dependencies match imported ones, checked with the project's own configured ignores — `deptry` invoked naively reported 67 phantom findings here against a real answer of zero, so the configuration is part of the rule and not a detail. | `uvx deptry . --optional-dependencies-dev-groups dev` from the project directory, plus whatever `--exclude` the project needs to cover `tests`. A finding that survives the configured run is the violation; a naive `deptry .` is not evidence either way. | SHOULD |
 | PY-PKG-07 | Development-only tooling lives in PEP 735 `[dependency-groups]`, not in `[project.optional-dependencies]` — an extra is installable by a consumer, so a `dev` extra offers the world a way to pull your test stack. | see block PY-PKG-07 and name any group holding a linter, a type checker or a test runner. Each is the violation; a `docs` extra is defensible and a `dev` extra is not. | SHOULD |
 
+The checks script ships in the `python-packaging-reference` skill this rule requires; load it, or read
+`.claude/skills/python-packaging-reference/checks/context.awk` (`~/.claude/skills/` when installed globally).
+
 ```sh
 # PY-PKG-07
-CHECKS=.claude/rules/python-packaging/checks    # where this rule's checks/ directory is installed
+CHECKS=.claude/skills/python-packaging-reference/checks    # where the reference skill's checks/ directory is installed
 git ls-files -z --cached --others --exclude-standard -- ':(glob)**/pyproject.toml' | PAT=optional-dependencies AFTER=12 BEFORE=0 xargs -0 -r awk -f "$CHECKS/context.awk" --
 ```
 

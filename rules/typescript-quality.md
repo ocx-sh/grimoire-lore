@@ -11,6 +11,8 @@ summary: The TypeScript quality index — the gate, the non-negotiables, and whe
 keywords: typescript,quality,standards,review,types,async,errors,exit-codes,security,modules,testing,eslint,biome,tsconfig,node,browser,vscode
 license: Apache-2.0
 repository: https://github.com/ocx-sh/grimoire-lore
+metadata:
+  grim.requires.skills.typescript-quality-reference: "./typescript-quality-reference:0"
 ---
 
 # TypeScript Quality
@@ -25,7 +27,7 @@ Contents: [The Gate](#the-gate) · [Non-Negotiables](#non-negotiables) ·
 [Siblings](#siblings)
 
 **Before trusting any rule below, confirm the lint is type-aware — read
-[typescript-quality/gate.md](typescript-quality/gate.md) first.** Roughly
+[typescript-quality-reference/gate.md](../skills/typescript-quality-reference/gate.md) first.** Roughly
 fifty rules, including the whole `no-unsafe-*` family,
 `no-floating-promises`, `no-misused-promises` and
 `switch-exhaustiveness-check`, need a type checker and are **off by
@@ -110,20 +112,23 @@ grep -H -n -E -e eslint-disable -e biome-ignore -e '\.skip\(' -e '\.only\(' -- "
 Read the file for the work you are about to do, not for the topic it is
 filed under. One level deep; these files do not point at each other.
 
+Depth files and checks scripts ship in the `typescript-quality-reference` skill this rule requires; load it, or read
+`.claude/skills/typescript-quality-reference/<file>` (`~/.claude/skills/` when installed globally).
+
 | Doing… | Read |
 |---|---|
-| Turning on a lint rule, wiring CI, or making a check able to go red at all | [typescript-quality/gate.md](typescript-quality/gate.md) |
-| Writing `as`, `any`, a type predicate, an `enum`, a union arm, or a `declare` block | [typescript-quality/types.md](typescript-quality/types.md) |
-| Adding an outbound call, a timer, an `await`, an async callback, or a fan-out over an array | [typescript-quality/async.md](typescript-quality/async.md) |
-| Throwing, catching, rethrowing, or turning an untrusted payload into a typed value | [typescript-quality/errors.md](typescript-quality/errors.md) |
-| Ending a process, choosing an exit status, parsing argv, or writing to stdout | [typescript-quality/cli-contract.md](typescript-quality/cli-contract.md) |
-| Spawning a child process, setting an interval, opening a handle, or writing `using` | [typescript-quality/resources.md](typescript-quality/resources.md) |
-| Editing an import specifier, a `module`/`moduleResolution` field, or a package's `"type"` | [typescript-quality/modules.md](typescript-quality/modules.md) |
-| Passing outside data to a shell, a path, an object key, a regex, or an HTML sink; touching a credential or an install script | [typescript-quality/security.md](typescript-quality/security.md) |
-| Writing a test, a coverage threshold, a type-level assertion, or a fake | [typescript-quality/testing.md](typescript-quality/testing.md) |
-| Adding a log line, a catch that does not rethrow, a `.sort()`, or a formatted date | [typescript-quality/observability.md](typescript-quality/observability.md) |
-| Rendering HTML, binding a URL, editing a CSP or a generated client, growing the bundle | [typescript-quality/browser.md](typescript-quality/browser.md) |
-| Writing code that runs inside an editor or Electron extension host — `activate()`, a webview, the host bundle, a host-API double | [typescript-quality/extension-host.md](typescript-quality/extension-host.md) |
+| Turning on a lint rule, wiring CI, or making a check able to go red at all | [typescript-quality-reference/gate.md](../skills/typescript-quality-reference/gate.md) |
+| Writing `as`, `any`, a type predicate, an `enum`, a union arm, or a `declare` block | [typescript-quality-reference/types.md](../skills/typescript-quality-reference/types.md) |
+| Adding an outbound call, a timer, an `await`, an async callback, or a fan-out over an array | [typescript-quality-reference/async.md](../skills/typescript-quality-reference/async.md) |
+| Throwing, catching, rethrowing, or turning an untrusted payload into a typed value | [typescript-quality-reference/errors.md](../skills/typescript-quality-reference/errors.md) |
+| Ending a process, choosing an exit status, parsing argv, or writing to stdout | [typescript-quality-reference/cli-contract.md](../skills/typescript-quality-reference/cli-contract.md) |
+| Spawning a child process, setting an interval, opening a handle, or writing `using` | [typescript-quality-reference/resources.md](../skills/typescript-quality-reference/resources.md) |
+| Editing an import specifier, a `module`/`moduleResolution` field, or a package's `"type"` | [typescript-quality-reference/modules.md](../skills/typescript-quality-reference/modules.md) |
+| Passing outside data to a shell, a path, an object key, a regex, or an HTML sink; touching a credential or an install script | [typescript-quality-reference/security.md](../skills/typescript-quality-reference/security.md) |
+| Writing a test, a coverage threshold, a type-level assertion, or a fake | [typescript-quality-reference/testing.md](../skills/typescript-quality-reference/testing.md) |
+| Adding a log line, a catch that does not rethrow, a `.sort()`, or a formatted date | [typescript-quality-reference/observability.md](../skills/typescript-quality-reference/observability.md) |
+| Rendering HTML, binding a URL, editing a CSP or a generated client, growing the bundle | [typescript-quality-reference/browser.md](../skills/typescript-quality-reference/browser.md) |
+| Writing code that runs inside an editor or Electron extension host — `activate()`, a webview, the host bundle, a host-API double | [typescript-quality-reference/extension-host.md](../skills/typescript-quality-reference/extension-host.md) |
 | Editing `package.json`, any `tsconfig*.json`, or a lint config file itself | `typescript-packaging` (sibling set — see below) |
 
 ## Severity

@@ -8,9 +8,11 @@ files routed to by task.
 grim add ghcr.io/ocx-sh/lore/cmake-build
 ```
 
+The depth files and checks scripts ship in the [`cmake-build-reference`](cmake-build-reference.md) skill, which the rule requires and grim installs with it (grim 0.16.0 or later).
+
 Loads on `**/CMakeLists.txt`, `**/*.cmake`, `**/*.cmake.in`,
 `**/CMakeLists.txt.in`, `**/CMakePresets.json`, `**/CMakeUserPresets.json`,
-`**/*.pc.in`, `**/.gersemirc` and `**/.cmake-format*`. The index is 180 lines
+`**/*.pc.in`, `**/.gersemirc` and `**/.cmake-format*`. The index is 185 lines
 and always present. A depth file is read only when the work calls for it.
 
 ## It starts with what a green configure does not prove
@@ -48,7 +50,7 @@ never because a path pattern matched. A Config template with an unusual
 suffix is the same story one level down, routed from the `CMakeLists.txt`
 that wires it rather than matched by name. A vcpkg triplet is a `.cmake` file
 too, but it loads only this rule, which then routes it sideways into
-`cpp-packaging/vcpkg.md`.
+`cpp-packaging-reference/vcpkg.md`.
 
 ## One dependency provider exists
 

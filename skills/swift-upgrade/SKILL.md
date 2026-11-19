@@ -52,8 +52,8 @@ The rules are cited by ID and live in the `swift-quality` and `swift-package`
 rule sets (SW-CORE, SW-CONC, SW-LANG, SW-PKG, SW-GATE and the families they
 cite). **This skill needs both rule sets installed.** The scripts it names
 (`canary.sh`, `k07.sh`, `fold-check.sh`, `weaken-check.sh`, `generated-touch.sh`)
-live in the `swift-quality` `checks/` directory, default
-`.claude/rules/swift-quality/checks/`. Without them, stop and ask. Writing new
+live in the `swift-quality-reference` skill's `checks/` directory, default
+`.claude/skills/swift-quality-reference/checks/`. Without them, stop and ask. Writing new
 concurrent code is the rules' job. A crash, hang or slow type-check afterwards is
 `swift-diagnose`, and tagging and publishing are `swift-release`.
 
@@ -98,7 +98,7 @@ Each row is an agreed default an adopter overrides once, in their own repository
 S=${TMPDIR:-/tmp}/swift-upgrade; mkdir -p "$S"
 cat > "$S/env.sh" <<'EOF'
 S=${TMPDIR:-/tmp}/swift-upgrade
-CK=${CK:-.claude/rules/swift-quality/checks}   # the swift-quality checks/ directory
+CK=${CK:-.claude/skills/swift-quality-reference/checks}   # the swift-quality-reference checks/ directory
 [ -r "$S/base" ] && BASE=$(cat "$S/base")      # written once in U0
 dk() { docker run --rm -u "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD":/src -w /src "swift:${FLOOR:?set FLOOR}" "$@"; }   # floor image, as you, never root in the tree
 count() { # NAME [swift build flags]: unique own-package diagnostics, sources and tests

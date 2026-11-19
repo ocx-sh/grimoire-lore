@@ -348,12 +348,12 @@ prevent. Each of these is a violation, not a fix:
 | 7 | `-p:TreatWarningsAsErrors=false` on the command line | CS-CORE-01 |
 | 8 | Accepting an advisory by muting it. Accept through `NuGetAuditSuppress` | CS-BUILD-26 |
 
-Before reporting a fix, run this from the repository root (`cd "$R"`). `W` is where the rule is
-installed (the repository's `.claude/rules` or `~/.claude/rules`), and `BASE` is the merge
+Before reporting a fix, run this from the repository root (`cd "$R"`). `W` is where the rule's
+`csharp-quality-reference` skill is installed (the repository's `.claude/skills` or `~/.claude/skills`), and `BASE` is the merge
 target, never a hard-coded `origin/main`:
 
 ```sh
-W=$(find . "$HOME/.claude" -path ./.git -prune -o -path '*csharp-quality/checks/weaken-check.sh' -not -path './.agents/*' -print -quit 2>/dev/null)
+W=$(find . "$HOME/.claude" -path ./.git -prune -o -path '*csharp-quality-reference/checks/weaken-check.sh' -not -path './.agents/*' -print -quit 2>/dev/null)
 : "${W:?MISSING weaken-check.sh, install csharp-quality (Owner handoff)}"
 BASE=$(git symbolic-ref --short refs/remotes/origin/HEAD)
 : "${BASE:?MISSING BASE}"

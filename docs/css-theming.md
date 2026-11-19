@@ -51,6 +51,8 @@ rationale, runnable verification and severity each, a preprocessor section, and
 a table of what twenty-eight surfaces actually emit. Ten depth files carry the
 per-framework divergence: the gate itself, Astro, Vue/VitePress, Svelte,
 Angular, Tailwind, CSS Modules, CSS-in-JS, Web Components, and VS Code webviews.
+They ship in the `css-theming-reference` skill, which the rule requires and grim
+installs with it (grim 0.16.0 or later).
 
 The gate ships as code, not prose — a brace-matching layer checker (a context
 grep silently passes on a one-line production bundle), a literal-colour check

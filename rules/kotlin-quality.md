@@ -8,6 +8,8 @@ summary: The Kotlin quality index — the gate, the non-negotiables, and where t
 keywords: kotlin,jvm,quality,standards,review,coroutines,cancellation,dispatchers,detekt,ktlint,kover,explicit-api,binary-compatibility,abi,jvmtarget,ksp,kapt,java-interop,jspecify,runtest,gradle
 license: Apache-2.0
 repository: https://github.com/ocx-sh/grimoire-lore
+metadata:
+  grim.requires.skills.kotlin-quality-reference: "./kotlin-quality-reference:0"
 ---
 
 # Kotlin Quality
@@ -22,7 +24,7 @@ Contents: [The Gate](#the-gate) · [Non-Negotiables](#non-negotiables) ·
 [Siblings](#siblings)
 
 **Before trusting any rule below, confirm the analyzers actually activate.
-Read [kotlin-quality/lint-gate.md](kotlin-quality/lint-gate.md) first.** detekt's
+Read [kotlin-quality-reference/lint-gate.md](../skills/kotlin-quality-reference/lint-gate.md) first.** detekt's
 shipped `default-detekt-config.yml` activates 129 of its 231 rules, so
 `buildUponDefaultConfig = true` runs 102 of them not at all, and the four
 coroutine rules this rule set leans on are among the off ones. ktlint reads only
@@ -109,15 +111,18 @@ defined in a depth file and only cited here.
 Read the file for the work you are about to do, not for the topic it is filed
 under. One level deep, and these files do not point at each other.
 
+Depth files ship in the `kotlin-quality-reference` skill this rule requires; load it, or read
+`.claude/skills/kotlin-quality-reference/<file>` (`~/.claude/skills/` when installed globally).
+
 | Doing… | Read |
 |---|---|
-| Wiring detekt or ktlint, activating or disabling a rule, editing `.editorconfig`, or promoting Kotlin compiler warnings to errors | [kotlin-quality/lint-gate.md](kotlin-quality/lint-gate.md) |
-| Launching, awaiting, cancelling or collecting, choosing a dispatcher, sharing mutable state, or editing anything with `suspend` in the signature | [kotlin-quality/coroutines.md](kotlin-quality/coroutines.md) |
-| Catching, wrapping or swallowing a failure, opening anything that must be closed, or leaving the process | [kotlin-quality/errors-and-resources.md](kotlin-quality/errors-and-resources.md) |
-| Changing a public Kotlin signature, adding a default parameter, exposing a `data class`, turning on explicit API mode, or wiring BCV or `abiValidation()` | [kotlin-quality/api-and-abi.md](kotlin-quality/api-and-abi.md) |
-| Exposing a Kotlin declaration to Java callers, calling Java from Kotlin, writing `@JvmStatic`, `@JvmOverloads` or `@Throws`, or setting a nullability severity flag | [kotlin-quality/java-interop.md](kotlin-quality/java-interop.md) |
-| Setting `jvmToolchain` or `jvmTarget`, adding a `-X` compiler flag, applying KSP or kapt, or bumping Kotlin, KGP, KSP or Dokka | [kotlin-quality/compiler-and-toolchain.md](kotlin-quality/compiler-and-toolchain.md) |
-| Writing a Kotlin test, wiring or reading a Kover coverage floor, or choosing a test framework | [kotlin-quality/testing.md](kotlin-quality/testing.md) |
+| Wiring detekt or ktlint, activating or disabling a rule, editing `.editorconfig`, or promoting Kotlin compiler warnings to errors | [kotlin-quality-reference/lint-gate.md](../skills/kotlin-quality-reference/lint-gate.md) |
+| Launching, awaiting, cancelling or collecting, choosing a dispatcher, sharing mutable state, or editing anything with `suspend` in the signature | [kotlin-quality-reference/coroutines.md](../skills/kotlin-quality-reference/coroutines.md) |
+| Catching, wrapping or swallowing a failure, opening anything that must be closed, or leaving the process | [kotlin-quality-reference/errors-and-resources.md](../skills/kotlin-quality-reference/errors-and-resources.md) |
+| Changing a public Kotlin signature, adding a default parameter, exposing a `data class`, turning on explicit API mode, or wiring BCV or `abiValidation()` | [kotlin-quality-reference/api-and-abi.md](../skills/kotlin-quality-reference/api-and-abi.md) |
+| Exposing a Kotlin declaration to Java callers, calling Java from Kotlin, writing `@JvmStatic`, `@JvmOverloads` or `@Throws`, or setting a nullability severity flag | [kotlin-quality-reference/java-interop.md](../skills/kotlin-quality-reference/java-interop.md) |
+| Setting `jvmToolchain` or `jvmTarget`, adding a `-X` compiler flag, applying KSP or kapt, or bumping Kotlin, KGP, KSP or Dokka | [kotlin-quality-reference/compiler-and-toolchain.md](../skills/kotlin-quality-reference/compiler-and-toolchain.md) |
+| Writing a Kotlin test, wiring or reading a Kover coverage floor, or choosing a test framework | [kotlin-quality-reference/testing.md](../skills/kotlin-quality-reference/testing.md) |
 | Writing the Java half of any contract above, or editing a `.java` source file | `java-quality` (sibling set, see below) |
 | Editing a build script, a `gradle.properties`, a version catalog, a lockfile or a wrapper descriptor | `gradle-build` (sibling set, see below) |
 | Editing a `pom.xml`, anything under the `.mvn` directory, the Maven wrapper, or a legacy Ant build file | `maven-build` (sibling set, see below) |

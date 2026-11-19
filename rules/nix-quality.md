@@ -7,6 +7,8 @@ summary: The Nix quality index, holding the gate, the non-negotiables, the flake
 keywords: nix,nixpkgs,flake,flakes,flake.lock,follows,derivation,package.nix,overlay,devshell,nixfmt,deadnix,statix,flake-checker,lix,nixconfig,generated-flake,release
 license: Apache-2.0
 repository: https://github.com/ocx-sh/grimoire-lore
+metadata:
+  grim.requires.skills.nix-quality-reference: "./nix-quality-reference:0"
 ---
 
 # Nix Quality
@@ -140,18 +142,20 @@ git diff --name-only -z --diff-filter=d --merge-base "$BASE" -- '*.nix' | xargs 
 
 Read the file for the work you are about to do, not for the topic it is filed
 under. One level deep: these files do not point at each other.
+Depth files ship in the `nix-quality-reference` skill this rule requires; load it, or read
+`.claude/skills/nix-quality-reference/<file>` (`~/.claude/skills/` when installed globally).
 
 | Doing… | Read |
 |---|---|
-| Writing or restructuring `flake.nix` outputs, iterating systems, instantiating nixpkgs, adding packages, overlays, apps, devShells, formatter, checks or templates | [nix-quality/flakes.md](nix-quality/flakes.md) |
-| Adding, removing or retargeting an input, writing `follows`, bumping or reviewing `flake.lock`, using submodules, LFS or sub-flakes | [nix-quality/inputs.md](nix-quality/inputs.md) |
-| Writing or editing a derivation or `package.nix`: fetchers and hashes, `src` filtering, `meta`, phases, version checks, Rust or Python builders | [nix-quality/packaging.md](nix-quality/packaging.md) |
-| Packaging a binary you did not build, or generating packages from an external index (committed data, reader, updater) | [nix-quality/generated-flakes.md](nix-quality/generated-flakes.md) |
-| Running or wiring the gate: formatter, deadnix, statix, `nix flake check`, the CI workflow, installer, cache, implementation legs | [nix-quality/gates.md](nix-quality/gates.md) |
-| Choosing a version string, tagging or publishing, deprecating an output, writing install instructions, supporting non-flake users, running nix-update, preparing a nixpkgs copy | [nix-quality/release.md](nix-quality/release.md) |
-| Writing Nix expressions (`rec`, `let`, `with`, `//`, paths and string context, impure builtins) or reading an evaluation error | [nix-quality/language.md](nix-quality/language.md) |
-| Touching `nixConfig`, tokens, secrets, substituters or trusted keys, the Nix version CI runs, or evaluating a flake you do not own | [nix-quality/security.md](nix-quality/security.md) |
-| Writing a NixOS, home-manager, nix-darwin or flake-parts module a flake exports, or the check that evaluates one | [nix-quality/modules.md](nix-quality/modules.md) |
+| Writing or restructuring `flake.nix` outputs, iterating systems, instantiating nixpkgs, adding packages, overlays, apps, devShells, formatter, checks or templates | [nix-quality-reference/flakes.md](../skills/nix-quality-reference/flakes.md) |
+| Adding, removing or retargeting an input, writing `follows`, bumping or reviewing `flake.lock`, using submodules, LFS or sub-flakes | [nix-quality-reference/inputs.md](../skills/nix-quality-reference/inputs.md) |
+| Writing or editing a derivation or `package.nix`: fetchers and hashes, `src` filtering, `meta`, phases, version checks, Rust or Python builders | [nix-quality-reference/packaging.md](../skills/nix-quality-reference/packaging.md) |
+| Packaging a binary you did not build, or generating packages from an external index (committed data, reader, updater) | [nix-quality-reference/generated-flakes.md](../skills/nix-quality-reference/generated-flakes.md) |
+| Running or wiring the gate: formatter, deadnix, statix, `nix flake check`, the CI workflow, installer, cache, implementation legs | [nix-quality-reference/gates.md](../skills/nix-quality-reference/gates.md) |
+| Choosing a version string, tagging or publishing, deprecating an output, writing install instructions, supporting non-flake users, running nix-update, preparing a nixpkgs copy | [nix-quality-reference/release.md](../skills/nix-quality-reference/release.md) |
+| Writing Nix expressions (`rec`, `let`, `with`, `//`, paths and string context, impure builtins) or reading an evaluation error | [nix-quality-reference/language.md](../skills/nix-quality-reference/language.md) |
+| Touching `nixConfig`, tokens, secrets, substituters or trusted keys, the Nix version CI runs, or evaluating a flake you do not own | [nix-quality-reference/security.md](../skills/nix-quality-reference/security.md) |
+| Writing a NixOS, home-manager, nix-darwin or flake-parts module a flake exports, or the check that evaluates one | [nix-quality-reference/modules.md](../skills/nix-quality-reference/modules.md) |
 | Editing `.envrc` (devShell), a Nix job in `.github/workflows/` or `treefmt.toml` (the gate), or a README install block | flakes.md, gates.md and release.md above, in that order |
 | Diagnosing an evaluation, build or check failure | the `nix-diagnose` skill |
 | Adding a flake to a repository or modernizing one, or cutting a release | the `nix-flake-adopt` and `nix-flake-release` skills |

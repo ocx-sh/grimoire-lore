@@ -175,7 +175,7 @@ Output: the discovery artifact. Schema in
 ## Checks to run
 
 Run these before declaring the run finished. The first three come from the
-`docs-quality` rule set, which ships them under its own `checks/` directory.
+`docs-quality` rule set, which ships them in the `checks/` directory of its `docs-quality-reference` skill.
 
 ```sh
 # Propose a doc_type per page from nav config or heading, for step 12.

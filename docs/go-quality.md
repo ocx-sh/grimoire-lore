@@ -7,8 +7,8 @@ non-negotiables, and ten depth files routed to by task.
 grim add ghcr.io/ocx-sh/lore/go-quality
 ```
 
-Loads on `**/*.go`. The index is 179 lines and always present; a depth file
-is read only when the work calls for it.
+Loads on `**/*.go`. The index is 193 lines and always present; a depth file
+is read only when the work calls for it. The depth files and checks scripts ship in the `go-quality-reference` skill, which the rule requires and grim installs with it (grim 0.16.0 or later).
 
 ## It starts by assuming your gate is quieter than it looks
 

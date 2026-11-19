@@ -19,7 +19,7 @@ grim add ghcr.io/ocx-sh/lore/python-essentials
 
 They have genuinely different globs, which is the only thing that
 justifies a second rule file. Everything that loads on `**/*.py` lives in
-one index plus an on-demand depth directory, because eight sibling rules
+one index plus on-demand depth files, because eight sibling rules
 that all glob the same extension just rebuild a monolith with extra steps
 — every one of them loads together.
 

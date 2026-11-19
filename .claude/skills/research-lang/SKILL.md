@@ -170,7 +170,7 @@ decorative.
 **Phase 7 — Author.** Turn rulesets into artifacts. Read
 [references/rule-distillation.md](references/rule-distillation.md) for
 the shape: what becomes an always-on rule, what becomes a scoped rule
-with a support directory, what becomes a skill, and what becomes a
+with a support skill for its depth, what becomes a skill, and what becomes a
 script. Budgets are hard limits, not targets.
 
 **Phase 8 — Validate.** Run the machine checks and the trigger evals in

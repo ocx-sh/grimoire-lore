@@ -472,7 +472,7 @@ rules relied on:  every rule ID cited above
 ```sh
 git rev-parse -q --verify pre-net10 > /dev/null || { echo "no tag: stopped before DN-UPG-00"; exit 0; }    # an S1, S2 or S10 stop prints this line and nothing below
 n=$(git rev-list --count pre-net10..HEAD); v=$(git log pre-net10..HEAD --format=%B | grep -c '^verify:'); echo "commits $n verify-lines $v"; test "$n" -eq "$v" && echo ok
-d=$PWD; W=; while :; do test -f "$d/.claude/rules/csharp-quality/checks/weaken-check.sh" && { W=$d/.claude/rules/csharp-quality/checks/weaken-check.sh; break; }; [ "$d" = / ] && break; d=$(dirname "$d"); done    # the project install, in the repository or above it
-test -n "$W" || W=${CLAUDE_CONFIG_DIR:-$HOME/.claude}/rules/csharp-quality/checks/weaken-check.sh    # else the user-level install
+d=$PWD; W=; while :; do test -f "$d/.claude/skills/csharp-quality-reference/checks/weaken-check.sh" && { W=$d/.claude/skills/csharp-quality-reference/checks/weaken-check.sh; break; }; [ "$d" = / ] && break; d=$(dirname "$d"); done    # the project install, in the repository or above it
+test -n "$W" || W=${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills/csharp-quality-reference/checks/weaken-check.sh    # else the user-level install
 if test -f "$W"; then BASE=pre-net10 bash "$W"; else echo 'FAIL: weaken-check.sh not found, install csharp-quality'; fi    # from the repository root; it prints the DN-UPG-01 lines (version, allowPrerelease, rollForward, the deleted bulk-severity line): each needs its written reason (CS-BUILD-11)
 ```

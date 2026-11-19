@@ -31,8 +31,9 @@ produced `unverified: reading heuristic`. Report; never fix unless asked.
 
 Read the installed `docs-quality` rule index, then only the depth files its
 routing table names for the target page types. Find it with
-`find . -path '*docs-quality*' -name 'docs-quality.md' -not -path '*/node_modules/*'`.
-Its `checks/` directory sits beside it. No hit means the rule is not
+`find . -path '*docs-quality-reference*' -name 'prose.py' -not -path '*/node_modules/*'`.
+The hit's directory is the `checks/` directory of the `docs-quality-reference`
+skill the rule requires. No hit means the rule is not
 installed: say `grim add ghcr.io/ocx-sh/lore/docs-quality` and stop.
 
 ## 3. Run the checks by format

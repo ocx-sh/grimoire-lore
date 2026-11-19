@@ -7,7 +7,9 @@ non-negotiables, and nine depth files routed to by task.
 grim add ghcr.io/ocx-sh/lore/java-quality
 ```
 
-Loads on `**/*.java` and `**/junit-platform.properties`. The index is 150 lines and always present; a depth file
+The depth files ship in the [`java-quality-reference`](java-quality-reference.md) skill, which the rule requires and grim installs with it (grim 0.16.0 or later).
+
+Loads on `**/*.java` and `**/junit-platform.properties`. The index is 157 lines and always present; a depth file
 is read only when the work calls for it.
 
 ## It starts by assuming your lint gate is a style gate

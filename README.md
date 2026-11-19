@@ -19,13 +19,14 @@ the index lists.
 
 | Path | Purpose |
 |---|---|
-| `rules/<name>.md` (+ optional `rules/<name>/`) | Glob-scoped rules; the sibling directory is the rule's on-demand depth |
+| `rules/<name>.md` | Glob-scoped rules, one file each |
 | `skills/<name>/SKILL.md` | Skills, with `references/` and `scripts/` beside them |
+| `skills/<name>-reference/` | The support skill a rule requires for its on-demand depth files and checks |
 | `bundles/<name>.toml` | Curated member sets, published after their members |
 | `publish.toml` | What `grim publish` pushes, and where it announces |
 | `.agents/research/` | The cited research each artifact was distilled from - `<topic>.md` is the consolidated position, `<topic>/<worker>.md` the sources behind it |
 
-Artifacts are validated before release with `ocx run task -- task verify`
+Artifacts are validated before release with `ocx exec task -- task verify`
 (name parity, context budgets, link resolution, dead globs, rule-table
 completeness, then `grim publish --dry-run`). Tools are pinned in
 `ocx.toml`, so CI and a contributor run identical versions.

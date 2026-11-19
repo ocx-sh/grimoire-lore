@@ -173,6 +173,10 @@ CITED: dict[str, Path] = {}
 # already threads four parameters. Make it a parameter if this ever needs to
 # run more than one configuration in a process.
 ALLOW_ABSENT: set[str] = set()
+# Skill directories already checked this run. A rule checks its support skill,
+# and a walk over `skills/` reaches the same directory; checking it twice would
+# print every finding twice.
+CHECKED: set[Path] = set()
 
 
 @dataclass
@@ -269,11 +273,12 @@ def check_toc(path: Path, body: str, findings: list[Finding]) -> None:
         return
     # Root-as-index files (SKILL.md, a rule index) route via a table of links
     # rather than an anchor list; accept that anywhere in the file.
-    is_index = path.name == "SKILL.md" or path.with_suffix("").is_dir()
+    support = path.parent.parent / "skills" / f"{path.stem}-reference"
+    is_index = path.name == "SKILL.md" or support.is_dir()
     routes = (
         re.search(r"^\|\s*\[?read", body, re.IGNORECASE | re.MULTILINE)
         or body.lower().count("](references/") >= 2
-        or body.lower().count(f"]({path.stem}/") >= 2
+        or body.lower().count(f"](../skills/{path.stem}-reference/") >= 2
     )
     if is_index and routes:
         return
@@ -537,6 +542,9 @@ def check_forbidden(path: Path, text: str, forbid: list[str], findings: list[Fin
 def check_skill(
     directory: Path, root: Path | None, forbid: list[str], findings: list[Finding], seen_ids: dict
 ) -> None:
+    if directory.resolve() in CHECKED:
+        return
+    CHECKED.add(directory.resolve())
     index = directory / "SKILL.md"
     text = index.read_text(encoding="utf-8")
     front, body = split_frontmatter(text)
@@ -552,12 +560,26 @@ def check_skill(
             Finding(index, f"name {name!r} violates the [a-z0-9] + single separator charset")
         )
     check_description(index, front.get("description"), findings)
+    skill_meta = front.get("metadata")
+    if isinstance(skill_meta, dict) and "claude.disable-model-invocation" in skill_meta:
+        findings.append(
+            Finding(
+                index,
+                "claude.disable-model-invocation is set; a skill the model cannot invoke "
+                "is unreachable to anything that requires it",
+            )
+        )
     if len(body.splitlines()) > SKILL_BODY_MAX:
         findings.append(
             Finding(index, f"body is {len(body.splitlines())} lines (max {SKILL_BODY_MAX})")
         )
     for md in sorted(directory.rglob("*.md")):
         inner = md.read_text(encoding="utf-8")
+        if "fixtures" in md.relative_to(directory).parts:
+            # A fixture is a planted violation a shipped check must reject:
+            # test data, not depth an agent reads. Only the leak scan applies.
+            check_forbidden(md, inner, forbid, findings)
+            continue
         _, inner_body = split_frontmatter(inner)
         check_toc(md, inner_body, findings)
         check_links(md, inner_body, findings)
@@ -585,7 +607,7 @@ def check_rule(
         findings.append(
             Finding(
                 path,
-                f"body is {len(body.splitlines())} lines (max {RULE_BODY_MAX}) — move depth into the support directory",
+                f"body is {len(body.splitlines())} lines (max {RULE_BODY_MAX}) — move depth into the support skill",
             )
         )
     metadata = front.get("metadata")
@@ -602,21 +624,34 @@ def check_rule(
     check_links(path, body, findings)
     check_rule_tables(path, body, findings, seen_ids)
     check_forbidden(path, text, forbid, findings)
-    support = path.with_suffix("")
-    if support.is_dir():
-        for md in sorted(support.rglob("*.md")):
-            if "fixtures" in md.relative_to(support).parts:
-                # A fixture is a planted violation a shipped check must reject:
-                # test data, not depth an agent reads. Dead links and missing
-                # routing are the point. Only the leak scan applies.
-                check_forbidden(md, md.read_text(encoding="utf-8"), forbid, findings)
+    # Docs ({#requires}) do not tie the binding name to the directory, so the
+    # existence check follows the VALUE; fully-qualified refs are not checked.
+    if isinstance(metadata, dict):
+        for key, val in metadata.items():
+            if not (str(key).startswith("grim.requires.skills.") and str(val).startswith("./")):
                 continue
-            inner_text = md.read_text(encoding="utf-8")
-            _, inner_body = split_frontmatter(inner_text)
-            check_toc(md, inner_body, findings)
-            check_links(md, inner_body, findings)
-            check_rule_tables(md, inner_body, findings, seen_ids)
-            check_forbidden(md, inner_text, forbid, findings)
+            target = str(val)[2:].split(":", 1)[0].split("@", 1)[0]
+            if not (path.parent.parent / "skills" / target / "SKILL.md").exists():
+                findings.append(
+                    Finding(path, f"requires skill {target}, which does not exist beside rules/")
+                )
+    support = path.parent.parent / "skills" / f"{stem}-reference"
+    if support.is_dir():
+        if not (support / "SKILL.md").exists():
+            findings.append(Finding(support, "sibling support skill has no SKILL.md"))
+            return
+        if not isinstance(metadata, dict) or f"grim.requires.skills.{support.name}" not in metadata:
+            findings.append(
+                Finding(
+                    path,
+                    f"sibling skill {support.name} exists but the rule does not require it "
+                    f"(metadata: grim.requires.skills.{support.name})",
+                )
+            )
+        check_skill(support, root, forbid, findings, seen_ids)
+        for md in sorted(support.rglob("*.md")):
+            if md.name == "SKILL.md" or "fixtures" in md.relative_to(support).parts:
+                continue
             if md.name not in text:
                 findings.append(Finding(md, "support file is not routed to from the rule index"))
 
@@ -631,14 +666,14 @@ def walk(
         for child in sorted(target.iterdir()):
             if child.name.startswith("."):
                 continue
-            if child.is_dir() and child.with_suffix(".md").exists():
-                continue  # rule support dir, covered by its index
             walk(child, root, forbid, findings, seen_ids)
         return
     if target.suffix == ".md":
-        index = target.parent.with_suffix(".md")
-        if index.exists():
-            target = index  # a depth file is checked through its rule index, under the depth budget
+        if (target.parent / "SKILL.md").exists():
+            walk(
+                target.parent, root, forbid, findings, seen_ids
+            )  # a file of a skill: check the skill
+            return
         check_rule(target, root, forbid, findings, seen_ids)
 
 
@@ -689,6 +724,7 @@ def self_test() -> int:
         findings: list[Finding] = []
         seen: dict = {}
         CITED.clear()
+        CHECKED.clear()
         walk(base, base, [], findings, seen)
         check_citations(seen, findings)
         messages = " ".join(f.message for f in findings)
@@ -746,22 +782,51 @@ def self_test() -> int:
         walk(good, base, [], clean, {})
         expect(not clean, [str(f) for f in clean])
 
-        # A support dir's fixtures/ holds planted violations: unrouted, with
+        # A support skill's fixtures/ holds planted violations: unrouted, with
         # dead links, by design. Only the leak scan may fire on them.
-        fixtured = base / "fixtured.md"
-        fixtured.write_text("# Fixtured\n\nSee [depth](fixtured/depth.md).\n", encoding="utf-8")
-        (base / "fixtured" / "checks" / "fixtures" / "x").mkdir(parents=True)
-        (base / "fixtured" / "depth.md").write_text("# Depth\n", encoding="utf-8")
-        (base / "fixtured" / "checks" / "fixtures" / "x" / "fail.md").write_text(
+        rules = base / "proj" / "rules"
+        skill_dir = base / "proj" / "skills" / "fixtured-reference"
+        (skill_dir / "checks" / "fixtures" / "x").mkdir(parents=True)
+        rules.mkdir(parents=True)
+        requires = '---\nmetadata:\n  grim.requires.skills.fixtured-reference: "./fixtured-reference:0"\n---\n'
+        rule_text = "# Fixtured\n\nSee [depth](../skills/fixtured-reference/depth.md).\n"
+        (rules / "fixtured.md").write_text(requires + rule_text, encoding="utf-8")
+        (skill_dir / "SKILL.md").write_text(
+            "---\nname: fixtured-reference\ndescription: Depth behind the fixtured rule. "
+            "Use when the rule routes you to a depth file.\n---\n\n# fixtured-reference\n\n"
+            "[depth](depth.md)\n",
+            encoding="utf-8",
+        )
+        (skill_dir / "depth.md").write_text("# Depth\n", encoding="utf-8")
+        (skill_dir / "checks" / "fixtures" / "x" / "fail.md").write_text(
             "# Planted\n\n[dead](./nope.md) at /home/someone\n", encoding="utf-8"
         )
-        quiet: list[Finding] = []
-        CITED.clear()
-        walk(fixtured, base, ["/home/"], quiet, {})
-        messages = " ".join(f.message for f in quiet)
+
+        def run_fixtured(forbid: list[str]) -> str:
+            found: list[Finding] = []
+            CITED.clear()
+            CHECKED.clear()
+            walk(rules / "fixtured.md", base, forbid, found, {})
+            return " ".join(f.message for f in found)
+
+        messages = run_fixtured(["/home/"])
         expect("not routed" not in messages, messages)
         expect("broken relative link" not in messages, messages)
+        expect("does not require" not in messages, messages)
         expect("forbidden string" in messages, messages)  # red control
+        # Red controls: an unrouted depth file, and a rule that omits `requires`.
+        (skill_dir / "orphan.md").write_text("# Orphan\n", encoding="utf-8")
+        expect("not routed" in run_fixtured([]), "unrouted depth file not reported")
+        (rules / "fixtured.md").write_text(rule_text, encoding="utf-8")
+        expect("does not require" in run_fixtured([]), "missing requires not reported")
+        ghost = (
+            '---\nmetadata:\n  grim.requires.skills.ghost-reference: "./ghost-reference:0"\n---\n'
+        )
+        (rules / "fixtured.md").write_text(ghost + rule_text, encoding="utf-8")
+        expect(
+            "ghost-reference, which does not exist" in run_fixtured([]),
+            "ghost require not reported",
+        )
     print("self-test: ok")
     return 0
 

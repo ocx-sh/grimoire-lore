@@ -6,7 +6,7 @@ Standards for writing and reviewing shell: the gate, the floor-first rule, a tab
 grim add ghcr.io/ocx-sh/lore/shell-quality
 ```
 
-Loads on `**/*.sh`, `**/*.bash`, `**/*.bats`, `**/*.zsh`, `**/*.ksh`, `**/*.fish`, `**/*.nu`, `**/*.elv`, `**/.shellcheckrc`, GitHub workflows and actions, Taskfiles and GitLab CI files. The index is 198 lines and always present. A depth file is read only when the work calls for it. It ships beside `powershell-quality` in `shell-essentials`, and that rule owns `.ps1`, `.psm1` and `.psd1`.
+Loads on `**/*.sh`, `**/*.bash`, `**/*.bats`, `**/*.zsh`, `**/*.ksh`, `**/*.fish`, `**/*.nu`, `**/*.elv`, `**/.shellcheckrc`, GitHub workflows and actions, Taskfiles and GitLab CI files. The index is 200 lines and always present. A depth file is read only when the work calls for it. The depth files and checks scripts ship in the `shell-quality-reference` skill, which the rule requires and grim installs with it (grim 0.16.0 or later). It ships beside `powershell-quality` in `shell-essentials`, and that rule owns `.ps1`, `.psm1` and `.psd1`.
 
 ## It starts by reading the floor
 
@@ -18,7 +18,7 @@ So the first rule is not about code. Read the floor the script must run on (SH-C
 
 The index carries the gate block (`bash scripts/shell-gate.sh`), the script-kind table, the core rows, a table of six tells, four waiver tokens that each require a reason, and the routing table from task to depth file. Fourteen depth files cover dialect, errors, expansion, security, CI, installers, userland, testing, gates, multi-shell emitters, zsh, fish, nushell and elvish.
 
-Every rule carries an ID, a rationale, a runnable verification and a severity. Thirty scripts sit in a `checks/` directory the rules name by path. The index tells adopters to copy them to `scripts/`.
+Every rule carries an ID, a rationale, a runnable verification and a severity. Thirty scripts sit in the skill's `checks/` directory, which the rules name by path. The index tells adopters to copy them to `scripts/`.
 
 ## What it does not cover
 

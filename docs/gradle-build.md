@@ -8,9 +8,11 @@ files routed to by task.
 grim add ghcr.io/ocx-sh/lore/gradle-build
 ```
 
+The depth files ship in the [`gradle-build-reference`](gradle-build-reference.md) skill, which the rule requires and grim installs with it (grim 0.16.0 or later).
+
 Loads on `**/*.gradle.kts`, `**/*.gradle`, `**/gradle.properties`,
 `**/*.versions.toml`, the wrapper descriptor, `verification-metadata.xml` and
-both lockfile names. The index is 171 lines and always present; a depth file is
+both lockfile names. The index is 186 lines and always present; a depth file is
 read only when the work calls for it.
 
 ## It starts with what a green build does not prove

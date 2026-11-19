@@ -64,7 +64,7 @@ Depth is in
 
 Agreed decisions, not derived facts. Each is a default the adopter may override
 once, for the whole repository. The full list is `release.md` under Dates and
-Defaults (rules/swift-package/release.md). The rows this procedure needs:
+Defaults (in the `swift-package-reference` skill, `.claude/skills/swift-package-reference/release.md`). The rows this procedure needs:
 
 | Decision | Default (pinned) | Override looks like |
 |---|---|---|
@@ -340,7 +340,7 @@ bound the depth or link with `-Xlinker -z -Xlinker stack-size=0x80000`. And
 compiled out under `#if`. The grep finds candidates, and reading decides. The list is git-fed, not a recursive grep: a recursive grep skips a symlinked file below `Sources`, so a
 symlink-farm layout (RxSwift, 412 files) scanned 1 and printed nothing, while the list reads all 412 (a symlinked
 directory is one entry the list does not descend: name its real directory). Run the canary of SW-CORE-03 first:
-`bash .claude/rules/swift-quality/checks/canary.sh` exits 1 when the list holds no Swift file (watched 2026-10-10 on the old recursive form: a planted
+`bash .claude/skills/swift-quality-reference/checks/canary.sh` exits 1 when the list holds no Swift file (watched 2026-10-10 on the old recursive form: a planted
 symlinked `Sources/M` gave 0 files and the compliant twin 1):
 
 ```sh

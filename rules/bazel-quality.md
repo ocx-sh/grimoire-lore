@@ -20,6 +20,8 @@ summary: The Bazel quality index — the gate, the non-negotiables, and where th
 keywords: bazel,starlark,bzlmod,module-extension,repository-rule,lockfile,remote-cache,remote-execution,rbe,disk-cache,hermeticity,sandbox,determinism,buildifier,gazelle,rules_go,go_deps,nogo,x_defs,rules_swift,swift_library,swift_binary,swift_test,swift.toolchain,rules_swift_package_manager,bazel-diff,target-determinator,rules_rust,rules_rs,rules_python,rules_js,rules_ts,rules_cc,protobuf,monorepo,ci,bazelrc,bazelisk
 license: Apache-2.0
 repository: https://github.com/ocx-sh/grimoire-lore
+metadata:
+  grim.requires.skills.bazel-quality-reference: "./bazel-quality-reference:0"
 ---
 
 # Bazel Quality
@@ -117,23 +119,26 @@ else is defined in a depth file and only cited here.
 Read the file for the work you are about to do, not for the topic it is
 filed under. One level deep; these files do not point at each other.
 
+Depth files and checks scripts ship in the `bazel-quality-reference` skill this rule requires; load it, or read
+`.claude/skills/bazel-quality-reference/<file>` (`~/.claude/skills/` when installed globally).
+
 | Doing… | Read |
 |---|---|
-| Writing or editing a `.bzl`, a BUILD file, a macro, a rule, or the lint gate — including Starlark generated as a string | [bazel-quality/starlark.md](bazel-quality/starlark.md) |
-| Touching `MODULE.bazel`, its lockfile, a module extension, a repository rule, or a registry submission — including a lockfile merge conflict | [bazel-quality/bzlmod.md](bazel-quality/bzlmod.md) |
-| Writing a genrule, action or generated file, editing a glob, setting a sandbox or `*_env` flag, or claiming a build is deterministic | [bazel-quality/hermeticity.md](bazel-quality/hermeticity.md) |
-| Wiring a remote or disk cache, a cache credential, a download-mode or eviction flag, an RBE readiness check, or reading a cache miss | [bazel-quality/caching.md](bazel-quality/caching.md) |
-| Writing a test target, choosing its size, timeout, tags or shard count, faking a `ctx` in a Starlark test, or reading a coverage report | [bazel-quality/testing.md](bazel-quality/testing.md) |
-| Adding or editing a CI job, matrix leg, release lockstep check, target-selection wrapper, or build event stream | [bazel-quality/ci.md](bazel-quality/ci.md) |
-| Adding or moving a BUILD file, setting visibility, writing a `select()` or transition, or wiring a code generator | [bazel-quality/architecture.md](bazel-quality/architecture.md) |
-| Bumping the Bazel version, writing a flag into an rc file, workflow or `PROJECT.scl`, or checking a ruleset's Bazel floor | [bazel-quality/flags.md](bazel-quality/flags.md) |
-| Adding a crate dependency, repinning a lockfile, porting a `build.rs`, or wiring `rust_test`, clippy or prost under Bazel | [bazel-quality/rust.md](bazel-quality/rust.md) |
-| Writing a `py_*` target, a `python.toolchain()` or `pip.parse()` call, a pytest suite, or running Gazelle for Python | [bazel-quality/python.md](bazel-quality/python.md) |
-| Writing a `ts_project`, `npm_translate_lock`, a pnpm lockfile entry, a JS test target, or running Gazelle for JS | [bazel-quality/typescript.md](bazel-quality/typescript.md) |
-| Writing a `cc_*` target, registering a C++ toolchain, enabling `layering_check` or a sanitizer, or wrapping a CMake or Autotools build | [bazel-quality/cpp.md](bazel-quality/cpp.md) |
-| Writing a `java_*` or `kt_jvm_*` target, pinning the JDK version flags, repinning `maven_install.json`, or building a deploy jar | [bazel-quality/java.md](bazel-quality/java.md) |
-| Writing a `go_*` target, running Gazelle for Go, repinning `go_deps`, or wiring `nogo` | [bazel-quality/go.md](bazel-quality/go.md) |
-| Writing a `swift_*` target, configuring rules_swift features or toolchains, or bridging SwiftPM dependencies with rules_swift_package_manager | [bazel-quality/swift.md](bazel-quality/swift.md) |
+| Writing or editing a `.bzl`, a BUILD file, a macro, a rule, or the lint gate — including Starlark generated as a string | [bazel-quality-reference/starlark.md](../skills/bazel-quality-reference/starlark.md) |
+| Touching `MODULE.bazel`, its lockfile, a module extension, a repository rule, or a registry submission — including a lockfile merge conflict | [bazel-quality-reference/bzlmod.md](../skills/bazel-quality-reference/bzlmod.md) |
+| Writing a genrule, action or generated file, editing a glob, setting a sandbox or `*_env` flag, or claiming a build is deterministic | [bazel-quality-reference/hermeticity.md](../skills/bazel-quality-reference/hermeticity.md) |
+| Wiring a remote or disk cache, a cache credential, a download-mode or eviction flag, an RBE readiness check, or reading a cache miss | [bazel-quality-reference/caching.md](../skills/bazel-quality-reference/caching.md) |
+| Writing a test target, choosing its size, timeout, tags or shard count, faking a `ctx` in a Starlark test, or reading a coverage report | [bazel-quality-reference/testing.md](../skills/bazel-quality-reference/testing.md) |
+| Adding or editing a CI job, matrix leg, release lockstep check, target-selection wrapper, or build event stream | [bazel-quality-reference/ci.md](../skills/bazel-quality-reference/ci.md) |
+| Adding or moving a BUILD file, setting visibility, writing a `select()` or transition, or wiring a code generator | [bazel-quality-reference/architecture.md](../skills/bazel-quality-reference/architecture.md) |
+| Bumping the Bazel version, writing a flag into an rc file, workflow or `PROJECT.scl`, or checking a ruleset's Bazel floor | [bazel-quality-reference/flags.md](../skills/bazel-quality-reference/flags.md) |
+| Adding a crate dependency, repinning a lockfile, porting a `build.rs`, or wiring `rust_test`, clippy or prost under Bazel | [bazel-quality-reference/rust.md](../skills/bazel-quality-reference/rust.md) |
+| Writing a `py_*` target, a `python.toolchain()` or `pip.parse()` call, a pytest suite, or running Gazelle for Python | [bazel-quality-reference/python.md](../skills/bazel-quality-reference/python.md) |
+| Writing a `ts_project`, `npm_translate_lock`, a pnpm lockfile entry, a JS test target, or running Gazelle for JS | [bazel-quality-reference/typescript.md](../skills/bazel-quality-reference/typescript.md) |
+| Writing a `cc_*` target, registering a C++ toolchain, enabling `layering_check` or a sanitizer, or wrapping a CMake or Autotools build | [bazel-quality-reference/cpp.md](../skills/bazel-quality-reference/cpp.md) |
+| Writing a `java_*` or `kt_jvm_*` target, pinning the JDK version flags, repinning `maven_install.json`, or building a deploy jar | [bazel-quality-reference/java.md](../skills/bazel-quality-reference/java.md) |
+| Writing a `go_*` target, running Gazelle for Go, repinning `go_deps`, or wiring `nogo` | [bazel-quality-reference/go.md](../skills/bazel-quality-reference/go.md) |
+| Writing a `swift_*` target, configuring rules_swift features or toolchains, or bridging SwiftPM dependencies with rules_swift_package_manager | [bazel-quality-reference/swift.md](../skills/bazel-quality-reference/swift.md) |
 | Editing `Cargo.toml`, `pyproject.toml`, `package.json`, `tsconfig*.json`, `build.gradle.kts`, `pom.xml`, `go.mod` or `Package.swift` themselves | `rust-cargo`, `python-packaging`, `typescript-packaging`, `gradle-build`, `maven-build`, `go-modules`, `swift-package` (sibling sets — see below) |
 | Deciding whether to adopt Bazel, or migrating a repository onto it | the `bazel-adopt` skill |
 | A build that is already slow, missing the cache, nondeterministic, flaky or refetching | the `bazel-diagnose` skill |

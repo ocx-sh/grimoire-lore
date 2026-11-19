@@ -324,7 +324,7 @@ Agreed decisions, not derivations. Each is a default an adopter overrides once, 
 ## MUST rows this procedure enforces
 
 Duplicated as a hedge against the scoped rule set not being loaded. The rule text, rationale and
-full verification live in `gradle-build/dependencies.md` and `maven-build/dependencies.md`, and a
+full verification live in `gradle-build-reference/dependencies.md` and `maven-build-reference/dependencies.md`, and a
 disputed row is settled there.
 
 | # | Finding | Rule |

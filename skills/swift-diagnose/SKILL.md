@@ -90,7 +90,7 @@ skill exists to prevent (SW-CORE-17). Each of these is a violation, not a fix.
 If the only fix available is one of these, record it as a gap under stop
 condition 3. Never apply it silently. Before reporting a fix, run
 `BASE=<base ref> bash weaken-check.sh` and `silence-check.sh` from the
-`swift-quality` rule's `checks/` directory (`.claude/rules/swift-quality/checks/`
+`swift-quality-reference` skill's `checks/` directory (`.claude/skills/swift-quality-reference/checks/`
 in Claude Code) at the repository root. Stdout from either is a violation to
 justify, and empty stdout with a passing canary (SW-CORE-03) is the pass. Judge by stdout
 and exit status and keep stderr visible: a git `warning: unable to access

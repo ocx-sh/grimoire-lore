@@ -8,8 +8,10 @@ lives here too, as the legacy file it is.
 grim add ghcr.io/ocx-sh/lore/maven-build
 ```
 
+The depth files ship in the [`maven-build-reference`](maven-build-reference.md) skill, which the rule requires and grim installs with it (grim 0.16.0 or later).
+
 Loads on `**/pom.xml`, `**/.mvn/**`, both wrapper scripts, and the Ant and Ivy
-files. The index is 163 lines and always present; a depth file is read only
+files. The index is 170 lines and always present; a depth file is read only
 when the work calls for it.
 
 ## It starts with two things that review clean and run nothing

@@ -7,8 +7,10 @@ non-negotiables, and seven depth files routed to by task.
 grim add ghcr.io/ocx-sh/lore/kotlin-quality
 ```
 
+The depth files ship in the [`kotlin-quality-reference`](kotlin-quality-reference.md) skill, which the rule requires and grim installs with it (grim 0.16.0 or later).
+
 Loads on `**/*.kt`, `**/*.kts` and the detekt config (`detekt*.yml`). The index
-is 161 lines and always present; a
+is 168 lines and always present; a
 depth file is read only when the work calls for it.
 
 ## It starts by assuming your analyzers do not activate
