@@ -21,7 +21,7 @@ Their globs do not overlap, which is the only thing that justifies a second
 rule file. Editing `package.json` is not writing TypeScript, and loading four
 hundred lines of async and error rules while you adjust an `exports` map is
 pure cost. Everything that loads on `**/*.ts` lives in one index plus an
-on-demand depth directory, because sibling rules that all glob the same
+on-demand depth files, because sibling rules that all glob the same
 extension just rebuild a monolith with extra steps — every one of them loads
 together.
 

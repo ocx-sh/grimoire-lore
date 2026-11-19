@@ -7,6 +7,8 @@ summary: The PowerShell quality index, holding the gate, the target by script ki
 keywords: powershell,pwsh,windows-powershell,ps1,psm1,psd1,psscriptanalyzer,pester,installer,irm-iex,encoding,native-commands
 license: Apache-2.0
 repository: https://github.com/ocx-sh/grimoire-lore
+metadata:
+  grim.requires.skills.powershell-quality-reference: "./powershell-quality-reference:0"
 ---
 
 # PowerShell Quality
@@ -24,8 +26,8 @@ or a `.yml` file loads `shell-quality` instead, which carries the run-step copie
 
 ## The Gate
 
-Run it after every change to a file this rule covers, from the repository root, and stop at the first non-zero exit. Copy the scripts the depth files name from this rule's
-`powershell-quality/checks/` directory to `scripts/` once (pinned decision, adopter may override the directory). Run step 1 once per kind directory with that kind's settings
+Run it after every change to a file this rule covers, from the repository root, and stop at the first non-zero exit. Copy the scripts the depth files name from the
+`powershell-quality-reference` skill's `checks/` directory (`.claude/skills/powershell-quality-reference/checks/`) to `scripts/` once (pinned decision, adopter may override the directory). Run step 1 once per kind directory with that kind's settings
 file (PS-GATE-03 holds the four), step 2 on a Windows PowerShell 5.1 host over the 5.1-bound paths, and step 3 where a `*.Tests.ps1` exists. A script is judged by its exit status.
 A cell in a depth file is judged by its output: empty stdout and empty stderr is the pass, and a `PREFLIGHT:` line means stop and fix the host (SH-GATE-25, SH-GATE-26).
 
@@ -120,18 +122,18 @@ Two tokens exist. A waiver ends the line it excuses and carries a reason. A bare
 ## Where the Depth Is
 
 Read the file for the work you are about to do, not for the topic it is filed under. One level deep: these files do not point at each other, so a task that spans two families names both.
-A script a depth file names as `checks/NAME` lives in this rule's `powershell-quality/checks/` directory.
+Depth files and checks scripts ship in the `powershell-quality-reference` skill this rule requires; load it, or read `.claude/skills/powershell-quality-reference/<file>` (`~/.claude/skills/` when installed globally). A script a depth file names as `checks/NAME` lives in that skill's `checks/` directory.
 
 | Doing… | Read |
 |---|---|
-| Writing PowerShell that must run on both Windows PowerShell 5.1 and PowerShell 7.x: syntax, cmdlets and parameters by edition, platform detection, `#Requires`, `-UseBasicParsing`, importing a module on both editions | [powershell-quality/compat.md](powershell-quality/compat.md) |
-| A native command fails and the script keeps going: `$ErrorActionPreference`, a `try/catch` that does not catch, `2>&1` under `Stop`, a CI step that goes green on a failed build, an entry point's exit status, stray output on stdout, a StrictMode error in `finally` | [powershell-quality/errors.md](powershell-quality/errors.md) |
-| Calling a native executable: argument arrays and splatting, `curl.exe` against the 5.1 alias, `Start-Process -ArgumentList`, empty strings and embedded quotes | [powershell-quality/native.md](powershell-quality/native.md) |
-| Writing or reading a file, adding non-ASCII text, a BOM, an em dash or a curly quote to a script, appending to `GITHUB_ENV` or `GITHUB_PATH`, or decoding a native command's output | [powershell-quality/encoding.md](powershell-quality/encoding.md) |
-| Setting up PSScriptAnalyzer, the 5.1 parse gate, the gate wrapper or the command resolver, calling `Set-ExecutionPolicy`, exporting from a manifest, or writing Pester tests (`*.Tests.ps1`, SH-TEST-18 to 22) | [powershell-quality/gates.md](powershell-quality/gates.md) |
-| Writing or reviewing an `install.ps1` or anything run through `irm \| iex`: hashes and signatures, TLS, `exit` against `throw`, `Invoke-Expression`, a URL override | [powershell-quality/security.md](powershell-quality/security.md), plus [compat.md](powershell-quality/compat.md) for the 5.1 floor and [encoding.md](powershell-quality/encoding.md) for the BOM |
-| Editing a `.psd1`: a module manifest (`PowerShellVersion`, `CompatiblePSEditions`, `*ToExport`) or a PSScriptAnalyzer settings file (`Severity`, `ExcludeRules`) | [powershell-quality/compat.md](powershell-quality/compat.md) and [powershell-quality/gates.md](powershell-quality/gates.md) |
-| Writing a script that a workflow step runs, or the PowerShell body of a `run:` step: several natives in one step, a custom `shell:`, appending to the runner files | [powershell-quality/errors.md](powershell-quality/errors.md) and [powershell-quality/encoding.md](powershell-quality/encoding.md), plus `shell-quality` (sibling rule: SH-CI, loaded on the workflow file) |
+| Writing PowerShell that must run on both Windows PowerShell 5.1 and PowerShell 7.x: syntax, cmdlets and parameters by edition, platform detection, `#Requires`, `-UseBasicParsing`, importing a module on both editions | [powershell-quality-reference/compat.md](../skills/powershell-quality-reference/compat.md) |
+| A native command fails and the script keeps going: `$ErrorActionPreference`, a `try/catch` that does not catch, `2>&1` under `Stop`, a CI step that goes green on a failed build, an entry point's exit status, stray output on stdout, a StrictMode error in `finally` | [powershell-quality-reference/errors.md](../skills/powershell-quality-reference/errors.md) |
+| Calling a native executable: argument arrays and splatting, `curl.exe` against the 5.1 alias, `Start-Process -ArgumentList`, empty strings and embedded quotes | [powershell-quality-reference/native.md](../skills/powershell-quality-reference/native.md) |
+| Writing or reading a file, adding non-ASCII text, a BOM, an em dash or a curly quote to a script, appending to `GITHUB_ENV` or `GITHUB_PATH`, or decoding a native command's output | [powershell-quality-reference/encoding.md](../skills/powershell-quality-reference/encoding.md) |
+| Setting up PSScriptAnalyzer, the 5.1 parse gate, the gate wrapper or the command resolver, calling `Set-ExecutionPolicy`, exporting from a manifest, or writing Pester tests (`*.Tests.ps1`, SH-TEST-18 to 22) | [powershell-quality-reference/gates.md](../skills/powershell-quality-reference/gates.md) |
+| Writing or reviewing an `install.ps1` or anything run through `irm \| iex`: hashes and signatures, TLS, `exit` against `throw`, `Invoke-Expression`, a URL override | [powershell-quality-reference/security.md](../skills/powershell-quality-reference/security.md), plus [compat.md](../skills/powershell-quality-reference/compat.md) for the 5.1 floor and [encoding.md](../skills/powershell-quality-reference/encoding.md) for the BOM |
+| Editing a `.psd1`: a module manifest (`PowerShellVersion`, `CompatiblePSEditions`, `*ToExport`) or a PSScriptAnalyzer settings file (`Severity`, `ExcludeRules`) | [powershell-quality-reference/compat.md](../skills/powershell-quality-reference/compat.md) and [powershell-quality-reference/gates.md](../skills/powershell-quality-reference/gates.md) |
+| Writing a script that a workflow step runs, or the PowerShell body of a `run:` step: several natives in one step, a custom `shell:`, appending to the runner files | [powershell-quality-reference/errors.md](../skills/powershell-quality-reference/errors.md) and [powershell-quality-reference/encoding.md](../skills/powershell-quality-reference/encoding.md), plus `shell-quality` (sibling rule: SH-CI, loaded on the workflow file) |
 | Writing the `.sh` half of a script pair, a workflow, a Taskfile or a GitLab job | `shell-quality` (sibling rule: SH-DIAL, SH-ERR, SH-CI and the rest) |
 | Emitting PowerShell from Rust, Go or Python | `shell-quality` (sibling rule: SH-EMIT, in its emit depth), and the `shell-integration` skill |
 | Writing or auditing an `install.ps1` end to end, or diagnosing a PowerShell 5.1 parse error or an exit under `irm \| iex` from its symptom | the `installer-script` and `shell-diagnose` skills |

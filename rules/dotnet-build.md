@@ -26,6 +26,8 @@ summary: The .NET build index, with the gate, the non-negotiables, the CS-BUILD 
 keywords: dotnet,msbuild,csproj,nuget,analyzers,globalconfig,bannedsymbols,central-package-management,global-json,tfm,pack,nupkg,trusted-publishing,release
 license: Apache-2.0
 repository: https://github.com/ocx-sh/grimoire-lore
+metadata:
+  grim.requires.skills.dotnet-build-reference: "./dotnet-build-reference:0"
 ---
 
 # .NET Build
@@ -102,7 +104,7 @@ Every line blocks a merge within the scope it names. IDs resolve through the rul
 
 ## Rules This File Owns
 
-The CS-BUILD family is defined here and nowhere else; the CS-PKG rows are in [dotnet-build/packaging.md](dotnet-build/packaging.md).
+The CS-BUILD family is defined here and nowhere else; the CS-PKG rows are in [dotnet-build-reference/packaging.md](../skills/dotnet-build-reference/packaging.md).
 CS-BUILD-07 is retired (binary selection moved to CS-XP-10's bans), 09 and 19 were never assigned.
 **Scope.** CS-BUILD-02, 03, 06, 08, 29 and every CS-PKG row bind `[packable-library]` repositories (tags: `csharp-quality`
 Conventions). A tool, benchmark, sample or test project in the same repository is outside them; an analyzer, source-generator or
@@ -194,7 +196,7 @@ find "$(dirname "${SLN:?MISSING SLN}")" -maxdepth 1 \( -name '*.sln' -o -name '*
 
 ## Posture Files
 
-The analyzer posture is one set of files in `.claude/rules/dotnet-build/checks/`, copied into the repository once and then
+The analyzer posture is one set of files in `.claude/skills/dotnet-build-reference/checks/`, copied into the repository once and then
 diffed, never hand-edited down: `BannedSymbols.txt` (repo-wide) and `BannedSymbols.Src.txt` (registered as `AdditionalFiles`
 from the root `Directory.Build.targets`, by project: `Condition="'$(IsPackable)' != 'false' And '$(IsTestProject)' != 'true'"`, which reads the project body; a layout without `src/` and `tests/` siblings needs no edit), `analyzers.globalconfig` (installed as the root `.globalconfig`),
 `analyzers.editorconfig` (appended to the root `.editorconfig`), `Directory.Packages.analyzers.props` (the packs of
@@ -211,11 +213,11 @@ A CA severity in `.editorconfig` for the whole tree, or a second `.globalconfig`
 
 ## Where the Depth Is
 
-Read the file for the work you are about to do, not its topic. One level deep: these files do not point at each other.
+Read the file for the work you are about to do, not its topic. One level deep: these files do not point at each other. Depth files and `checks/` ship in the `dotnet-build-reference` skill this rule requires; load it, or read `.claude/skills/dotnet-build-reference/<file>` (`~/.claude/skills/` when installed globally).
 
 | Doing… | Read |
 |---|---|
-| Setting pack properties, a nupkg readme, SourceLink, symbols, deterministic builds, MinVer tags, package validation, strong naming, Trusted Publishing, author signing or the tag push | [dotnet-build/packaging.md](dotnet-build/packaging.md) (CS-PKG) |
+| Setting pack properties, a nupkg readme, SourceLink, symbols, deterministic builds, MinVer tags, package validation, strong naming, Trusted Publishing, author signing or the tag push | [dotnet-build-reference/packaging.md](../skills/dotnet-build-reference/packaging.md) (CS-PKG) |
 | Editing a `PublicAPI*.txt` or adding the PublicApiAnalyzers pack (CS-API-11); relaxing an analyzer for a test project (CS-TEST-12); writing a workflow, a CI matrix or a `ci-ok` job (CS-CI); adding a build-only package (CS-SEC-10, CS-SEC-11); editing any `*.cs` file | `csharp-quality` (sibling rule; the IDs live in its `api-design.md`, `testing.md` and `security.md`) |
 | Moving to a new SDK, TFM floor or `AnalysisLevel` / a build that fails, hangs or prints an NU, NETSDK, MSB or IL code / cutting a release or publishing an app | the `dotnet-upgrade` / `dotnet-diagnose` / `dotnet-release` skill (procedures behind this set; they cite IDs, never restate them) |
 | Writing a doc comment, a README or a CHANGELOG | `code-docs` and `docs-quality` (sibling sets) |

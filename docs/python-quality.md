@@ -8,8 +8,8 @@ grim add ghcr.io/ocx-sh/lore/python-quality
 ```
 
 Loads on `**/*.py`, `**/*.pyi` and the ruff config (`ruff.toml`,
-`.ruff.toml`). The index is 128 lines and always present; the depth is
-read only when the work calls for it.
+`.ruff.toml`). The index is 154 lines and always present; the depth is
+read only when the work calls for it. The depth files and checks scripts ship in the `python-quality-reference` skill, which the rule requires and grim installs with it (grim 0.16.0 or later).
 
 ## Written against four shapes, not one
 

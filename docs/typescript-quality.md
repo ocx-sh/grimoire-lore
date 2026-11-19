@@ -10,7 +10,7 @@ grim add ghcr.io/ocx-sh/lore/typescript-quality
 Loads on `**/*.ts`, `**/*.tsx`, `**/*.mts` and `**/*.cts`, plus the install
 config (`.npmrc`, `.yarnrc.yml`, `bunfig.toml`). The index is 149
 lines and always present; a depth file is read only when the work calls for
-it.
+it. The depth files and checks scripts ship in the `typescript-quality-reference` skill, which the rule requires and grim installs with it (grim 0.16.0 or later).
 
 ## It starts by assuming your lint is inert
 

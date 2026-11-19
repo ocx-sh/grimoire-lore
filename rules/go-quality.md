@@ -5,6 +5,8 @@ summary: The Go quality index, holding the gate, the non-negotiables, and where 
 keywords: go,golang,quality,errors,concurrency,testing,cli,iterators,generics,slog,net/http
 license: Apache-2.0
 repository: https://github.com/ocx-sh/grimoire-lore
+metadata:
+  grim.requires.skills.go-quality-reference: "./go-quality-reference:0"
 ---
 
 # Go Quality
@@ -129,19 +131,21 @@ git diff -z --name-only --diff-filter=d --merge-base "$BASE" -- '*.go' | xargs -
 
 Read the file for the work you are about to do, not for the topic it is filed
 under. One level deep: these files do not point at each other.
+Depth files and checks scripts ship in the `go-quality-reference` skill this rule requires; load it, or read
+`.claude/skills/go-quality-reference/<file>` (`~/.claude/skills/` when installed globally).
 
 | Doing… | Read |
 |---|---|
-| Writing Go against the module's `go` line, choosing an idiom that changed between releases, designing a generic function or an iterator, touching JSON, maps, `time.Time`, runes or randomness, or moving a module to a new Go release | [go-quality/language.md](go-quality/language.md) |
-| Returning, wrapping, matching or exposing an error, panicking, exiting, or closing a writable file or buffered writer | [go-quality/errors.md](go-quality/errors.md) |
-| Starting a goroutine, fanning out work, passing, storing or cancelling a context, or sharing state across goroutines | [go-quality/concurrency.md](go-quality/concurrency.md) |
-| Adding or changing an exported identifier, laying out packages, choosing functional options or a config struct, writing a doc comment or deprecation, tagging a library release, or building an SDK that wraps a CLI binary | [go-quality/api-design.md](go-quality/api-design.md) |
-| Writing or reviewing a test, a fuzz target or a CI workflow that runs `go test -fuzz`, a benchmark, a golden file, a helper process that fakes a CLI, or a coverage gate | [go-quality/testing.md](go-quality/testing.md) |
-| Writing a `main` package, choosing an exit code, wiring cobra commands or groups, handling a signal or a broken pipe, prompting, or writing to stdout, stderr or a terminal | [go-quality/cli-contract.md](go-quality/cli-contract.md) |
-| Writing or replacing a file on disk, opening a path built from external input, extracting or decompressing an archive, or starting, cancelling and reaping a subprocess | [go-quality/io.md](go-quality/io.md) |
-| Making an HTTP request, building a client, transport or server, bounding a timeout or a body, retrying, streaming or staging a downloaded blob, parsing a digest, or talking to an OCI registry | [go-quality/network.md](go-quality/network.md) |
-| Generating a token or ID, configuring TLS or an `--insecure` or `--ca-file` flag, holding or logging a credential, rendering an HTML template, touching `unsafe`, `//go:linkname` or cgo, or decoding an untrusted body | [go-quality/security.md](go-quality/security.md) |
-| Logging or accepting a logger, exposing pprof or a metrics endpoint, setting `GOMAXPROCS`, `GOGC`, `GOMEMLIMIT` or a `GODEBUG` value, diagnosing a hung, racy or leaking process, or making or judging a performance claim | [go-quality/observability.md](go-quality/observability.md) |
+| Writing Go against the module's `go` line, choosing an idiom that changed between releases, designing a generic function or an iterator, touching JSON, maps, `time.Time`, runes or randomness, or moving a module to a new Go release | [go-quality-reference/language.md](../skills/go-quality-reference/language.md) |
+| Returning, wrapping, matching or exposing an error, panicking, exiting, or closing a writable file or buffered writer | [go-quality-reference/errors.md](../skills/go-quality-reference/errors.md) |
+| Starting a goroutine, fanning out work, passing, storing or cancelling a context, or sharing state across goroutines | [go-quality-reference/concurrency.md](../skills/go-quality-reference/concurrency.md) |
+| Adding or changing an exported identifier, laying out packages, choosing functional options or a config struct, writing a doc comment or deprecation, tagging a library release, or building an SDK that wraps a CLI binary | [go-quality-reference/api-design.md](../skills/go-quality-reference/api-design.md) |
+| Writing or reviewing a test, a fuzz target or a CI workflow that runs `go test -fuzz`, a benchmark, a golden file, a helper process that fakes a CLI, or a coverage gate | [go-quality-reference/testing.md](../skills/go-quality-reference/testing.md) |
+| Writing a `main` package, choosing an exit code, wiring cobra commands or groups, handling a signal or a broken pipe, prompting, or writing to stdout, stderr or a terminal | [go-quality-reference/cli-contract.md](../skills/go-quality-reference/cli-contract.md) |
+| Writing or replacing a file on disk, opening a path built from external input, extracting or decompressing an archive, or starting, cancelling and reaping a subprocess | [go-quality-reference/io.md](../skills/go-quality-reference/io.md) |
+| Making an HTTP request, building a client, transport or server, bounding a timeout or a body, retrying, streaming or staging a downloaded blob, parsing a digest, or talking to an OCI registry | [go-quality-reference/network.md](../skills/go-quality-reference/network.md) |
+| Generating a token or ID, configuring TLS or an `--insecure` or `--ca-file` flag, holding or logging a credential, rendering an HTML template, touching `unsafe`, `//go:linkname` or cgo, or decoding an untrusted body | [go-quality-reference/security.md](../skills/go-quality-reference/security.md) |
+| Logging or accepting a logger, exposing pprof or a metrics endpoint, setting `GOMAXPROCS`, `GOGC`, `GOMEMLIMIT` or a `GODEBUG` value, diagnosing a hung, racy or leaking process, or making or judging a performance claim | [go-quality-reference/observability.md](../skills/go-quality-reference/observability.md) |
 | Editing `go.mod`, `go.sum`, `go.work` or a `.go-version` file, a golangci-lint, `revive.toml` or `staticcheck.conf` file, or a Makefile or CI workflow that runs the gate | `go-modules` (sibling rule: GO-MOD, and GO-GATE in its gates depth) |
 | Building, signing or publishing a release binary, or editing a goreleaser or `.ko.yaml` file | `go-modules` (GO-REL in its release depth) |
 | Writing a `Dockerfile` for a Go binary | its `ENV` lines are GO-OBS-06 and GO-OBS-07 (observability.md) and GO-LANG-16 (language.md), its build is GO-REL in `go-modules` |

@@ -17,6 +17,8 @@ summary: The Go module and build-config index, with the gate, the non-negotiable
 keywords: go,golang,go.mod,go.sum,go.work,toolchain,godebug,replace,retract,depguard,govulncheck,golangci-lint,staticcheck,goreleaser,ko,cosign,setup-go,dependabot,release
 license: Apache-2.0
 repository: https://github.com/ocx-sh/grimoire-lore
+metadata:
+  grim.requires.skills.go-modules-reference: "./go-modules-reference:0"
 ---
 
 # Go Modules
@@ -153,11 +155,13 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflow
 ## Where the Depth Is
 
 Read the file for the work you are about to do. One level deep, and the depth files do not point at each other.
+Depth files (and the `golangci/` config files) ship in the `go-modules-reference` skill this rule requires; load it, or read
+`.claude/skills/go-modules-reference/<file>` (`~/.claude/skills/` when installed globally).
 
 | Doing… | Read |
 |---|---|
-| Writing or changing a CI gate step, a `.golangci.yml` or `staticcheck.conf`, the `go vet`, `go fix`, `-race`, generate or govulncheck step, or adding, removing or silencing a linter | [go-modules/gates.md](go-modules/gates.md) |
-| Building a release binary, stamping a version or writing `--version`, writing a goreleaser or ko config, signing or attesting release assets, pinning workflow actions, or tagging a module version | [go-modules/release.md](go-modules/release.md) |
+| Writing or changing a CI gate step, a `.golangci.yml` or `staticcheck.conf`, the `go vet`, `go fix`, `-race`, generate or govulncheck step, or adding, removing or silencing a linter | [go-modules-reference/gates.md](../skills/go-modules-reference/gates.md) |
+| Building a release binary, stamping a version or writing `--version`, writing a goreleaser or ko config, signing or attesting release assets, pinning workflow actions, or tagging a module version | [go-modules-reference/release.md](../skills/go-modules-reference/release.md) |
 | Editing any `*.go` file, or the `ENV` lines of a `Dockerfile` that runs Go | `go-quality` (sibling set, below) |
 | Bumping the Go toolchain, golangci-lint or a dependency, or re-probing the dated snapshots above | the `go-upgrade` skill |
 | Cutting a release end to end (GO-MOD-13 to 15, GO-REL) | the `go-release` skill |

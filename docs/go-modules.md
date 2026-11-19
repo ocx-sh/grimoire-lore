@@ -17,6 +17,8 @@ golangci-lint v2.14.0, staticcheck 2026.2.1, govulncheck v1.8.0 and goreleaser
 2.17.1, measured on 2026-09-26 against a 35-repository upstream exemplar
 corpus, because the fleet that adopts this set has no Go code of its own yet.
 
+The depth files and the three golangci-lint files ship in the `go-modules-reference` skill, which the rule requires and grim installs with it (grim 0.16.0 or later).
+
 ## It starts with what a green build does not prove
 
 A green `go test` runs 12 of vet's 35 analyzers, so a copylocks or a

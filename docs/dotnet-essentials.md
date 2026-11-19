@@ -36,7 +36,7 @@ So the split follows what the file under edit is. `csharp-quality` carries the s
 
 Loading any of them on a routine edit would be dead context weight, so they carry no rules of their own. Each restates the merge-blocking rows it enforces as findings with rule IDs. A review run without the rules loaded still reports them correctly.
 
-The skills cite scripts and data that ship in the `checks/` directories of the two rules. Install the bundle rather than a skill alone.
+The skills cite scripts and data that ship in the `checks/` directories of the `csharp-quality-reference` and `dotnet-build-reference` skills, installed with the two rules. Install the bundle rather than a skill alone.
 
 ## Pinned decisions
 

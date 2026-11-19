@@ -13,6 +13,8 @@ summary: "The CMake build index: the configure gate, the non-negotiables, and wh
 keywords: cmake,cmakelists,cmake-presets,ctest,cmake_minimum_required,policies,find_package,fetchcontent,cpm,hunter,toolchain,dependency-provider,cps,install,export,gnuinstalldirs,pkg-config,cross-compiling,gersemi,rules_foreign_cc,cpp,c++
 license: Apache-2.0
 repository: https://github.com/ocx-sh/grimoire-lore
+metadata:
+  grim.requires.skills.cmake-build-reference: "./cmake-build-reference:0"
 ---
 
 # CMake Build
@@ -108,7 +110,7 @@ rationale and verification, or to this file's own table.
 ## Rules This File Owns
 
 The gate and the checks around it, which belong to no single depth file. Run
-each command from the repository root, once per directory of CI definitions. Source files come from `git ls-files -z` with quoted pathspecs, build and install trees from `find`. `CHECKS` (`.claude/rules/cmake-build/checks`) holds `context.awk` and `call-lacks.awk`, the POSIX awk scripts behind the context and multi-line checks.
+each command from the repository root, once per directory of CI definitions. Source files come from `git ls-files -z` with quoted pathspecs, build and install trees from `find`. `CHECKS` (`.claude/skills/cmake-build-reference/checks`) holds `context.awk` and `call-lacks.awk`, the POSIX awk scripts behind the context and multi-line checks.
 
 ```sh
 CI_DIR=.github
@@ -137,19 +139,22 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.sh' ':(glob
 
 ## Where the Depth Is
 
+Depth files and checks scripts ship in the `cmake-build-reference` skill this rule requires; load it, or read
+`.claude/skills/cmake-build-reference/<file>` (`~/.claude/skills/` when installed globally).
+
 | Doing… | Read |
 |---|---|
-| Choosing or raising `cmake_minimum_required`, setting or silencing a policy, touching a `CMAKE_EXPERIMENTAL_*` variable, using a feature newer than the floor, or getting an old dependency to configure on CMake 4 | [cmake-build/versions-and-policies.md](cmake-build/versions-and-policies.md) |
-| Writing any function, macro, `if()`, loop, cache variable or `option()`, returning a value from a function, or chasing "my `-D` did not take" | [cmake-build/language.md](cmake-build/language.md) |
-| Writing a `.cmake` file other projects include (a Find module, a helper or copy-and-own module, a provider file), or anything that downloads or runs a process at configure time | [cmake-build/module-authoring.md](cmake-build/module-authoring.md) |
-| Adding or changing a library or executable, linking anything, setting a flag, a language standard, the MSVC runtime or the build type, visibility, PIC, shared or static, or raising the standard to C++20 | [cmake-build/targets.md](cmake-build/targets.md) |
-| Making a library installable or consumable: `install()` rules, the Config template and its version file, relocation, RPATH, a `.pc.in`, a multi-config install or a CPS export. A Config template with an unusual suffix loads no rule by glob, so reach it from the `CMakeLists.txt` that wires it | [cmake-build/install-and-export.md](cmake-build/install-and-export.md) |
-| Adding, pinning or replacing a dependency (`find_package`, FetchContent, CPM, Hunter, vendoring, CPS import), injecting policy into one, making the configure work offline, or finding out which copy a configure used | [cmake-build/dependencies.md](cmake-build/dependencies.md) |
-| Wiring a toolchain file, a package manager's toolchain, `CMAKE_PROJECT_TOP_LEVEL_INCLUDES` or a dependency provider, or cross-compiling (sysroot, find-root modes, host tools, emulator) | [cmake-build/toolchains-and-providers.md](cmake-build/toolchains-and-providers.md) |
-| Adding tests, gating the test tree, running CTest in CI, or testing a CMake module itself | [cmake-build/testing.md](cmake-build/testing.md) |
-| Editing a presets file, including a file another presets file `include`s or one passed by `cmake --presets-file` (CMake ≥ 4.4), neither of which loads a rule by glob, standing up or changing a pipeline that runs CMake, setting a compiler launcher, or pinning the CMake a pipeline uses | [cmake-build/presets-and-ci.md](cmake-build/presets-and-ci.md), read from here, because no glob in this rule reaches `.github/workflows/`, so `CMK-CI` loads only through this line |
-| Making the project wrappable by `rules_foreign_cc`, or keeping a CMake build and a Bazel build of the same code in step | [cmake-build/bazel-seam.md](cmake-build/bazel-seam.md) |
-| Editing a vcpkg triplet, which is a `.cmake` file that loads only this rule, or a `portfile.cmake`, `vcpkg.json`, a `conanfile` or a Conan profile | `cpp-packaging/vcpkg.md` or `cpp-packaging/conan.md` (sibling set, see below) |
+| Choosing or raising `cmake_minimum_required`, setting or silencing a policy, touching a `CMAKE_EXPERIMENTAL_*` variable, using a feature newer than the floor, or getting an old dependency to configure on CMake 4 | [cmake-build-reference/versions-and-policies.md](../skills/cmake-build-reference/versions-and-policies.md) |
+| Writing any function, macro, `if()`, loop, cache variable or `option()`, returning a value from a function, or chasing "my `-D` did not take" | [cmake-build-reference/language.md](../skills/cmake-build-reference/language.md) |
+| Writing a `.cmake` file other projects include (a Find module, a helper or copy-and-own module, a provider file), or anything that downloads or runs a process at configure time | [cmake-build-reference/module-authoring.md](../skills/cmake-build-reference/module-authoring.md) |
+| Adding or changing a library or executable, linking anything, setting a flag, a language standard, the MSVC runtime or the build type, visibility, PIC, shared or static, or raising the standard to C++20 | [cmake-build-reference/targets.md](../skills/cmake-build-reference/targets.md) |
+| Making a library installable or consumable: `install()` rules, the Config template and its version file, relocation, RPATH, a `.pc.in`, a multi-config install or a CPS export. A Config template with an unusual suffix loads no rule by glob, so reach it from the `CMakeLists.txt` that wires it | [cmake-build-reference/install-and-export.md](../skills/cmake-build-reference/install-and-export.md) |
+| Adding, pinning or replacing a dependency (`find_package`, FetchContent, CPM, Hunter, vendoring, CPS import), injecting policy into one, making the configure work offline, or finding out which copy a configure used | [cmake-build-reference/dependencies.md](../skills/cmake-build-reference/dependencies.md) |
+| Wiring a toolchain file, a package manager's toolchain, `CMAKE_PROJECT_TOP_LEVEL_INCLUDES` or a dependency provider, or cross-compiling (sysroot, find-root modes, host tools, emulator) | [cmake-build-reference/toolchains-and-providers.md](../skills/cmake-build-reference/toolchains-and-providers.md) |
+| Adding tests, gating the test tree, running CTest in CI, or testing a CMake module itself | [cmake-build-reference/testing.md](../skills/cmake-build-reference/testing.md) |
+| Editing a presets file, including a file another presets file `include`s or one passed by `cmake --presets-file` (CMake ≥ 4.4), neither of which loads a rule by glob, standing up or changing a pipeline that runs CMake, setting a compiler launcher, or pinning the CMake a pipeline uses | [cmake-build-reference/presets-and-ci.md](../skills/cmake-build-reference/presets-and-ci.md), read from here, because no glob in this rule reaches `.github/workflows/`, so `CMK-CI` loads only through this line |
+| Making the project wrappable by `rules_foreign_cc`, or keeping a CMake build and a Bazel build of the same code in step | [cmake-build-reference/bazel-seam.md](../skills/cmake-build-reference/bazel-seam.md) |
+| Editing a vcpkg triplet, which is a `.cmake` file that loads only this rule, or a `portfile.cmake`, `vcpkg.json`, a `conanfile` or a Conan profile | `cpp-packaging-reference/vcpkg.md` or `cpp-packaging-reference/conan.md` (sibling set, see below) |
 | Asking which copy, version or mechanism resolved a dependency, and why not the expected one | the `cmake-dependency-triage` skill |
 | Moving a legacy tree to targets and a consumable package | the `cmake-modernize` skill |
 

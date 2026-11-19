@@ -64,13 +64,15 @@ Do not run it when:
 
 1. Find the rule's checks, in the project first, then in the global client
    directories:
-   `find . "$HOME/.claude" "$HOME/.config" -path '*/code-docs/checks/cleanup_check.py' -not -path '*/node_modules/*' 2>/dev/null | head -n 1`.
+   `find . "$HOME/.claude" "$HOME/.config" -path '*/code-docs-reference/checks/cleanup_check.py' -not -path '*/node_modules/*' 2>/dev/null | head -n 1`.
    `CHECKS` below is the directory of that hit; any installed copy works. Read
-   the `code-docs.md` index installed beside the `code-docs/` folder. No hit
+   the `code-docs.md` index in the rules directory beside the `skills/` directory
+   holding `code-docs-reference/`. No hit
    means the rule is installed neither in the project nor globally: install it
    with `grim add ghcr.io/ocx-sh/lore/code-docs`. Where the client tool cannot
-   install it, copy `code-docs.md` and the `code-docs/` folder from the rule's
-   source into the client's rules directory (such as `.claude/rules/`) with
+   install it, copy `rules/code-docs.md` into the client's rules directory (such as
+   `.claude/rules/`) and `skills/code-docs-reference/` into its skills directory
+   (such as `.claude/skills/`) from the rule's source with
    `rsync -a --exclude __pycache__` or `git archive`, so no stale `.pyc` file
    rides along, commit that on its own before the cleanup, and run the find
    again.

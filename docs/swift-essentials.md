@@ -38,7 +38,7 @@ Workflows, Dockerfiles, `.xcconfig` and `*.pbxproj` files are never globbed. The
 
 Loading any of them on a routine edit would be dead context weight, so they carry no rules of their own. Each restates the merge-blocking rows it enforces as findings with rule IDs. A review run without the rules loaded still reports them correctly.
 
-The skills use scripts that ship in the `swift-quality` `checks/` directory. Install the bundle rather than a skill alone.
+The skills use scripts that ship in the `checks/` directory of the `swift-quality-reference` skill, installed with the `swift-quality` rule. Install the bundle rather than a skill alone.
 
 ## Pinned decisions
 

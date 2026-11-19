@@ -12,6 +12,8 @@ summary: "The Gradle build index: the gate, the non-negotiables, and where the d
 keywords: gradle,kotlin-dsl,build-logic,convention-plugin,version-catalog,configuration-cache,build-cache,toolchain,wrapper,dependency-locking,verification-metadata,shadow,publishing,central-portal,testkit,ci
 license: Apache-2.0
 repository: https://github.com/ocx-sh/grimoire-lore
+metadata:
+  grim.requires.skills.gradle-build-reference: "./gradle-build-reference:0"
 ---
 
 # Gradle Build
@@ -125,17 +127,20 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.gradle.kts'
 Read the file for the work you are about to do, not for the topic it is filed
 under. One level deep. These files do not point at each other.
 
+Depth files ship in the `gradle-build-reference` skill this rule requires; load it, or read
+`.claude/skills/gradle-build-reference/<file>` (`~/.claude/skills/` when installed globally).
+
 | Doing… | Read |
 |---|---|
-| Adding a subproject or a convention plugin, choosing `buildSrc` or `build-logic`, wiring a version catalog into build logic, or editing a settings file or a `gradle.properties` | [gradle-build/structure-and-conventions.md](gradle-build/structure-and-conventions.md) |
-| Declaring a dependency, choosing `api` or `implementation` or `compileOnly`, importing a platform or BOM, resolving a version conflict, locking or verifying dependencies, or bumping a version | [gradle-build/dependencies.md](gradle-build/dependencies.md) |
-| Touching any version catalog file, including one whose name does not end `.versions.toml` and which therefore loads no rule by glob at all | [gradle-build/dependencies.md](gradle-build/dependencies.md), read from here, because `GRADLE-DEP-08`'s whole subject is that the filename is a false negative |
-| Writing a task action or build script that must survive `--configuration-cache`, declaring task inputs and outputs, reading an environment variable or a file at configuration time, or editing an archive task | [gradle-build/caching-and-correctness.md](gradle-build/caching-and-correctness.md) |
-| Declaring or changing a Java toolchain, deciding how a JDK is acquired, setting `options.release` or a source encoding, or editing the wrapper's `distributionUrl` | [gradle-build/toolchains-and-compilation.md](gradle-build/toolchains-and-compilation.md) |
-| Writing a Gradle plugin or a `Plugin<Settings>`: annotating task inputs, reading the environment or an external CLI, wiring a `ValueSource` or a `BuildService`, building the TestKit matrix, or publishing to the Plugin Portal | [gradle-build/plugin-authoring.md](gradle-build/plugin-authoring.md) |
-| Shipping something runnable, or deciding whether a library may shade at all: fat jars and transformers, the `application` plugin, Spring Boot `bootJar` and layers, jlink, jpackage, Jib and Dockerfiles | [gradle-build/distribution.md](gradle-build/distribution.md) |
-| Publishing an artifact anyone else consumes, or changing what a consumer sees: publications, POM metadata, signing, Gradle Module Metadata, `mavenLocal`, release-job exit semantics | [gradle-build/publishing.md](gradle-build/publishing.md) |
-| Writing or editing a CI workflow that runs Gradle: the setup and wrapper-validation step, who owns the cache switches, build scans, the JDK matrix, action pinning and workflow permissions, Dependabot or Renovate | [gradle-build/ci.md](gradle-build/ci.md), read from here, because no glob in this rule reaches `.github/workflows/`, so the whole `GRADLE-CI` family loads only through this line |
+| Adding a subproject or a convention plugin, choosing `buildSrc` or `build-logic`, wiring a version catalog into build logic, or editing a settings file or a `gradle.properties` | [gradle-build-reference/structure-and-conventions.md](../skills/gradle-build-reference/structure-and-conventions.md) |
+| Declaring a dependency, choosing `api` or `implementation` or `compileOnly`, importing a platform or BOM, resolving a version conflict, locking or verifying dependencies, or bumping a version | [gradle-build-reference/dependencies.md](../skills/gradle-build-reference/dependencies.md) |
+| Touching any version catalog file, including one whose name does not end `.versions.toml` and which therefore loads no rule by glob at all | [gradle-build-reference/dependencies.md](../skills/gradle-build-reference/dependencies.md), read from here, because `GRADLE-DEP-08`'s whole subject is that the filename is a false negative |
+| Writing a task action or build script that must survive `--configuration-cache`, declaring task inputs and outputs, reading an environment variable or a file at configuration time, or editing an archive task | [gradle-build-reference/caching-and-correctness.md](../skills/gradle-build-reference/caching-and-correctness.md) |
+| Declaring or changing a Java toolchain, deciding how a JDK is acquired, setting `options.release` or a source encoding, or editing the wrapper's `distributionUrl` | [gradle-build-reference/toolchains-and-compilation.md](../skills/gradle-build-reference/toolchains-and-compilation.md) |
+| Writing a Gradle plugin or a `Plugin<Settings>`: annotating task inputs, reading the environment or an external CLI, wiring a `ValueSource` or a `BuildService`, building the TestKit matrix, or publishing to the Plugin Portal | [gradle-build-reference/plugin-authoring.md](../skills/gradle-build-reference/plugin-authoring.md) |
+| Shipping something runnable, or deciding whether a library may shade at all: fat jars and transformers, the `application` plugin, Spring Boot `bootJar` and layers, jlink, jpackage, Jib and Dockerfiles | [gradle-build-reference/distribution.md](../skills/gradle-build-reference/distribution.md) |
+| Publishing an artifact anyone else consumes, or changing what a consumer sees: publications, POM metadata, signing, Gradle Module Metadata, `mavenLocal`, release-job exit semantics | [gradle-build-reference/publishing.md](../skills/gradle-build-reference/publishing.md) |
+| Writing or editing a CI workflow that runs Gradle: the setup and wrapper-validation step, who owns the cache switches, build scans, the JDK matrix, action pinning and workflow permissions, Dependabot or Renovate | [gradle-build-reference/ci.md](../skills/gradle-build-reference/ci.md), read from here, because no glob in this rule reaches `.github/workflows/`, so the whole `GRADLE-CI` family loads only through this line |
 | Writing the Java or Kotlin sources this build compiles | `java-quality`, `kotlin-quality` (sibling sets, see below) |
 | Editing a `pom.xml`, a `.mvn` directory or a `build.xml` in the same repository | `maven-build` (sibling set, see below) |
 

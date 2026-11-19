@@ -22,6 +22,8 @@ summary: The shell quality index, holding the gate, the floor-first rule, the sc
 keywords: shell,sh,posix,bash,zsh,ksh,fish,nushell,elvish,shellcheck,shfmt,bats,github-actions,taskfile,gitlab-ci,installer
 license: Apache-2.0
 repository: https://github.com/ocx-sh/grimoire-lore
+metadata:
+  grim.requires.skills.shell-quality-reference: "./shell-quality-reference:0"
 ---
 
 # Shell Quality
@@ -35,7 +37,7 @@ Contents: [The Gate](#the-gate) · [Read the Floor First](#read-the-floor-first)
 ## The Gate
 
 Run it after every change that touches a file this rule covers, from the repository root, and stop at the first non-zero exit.
-SH-GATE-08 owns the script and its depth. Copy `checks/shell-gate.sh` from this rule's `shell-quality/checks/` directory to
+SH-GATE-08 owns the script and its depth. Copy `checks/shell-gate.sh` from the `shell-quality-reference` skill's `checks/` directory (`.claude/skills/shell-quality-reference/checks/`) to
 `scripts/shell-gate.sh` once, copy any other script a depth file names as `checks/NAME` to `scripts/NAME` the same way, and put the
 `.shellcheckrc` and `.editorconfig` templates of `gates.md` at the repository root, because the script exits 78 without them.
 A script is judged by its exit status. An inline cell is judged by its output: empty stdout and empty stderr is the pass, and a
@@ -149,27 +151,27 @@ Four tokens exist. A waiver ends the line it excuses and carries a reason. A bar
 ## Where the Depth Is
 
 Read the file for the work you are about to do, not for the topic it is filed under. One level deep: these files do not point at each other,
-so a task that spans two families names both. The rule loads on the globs above and on nothing else. A script with no extension (`bin/tool`),
+so a task that spans two families names both. Depth files and checks scripts ship in the `shell-quality-reference` skill this rule requires; load it, or read `.claude/skills/shell-quality-reference/<file>` (`~/.claude/skills/` when installed globally). The rule loads on the globs above and on nothing else. A script with no extension (`bin/tool`),
 `.bashrc`, a Makefile recipe or a Dockerfile `RUN` loads nothing, so route them from this table by what the code does.
 
 | Doing… | Read |
 |---|---|
-| Choosing `#!/bin/sh` or bash, declaring a bash floor or a `# Kind:` header, enabling pipefail in sh, using a POSIX.1-2024 feature, `local` in sh, a shebang argument, or testing an sh script on dash and busybox | [shell-quality/dialect.md](shell-quality/dialect.md) |
-| Calling sed, grep, find, mktemp, readlink, date, stat, timeout, sha256sum, curl or wget so it runs on GNU, BSD and macOS, busybox and uutils | [shell-quality/userland.md](shell-quality/userland.md) |
-| Choosing `set -e`, `set -u` or pipefail for a script's kind, writing a trap or cleanup, picking an exit code, handling a signal, an empty array under `set -u`, a glob loop or `nullglob`, or error propagation through a subshell, `$( )` or a pipe | [shell-quality/errors.md](shell-quality/errors.md) |
-| Quoting a variable, building an argument list, looping over files or lines, choosing echo or printf, a here-doc, arithmetic on input, a test operator, brace or glob expansion, `eval`, option parsing, or passing a value through ssh or `sh -c` | [shell-quality/expansion.md](shell-quality/expansion.md) |
-| Putting a token, password or credential on a command line, in git or cargo auth or under `set -x`, sourcing a file, extending PATH, calling sudo, taking a lock, passing data to ssh, git, rm or tar, or taking a variable name from data | [shell-quality/security.md](shell-quality/security.md) |
-| Setting up or changing ShellCheck, shfmt, `.shellcheckrc`, `.editorconfig`, the gate script, the parse gate of a shell family, line endings or file modes, or writing a verification cell | [shell-quality/gates.md](shell-quality/gates.md) |
-| Writing or running bats tests, isolating a test, setting a skip budget, counting tests, or testing across bash and sh versions | [shell-quality/testing.md](shell-quality/testing.md) |
-| Editing a workflow `run:` step, a composite action, a Taskfile `cmds` item or a GitLab `script:` block: the default shell, an untrusted `${{ }}`, pipefail scope, runner files, Windows and macOS runners | [shell-quality/ci.md](shell-quality/ci.md) |
-| Enabling pipefail or writing a bashism in a `run:` step, a Taskfile `cmds` item or a script that a `shell: sh` step runs | [shell-quality/dialect.md](shell-quality/dialect.md) and [shell-quality/ci.md](shell-quality/ci.md) |
-| Writing or sourcing zsh code: emulation, word splitting, arrays, options, startup files, a zsh floor, or a pasted block that globs | [shell-quality/zsh.md](shell-quality/zsh.md) |
-| Writing a fish function, completion or `conf.d` snippet, or fish code a tool generates for fish 3.6 to 4.9 | [shell-quality/fish.md](shell-quality/fish.md) |
-| Writing a nushell script, module or env, config or autoload snippet, or nu code a tool generates across nu releases | [shell-quality/nushell.md](shell-quality/nushell.md) |
-| Writing an elvish module or `rc.elv` snippet, or elvish code a tool generates | [shell-quality/elvish.md](shell-quality/elvish.md) |
-| Generating shell code for other shells from Rust, Go or Python: quoting a value per target, editing an rc or profile file, registering a hook or completion, a Windows cmd or PowerShell target | [shell-quality/emit.md](shell-quality/emit.md) |
-| Writing or reviewing an `install.sh`: the truncation guard, integrity check, TLS and wget flags, platform detection, prompts, privilege, PATH edits, the exit table or retry | [shell-quality/installers.md](shell-quality/installers.md) |
-| Writing the sh of a curl-piped installer, or the sh an emitter prints | [shell-quality/installers.md](shell-quality/installers.md) or [shell-quality/emit.md](shell-quality/emit.md), plus [shell-quality/dialect.md](shell-quality/dialect.md) |
+| Choosing `#!/bin/sh` or bash, declaring a bash floor or a `# Kind:` header, enabling pipefail in sh, using a POSIX.1-2024 feature, `local` in sh, a shebang argument, or testing an sh script on dash and busybox | [shell-quality-reference/dialect.md](../skills/shell-quality-reference/dialect.md) |
+| Calling sed, grep, find, mktemp, readlink, date, stat, timeout, sha256sum, curl or wget so it runs on GNU, BSD and macOS, busybox and uutils | [shell-quality-reference/userland.md](../skills/shell-quality-reference/userland.md) |
+| Choosing `set -e`, `set -u` or pipefail for a script's kind, writing a trap or cleanup, picking an exit code, handling a signal, an empty array under `set -u`, a glob loop or `nullglob`, or error propagation through a subshell, `$( )` or a pipe | [shell-quality-reference/errors.md](../skills/shell-quality-reference/errors.md) |
+| Quoting a variable, building an argument list, looping over files or lines, choosing echo or printf, a here-doc, arithmetic on input, a test operator, brace or glob expansion, `eval`, option parsing, or passing a value through ssh or `sh -c` | [shell-quality-reference/expansion.md](../skills/shell-quality-reference/expansion.md) |
+| Putting a token, password or credential on a command line, in git or cargo auth or under `set -x`, sourcing a file, extending PATH, calling sudo, taking a lock, passing data to ssh, git, rm or tar, or taking a variable name from data | [shell-quality-reference/security.md](../skills/shell-quality-reference/security.md) |
+| Setting up or changing ShellCheck, shfmt, `.shellcheckrc`, `.editorconfig`, the gate script, the parse gate of a shell family, line endings or file modes, or writing a verification cell | [shell-quality-reference/gates.md](../skills/shell-quality-reference/gates.md) |
+| Writing or running bats tests, isolating a test, setting a skip budget, counting tests, or testing across bash and sh versions | [shell-quality-reference/testing.md](../skills/shell-quality-reference/testing.md) |
+| Editing a workflow `run:` step, a composite action, a Taskfile `cmds` item or a GitLab `script:` block: the default shell, an untrusted `${{ }}`, pipefail scope, runner files, Windows and macOS runners | [shell-quality-reference/ci.md](../skills/shell-quality-reference/ci.md) |
+| Enabling pipefail or writing a bashism in a `run:` step, a Taskfile `cmds` item or a script that a `shell: sh` step runs | [shell-quality-reference/dialect.md](../skills/shell-quality-reference/dialect.md) and [shell-quality-reference/ci.md](../skills/shell-quality-reference/ci.md) |
+| Writing or sourcing zsh code: emulation, word splitting, arrays, options, startup files, a zsh floor, or a pasted block that globs | [shell-quality-reference/zsh.md](../skills/shell-quality-reference/zsh.md) |
+| Writing a fish function, completion or `conf.d` snippet, or fish code a tool generates for fish 3.6 to 4.9 | [shell-quality-reference/fish.md](../skills/shell-quality-reference/fish.md) |
+| Writing a nushell script, module or env, config or autoload snippet, or nu code a tool generates across nu releases | [shell-quality-reference/nushell.md](../skills/shell-quality-reference/nushell.md) |
+| Writing an elvish module or `rc.elv` snippet, or elvish code a tool generates | [shell-quality-reference/elvish.md](../skills/shell-quality-reference/elvish.md) |
+| Generating shell code for other shells from Rust, Go or Python: quoting a value per target, editing an rc or profile file, registering a hook or completion, a Windows cmd or PowerShell target | [shell-quality-reference/emit.md](../skills/shell-quality-reference/emit.md) |
+| Writing or reviewing an `install.sh`: the truncation guard, integrity check, TLS and wget flags, platform detection, prompts, privilege, PATH edits, the exit table or retry | [shell-quality-reference/installers.md](../skills/shell-quality-reference/installers.md) |
+| Writing the sh of a curl-piped installer, or the sh an emitter prints | [shell-quality-reference/installers.md](../skills/shell-quality-reference/installers.md) or [shell-quality-reference/emit.md](../skills/shell-quality-reference/emit.md), plus [shell-quality-reference/dialect.md](../skills/shell-quality-reference/dialect.md) |
 | Writing a `.ps1`, `.psm1` or `.psd1` file or a Pester test | `powershell-quality` (sibling rule: PS-COMPAT, PS-ERR, PS-NATIVE, PS-ENC, PS-GATE, PS-SEC) |
 | Writing a header comment or a comment block in a script | `code-docs` (sibling rule) |
 | Emitting code for N shells, writing an installer pair, porting to a target matrix, or diagnosing a shell failure from its symptom | the `shell-integration`, `installer-script`, `shell-port` and `shell-diagnose` skills |

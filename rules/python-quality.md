@@ -8,6 +8,8 @@ summary: The Python quality index — the gate, the non-negotiables, the pinned 
 keywords: python,quality,standards,review,typing,async,subprocess,pytest,exit-codes,cli,security,logging,packaging,ruff,pyright
 license: Apache-2.0
 repository: https://github.com/ocx-sh/grimoire-lore
+metadata:
+  grim.requires.skills.python-quality-reference: "./python-quality-reference:0"
 ---
 
 # Python Quality
@@ -22,7 +24,7 @@ Contents: [The Gate](#the-gate) · [Non-Negotiables](#non-negotiables) ·
 [Siblings](#siblings)
 
 **Ending a process, choosing a status, or writing to stdout? Read
-[python-quality/cli-contract.md](python-quality/cli-contract.md) first.**
+[python-quality-reference/cli-contract.md](../skills/python-quality-reference/cli-contract.md) first.**
 The exit-code table is pinned and already scripted against, and one shape
 here deliberately exits `0` on failure because its harness reads the
 verdict from stdout — a number changed locally is a shipped contract break.
@@ -114,20 +116,23 @@ git ls-files -z --cached --others --exclude-standard -- '.' | xargs -0 -r grep -
 Read the file for the work you are about to do, not for the topic it is
 filed under. One level deep; these files do not point at each other.
 
+Depth files and checks scripts ship in the `python-quality-reference` skill this rule requires; load it, or read
+`.claude/skills/python-quality-reference/<file>` (`~/.claude/skills/` when installed globally).
+
 | Doing… | Read |
 |---|---|
-| Anything that ends a process, picks an exit status, parses argv, or writes to stdout | [python-quality/cli-contract.md](python-quality/cli-contract.md) |
-| Spawning a process, capturing its output, driving a CLI, or handling a PTY | [python-quality/processes.md](python-quality/processes.md) |
-| Writing or changing a test, a fixture, a marker, or a coverage setting | [python-quality/testing.md](python-quality/testing.md) |
-| Adding or changing an annotation, a generic, a `cast`, or a type-checker setting | [python-quality/typing.md](python-quality/typing.md) |
-| Anything `async`, awaited, spawned, cancelled, or timed out | [python-quality/async.md](python-quality/async.md) |
-| Making a network request, handling a response, retrying, or paginating | [python-quality/http.md](python-quality/http.md) |
-| Unpacking an archive, reading untrusted input, or touching a credential | [python-quality/security.md](python-quality/security.md) |
-| Writing a log line, a warning, or user-facing diagnostic output | [python-quality/observability.md](python-quality/observability.md) |
-| Designing a public function, class, or exception that something outside the package imports | [python-quality/api-surface.md](python-quality/api-surface.md) |
-| Choosing a dataclass, enum, `TypedDict`, or sentinel; serializing anything another tool reads | [python-quality/data-modelling.md](python-quality/data-modelling.md) |
-| Writing a script that must run with no third-party dependencies | [python-quality/single-file-tools.md](python-quality/single-file-tools.md) |
-| Turning on a lint, wiring a CI job, or adopting a gate on a tree that had none | [python-quality/ci-gate.md](python-quality/ci-gate.md) |
+| Anything that ends a process, picks an exit status, parses argv, or writes to stdout | [python-quality-reference/cli-contract.md](../skills/python-quality-reference/cli-contract.md) |
+| Spawning a process, capturing its output, driving a CLI, or handling a PTY | [python-quality-reference/processes.md](../skills/python-quality-reference/processes.md) |
+| Writing or changing a test, a fixture, a marker, or a coverage setting | [python-quality-reference/testing.md](../skills/python-quality-reference/testing.md) |
+| Adding or changing an annotation, a generic, a `cast`, or a type-checker setting | [python-quality-reference/typing.md](../skills/python-quality-reference/typing.md) |
+| Anything `async`, awaited, spawned, cancelled, or timed out | [python-quality-reference/async.md](../skills/python-quality-reference/async.md) |
+| Making a network request, handling a response, retrying, or paginating | [python-quality-reference/http.md](../skills/python-quality-reference/http.md) |
+| Unpacking an archive, reading untrusted input, or touching a credential | [python-quality-reference/security.md](../skills/python-quality-reference/security.md) |
+| Writing a log line, a warning, or user-facing diagnostic output | [python-quality-reference/observability.md](../skills/python-quality-reference/observability.md) |
+| Designing a public function, class, or exception that something outside the package imports | [python-quality-reference/api-surface.md](../skills/python-quality-reference/api-surface.md) |
+| Choosing a dataclass, enum, `TypedDict`, or sentinel; serializing anything another tool reads | [python-quality-reference/data-modelling.md](../skills/python-quality-reference/data-modelling.md) |
+| Writing a script that must run with no third-party dependencies | [python-quality-reference/single-file-tools.md](../skills/python-quality-reference/single-file-tools.md) |
+| Turning on a lint, wiring a CI job, or adopting a gate on a tree that had none | [python-quality-reference/ci-gate.md](../skills/python-quality-reference/ci-gate.md) |
 
 ## Severity
 

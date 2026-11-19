@@ -8,9 +8,11 @@ merge-blocking non-negotiables and two depth files, one per manager.
 grim add ghcr.io/ocx-sh/lore/cpp-packaging
 ```
 
+The depth files and checks scripts ship in the [`cpp-packaging-reference`](cpp-packaging-reference.md) skill, which the rule requires and grim installs with it (grim 0.16.0 or later).
+
 Loads on `**/conanfile.py`, `**/conanfile.txt`, `**/conandata.yml`,
 `**/conan.lock`, `**/conanws.yml`, `**/conanws.py`, `**/vcpkg.json`,
-`**/vcpkg-configuration.json` and `**/portfile.cmake`. The index is 189 lines
+`**/vcpkg-configuration.json` and `**/portfile.cmake`. The index is 209 lines
 and always present. A depth file is read only when the work calls for it.
 
 ## It starts with what a green configure does not prove

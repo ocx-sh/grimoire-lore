@@ -6,7 +6,7 @@ Standards for the files a Swift compiler never checks: the manifest, the lock fi
 grim add ghcr.io/ocx-sh/lore/swift-package
 ```
 
-Loads on `**/Package.swift`, `**/Package@swift-*.swift`, `**/Package.resolved`, `**/.swift-format`, `**/.swiftformat`, `**/.swiftlint.yml`, `**/.swift-version` and `**/.spi.yml`. The index is 214 lines and always present. A depth file is read only when the work calls for it. It ships beside `swift-quality` in `swift-essentials`.
+Loads on `**/Package.swift`, `**/Package@swift-*.swift`, `**/Package.resolved`, `**/.swift-format`, `**/.swiftformat`, `**/.swiftlint.yml`, `**/.swift-version` and `**/.spi.yml`. The index is 214 lines and always present. A depth file is read only when the work calls for it. It ships beside `swift-quality` in `swift-essentials`. The depth files ship in the `swift-package-reference` skill, which the rule requires and grim installs with it (grim 0.16.0 or later).
 
 ## It starts by reading which manifest is in effect
 

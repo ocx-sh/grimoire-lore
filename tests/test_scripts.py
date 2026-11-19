@@ -12,7 +12,7 @@ and stays silent on the near-miss that looks like it.
 
 Stdlib only, so nothing needs installing:
 
-    ocx run task -- task test
+    ocx exec task -- task test
     python3 -m unittest discover -s tests -v
 """
 

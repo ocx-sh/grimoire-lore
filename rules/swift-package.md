@@ -12,6 +12,8 @@ summary: The Swift package and build-config index, with the gate, the non-negoti
 keywords: swift,swiftpm,package,manifest,swift-format,swiftlint,toolchain,release,ci
 license: Apache-2.0
 repository: https://github.com/ocx-sh/grimoire-lore
+metadata:
+  grim.requires.skills.swift-package-reference: "./swift-package-reference:0"
 ---
 
 # Swift Package
@@ -74,7 +76,7 @@ Every line below blocks a merge within the scope it names. IDs resolve through
 
 ## Rules This File Owns
 
-The SW-PKG family is defined here and in [swift-package/manifest.md](swift-package/manifest.md), nowhere else. This file keeps every MUST row and the three SHOULD rows the skeleton below pins or instantiates (SW-PKG-02, SW-PKG-12, SW-PKG-18). `manifest.md` holds the other 22 rows whole, IDs unchanged. A grep, awk or find check prints its violation, so empty output is the pass (ignore grep's exit status: 1 on no match, 123 behind `xargs`), and a presence check (`grep -L`) lists the violators. Run each from the package root. The PKG-02, PKG-11, PKG-12 and PKG-13 cells read `./Package.swift` only, because a nested `Benchmarks` or fixture manifest is no product root (a monorepo runs them per package directory). A `Package@swift-*.swift` that shadows it is checked per file (manifest.md, Dates and Defaults). Before trusting an empty result confirm the operand holds manifests: `git ls-files --cached --others --exclude-standard -- ':(glob)**/Package*.swift' ':(exclude,glob)**/.build/**'` prints a path. Every file list over `.` is a `git ls-files` call that carries `':(exclude,glob)**/.build/**'`, because a built tree leaks `.build/checkouts/**/Package.swift`. Commands in these files were translated 2026-10-11 to the portable dialect (git-fed file lists, POSIX grep and awk) and each was re-watched red on a plant and green on a twin under GNU and busybox; a "measured 2026-10-10" date dates the original form.
+The SW-PKG family is defined here and in [swift-package-reference/manifest.md](../skills/swift-package-reference/manifest.md), nowhere else. This file keeps every MUST row and the three SHOULD rows the skeleton below pins or instantiates (SW-PKG-02, SW-PKG-12, SW-PKG-18). `manifest.md` holds the other 22 rows whole, IDs unchanged. A grep, awk or find check prints its violation, so empty output is the pass (ignore grep's exit status: 1 on no match, 123 behind `xargs`), and a presence check (`grep -L`) lists the violators. Run each from the package root. The PKG-02, PKG-11, PKG-12 and PKG-13 cells read `./Package.swift` only, because a nested `Benchmarks` or fixture manifest is no product root (a monorepo runs them per package directory). A `Package@swift-*.swift` that shadows it is checked per file (manifest.md, Dates and Defaults). Before trusting an empty result confirm the operand holds manifests: `git ls-files --cached --others --exclude-standard -- ':(glob)**/Package*.swift' ':(exclude,glob)**/.build/**'` prints a path. Every file list over `.` is a `git ls-files` call that carries `':(exclude,glob)**/.build/**'`, because a built tree leaks `.build/checkouts/**/Package.swift`. Commands in these files were translated 2026-10-11 to the portable dialect (git-fed file lists, POSIX grep and awk) and each was re-watched red on a plant and green on a twin under GNU and busybox; a "measured 2026-10-10" date dates the original form.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
@@ -172,14 +174,14 @@ SW-PKG-28 and SW-PKG-29 in CI, while the SDK library gitignores it (SW-PKG-27).
 
 ## Where the Depth Is
 
-Read the file for the work you are about to do, not for the topic it is filed under. One level deep: these files do not
-point at each other.
+Read the file for the work you are about to do, not for the topic it is filed under. One level deep: these files do not point at each other.
+Depth files ship in the `swift-package-reference` skill this rule requires; load it, or read `.claude/skills/swift-package-reference/<file>` (`~/.claude/skills/` when installed globally).
 
 | Doing… | Read |
 |---|---|
-| Choosing a dependency requirement or a pin, adding a trait, naming a product, adding a `Package@swift-*.swift`, raising a tools version, enabling a feature on an existing package, reading `swiftLanguageMode` or `platforms:`, or depending on a macro package | [swift-package/manifest.md](swift-package/manifest.md) |
-| Setting up or changing format, lint, warnings-as-errors, warning groups, TSan, API-breakage, DocC or CI matrix gates, or editing `.swift-format`, `.swiftlint.yml` or `.spi.yml` | [swift-package/gates.md](swift-package/gates.md) |
-| Building release binaries or images, choosing the static Linux SDK over `--static-swift-stdlib`, checking the glibc floor, stamping a version, tagging or checksumming a release, producing an SBOM or provenance, or running the API-breakage gate before a release | [swift-package/release.md](swift-package/release.md) |
+| Choosing a dependency requirement or a pin, adding a trait, naming a product, adding a `Package@swift-*.swift`, raising a tools version, enabling a feature on an existing package, reading `swiftLanguageMode` or `platforms:`, or depending on a macro package | [swift-package-reference/manifest.md](../skills/swift-package-reference/manifest.md) |
+| Setting up or changing format, lint, warnings-as-errors, warning groups, TSan, API-breakage, DocC or CI matrix gates, or editing `.swift-format`, `.swiftlint.yml` or `.spi.yml` | [swift-package-reference/gates.md](../skills/swift-package-reference/gates.md) |
+| Building release binaries or images, choosing the static Linux SDK over `--static-swift-stdlib`, checking the glibc floor, stamping a version, tagging or checksumming a release, producing an SBOM or provenance, or running the API-breakage gate before a release | [swift-package-reference/release.md](../skills/swift-package-reference/release.md) |
 | Editing any `*.swift` file: language, concurrency, errors, API design, tests, a CLI, process or file I/O, networking or security | `swift-quality` (sibling rule: SW-LANG, SW-CONC, SW-ERR, SW-API, SW-TEST, SW-CLI, SW-IO, SW-NET and SW-SEC in its depth files, SW-CORE in its index) |
 | Editing Xcode build settings, an `.xcconfig` or a `project.pbxproj`, or writing SwiftUI, Observation or Combine code | `swift-quality` (SW-APPLE in its apple depth file) |
 | Writing a `swift_*` Bazel target, configuring `rules_swift` or bridging SwiftPM with `rules_swift_package_manager` | `bazel-quality` (sibling set: its `swift.md`, BZL-SWIFT) |
@@ -202,7 +204,7 @@ fleet (`ocx`, `OcxSDK`, `OcxSpawn`) are examples the adopter renames.
 
 ## Siblings
 
-- **`swift-quality`** loads on `**/*.swift` and ships beside this rule. It owns SW-CORE (weakened checks, red before
+- **`swift-quality`** loads on `**/*.swift` and ships beside this rule; the `checks/` scripts the depth files run live in its `swift-quality-reference` skill (`swift-essentials` co-installs both). It owns SW-CORE (weakened checks, red before
   green, empty output, the floor read, generated code, the upgrade and diagnosis rules), the done-gate block and
   every source-level family this file only cites. A manifest edit never pays for it and a source edit never pays for
   this file, except `Package.swift` itself, which both load.

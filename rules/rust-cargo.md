@@ -15,6 +15,8 @@ summary: Lint policy, toolchain pinning, dependency gates, CI and release settin
 keywords: rust,cargo,clippy,lints,msrv,toolchain,ci,cargo-deny,release,supply-chain
 license: Apache-2.0
 repository: https://github.com/ocx-sh/grimoire-lore
+metadata:
+  grim.requires.skills.rust-cargo-reference: "./rust-cargo-reference:0"
 ---
 
 # Rust Cargo, Lints and CI
@@ -38,7 +40,7 @@ Contents: [Lint Policy](#lint-policy) · [The Lints Stanza](#the-lints-stanza) �
 [What Agents Get Wrong](#what-agents-get-wrong-here) · [Sources](#sources)
 
 **Adding, replacing or upgrading a dependency? Read
-[rust-cargo/crates-of-record.md](rust-cargo/crates-of-record.md) first** —
+[rust-cargo-reference/crates-of-record.md](../skills/rust-cargo-reference/crates-of-record.md) first** —
 the crate this family uses for each job, the superseded crate a model
 reaches for instead, and what changed to make it wrong (DEP-01…08).
 
@@ -57,7 +59,9 @@ Severity maps onto the house tiers: MUST = Block, SHOULD = Warn,
 CONSIDER = Suggest.
 
 A verification cell that reads `see block ID` is run from the block of that ID in
-[rust-cargo/gates.md](rust-cargo/gates.md), from the repository root.
+[rust-cargo-reference/gates.md](../skills/rust-cargo-reference/gates.md), from the repository root.
+Depth files and the checks script ship in the `rust-cargo-reference` skill this rule requires; load it, or read
+`.claude/skills/rust-cargo-reference/<file>` (`~/.claude/skills/` when installed globally).
 
 ## Lint Policy
 

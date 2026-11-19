@@ -5,6 +5,8 @@ summary: The Rust quality index — non-negotiables, the verification gate, the 
 keywords: rust,quality,standards,review,async,errors,exit-codes,cli,security,testing,architecture,idioms
 license: Apache-2.0
 repository: https://github.com/ocx-sh/grimoire-lore
+metadata:
+  grim.requires.skills.rust-quality-reference: "./rust-quality-reference:0"
 ---
 
 # Rust Quality
@@ -18,7 +20,7 @@ Contents: [The Gate](#the-gate) · [Non-Negotiables](#non-negotiables) ·
 [Siblings](#siblings)
 
 **Ending a process, choosing a status, or writing to stdout? Read
-[rust-quality/cli-contract.md](rust-quality/cli-contract.md) first.** The
+[rust-quality-reference/cli-contract.md](../skills/rust-quality-reference/cli-contract.md) first.** The
 exit-code table is pinned, already scripted against, and locked by tests —
 a number invented locally is a shipped contract break.
 
@@ -74,33 +76,36 @@ next section, where each rule carries its rationale and verification.
 Read the file for the work you are about to do, not for the topic it is
 filed under. One level deep; these files do not point at each other.
 
+Depth files and checks scripts ship in the `rust-quality-reference` skill this rule requires; load it, or read
+`.claude/skills/rust-quality-reference/<file>` (`~/.claude/skills/` when installed globally).
+
 A verification cell that reads `see block ID` points at the fenced `sh`
 block under the same table. Run it from the repository root: file lists come
 from `git ls-files`, so `external/` stays out, and the commands need neither
 ripgrep nor GNU-only grep options. Empty output passes unless the row says
 otherwise. A block that calls an awk script sets `CHECKS` to
-`.claude/rules/rust-quality/checks`.
+`.claude/skills/rust-quality-reference/checks`.
 
 | Doing… | Read |
 |---|---|
-| Adding a type, trait, or module; moving code between them; touching crate boundaries | [rust-quality/architecture.md](rust-quality/architecture.md) |
-| Defining or changing an error type; deciding what a failure returns or prints | [rust-quality/errors.md](rust-quality/errors.md) |
-| Anything that ends a process, picks an exit status, parses argv, or writes to stdout | [rust-quality/cli-contract.md](rust-quality/cli-contract.md) |
-| Anything `async`, spawned, locked, timed out, retried, or cancelled | [rust-quality/async.md](rust-quality/async.md) |
-| Handling registry content, archives, paths from outside, subprocesses, credentials, TLS | [rust-quality/security.md](rust-quality/security.md) |
-| Writing or changing a test, a fixture, a snapshot, or a test seam | [rust-quality/testing.md](rust-quality/testing.md) |
-| A change made for speed, or one that could plausibly cost it | [rust-quality/performance.md](rust-quality/performance.md) |
-| Writing a doc comment's sections or examples, a log line, a span, or user-facing diagnostic output. What any comment keeps, where it goes and how long it runs is the `code-docs` rule | [rust-quality/docs-and-tracing.md](rust-quality/docs-and-tracing.md) |
-| Designing a public function signature, a derive set, or a conversion | [rust-quality/api-and-idioms.md](rust-quality/api-and-idioms.md) |
-| Choosing a crate, or writing code against an API you have not checked this year | [rust-quality/current-apis.md](rust-quality/current-apis.md) |
-| Serializing anything, changing an on-disk or wire format, or emitting output another tool parses | [rust-quality/data-and-formats.md](rust-quality/data-and-formats.md) |
-| Touching a path, a filename, an archive entry, a `cfg(target_os)` branch, or the clock | [rust-quality/platform-and-paths.md](rust-quality/platform-and-paths.md) |
-| Writing state that must survive a crash — atomic writes, fsync, locks, guards, `Drop` | [rust-quality/durable-state.md](rust-quality/durable-state.md) |
-| Registry resilience, retries against a remote, partial failure across a batch of packages | [rust-quality/package-manager-domain.md](rust-quality/package-manager-domain.md) |
-| Anything in the terminal UI — rendering, events, keybindings, terminal state | [rust-quality/tui.md](rust-quality/tui.md) |
-| Reviewing a diff someone else — or something else — wrote | [rust-quality/reviewing-a-diff.md](rust-quality/reviewing-a-diff.md) |
-| Checking whether a change turned the gate green by weakening it | [rust-quality/diff-integrity.md](rust-quality/diff-integrity.md) |
-| Moving code at scale — extracting a type, splitting a crate, a codemod across many files | [rust-quality/restructuring.md](rust-quality/restructuring.md) |
+| Adding a type, trait, or module; moving code between them; touching crate boundaries | [rust-quality-reference/architecture.md](../skills/rust-quality-reference/architecture.md) |
+| Defining or changing an error type; deciding what a failure returns or prints | [rust-quality-reference/errors.md](../skills/rust-quality-reference/errors.md) |
+| Anything that ends a process, picks an exit status, parses argv, or writes to stdout | [rust-quality-reference/cli-contract.md](../skills/rust-quality-reference/cli-contract.md) |
+| Anything `async`, spawned, locked, timed out, retried, or cancelled | [rust-quality-reference/async.md](../skills/rust-quality-reference/async.md) |
+| Handling registry content, archives, paths from outside, subprocesses, credentials, TLS | [rust-quality-reference/security.md](../skills/rust-quality-reference/security.md) |
+| Writing or changing a test, a fixture, a snapshot, or a test seam | [rust-quality-reference/testing.md](../skills/rust-quality-reference/testing.md) |
+| A change made for speed, or one that could plausibly cost it | [rust-quality-reference/performance.md](../skills/rust-quality-reference/performance.md) |
+| Writing a doc comment's sections or examples, a log line, a span, or user-facing diagnostic output. What any comment keeps, where it goes and how long it runs is the `code-docs` rule | [rust-quality-reference/docs-and-tracing.md](../skills/rust-quality-reference/docs-and-tracing.md) |
+| Designing a public function signature, a derive set, or a conversion | [rust-quality-reference/api-and-idioms.md](../skills/rust-quality-reference/api-and-idioms.md) |
+| Choosing a crate, or writing code against an API you have not checked this year | [rust-quality-reference/current-apis.md](../skills/rust-quality-reference/current-apis.md) |
+| Serializing anything, changing an on-disk or wire format, or emitting output another tool parses | [rust-quality-reference/data-and-formats.md](../skills/rust-quality-reference/data-and-formats.md) |
+| Touching a path, a filename, an archive entry, a `cfg(target_os)` branch, or the clock | [rust-quality-reference/platform-and-paths.md](../skills/rust-quality-reference/platform-and-paths.md) |
+| Writing state that must survive a crash — atomic writes, fsync, locks, guards, `Drop` | [rust-quality-reference/durable-state.md](../skills/rust-quality-reference/durable-state.md) |
+| Registry resilience, retries against a remote, partial failure across a batch of packages | [rust-quality-reference/package-manager-domain.md](../skills/rust-quality-reference/package-manager-domain.md) |
+| Anything in the terminal UI — rendering, events, keybindings, terminal state | [rust-quality-reference/tui.md](../skills/rust-quality-reference/tui.md) |
+| Reviewing a diff someone else — or something else — wrote | [rust-quality-reference/reviewing-a-diff.md](../skills/rust-quality-reference/reviewing-a-diff.md) |
+| Checking whether a change turned the gate green by weakening it | [rust-quality-reference/diff-integrity.md](../skills/rust-quality-reference/diff-integrity.md) |
+| Moving code at scale — extracting a type, splitting a crate, a codemod across many files | [rust-quality-reference/restructuring.md](../skills/rust-quality-reference/restructuring.md) |
 
 ## Severity
 

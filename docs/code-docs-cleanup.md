@@ -71,5 +71,5 @@ change of their own.
 ## Sibling
 
 It needs the `code-docs` rule installed, because the checks it runs ship in
-that rule's `checks/` directory. The Rust, Python, TypeScript, Go and JVM
+the `checks/` directory of the `code-docs-reference` skill that rule requires. The Rust, Python, TypeScript, Go and JVM
 essentials bundles install both, and so does `code-docs-essentials` on its own.

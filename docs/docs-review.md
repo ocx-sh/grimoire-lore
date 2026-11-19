@@ -24,4 +24,4 @@ is `docs-plan`. Wiring the checks into CI, which is `docs-instrument`.
 ## Sibling
 
 Needs the `docs-quality` rule installed, because the checks it runs ship in
-that rule's `checks/` directory. The `docs-essentials` bundle installs both.
+the `checks/` directory of the `docs-quality-reference` skill that rule requires. The `docs-essentials` bundle installs both.

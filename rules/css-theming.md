@@ -28,6 +28,8 @@ summary: The CSS theming index — why a consumer's override loses, the one laye
 keywords: css,theming,design-tokens,custom-properties,cascade-layers,specificity,forced-colors,dark-mode,light-dark,shadow-dom,scoped-styles,overrides,sass,less,astro,vue,svelte,angular,tailwind,css-modules,css-in-js,web-components,vitepress,webview
 license: Apache-2.0
 repository: https://github.com/ocx-sh/grimoire-lore
+metadata:
+  grim.requires.skills.css-theming-reference: "./css-theming-reference:0"
 ---
 
 # CSS Theming
@@ -48,13 +50,13 @@ surface — and know that no DOM emulator can test a layered cascade.** happy-do
 0`, and a bare `@layer a, b;` statement corrupts the parse of every rule *after*
 it in the same sheet. jsdom 30.0.1 parses `@layer` into correct CSSOM objects
 and applies none of it. Either way the assertion passes or fails for reasons
-unrelated to your CSS. Read [gate.md](css-theming/gate.md) before wiring
+unrelated to your CSS. Read [gate.md](../skills/css-theming-reference/gate.md) before wiring
 anything.
 
 Every measured claim comes from Chromium 151.0.7922.34 and real production
 builds at the versions each depth file names. Firefox and WebKit were not
 tested. Where a claim is spec-derived rather than measured,
-[rules.md](css-theming/rules.md) says so on the rule.
+[rules.md](../skills/css-theming-reference/rules.md) says so on the rule.
 
 ## The Gate
 
@@ -68,7 +70,7 @@ node scripts/literal-colours.mjs <built.css>       # strip var() AND --x: RHS fi
 node scripts/dark-parity.mjs     <built.css>       # with a light-dark() skip
 ```
 
-All four ship as code in [gate.md](css-theming/gate.md), with the ignore list
+All four ship as code in [gate.md](../skills/css-theming-reference/gate.md), with the ignore list
 each needs to avoid going red on correct code — `@property` and a bare
 `@layer a, b;` are not layerable rules, and a token declaration is not a
 literal. A checker without them gets switched off, which is worse than none.
@@ -78,13 +80,13 @@ cascade-layer or cross-context relationship, and then never a DOM emulator.
 **Conditionally, a different artifact** — Angular compiles component `styles:`
 into the JS bundle, Qwik's chunk carries raw unscoped CSS, Astro's
 view-transition layer lands inline in the HTML. Routing table in
-[gate.md](css-theming/gate.md). Chain them into one named target and have CI
+[gate.md](../skills/css-theming-reference/gate.md). Chain them into one named target and have CI
 invoke that, never a hand-copied step list.
 
 ## Non-Negotiables
 
 Every MUST below blocks a merge. IDs resolve to
-[rules.md](css-theming/rules.md), where each carries its rationale, runnable
+[rules.md](../skills/css-theming-reference/rules.md), where each carries its rationale, runnable
 verification, severity, and whether it was measured or spec-derived. A rule with
 a bold **Except:** clause there is not universal — six are not.
 
@@ -134,30 +136,30 @@ Read your row before changing a selector. An absent surface means nobody looked.
 | Surface | Emits | Layered by default? | Depth |
 |---|---|---|---|
 | Plain CSS · Sass / Less | what you wrote; `$var` inlined, selectors flattened | no | this file |
-| Astro (default `attribute`) | `.foo[data-astro-cid-h]` (0,2,0) | no | [astro.md](css-theming/astro.md) |
-| Vue SFC `<style scoped>` | `.foo[data-v-h]` (0,2,0) | no | [vue.md](css-theming/vue.md) |
-| VitePress 1.x | theme reset UNLAYERED — your layer LOSES | no | [vue.md](css-theming/vue.md) |
-| VitePress 2.x | `@layer __vitepress_base` first; yours wins | theirs, yes | [vue.md](css-theming/vue.md) |
-| Svelte 5 | `.foo.svelte-h` (0,2,0); unused rules DELETED | no — the anonymous bucket beats every named layer | [svelte.md](css-theming/svelte.md) |
-| Angular Emulated | `.foo[_ngcontent-ng-cN]` (0,2,0) | no; layer order = MOUNT order | [angular.md](css-theming/angular.md) |
-| Angular None / Material | bare selectors, appended to `<head>` at first render | no | [angular.md](css-theming/angular.md) |
-| Angular ShadowDom | a real shadow root — plus a copy of every `None` style | no | [angular.md](css-theming/angular.md) |
-| Tailwind v4 | utilities (0,1,0)–(0,2,0) in five native layers | yes, for what IT generates only | [tailwind.md](css-theming/tailwind.md) |
-| CSS Modules (Vite) | `._name_hash_1` (0,1,0) — no inflation | no | [css-modules.md](css-theming/css-modules.md) |
-| CSS Modules (Turbopack) | `.name-module___hash__name` (0,1,0) | no | [css-modules.md](css-theming/css-modules.md) |
-| Next / Nuxt / React Router | declaration order; the LAST tie wins, not "global" | no | [css-modules.md](css-theming/css-modules.md) |
-| styled-components / Emotion | `.hash` (0,1,0), injected at end of `<head>` | no — `stylisPlugins` opt-in | [css-in-js.md](css-theming/css-in-js.md) |
-| vanilla-extract | one hashed class per `style()` (0,1,0) | opt-in; the layer NAME is hashed | [css-in-js.md](css-theming/css-in-js.md) |
-| StyleX (plugin default) | `.x:not(#\#):not(#\#)` (2,1,0)→(3,1,0) | no | [css-in-js.md](css-theming/css-in-js.md) |
-| StyleX (`useCSSLayers:true`) | bare atomic classes in `@layer priorityN` | yes | [css-in-js.md](css-theming/css-in-js.md) |
-| Panda CSS | already fully layered | yes — do not wrap | [css-in-js.md](css-theming/css-in-js.md) |
-| Shadow DOM / Lit | `adoptedStyleSheets`, no `<style>` to walk | irrelevant across the boundary | [web-components.md](css-theming/web-components.md) |
-| Stencil `scoped:true` | `.name.sc-my-component` (0,2,0), one global `<style>` | no | [web-components.md](css-theming/web-components.md) |
-| Shoelace / Web Awesome | `::part()` + often UN-prefixed `--size` hooks | n/a | [web-components.md](css-theming/web-components.md) |
+| Astro (default `attribute`) | `.foo[data-astro-cid-h]` (0,2,0) | no | [astro.md](../skills/css-theming-reference/astro.md) |
+| Vue SFC `<style scoped>` | `.foo[data-v-h]` (0,2,0) | no | [vue.md](../skills/css-theming-reference/vue.md) |
+| VitePress 1.x | theme reset UNLAYERED — your layer LOSES | no | [vue.md](../skills/css-theming-reference/vue.md) |
+| VitePress 2.x | `@layer __vitepress_base` first; yours wins | theirs, yes | [vue.md](../skills/css-theming-reference/vue.md) |
+| Svelte 5 | `.foo.svelte-h` (0,2,0); unused rules DELETED | no — the anonymous bucket beats every named layer | [svelte.md](../skills/css-theming-reference/svelte.md) |
+| Angular Emulated | `.foo[_ngcontent-ng-cN]` (0,2,0) | no; layer order = MOUNT order | [angular.md](../skills/css-theming-reference/angular.md) |
+| Angular None / Material | bare selectors, appended to `<head>` at first render | no | [angular.md](../skills/css-theming-reference/angular.md) |
+| Angular ShadowDom | a real shadow root — plus a copy of every `None` style | no | [angular.md](../skills/css-theming-reference/angular.md) |
+| Tailwind v4 | utilities (0,1,0)–(0,2,0) in five native layers | yes, for what IT generates only | [tailwind.md](../skills/css-theming-reference/tailwind.md) |
+| CSS Modules (Vite) | `._name_hash_1` (0,1,0) — no inflation | no | [css-modules.md](../skills/css-theming-reference/css-modules.md) |
+| CSS Modules (Turbopack) | `.name-module___hash__name` (0,1,0) | no | [css-modules.md](../skills/css-theming-reference/css-modules.md) |
+| Next / Nuxt / React Router | declaration order; the LAST tie wins, not "global" | no | [css-modules.md](../skills/css-theming-reference/css-modules.md) |
+| styled-components / Emotion | `.hash` (0,1,0), injected at end of `<head>` | no — `stylisPlugins` opt-in | [css-in-js.md](../skills/css-theming-reference/css-in-js.md) |
+| vanilla-extract | one hashed class per `style()` (0,1,0) | opt-in; the layer NAME is hashed | [css-in-js.md](../skills/css-theming-reference/css-in-js.md) |
+| StyleX (plugin default) | `.x:not(#\#):not(#\#)` (2,1,0)→(3,1,0) | no | [css-in-js.md](../skills/css-theming-reference/css-in-js.md) |
+| StyleX (`useCSSLayers:true`) | bare atomic classes in `@layer priorityN` | yes | [css-in-js.md](../skills/css-theming-reference/css-in-js.md) |
+| Panda CSS | already fully layered | yes — do not wrap | [css-in-js.md](../skills/css-theming-reference/css-in-js.md) |
+| Shadow DOM / Lit | `adoptedStyleSheets`, no `<style>` to walk | irrelevant across the boundary | [web-components.md](../skills/css-theming-reference/web-components.md) |
+| Stencil `scoped:true` | `.name.sc-my-component` (0,2,0), one global `<style>` | no | [web-components.md](../skills/css-theming-reference/web-components.md) |
+| Shoelace / Web Awesome | `::part()` + often UN-prefixed `--size` hooks | n/a | [web-components.md](../skills/css-theming-reference/web-components.md) |
 | shadcn / Radix / Base UI | `data-state` family; `data-slot` in one registry only | n/a — source is copied into YOUR repo | CSS-API-01 |
 | Solid (solid-styled) | `.box[s\:c-hash-0]` — a grep for `data-s-` finds nothing | no; only `src/**` is transformed | this row |
 | Qwik | RAW unscoped CSS in the JS chunk; scoping exists only once rendered | no | this row |
-| VS Code webview | one flat author stylesheet; host tokens inline on `<html>` | host: only ≥1.104 | [vscode-webview.md](css-theming/vscode-webview.md) |
+| VS Code webview | one flat author stylesheet; host tokens inline on `<html>` | host: only ≥1.104 | [vscode-webview.md](../skills/css-theming-reference/vscode-webview.md) |
 | Email HTML | inline `style=` — INVERTS CSS-CAS-04 and CSS-TOK-01 | n/a *(spec-cited)* | this row |
 | iframe / widget embed | nothing crosses — a separate Document, no channel at all | n/a *(spec-cited)* | this row |
 
@@ -184,21 +186,21 @@ specific holes, so a reader can tell a gap from a clearance:
 ## Where the Depth Is
 
 Read the file for the work you are about to do, not the topic it is filed under.
-One level deep; these files do not point at each other.
+One level deep; these files do not point at each other. Depth files ship in the `css-theming-reference` skill this rule requires. Load it, or read `.claude/skills/css-theming-reference/<file>` (`~/.claude/skills/` when installed globally).
 
 | Doing… | Read |
 |---|---|
-| Looking up any rule ID, its rationale, its verification, or whether it was measured | [css-theming/rules.md](css-theming/rules.md) |
-| Wiring a check, choosing a test environment, or making a contract test able to go red | [css-theming/gate.md](css-theming/gate.md) |
-| Editing a `.astro` `<style>` block, `astro.config`, or an island's styles | [css-theming/astro.md](css-theming/astro.md) |
-| Editing `<style scoped>`, `:deep()`, `v-bind()` in CSS, or a VitePress theme | [css-theming/vue.md](css-theming/vue.md) |
-| Editing a Svelte `<style>`, a dynamically-composed class name, or `svelte.config.js` | [css-theming/svelte.md](css-theming/svelte.md) |
-| Touching a component `styles:`/`styleUrl`, an Angular custom property, or a Material theme | [css-theming/angular.md](css-theming/angular.md) |
-| Editing `@theme`, `@utility`, `@custom-variant`, or an `@import "tailwindcss"` line | [css-theming/tailwind.md](css-theming/tailwind.md) |
-| Editing a `.module.css`, a Next/Nuxt/React-Router global stylesheet, or a bundler CSS option | [css-theming/css-modules.md](css-theming/css-modules.md) |
-| Writing a `styled`/`css` template, a `.css.ts`, a `stylex.create`, or a theme object | [css-theming/css-in-js.md](css-theming/css-in-js.md) |
-| Writing `:host`, `::part()`, `adoptedStyleSheets`, a Lit `static styles`, or a Stencil component | [css-theming/web-components.md](css-theming/web-components.md) |
-| Writing CSS that runs inside a VS Code webview | [css-theming/vscode-webview.md](css-theming/vscode-webview.md) |
+| Looking up any rule ID, its rationale, its verification, or whether it was measured | [css-theming-reference/rules.md](../skills/css-theming-reference/rules.md) |
+| Wiring a check, choosing a test environment, or making a contract test able to go red | [css-theming-reference/gate.md](../skills/css-theming-reference/gate.md) |
+| Editing a `.astro` `<style>` block, `astro.config`, or an island's styles | [css-theming-reference/astro.md](../skills/css-theming-reference/astro.md) |
+| Editing `<style scoped>`, `:deep()`, `v-bind()` in CSS, or a VitePress theme | [css-theming-reference/vue.md](../skills/css-theming-reference/vue.md) |
+| Editing a Svelte `<style>`, a dynamically-composed class name, or `svelte.config.js` | [css-theming-reference/svelte.md](../skills/css-theming-reference/svelte.md) |
+| Touching a component `styles:`/`styleUrl`, an Angular custom property, or a Material theme | [css-theming-reference/angular.md](../skills/css-theming-reference/angular.md) |
+| Editing `@theme`, `@utility`, `@custom-variant`, or an `@import "tailwindcss"` line | [css-theming-reference/tailwind.md](../skills/css-theming-reference/tailwind.md) |
+| Editing a `.module.css`, a Next/Nuxt/React-Router global stylesheet, or a bundler CSS option | [css-theming-reference/css-modules.md](../skills/css-theming-reference/css-modules.md) |
+| Writing a `styled`/`css` template, a `.css.ts`, a `stylex.create`, or a theme object | [css-theming-reference/css-in-js.md](../skills/css-theming-reference/css-in-js.md) |
+| Writing `:host`, `::part()`, `adoptedStyleSheets`, a Lit `static styles`, or a Stencil component | [css-theming-reference/web-components.md](../skills/css-theming-reference/web-components.md) |
+| Writing CSS that runs inside a VS Code webview | [css-theming-reference/vscode-webview.md](../skills/css-theming-reference/vscode-webview.md) |
 
 ## Severity
 

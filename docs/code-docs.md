@@ -15,7 +15,7 @@ Python, TypeScript and JavaScript, Go, Java, Kotlin, Swift, C#, Scala, C and
 C++, plus the script blocks of Vue, Svelte and Astro files. It loads without
 measuring on .pyi stubs, Objective-C, Ruby, PHP, Lua, Dart, Zig, shell and
 PowerShell, Makefiles, Dockerfiles, CMake, Bazel and Starlark, Nix, and Gradle
-Groovy; there the rows hold in review. The index is 231 lines and always
+Groovy; there the rows hold in review. The index is 237 lines and always
 present. A depth file is read only when the work calls for it.
 
 ## Two failures, in opposite directions
@@ -73,6 +73,9 @@ those, 22 block a merge, 26 warn and 3 suggest.
 | `linkage.md` | Process IDs, the one record-pointer form, and records that cite moved code | 14 |
 | `surfaces.md` | Doc text a generator copies into help, schemas, tool lists and API docs | 5 |
 | `length.md` | The caps, how the census counts a block, and the per-file ratchet | 8 |
+
+The depth files and checks ship in the `code-docs-reference` skill, which the
+rule requires and grim installs with it (grim 0.16.0 or later).
 
 The `checks/` directory ships five Python scripts that need only the standard
 library. Each has its own `--self-test`.

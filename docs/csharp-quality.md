@@ -6,7 +6,7 @@ Standards for writing and reviewing C#: the gate, 24 merge-blocking non-negotiab
 grim add ghcr.io/ocx-sh/lore/csharp-quality
 ```
 
-Loads on `**/*.cs`, `**/*.csx` and `**/*.cake`. The index is always present. A depth file is read only when the work calls for it. It ships beside `dotnet-build` in `dotnet-essentials`, and that rule owns the project, props and analyzer files, the pinned analyzer packs and the pack properties, and loads on workflow and build-script edits.
+Loads on `**/*.cs`, `**/*.csx` and `**/*.cake`. The index is always present. A depth file is read only when the work calls for it. It ships beside `dotnet-build` in `dotnet-essentials`, and that rule owns the project, props and analyzer files, the pinned analyzer packs and the pack properties, and loads on workflow and build-script edits. The depth files and `checks/` scripts ship in the `csharp-quality-reference` skill, which the rule requires and grim installs with it (grim 0.16.0 or later).
 
 ## It starts by never weakening a check
 

@@ -6,7 +6,7 @@ Standards for writing and reviewing PowerShell: the gate wrapper, the target by 
 grim add ghcr.io/ocx-sh/lore/powershell-quality
 ```
 
-Loads on `**/*.ps1`, `**/*.psm1` and `**/*.psd1`. The index is 161 lines and always present. A depth file is read only when the work calls for it. It ships beside `shell-quality` in `shell-essentials`.
+Loads on `**/*.ps1`, `**/*.psm1` and `**/*.psd1`. The index is 163 lines and always present. A depth file is read only when the work calls for it. The depth files and checks scripts ship in the `powershell-quality-reference` skill, which the rule requires and grim installs with it (grim 0.16.0 or later). It ships beside `shell-quality` in `shell-essentials`.
 
 ## It starts with the target
 
@@ -14,7 +14,7 @@ PowerShell 5.1 and 7 are different languages in practice. An installer run by `i
 
 ## What is in it
 
-Three index rows: run the gate wrapper (exit 0, 1 or 2, with a 5.1 parser gate on a 5.1 host), the target table, and the tell set agents produce by default. Six depth files cover compatibility, encoding, errors, gates (including Pester), native commands and security. Nineteen scripts sit in a `checks/` directory the rules name by path, and the index tells adopters to copy them to `scripts/`.
+Three index rows: run the gate wrapper (exit 0, 1 or 2, with a 5.1 parser gate on a 5.1 host), the target table, and the tell set agents produce by default. Six depth files cover compatibility, encoding, errors, gates (including Pester), native commands and security. Nineteen scripts sit in the skill's `checks/` directory, which the rules name by path, and the index tells adopters to copy them to `scripts/`.
 
 Every rule carries an ID, a rationale, a runnable verification and a severity.
 

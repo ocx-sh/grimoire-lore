@@ -34,7 +34,9 @@ a check. Both are the failure this whole gate exists to prevent.
 
 ## Before you start
 
-- Read `rules/docs-quality/checks.md`. It carries one row per script: what it
+- Read `checks.md` in the `docs-quality-reference` skill
+  (`.claude/skills/docs-quality-reference/checks.md`, `~/.claude/skills/` when installed
+  globally). It carries one row per script: what it
   checks, how to run it, its exit codes and its fixtures. Every flag beyond the
   common four lives there. Never invent a script name or a flag.
 - Every Python check shares one interface:
@@ -270,12 +272,12 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)checks/*.py' \
   | xargs -0 -r -n1 sh -c 'python3 "$0" --self-test || echo "SELF-TEST FAILED $0"'
 
 # every path any rule or config names resolves on disk
-git ls-files -z --cached --others --exclude-standard -- ':(glob)rules/docs-quality*.md' ':(glob)rules/docs-quality/*.md' \
+git ls-files -z --cached --others --exclude-standard -- ':(glob)rules/docs-quality.md' ':(glob)skills/docs-quality-reference/*.md' \
   | xargs -0 -r -n1 grep -o -E -e 'checks/[A-Za-z0-9_.-]+' -- \
   | sort -u | while read -r p; do test -e "$p" || echo "MISSING $p"; done
 
 # no unwired gate is described as coverage
-git ls-files -z --cached --others --exclude-standard -- ':(glob)rules/**' ':(glob).github/**' \
+git ls-files -z --cached --others --exclude-standard -- ':(glob)rules/**' ':(glob)skills/*-reference/**' ':(glob).github/**' \
   | xargs -0 -r grep -H -n -i -E -e 'tracked, not built' -e 'future gate' -e 'not implemented yet' -e '(gate|check).{0,15}TODO' --
 
 # no absolute or repository-specific path leaked into a template or fixture

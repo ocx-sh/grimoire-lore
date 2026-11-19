@@ -6,6 +6,8 @@ summary: The Java quality index — the gate, the non-negotiables, and where the
 keywords: java,jvm,quality,standards,review,nullness,jspecify,nullaway,error-prone,concurrency,virtual-threads,records,exceptions,security,deserialization,junit,jacoco,japicmp,jdk,gradle,maven
 license: Apache-2.0
 repository: https://github.com/ocx-sh/grimoire-lore
+metadata:
+  grim.requires.skills.java-quality-reference: "./java-quality-reference:0"
 ---
 
 # Java Quality
@@ -20,7 +22,7 @@ Contents: [The Gate](#the-gate) · [Non-Negotiables](#non-negotiables) ·
 [Siblings](#siblings)
 
 **Before trusting any rule below, confirm a lint gate exists at all — read
-[java-quality/lint-gate.md](java-quality/lint-gate.md) first.** Eight of the
+[java-quality-reference/lint-gate.md](../skills/java-quality-reference/lint-gate.md) first.** Eight of the
 nine Error Prone checks in `JAVA-LINT-02`'s promotion list ship in
 `DISABLED_CHECKS` and fire only under an explicit
 `-Xep:UnnecessaryDefaultInEnumSwitch:ERROR`-style promotion, and 21 of 32 flagship JVM repositories measured 2026-09-12 wire
@@ -100,17 +102,20 @@ is defined in a depth file and only cited here.
 Read the file for the work you are about to do, not for the topic it is filed
 under. One level deep; these files do not point at each other.
 
+Depth files ship in the `java-quality-reference` skill this rule requires; load it, or read
+`.claude/skills/java-quality-reference/<file>` (`~/.claude/skills/` when installed globally).
+
 | Doing… | Read |
 |---|---|
-| Wiring or changing what fails the build: Error Prone, NullAway, `-Xlint` keys and `-Werror`, Checkstyle, SpotBugs, Spotless, or writing a suppression | [java-quality/lint-gate.md](java-quality/lint-gate.md) |
-| Throwing, catching, rethrowing or logging a failure; closing a stream, a pool or any handle; handling `InterruptedException`; ending a process | [java-quality/errors-and-resources.md](java-quality/errors-and-resources.md) |
-| Parsing or deserialising outside data, hardening an XML factory, building a path or a command from a caller's string, picking a random source, or wiring find-sec-bugs | [java-quality/security-and-untrusted-input.md](java-quality/security-and-untrusted-input.md) |
-| Starting a thread or a virtual thread, choosing a lock, bounding a fan-out, spawning or reaping a subprocess, or reaching for a preview concurrency API | [java-quality/concurrency.md](java-quality/concurrency.md) |
-| Changing a published signature, annotating nullness on an API, choosing a return type, deciding what a library exposes, or wiring the binary-compatibility gate | [java-quality/api-and-evolution.md](java-quality/api-and-evolution.md) |
-| Adding a nullness annotation, choosing between JSpecify and an older flavour, marking a package or module `@NullMarked`, or tracing a null that reached Kotlin | [java-quality/nullness.md](java-quality/nullness.md) |
-| Writing a record, a sealed hierarchy, a `switch` over a closed type, an `equals`/`hashCode` pair, or an `Optional` | [java-quality/data-and-patterns.md](java-quality/data-and-patterns.md) |
-| Choosing a JDK floor or `--release`, writing or packaging `module-info.java`, passing a charset or locale at a call site, or reacting to a removed or disabled JDK API | [java-quality/platform-and-versions.md](java-quality/platform-and-versions.md) |
-| Writing or reviewing a test, parallelising a suite, picking a JUnit major, editing a `junit-platform.properties` file, or deciding whether a coverage number means anything | [java-quality/testing.md](java-quality/testing.md) |
+| Wiring or changing what fails the build: Error Prone, NullAway, `-Xlint` keys and `-Werror`, Checkstyle, SpotBugs, Spotless, or writing a suppression | [java-quality-reference/lint-gate.md](../skills/java-quality-reference/lint-gate.md) |
+| Throwing, catching, rethrowing or logging a failure; closing a stream, a pool or any handle; handling `InterruptedException`; ending a process | [java-quality-reference/errors-and-resources.md](../skills/java-quality-reference/errors-and-resources.md) |
+| Parsing or deserialising outside data, hardening an XML factory, building a path or a command from a caller's string, picking a random source, or wiring find-sec-bugs | [java-quality-reference/security-and-untrusted-input.md](../skills/java-quality-reference/security-and-untrusted-input.md) |
+| Starting a thread or a virtual thread, choosing a lock, bounding a fan-out, spawning or reaping a subprocess, or reaching for a preview concurrency API | [java-quality-reference/concurrency.md](../skills/java-quality-reference/concurrency.md) |
+| Changing a published signature, annotating nullness on an API, choosing a return type, deciding what a library exposes, or wiring the binary-compatibility gate | [java-quality-reference/api-and-evolution.md](../skills/java-quality-reference/api-and-evolution.md) |
+| Adding a nullness annotation, choosing between JSpecify and an older flavour, marking a package or module `@NullMarked`, or tracing a null that reached Kotlin | [java-quality-reference/nullness.md](../skills/java-quality-reference/nullness.md) |
+| Writing a record, a sealed hierarchy, a `switch` over a closed type, an `equals`/`hashCode` pair, or an `Optional` | [java-quality-reference/data-and-patterns.md](../skills/java-quality-reference/data-and-patterns.md) |
+| Choosing a JDK floor or `--release`, writing or packaging `module-info.java`, passing a charset or locale at a call site, or reacting to a removed or disabled JDK API | [java-quality-reference/platform-and-versions.md](../skills/java-quality-reference/platform-and-versions.md) |
+| Writing or reviewing a test, parallelising a suite, picking a JUnit major, editing a `junit-platform.properties` file, or deciding whether a coverage number means anything | [java-quality-reference/testing.md](../skills/java-quality-reference/testing.md) |
 | Editing a build script, a `gradle.properties`, a version catalog, a lockfile or a wrapper descriptor | `gradle-build` (sibling set — see below) |
 | Editing a `pom.xml`, anything under the `.mvn` directory, the Maven wrapper, or a legacy Ant build file | `maven-build` (sibling set — see below) |
 | Writing the Kotlin half of any contract above, or editing a Kotlin source or script file | `kotlin-quality` (sibling set — see below) |

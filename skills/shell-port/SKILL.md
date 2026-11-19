@@ -13,7 +13,7 @@ A shell script has to run somewhere it does not run today: the macOS system
 bash (3.2.57), an Alpine or Debian `/bin/sh`, or every bash from 3.2 to 5.3.
 This skill carries the procedure only. The standards live in the
 `shell-quality` rule, and this skill cites them by ID. It reads `dialect.md`
-(SH-DIAL) and `userland.md` (SH-USER) from that rule's depth directory.
+(SH-DIAL) and `userland.md` (SH-USER) from the `shell-quality-reference` skill.
 
 Every command and every form was run on **bash 3.2.57 to 5.3, dash 0.5.12-2,
 busybox ash 1.37 and ShellCheck 0.11.0 on 2026-10-11** (measured 2026-10-11).
