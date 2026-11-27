@@ -1,0 +1,43 @@
+{
+ "topics": [
+  {
+   "slug": "marketing-claims-evidence",
+   "idFamily": "MKT-CLAIM",
+   "followups": 2,
+   "unanswered": 0,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/marketing-claims-evidence.md",
+   "rules": 31,
+   "must": 24,
+   "newMust": [],
+   "newIds": [
+    "MKT-CLAIM-31"
+   ],
+   "changedIds": [
+    "MKT-CLAIM-02",
+    "MKT-CLAIM-04",
+    "MKT-CLAIM-05",
+    "MKT-CLAIM-06",
+    "MKT-CLAIM-13",
+    "MKT-CLAIM-28",
+    "MKT-CLAIM-30"
+   ],
+   "retiredIds": [],
+   "newFailureClasses": [
+    "Analyst placement, award or ranking written from memory into a proof slot (MKT-CLAIM-31)",
+    "Unconditional guarantee in body copy outside headline lines (MKT-CLAIM-02 absolute reading check, 16)",
+    "Demo figures inside a product mock-up read as claims; in a blocked class they cannot take an [[allow]] entry",
+    "Icon-only comparison cell that states no bindable fact (MKT-CLAIM-30)",
+    "Evaluative judgement on a competitor set inside an image, invisible to text checks (MKT-CLAIM-30 check 4)",
+    "Gate shortcuts: chart method pointed at a nearby or self link, comparison marker on the wrong cell, quote page cited under another URL spelling as a figure's source (MKT-CLAIM-06, 30, 28)"
+   ],
+   "stillOpen": [
+    "Does a second rater, on the 19 held-out pages and on pages that are not developer products, confirm the 58.2 % to 66.6 % precision of MKT-CLAIM-02?",
+    "Which block definition lets MKT-CLAIM-30 (1) check a card list such as the ocx drift table, the fleet's one comparison violation, which is not a <table> and now falls only to the reading list?",
+    "Which exemption, if any, lets a figure inside a labelled product mock-up, or a non-product 'AI-powered' phrase, pass check E without opening a bypass for real counts, prices and AI labels?",
+    "Will the owner give agents their own GitHub identity, without which every MKT-CLAIM-16 sign-off class (including MKT-CLAIM-30 compared-party changes) stays blocked?",
+    "Is one comparison row per compared-party cell (607 rows on 9 pages) an acceptable cost, or must a cheaper per-row design be built and measured before MKT-CLAIM-30 ships?"
+   ]
+  }
+ ],
+ "failed": []
+}
