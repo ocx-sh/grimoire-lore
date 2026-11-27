@@ -148,7 +148,7 @@ version = "0.3.0"
 description = { readme = "docs/rust-quality.md", logo = "assets/lore-rust.svg" }
 
 [skills.rust-quality-reference]
-version = "0.2.0"
+version = "0.3.0"
 description = { readme = "docs/rust-quality-reference.md", logo = "assets/lore-rust.svg" }
 
 [rules.rust-cargo]
@@ -235,11 +235,11 @@ description = { readme = "docs/typescript-essentials.md", logo = "assets/lore-ty
 # and the repository's own CI runner. `docs-review` is the on-demand trigger:
 # a rule only loads on an edit, so grading an untouched page needs a name.
 [rules.docs-quality]
-version = "0.4.1"
+version = "0.5.0"
 description = { readme = "docs/docs-quality.md", logo = "assets/lore-docs.svg" }
 
 [skills.docs-quality-reference]
-version = "0.2.0"
+version = "0.3.0"
 description = { readme = "docs/docs-quality-reference.md", logo = "assets/lore-docs.svg" }
 
 [skills.docs-plan]
@@ -422,7 +422,7 @@ version = "0.3.1"
 description = { readme = "docs/go-quality.md", logo = "assets/lore-go.svg" }
 
 [skills.go-quality-reference]
-version = "0.1.1"
+version = "0.2.0"
 description = { readme = "docs/go-quality-reference.md", logo = "assets/lore-go.svg" }
 
 [rules.go-modules]
@@ -629,23 +629,23 @@ description = { readme = "docs/shell-essentials.md", logo = "assets/lore-shell.s
 # arrives through the rule's requirement and the three skills' requirement, so
 # the bundle does not list it.
 [rules.ux-quality]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/ux-quality.md", logo = "assets/lore-ux.svg" }
 
 [skills.ux-quality-reference]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/ux-quality-reference.md", logo = "assets/lore-ux.svg" }
 
 [skills.ux-cli]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/ux-cli.md", logo = "assets/lore-ux.svg" }
 
 [skills.ux-agent-interfaces]
-version = "0.1.0"
+version = "0.2.0"
 description = { readme = "docs/ux-agent-interfaces.md", logo = "assets/lore-ux.svg" }
 
 [skills.ux-review]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/ux-review.md", logo = "assets/lore-ux.svg" }
 
 [bundles.ux-essentials]
@@ -659,11 +659,11 @@ description = { readme = "docs/ux-essentials.md", logo = "assets/lore-ux.svg" }
 # template and the GitHub Release. `marketing-review` is the on-demand trigger.
 # `marketing-measurement` decides whether an analytics script may exist at all.
 [rules.marketing-quality]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/marketing-quality.md", logo = "assets/lore-product.svg" }
 
 [skills.marketing-quality-reference]
-version = "0.1.0"
+version = "0.2.0"
 description = { readme = "docs/marketing-quality-reference.md", logo = "assets/lore-product.svg" }
 
 [skills.positioning-brief]
@@ -675,7 +675,7 @@ version = "0.1.0"
 description = { readme = "docs/release-notes.md", logo = "assets/lore-product.svg" }
 
 [skills.marketing-review]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/marketing-review.md", logo = "assets/lore-product.svg" }
 
 [skills.marketing-measurement]
@@ -698,7 +698,7 @@ version = "0.1.0"
 description = { readme = "docs/github-presence.md", logo = "assets/lore-product.svg" }
 
 [skills.linkedin-post]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/linkedin-post.md", logo = "assets/lore-product.svg" }
 
 [skills.youtube-video]
