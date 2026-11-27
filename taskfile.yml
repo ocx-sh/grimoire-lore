@@ -100,8 +100,11 @@ tasks:
       # The guard probes for CONTENT, not for the directory: `..` always
       # exists, so `-d` would never fall through and CI would report every
       # TypeScript glob as dead against a runner's parent directory.
+      # `checks/fixtures/` is excluded from the probe: a planted `.ts` fixture of
+      # a shipped check is not a TypeScript consumer, and counting it would send
+      # CI down the liveness branch against a runner's parent directory.
       - |
-        if [ -d "{{.TS_CONSUMER}}" ] && [ -n "$(find "{{.TS_CONSUMER}}" -name '*.ts' -not -path '*/node_modules/*' -not -path '*/.agents/*' -print -quit 2>/dev/null)" ]; then
+        if [ -d "{{.TS_CONSUMER}}" ] && [ -n "$(find "{{.TS_CONSUMER}}" -name '*.ts' -not -path '*/node_modules/*' -not -path '*/.agents/*' -not -path '*/checks/fixtures/*' -print -quit 2>/dev/null)" ]; then
           {{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --root {{.TS_CONSUMER}} --allow-absent '**/npm-shrinkwrap.json' rules/typescript-quality.md rules/typescript-packaging.md
         else
           echo "note: no TypeScript under {{.TS_CONSUMER}} — glob liveness NOT checked for typescript; run locally against a tree containing TypeScript"
