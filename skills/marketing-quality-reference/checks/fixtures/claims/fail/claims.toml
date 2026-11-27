@@ -1,0 +1,46 @@
+# [[allow]] never covers a blocked class: the price line stays a finding.
+[[allow]]
+file = "README.md"
+text = "$9"
+reason = "plan page copy"
+
+[[claim]]
+id = "smaller"
+class = "performance"
+claim = "Cuts install time by 40%."
+surface = ["README.md"]
+value = 40
+unit = "percent"
+source = "https://example.com/bench"
+source_type = "own-measurement"
+method = "hyperfine, 20 runs"
+window = "2026-01"
+subject_version = "mytool 0.2.0"
+caveat = "warm cache"
+observed = 2026-01-01
+refresh_by = 2026-04-01
+
+[[claim]]
+id = "client-count"
+class = "count"
+claim = "10 clients"
+surface = ["README.md"]
+value = 10
+unit = "supported clients"
+source = "README.md:5"
+source_type = "own-measurement"
+check = "printf 11"
+definition = "clients the installer writes config for"
+observed = 2026-11-27
+refresh_by = "next-release"
+subject_version = "mytool 0.2.0"
+
+[[claim]]
+id = "thin"
+class = "ai-capability"
+claim = "98% accurate"
+surface = ["README.md"]
+source = "ftp://example.com"
+source_type = "endorsement"
+observed = 2026-11-27
+refresh_by = 2026-12-01

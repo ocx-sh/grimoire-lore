@@ -1,0 +1,4 @@
+[package]
+name = "mytool"
+version = "0.1.0"
+description = "Pins CLI tools per project and installs them by digest."

@@ -1,0 +1,68 @@
+{
+ "units": [
+  {
+   "id": "marketing-quality-index",
+   "written": [
+    "rules/marketing-quality.md",
+    "skills/marketing-quality-reference/SKILL.md",
+    "skills/marketing-quality-reference/claims.md",
+    "skills/marketing-quality-reference/trust-claims.md",
+    "skills/marketing-quality-reference/checks/claims_lint.py",
+    "skills/marketing-quality-reference/checks/fixtures/claims/pass/README.md",
+    "skills/marketing-quality-reference/checks/fixtures/claims/pass/Cargo.toml",
+    "skills/marketing-quality-reference/checks/fixtures/claims/pass/claims.toml",
+    "skills/marketing-quality-reference/checks/fixtures/claims/fail/README.md",
+    "skills/marketing-quality-reference/checks/fixtures/claims/fail/Cargo.toml",
+    "skills/marketing-quality-reference/checks/fixtures/claims/fail/claims.toml",
+    "skills/marketing-quality-reference/checks/fixtures/claims/fail/expect.txt"
+   ],
+   "rulesShipped": 31,
+   "mustShipped": 22,
+   "droppedMust": [],
+   "planDeviations": [
+    "Placed MKT-CLAIM-27, 29 and 30 (not in the plan's family table) in claims.md: 27 beside MKT-CLAIM-03 (price), 29 beside 06 (caveat), 30 beside 06 (comparison and chart evidence). They sit in a new 'Prices, Captions and Comparisons' section.",
+    "Placed MKT-CLAIM-28 and 31 in trust-claims.md: 28 (MUST, endorsement as evidence) beside 20 to 23, and 31 (SHOULD, accolades) beside 24. Both are in a new 'Counts, Sources and Accolades' section.",
+    "MKT-CLAIM-27 (SHOULD), 29 (SHOULD) and 31 (SHOULD) are not named in the rule's non-negotiables. Only MUST rows 28 and 30 are named, in rows 12 and 13. The three SHOULD rows are reached through the routing table.",
+    "The plan's 'non-negotiable 3' (the only one a manifest edit without description or keywords needs) is ambiguous. I read it as the licence row and named it 'row 9' in the rule's lead paragraph.",
+    "The rule's non-negotiables table has 21 rows, not about 20. I added a row for comparisons (MKT-CLAIM-30, 16), and the plan's endorsement row also carries MKT-CLAIM-28.",
+    "Per-chart (MKT-CLAIM-06) and per-cell (MKT-CLAIM-30) checks, the GitHub description binding, the release-arm API call of MKT-CLAIM-05 and the sign-off review (MKT-CLAIM-16) are not in claims_lint.py. Each needs a parsed page or the network. The depth files say so and give the procedure or a command. The lint's file list, `--run-checks` and `--reading` options and its manifest-line scope are my own shortcuts and are documented in its docstring.",
+    "claims.md carries the 15-line MKT-CLAIM-02 pattern set as a fenced `pattern-set` block, and claims_lint.py --self-test fails if its ARMS differ from that block. This keeps one definition.",
+    "All wave, followup, dive-local (C1 to C21) and fleet-repository references were removed or turned into unnamed measurements, such as '17 measured repositories'.",
+    "The two sentences about how the lint treats `[defaults]` and the date-versus-next-release forms (only 'next-release' accepted for licence, security-mechanism, maturity and attestation classes without a [defaults] entry) are the lint's conservative reading of MKT-CLAIM-05's default table. The consolidation does not state this check at that granularity."
+   ],
+   "validator": "python3 .claude/skills/research-lang/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' --forbid 'ocx.sh' --forbid 'grimoire.rs' --forbid 'grimoire-rs/' --forbid 'ocx-sh/ocx' --forbid '@ocx-sh/' --forbid 'grim-gui' rules/marketing-quality.md skills/marketing-quality-reference -> exit 0 (clean); claims_lint.py --self-test -> exit 0. Rule body 92 lines; SKILL.md body 27 lines; claims.md 295 lines and trust-claims.md 178 lines, each with a table of contents and a What Agents Get Wrong Here section.",
+   "repaired": false,
+   "ok": true,
+   "blocking": [],
+   "nits": [
+    "rules/marketing-quality.md:34 carries `repository: https://github.com/ocx-sh/grimoire-lore`, which is a fleet repository name. It is identical to rules/go-quality.md, so I left it as the house shape.",
+    "The fail fixture's expect.txt (15 lines) is a subset of the lint's 25-line output, so a plain diff differs. `--self-test` passes. If expect.txt is meant as a full golden file, it is stale.",
+    "Author's deviation: non-negotiables row 9 (licence) stands in for the plan's ambiguous 'non-negotiable 3'. It is reasonable, but the owner should confirm it."
+   ]
+  },
+  {
+   "id": "marketing-procedures",
+   "written": [
+    "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/skills/marketing-review/SKILL.md",
+    "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/skills/positioning-brief/SKILL.md"
+   ],
+   "rulesShipped": 0,
+   "mustShipped": 0,
+   "droppedMust": [],
+   "planDeviations": [
+    "Repair pass only: no rule rows changed. marketing-review Limits now dates the held-out precision figure (2026-11-27, 19 pages, one reader, no second rater, 58.2/66.6 percent precision, recall at most 50.5 percent) and says non-developer-product pages were not measured. A pinned-defaults line was added to marketing-review step 1 (claims.toml, .agents/positioning.toml, .agents/voice.toml) and to positioning-brief intro (.agents/positioning.toml, .agents/voice.toml). SKILL.md body lines: positioning-brief 211, marketing-review 182, both under 500."
+   ],
+   "validator": "python3 .claude/skills/research-lang/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' skills/positioning-brief skills/marketing-review: clean, exit 0",
+   "repaired": true,
+   "ok": true,
+   "blocking": [],
+   "nits": [
+    "skills/marketing-review/SKILL.md:60 names ghcr.io/ocx-sh/lore/marketing-quality; this is the allowed catalog install line.",
+    "skills/marketing-review/SKILL.md refers to trust-claims.md (MKT-CLAIM-11 to 13, 20 to 24, 26 and the MUST list), which is not on disk yet. The marketing-quality-reference unit owns it. Re-check once that unit lands.",
+    "skills/marketing-review/SKILL.md MUST list: rule IDs and severities match the consolidated rows in the depth files present (positioning, first-screen, voice, discoverability, claims). The trust-claims IDs could not be checked."
+   ]
+  }
+ ],
+ "failed": [],
+ "integrated": []
+}

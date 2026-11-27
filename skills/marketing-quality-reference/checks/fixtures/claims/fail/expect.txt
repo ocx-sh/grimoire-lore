@@ -1,0 +1,15 @@
+README.md:5: MKT-CLAIM-01 [C]
+README.md:6: MKT-CLAIM-03 [E]
+README.md:6: MKT-CLAIM-20 [E]
+README.md:7: MKT-CLAIM-14 [E]
+README.md:8: MKT-CLAIM-18 [E]
+README.md:9: MKT-CLAIM-03 [E]
+README.md:10: MKT-CLAIM-01 [C]
+README.md:12: MKT-CLAIM-01 [B]
+Cargo.toml:4: MKT-CLAIM-01 [C]
+claims.toml:0: MKT-CLAIM-04 [A] thin: required field 'approved_by'
+claims.toml:0: MKT-CLAIM-05 [D] smaller: expired
+claims.toml:0: MKT-CLAIM-03 [E] client-count: check printed '11'
+!README.md:11:
+!README.md:13:
+!README.md:16:
