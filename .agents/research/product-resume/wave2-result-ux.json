@@ -1,0 +1,262 @@
+{
+ "topics": [
+  {
+   "slug": "ux-verification-claims",
+   "idFamily": "UX-VERIFY",
+   "followups": 1,
+   "unanswered": 0,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/ux-verification-claims.md",
+   "rules": 32,
+   "must": 28,
+   "newMust": [],
+   "newIds": [],
+   "changedIds": [
+    "UX-VERIFY-13",
+    "UX-VERIFY-15",
+    "UX-VERIFY-16"
+   ],
+   "retiredIds": [],
+   "newFailureClasses": [
+    "Agent treats its own screenshot labels of matrix firings as the human error-rate study that would let a heuristic check block",
+    "Bounding-box hit test on a focused inline link that wraps reports a visible link as entirely hidden (sample points fall between line boxes)"
+   ],
+   "stillOpen": [
+    "Who is the human who labels every newClipped, noRing and fullyObscured firing on at least 20 routes, and what false-positive share does the owner accept before any heuristic matrix check may block?",
+    "Why does the two-ancestor pass of UX-VERIFY-16 fail to clear the command-bar focus ring on ocx.sh / and the 11 outlined-but-blank stops at 400 % zoom: an inset outline, or :focus-visible lost after the script's blur and refocus?",
+    "Will the UX review skill ship checks/ui-matrix.mjs (line-box sampling plus ancestor pass, with noRingSelf/ancestorCleared fields), wcag22-ids.txt and the docs-quality.md:184-186 cross-reference, which are the publication preconditions?",
+    "Do the matrix firing rates hold on a Starlight docs build and the MkDocs indexer, neither of which existed on the machine on 2026-11-27?"
+   ]
+  },
+  {
+   "slug": "ux-a11y-authoring",
+   "idFamily": "UX-A11Y",
+   "followups": 3,
+   "unanswered": 0,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/ux-a11y-authoring.md",
+   "rules": 35,
+   "must": 25,
+   "newMust": [
+    "UX-A11Y-36"
+   ],
+   "newIds": [
+    "UX-A11Y-36"
+   ],
+   "changedIds": [
+    "UX-A11Y-12",
+    "UX-A11Y-13",
+    "UX-A11Y-19",
+    "UX-A11Y-22"
+   ],
+   "retiredIds": [],
+   "newFailureClasses": [
+    "Focusable control inside a scroll- or hover-faded container sits at opacity 0 when focus arrives (ring drawn, control invisible; hidden by reduced motion)",
+    "Live or error region rendered only on the branch that has a message, so it is created together with its text",
+    "A check script's colour test reads rgba() as opaque and passes a tint-only state (alpha not blended)"
+   ],
+   "stillOpen": [
+    "Can one published focus check merge A1's <style>-block reading and BEM branch with A7's fixes (a)-(f), and what are its precision and recall against a Tab-and-diff oracle on built Primer and Radix Storybooks?",
+    "Does UX-A11Y-36 hold outside headless Chrome (Firefox, WebKit, OS smooth scrolling), and is the 2.4.7 reading for an invisible focused control accepted by a reviewer, given that W3C text does not name the case?",
+    "Do real screen readers (NVDA+Firefox, VoiceOver macOS/iOS) announce a role=status or role=alert created together with its content, since ARIA22 and ARIA19 do not say so and UX-A11Y-22/-24 rest only on virtual-reader output?",
+    "Which static checker enforces UX-A11Y-01 to -10 on .astro files and lit html template literals, where the rules currently rely on grep?"
+   ]
+  },
+  {
+   "slug": "ux-interface-states",
+   "idFamily": "UX-STATE",
+   "followups": 3,
+   "unanswered": 0,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/ux-interface-states.md",
+   "rules": 35,
+   "must": 23,
+   "newMust": [
+    "UX-STATE-27"
+   ],
+   "newIds": [
+    "UX-STATE-35"
+   ],
+   "changedIds": [
+    "UX-STATE-07",
+    "UX-STATE-21",
+    "UX-STATE-22",
+    "UX-STATE-24",
+    "UX-STATE-26",
+    "UX-STATE-27",
+    "UX-STATE-34"
+   ],
+   "retiredIds": [],
+   "newFailureClasses": [
+    "Tag grep (<input, <label) returns 0 on helper-generated forms (Haml simple_form, Phoenix <.input>): false pass",
+    "Event-handler grep misses a project's own on( helper and prettier-split calls: false pass on UX-STATE-22",
+    "Focus test that starts its log after activation, or activates by mouse click, fails correct forms",
+    "Count-only focus check passes a form that returns focus to the pressed button",
+    "Required marker drawn by CSS (content: \"*\") is invisible to template greps",
+    "Bare 'cursor' and 'cache' trigger tokens match editor/mouse cursors and preferences, not paging or cached remote data",
+    "Paging token list tuned on GitHub-API code misses a codebase that names paging PagingState/PAGE_SIZE (the fleet itself)",
+    "Blur handler that refocuses the field it left traps keyboard users"
+   ],
+   "stillOpen": [
+    "UX-STATE-02 and UX-STATE-17 are MUST but have no instance in any measured codebase, which goes against the ruleset's own promote-only-on-evidence note. Should they be demoted to SHOULD or proven on a second codebase before publishing?",
+    "Do the UX-STATE-24 focus test and the UX-STATE-35 blur test give the same verdicts in Firefox and WebKit, and inside the live VS Code webview iframe? Only headless Chromium on a stubbed host has run them.",
+    "Does the UX-STATE-27 helper-source check work on a Vue or Svelte codebase? It was only run on Rails/Haml and Phoenix.",
+    "Can UX-STATE-22 catch a real premature validation error? That needs a browser run of an app such as Mastodon's sign-up page. Until then it stays SHOULD and has never caught a violation.",
+    "Does UX-STATE-34 have any instance outside the fleet? Neither second codebase had a stale-data view, so its cache-age trigger rests on one instance."
+   ]
+  },
+  {
+   "slug": "ux-interface-text",
+   "idFamily": "UX-TEXT",
+   "followups": 2,
+   "unanswered": 0,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/ux-interface-text.md",
+   "rules": 31,
+   "must": 15,
+   "newMust": [],
+   "newIds": [
+    "UX-TEXT-31"
+   ],
+   "changedIds": [
+    "UX-TEXT-02",
+    "UX-TEXT-08",
+    "UX-TEXT-24"
+   ],
+   "retiredIds": [],
+   "newFailureClasses": [
+    "Wrapper-blind call-site check: a grep on show(Error|Warning)Message sees 14 of 41 extension failure sites because 27 go through notifyError and reportGrimFailure",
+    "Source-token proxy for a rendered property: 83-84% of Rust #[error] strings lack an action token against 45% of rendered errors lacking a next step, so gating on source tokens fails correct messages",
+    "Fragment assembly from a data table plus a joining helper (gatePrompt.ts:221-233), invisible to any template-literal extractor"
+   ],
+   "stillOpen": [
+    "Do coding agents with no rule loaded actually write the UX-TEXT-16 and -17 tells (emoji, '!', 'Oops', 'please', 'Learn more')? Without a scored agent-output sample these rules stay unproven guards.",
+    "Does a second reader score the 120 exemplar outputs the same way? The next-step rate behind the UX-TEXT-02 and -04 MUSTs is one researcher's reading, and the raw text was not archived.",
+    "What is the recall of the two new UX-TEXT-08 gates and of the UX-TEXT-24 candidate list (sampled 58%, interval about 20% to 98%)? A labelled ground truth of 200 or more items is needed before any of them can certify the rule rather than ratchet it.",
+    "Is translation on the owner's roadmap? It decides whether UX-TEXT-24 and -26 become MUST."
+   ]
+  },
+  {
+   "slug": "ux-cli-interaction",
+   "idFamily": "UX-CLI",
+   "followups": 3,
+   "unanswered": 0,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/ux-cli-interaction.md",
+   "rules": 31,
+   "must": 16,
+   "newMust": [],
+   "newIds": [
+    "UX-CLI-31"
+   ],
+   "changedIds": [
+    "UX-CLI-08",
+    "UX-CLI-14"
+   ],
+   "retiredIds": [],
+   "newFailureClasses": [
+    "Trusting a vendor success-message setting (cargo-dist install-success-msg) to control the installer's final line, when the PATH block prints after it",
+    "A depth cap used as the loop guard, which hides a prose-parsing loop instead of fixing the parse",
+    "A check script that reads its input after cd into a temp dir, so a relative path fails to open and the script exits 0",
+    "A network gate with no control run, or a Linux-only pass reported as a macOS or Windows pass"
+   ],
+   "stillOpen": [
+    "Does the UX-CLI-08 no-network check (sandbox-exec plus log stream on macOS, WFP event 5157 on Windows) actually separate a pass from a fail on a real Mac and Windows host, given that neither has ever been run?",
+    "Do the UX-CLI-21 animation counts and the NO_COLOR/CLICOLOR_FORCE behaviour hold for the Windows builds of ocx and grim on Windows Terminal and conhost, given that this MUST was measured on Linux only?",
+    "What is the declared headline command for ocx and for grim? UX-CLI-04, 05, 14 and 31 cannot be checked without it.",
+    "What do NVDA, JAWS and Orca actually speak for the fleet's progress output and grim tui? Without that test, UX-CLI-26 can only forbid claims and cannot record a test."
+   ]
+  },
+  {
+   "slug": "ux-consequential-actions",
+   "idFamily": "UX-ACT",
+   "followups": 2,
+   "unanswered": 0,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/ux-consequential-actions.md",
+   "rules": 28,
+   "must": 25,
+   "newMust": [
+    "UX-ACT-20"
+   ],
+   "newIds": [],
+   "changedIds": [
+    "UX-ACT-13",
+    "UX-ACT-15",
+    "UX-ACT-16",
+    "UX-ACT-17",
+    "UX-ACT-19",
+    "UX-ACT-20",
+    "UX-ACT-22"
+   ],
+   "retiredIds": [],
+   "newFailureClasses": [
+    "False readOnlyHint: true as a prompt bypass in VS Code, Codex CLI and ChatGPT developer mode (sharpened item 12)",
+    "Change word printed for a no-op or refused run (grim add run 2 'added', refused grim update 'updated')",
+    "Refusal that moves state before refusing (grim update re-pins grimoire.lock, exit 65)",
+    "Dry run that skips the real run's conflict check (grim release --dry-run 0 vs real 65)",
+    "Documented skip that hides a content conflict (grim publish 'skipped', exit 0, old digest)",
+    "One failure cause, two exit codes inside one CLI (ocx 69 vs 75 on refused connection), routed to UX-AGENT/CLI-04"
+   ],
+   "stillOpen": [
+    "Will the owner adopt the unsourced house conventions (Consequence: help line, Try:/Override: refusal lines, docs/agent-trifecta.csv) that the MUST checks of UX-ACT-02, UX-ACT-12 and UX-ACT-25 depend on?",
+    "Does a running VS Code build skip the MCP prompt for readOnlyHint: true as the commit-75901b0 source reading says? Checking this needs a logged-in agent session, and the new UX-ACT-20 MUST rests on source plus vendor docs, not a run.",
+    "Should shipped fleet commands change their repeat-run and content-conflict exit codes (ocx init 64, ocx remove 79, grim publish 0 on a differing digest)? This decides whether UX-ACT-16 stays SHOULD for them."
+   ]
+  },
+  {
+   "slug": "ux-ai-features",
+   "idFamily": "UX-AI",
+   "followups": 2,
+   "unanswered": 0,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/ux-ai-features.md",
+   "rules": 22,
+   "must": 9,
+   "newMust": [
+    "UX-AI-24"
+   ],
+   "newIds": [
+    "UX-AI-24"
+   ],
+   "changedIds": [
+    "UX-AI-05",
+    "UX-AI-15",
+    "UX-AI-01"
+   ],
+   "retiredIds": [],
+   "newFailureClasses": [
+    "Companion-chatbot duties collapsed to the NY three-hour notice, missing CA known-minor, protocol-publication and minors-suitability duties (UX-AI-05)",
+    "NY art. 48 read as 'protect known minors', leaving persona, flattery and long-term personal memory features on by default instead of off until a permissible age determination (UX-AI-24, C13)",
+    "Calibration measured once and never re-run after a model or prompt change, so a displayed confidence number outlives its protocol (UX-AI-15)"
+   ],
+   "stillOpen": [
+    "Does the chaptered text of NY Laws 2026 ch. 368 match the as-passed S9051-B text that UX-AI-24 (MUST, conditional) rests on, including the 1801(1) default-off condition and the $25,000 penalty?",
+    "Will the owner approve the joint change that lands the DOC-PLAIN-08 exemption for data-ai-disclosure labels with ux-ai-reference (C11 publishing gate)?",
+    "What does the final code of practice commit providers to for text marking, and do the Anthropic, OpenAI and Google APIs mark text so that UX-AI-06's agent action is settled before the 2026-12-02 Art. 111(4) deadline?",
+    "Have the published artifacts that cite UX-AI-05 and UX-AI-15 been re-checked against the rewritten rule text?"
+   ]
+  },
+  {
+   "slug": "ux-agent-facing-interfaces",
+   "idFamily": "UX-AGENT",
+   "followups": 3,
+   "unanswered": 0,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/ux-agent-facing-interfaces.md",
+   "rules": 26,
+   "must": 13,
+   "newMust": [],
+   "newIds": [],
+   "changedIds": [
+    "UX-AGENT-15",
+    "UX-AGENT-16",
+    "UX-AGENT-20",
+    "UX-AGENT-26"
+   ],
+   "retiredIds": [],
+   "newFailureClasses": [
+    "Client rewrites MCP errors: Copilot appends 'Please check your input and try again.' to every thrown error and drops the isError flag before the prompt, so only the text can say a call failed",
+    "A non-Claude client cuts a result below Claude Code's 50,000: Gemini CLI at 40,000 characters, Codex at about 48,000 bytes, or 10,000 bytes for a model missing from models.json"
+   ],
+   "stillOpen": [
+    "Owner decision 3: does a refused or reset connection map to 75 (retryable) or 69, given the Rust and Go exit tables' '69 non-retryable' wording? UX-AGENT-10 cannot become MUST until this is settled.",
+    "Owner decision 4: will Rust CLI-04 make `retryable` required and add `schema_version`? UX-AGENT-09 clause (c) and UX-AGENT-04's error-document clause stay SHOULD until it does.",
+    "Does an OpenAI strict function with a root `anyOf` actually get rejected by the API? This needs a human with an API key, and it decides whether UX-AGENT-20's combinator clause becomes MUST."
+   ]
+  }
+ ],
+ "failed": []
+}

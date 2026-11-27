@@ -12,6 +12,10 @@ consolidates:
   - ux-a11y-authoring/focus-contrast-target-size.md
   - ux-a11y-authoring/announcements-and-motion.md
   - ux-a11y-authoring/page-structure-and-consistency.md
+  - ux-a11y-authoring/followup-q0.md
+  - ux-a11y-authoring/followup-q1.md
+  - ux-a11y-authoring/followup-q2.md
+revision: 2
 grounding:
   - product-audit/ui-code-posture.md
   - product-audit/site-shape.md
@@ -72,7 +76,10 @@ custom widgets it must refuse to write.
    plausible final date is about 2030 ([Roselli, April 2026](https://adrianroselli.com/2026/04/wcag3-contrast-as-of-april-2026.html)).
 6. **Focus rules check for a missing replacement, not for the string `outline: none`.** All 16
    theme sites that remove the outline draw a replacement (`ui-code-posture.md` §2), so "never
-   write `outline: none`" would be a false rule for this codebase.
+   write `outline: none`" would be a false rule for this codebase. A drawn ring is not enough on
+   its own: the focused control must also be visible when focus arrives (UX-A11Y-36). Wave 2
+   measured five Tab stops in three containers at an effective opacity below 0.1 on the built
+   sites. A scroll position or a mouse hover fades each container in.
 7. **Targets are measured on the rendered hit box, against 24×24 CSS px (AA).** The token is not
    the measure. 44×44 is AAA, and an agent must never call it AA.
 8. **Announcements write text into a live region that already exists.** They never move focus and
@@ -96,7 +103,25 @@ custom widgets it must refuse to write.
 13. **Every check this ruleset names is either a command, or it is labelled a reading heuristic.**
     The scripts the checks need are inlined in the
     [Appendix](#appendix-check-scripts). They are not paths in a local cache. A check that runs on
-    a simulated reader or on a heuristic says so in its rule.
+    a simulated reader or on a heuristic says so in its rule. Wave 2 ran the two source and
+    browser heuristics on Primer and Radix (followup-q1). Neither `focus_outline.py` nor the first
+    `colour_only.mjs` separates a pass from a fail on its own, so both are lead generators. The
+    pass condition of UX-A11Y-12 is now the triaged end state: every FAIL row is fixed or carries
+    a `focus-ok:` comment. Appendix A6 is replaced by the measured alpha-blending version.
+14. **Wave 2 left these gaps on record. They are findings, not open questions.**
+    - Focus checks. No oracle exists for UX-A11Y-12: no Tab-and-diff pass ran on a built Primer
+      or Radix Storybook. The 82% precision of the improved check (A7) was tuned on the same
+      corpora, so it is an upper bound. Three false positives remain in every selector-based
+      version: a wrapper in another file draws the ring, and only the markup links the two.
+    - Colour checks. `colour_only_v2.mjs`, like the script it replaces, tests the state element only. A cue drawn on the parent
+      (Primer NavList: tint and bar on the `li`) is reported as INFO, and the INFO text is wrong
+      there. Validation state set by a `data-*` attribute on a wrapper is not seen.
+    - Visibility of focus (UX-A11Y-36). It was measured in headless Chrome only, with no Firefox,
+      no Safari, no real device and no real assistive technology. Calling an invisible focused
+      control a 2.4.7 failure is this catalog's reading. The W3C text does not name the case.
+    - Announcements (UX-A11Y-22). No real or virtual reader was run in wave 2. Neither ARIA22 nor
+      ARIA19 says whether a region created together with its text is announced. The rule now
+      rests on their "exists before the message" tests, not on a claim about speech.
 
 ### Conflicts resolved
 
@@ -312,23 +337,42 @@ attributes after each key. If no test exists, the rule fails.
 styles on `:focus-visible`, not bare `:focus`. The default recipe is
 `outline: 2px solid <token>; outline-offset: 2px`. A replacement may move to an ancestor through
 `:has(<child>:focus-visible)` or `:focus-within`. It must be an outline or a border change, never
-a `box-shadow` alone, because forced colours suppress `box-shadow` (CSS-A11Y-01).
+a `box-shadow` alone, because forced colours suppress `box-shadow` (CSS-A11Y-01). `all: unset`
+and `all: initial` on a focusable element remove its outline too, so they need the same
+replacement. When a wrapper in another file draws the ring, put
+`/* focus-ok: ring drawn by <selector> in <file> */` directly before the removing rule.
 *Why:* 2.4.7 (AA), failure F78
 ([Understanding 2.4.7](https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html),
 2026-10-04). The 2px default comes from 2.4.13, which is AAA, so it is a recipe and not the floor.
-*Verify:* `python3 -I focus_outline.py <source dirs>` ([Appendix A1](#a1-focus_outlinepy-ux-a11y-12))
-exits 0. For each `outline: none|0` on a selector with `:focus`, `:focus-visible` or
-`:focus-within`, the script looks in the same file (CSS files and `<style>` blocks) for one of
-three replacements. (1) The same rule, or a focus rule on the same base selector, sets a
-non-`none` outline or a border. (2) A `:has(…:focus…)` rule names the element and draws an outline
-or border. (3) A `:focus-within` rule on an ancestor draws one. The ancestor is found by
-descendant selector or by BEM `block__element` naming. A `box-shadow` alone is not a replacement.
-A reviewed exception passes only with a `/* focus-ok: <reason> */` comment directly before the
-rule. An example is a listbox whose highlighted option shows focus through
-`aria-activedescendant`. Pass: `command-bar.css:141-143` with `:124-127`. Fail: a lone
-`button:focus{outline:none}`. Run `python3 -I focus_outline.py --selftest` first. Scope limit: an
-`outline: none` with no focus pseudo-class is not seen. One such case is the asciinema player's
-`pre.ap-term-text`. UX-A11Y-13's browser pass catches those.
+On radix-ui/website, 37 of 88 `all: unset` rules are on controls whose only focus style is a
+`box-shadow` (followup-q1).
+*Verify:* two scripts generate leads. Neither is a gate on its own (followup-q1).
+1. `python3 -I focus_outline.py <source dirs>` ([Appendix A1](#a1-focus_outlinepy-ux-a11y-12)).
+   It reads `.css` files and `<style>` blocks. For each `outline: none|0` on a selector with
+   `:focus`, `:focus-visible` or `:focus-within`, it looks in the same file for one of three
+   replacements. (a) The same rule, or a focus rule on the same base selector, sets a non-`none`
+   outline or a border. (b) A `:has(…:focus…)` rule names the element and draws an outline or a
+   border. (c) A `:focus-within` rule on an ancestor draws one. The ancestor is found by
+   descendant selector or by BEM `block__element` naming. Measured on Primer and Radix: 30 FAIL,
+   of which 11 are real (precision 37%). It misses `.scss`, CSS nesting and `all: unset` (recall 11
+   of 52). 14 of its 19 false positives are the `:focus:not(:focus-visible)` mouse-focus idiom.
+2. `V3=1 node focus_outline_v2.mjs <root>` ([Appendix A7](#a7-focus_outline_v2mjs-ux-a11y-12)).
+   It uses PostCSS, resolves nesting and reads `.scss`. It skips `:not(:focus-visible)` and
+   `::-webkit-*` sub-parts, accepts a ring on `::before`/`::after`, and checks `all: unset|initial`.
+   Measured on the same corpora: 17 FAIL on the outline class, 14 real, recall 14 of 14. Its
+   precision of 82% was tuned on those corpora, so it is an upper bound. It does not read
+   `<style>` blocks and has no BEM branch: on the fleet theme it flags `field.css:188`, which A1
+   passes by BEM naming.
+Run `python3 -I focus_outline.py --selftest` and A7 on its nine-case fixture first. Then run both
+scripts and triage the union of FAIL rows. Either fix each row, or put a
+`/* focus-ok: <reason> */` comment directly before the rule. The reason names the drawing
+selector and file (`grep -rn '<selector>' <file>` must hit), or says why focus shows another way.
+A listbox whose highlighted option shows focus through `aria-activedescendant` is one such case.
+An element that cannot take focus (`fieldset`, `p`, a heading) is another. The rule passes when A1
+exits 0 and A7 prints no `FAIL` row. Pass: `command-bar.css:141-143` with `:124-127`. Fail: a
+lone `button:focus{outline:none}`. Scope limit: an `outline: none` with no focus pseudo-class is
+not seen. One such case is the asciinema player's `pre.ap-term-text`. UX-A11Y-13's browser pass
+catches those.
 *From:* focus rules 1, 2, 4, 15.
 
 **UX-A11Y-13 (MUST).** The focus indicator reaches 3:1 against the colour it sits on, in every
@@ -341,9 +385,13 @@ surface is the element's own background. Every element with `tabindex="0"`, incl
 *Verify (built, in a browser):* Tab through each page at 1280 and 390 px. Pixel-diff the focused
 element and a 40px frame against its blurred state with
 `PAD=40 node focus_diff.mjs <url> <theme> <width> '<regex>'` ([Appendix A5](#a5-focus_diffmjs-ux-a11y-13)). A stop
-that changes 0 pixels is a lead to inspect, not a verdict: the harness can miss a ring, and the
-cause of one 0-pixel stop is still unknown (Open question 6). It becomes a fail when the computed
-style confirms it: `outline-style: none`, no `box-shadow`, and no border change. Then compute the
+that changes 0 pixels is a lead, not a verdict. Resolve it with two reads. (1) Read the computed
+style of the element and of its ring owner. `outline-style: none`, no `box-shadow` and no border
+change mean a missing ring, which fails this rule. (2) Read the effective opacity of the element
+and all its ancestors when focus arrives, with `focus_opacity.mjs` (UX-A11Y-36). A value below
+0.99 means an invisible stop, which fails UX-A11Y-36. Pass `clip` to the screenshot in page
+coordinates (`rect + scrollX/scrollY`), never in viewport coordinates. A stop that passes both
+reads and still shows 0 pixels is a harness artefact (followup-q0). Then compute the
 ring colour against `getComputedStyle(el).backgroundColor` (negative offset) or against the
 parent background. Fail below 3.0, unrounded. Run
 `THEMES=light,dark node measure.mjs <base-url> <page,page> out.json` ([Appendix A4](#a4-measuremjs-ux-a11y-13--20)) and read
@@ -418,14 +466,21 @@ on hover and focus (G183).
 updated 2025-09-16). The page counts a lightness difference as a cue "as long as the difference in
 relative luminance between the colors leads to a contrast ratio of 3:1 or greater".
 *Verify (built, in a browser):*
-- `CHR=<chrome> node colour_only.mjs <url> …` ([Appendix A6](#a6-colour_onlymjs-ux-a11y-19)) exits 0. It runs in light and dark.
+- `WAIT=load CHR=<chrome> node colour_only_v2.mjs <url> …` ([Appendix A6](#a6-colour_only_v2mjs-ux-a11y-19)) exits 0.
+  Exit 1 means at least one FAIL. Exit 2 means a page failed to load, and that run proves
+  nothing. It runs in light and dark.
   It pairs each element in a state with a peer of the same tag and the same classes without that
   state. A state is a class token such as `active`, `selected`, `error` or `planned`, or
   `aria-current`, `aria-pressed`, `aria-selected` or `aria-invalid`. The script reports FAIL when
   the pair differs in colour and in nothing else. Nothing else means no font, decoration, border
-  width or style, outline, background image, pseudo-element content or child element. A colour
-  pair at 3:1 or more counts as a cue. A pair with no visual difference at all is reported as
-  INFO, because colour carries nothing there. States that script sets after load are not seen.
+  width or style, outline, background image, child element, or pseudo-element `content`,
+  `background-color`, `width` or `height`. A colour pair counts as a cue only when both colours
+  are first blended onto the page background (alpha applied) and the ratio is at least 3. A pair
+  with no visual difference on the element itself is reported as INFO. INFO is a lead: read the
+  parent, because a cue drawn on the parent `li` is not seen. States that script sets after load
+  are not seen, nor is a state set by a `data-*` attribute on a wrapper. Before you rely on it,
+  run it on the R1 to R4 fixture in A6: it must print exactly two FAIL lines per colour scheme
+  (R1 and R3), no INFO line, and exit 1.
 - Prose links: axe `link-in-text-block` (WCAG 1.4.1, tag `wcag2a`, axe-core 4.14) reports no
   violation. `grep -rnE 'text-decoration:\s*none' src` on selectors that match prose links (`p a`,
   `.prose a`, `.sl-markdown-content a`) finds none without a replacement cue.
@@ -463,11 +518,25 @@ create the region and fill it in one step. When script must create it, set the t
 task. Never move focus only to announce. Do not announce expand, collapse, tab selection or a
 dialog that takes focus: their ARIA state already does that.
 *Why:* 4.1.3 (AA) ([Understanding 4.1.3](https://www.w3.org/WAI/WCAG22/Understanding/status-messages.html),
-2026-10-04). [ARIA22](https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA22) test 1 (2026-01-12):
-a role added together with its content "may not be announced reliably".
+2026-10-04). [ARIA22](https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA22) (updated
+2026-01-12) test 1: "Check that the container destined to hold the status message has a role
+attribute with a value of status before the status message occurs." For errors,
+[ARIA19](https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA19) (updated 2026-04-27): "The error
+container must be present in the DOM on page load for the error message to be spoken by most
+screen readers." Neither page says whether a role added together with its content is announced.
+Both quotes were checked in the raw HTML on 2026-11-27, and the phrase "announced reliably" is on
+neither page (`curl -sSL <url> | grep -ci 'announced reliably'` prints 0 for both).
 *Verify:*
 - For each handler that changes visible status text, `grep -nE 'role="(status|alert)"|aria-live'`
   finds the container in the same component or in the page announcer.
+- Error containers. List each element that renders an error message, for example
+  `grep -rnE 'class="(error-state|row-error)"' <webview> | grep -v 'role="alert"'` in the fleet
+  webview. The check passes only when the list is empty, or when each hit sits inside a wrapper
+  with `role="alert"` that renders in every state of the component and starts empty. An error
+  element that carries `role="alert"` on its own line is created with its content. It fails
+  ARIA19 test 1. Fix it by rendering the wrapper unconditionally and writing the text into it.
+- Status containers. For each `grep -rnE 'role="status"'` hit, read the template and confirm the
+  element renders in every state of the component, not only on one branch.
 - Fail patterns: `insertAdjacentHTML(…role="status"…>text<`, and `createElement` followed by
   `role` and `textContent` in one block.
 - Harness (simulated): the region's `textContent === ''` before the update. The harness source is
@@ -479,7 +548,7 @@ a role added together with its content "may not be announced reliably".
   `W` path with a repo-relative one. Then run
   `npm i -D vitest jsdom @guidepup/virtual-screen-reader` and `npx vitest run`. The dive's
   working copy under `~/.cache/…/ux-announce-harness/` is gone: `ls` on 2026-11-27 reports
-  "No such file or directory". This revision did not re-run the harness. Its spoken output is
+  "No such file or directory". Neither revision 1 nor wave 2 re-ran the harness. Its spoken output is
   virtual-reader output and is labelled UNVERIFIED against real readers. The DOM-contract
   assertions do not depend on the virtual reader.
 *From:* A11Y-ANN-1, -2, -7, -8, -11.
@@ -700,6 +769,38 @@ until someone does.
 clause. It had no check, and the platform text ("Use command actions in the toolbar and in the
 view") is about toolbar placement, not accessibility.
 
+### Visibility of the focused control
+
+**UX-A11Y-36 (MUST; added in revision 2).** A control that can take keyboard focus is visible
+whenever it has focus. A container that a scroll position, a hover or an animation fades,
+translates or reveals must show its focused descendants at full opacity. Use one of three fixes:
+- Add `:focus-within { opacity: 1; transform: none; }` to the container.
+- Make the visible state the default and let motion only enhance it.
+- Make the hidden controls `inert` until they are revealed.
+Never fix it by writing the scroll variable on `focusin`, because the scroll code overwrites it.
+*Why:* 2.4.7 (AA) requires "a mode of operation where the keyboard focus indicator is visible"
+([WCAG 2.2](https://www.w3.org/TR/WCAG22/#focus-visible), Rec 2024-12-12). Its purpose is "to help
+a person know which element has the keyboard focus"
+([Understanding 2.4.7](https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html), updated
+2026-10-04). A ring on a control at opacity 0 cannot do that. Calling this a 2.4.7 failure is the
+reading of this catalog and of followup-q0, not W3C text. Measured in followup-q0 on ocx.sh: the
+finale trigger takes focus at effective opacity 0 at default motion, in both themes, at 1280 and
+390 px. The `:focus-within` fix gives opacity 1 and survives a scroll away and back. The `focusin`
+fix reverts to 0 when the user scrolls back.
+*Verify (built, in a browser):* `CHR=<chrome> node focus_opacity.mjs <url> …`
+([Appendix A8](#a8-focus_opacitymjs-ux-a11y-36)) exits 0 at default motion. It Tabs through every
+stop in light and dark, at 1280 and 390 px. After each Tab it waits 300 ms, then multiplies
+`opacity` over the element and its ancestors. A product below 0.99, or `visibility: hidden` or
+`content-visibility: hidden` on the chain, is a FAIL. The output names the outermost fading
+ancestor (`low`). Run it again with `MOTION=reduce`, which must also exit 0. Exit 2 means a page
+failed to load. Static pre-check that lists candidate containers:
+`grep -rnE 'opacity:\s*(0\s*(;|!|$)|var\()|scroll-timeline|animation-timeline' src`, then check
+each container for focusable descendants. On the fleet theme it lists 66 lines, among them
+`ScrollStage.astro:117` and `ScrollFade.astro:24` (run 2026-11-27). Scope limit: `clip-path`, a zero-size clip and an off-screen
+position are not seen. A stop that passes here and still shows 0 changed pixels in
+`focus_diff.mjs` needs a reading.
+*From:* followup-q0 (new rule; it closes the default-motion branch that UX-A11Y-27 does not cover).
+
 ### Dropped, with reason
 
 | Dive ID | Why dropped |
@@ -731,11 +832,12 @@ named.
 | UX-A11Y-04 | 19 of 72 webview buttons are named only by `title`, for example `W:render.ts:334`, `:465`, `:594` and `W:settings/render.ts:71`. `W:settings/render.ts:137` `button.chip-remove` has no name at all | native-widgets §8.1 (scan_wv.py) |
 | UX-A11Y-06 | `title="Manage"` appears 3 times and `title="More options"` 3 times in `W:` | native-widgets UXA-NAME-03 |
 | UX-A11Y-07 | The webview detail tabs (`W:render.ts:2007-2033`) mark the selected tab with only the `active` class: no `tablist`, no `aria-selected`, no `aria-pressed`. The card, context and scope menu triggers (`W:render.ts:320`, `:334`, `:1550`) open a menu with no `aria-expanded` (`grep -c aria-expanded render.ts` gives 2 in the whole file, re-run 2026-11-27) | native-widgets §8.3; re-checked |
-| UX-A11Y-13 | Grimoire docs scrollable code blocks: `outline: 3px solid rgb(18,45,66)` at offset −3px on `rgb(27,29,44)` is 1.18:1 (computed values). The asciinema terminal `pre.ap-term-text` (tabindex 0) is confirmed by three separate readings. (1) 0 pixels change on focus. (2) The recorded computed style is `outline-style: none`, no `box-shadow`, `border` 0px. (3) In source, `G:public/asciinema-player.css:111-124` sets `outline: none` on `div.ap-term pre.ap-term-text` with no condition, and the file has 0 `:focus` rules (`grep -c ':focus' public/asciinema-player.css` gives 0, run 2026-11-27). Not cited: the second `ocx-cmdbar__trigger`, whose 0-pixel result has no known cause (Open question 6) | focus-contrast §1 (headless Chromium); `ux-a11y-fcts/grim.json` focus records; source re-read in revision 1 |
+| UX-A11Y-13 | Grimoire docs scrollable code blocks: `outline: 3px solid rgb(18,45,66)` at offset −3px on `rgb(27,29,44)` is 1.18:1 (computed values). The asciinema terminal `pre.ap-term-text` (tabindex 0) is confirmed by three separate readings. (1) 0 pixels change on focus. (2) The recorded computed style is `outline-style: none`, no `box-shadow`, `border` 0px. (3) In source, `G:public/asciinema-player.css:111-124` sets `outline: none` on `div.ap-term pre.ap-term-text` with no condition, and the file has 0 `:focus` rules (`grep -c ':focus' public/asciinema-player.css` gives 0, run 2026-11-27). The second `ocx-cmdbar__trigger` (0 pixels) is not a ring defect: its ring is drawn. It is a UX-A11Y-36 violation, listed below | focus-contrast §1 (headless Chromium); `ux-a11y-fcts/grim.json` focus records; source re-read in revision 1; followup-q0 |
 | UX-A11Y-15 | `G:public/start.html:256` is text at 45% alpha, 3.91:1 | ui-code-posture §4 |
 | UX-A11Y-18 | `grimoire-rs/grim-gui/src/styles.css` declares no `color-scheme`. `.hint #555` is 2.51:1 if the webview paints dark | ui-code-posture §1, §4 |
 | UX-A11Y-20 | On the OCX team page, the sidebar links "Overview" and "Get in touch" are 236×23.6 px, stacked with gap 0 (circles overlap by 0.38 px). The Grimoire `sl-anchor-link` heading anchors at 390 px are 16.5×24 and 14.1×20.4, touching the heading link | focus-contrast §3 |
-| UX-A11Y-22 | grim-gui renders its error view with no live region (`src/view.ts:23-30`, `src/main.ts:11-22`). The webview's results, details and settings error states have 0 `role`/`aria-live`/`aria-busy` | ui-code-posture smell 1; `ux-interface-states/empty-error-notification.md` |
+| UX-A11Y-22 | grim-gui renders its error view with no live region. `grep -rnE 'role=\|aria-live\|aria-busy' src index.html` in `grim-gui` at `edda90d` (2026-11-26) prints nothing. The error branch is `src/view.ts:23-30`, mounted by `src/main.ts:11-23`. The webview at `grimoire-rs/vscode` `9230dcd` (2026-11-24) has 3 live elements. (1) `W:render.ts:1219`, `role="status"` with `aria-live` and `aria-busy`, added in `2c9c56c` (2026-10-18). It renders only on the paging branch (`W:render.ts:1190-1197`), so it is created in the same render that fills it. (2) `W:render.ts:1221`, `role="alert"` on the paging failure. (3) `W:settings/render.ts:522`, `role="alert"` on the add-registry error, created with its content. The page-level error states have no live region: `W:render.ts:1177` (results), `:2049` (details) and `W:settings/render.ts:656` (settings). Nor do the settings row errors `:181` and `:346`. The error-container grep in the Verify prints these 5 hits | ui-code-posture smell 1; `ux-interface-states/empty-error-notification.md`; followup-q2 (re-measured 2026-11-27) |
+| UX-A11Y-36 | `focus_opacity.mjs` (Appendix A8) on the built pages, run 2026-11-27, exit 1, 30 FAIL lines. (1) ocx.sh `index.html`: the second `ocx-cmdbar__trigger` sits in `.ocx-stage__finale` at opacity 0 (`T:components/ScrollStage.astro:111-118`, written per frame by `T:components/ui/scroll.mjs:170`). It fails in light and dark, at 1280 px (scroll y 1002) and at 390 px (y 1136). (2) ocx.sh `index.html` at 390 px only: a `button` in `.ocx-fade.lp-hero__term` has effective opacity 0.066 at scroll y 411 (`T:components/ScrollFade.astro:24`, `opacity: var(--ocx-fade-o, 1)`). (3) Grimoire docs `index.html` and `quickstart.html`, all four theme and width runs: the asciinema Play, Keyboard shortcuts and Fullscreen buttons have opacity 0. `div.ap-control-bar` is `opacity: 0` (`G:public/asciinema-player.css:171-188`) and shows only under `.ap-hud`. A probe found `ap-hud` still absent 3 s after Tab. With `MOTION=reduce`, ocx.sh `index.html` exits 0 (0 FAIL, 32 or 33 stops). `apps/` and `integrations/` give 0 FAIL. The player is vendored, and DOC-EX-16 owns player controls. The finding is listed here because the rule catches it | followup-q0 (finale, with the `:focus-within` fix verified); revision 2 (full run) |
 | UX-A11Y-24 | `T:components/ui/command-bar.mjs:128-131`: a second copy inside the 2 s window writes the same text and is not re-announced, as the source comment itself says | announcements §2 |
 | UX-A11Y-28 | The catalog home `<title>` is the bare `ocx.sh`. `site/dist/_shell/v1/<rev>/nav.html` has no `lang` | page-structure §3; ui-code-posture §3 |
 | UX-A11Y-29 (SHOULD finding) | `G:public/start.html` and `G:public/privacy.html` have no `<main>` (`grep -c '<main'` gives 0 and 0, re-run 2026-11-27) | page-structure §3 |
@@ -755,11 +857,11 @@ named.
 | UX-A11Y-09 | `ui/Menu.astro:3-4` is disclosure navigation in a `<nav popover>` with links, and no `role="menu"`. 13 `popovertarget`/`commandfor` uses |
 | UX-A11Y-10 | 0 `tabindex>0`, 0 `aria-checked` on native checkboxes, 0 `role="menu"` in both corpora. The 2 `role="list"` hits (`TileGrid.astro:23`, `ui/TagGroup.astro:97`) are the documented styled-list exception |
 | UX-A11Y-11 (webview tree) | `W:render.ts:1019` `role="tree"` uses roving `tabindex` (`sidebar/main.ts:993-1000`), Left/Right (`main.ts:1066`) and Up/Down/Home/End/PageUp/PageDown (`model.ts:2046`) |
-| UX-A11Y-12 | All 16 theme `outline: none` sites draw a replacement. `command-bar.css:141-143` is replaced at `:124-127`, confirmed in a browser. `G:public/start.html:90-91` restores the ring on `:focus-visible` (focus-contrast §1; ui-code-posture §2). Script run in revision 1, `python3 -I focus_outline.py <dir>` (Appendix A1), on 2026-11-27. In `T:` it found 8 focus-selector removals: 7 PASS. It flagged `components/ui/overlay.css:96` (`.ocx-ui-select__list:focus-visible`), the active-descendant listbox whose source comment at `:95` says "the highlighted row shows it". In `W:` it found 3: 2 PASS. It flagged `sidebar/sidebar.css:355` (`.result-summary:focus`), a `role="status" tabindex="-1"` line that is focused from script (`render.ts:1219`, `sidebar/main.ts:870`) and is not in the Tab order. Both flagged sites are reviewed exceptions. Each needs the `focus-ok:` comment before the script exits 0. `G:public`, `G:src` and `grim-gui/src` give exit 0 |
+| UX-A11Y-12 | All 16 theme `outline: none` sites draw a replacement. `command-bar.css:141-143` is replaced at `:124-127`, confirmed in a browser. `G:public/start.html:90-91` restores the ring on `:focus-visible` (focus-contrast §1; ui-code-posture §2). Script run in revision 1, `python3 -I focus_outline.py <dir>` (Appendix A1), on 2026-11-27. In `T:` it found 8 focus-selector removals: 7 PASS. It flagged `components/ui/overlay.css:96` (`.ocx-ui-select__list:focus-visible`), the active-descendant listbox whose source comment at `:95` says "the highlighted row shows it". In `W:` it found 3: 2 PASS. It flagged `sidebar/sidebar.css:355` (`.result-summary:focus`), a `role="status" tabindex="-1"` line that is focused from script (`render.ts:1219`, `sidebar/main.ts:870`) and is not in the Tab order. Both flagged sites are reviewed exceptions. Each needs the `focus-ok:` comment before the script exits 0. `G:public`, `G:src` and `grim-gui/src` give exit 0. Revision 2 ran `V3=1 node focus_outline_v2.mjs <dir>` (Appendix A7) on the same trees on 2026-11-27. `T:` gave `{"PASS":6,"FAIL":2}`: `overlay.css:96` as above, and `components/ui/field.css:188` (`.ocx-ui-input-group__input:focus-visible`). The second is a false positive of A7: the ring is drawn by `.ocx-ui-input-group:focus-within` (`field.css:158`), which A1 links by BEM naming. `W:` gave `{"PASS":2,"FAIL":1}`, `sidebar.css:355` as above. `G:public`, `G:src` and `grim-gui/src` printed no row, because A7 reads no `<style>` blocks. The triage list for the fleet is therefore 3 rows, each a `focus-ok:` comment |
 | UX-A11Y-13 (OCX) | Every OCX focus stop draws a ring of 5.17:1 (light) or 5.83:1 (dark). Grimoire's user-agent ring is 15.17:1 |
 | UX-A11Y-15, -16 (OCX theme) | Every ocx text token passes on bg, surface and surface-subtle in both themes (minimum 4.93). `border-control` is 3.3 (light) and 3.67 (dark). The coral 2.79 is never used for text or focus in light mode (ui-code-posture §4) |
-| UX-A11Y-19 | `T:components/ui/field.css:60-62` pairs the danger border with error text and `aria-invalid`. `T:base.css:171` keeps the underline on prose links. `colour_only.mjs` (Appendix A6) was run in revision 1 on 2026-11-27, against the built `index.html`, `apps/index.html` and `integrations/index.html` of ocx.sh and `index.html` and `quickstart.html` of the Grimoire docs, light and dark. It found 0 FAIL. It gave 1 INFO: the Grimoire header's `aria-current` "docs" link has the same computed style as "index" (`Header.astro:84`, no `aria-current` style). The current page therefore has no visual cue at all. That is not a 1.4.1 failure, and it is a UX-STATE or UX-TEXT question |
-| UX-A11Y-23 | `W:settings/render.ts:518-522` uses `role="alert"` for save failures. `Deferred` shows its error as `role="alert"` (`Could not load this.` plus Retry) |
+| UX-A11Y-19 | `T:components/ui/field.css:60-62` pairs the danger border with error text and `aria-invalid`. `T:base.css:171` keeps the underline on prose links. The alpha-blending `colour_only_v2.mjs` (Appendix A6) was run in revision 2 on 2026-11-27 with `WAIT=load`, against the built `index.html`, `apps/index.html` and `integrations/index.html` of ocx.sh and `index.html` and `quickstart.html` of the Grimoire docs, light and dark. It exited 0 with 0 FAIL, the same result as the first script in revision 1. It gave 1 INFO item (one line per scheme, on `quickstart.html`): the Grimoire header's `aria-current` "docs" link has the same computed style as "index" (`Header.astro:84`, no `aria-current` style). The current page therefore has no visual cue at all. That is not a 1.4.1 failure, and it is a UX-STATE or UX-TEXT question |
+| UX-A11Y-23 | `W:settings/render.ts:518-522` uses `role="alert"` for save failures. `Deferred` shows its error as `role="alert"` (`Could not load this.` plus Retry). Re-confirmed in followup-q2: both webview `role="alert"` uses carry error text only, loading uses `aria-live="off"` plus `aria-busy`, and `grep -rnE 'aria-live="?assertive\|assertive' src/webview` exits 1 with no output |
 | UX-A11Y-25, -26 | The only infinite animation is the vendored asciinema loader (`G:public/asciinema-player.css:440`), a lone loading indicator. No flashing keyframes. `W:` `details.css:1366` is a 2 s opacity fade, run once |
 | UX-A11Y-27 | `T:tokens.css:353` zeroes every duration under `reduce`. 0 literal `transition` timings bypass the token (`cd T && grep -rnE 'transition:\s*[^;]*[0-9.]+m?s' . \| grep -v 'var(--ocx-duration' \| wc -l` gives 0, run 2026-11-27). `starlight/theme-toggle.mjs:22` feature-detects and gates `startViewTransition`. Grimoire's 14 `transition:` lines change colour only |
 | UX-A11Y-28, -29, -32 (Starlight and catalog) | All 70+ measured Starlight pages have `lang="en"`, one `<main>` and a `#_top` skip link. The catalog uses `.ocx-skip` with its target present |
@@ -822,11 +924,15 @@ Each is grouped by the mechanism that produces it, and the rule that catches it 
 17. Renames or reorders header items "for clarity" on one site of a set. [33]
 
 **Mechanism E: timing and state that no static view shows.**
-18. Creates the live region and writes the text in the same function: visible on screen, silent
-    in a reader. [22]
+18. Creates the live region and writes the text in the same function, or renders the region
+    only on the branch that has a message. 1 status and 1 alert in the webview are created with
+    their content, and 5 error states have no region. [22]
 19. Re-sets identical text into an unchanged region and assumes it is announced again. [24]
 20. Calls `startViewTransition` or a JS animation with no reduced-motion path, or "fixes" motion
     with a blanket `animation: none !important` that also kills loaders. [27]
+23. Fades a container in by scroll position or hover and leaves its controls in the Tab order.
+    The ring is drawn, but the control is at opacity 0 when focus arrives. Reduced motion hides
+    the defect, because there the container is visible. 5 stops in 3 containers. [36]
 
 **Mechanism F: false assurance from a checker.** This feeds every mechanism above.
 21. Treats a green axe run, a Lighthouse 100 or a virtual screen-reader log as proof. axe passes
@@ -846,7 +952,9 @@ Each is grouped by the mechanism that produces it, and the rule that catches it 
 - **Brand colours or a brand focus ring that fail 3:1 or 4.5:1.** Propose a passing alternative
   and ask.
 - **Changes to the shared theme package** (`@ocx-sh/theme`, consumed by five sites), for example
-  the `Choice` `min-height`. A change there alters every consumer.
+  the `Choice` `min-height` or the `.ocx-stage__finale:focus-within` fix (UX-A11Y-36). A change
+  there alters every consumer. The same holds for the vendored asciinema player in the Grimoire
+  docs: a fix there diverges from upstream.
 - **Global keyboard shortcuts** (`/`, Ctrl/Cmd+K). They conflict with browser, screen-reader and
   VS Code bindings.
 - **The browser-support policy** before adopting Invoker Commands, Baseline since December 2025,
@@ -865,7 +973,7 @@ Each is grouped by the mechanism that produces it, and the rule that catches it 
 | Fact a rule rests on | Rules | Source and date | Refresh | How to re-check |
 |---|---|---|---|---|
 | WebAIM prevalence figures (83.9 / 53.1 / 51 / 46.3 / 30.6 / 13.5 %; ARIA 59.1 vs 42.0) | Verdict 1-2, 01-04, 15, 28 | [WebAIM Million](https://webaim.org/projects/million/), 2026-03-30 | 12 months (annual report, February crawl) | Re-read the ranking table. Re-rank the failure modes if the order changes |
-| WCAG 2.2 criteria texts and Understanding pages (revised between 2025-09 and 2026-11) | 12-16, 19-20, 22-29, 33 | [WCAG 2.2](https://www.w3.org/TR/WCAG22/), Rec 2024-12-12; Understanding pages dated per rule | 6 months | Fetch each linked Understanding page and diff the levels, thresholds and listed techniques and failures |
+| WCAG 2.2 criteria texts and Understanding pages (revised between 2025-09 and 2026-11) | 12-16, 19-20, 22-29, 33, 36 | [WCAG 2.2](https://www.w3.org/TR/WCAG22/), Rec 2024-12-12; Understanding pages dated per rule | 6 months | Fetch each linked Understanding page and diff the levels, thresholds and listed techniques and failures |
 | ARIA in HTML allowed-role table and MUST NOTs | 07, 09, 10 | [AIH](https://www.w3.org/TR/html-aria/), Rec 2026-08-11 | 12 months | Re-read the `button`, `a`, `input type=checkbox`, `summary`, `details` and `dialog` rows |
 | Accname: `title` as the last fallback (Working Draft) | Verdict 3, 04 | [Accname 1.2](https://www.w3.org/TR/accname-1.2/), WD 2026-11-04 | 6 months | Check step 2I and the document's status |
 | axe passes a title-only button; axe rule IDs and impacts | 03, 04, 05, 10, 29-32 | [axe-core rule-descriptions](https://raw.githubusercontent.com/dequelabs/axe-core/develop/doc/rule-descriptions.md) (4.14.1); [Deque button-name](https://dequeuniversity.com/rules/axe/4.14/button-name) | each axe minor release (about 6 months) | Grep the rule list for each ID. Re-run a `<button title="x"></button>` fixture through axe |
@@ -876,14 +984,17 @@ Each is grouped by the mechanism that produces it, and the rule that catches it 
 | WCAG 3 contrast algorithm unselected | Verdict 5, 17 | [Roselli](https://adrianroselli.com/2026/04/wcag3-contrast-as-of-april-2026.html), 2026-04 (draft of 2026-04-08) | 12 months | Check the latest WCAG 3 editor's draft for a selected algorithm |
 | VS Code webview body classes, `--vscode-*` mapping, `focusBorder`, "themeable" guideline | 27, 35 | [webview guide](https://code.visualstudio.com/api/extension-guides/webview), 2026-11-25; [webview UX](https://code.visualstudio.com/api/ux-guidelines/webviews), 2026-11-25; [Theme Color](https://code.visualstudio.com/api/references/theme-color), undated; [themeing.ts](https://raw.githubusercontent.com/microsoft/vscode/main/src/vs/workbench/contrib/webview/browser/themeing.ts), main, fetched 2026-11-27 | 6 months | Re-read the theming section and the `replace('.', '-')` line. Read `getComputedStyle(document.documentElement).getPropertyValue('--vscode-focusBorder')` in a rendered webview. A non-empty value promotes the focus-colour clause of 35 to MUST |
 | Flash definition and the 0.34 s derivation | 26 | [Understanding 2.3.1](https://www.w3.org/WAI/WCAG22/Understanding/three-flashes-or-below-threshold.html), updated 2025-09-17 | with WCAG | Re-read the definition of "flash". If it is no longer "a pair of opposing changes", redo the derivation |
-| Lightness counts as a cue at 3:1 | 19 (`colour_only.mjs`) | [Understanding 1.4.1](https://www.w3.org/WAI/WCAG22/Understanding/use-of-color.html), updated 2025-09-16 | with WCAG | Re-read the "significant difference in lightness" paragraph |
-| Check scripts in the Appendix | 03, 04, 12, 13, 15, 16, 19, 20, 35 | this artifact, revision 1 | each Chromium or puppeteer-core major | Run each script's self-test or fixture. Re-run them on the fleet |
+| Lightness counts as a cue at 3:1 | 19 (`colour_only_v2.mjs`) | [Understanding 1.4.1](https://www.w3.org/WAI/WCAG22/Understanding/use-of-color.html), updated 2025-09-16 | with WCAG | Re-read the "significant difference in lightness" paragraph |
+| ARIA22 test 1 ("before the status message occurs") and ARIA19 ("present in the DOM on page load") | 22 | [ARIA22](https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA22), updated 2026-01-12; [ARIA19](https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA19), updated 2026-04-27; both read in raw HTML 2026-11-27 | 12 months | `curl -sSL <url> \| sed 's/<[^>]*>//g' \| grep -iE 'before the status message\|present in the DOM'`. If either test text changes, re-word the Why of 22 |
+| Check scripts in the Appendix | 03, 04, 12, 13, 15, 16, 19, 20, 35, 36 | this artifact; A1 to A5 revision 1; A6 replaced and A7, A8 added in revision 2 | each Chromium, puppeteer-core or PostCSS major | Run each script's self-test or fixture (A1 `--selftest`, A6 R1 to R4, A7 F1 to F9, A8 O1 to O5). Re-run them on the fleet |
+| Precision and recall of the focus and colour checks on Primer and Radix | Verdict 13-14, 12, 19 | followup-q1; primer/react and primer/css at 2026-11-25, radix-ui/themes at 2026-04-11, radix-ui/website at 2026-10-07 | when a check script changes | Re-run A1, A7 and A6 on the same four repositories, and compare with followup-q1's tables |
 | Starlight `PageTitle` `id="_top"`; Material skip link only with a table of contents | 31, 32 | [Starlight overrides](https://starlight.astro.build/reference/overrides/), undated; Material `base.html` master, fetched 2026-11-27 | each major or minor framework upgrade | `grep -n 'toc | first' base.html` in the installed Material. Read the Starlight overrides page |
-| Fleet measurements in "Applied" | all rows | dists built 2026-11-16 to 11-24; sources read 2026-11-27 | each rebuild, at least quarterly | Re-run the commands cited in the rows |
+| Fleet measurements in "Applied" | all rows | dists built 2026-11-16 to 11-24; sources read 2026-11-27. Wave 2 pins: `grimoire-rs/vscode` `9230dcd` (2026-11-24), `grim-gui` `edda90d` (2026-11-26). The ocx.sh `ScrollStage.astro` and `scroll.mjs` were read in the working tree of the sibling checkout, not in a release | each rebuild, at least quarterly | Re-run the commands cited in the rows |
 | Virtual reader logging (`polite:`/`assertive:` is undocumented behaviour) | 22, 24 | `@guidepup/virtual-screen-reader` 0.33.0 (npm 2026-09-20) | each release of the tool | Re-run the harness probes |
 
-Rules that rest on no moving fact (01, 02, 05, 06, 12, 25, 29, 33) need re-checking only
-when WCAG itself changes.
+Rules that rest on no moving fact (01, 02, 05, 06, 25, 29, 33) need re-checking only
+when WCAG itself changes. Revision 2 took 12 off this list, because its Verify now rests on the
+measured precision of A1 and A7.
 
 ## Open questions
 
@@ -902,14 +1013,16 @@ when WCAG itself changes.
    identical text, `aria-atomic`, and `role="alert"` injected with content.
 5. How do the theme and the webview render under Windows High Contrast and `forced-colors`, where
    only the CSS source has been read so far?
-6. Why does the second `ocx-cmdbar__trigger` ("ocx add ocx.sh/node") show 0 changed pixels on
-   focus? Its sibling triggers show 988 to 2014 changed pixels from the same parent-ring rule. The
-   cause may be the harness. Until this is answered, a 0-pixel stop is a lead to inspect, not a
-   violation (UX-A11Y-13 Verify). The asciinema case was answered in revision 1: the source
-   removes the outline.
-7. Do the checks inlined in revision 1 hold beyond the fleet? `focus_outline.py` links an
-   ancestor ring by BEM naming, and `colour_only.mjs` finds peers by class list. Run both on two
-   exemplar design systems (Primer, Radix) and count false positives and false negatives.
+Questions 6 and 7 were answered in wave 2 (followup-q0 and followup-q1). Their numbers are not
+reused.
+
+8. Can one focus check combine A1's `<style>`-block reading and BEM branch with A7's fixes (a)
+   to (f), and what are its precision and recall against an oracle? The oracle is a Tab-and-diff
+   pass on built Primer and Radix Storybooks and on the radix-ui/website demos. Until then the
+   two scripts stay lead generators (UX-A11Y-12, Verdict 14).
+9. Does UX-A11Y-36 hold outside headless Chrome? Run `focus_opacity.mjs` in Firefox and WebKit,
+   and run the `:focus-within` fix with OS-level smooth scrolling, on every page of ocx.sh, not
+   only `index.html`.
 
 **Owner decisions**
 
@@ -939,6 +1052,14 @@ when WCAG itself changes.
 - [page-structure-and-consistency.md](ux-a11y-authoring/page-structure-and-consistency.md) covers
   per-template landmarks, headings, skip link, `lang` and title, the "set of web pages" decision,
   3.2.3, 3.2.4 and 3.2.6 across the sites, and planned nav entries.
+- [followup-q0.md](ux-a11y-authoring/followup-q0.md) (wave 2) explains the 0-pixel cmdbar
+  trigger: an ancestor at opacity 0 when focus arrives. It verifies the `:focus-within` fix and is
+  the source of UX-A11Y-36.
+- [followup-q1.md](ux-a11y-authoring/followup-q1.md) (wave 2) gives precision and recall of
+  `focus_outline.py` and `colour_only.mjs` on Primer and Radix. It also holds the measured
+  prototypes behind Appendix A6 and A7.
+- [followup-q2.md](ux-a11y-authoring/followup-q2.md) (wave 2) re-measures the webview and grim-gui
+  live regions, and corrects the ARIA22 quote in UX-A11Y-22.
 
 ## Key sources
 
@@ -1270,7 +1391,9 @@ This is the dive's `diff.mjs`, verbatim except for the first line, and renamed h
 `PAD=40 node focus_diff.mjs <url> <light|dark> <width> '<regex on tag.class|text>'`. It prints
 the changed pixel count of each matching stop, focused against blurred. Re-run in revision 1 on
 the built ocx.sh `index.html`, light, 1280: the three `ocx-cmdbar__trigger` stops gave 2124, 0
-and 1858 changed pixels. That reproduces the unexplained 0 of Open question 6.
+and 1858 changed pixels. followup-q0 explains the 0: the ancestor `.ocx-stage__finale` is at
+opacity 0 when focus arrives (UX-A11Y-36). This script passes `clip` in page coordinates
+(`r.y+scrollY`), which is correct. A viewport-coordinate clip photographs the wrong region.
 
 ```js
 import puppeteer from 'puppeteer-core';
@@ -1300,45 +1423,80 @@ for(let i=0;i<80;i++){
 await b.close();
 ```
 
-### A6. colour_only.mjs (UX-A11Y-19)
+### A6. colour_only_v2.mjs (UX-A11Y-19)
 
-Written in revision 1. Fixture check: on a page with a `.tab.is-active` that differs only in
-`color: red`, it prints FAIL. It prints nothing for a `.row--selected` that adds `font-weight:
-700`, or for a `.pill--active` whose colour `#ccc` is 3:1 or more against its peer. It prints
-INFO for a state with no visual difference. Fleet results are in "Applied to the fleet",
-UX-A11Y-19.
+Replaced in revision 2. This is the prototype `colour_only_v2.mjs` from followup-q1, verbatim. It
+replaces revision 1's `colour_only.mjs`, which read an `rgba()` colour as opaque and missed a
+tint-only state (Radix docs side nav: 1.34:1 real, 3.27 scored). The changes: alpha is blended
+onto the backdrop before the 3:1 test; a pseudo-element's `background-color`, `width` and `height`
+count as a cue; a navigation error prints `ERROR` and exits 2. Always run it with `WAIT=load`. Its
+default `networkidle2` still timed out on third-party pages, and `load` plus 1.5 s loaded 20 of 20
+(followup-q1). Measured: 0 FAIL on 10 Primer pages; 1 real FAIL item on 10 Radix pages; 0 FAIL and
+1 INFO item on the 5 fleet pages (revision 2). Usage:
+`WAIT=load CHR=<chrome-headless-shell> node colour_only_v2.mjs <url> [<url> ...]`.
+
+Fixture, saved as `fixture.html`. Expected: R1 and R3 FAIL, R2 and R4 silent. Run in revision 2:
+`WAIT=load node colour_only_v2.mjs file://$PWD/fixture.html` printed `FAIL light … LI|row "Tabs" vs
+"Overview"`, `FAIL light … A|nav "Blog" vs "Docs"`, the same two lines for dark,
+`colour-only state pairs: 4`, and exited 1. `node colour_only_v2.mjs http://127.0.0.1:59999/`
+exited 2.
+
+```html
+<!doctype html><meta charset="utf-8"><title>colour-only fixture</title>
+<style>
+body{background:#fff;color:#111;font:16px sans-serif}
+ul{list-style:none;padding:0;margin:8px}
+li.row{padding:6px 10px;color:#111;background:transparent}
+li.row.is-current{background:rgba(0,68,255,.176)}                       /* R1: tint only: expected FAIL (about 1.34:1) */
+a.tab{display:inline-block;position:relative;padding:6px 12px;color:#111;text-decoration:none}
+a.tab::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:transparent}
+a.tab.is-selected::after{background:#c33}                               /* R2: bar in a pseudo-element, content "" on both: expected silent */
+a.nav{display:inline-block;padding:6px 12px;color:#0b4f9c;text-decoration:none}
+a.nav.is-active{color:#8a2d1f}                                         /* R3: hue-only text change, lightness close: expected FAIL */
+b.k{display:inline-block;padding:6px 12px;font-weight:400}
+b.k.is-current{font-weight:700}                                         /* R4: weight change: expected silent */
+</style>
+<ul><li class="row">Overview</li><li class="row is-current">Tabs</li></ul>
+<nav><a class="tab" href="#">Code</a><a class="tab is-selected" href="#">Issues</a></nav>
+<nav><a class="nav" href="#">Docs</a><a class="nav is-active" href="#">Blog</a></nav>
+<div><b class="k">One</b><b class="k is-current">Two</b></div>
+```
 
 ```js
-// UX-A11Y-19 check: flag a state element that differs from a stateless peer only in colour.
-// Usage: CHR=<chrome-headless-shell> node colour_only.mjs <url> [<url> ...]   (exit 1 when any FAIL)
-// shortcut: alpha is ignored in the 3:1 lightness test, and peers are found by tag + class list minus state tokens; states set only by script after load are not seen.
+// Prototype of colour_only.mjs with the UX-A11Y-19 changes: alpha blended onto the backdrop, pseudo-element background/width/height counted as a cue,
+// networkidle2 + 30 s timeout, exit 2 on a navigation error (exit 1 = FAIL found, 0 = none).
 import puppeteer from 'puppeteer-core';
 const urls = process.argv.slice(2);
 const b = await puppeteer.launch({ executablePath: process.env.CHR, headless: true, args: ['--no-sandbox'] });
-let fails = 0;
+let fails = 0, navErr = 0;
 for (const url of urls) for (const scheme of ['light', 'dark']) {
   const p = await b.newPage();
   await p.setViewport({ width: 1280, height: 800 });
   await p.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: scheme }]);
-  await p.goto(url, { waitUntil: 'networkidle0' });
+  const W = process.env.WAIT || 'networkidle2';
+  try { await p.goto(url, { waitUntil: W, timeout: 30000 }); if (W === 'load') await new Promise((r) => setTimeout(r, 1500)); } catch (e) { navErr++; console.log('ERROR', scheme, url, String(e.message).split('\n')[0]); await p.close(); continue; }
   const rows = await p.evaluate(() => {
     const TOK = /(^|[-_])(active|selected|current|error|danger|success|warning|invalid|planned|checked|disabled)($|[-_])/;
     const isState = (e) => [...e.classList].some((c) => TOK.test(c)) ||
       e.getAttribute('aria-current') || ['aria-pressed', 'aria-selected', 'aria-invalid'].some((a) => e.getAttribute(a) === 'true');
     const key = (e) => e.tagName + '|' + [...e.classList].filter((c) => !TOK.test(c)).sort().join(' ');
-    // Properties whose change is a visual cue that survives without colour perception.
     const CUE = ['font-weight', 'font-style', 'text-decoration-line', 'text-decoration-style', 'border-top-style',
       'border-top-width', 'border-bottom-style', 'border-bottom-width', 'border-left-width', 'outline-style',
       'outline-width', 'background-image', 'list-style-type', 'text-transform'];
+    const PS = ['content', 'background-color', 'width', 'height'];
     const sig = (e) => {
       const s = getComputedStyle(e);
-      const pseudo = ['::before', '::after'].map((x) => getComputedStyle(e, x).content).join('|');
+      const pseudo = ['::before', '::after'].map((x) => { const q = getComputedStyle(e, x); return PS.map((k) => q.getPropertyValue(k)).join('/'); }).join('|');
       return { css: CUE.map((k) => s.getPropertyValue(k)), pseudo, kids: [...e.children].map((c) => c.tagName + (c.getAttribute('aria-hidden') ? '-h' : '')).join(',') };
     };
-    // Understanding 1.4.1: a lightness difference of 3:1 or more between the two colours counts as a cue.
-    const lum = (c) => { const m = c.match(/[\d.]+/g); if (!m) return null; const [r, g, bl] = m.slice(0, 3).map((v) => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * bl; };
-    const ratio = (x, y) => { const a = lum(x), z = lum(y); return a == null || z == null ? 1 : (Math.max(a, z) + 0.05) / (Math.min(a, z) + 0.05); };
-    const lightCue = (e, q) => ['color', 'background-color', 'border-bottom-color'].some((k) => ratio(getComputedStyle(e).getPropertyValue(k), getComputedStyle(q).getPropertyValue(k)) >= 3);
+    const rgba = (c) => { const m = c.match(/[\d.]+/g); if (!m) return null; const a = m.length > 3 ? +m[3] : 1; return [+m[0], +m[1], +m[2], a]; };
+    const backdrop = (e) => { let acc = [255, 255, 255]; const chain = []; for (let n = e; n; n = n.parentElement) chain.push(n);
+      for (const n of chain.reverse()) { const c = rgba(getComputedStyle(n).backgroundColor); if (c) acc = acc.map((v, i) => c[i] * c[3] + v * (1 - c[3])); } return acc; };
+    const blend = (c, under) => { const q = rgba(c); if (!q) return null; return under.map((v, i) => q[i] * q[3] + v * (1 - q[3])); };
+    const lum = (rgb) => { const [r, g, bl] = rgb.map((v) => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * bl; };
+    const ratio = (x, y) => { if (!x || !y) return 1; const a = lum(x), z = lum(y); return (Math.max(a, z) + 0.05) / (Math.min(a, z) + 0.05); };
+    const lightCue = (e, q) => ['color', 'background-color', 'border-bottom-color'].some((k) =>
+      ratio(blend(getComputedStyle(e).getPropertyValue(k), backdrop(e)), blend(getComputedStyle(q).getPropertyValue(k), backdrop(q))) >= 3);
     const vis = (e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
     const all = [...document.body.querySelectorAll('*')].filter(vis);
     const peers = new Map();
@@ -1350,7 +1508,6 @@ for (const url of urls) for (const scheme of ['light', 'dark']) {
       const a = sig(e), z = sig(peer);
       const differs = a.pseudo !== z.pseudo || a.kids !== z.kids || a.css.some((v, i) => v !== z.css[i]);
       const colourDiff = ['color', 'background-color', 'border-bottom-color', 'outline-color'].some((k) => getComputedStyle(e).getPropertyValue(k) !== getComputedStyle(peer).getPropertyValue(k));
-      // No difference at all is not a 1.4.1 failure (colour carries nothing); it is reported as INFO.
       if (!differs && !lightCue(e, peer)) out.push({ kind: colourDiff ? 'FAIL' : 'INFO', el: key(e), text: (e.textContent || '').trim().slice(0, 30), peer: (peer.textContent || '').trim().slice(0, 30) });
     }
     return out;
@@ -1360,7 +1517,157 @@ for (const url of urls) for (const scheme of ['light', 'dark']) {
 }
 await b.close();
 console.log('colour-only state pairs:', fails);
-process.exit(fails ? 1 : 0);
+process.exit(navErr ? 2 : fails ? 1 : 0);
+```
+
+### A7. focus_outline_v2.mjs (UX-A11Y-12)
+
+Added in revision 2. This is the prototype `focus_v2.mjs` from followup-q1, verbatim, published
+under this name. Always run it with `V3=1`, which turns on fixes (e) and (f). It needs Node 20 or
+later and `npm i -D postcss postcss-scss postcss-nested`. It scans one root per run. It prints
+one tab-separated row per finding and the counts on stderr, and it sets no exit code: the pass
+condition is that no row starts with `FAIL`. It does not read `<style>` blocks, and it has no BEM
+ancestor branch (see UX-A11Y-12).
+
+Fixture: save the two files below in a directory `ffix`, then run `V3=1 node
+focus_outline_v2.mjs ffix`. Revision 2 run: FAIL for `.bare:focus`, `.nest:focus`, `.bs`
+(`all:unset, box-shadow only`) and `.scss-bare:focus`; PASS for `.ring:focus-visible` (replacement
+`a.css:4 .ring:focus-visible::after`) and `.ok`; EXEMPT for `.dlg:focus`; no row for F1 and F8.
+The stderr line was `{"FAIL":4,"PASS":2,"EXEMPT":1}`.
+
+```css
+/* ffix/a.css */
+.mouse { &:focus:not(:focus-visible) { outline: 0; } }               /* F1 expect: skipped (no line) */
+.bare:focus { outline: none; }                                        /* F2 expect: FAIL no replacement */
+.ring:focus-visible { outline: none; }
+.ring:focus-visible::after { outline: 2px solid blue; }               /* F3 expect: PASS (pseudo-element ring) */
+.nest { padding: 0; &:focus { outline: none; } }                      /* F4 expect: FAIL (nesting resolved, selector is .nest:focus) */
+.bs { all: unset; }
+.bs:focus-visible { box-shadow: 0 0 0 2px red; }                      /* F5 expect: FAIL box-shadow only */
+.ok { all: unset; }
+.ok:focus-visible { outline: 2px solid blue; }                        /* F6 expect: PASS */
+/* focus-ok: container focused by script */
+.dlg:focus { outline: none; }                                         /* F7 expect: EXEMPT */
+.in::-webkit-datetime-edit-day-field:focus { outline: none; }         /* F8 expect: skipped (vendor sub-part) */
+```
+
+```scss
+/* ffix/b.scss */
+.scss-bare { &:focus { outline: 0; } }                                /* F9 expect: FAIL (.scss scanned) */
+```
+
+```js
+// Prototype of focus_outline.py with fixes (a)-(d). Node + postcss so nesting resolves. Not the shipped script.
+// (a) skip selectors containing :not(:focus-visible)/:not(:focus); (b) resolve nesting; (c) look for the replacement in every file under the root;
+// (d) scan .scss, treat all:unset/initial, outline:transparent, outline-color:transparent as removals; all:unset on a plain class counts too.
+import fs from 'fs'; import path from 'path';
+import postcss from 'postcss'; import scss from 'postcss-scss'; import nested from 'postcss-nested';
+const root = process.argv[2];
+function* walk(d){ for (const e of fs.readdirSync(d,{withFileTypes:true})) { if (e.name==='node_modules'||e.name==='.git') continue; const p=path.join(d,e.name); if (e.isDirectory()) yield* walk(p); else if (/\.(css|scss)$/.test(e.name)) yield p; } }
+const FOCUS=/:focus(-visible|-within)?\b/;
+const split=(s)=>{const o=[];let d=0,c='';for(const ch of s){if(ch==='(')d++;if(ch===')')d--;if(ch===','&&d===0){o.push(c.trim());c=''}else c+=ch}o.push(c.trim());return o};
+const V3=process.env.V3==='1';
+const base=(s)=>s.replace(V3?/::(before|after)\b/g:/$^/,'').replace(/:not\(:focus(-visible)?\)/g,'').replace(/:focus(-visible|-within)?\b/g,'').replace(/:where\(\)|:is\(\)/g,'').replace(/\s+/g,' ').trim();
+const removes=(d)=>{const r=[];for(const [k,v0] of Object.entries(d)){const v=v0.trim();
+  if(k==='outline'&&/^(none|0(px)?|transparent)\s*(!important)?$/.test(v))r.push(k+':'+v);
+  if(k==='outline-style'&&v==='none')r.push(k+':'+v); if(k==='outline-width'&&/^0(px)?$/.test(v))r.push(k+':'+v);
+  if(k==='outline-color'&&/^transparent$/.test(v))r.push(k+':'+v); if(k==='all'&&/^(unset|initial)$/.test(v))r.push('all:'+v);} return r};
+const draws=(d)=>Object.entries(d).some(([k,v])=>(k==='outline'&&!/^(none|0(px)?|transparent)/.test(v.trim()))||(k==='outline-style'&&v.trim()!=='none')||/^border(-(top|right|bottom|left))?(-color)?$/.test(k)&&!/^(none|0)/.test(v.trim())||(k==='outline-color'&&!/transparent/.test(v)));
+const rules=[];
+for (const f of walk(root)) { const src=fs.readFileSync(f,'utf8'); let r;
+  try{ r=postcss([nested()]).process(src,{from:f,syntax:scss}).root }catch(e){ console.error('PARSEERR',f,String(e).slice(0,60)); continue }
+  r.walkRules(ru=>{ if(ru.parent&&ru.parent.type==='atrule'&&/keyframes/.test(ru.parent.name)) return; const d={}; ru.each(n=>{if(n.type==='decl')d[n.prop]=n.value});
+    const prev=ru.prev(); const ok=prev&&prev.type==='comment'&&/focus-ok:/.test(prev.text);
+    for (const s of split(ru.selector)) rules.push({f:path.relative(root,f),line:ru.source?.start?.line,s,d,ok}); });
+}
+const counts={};
+const emit=(v,r,kind,ev)=>{counts[v]=(counts[v]||0)+1;console.log([v,kind,r.f+':'+r.line,r.s.slice(0,90),ev].join('\t'))};
+for (const r of rules) { const rem=removes(r.d); if(!rem.length) continue;
+  const isFocus=FOCUS.test(r.s); const plainUnset=!isFocus&&rem.length===1&&rem[0].startsWith('all:')&&!/:/.test(r.s);
+  if(!isFocus&&!plainUnset) continue;
+  if(isFocus&&/:not\(:focus(-visible)?\)/.test(r.s)){ continue } // (a) mouse-focus idiom
+  if(V3&&isFocus&&/::-webkit-/.test(r.s)) continue; // (e) vendor sub-part pseudo-element of an input: the root draws the ring
+  if(r.ok){emit('EXEMPT',r,rem[0],'focus-ok');continue}
+  const rest={...r.d}; delete rest.outline; delete rest['outline-style']; delete rest['outline-width']; delete rest['outline-color']; delete rest.all;
+  if(isFocus&&draws({...rest, ...(/^outline/.test(rem[0])?{}:{})})&&Object.keys(r.d).some(k=>/^(border|outline)/.test(k)&&!rem.some(x=>x.startsWith(k+':')))){emit('PASS',r,rem[0],'same rule draws');continue}
+  const b=base(r.s); const last=b.split(/[\s>+~]+/).pop();
+  const hit=rules.find(x=>x!==r&&FOCUS.test(x.s)&&!/:not\(:focus(-visible)?\)/.test(x.s)&&draws(x.d)&&!removes(x.d).length&&(base(x.s)===b||(x.s.includes(':has(')&&last&&x.s.includes(last))||(x.s.includes(':focus-within')&&base(x.s)&&(b.startsWith(base(x.s)+' ')))));
+  if(hit) emit('PASS',r,rem[0],'replacement '+hit.f+':'+hit.line+' '+hit.s.slice(0,50));
+  else { const sh=rules.some(x=>FOCUS.test(x.s)&&base(x.s)===b&&x.d['box-shadow']); emit('FAIL',r,rem[0],(plainUnset?'all:unset, ':'')+(sh?'box-shadow only':'no replacement')) }
+}
+console.error(JSON.stringify(counts));
+```
+
+### A8. focus_opacity.mjs (UX-A11Y-36)
+
+Written in revision 2 from the `probeM.mjs` method of followup-q0. That probe was tied to one
+selector, and this version checks every Tab stop. Usage: `CHR=<chrome-headless-shell> node
+focus_opacity.mjs <url> [<url> ...]`, with optional `THEMES`, `WIDTHS`, `MOTION=reduce` and
+`STOPS`. Exit 0 means every stop is visible, 1 means at least one FAIL, 2 means a page failed to
+load. Fixture, saved as `opacity.html`. Expected: O2 FAIL, O1, O3 and O5 pass, and O4 is not a
+stop. Run in revision 2: `THEMES=light WIDTHS=1280 node focus_opacity.mjs file://$PWD/opacity.html`
+printed one FAIL line, for "O2 in opacity-0 container" with `"eff":0` and `"low":"DIV.fade"`, then
+`stops … 4` and `invisible focus stops: 1`. It exited 1. `node focus_opacity.mjs
+http://127.0.0.1:59999/` exited 2. Fleet results are in "Applied to the fleet", UX-A11Y-36.
+
+```html
+<!doctype html><html lang="en"><title>fixture</title>
+<style>.fade{opacity:0}.fixed{opacity:0}.fixed:focus-within{opacity:1}.vh{visibility:hidden}</style>
+<button>O1 visible</button>
+<div class="fade"><button>O2 in opacity-0 container</button></div>
+<div class="fixed"><button>O3 container fixed with focus-within</button></div>
+<div class="fade" inert><button>O4 inert, not a stop</button></div>
+<button>O5 visible</button>
+</html>
+```
+
+```js
+// UX-A11Y-36 check: every Tab stop is visible when it has focus (effective opacity and visibility).
+// Usage: CHR=<chrome-headless-shell> node focus_opacity.mjs <url> [<url> ...]
+//   env: THEMES=light,dark  WIDTHS=1280,390  MOTION=no-preference|reduce  STOPS=120
+// Exit 0 = every stop visible, 1 = at least one FAIL, 2 = a page failed to load.
+// shortcut: reads computed opacity, visibility and content-visibility only; clip-path, a zero-size clip and an off-screen
+// position are not seen. Upgrade with a pixel diff (focus_diff.mjs) when a stop passes here but shows 0 changed pixels.
+import puppeteer from 'puppeteer-core';
+const urls = process.argv.slice(2);
+const env = (k, d) => (process.env[k] || d).split(',');
+const b = await puppeteer.launch({ executablePath: process.env.CHR, headless: true, args: ['--no-sandbox'] });
+let fails = 0, errs = 0;
+for (const url of urls) for (const theme of env('THEMES', 'light,dark')) for (const vw of env('WIDTHS', '1280,390')) {
+  const p = await b.newPage();
+  await p.setViewport({ width: +vw, height: 800 });
+  await p.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: theme },
+    { name: 'prefers-reduced-motion', value: process.env.MOTION || 'no-preference' }]);
+  await p.evaluateOnNewDocument((t) => { try { localStorage.setItem('starlight-theme', t); localStorage.setItem('theme', t); } catch (e) {} }, theme);
+  try { await p.goto(url, { waitUntil: 'load', timeout: 30000 }); await new Promise((r) => setTimeout(r, 1500)); }
+  catch (e) { errs++; console.log('ERROR', theme, vw, url, String(e.message).split('\n')[0]); await p.close(); continue; }
+  await p.mouse.click(1, 1);
+  let n = 0;
+  for (let i = 0; i < +(process.env.STOPS || 120); i++) {
+    await p.keyboard.press('Tab');
+    await new Promise((r) => setTimeout(r, 300)); // let scroll-driven styles settle
+    const o = await p.evaluate(() => {
+      const e = document.activeElement; if (!e || e === document.body) return null;
+      if (e.__fo) return { again: true }; e.__fo = 1; // back at a stop already seen: the Tab order wrapped
+      let eff = 1, hidden = null;
+      for (let a = e; a; a = a.parentElement) {
+        const s = getComputedStyle(a); eff *= parseFloat(s.opacity);
+        if (!hidden && (s.visibility === 'hidden' || s.contentVisibility === 'hidden')) hidden = a.tagName + '.' + String(a.className).slice(0, 40);
+      }
+      let low = null; // the outermost ancestor that lowers opacity, to name the container to fix
+      for (let a = e; a; a = a.parentElement) if (parseFloat(getComputedStyle(a).opacity) < 1) low = a.tagName + '.' + String(a.className).slice(0, 40);
+      return { k: e.tagName.toLowerCase() + '.' + String(e.className).slice(0, 40) + '|' + (e.textContent || e.getAttribute('aria-label') || '').trim().slice(0, 24),
+        eff: +eff.toFixed(3), hidden, low, sy: Math.round(scrollY) };
+    });
+    if (!o || o.again) break; n++;
+    if (o.eff < 0.99 || o.hidden) { fails++; console.log('FAIL', theme, vw, url, JSON.stringify(o)); }
+  }
+  console.log('stops', theme, vw, url, n);
+  await p.close();
+}
+await b.close();
+console.log('invisible focus stops:', fails);
+process.exit(errs ? 2 : fails ? 1 : 0);
 ```
 
 ## Revision log
@@ -1415,3 +1722,43 @@ Revision 1, 2026-11-27, after an adversarial check. No rule was renumbered. One 
   Open question 7 was added for the new scripts.
 - Verdict 13 added: every check is a command or is labelled a heuristic. Decay table: added
   `themeing.ts`, the flash definition, the 1.4.1 lightness clause and the scripts.
+
+Revision 2, 2026-11-27, folding the wave-2 follow-ups. No rule was renumbered, retired or demoted.
+One rule was added (36). No severity changed on an existing rule.
+
+- 2026-11-27, UX-A11Y-36 (new, MUST), from followup-q0: a focused control must be visible. The
+  0-pixel cmdbar trigger is a real defect: its container `.ocx-stage__finale` is at opacity 0 when
+  focus arrives, at default motion, in both themes and at both widths. The `:focus-within` fix was
+  verified; the `focusin` fix reverts on scroll. Revision 2 wrote `focus_opacity.mjs` (Appendix
+  A8), checked it on a fixture, and ran it on 5 fleet pages: 2 more containers fail (the
+  ScrollFade hero at 390 px, the asciinema control bar). Violated row, Verdict 6, failure mode 23
+  and the shared-theme ask were added.
+- 2026-11-27, UX-A11Y-13, from followup-q0: the Verify no longer calls a 0-pixel stop
+  unexplained. It resolves such a stop with two reads (computed ring, effective opacity) and
+  requires page-coordinate clips. The Applied row cites the cmdbar trigger under 36, not 13.
+  Appendix A5's note was updated.
+- 2026-11-27, UX-A11Y-12, from followup-q1: the rule gained the `all: unset|initial` clause and
+  the cross-file `focus-ok: ring drawn by <selector> in <file>` comment. The Verify now calls
+  `focus_outline.py` a lead generator (precision 37%, recall 11 of 52 on Primer and Radix). It
+  adds the measured prototype as `focus_outline_v2.mjs` (Appendix A7, with its nine-case fixture).
+  The pass condition is the triaged end state: A1 exits 0 and A7 prints no FAIL row. Severity
+  stays MUST: after triage the end state is checkable. Revision 2 ran A7 on the fleet and found
+  1 false positive (`field.css:188`), caused by its missing BEM branch.
+- 2026-11-27, UX-A11Y-19, from followup-q1: a colour pair counts as a cue only after alpha
+  blending. A pseudo-element's `background-color`, `width` and `height` count as a cue. Appendix
+  A6 is replaced by the measured `colour_only_v2.mjs` (exit 2 on a load error, run with
+  `WAIT=load`) and its R1 to R4 fixture. Revision 2 re-ran it on the fixture (4 FAIL lines,
+  exit 1) and on the 5 fleet pages (0 FAIL, exit 0). The Satisfied row was updated.
+- 2026-11-27, UX-A11Y-22, from followup-q2: the Why quoted a phrase, "may not be announced
+  reliably", that is not on the ARIA22 page. This revision confirmed that by `curl` on the raw
+  HTML. The Why now quotes ARIA22 test 1 and ARIA19, and says that neither page states what
+  happens when a role is added with its content. The Verify gained the error-container and
+  status-container checks. The Applied row was re-measured: 3 live elements at `9230dcd`, and
+  the status region renders on the paging branch only. Failure mode 18 was updated.
+- 2026-11-27, UX-A11Y-23, from followup-q2: Satisfied row re-confirmed; no text change.
+- 2026-11-27, Open questions 6 and 7 removed as answered (followup-q0, followup-q1). Questions 8
+  (one merged focus check against an oracle) and 9 (36 outside headless Chrome) were added.
+  Verdict 13 was extended and Verdict 14 added for the documented gaps.
+- 2026-11-27, Decay: ARIA22/ARIA19 row and Primer/Radix precision row added. The scripts row
+  now covers A6 to A8, the WCAG row now covers 36, and the fleet row pins the wave-2 commits.
+  Frontmatter: the three follow-ups are added to `consolidates`, and `revision: 2` was added.
