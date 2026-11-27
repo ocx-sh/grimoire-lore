@@ -135,7 +135,8 @@ different actions of the same rule (BZL-TEST-07).
 
 ## The Bazel 8 to 9 boundary
 
-Exactly one substantive change: 9.0.0 adds a mandatory **implicit toolchain
+One substantive change at 9.0.0, plus the 9.3.0 run-time failure below: 9.0.0
+adds a mandatory **implicit toolchain
 requirement** on `@bazel_tools//tools/test:default_test_toolchain_type`. The
 `test` exec group itself, and `test.<key>`-scoped `exec_properties`, already
 existed at 8.8.0 — describing the exec group as new is wrong (BZL-TEST-28).
@@ -145,6 +146,15 @@ by shipping a custom toolchain for that type. The escape hatch
 (`--@bazel_tools//tools/test:incompatible_use_default_test_toolchain=false`) is
 marked for removal with **no version and no tracking issue** — a documented gap,
 watchable only through release notes.
+
+From 9.3.0 a test built for a target platform that no execution platform is
+compatible with builds, and fails only when it runs (release notes, PR 30946;
+not measured here), so `bazel build` stays green. A test that fails only under
+`bazel test` on 9.3.0 or later: check its execution platform first
+(BZL-TEST-28). Confirm with `bazel build //the:test` green and
+`bazel test //the:test` red on the same flags, then read which execution
+platforms were rejected with
+`bazel test //the:test --toolchain_resolution_debug='@bazel_tools//tools/test:default_test_toolchain_type'`.
 
 `--combined_report` flipped `none` → `lcov` at 9.0.0. A matrix spanning both
 majors produces a merged report on the 9.x leg and none on the 8.x leg unless the
