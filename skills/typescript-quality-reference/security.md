@@ -184,7 +184,7 @@ export default [
       "no-implied-eval": "error",
       "no-new-func": "error",
       "react/no-danger": "error",        // React trees only — opt-in, in no recommended config
-      // vue/no-v-html is already error in eslint-plugin-vue's recommended config
+      "vue/no-v-html": "error",          // Vue trees only — warn in eslint-plugin-vue's recommended config, error only in recommended-error
   } },
 ];
 ```
@@ -216,19 +216,21 @@ git ls-files -z --cached --others --exclude-standard -- ":(glob)$SRC/**/*.ts" ":
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| TS-SEC-13 | Install-time script execution is off by default (`ignore-scripts=true` in `.npmrc`, the equivalent key in `bunfig.toml`, an explicit built-dependency allowlist under pnpm), with any package that genuinely needs a build script named in an allowlist rather than the flag being dropped. State the documented gap wherever the setting is claimed: it suppresses `preinstall`/`install`/`postinstall`, but `npm start`, `npm test` and `npm run <name>` still execute the named script — only their own pre/post hooks are skipped. | Arbitrary code execution at `install` time is the largest npm supply-chain vector, and it runs before any test, lint or review sees the package. A reviewer who greps for the flag and stops has verified something narrower than they believe. | see block TS-SEC-13 — no hit is the violation; a hit set to `false` is the violation. A missing config file prints nothing, and for this check nothing is the violation, so it cannot pass quietly. | MUST |
-| TS-SEC-14 | A release cooldown is configured, so a version published minutes ago cannot be installed before anyone has looked at it. Every major package manager now has one as an install-time control, not just a PR gate: npm 11.10.0 (Feb 2026) `min-release-age`, pnpm 10.16 (Sep 2025) `minimumReleaseAge` (default-on from pnpm 11), with Yarn and Bun shipping their own flags in late 2025. Renovate's `minimumReleaseAge` gates the PR, which is a different layer — set both. **Pinned default the adopter may override**: the window is a project decision; the setting existing is not. | Malicious package versions rely on being consumed in the hours before takedown. The naming differs per tool and nothing propagates between them, so a repo that set it in one file is unprotected in the others. | see block TS-SEC-14 — empty output means the control is configured nowhere and is the violation. Verify the setting sits in the file the tool actually reads: npm and pnpm read `.npmrc`, Bun reads `bunfig.toml`, Renovate reads its own config. | SHOULD |
+| TS-SEC-13 | Install-time dependency script execution is off, with any package that genuinely needs a build script named in an allowlist rather than the gate being dropped. npm 12, pnpm 11 and Bun deny dependency scripts by default and allowlist in their own place: `allowScripts` in `package.json` (npm 12, filled by `npm install-scripts approve`), the `allowBuilds` map in `pnpm-workspace.yaml` with `strictDepBuilds` left `true` (pnpm 11), `trustedDependencies` in `package.json` (Bun). npm 11 and older need `ignore-scripts=true` in `.npmrc`; Yarn takes `enableScripts: false` in `.yarnrc.yml`. State the documented gap wherever `ignore-scripts` is claimed: it suppresses `preinstall`/`install`/`postinstall`, but `npm start`, `npm test` and `npm run <name>` still execute the named script — only their own pre/post hooks are skipped. | Arbitrary code execution at `install` time is the largest npm supply-chain vector, and it runs before any test, lint or review sees the package. The controls changed shape in 2026: pnpm 11.0.0 (2026-04-28) removed `onlyBuiltDependencies`, `neverBuiltDependencies` and `ignoredBuiltDependencies`, and npm 12.0.0 (2026-07-08) made dependency scripts default-deny, so a config still carrying the old pnpm keys configures nothing. A reviewer who greps for one flag and stops has verified something narrower than they believe. | see block TS-SEC-13 (1) and read each hit against the package manager and major version in use. A hit that re-enables scripts — `ignore-scripts=false`, `strictDepBuilds: false`, `dangerouslyAllowAllBuilds: true`, `enableScripts: true` — is the violation. On npm 11 or older, no `ignore-scripts=true` hit is the violation; a missing config file prints nothing, and there nothing is the violation, so it cannot pass quietly. On pnpm 11 or later, any output from see block TS-SEC-13 (2) is the violation. | MUST |
+| TS-SEC-14 | A release cooldown is configured, so a version published minutes ago cannot be installed before anyone has looked at it. Every major package manager has one as an install-time control, not just a PR gate, each with its own key, file and unit: npm 11.10.0 (Feb 2026) `min-release-age` in `.npmrc`, in days, off by default; pnpm `minimumReleaseAge` in `pnpm-workspace.yaml`, in minutes, on by default at 1440 since pnpm 11.0.0 (2026-04-28); Yarn `npmMinimalAgeGate` in `.yarnrc.yml` (4.10.0 and later), on by default since 4.15.0; Bun `install.minimumReleaseAge` in `bunfig.toml`, in seconds or a duration string. Renovate's `minimumReleaseAge` gates the PR, which is a different layer — set both. **Pinned default the adopter may override**: the window is a project decision; the setting existing is not. | Malicious package versions rely on being consumed in the hours before takedown. The naming and the unit differ per tool and nothing propagates between them, so a repo that set it in one file is unprotected in the others, and a number copied between tools means something else — `7` is a week to npm and seven minutes to pnpm. | see block TS-SEC-14 — empty output means the control is configured nowhere and is the violation, except on pnpm 11 or later and Yarn 4.15 or later, whose defaults apply. Verify the setting sits in the file the tool actually reads: npm reads `.npmrc`, pnpm reads `pnpm-workspace.yaml`, Yarn reads `.yarnrc.yml`, Bun reads `bunfig.toml`, Renovate reads its own config. | SHOULD |
 
 ```sh
-# TS-SEC-13
+# TS-SEC-13 (1)
 REPO=.    # the directory to search
-git ls-files -z --cached --others --exclude-standard -- ":(glob)$REPO/**" | xargs -0 -r grep -H -n -E -e ignore-scripts -e onlyBuiltDependencies -e trustedDependencies --
+git ls-files -z --cached --others --exclude-standard -- ":(glob)$REPO/**" | xargs -0 -r grep -H -n -E -e ignore-scripts -e allowScripts -e allowBuilds -e strictDepBuilds -e dangerouslyAllowAllBuilds -e enableScripts -e trustedDependencies --
+# TS-SEC-13 (2)
+git ls-files -z --cached --others --exclude-standard -- ":(glob)$REPO/**" | xargs -0 -r grep -H -n -E -e onlyBuiltDependencies -e neverBuiltDependencies -e ignoredBuiltDependencies --
 ```
 
 ```sh
 # TS-SEC-14
 REPO=.    # the directory to search
-git ls-files -z --cached --others --exclude-standard -- ":(glob)$REPO/**" | xargs -0 -r grep -H -n -E -e min-release-age -e minimumReleaseAge --
+git ls-files -z --cached --others --exclude-standard -- ":(glob)$REPO/**" | xargs -0 -r grep -H -n -E -e min-release-age -e minimumReleaseAge -e npmMinimalAgeGate --
 ```
 
 ## Untrusted Workspaces
@@ -279,6 +281,7 @@ git ls-files -z --cached --others --exclude-standard -- ":(glob)$SRC/**/*.ts" | 
 - [OWASP Prototype Pollution Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Prototype_Pollution_Prevention_Cheat_Sheet.html) — the graduated mitigation order and the `--disable-proto` limitation
 - [OWASP NPM Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/NPM_Security_Cheat_Sheet.html) — install-script policy, allowlisting, token scoping
 - [npm config — `ignore-scripts`](https://docs.npmjs.com/cli/v10/using-npm/config#ignore-scripts) — the documented `npm run` gap
+- [npm 12 `install-scripts`](https://docs.npmjs.com/cli/v12/commands/npm-install-scripts) and [pnpm build settings](https://pnpm.io/settings/build) — the default-deny allowlists that replaced `ignore-scripts` and `onlyBuiltDependencies`
 - [Renovate — minimum release age](https://docs.renovatebot.com/key-concepts/minimum-release-age/) — the PR-gating layer, distinct from the package manager's install-time cooldown
 - [eslint-plugin-regexp rules](https://ota-meshi.github.io/eslint-plugin-regexp/rules/) — structural backtracking analysis
 - [eslint-plugin-security](https://github.com/eslint-community/eslint-plugin-security) — source-aware regex and child-process detection

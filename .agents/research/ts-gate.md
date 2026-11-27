@@ -7,6 +7,7 @@ consolidates:
   - ts-gate/biome-eslint-parity.md
   - ts-gate/rule-text-residue.md
 date: 2026-08-29
+revised: 2026-11-27
 ---
 
 ## Verdict
@@ -15,9 +16,9 @@ date: 2026-08-29
 2. **`allowDefaultProject` is mandatory in every repo, not an edge case.** All seven in-scope main tsconfigs `include` only `src`; none includes its own `eslint.config.js`. A bare `projectService: true` throws hard parsing errors — reproduced live on 11 files in grimoire-indexer and 16 in ocx-catalog.
 3. **Two repos additionally need a `files`-scoped legacy `project` block.** `projectService` auto-discovery only walks up for files literally named `tsconfig.json`; `ocx-catalog/tsconfig.theme.json` and `creeptd-ng/web/e2e/tsconfig.e2e.json` are invisible to it. Confirmed live for ocx-catalog. Solution-style roots (`fma`) need nothing — measured, zero errors.
 4. **Typed lint does not replace `tsc --noEmit`; setup-ocx is wrong to have dropped it.** Measured: typed ESLint costs 2.23× bare `tsc` on grimoire-indexer, 2.01× on fma — it rebuilds the program in its own process rather than reusing anything, and it only reports what specific rules probe for, not TypeScript's diagnostic set. setup-ocx has *no* typecheck script; its type coverage is an undocumented side effect of lint. Both stay, everywhere.
-5. **Keep two linters.** One prose file binds typescript-eslint and Biome — every name/config difference is mechanical, never semantic. The one exception is structural: Biome has **no** equivalent to the `no-unsafe-*` family, in any group, at any severity. That contract must be labelled unenforced-by-tooling in the Biome repo rather than silently assumed covered.
+5. **Keep two linters.** One prose file binds typescript-eslint and Biome — every name/config difference is mechanical, never semantic. The one exception is structural: Biome has **no** equivalent to four of the five `no-unsafe-*` rules (assignment, member access, call, argument), in any group, at any severity, as re-confirmed at v2.6.9. The fifth, `no-unsafe-return`, gained the nursery counterpart `noUnsafeReturn` in v2.6.3 (TS-GATE-20), which covers the return position only. That contract must be labelled unenforced-by-tooling in the Biome repo rather than silently assumed covered.
 6. **Two claimed parity gaps are refuted.** `no-unsafe-type-assertion` is in *no* typescript-eslint preset either — both sides opt-in, no gap. `prefer-readonly` carries no config badge at all — `useReadonlyClassProperties` is not weaker. The real gaps are `noFloatingPromises`, `noMisusedPromises` (nursery/off vs recommended-type-checked/on) and `useThrowOnlyError` (style/off vs recommended-type-checked/on).
-7. **Counts: 13 type-aware rules ship in no preset, not 12; 61 type-aware rules total; Biome JS/TS is 442/210, not 441/224.** Read from generated config source at `v8.68.0` and the live rules index, against rendered tables that gave inconsistent counts. The sweep's own "34 adopt-as-rule-text from typescript-eslint" reconciles to **16**. Do not carry any of these numbers forward without re-measuring.
+7. **Counts: 13 type-aware rules ship in no preset, not 12; 61 type-aware rules total at v8.68.0 (64 at typescript-eslint 8.74.0, re-measured 2026-11-27); Biome JS/TS is 442/210, not 441/224.** Read from generated config source at `v8.68.0` and the live rules index, against rendered tables that gave inconsistent counts. The sweep's own "34 adopt-as-rule-text from typescript-eslint" reconciles to **16**. Do not carry any of these numbers forward without re-measuring.
 8. **The `adopt-as-rule-text` residue mostly drops.** Of 30 rows triaged, 18 drop, 7 become prose, 5 become a Biome config change. `detect-object-injection` (391 sites, all typed lookups), `detect-child-process` (the shell-injection risk it proxies is already measured at zero), `detect-possible-timing-attacks` (no credential comparison exists), `prefer-enum-initializers` (zero hand-written enums fleet-wide) all drop on measurement. `no-loop-func` drops as deprecated upstream — a live catalogue-rot correction to the sweep.
 9. **The gate's real failure is severity, not coverage.** vscode-ocx runs its sibling's identical rule set at `warn`, with a lint script that has no `--max-warnings 0` and a `src`-only glob. That is a gate that reports and blocks nothing — the same silent-pass class as creeptd-ng/web's config-less `lint` script.
 10. **kate-middlechild is exempt from every typescript-eslint change and still binds to the gate** via five `biome.json` keys: `nursery.noFloatingPromises`, `nursery.noMisusedPromises`, `style.useThrowOnlyError`, `complexity.noExcessiveCognitiveComplexity`, `complexity.noExcessiveLinesPerFunction`. Those three nursery/style keys put it *ahead* of five of the seven ESLint repos, which do not run these rules either.
@@ -61,20 +62,20 @@ model common knowledge. No verification, no rule.
 *Verify:* a PR enabling typed lint carries a before/after `time` on that repo. (This is TS-TOOL-17's discipline applied to the gate's own cost, not a second copy of it.)
 
 **TS-GATE-09 — MUST.** A Biome rule key is written nested under its group (`linter.rules.<group>.<ruleName>`); never at the top of `rules`.
-*Rationale:* an ungrouped key is **silently ignored** — not a config error. ESLint's flat namespace trains exactly the wrong reflex, so the tell is a lint run showing zero new diagnostics after "enabling" a rule, not a validation failure.
-*Verify:* run `biome lint` before and after the edit; an unchanged diagnostic count means the key did not take. Group membership is not derivable from the rule name — look it up per rule.
+*Rationale:* Biome validates every rule key against its group: a key written ungrouped or under the wrong group aborts every command with `Found an unknown key` and `Biome exited because the configuration resulted in errors` (measured on v2.5.11 through v2.6.9). ESLint's flat namespace trains the wrong reflex, and the group is not derivable from the name — `noFloatingPromises` sits in `nursery`, `useThrowOnlyError` in `style`.
+*Verify:* run `biome lint` after the edit: a `Found an unknown key` error means the key sits in the wrong place. Then prove the rule fires on a planted violation — for `nursery.noFloatingPromises`, `async function f() {} f();` must report `lint/nursery/noFloatingPromises`.
 
 **TS-GATE-10 — MUST.** The Biome repo sets `linter.rules.nursery.noFloatingPromises`, `nursery.noMisusedPromises`, and `style.useThrowOnlyError` to `"error"`.
 *Rationale:* these are the only three real default-severity gaps against `recommendedTypeChecked`. Biome's own team measures `noFloatingPromises` at ~75% of typescript-eslint's catch rate — partial coverage of a live risk (127 async/`.catch`-adjacent call sites in kate-middlechild) beats none.
 *Verify:* `grep -A3 '"nursery"' biome.json` and `grep -A3 '"style"' biome.json` show all three keys at `"error"`. Budget for the Scanner: any `types`-domain rule triggers a full-project scan — time `biome check` before and after.
 
 **TS-GATE-11 — MUST.** The `any`-flow contract ("no `any` crosses a typed parameter, property, or return without an explicit narrowing check") is written as prose binding all repos, and explicitly labelled unenforced-by-tooling in the Biome repo.
-*Rationale:* Biome has no equivalent to `no-unsafe-assignment`/`-member-access`/`-call`/`-argument`/`-return` in any group as of v2.5.11 — confirmed against both the rules index and the cross-reference. A reviewer who assumes Biome catches it is wrong, and nothing in the tool tells them.
+*Rationale:* Biome has no equivalent to `no-unsafe-assignment`/`-member-access`/`-call`/`-argument` in any group, at any severity — confirmed at v2.6.9. `no-unsafe-return` gained the nursery counterpart `noUnsafeReturn` in v2.6.3 (TS-GATE-20), which covers the return position only. A reviewer who assumes Biome catches it is wrong, and nothing in the tool tells them.
 *Verify:* on ESLint repos, the five rules are at `"error"` under a `*TypeChecked` config. On the Biome repo, the rule file itself carries the "no linter enforces this here" sentence — its absence is the defect.
 
 **TS-GATE-12 — MUST.** After `biome migrate eslint`, hand-check that `noFloatingPromises`, `noMisusedPromises`, `noUnsafeTypeAssertion`, and `useReadonlyClassProperties` were actually ported.
-*Rationale:* Biome's published `rules-sources` table — which the migration draws from — omits all four typescript-eslint counterparts entirely, even though three state their source on their own rule page. The tool's silence is not evidence the rule does not exist.
-*Verify:* `grep -E 'noFloatingPromises|noMisusedPromises|noUnsafeTypeAssertion|useReadonlyClassProperties' biome.json` after migrating — none will appear unless added by hand.
+*Rationale:* a default `biome migrate eslint` run ports only `useReadonlyClassProperties` of the four; `--include-nursery` adds `noFloatingPromises` and `noMisusedPromises`; no flag ports `noUnsafeTypeAssertion` (measured on v2.5.11 and v2.6.9). Biome's published `rules-sources` table omits all four typescript-eslint counterparts entirely, even though three state their source on their own rule page. The tool's silence is not evidence the rule does not exist.
+*Verify:* `grep -E 'noFloatingPromises|noMisusedPromises|noUnsafeTypeAssertion|useReadonlyClassProperties' biome.json` after migrating — any of the four missing from the output must be added by hand.
 
 **TS-GATE-13 — MUST.** Enabling a typescript-eslint extension rule turns its same-named core ESLint rule `'off'` in the same config object.
 *Rationale:* 25 typescript-eslint rules shadow a core rule; with both on, either both fire or the later-declared one silently wins depending on config order. `no-throw-literal` → `only-throw-error` and `no-return-await` → `return-await` are full renames, not deprecations — the old names are gone.
@@ -85,12 +86,16 @@ model common knowledge. No verification, no rule.
 *Verify:* `grep -nE 'prefer-readonly-parameter-types|detect-object-injection|detect-non-literal-require|detect-child-process|detect-possible-timing-attacks' eslint.config.*` returns nothing; any hit is review-blocking.
 
 **TS-GATE-15 — SHOULD.** Do not hand-pick a type-aware rule outside the repo's chosen preset unless a measured hit on that repo's own code justifies it.
-*Rationale:* 13 of the 61 type-aware rules ship in no preset at all, and every rule with a real measured hit this program (`no-floating-promises`, `no-misused-promises`, the five `no-unsafe-*`, `no-unnecessary-type-assertion`, `no-implied-eval`) is already inside `recommendedTypeChecked`. "More rules is safer" is how a config becomes unmaintainable.
+*Rationale:* 13 of the 64 type-aware rules ship in no preset at all, and every rule with a real measured hit this program (`no-floating-promises`, `no-misused-promises`, the five `no-unsafe-*`, `no-unnecessary-type-assertion`, `no-implied-eval`) is already inside `recommendedTypeChecked`. "More rules is safer" is how a config becomes unmaintainable.
 *Verify:* diff the config's rules block against the preset's generated source at the pinned tag; every addition traces to a named finding. Special case: `no-unnecessary-condition` needs a real run before adoption in the three repos that set `noUncheckedIndexedAccess`.
 
 **TS-GATE-16 — SHOULD.** The Biome repo sets `linter.rules.complexity.noExcessiveCognitiveComplexity` and `noExcessiveLinesPerFunction` to `"error"`.
 *Rationale:* both are single-threshold, zero-config, stable (defaults 15 and 50), currently off. This is the maintainability class an agent editing without human review most needs a mechanical backstop for, at the cost of a one-line config change.
 *Verify:* `grep -A3 '"complexity"' biome.json` shows both keys; `biome lint` in the gate.
+
+**TS-GATE-20 — SHOULD.** On Biome v2.6.3 or later, set `nursery.noUnsafeReturn` to `"error"`. Overridable, on the same nursery terms as TS-GATE-10.
+*Rationale:* it is Biome's first counterpart to a typescript-eslint `no-unsafe-*` rule (source `@typescript-eslint/no-unsafe-return`, `types` domain), and its default severity is `information`, so enabling it with `"on"` is weaker than this rule asks. It covers the return position only, so TS-GATE-11 still holds for assignment, member access, calls and arguments.
+*Verify:* `git ls-files -z --cached --others --exclude-standard -- 'biome.json' | xargs -0 -r grep -H -n -E -e noUnsafeReturn --` — on v2.6.3 or later, empty output is the finding. Then prove it fires: `function f(x: string) { return JSON.parse(x); }` in a source file must report `lint/nursery/noUnsafeReturn`.
 
 **TS-GATE-17 — SHOULD.** Write `x!` only immediately on a DOM/ref API call already known non-null in context; anywhere else narrow the type or handle the nullable case.
 *Rationale:* ~18 genuine uses fleet-wide, concentrated exactly in the DOM/ref carve-out the rule's own docs name as its main false-positive source (`fma/src/main.tsx:7`, `fma/src/audio/FFTBars.tsx:20`). `no-non-null-assertion` lives in `strict` only, and its blanket ban would fire on the legitimate sites.
@@ -169,9 +174,10 @@ Ranked by how often each will bite on this fleet.
    made this call and documents it nowhere. *Check:* both a `typecheck` script and
    a typed lint step appear in the gate; typed lint being *slower* than the
    typecheck is the proof it is not reusing that work.
-4. **Writing a Biome rule key ungrouped.** `{"rules": {"noFloatingPromises":
-   "error"}}` is silently ignored — no validation error — so a clean lint run
-   reads as success. *Check:* diagnostic count before and after the edit.
+4. **Writing a Biome rule key ungrouped, or under a group guessed from its
+   name.** `{"rules": {"noFloatingPromises": "error"}}` aborts with `Found an
+   unknown key`; look the group up on the rule's own page instead of guessing
+   again. *Check:* a planted violation must fire after the edit.
 5. **Trusting `biome migrate eslint` or the `rules-sources` page.** Four rules
    that matter here are absent from Biome's own published cross-reference.
    *Check:* grep the resulting `biome.json` for the four names.
@@ -212,6 +218,10 @@ Ranked by how often each will bite on this fleet.
 
 **Unresolved, needs a run rather than a decision.**
 
+- **Typed-lint cost (2.0 to 2.2 times).** Not re-measured after typescript-eslint 8.72.1 changed Program reuse in single-run mode; the figures in TS-GATE-03 and TS-GATE-08 are the 2026-08-29 measurements.
+- **TS-GATE-10's "~75% of the tsc-backed rule's catch rate".** The fetched rule page and the release notes in the 2026-11 window do not state the figure. Nothing contradicts it, so it stays until a primary source is found or the figure is withdrawn.
+- **The two type-aware typescript-eslint rules that tsgolint does not port** are still unnamed.
+
 - **Does `no-unsafe-type-assertion` catch `x as unknown as T`?** Its docs show only
   single-step narrowing; the double-cast — the fleet's actual 164-occurrence escape
   hatch — appears in no example. Unproven either way. Grep for the literal string
@@ -231,6 +241,16 @@ been timed**, because neither has installed `node_modules` in this environment, 
 installs, flips `projectService` + `recommendedTypeChecked` on those two, and
 records the real diagnostic count and wall clock would either confirm the 2× model
 or overturn the cost half of this verdict.
+
+## Revision log
+
+- 2026-11-27: TS-GATE-09 gets a new rationale and verification (Biome rejects a misplaced key with `Found an unknown key`; it is not silently ignored). Decision: `refresh-2026-11/typescript-quality.md`.
+- 2026-11-27: TS-GATE-11 rationale corrected for `nursery.noUnsafeReturn` (v2.6.3); Verdict item 5 matches. Decision: `refresh-2026-11/typescript-quality.md`.
+- 2026-11-27: TS-GATE-12 gets the measured migrate behavior (a default run ports `useReadonlyClassProperties`; `--include-nursery` adds the two promise rules). Decision: `refresh-2026-11/typescript-quality.md`.
+- 2026-11-27: TS-GATE-15 becomes 13 of 64 type-aware rules (typescript-eslint 8.74.0); Verdict item 7 notes the new count. Decision: `refresh-2026-11/typescript-quality.md`.
+- 2026-11-27: new rule TS-GATE-20 (`nursery.noUnsafeReturn` at `"error"`, SHOULD). Decision: `refresh-2026-11/typescript-quality.md`.
+- 2026-11-27: AI-agent failure mode 4 corrected to match TS-GATE-09. Decision: `refresh-2026-11/typescript-quality.md`.
+- 2026-11-27: Open questions gain the typed-lint cost not re-run, the unverified 75% figure, and the unnamed tsgolint gap. Decision: `refresh-2026-11/typescript-quality.md`.
 
 ## Sub-artifacts
 

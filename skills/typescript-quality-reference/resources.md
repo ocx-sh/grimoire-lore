@@ -63,7 +63,7 @@ verbatim that "child processes of child processes will not be terminated." The
 `timeout` option calls `child.kill()` internally, so it inherits that limit
 exactly, and so does `AbortSignal`-driven termination. Node core has no
 `killTree()` and nobody building one: [nodejs/node#64406](https://github.com/nodejs/node/issues/64406)
-is open (filed 2026-07-10, no maintainer response); its 2021 predecessor was
+is open but bot-labelled `stale` on 2026-11-20 (filed 2026-07-10, no maintainer response); its 2021 predecessor was
 bot-closed on staleness. Everything below is **best-effort by construction** —
 a descendant that calls `setsid()` escapes a process-group signal, and Windows'
 `taskkill /t` depends on parent-PID bookkeeping staying intact. Do not write
@@ -86,7 +86,7 @@ already owns tree cleanup; hardening those is scope creep.
 | TS-RES-15 | On an unattended call that spawns `git`, a package manager (`npm`/`pnpm`/`yarn`/`bun`), or anything under `shell: true`, pair the `timeout` with a group kill — `detached` at spawn plus your own timer calling `process.kill(-pid, …)` or `taskkill` — never the built-in `timeout` option alone. | The built-in kill reaches one PID. `git` over `ssh://` spawns `ssh`, which spawns `GIT_ASKPASS`; `npm` spawns lifecycle scripts. The hang stops and the descendant keeps the port, the lock and the credential prompt. `Bun.spawn` has the identical single-PID limit — not an escape hatch. | From the enumeration above, classify each site by the table. For each qualifying site: the options object sets `detached`, and the timeout handler calls a platform-branching kill helper, not `child.kill()`. see block TS-RES-15 — every hit is in scope unconditionally. | MUST |
 | TS-RES-16 | Write `detached: process.platform !== "win32"`, never a bare `detached: true`; make the Windows branch `taskkill /pid <pid> /t /f`; and never add `.unref()` to a child the caller still awaits. | On Windows `detached` means "own console window, outlives the parent" — an unrelated behaviour that pops a visible window on every run, with no process group Node can address by PID sign. `.unref()` is orthogonal to `detached` and silently changes whether the parent waits at all. | see block TS-RES-16 (1) — every hit is a platform expression, not `true`. see block TS-RES-16 (2) — every hit sits inside a non-`win32` branch. see block TS-RES-16 (3) — every hit carries both `/t` and `/f`. | MUST |
 | TS-RES-10 | Never wrap a call in `Promise.race`/`Promise.any` to fake a timeout when the API never hands back the child process; move that one call to `execFile` and leave the rest. | `@actions/exec`'s `exec`/`getExecOutput` return `Promise<number>` and never expose a `ChildProcess` — its `ToolRunner` calls `.kill()` on no path, and its internal `delay` is a post-exit stdio drain. Racing stops the caller waiting while the process runs on orphaned. | see block TS-RES-10 — a hit racing a call that returns no process handle is the finding, unconditionally, not a judgment call. Empty output is the pass. | MUST |
-| TS-RES-18 | Do not add `execa` or `tree-kill` for fewer than three call sites that actually meet TS-RES-15's bar; before adding either, diff its floor against your declared `engines.node` **and** against the runtime that is not `npm install`-selectable. | `execa@10.0.1` is ESM-only, `engines.node: ">=22"`, ~11 transitive deps. `tree-kill` is the only tool that walks the real process tree — and its last publish is 2019-12-11. A PR that bumps `engines.node` to satisfy a dependency added for one call site has moved the package's published contract for one function. | Count qualifying sites before any `package.json` edit. `npm view execa engines.node` against your own `engines` field — and against an editor extension host's bundled Node or a CI action's declared runtime, neither of which `engines` can move. **Adopter default:** three is a pinned project threshold, not a derived fact; set your own and write it down. | MUST |
+| TS-RES-18 | Do not add `execa` or `tree-kill` for fewer than three call sites that actually meet TS-RES-15's bar; before adding either, diff its floor against your declared `engines.node` **and** against the runtime that is not `npm install`-selectable. | `execa@10.2.1` is ESM-only, `engines.node: ">=22"`, 12 direct dependencies. `tree-kill` is the only tool that walks the real process tree — and its last publish is 2019-12-11. A PR that bumps `engines.node` to satisfy a dependency added for one call site has moved the package's published contract for one function. | Count qualifying sites before any `package.json` edit. `npm view execa engines.node` against your own `engines` field — and against an editor extension host's bundled Node or a CI action's declared runtime, neither of which `engines` can move. **Adopter default:** three is a pinned project threshold, not a derived fact; set your own and write it down. | MUST |
 
 ```sh
 # TS-RES-15
@@ -139,9 +139,10 @@ a clean zero.
 Two preconditions. Both fail at runtime, not at `tsc --noEmit`, so a
 type-check-only gate reports green on either.
 
-Native, unpolyfilled support, from MDN browser-compat-data as of 2026-08-29:
+Native, unpolyfilled support, from MDN browser-compat-data as of 2026-11-27:
 **Node ≥24.0.0, Chrome/Edge ≥134, Firefox ≥141, Bun ≥1.0.23, Deno ≥2.2.10.
-Safari has never shipped it.** Node 22 ships V8 12.4 — below the line for that
+No stable Safari has shipped it** — BCD lists it for the Safari 27.3 beta
+(2026-11-11), which is not a floor until 27.3 releases. Node 22 ships V8 12.4 — below the line for that
 whole LTS, so "modern Node" is not the same claim as "native `using`."
 
 | ID | Rule | Rationale | Verification | Severity |

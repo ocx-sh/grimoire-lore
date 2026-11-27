@@ -22,8 +22,10 @@ version ceiling that makes it installable is **TS-TOOL-01**; a `lint` script
 that resolves to a real config is **TS-TOOL-04**. This file is everything
 *after* the preset is on.
 
-Version-bound claims below were measured 2026-08-29 against
-typescript-eslint 8.68.0 and Biome v2.5.11. Rule group membership and preset
+Version-bound claims below were re-measured 2026-11-27 against
+typescript-eslint 8.74.0 and Biome v2.6.9 (first measured 2026-08-29 against
+8.68.0 and v2.5.11); the typed-lint cost figure under One Command is the
+2026-08-29 measurement and was not re-run. Rule group membership and preset
 membership both move between releases — re-read the generated config source at
 your pinned tag rather than a rendered table or a blog post.
 
@@ -107,7 +109,7 @@ inconsistent counts across fetches.
 | TS-GATE-13 | Enabling a typescript-eslint extension rule sets the identically-named core ESLint rule `'off'` in the same config object. | 25 typescript-eslint rules shadow a core rule. With both on, either both fire or the later-declared one silently wins depending on config order. `no-throw-literal` → `only-throw-error` and `no-return-await` → `return-await` are full renames: the old names no longer exist, so a hit on either is stale config doing nothing. | see block TS-GATE-13 — a union over the highest-traffic extension names. A hit lacking the `@typescript-eslint/` prefix, in a config that also enables the prefixed twin, is the violation. | MUST |
 | TS-GATE-04 | A `no-unsafe-*` rule is disabled only inside a config object carrying a `files:` array naming the files that touch the untyped surface, with a comment naming that surface. | This family is the only mechanical defence against `any` flowing out of an untyped dependency. A repo-wide disable to quiet a handful of import sites deletes it everywhere, and the config then claims less than it does. | see block TS-GATE-04 — for every hit set to `"off"`, confirm a sibling `files:` key in the same object. A disable with no `files:` key is the violation. | MUST |
 | TS-GATE-14 | Do not add `prefer-readonly-parameter-types`, `detect-object-injection`, `detect-non-literal-require`, `detect-child-process`, or `detect-possible-timing-attacks`. Overridable per repo — unban one only after counting real hits in your own tree. | The first self-disqualifies in its own docs ("skip this rule if your project does not attempt to enforce strong immutability guarantees of parameters"). The other four come from a plugin whose README concedes it "finds a lot of false positives which need triage by a human" — a direct conflict with a gate that has no human in the loop. Every bracket-index lookup on a typed object trips `detect-object-injection`. | see block TS-GATE-14 — a union; any hit is review-blocking, empty output is the pass. | MUST |
-| TS-GATE-15 | Do not hand-pick a type-aware rule outside the repo's chosen preset unless a measured hit on that repo's own code justifies it, named in a comment beside the rule. | 13 of the 61 type-aware rules ship in no preset at all, and the ones that catch real bugs on first run are already inside `recommendedTypeChecked`. "More rules is safer" is how a config becomes unmaintainable, and each addition costs program-build time on every run. | see block TS-GATE-15 — each hit outside the preset must carry a comment naming the finding that justified it. An uncommented addition is the finding. | SHOULD |
+| TS-GATE-15 | Do not hand-pick a type-aware rule outside the repo's chosen preset unless a measured hit on that repo's own code justifies it, named in a comment beside the rule. | 13 of the 64 type-aware rules ship in no preset at all, and the ones that catch real bugs on first run are already inside `recommendedTypeChecked`. "More rules is safer" is how a config becomes unmaintainable, and each addition costs program-build time on every run. | see block TS-GATE-15 — each hit outside the preset must carry a comment naming the finding that justified it. An uncommented addition is the finding. | SHOULD |
 
 ```sh
 # TS-GATE-13
@@ -131,12 +133,13 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)eslint.config.*'
 
 ## Biome
 
-Caught by `biome lint` and by reading `biome.json`. The trap is that Biome
-accepts a misplaced rule key without complaint: a "clean" run after an edit is
-not evidence the edit took effect.
+Caught by `biome lint` and by reading `biome.json`. Biome rejects a misplaced
+rule key loudly — every command aborts with `Found an unknown key` — so the
+trap is the group lookup, not silence: a rule's group cannot be derived from
+its name.
 
 ```jsonc
-// wrong — silently ignored, no validation error, lint stays green
+// wrong — every command aborts: "Found an unknown key"
 { "linter": { "rules": { "noFloatingPromises": "error" } } }
 ```
 
@@ -147,10 +150,11 @@ not evidence the edit took effect.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| TS-GATE-09 | Write every Biome rule key nested under its group (`linter.rules.<group>.<ruleName>`), and look the group up per rule rather than deriving it from the name. | An ungrouped key is silently ignored — not a config error. ESLint's flat rule namespace trains exactly the wrong reflex, so the tell is a lint run showing zero new diagnostics after "enabling" a rule, never a validation failure. | Run `biome lint` before and after the edit and compare the diagnostic count. An unchanged count means the key did not take. | MUST |
-| TS-GATE-12 | After `biome migrate eslint`, hand-check that `noFloatingPromises`, `noMisusedPromises`, `noUnsafeTypeAssertion` and `useReadonlyClassProperties` were actually ported. | Biome's published rule-sources cross-reference — which the migration draws from — omits all four typescript-eslint counterparts, even though three name their source on their own rule page. The tool's silence is not evidence the rule has no equivalent. | see block TS-GATE-12 — a union; empty output after a migration is the finding, not the pass. | MUST |
+| TS-GATE-09 | Write every Biome rule key nested under its group (`linter.rules.<group>.<ruleName>`), and look the group up per rule rather than deriving it from the name. | Biome validates every rule key against its group: a key written ungrouped or under the wrong group aborts every command with `Found an unknown key` and `Biome exited because the configuration resulted in errors` (measured on v2.5.11 through v2.6.9). ESLint's flat rule namespace trains the wrong reflex, and the group is not derivable from the name — `noFloatingPromises` sits in `nursery`, `useThrowOnlyError` in `style`. | Run `biome lint` after the edit: a `Found an unknown key` error means the key sits in the wrong place. Then prove the rule fires on a planted violation — for `nursery.noFloatingPromises`, `async function f() {} f();` must report `lint/nursery/noFloatingPromises`. | MUST |
+| TS-GATE-12 | After `biome migrate eslint`, hand-check that `noFloatingPromises`, `noMisusedPromises`, `noUnsafeTypeAssertion` and `useReadonlyClassProperties` were actually ported. | A default `biome migrate eslint` run ports only `useReadonlyClassProperties` of the four; `--include-nursery` adds `noFloatingPromises` and `noMisusedPromises`; no flag ports `noUnsafeTypeAssertion` (measured on v2.5.11 and v2.6.9). Biome's published rule-sources cross-reference omits all four typescript-eslint counterparts, even though three name their source on their own rule page. The tool's silence is not evidence the rule has no equivalent. | see block TS-GATE-12 — a union; empty output after a migration is the finding, not the pass. | MUST |
 | TS-GATE-10 | Set `nursery.noFloatingPromises`, `nursery.noMisusedPromises` and `style.useThrowOnlyError` to `"error"`. Overridable — `nursery` is opt-in upstream precisely because those rules may still have bugs. | These are the three real default-severity gaps against typescript-eslint's `recommendedTypeChecked`. Biome's own team measures `noFloatingPromises` at ~75% of the tsc-backed rule's catch rate; partial coverage of an unawaited promise beats none. | see block TS-GATE-10 — a union; each hit must sit under its stated group. Then time `biome check`: any `types`-domain rule triggers a full-project scan. | SHOULD |
 | TS-GATE-16 | Set `complexity.noExcessiveCognitiveComplexity` and `complexity.noExcessiveLinesPerFunction` to `"error"`. Overridable — raise the thresholds rather than deleting the keys. | Both are single-threshold, zero-config and off by default (15 and 50). This is the maintainability class an agent editing without human review most needs a mechanical backstop for, at the cost of one config line. | see block TS-GATE-16 — a union; empty output is the finding. | SHOULD |
+| TS-GATE-20 | On Biome v2.6.3 or later, set `nursery.noUnsafeReturn` to `"error"`. Overridable, on the same nursery terms as TS-GATE-10. | It is Biome's first counterpart to a typescript-eslint `no-unsafe-*` rule (source `@typescript-eslint/no-unsafe-return`, `types` domain), and its default severity is `information`, so enabling it with `"on"` is weaker than this rule asks. It covers the return position only; TS-GATE-11 still holds for assignment, member access, calls and arguments. | see block TS-GATE-20 — on Biome v2.6.3 or later, empty output is the finding. Then prove it fires: `function f(x: string) { return JSON.parse(x); }` in a source file must report `lint/nursery/noUnsafeReturn`. | SHOULD |
 
 ```sh
 # TS-GATE-12
@@ -167,11 +171,16 @@ git ls-files -z --cached --others --exclude-standard -- 'biome.json' | xargs -0 
 git ls-files -z --cached --others --exclude-standard -- 'biome.json' | xargs -0 -r grep -H -n -E -e noExcessiveCognitiveComplexity -e noExcessiveLinesPerFunction --
 ```
 
+```sh
+# TS-GATE-20
+git ls-files -z --cached --others --exclude-standard -- 'biome.json' | xargs -0 -r grep -H -n -E -e noUnsafeReturn --
+```
+
 ## What No Linter Enforces
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| TS-GATE-11 | No `any` crosses a typed parameter, property or return without an explicit narrowing check. In a Biome-only repo, write this contract into the repo's own rule text and label it unenforced-by-tooling. | Biome has no equivalent to `no-unsafe-assignment`, `no-unsafe-member-access`, `no-unsafe-call`, `no-unsafe-argument` or `no-unsafe-return` in any group, at any severity — confirmed against both its rule index and its cross-reference at v2.5.11. A reviewer who assumes the linter catches it is wrong, and nothing in the tool says so. | On ESLint repos: see block TS-GATE-11 (1) — a union; each must be at `"error"` under a `*TypeChecked` config. On Biome repos the standing check is see block TS-GATE-11 (2) — every hit read by hand, because nothing else will. (TS-TOOL-10 owns the test-fake form of that cast.) | MUST |
+| TS-GATE-11 | No `any` crosses a typed parameter, property or return without an explicit narrowing check. In a Biome-only repo, write this contract into the repo's own rule text and label it unenforced-by-tooling. | Biome has no equivalent to `no-unsafe-assignment`, `no-unsafe-member-access`, `no-unsafe-call` or `no-unsafe-argument` in any group, at any severity — confirmed at v2.6.9. `no-unsafe-return` gained the nursery counterpart `noUnsafeReturn` in v2.6.3 (TS-GATE-20), which covers the return position only. A reviewer who assumes the linter catches it is wrong, and nothing in the tool says so. | On ESLint repos: see block TS-GATE-11 (1) — a union; each must be at `"error"` under a `*TypeChecked` config. On Biome repos the standing check is see block TS-GATE-11 (2) — every hit read by hand, because nothing else will. (TS-TOOL-10 owns the test-fake form of that cast.) | MUST |
 
 ```sh
 # TS-GATE-11 (1)
@@ -191,8 +200,9 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)src/**/*.ts' ':(
 3. **Dropping `tsc --noEmit` because "typed lint covers it."** It does not, and
    it is also slower — typed lint being slower is the proof it built its own
    program rather than reusing the typecheck's.
-4. **Writing a Biome rule key ungrouped.** Silently ignored, no validation
-   error, so the clean run afterwards reads as success.
+4. **Writing a Biome rule key ungrouped, or under a group guessed from its
+   name.** Biome aborts with `Found an unknown key`; look the group up on the
+   rule's own page instead of guessing again.
 5. **Trusting `biome migrate eslint` or the published rule-sources table.** Four
    rules that matter here are absent from Biome's own cross-reference.
 6. **Reaching for a security plugin's full recommended set when asked to

@@ -61,7 +61,7 @@ the single fact that decides each:
 |---|---|---|
 | Anything already transformed by Vite/Rolldown | Vitest | shares the app's own transform pipeline; no second build config to drift |
 | A package built and run by Bun | `bun test` | native TS transform, Jest-shaped API, zero added dependency |
-| An editor/Electron extension host | Mocha plus the vendor's extension test CLI | the only harness that boots the real host; it has no ESM or TS loader, so test files need a bundle step before the runner sees them |
+| An editor/Electron extension host | Mocha plus the vendor's extension test CLI | the only harness that boots the real host; it does not transpile TypeScript itself, so test files need a bundle step before the runner sees them |
 | Browser end-to-end and visual regression | Playwright | isolates every individual test; a unit runner's browser mode isolates only per *file* |
 | A zero-dependency script | `node:test` | free with Node — but its coverage, tags and global setup/teardown are all still Stability 1 as of Node 26 (2026-08), so its thresholds are not a gate |
 
@@ -74,7 +74,7 @@ non-zero. A coverage config nobody has watched go red is decoration.
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
 | TS-TEST-04 | Copy a coverage-threshold block from the runner's current documentation key for key, and prove it red once before trusting it. Never let a single metric be the only threshold. | No runner errors on an unrecognized threshold key — a misspelling is treated as unset, so the gate prints a percentage, exits 0 forever, and is indistinguishable from a passing gate. Named instance: Bun's keys are plural (`lines`, `functions`, `statements`), the singular forms are accepted and ignored, and `statements` is documented as accepted but never enforced even when spelled right. Bun also skips threshold enforcement on an lcov-only run, which exits 0 regardless of the numbers. | see block TS-TEST-04 and check each key against the runner's own docs. Then raise one threshold above the tree's real coverage and run the gate: exit code 0 is the violation. | MUST |
-| TS-TEST-05 | On Vitest 4.0 and later (2025-10-22), set `coverage.include` explicitly. | v4.0 removed `coverage.all`; coverage now reports only files the run actually loaded, so a source file no test imports is absent from the report rather than present at 0% — and the percentage goes **up** when coverage gets worse. `coverage.exclude` does not close this; the include list is what makes an untested file visible. | see block TS-TEST-05 — no `include` key under `coverage` is the violation. Confirm live: add a source file nothing imports, run coverage, and require it to appear at 0%. Missing from the report is the finding. | MUST |
+| TS-TEST-05 | On Vitest 4.0 and later (2025-10-22), 5.x included, set `coverage.include` explicitly. | v4.0 removed `coverage.all`; coverage now reports only files the run actually loaded, so a source file no test imports is absent from the report rather than present at 0% — and the percentage goes **up** when coverage gets worse. `coverage.exclude` does not close this; the include list is what makes an untested file visible. | see block TS-TEST-05 — no `include` key under `coverage` is the violation. Confirm live: add a source file nothing imports, run coverage, and require it to appear at 0%. Missing from the report is the finding. Rerun that live check after an upgrade to Vitest 5: 5.0.0 (2026-09-03) matches include globs relative to the project root and treats a pattern with no wildcard as a directory. | MUST |
 
 ```sh
 # TS-TEST-04
@@ -191,4 +191,6 @@ git ls-files -z --cached --others --exclude-standard -- ":(glob)$SRC_DIR/**/*.ts
 7. **Updating a snapshot to make a suite green** on a change that touched no
    rendering code.
 8. **Assuming `useFakeTimers()` faked everything with a clock in it.** The
-   two APIs it skips are the two a microtask-ordering test depends on.
+   two APIs it skips are the two a microtask-ordering test depends on. On
+   Vitest 5.0 and later the default set also fakes `Temporal`; keep it native
+   with `toNotFake: ['Temporal']`, which cannot be combined with `toFake`.
