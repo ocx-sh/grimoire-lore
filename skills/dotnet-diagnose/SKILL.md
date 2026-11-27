@@ -114,7 +114,8 @@ or Git Bash.
 
 On a Microsoft.Testing.Platform (MTP) project `dotnet test` takes no `--nologo`,
 `--tl:off`, `--interactive` or `--disable-build-servers`: each one is passed to the test
-app, which reports `Zero tests ran` and exit 5 (DN-DIAG-57). A VSTest project accepts
+app, which reports `Zero tests ran` and exit 5 (DN-DIAG-57; measured on SDK 10.0.401. SDK 11 documents
+`--nologo` and `--tl` as accepted by `dotnet test` in MTP mode, read 2026-11-27, not measured). A VSTest project accepts
 `--nologo`, `--tl:off` and `--disable-build-servers` (1218 tests ran with the first two)
 and rejects `--interactive false` with MSB1001, so keep all four off `dotnet test` either
 way (DN-RULE-02). Assert the SDK before the first diagnosis (DN-RULE-03, CS-BUILD-21):
@@ -251,18 +252,20 @@ it exits 0 or 1, rejects `--minimum-expected-tests` with MSB1001, and a filter o
 empty assembly that runs no test still exits 0 (DN-DIAG-71). Its proof is a `Passed!`
 line with `Total` above 0 per project. The MTP proof is the summary block: `grep -c -e 'Test run summary: Passed' test.log`
 prints 1 or more, and `grep -c -E 'total: +[1-9]' test.log` prints 1 or more. Exit 1 (the `mono` module), 5, 8, 9 and 150 were
-measured on SDK 10.0.401 with `xunit.v3.mtp-v2` 4.0.2 (2026-10-11); exit 2 on Ocelot's `xunit.v3` unit tests; 3 and 7 are
+measured on SDK 10.0.401 with `xunit.v3.mtp-v2` 4.0.2 (2026-10-11); exit 2 on Ocelot's `xunit.v3` unit tests; 3, 7, 13 and 14 are
 unverified: read only.
 
 | Exit | Meaning | Row |
 |---|---|---|
 | 1 | Generic failure with `0 failed`: a test module could not start (a `net48` module on a non-Windows host: `Win32Exception ... start process 'mono'`, and on SDK 11 RC1 `error NETSDK1243`), or `dotnet test` refused a mixed-runner solution. Read the first exception, then test each runnable TFM or project on its own, as the CI does | DN-DIAG-77, DN-DIAG-78 |
 | 2 | At least one test failed (`failed X (12ms)`, then `Test run summary: Failed!`) | DN-DIAG-79 |
-| 3 | The session was aborted | none |
+| 3 | The session was aborted, or a `--timeout` expired (the `dotnet test` option needs SDK 11 and MTP 2.4). Unverified: read only | none |
 | 5 | Invalid arguments. Run `dotnet run --project TESTPROJECT -- <the same arguments>` to see `Unknown option`, because `dotnet test` hides the reason | DN-DIAG-57 |
 | 7 | The test host crashed or hung. Unverified: read only. Without the crash-dump extension a crash surfaces the native exit instead (134 on Linux, `non-success exit code: 134` in the log). Rerun with the hang and crash dump extensions | DN-DIAG-62 |
 | 8 | Zero tests ran. Never ignore it. Gate every run with `--minimum-expected-tests N` | DN-DIAG-58 |
 | 9 | Fewer tests ran than the minimum | DN-DIAG-59 |
+| 13 | `--maximum-failed-tests` stopped the run at that many failures (the `dotnet test` option needs SDK 11 and MTP 2.4). Read the failures as for exit 2. Unverified: read only | DN-DIAG-79 |
+| 14 | A coverage collector reported a failed coverage threshold. Unverified: read only | none |
 | 150 | The apphost found no matching shared runtime (`You must install or update .NET`): owner handoff | DN-DIAG-70 |
 
 On SDK 10 an MTP project needs `"test": {"runner": "Microsoft.Testing.Platform"}`

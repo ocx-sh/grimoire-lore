@@ -24,9 +24,9 @@ the upgrade.
   named and the per-TFM test counts equal the baseline (CS-CORE-03).
 - **Rollback is a tag plus a worktree.** A `global.json` revert alone fails with
   NETSDK1045 and MSB1003 (measured 2026-10-11, SDK 8.0.425).
-- **`net9.0` is never a stop, `net11.0` is a probe branch only.** .NET 8 and 9 both end
-  support on 2026-11-10, .NET 10 LTS runs to 2028-11-14, and .NET 11 reaches GA in
-  November 2026.
+- **`net9.0` is never a stop, `net11.0` is a probe branch only.** .NET 8 and 9 both ended
+  support on 2026-11-10, .NET 10 LTS runs to 2028-11-14, and .NET 11 (STS) reached GA on
+  2026-11-10 and is supported to 2028-11-14.
 
 Contents: [Scope](#scope) · [Pinned defaults](#pinned-defaults) ·
 [Before DN-UPG-00](#before-dn-upg-00) · [The ladder](#the-ladder) ·
