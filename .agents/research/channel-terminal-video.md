@@ -4,7 +4,7 @@ topic: channel-terminal-video
 program: product
 sub_program: channels
 date: 2026-11-27
-revised: 2026-11-27
+revised: 2026-11-27 (wave 2: follow-ups q0, q1, q3 folded in)
 model: opus
 id_family: CH-VID
 consolidates:
@@ -12,6 +12,9 @@ consolidates:
   - channel-terminal-video/vid-legibility-thresholds.md
   - channel-terminal-video/vid-accessibility.md
   - channel-terminal-video/vid-scrub-and-reproducibility.md
+  - channel-terminal-video/followup-q0.md
+  - channel-terminal-video/followup-q1.md
+  - channel-terminal-video/followup-q3.md
 grounding:
   - product-audit/exemplar-readmes.md
   - product-audit/distribution-posture.md
@@ -39,12 +42,13 @@ Placement: the procedure (scenario or tape, render, flatten, scan, diff, legibil
    - Shorts and other vertical video: a separate narrow tape. Never crop a landscape recording.
    - Remotion: only for produced explainer or launch video, and only after the owner signs off on the licence.
    The measured sizes for one 16 s session support this choice: cast 4,653 B, VHS MP4 38,181 B, VHS GIF 68,110 B, agg GIF 121,514 B ([vid-pipeline-choice §3](channel-terminal-video/vid-pipeline-choice.md)).
-3. **Legibility is set by columns, not by font size.** The measured law is rendered x-height ≈ 0.98 × display width ÷ columns, and FontSize cancels out ([vid-legibility §1.2](channel-terminal-video/vid-legibility-thresholds.md)). The floor is 6 px x-height and the target is 8 px. Both are DERIVED from one OCR engine on 2026-11-27, not from a platform or a human study, and must stay labelled that way.
+3. **Legibility is set by columns, not by font size.** The measured law is rendered x-height ≈ 0.98 × display width ÷ columns, and FontSize cancels out ([vid-legibility §1.2](channel-terminal-video/vid-legibility-thresholds.md)). The floor is 6 px x-height and the target is 8 px. Both are DERIVED from one OCR engine on 2026-11-27, not from a platform or a human study, and must stay labelled that way. W is now measured, not assumed ([followup-q3](channel-terminal-video/followup-q3.md), headless Chromium, 2026-11-27): every fleet embed uses `fit: 'width'`, a 360 px phone gives a 322 px text line on Starlight docs (cap 52 columns) and the desktop docs column gives 708 px (cap 115). No fleet cast passes the floor on a phone, so on phones the CH-VID-14 text alternative is today the only legible reading path.
 4. **A silent recording is video-only content under WCAG SC 1.2.1.** It needs an in-page text alternative that lists every command in order. A downloadable `.cast` file does not count. Captions (1.2.2) and audio description (1.2.3, 1.2.5) apply only to narrated video.
 5. **Scrub at the source, then scan the flattened text.** Record in an isolated environment and re-record to fix a leak. Never edit the finished media. A secret scan of the raw `.cast` file is not a gate: raw `gitleaks dir` caught 1 of 4 synthetic casts holding the same fake token, and the flattened text caught 4 of 4 ([vid-scrub §4](channel-terminal-video/vid-scrub-and-reproducibility.md)).
 6. **Regeneration is checked as normalised text, never as bytes.** VHS GIF, MP4 and WebM output differed between two identical runs. agg output and VHS `golden.txt` were stable. The fleet's casts also embed a random temp directory and a random port.
 7. **Platform numbers are fetched and dated, never remembered.** When two first-party pages disagree, plan to the stricter value. The vertical safe rectangle is a DERIVED union of third-party figures, because no platform publishes one.
-8. **Documented gap: recording-theme contrast is only partly checkable.** The palette script (Appendix A) checks the theme foreground and the 16 ANSI entries a cast uses. It cannot check SGR 2 (dim), whose colour the renderer computes, or 256-colour and truecolour output. Three fleet casts use dim and one uses extended colour, so those stay a manual check (CH-VID-12).
+8. **Documented gap: recording-theme contrast is mostly checkable, not fully.** Appendix A checks the theme foreground and the 16 ANSI entries a cast uses. Dim (SGR 2) is now checkable too: asciinema-player 3.15.1, 3.17.0 and 3.19.0 all draw it at CSS `opacity: 0.5`, so its colour is a 50/50 blend with the background, scored by Appendix B (CH-VID-27). The blend matched a rendered Chromium pixel within 0.02 ([followup-q1](channel-terminal-video/followup-q1.md) Measurement D). Still manual: 256-colour indices 16 to 255 and truecolour. One fleet cast, `browse-tui`, prints `38;5;236` (`grep -c -E '[34]8;(5;(1[6-9]|[2-9][0-9]|[12][0-9]{2})|2;)' *.cast` prints 7 for it and 0 for the other 10 grimoire casts, [followup-q0](channel-terminal-video/followup-q0.md)). The contrast that counts is the theme the viewer sees: the ocx embed forces `theme: 'ocx'`, so a cast's header theme does not decide its colours there (CH-VID-12).
+9. **Documented gaps the follow-ups could not close.** No screen reader or accessibility-tree export was run on the player, so the "unnamed first Tab stop" in CH-VID-18 rests on attributes, not speech output. Widths were measured in desktop Chromium with narrow viewports, not on real phones (no device pixel ratio, no iOS Safari, no font boosting). The grimoire player fonts did not load in the headless browser, so its x-height is the law's estimate; only the column caps are measured. Neither the deployed ocx site nor the deployed grimoire site was screenshot; both were rendered from fleet files in a scratch directory.
 
 Conflicts between the dives, and with the catalog, resolved:
 
@@ -61,7 +65,7 @@ Conflicts between the dives, and with the catalog, resolved:
 
 ## The ruleset
 
-Severity: **MUST** blocks commit or upload. **SHOULD** warns, and passing it needs a recorded reason. **CONSIDER** is advice. "The scenario" means the committed YAML scenario or `.tape` file. "Flattened text" means every `o` event's data joined in order, with `\x1b[...` sequences removed (script in [vid-scrub §4](channel-terminal-video/vid-scrub-and-reproducibility.md)). "W" means the narrowest display width, in CSS px, at which the surface shows the recording.
+Severity: **MUST** blocks commit or upload. **SHOULD** warns, and passing it needs a recorded reason. **CONSIDER** is advice. "The scenario" means the committed YAML scenario or `.tape` file. "Flattened text" means every `o` event's data joined in order, with `\x1b[...` sequences removed (script in [vid-scrub §4](channel-terminal-video/vid-scrub-and-reproducibility.md)). "W" means the width, in CSS px, of the drawn terminal text line (the player's `.ap-line`, not its container) at the narrowest viewport at which the surface shows the recording.
 
 ### Source and form
 
@@ -102,11 +106,11 @@ Use one player version per site family.
 
 ### Legibility
 
-**CH-VID-08 (MUST).** Set the recording geometry by columns, and keep the column count at or below floor(0.98 × W ÷ 6). This keeps x-height at 6 px or more, a DERIVED floor. Measure W on the live surface. Do not assume it.
-- *Rationale:* FontSize cancels out of the on-screen size. OCR similarity is 0.85 at 6 px, 0.72 at 5 px and 0.45 at 4 px (VHS v0.12.1, RapidOCR 1.2.3, measured 2026-11-27).
-- Caps at the 6 px floor: 360 px phone, 58 columns; 720 px column, 117; 896 px, 146; 1080 px, 176; 1920 px, 313. The 720 and 896 px widths are assumptions.
-- Target (CONSIDER, formerly CH-VID-09): an x-height of 8 px, which is at most floor(0.98 × W ÷ 8) columns: 44 at 360 px and 88 at 720 px. This is a project choice for human readers and video compression, and it has not been tested on people.
-- *Verify:* compare the cast header `width`, `term.cols` or the tape's `Set Columns` with the cap. Measure W with Playwright as `document.querySelector('[data-cast]').getBoundingClientRect().width` at a 360 px viewport and at desktop width. A tape that sets `FontSize` without `Columns` fails, and so does one that combines `Columns` with `Width`.
+**CH-VID-08 (MUST).** Set the recording geometry by columns, and keep the column count at or below floor(0.98 × W ÷ 6), with W measured at the narrowest viewport the surface supports. This keeps x-height at 6 px or more, a DERIVED floor. Measure W on the surface. Do not assume it.
+- *Rationale:* FontSize cancels out of the on-screen size. OCR similarity is 0.85 at 6 px, 0.72 at 5 px and 0.45 at 4 px (VHS v0.12.1, RapidOCR 1.2.3, measured 2026-11-27). Every fleet embed uses `fit: 'width'`, so the cell width is W ÷ columns whatever font size the source sets. The drawn line is narrower than its container: 322 of 328 px on a grimoire phone page, and the ocx player snaps its font and draws 300 px inside a 326 px box ([followup-q3](channel-terminal-video/followup-q3.md)). The 0.98 constant was fitted on the VHS font. IBM Plex Mono, the ocx font, has an x-height of 0.887 of its advance, so the law over-reads it by about 10 %. The caps are therefore column caps; the x-height they imply is an estimate.
+- Caps at the 6 px floor, measured 2026-11-27 in headless Chromium build 1255 (followup-q3). Starlight and MkDocs Material docs: at a 360 px viewport the text line is 322 px, cap 52 columns; at 390 px, cap 57. The grimoire desktop docs column is a fixed 720 px from 768 to 1920 px viewports, with a 708 px text line, cap 115. The ocx examples player draws 3.000 px per column at 360 and 390 px (cap 49) and 7.000 px on desktop (cap 114). The grimoire landing hero is narrower than the docs column from 1024 px up (text 408 to 455 px, caps 66 to 74). These caps hold for those layouts as built on 2026-11-27; measure any other surface.
+- Target (CONSIDER, formerly CH-VID-09): an x-height of 8 px, which is at most floor(0.98 × W ÷ 8) columns: 39 at a 360 px phone and 86 on the 720 px docs column. This is a project choice for human readers and video compression, and it has not been tested on people.
+- *Verify:* compare the cast header `width`, `term.cols` or the tape's `Set Columns` with the cap of the surface. On a page, after the player mounts, at a 360 px viewport and at 768 px or wider, run `const l=document.querySelector('.ap-line'); l.getBoundingClientRect().width / l.textContent.length` (Playwright `page.evaluate`) to get the cell width in px. The check fails when 0.98 × cell is under 6. A wrong-geometry failure shows as a cell of 1.7 to 2.7 px on a 360 px phone with 120 to 180 columns. A tape that sets `FontSize` without `Columns` fails, and so does one that combines `Columns` with `Width`.
 
 **CH-VID-09 (retired 2026-11-27).** The 8 px target is folded into CH-VID-08 as a CONSIDER line. It had no evidence beyond a project choice and the same check as CH-VID-08. The number is not reused.
 
@@ -118,10 +122,11 @@ Use one player version per site family.
 - *Rationale:* long pauses read as a broken demo ([agg usage](https://docs.asciinema.org/manual/agg/usage/), [player options](https://docs.asciinema.org/manual/player/options/), both undated).
 - *Verify:* the header field, the embed option or the agg flag is 2 or less. Otherwise, the largest gap between events, computed from the timestamps, is 2 s or less.
 
-**CH-VID-12 (SHOULD).** The theme foreground and every ANSI palette colour the session prints reach 4.5:1 contrast against the recording theme's background.
-- *Rationale:* WCAG SC 1.4.3 sets 4.5:1 for text and images of text ([W3C](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html), updated 2026-10-04). The asciinema player renders HTML text, not a raster ([vid-legibility §1.2](channel-terminal-video/vid-legibility-thresholds.md)), and since v3.8 it uses the theme embedded in the recording by default ("auto/asciinema", [player options](https://docs.asciinema.org/manual/player/options/), undated, fetched 2026-11-27). So on a docs embed the cast theme is page text, and SC 1.4.3 applies as it does to any text. For GIF and MP4 renders the Understanding page does not mention video, so applying it to video frames is a reading. The rule is SHOULD, not MUST, because the script cannot check dim (SGR 2) or 256-colour and truecolour output, and those need a manual look. The catalog's css-theming rule has no contrast threshold to reuse.
+**CH-VID-12 (SHOULD).** The theme foreground and every ANSI palette colour the session prints reach 4.5:1 contrast against the background of the theme the viewer sees. That is the recording's header theme, unless the embed forces a theme. A forced theme is checked instead, in every colour scheme the site offers, and passes only if it passes in all of them.
+- *Rationale:* WCAG SC 1.4.3 sets 4.5:1 for text and images of text ([W3C](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html), updated 2026-10-04). The asciinema player renders HTML text, not a raster ([vid-legibility §1.2](channel-terminal-video/vid-legibility-thresholds.md)), and since v3.8 it uses the theme embedded in the recording by default ("auto/asciinema", [player options](https://docs.asciinema.org/manual/player/options/), undated, fetched 2026-11-27). So on a docs embed the cast theme is page text, and SC 1.4.3 applies as it does to any text. An embed can override the default: the ocx theme's `terminal.mjs:283` passes `theme: 'ocx'`, and `Terminal.astro` maps ANSI 0 to 15 onto site tokens, so the ocx casts' headers (which carry no theme) never decide their colours ([followup-q1](channel-terminal-video/followup-q1.md) findings 3 and 4, read at the website commit `e86b830` that `www-setup/site/package.json:15` pins, dated 2026-10-26). For GIF and MP4 renders the Understanding page does not mention video, so applying it to video frames is a reading. The rule is SHOULD, not MUST, because of that reading and because the scripts cannot score 256-colour indices 16 to 255 or truecolour output, which need a manual look. Dim (SGR 2) is scored by CH-VID-27. The catalog's css-theming rule has no contrast threshold to reuse.
 - Measured 2026-11-27 with Appendix A over the 11 grimoire docs casts: all 11 share one theme. The foreground is 14.54:1 and every used palette entry passes (4.86 to 7.79:1). Palette entry 8 (bright black, `#595d6c`) is 2.69:1 and would fail, but no fleet cast prints SGR 90. A synthetic cast that prints SGR 90 makes the script exit 1.
-- *Verify:* `python3 -I castcontrast.py f.cast` (Appendix A) exits 0. It prints a manual-check line when the cast uses dim or extended colour. A cast with no theme in its header is checked against the player or VHS theme instead.
+- Measured 2026-11-27 over the 8 ocx v3 casts against the forced ocx theme at `e86b830`: all 16 entries reach 5.20 to 15.22:1 (light) and 5.94 to 14.87:1 (dark). The casts print only SGR 32 (5.29 light, 10.34 dark). The www-setup site has no stylesheet of its own that could override a token. This is computed from the pinned tokens, not read from a screenshot of the deployed site (followup-q1 Measurement A).
+- *Verify:* for a cast whose header theme applies, `python3 -I castcontrast.py f.cast` (Appendix A) exits 0. It prints a manual-check line when the cast uses dim or extended colour. For a cast under a forced theme, read the theme at the commit the site pins and run `python3 -I contrast.py <website-repo> <pinned-commit>` ([followup-q1](channel-terminal-video/followup-q1.md) Measurement A, ocx-specific); it must print no `FAIL` for either scheme.
 
 ### Accessibility
 
@@ -152,8 +157,8 @@ Use one player version per site family.
 - *Verify:* the cast scan from [vid-accessibility F8](channel-terminal-video/vid-accessibility.md) (method in its Appendix C) counts clears per second. `grep -cE '\\u001b\[(2J|3J|\?1049h)' x.cast` gives the total as a quick screen: 3 or fewer in the whole cast passes without the per-second scan. The `flash.mjs` screen (Appendix B there) fails at a mean frame-to-frame change of 0.10 or more.
 
 **CH-VID-18 (SHOULD).** Set `controls: true` on asciinema embeds. Wrap the player in `role="group"` with `aria-label="Terminal recording: <title>"`, and add a visible hint: "Focus the player; Space pauses."
-- *Rationale:* `controls: "auto"` hides the bar while the pointer is still ([player options](https://docs.asciinema.org/manual/player/options/), default "auto"). The `.ap-player` node carried no role, tabindex or label when probed on player 3.17.0, the fleet's vendored version, on 2026-11-27 ([vid-accessibility F8](channel-terminal-video/vid-accessibility.md)). Player 3.19.0 was not probed. DOC-EX-16 accepts `"auto"`; this rule is a stricter SHOULD.
-- *Verify:* `grep -nE 'controls|aria-label' <embed js>` shows `controls: true` and the label. A DOM probe (vid-accessibility Appendix A) finds the label on the container. Re-run the probe after any player upgrade; if the upgraded `.ap-player` carries its own role and label, drop the wrapper part of this rule.
+- *Rationale:* `controls: "auto"` hides the bar while the pointer is still ([player options](https://docs.asciinema.org/manual/player/options/), default "auto"). The `.ap-player` node carries only `class` and `style` on player 3.17.0 (the fleet's vendored bundle, byte-identical to the npm package by sha256) and on 3.19.0, probed 2026-11-27 ([followup-q0](channel-terminal-video/followup-q0.md) F0 and F1). No element in the player has a `role`. The first Tab stop is the inner `pre.ap-term-text` (`tabindex=0`, `aria-live=off`, no accessible name), and Space on it toggles playback, so the hint is accurate. The three buttons carry labels ("Play", "Show keyboard shortcuts", "Toggle fullscreen mode"). The 3.19.0 release notes list only rendering and sizing changes ([v3.19.0](https://github.com/asciinema/asciinema-player/releases/tag/v3.19.0), published 2026-11-22). DOC-EX-16 accepts `"auto"`; this rule is a stricter SHOULD. It stays SHOULD because no screen reader or accessibility-tree export was run (Verdict 9).
+- *Verify:* `grep -nE 'controls|aria-label' <embed js>` shows `controls: true` and the label. A DOM probe (vid-accessibility Appendix A) finds the label on the container. After every player upgrade, serve a page that mounts the new player and run `node ap-a11y.mjs <page-url>` ([followup-q0](channel-terminal-video/followup-q0.md) Appendix B, needs `playwright`). Exit 0 means `.ap-player` still carries no role, label or tabindex, and the wrapper part of this rule stays. Exit 1 means the player now names itself, and the wrapper part may be dropped.
 
 ### Scrub and reproducibility
 
@@ -211,6 +216,12 @@ Use one player version per site family.
   ```
   Run it as `python3 -I needs.py .github/workflows/*.yml`. `terminal-demo-gate` is the gate job name the `terminal-demo` skill defines. An upload from a script outside `.github/workflows` is not covered by this check, and the ask-the-owner line covers it.
 
+### Dim text (added in wave 2)
+
+**CH-VID-27 (SHOULD).** Do not print SGR 2 (dim) text in a colour whose 50/50 blend with the viewer's theme background is under 4.5:1. Two exceptions need a recorded reason in the gate report: the same text appears in the page's text alternative (CH-VID-14), or the text is the label of an inactive control. Score the blend, not the palette entry. Under a forced theme, score every colour scheme. To set secondary text apart, print it in a palette colour that passes on its own.
+- *Rationale:* asciinema-player draws dim as `pre.ap-term-text .ap-faint { opacity: 0.5; }` in 3.15.1 ([followup-q1](channel-terminal-video/followup-q1.md) Measurement D, computed style 0.5), 3.17.0 (`grimoire-rs/grimoire/docs/public/asciinema-player.css:156-157`, read 2026-11-27) and 3.19.0 ([followup-q0](channel-terminal-video/followup-q0.md) F2). The effective colour is half text and half background, and no theme can repair it, because the opacity is fixed in the player CSS. On the grimoire theme (background `#161826`), dim passes only over the theme foreground and palette 7 (4.52:1, a margin of 0.02) and palette 15 (5.22:1). The other 14 palette entries give 1.00 to 3.86:1 (followup-q0 F3). On the ocx theme, dim default foreground computes to 3.16:1 light and 3.77:1 dark. The strongest rendered glyph pixel in headless Chromium gave 3.18:1 and 3.77:1 (followup-q1 Measurement D), so the arithmetic and the rendering agree within 0.02. SHOULD, not MUST: SC 1.4.3 covers player text only by the reading in CH-VID-12, and it exempts text of inactive user interface components.
+- *Verify:* `python3 -I dimcheck.py f.cast` (Appendix B) exits 0. For a cast under a forced theme, run `python3 -I dimcheck.py f.cast theme.json` once per scheme, where `theme.json` holds the forced theme's `fg`, `bg` and `palette`. Exit 1 names each failing colour and ratio. A failing cast passes only when the gate report names one of the two exceptions for each failing dim string. Negative tests, run 2026-11-27: a synthetic cast printing `\x1b[2m\x1b[32m` on the grimoire theme exits 1 (2.67:1). A synthetic cast with a truecolour background `\x1b[48;2;2;30;40m` and no dim exits 0. The followup-q0 F4 version of the script, which has no `48` branch, misreads that background as dim and exits 1 (Appendix B gives the commands).
+
 ## Applied to the fleet
 
 Paths are relative to `/home/mherwig/dev`. Each row's evidence carries one of three marks. **re-check** means I ran the command shown for this revision, on 2026-11-27, read-only. **audit** cites a `product-audit/` file and line. **dive only** means the fact comes from a dive artifact and was not re-run here.
@@ -223,15 +234,15 @@ Paths are relative to `/home/mherwig/dev`. Each row's evidence carries one of th
 | 03 | **New commitment** | audit: 0 of 17 fleet READMEs carry a screenshot or recording, including `grim-gui` ([distribution-posture.md:252](product-audit/distribution-posture.md)); 0 of 18 have a demo in the first screen ([exemplar-readmes.md:164](product-audit/exemplar-readmes.md)). Add a still image and a link to the docs player. Do not add a looping GIF |
 | 04, 10, 15, 16 | **New commitment** | dive only: the fleet repositories hold no rendered video, and 0 `.tape` files (`find . -name '*.tape' -not -path '*/node_modules/*' -not -path '*/.git/*'`, [vid-pipeline §1](channel-terminal-video/vid-pipeline-choice.md)). The existing Shorts must meet CH-VID-10 when they are re-rendered |
 | 05 | Satisfied | dive only: 0 Remotion dependencies in the fleet ([vid-pipeline §1](channel-terminal-video/vid-pipeline-choice.md)) |
-| 06 | **Violated** | re-check: the ocx theme pins npm `"asciinema-player": "3.15.1"` (`ocx-sh/website/packages/theme/package.json:158`). The grimoire provenance comment says "181 KB" (`grimoire-rs/grimoire/docs/public/casts.js:7`). dive only: the vendored file is 3.17.0 and 185,010 B (`stat -c %s docs/public/asciinema-player.min.js`), no sha256 is recorded, and upstream is 3.19.0 (2026-11-22) ([vid-pipeline §1](channel-terminal-video/vid-pipeline-choice.md)) |
+| 06 | **Satisfied** (grimoire), pinned by lockfile (ocx) | re-check 2026-11-27 (wave 2): `grimoire-rs/grimoire/docs/public/casts.js:16-19` records player 3.17.0 and the sha256 of both vendored files, and `sha256sum docs/public/asciinema-player.min.js` prints the recorded `a13c3763…aceb880`. These files equal the npm 3.17.0 package ([followup-q0](channel-terminal-video/followup-q0.md) F0). The wave-1 "no sha256 is recorded" was wrong. One nit stays: the comment at `casts.js:7` says "181 KB", while `stat -c %s` prints 185,010 B. The ocx theme pins npm `"asciinema-player": "3.15.1"` (`ocx-sh/website/packages/theme/package.json:158`), resolved by `www-setup/site/pnpm-lock.yaml:1123` (followup-q1 Measurement D). It is not vendored, so the sha256-comment clause does not apply there. Upstream is 3.19.0 (2026-11-22). Its npm `dist/bundle/asciinema-player.min.js` sha256 is `808731d0463da04f6426972a5f929f1030988e0a003444a83741d64a17a7f128` (followup-q0 Method), the value to record on upgrade |
 | 07 | New commitment | re-check: `head -qn1 grimoire-rs/grimoire/docs/public/casts/*.cast grimoire-rs/grimoire/docs/public/demo.cast` shows 12 v2 headers, and `head -qn1 ocx-sh/www-setup/site/public/casts/examples/*.cast` shows 8 v3 headers. Convert each grimoire cast when it is next re-recorded |
-| 08 | **Violated (pending a width measurement)** | re-check: `grep -c '"width": 180'` is 1 in 11 of the 12 grimoire casts (line 1 of each, for example `quickstart.cast:1`); `browse-tui.cast:1` is 120. At an assumed 720 px column that is 3.9 px and 5.9 px x-height, both under the 6 px floor ([vid-legibility §1.4](channel-terminal-video/vid-legibility-thresholds.md)). The 8 ocx v3 casts are 100 columns: 7.1 px at 720 px, but 3.5 px on a 360 px phone. Measure W per site before re-recording. The decision to re-record belongs to the owner |
+| 08 | **Violated, measured** | re-check: `grep -c '"width": 180'` is 1 in 11 of the 12 grimoire casts (line 1 of each, for example `quickstart.cast:1`); `browse-tui.cast:1` is 120. Measured with the `.ap-line` probe (headless Chromium, 2026-11-27, [followup-q3](channel-terminal-video/followup-q3.md) `cell.mjs`). The grimoire 180-column docs casts get a cell of 3.935 px on desktop and 1.790 px at 360 px, which is 3.86 and 1.75 px x-height by the law. `browse-tui` (120 columns) gets 5.74 px on desktop, 0.26 px under the floor, and 2.61 px on a phone. The landing `demo.cast` (180 columns) gets 2.2 to 3.7 px at 768 px and wider, and 1.7 px on a phone. The ocx casts (100 columns) pass on desktop (law 6.86 px; about 6.2 px for the real Plex Mono font) and fail on a phone (2.94 px by the law). To pass on a 360 px phone a docs cast needs 52 columns or fewer (49 on the ocx player); to pass on desktop only, 114. The decision to re-record belongs to the owner |
 | 11 | Satisfied | re-check (timestamp scan of each cast, the method of [vid-legibility §1.5](channel-terminal-video/vid-legibility-thresholds.md)): the 12 grimoire v2 headers lack `idle_time_limit` and their largest gaps are 3.0 to 4.0 s, but the player caps idle gaps at 2 s (`casts.js:42`). The 8 ocx v3 headers carry `idle_time_limit: 2`, and their largest gaps are 1.35 to 2.00 s |
-| 12 | Satisfied for the used colours, with manual items | re-check: `python3 -I castcontrast.py` (Appendix A) over the 11 `grimoire-rs/grimoire/docs/public/casts/*.cast`: one shared theme, foreground 14.54:1, used palette entries 4.86 to 7.79:1, exit 0 for all 11. Bright black is 2.69:1 but unused. `browse-tui`, `inspect` and `lifecycle` print dim (SGR 2), and `browse-tui` prints extended colour; both need a manual check. The ocx v3 casts carry no theme, so their check runs against the ocx player theme, not done. Separately, audit: `G:public/start.html:256` measures 3.91:1 ([ui-code-posture.md:145](product-audit/ui-code-posture.md)) |
+| 12 | Satisfied for the used colours, with manual items | re-check: `python3 -I castcontrast.py` (Appendix A) over the 11 `grimoire-rs/grimoire/docs/public/casts/*.cast`: one shared theme, foreground 14.54:1, used palette entries 4.86 to 7.79:1, exit 0 for all 11. Bright black is 2.69:1 but unused. `browse-tui`, `inspect` and `lifecycle` print dim (now CH-VID-27), and `browse-tui` prints 256-colour 236, which stays a manual check. The ocx v3 casts, checked against the forced ocx theme at the pinned website commit `e86b830`: every palette entry passes in both schemes (5.20:1 or more), and the casts print only SGR 32 ([followup-q1](channel-terminal-video/followup-q1.md) Measurement A; computed from tokens, not a deployed-site screenshot). Separately, audit: `G:public/start.html:256` measures 3.91:1 ([ui-code-posture.md:145](product-audit/ui-code-posture.md)) |
 | 13 | Satisfied | re-check: the CH-VID-02 row above (`casts.js:45` `autoPlay: false`, no `loop`). dive only: the ocx `Cast.astro` has no autoplay or loop string (`grep -rniE "autoplay\|loop:" ocx-sh/www-setup/site/src`, [vid-accessibility F8](channel-terminal-video/vid-accessibility.md)) |
 | 14 | **Violated** | The landing demo's only alternative is "The recording is plain text: demo.cast" (`grimoire-rs/grimoire/docs/src/pages/index.astro:98-99`). Every docs embed falls back to `<noscript><a href="/casts/….cast">Download the recording</a>` (for example `docs/src/content/docs/quickstart.md:24-25`, `guides/lifecycle.md:180-181`), and none of the 11 casts has a transcript (dive only, [vid-accessibility F8](channel-terminal-video/vid-accessibility.md)). `quickstart.md` may pass through its numbered steps after the embed. `lifecycle.md` puts the embed at the end of the page, under "See it run". Run the CH-VID-14 script per page |
 | 17 | Satisfied | re-check: `grep -cE '\\u001b\[(2J\|3J\|\?1049h)' grimoire-rs/grimoire/docs/public/casts/*.cast` prints 2 for `browse-tui.cast` and 0 for the other 10, and the per-second scan puts both `browse-tui` clears in one 1 s window (2 per second, under 3). dive only: the largest frame-to-frame luminance change was 0.0039 ([vid-accessibility F8](channel-terminal-video/vid-accessibility.md)) |
-| 18 | **Violated** (grimoire), satisfied (ocx) | re-check: the player options at `casts.js:41-46` pass no `controls` (`grep -c controls casts.js` is 0), so it defaults to `"auto"`. dive only: `.ap-player` had no role or label on player 3.17.0 ([vid-accessibility F8](channel-terminal-video/vid-accessibility.md)). re-check: the ocx `terminal.mjs` brings its own controls with `aria-label` (`terminal.mjs:171`, `:310`) |
+| 18 | **Violated** (grimoire), satisfied (ocx) | re-check: the player options at `casts.js:41-46` pass no `controls` (`grep -c controls casts.js` is 0), so it defaults to `"auto"`. `.ap-player` has no role or label on player 3.17.0 or 3.19.0, so upgrading does not fix this (`node ap-a11y.mjs` exits 0 on both, [followup-q0](channel-terminal-video/followup-q0.md) Appendix B). re-check: the ocx `terminal.mjs` brings its own controls with `aria-label` (`terminal.mjs:171`, `:310`) |
 | 19 | Satisfied (grimoire) | re-check: `GrimRunner` (`grimoire-rs/grimoire/test/src/runner.py:43`) builds `env` as a dict at `:66-76` with an isolated `HOME` (`:68`) and `XDG_CONFIG_HOME` (`:76`), and copies only named host keys at `:81-82`. The sentinel prompt is set at `test/recordings/cast_recorder.py:160`. dive only: the docstring at `cast_recorder.py:13-25` records why post-hoc rewriting was removed ([vid-scrub §3](channel-terminal-video/vid-scrub-and-reproducibility.md)) |
 | 20 | **New commitment** | dive only: raw and flattened gitleaks both found nothing across 20 casts ([vid-scrub §3](channel-terminal-video/vid-scrub-and-reproducibility.md)), but no repository runs the scan or a canary. The gate does not exist yet |
 | 21 | Satisfied (with allowlist) | dive only: 0 emails, 0 `/Users/`, 0 private domain suffixes, 0 real user or host names ([vid-scrub §3](channel-terminal-video/vid-scrub-and-reproducibility.md)). `/home/runner` appears in 6 of 8 ocx casts (`grep -c '/home/runner' ocx-sh/www-setup/site/public/casts/examples/*.cast`), and goes on the allowlist |
@@ -240,6 +251,7 @@ Paths are relative to `/home/mherwig/dev`. Each row's evidence carries one of th
 | 24 | **Violated** | Casts are regenerated only by hand, with `task test:demo` (`grimoire-rs/grimoire/test/taskfile.yml:234`). `grep -ln -E 'demo\|record_casts\|casts' grimoire-rs/grimoire/.github/workflows/*` exits 1, so no workflow runs a drift check. The scenario directory is also outside `testpaths = ["tests"]` (`test/pyproject.toml:7`). The fix is a non-required drift job, not a required one |
 | 25 | New commitment | 0 tapes today. The rule applies to the first tape |
 | 26 | **New commitment** | No gate report exists. The Shorts were uploaded without one (audit: [distribution-posture.md:228](product-audit/distribution-posture.md)) |
+| 27 | **Violated** (1 of 11 grimoire casts, 5 of 8 ocx casts) | re-check 2026-11-27: `python3 -I dimcheck.py` (Appendix B) over copies of all 19 casts in a scratch directory. Grimoire, header theme: `inspect` and `lifecycle` print dim over the theme foreground at 4.52:1 (pass), and 8 casts print no dim. `browse-tui` prints dim over palette 8 at 1.57:1 (fail) on `Readme` and `Changelog`, which may be inactive tab labels; that reading is the owner's. ocx, under the forced theme passed as `ocx-light.json` and `ocx-dark.json`: `ci-wrapper` and `dev-box-elvish`, `-fish`, `-pwsh` and `-sh` print dim over the default foreground at 3.16:1 (light) and 3.77:1 (dark), both fails. `air-gapped`, `dev-box-nu` and `dockerfile` print no dim. The two theme files hold the token values that [followup-q1](channel-terminal-video/followup-q1.md) Measurement A printed for `e86b830` |
 
 Two findings outside this topic, one line each:
 - css-theming carries no contrast threshold (`grep -n -i contrast rules/css-theming.md` finds no threshold). The ux sub-program should add one, or cite SC 1.4.3.
@@ -262,6 +274,7 @@ Ranked by how often each one bites. "Check" names the rule that catches it.
 
 **3. Sizing by font instead of columns.**
 - It writes `Set FontSize 28` or "zoom in" and believes the text is now large. Check: 08.
+- It measures the embed container instead of the drawn text line, or assumes the viewport width is W. The ocx player draws 300 px inside a 326 px box. Check: 08's `.ap-line` probe.
 - It crops a 16:9 recording into 9:16 for Shorts. Check: 10.
 
 **4. Platform facts from memory or from vendors.**
@@ -281,6 +294,8 @@ Ranked by how often each one bites. "Check" names the rule that catches it.
 - It counts the `<noscript>` download link as the text alternative. Check: 14.
 - It adds a looping autoplay GIF to a README, or `<video autoplay loop>` without `muted` and `controls`. Check: 03, 13.
 - It judges flashing by eye on a dark cast and extends that verdict to a light theme. Check: 17.
+- It scores dim text by its palette entry, which passes, instead of the 50/50 blend the player draws, which may fail. Check: 27.
+- It checks contrast against the cast header theme when the embed forces another theme, or checks only one colour scheme of a site that has two. Check: 12.
 
 **7. Wiring the recorder into the required gate.** It makes the regeneration job a required check, or commits a recording that the build also regenerates. Check: 24, 26, and docs-quality DOC-EX-11 and DOC-EX-13.
 
@@ -288,7 +303,8 @@ Ranked by how often each one bites. "Check" names the rule that catches it.
 
 ## What an agent must ask a human
 
-- Whether to re-record the fleet's 180-column casts, and at which measured column width. This is a content and brand call (CH-VID-08).
+- Whether to re-record the fleet's 180-column casts, and at which column count. This is a content and brand call (CH-VID-08). The measured caps are 52 columns for a 360 px phone and 114 or 115 for desktop only. As written, CH-VID-08 requires the phone cap, and no 80-column CLI output meets it. Whether the CH-VID-14 text alternative may serve as the phone reading path instead is the owner's call; until then the strict reading stands.
+- Whether the dim labels `Readme` and `Changelog` in `browse-tui` are inactive controls, which SC 1.4.3 exempts (CH-VID-27).
 - Whether the 8 px target (the CONSIDER line in CH-VID-08, formerly CH-VID-09) becomes MUST.
 - Every upload or publication: `asciinema upload`, `vhs publish`, YouTube, LinkedIn, Shorts. Ask before each one. No check replaces this (CH-VID-26).
 - Whether any real customer, account, registry, host name or person may appear on screen, even a public one.
@@ -314,10 +330,13 @@ Ranked by how often each one bites. "Check" names the rule that catches it.
 | 03, 11 | agg `--no-loop` and `--idle-time-limit` (default 5) | [agg usage](https://docs.asciinema.org/manual/agg/usage/), undated, fetched 2026-11-27 | On an agg major release |
 | 10 | Third-party safe-zone margins | [Tella](https://www.tella.com/help/editing/social-safe-zones) undated; [ManyPixels](https://www.manypixels.co/blog/social-media-design/tiktok-ad-specs) 2026-11-11 | 6 months, or when a platform publishes its own figures |
 | 12 | Player default theme "auto/asciinema" (embedded theme first) | [player options](https://docs.asciinema.org/manual/player/options/), undated, fetched 2026-11-27 | On a player upgrade |
+| 12, 27 | ocx forced theme `theme: 'ocx'` and its token values | website commit `e86b830` (2026-10-26), pinned at `ocx-sh/www-setup/site/package.json:15`, read 2026-11-27 ([followup-q1](channel-terminal-video/followup-q1.md)) | Whenever the pin moves; re-run `contrast.py` and `dimcheck.py` with the new theme files |
+| 27 | Dim drawn at `opacity: 0.5` | player CSS in 3.15.1, 3.17.0 and 3.19.0, read 2026-11-27 ([followup-q0](channel-terminal-video/followup-q0.md) F2, followup-q1 Measurement D) | On every player upgrade: `grep -n -A2 'ap-faint' asciinema-player.css` |
+| 08 | Measured W per surface (Starlight docs 322 / 708 px text line; ocx player 300 / 700 px; landing hero 408 to 455 px from 1024 px up) | headless Chromium 1255 against grimoire docs (Astro 7.4.13, Starlight 0.43.1, built 2026-11-24), ocx www-setup (Astro 7.3.5, Starlight 0.42.4), MkDocs Material 9.7.7; measured 2026-11-27 ([followup-q3](channel-terminal-video/followup-q3.md)) | On a Starlight, MkDocs Material or ocx theme upgrade, or a docs layout change |
 | 13 to 17 | WCAG 2.2 Understanding pages (edited in 2026: March, August, September, October) | W3C pages linked in the rules | 12 months; re-read the per-page dates before citing |
 | 16 | YouTube captions API `trackKind` values; auto-caption scope | [captions resource](https://developers.google.com/youtube/v3/docs/captions), [captions.list](https://developers.google.com/youtube/v3/docs/captions/list), both undated, fetched 2026-11-27; [2734796](https://support.google.com/youtube/answer/2734796), undated | 12 months |
-| 18 | `.ap-player` attributes | DOM probe on player 3.17.0, 2026-11-27 | On every player upgrade |
-| 06, 25 | VHS 0.12.1, vhs-action 2.1.1, agg 1.9.0, player 3.19.0, asciinema CLI 3.2.1 | GitHub releases API, read 2026-11-27 | The gate prints pinned versus latest on every run; review quarterly |
+| 18 | `.ap-player` attributes (none besides `class` and `style`; unnamed `pre.ap-term-text` first Tab stop) | DOM probe on players 3.17.0 and 3.19.0, 2026-11-27 ([followup-q0](channel-terminal-video/followup-q0.md)) | On every player upgrade: `node ap-a11y.mjs` |
+| 06, 25 | VHS 0.12.1, vhs-action 2.1.1, agg 1.9.0, player 3.19.0 (published 2026-11-22; npm bundle sha256 `808731d0…a17a7f128`), asciinema CLI 3.2.1 | GitHub releases API, read 2026-11-27 | The gate prints pinned versus latest on every run; review quarterly |
 | 20 | gitleaks is feature complete and its author is moving to Betterleaks; trufflehog 3.100.1 | [gitleaks](https://github.com/gitleaks/gitleaks), v8.30.1 2026-03-21 | 6 months; re-run the canary on any scanner change |
 | 05 | Remotion licence; 5.0 terms change | [pricing](https://www.remotion.dev/docs/license/pricing.md), [FAQ](https://www.remotion.dev/docs/license/faq.md), vendor, undated | 6 months, or at the Remotion 5.0 release |
 | 08, 10 | The derived 6 px floor, the 8 px target and the 0.98 × W ÷ C law | own measurement, VHS v0.12.1, RapidOCR 1.2.3, 2026-11-27 | Re-measure on a VHS or player major release, a font change, or a human legibility test |
@@ -327,22 +346,22 @@ Ranked by how often each one bites. "Check" names the rule that catches it.
 
 Subareas that deserve another round:
 - Does a human legibility test on a 360 px phone and a 720 px docs column confirm, raise or lower the 6 px floor that one OCR engine produced?
-- What is the measured content width of each fleet surface (Starlight docs, the grimoire docs pages, the ocx `/install/` page, a MkDocs site) at phone and desktop sizes? At what column count does each existing cast pass?
 - How should a GUI screen recording (VS Code extension, `grim-gui`) be scrubbed and checked for legibility, given that the text scan sees no pixels? Can OCR over one frame per second plus the CH-VID-21 patterns replace visual inspection?
 - Do GitHub secret scanning and trufflehog `filesystem` catch the CH-VID-20 canary in a raw `.cast`? Their behaviour on casts is undocumented.
 - What do encode loudness (EBU R128 or the YouTube target) and background-audio rules need for narrated demos? This was deferred in the map as M-VID-9.
 - Which PEAT-class flash analyser runs headless in CI for light-theme or auto-zoom cuts?
 - Does LinkedIn's member upload UI, as opposed to the API, accept non-English SRT, and what limits does it state today? This may belong to channel-linkedin.
-- Does player 3.19.0 add a role, tabindex or label to `.ap-player`, and how does it render SGR 2 (dim) against the fleet theme? Both decide whether CH-VID-12 and CH-VID-18 can tighten.
+- Does a browser accessibility-tree export or a screen reader confirm that the player's first Tab stop is announced without a name? This decides whether CH-VID-18 can rise to MUST.
+- How do real phones (device pixel ratio, iOS Safari, font boosting) and the grimoire player's real fonts change the measured cell widths and x-heights of CH-VID-08?
 
 Owner decisions:
-1. Re-record the 180-column grimoire casts, or accept them until the next CLI change.
+1. Re-record the 180-column grimoire casts, or accept them until the next CLI change. Measured targets: 52 columns or fewer to pass on a 360 px phone, 114 or fewer to pass on desktop only (CH-VID-08). Decide also whether the CH-VID-14 text alternative may stand in for phone legibility.
 2. Whether docs-quality DOC-EX-13 also covers a CI drift check that regenerates into a scratch directory. If it does, CH-VID-24 is retired for that repository. (CH-VID-24 is non-required in either case, per DOC-EX-11.)
 3. Where the `terminal-demo` skill's flatten, scan, contrast and transcript-check scripts live: a new `terminal-demo-reference` skill, or the grimoire recorder exported as a reusable tool.
 4. Whether fleet READMEs get a still screenshot now (CH-VID-03), product by product.
 5. Where the source of the `@ocx-sh` Shorts lives, and whether they are re-rendered under CH-VID-10.
 6. One asciinema-player version for both site families, and who owns its update.
-7. Whether CH-VID-12 returns to MUST for player embeds, where the cast theme is page text under SC 1.4.3.
+7. Whether CH-VID-12 and CH-VID-27 return to MUST for player embeds, where the cast theme is page text under SC 1.4.3. Both checks are now mechanical; the open part is the reading, not the check.
 
 ## Sub-artifacts
 
@@ -350,6 +369,9 @@ Owner decisions:
 - [vid-legibility-thresholds.md](channel-terminal-video/vid-legibility-thresholds.md): the geometry law, the OCR sweep, column caps per surface, idle and speed defaults, contrast, and the derived vertical safe rectangle.
 - [vid-accessibility.md](channel-terminal-video/vid-accessibility.md): the WCAG 1.2.x, 1.4.2, 2.2.2 and 2.3.1 map for demos, caption delivery on YouTube and LinkedIn, and axe and flash measurements on the grimoire docs, with scripts.
 - [vid-scrub-and-reproducibility.md](channel-terminal-video/vid-scrub-and-reproducibility.md): leak paths, scanner documentation, the fleet scan, the synthetic evasion test (raw 1 of 4, flattened 4 of 4), and reproducibility requirements and exemplars.
+- [followup-q0.md](channel-terminal-video/followup-q0.md) (wave 2): player 3.19.0 against 3.17.0 DOM attributes, the Tab order and Space behaviour, how dim is drawn, the dim contrast of all 16 grimoire palette entries, `dimcheck.py` and `ap-a11y.mjs`.
+- [followup-q1.md](channel-terminal-video/followup-q1.md) (wave 2): the forced ocx player theme at the pinned website commit, its palette contrast in light and dark, and dim rendered in Chromium.
+- [followup-q3.md](channel-terminal-video/followup-q3.md) (wave 2): the measured drawn-text width W of every fleet docs surface at six viewports, and the resulting column caps per existing cast.
 
 ## Key sources
 
@@ -405,10 +427,94 @@ assert abs(ratio('#000000','#ffffff')-21)<1e-9
 bad=0
 for name,c in [('fg',th['fg'])]+[(i,pal[i]) for i in sorted(u for u in used if isinstance(u,int))]:
     r=ratio(c,th['bg']); bad|=r<4.5; print(name,c,'%.2f'%r,'FAIL' if r<4.5 else 'ok')
-if 'dim' in used: print('dim (SGR 2) used: renderer-dependent, check the rendered colour by hand')
+if 'dim' in used: print('dim (SGR 2) used: score it with dimcheck.py (Appendix B, CH-VID-27)')
 if 'ext' in used: print('256-colour or truecolour SGR used: not checked')
 sys.exit(bad)
 ```
+
+## Appendix B. dimcheck.py (CH-VID-27)
+
+Taken from [followup-q0](channel-terminal-video/followup-q0.md) F4, with two changes made and tested for this revision on 2026-11-27. First, an optional second argument gives the theme an embed forces, because the ocx casts carry no header theme. Second, a `48` branch skips background-colour parameters. Without it, `48;2;2;30;40` was read as dim (`2`) plus foreground palette 0 (`30`). The script reads the theme, walks the `o` events with a small SGR state machine, records the colour of every printable character drawn while dim is on, and scores the 50/50 blend with the theme background. Self-check: black on white must give 21:1.
+
+```python
+# Usage: python3 -I dimcheck.py f.cast [theme.json]  -- exit 1 if printed SGR 2 (dim) text is under 4.5:1 once drawn at opacity 0.5 (asciinema-player CSS)
+# theme.json ({"fg","bg","palette"}) replaces the header theme; pass it when the embed forces a theme, once per colour scheme.
+import json,re,sys
+L=open(sys.argv[1],encoding='utf-8').read().splitlines()
+h=json.loads(L[0]); th=json.load(open(sys.argv[2])) if len(sys.argv)>2 else (h.get('theme') or h.get('term',{}).get('theme'))
+if not th: sys.exit('no theme in header: pass the theme the embed forces as a second argument')
+pal=th['palette'].split(':')
+def rgb(c): c=c.lstrip('#'); return [int(c[i:i+2],16) for i in (0,2,4)]
+def lum(c):
+    f=lambda v:(v/255/12.92) if v/255<=0.04045 else ((v/255+0.055)/1.055)**2.4
+    return .2126*f(c[0])+.7152*f(c[1])+.0722*f(c[2])
+def ratio(a,b):
+    x,y=sorted((lum(a),lum(b)),reverse=True); return (x+.05)/(y+.05)
+assert abs(ratio([0,0,0],[255,255,255])-21)<1e-9
+bg=rgb(th['bg']); txt=''.join(json.loads(l)[2] for l in L[1:] if l.strip() and json.loads(l)[1]=='o')
+fg=None; dim=False; used=set()
+for m in re.finditer(r'\x1b\[([0-9;]*)m|\x1b\[[0-9;?]*[A-Za-z]|([^\x1b])',txt):
+    if m.group(2) is not None:
+        if dim and m.group(2).strip() and ord(m.group(2))>=32: used.add(fg)
+        continue
+    if m.group(1) is None: continue
+    ps=[int(x or 0) for x in m.group(1).split(';')] or [0]; i=0
+    while i<len(ps):
+        p=ps[i]; i+=1
+        if p==0: fg=None; dim=False
+        elif p==2: dim=True
+        elif p==22: dim=False
+        elif p==39: fg=None
+        elif 30<=p<=37: fg=p-30
+        elif 90<=p<=97: fg=p-82
+        elif p==38 and ps[i:i+1]==[5]: n=ps[i+1]; i+=2; fg=n if n<16 else 'x%d'%n
+        elif p==38: fg='truecolour'; i+=4
+        elif p==48: i+=2 if ps[i:i+1]==[5] else 4  # shortcut: background colours are skipped and dim is scored against the theme bg; score by hand if dim text sits on a set background
+bad=0
+for f in sorted(used,key=str):
+    if isinstance(f,str): print('dim over',f,'not checked'); continue
+    c=rgb(th['fg'] if f is None else pal[f]); mix=[v*.5+b*.5 for v,b in zip(c,bg)]
+    r=ratio(mix,bg); bad|=r<4.5; print('dim over','theme fg' if f is None else 'palette %d'%f,'#%02x%02x%02x'%tuple(c),'effective #%02x%02x%02x'%tuple(round(x) for x in mix),'%.2f'%r,'FAIL' if r<4.5 else 'ok')
+if not used: print('no dim text printed')
+sys.exit(bad)
+```
+
+Runs, 2026-11-27, in `~/.cache/research-lang/exemplars/product/wave2/channel-terminal-video-revise/casts/`, on copies of fleet casts. `syn-dim.cast` is the followup-q0 `syn.cast` (dim green on the grimoire theme). `syn-bg48.cast` is the same header with the single event `[0.1, "o", "\u001b[48;2;2;30;40mtruecolour background, not dim\u001b[0m"]`. `ocx-light.json` and `ocx-dark.json` hold the `code-fg`, `code-bg` and 16 mapped palette values that followup-q1 Measurement A printed for website commit `e86b830`. `dimcheck-q0.py` is this script without the `48` line (`grep -v 'elif p==48' dimcheck.py`), which is the followup-q0 F4 version plus the theme argument.
+
+```
+$ python3 -I dimcheck.py inspect.cast
+dim over theme fg #e9e9ed effective #80808a 4.52 ok
+exit 0
+$ python3 -I dimcheck.py browse-tui.cast
+dim over palette 8 #595d6c effective #383a49 1.57 FAIL
+exit 1
+$ python3 -I dimcheck.py quickstart.cast
+no dim text printed
+exit 0
+$ python3 -I dimcheck.py syn-dim.cast
+dim over palette 2 #7fae6f effective #4a634a 2.67 FAIL
+exit 1
+$ python3 -I dimcheck.py syn-bg48.cast
+no dim text printed
+exit 0
+$ python3 -I dimcheck.py dev-box-sh.cast
+no theme in header: pass the theme the embed forces as a second argument
+exit 1
+$ python3 -I dimcheck.py dev-box-sh.cast ocx-light.json
+dim over theme fg #1b2129 effective #888c92 3.16 FAIL
+exit 1
+$ python3 -I dimcheck.py dev-box-sh.cast ocx-dark.json
+dim over theme fg #c8d0da effective #6e747c 3.77 FAIL
+exit 1
+$ python3 -I dimcheck.py air-gapped.cast ocx-light.json
+no dim text printed
+exit 0
+$ python3 -I dimcheck-q0.py syn-bg48.cast
+dim over palette 0 #161826 effective #161826 1.00 FAIL
+exit 1
+```
+
+The light ocx value is 3.16 here and 3.17 in followup-q1, because that script rounds the blend to whole channel values first. The rendered pixel gave 3.18. The script does not track background colours (SGR 40 to 47, 48): dim text on a set background is scored against the theme background, and must be checked by hand.
 
 ## Revision log
 
@@ -430,3 +536,21 @@ sys.exit(bad)
 - CH-VID-09: retired. Its 8 px target is folded into CH-VID-08 as a CONSIDER line. The ask-human list and Decay are updated.
 - CH-VID-07: kept unchanged apart from a DOC-EX-14 cross-reference. It has a mechanical check and catches a listed agent failure (mixed v2 and v3 fields).
 - New failure mode 7 (recorder wired into the required gate) and a new open question (player 3.19.0 attributes and dim rendering).
+
+2026-11-27, wave 2: follow-ups q0, q1 and q3 folded in. IDs are unchanged; one is added (CH-VID-27). No rule changed severity.
+
+- 2026-11-27: CH-VID-08 (MUST, unchanged): W is redefined in place as the drawn `.ap-line` text width at the narrowest viewport, not the container width. The assumed 720 and 896 px caps are replaced by measured caps (52 at a 360 px phone, 115 on the 720 px docs column, 49 and 114 on the ocx player), and the 1080 and 1920 px video-frame caps are removed, because they are not docs surfaces. The Playwright check now probes `.ap-line`, and the 8 px target caps are now 39 and 86. Source: [followup-q3](channel-terminal-video/followup-q3.md).
+- 2026-11-27: CH-VID-08: followup-q3's proposed CONSIDER rule (52 columns on a phone, or the text alternative as the phone reading path) is not adopted. CH-VID-08 at MUST already requires the phone cap. Adding an escape at CONSIDER would weaken a MUST without new evidence. The escape is recorded as an owner decision (owner decision 1 and the ask-human list). Source: followup-q3.
+- 2026-11-27: Applied row 08: from "Violated (pending a width measurement)" to "Violated, measured", with per-cast x-heights. Source: followup-q3.
+- 2026-11-27: Verdict 3: measured W added, and the finding that on a phone only the text alternative is legible today. Source: followup-q3.
+- 2026-11-27: CH-VID-12 (SHOULD, unchanged): the rule now scores the theme the viewer sees, which is the forced embed theme where there is one, checked in every colour scheme. Verify gains a forced-theme path (`contrast.py`). The dim caveat moved to CH-VID-27, and the ocx measurement was added. Source: [followup-q1](channel-terminal-video/followup-q1.md).
+- 2026-11-27: Applied row 12: ocx casts measured, from "not done" to every entry 5.20:1 or more in both schemes. Source: followup-q1.
+- 2026-11-27: CH-VID-27 (new, SHOULD): dim text scored as the 50/50 blend the player draws, with Appendix B `dimcheck.py`. It merges followup-q0's proposed CH-VID-27 and followup-q1's proposed "CH-VID-12a". The letter-suffixed ID was not used. Not MUST: SC 1.4.3 covers player text only by a reading (owner decision 7), and it exempts inactive controls. Sources: [followup-q0](channel-terminal-video/followup-q0.md) F2 to F4, followup-q1 Measurement D.
+- 2026-11-27: Appendix B (new): `dimcheck.py` from followup-q0 F4 with a forced-theme argument and a fix for a defect found in this revision. Without the `48` branch, a truecolour background was misread as dim (a synthetic test exited 1). Appendix A's dim message now points to Appendix B. Applied row 27 (new) was run over all 19 fleet casts. Sources: followup-q0, followup-q1.
+- 2026-11-27: Verdict 8: the gap narrows. Dim is now scripted; only 256-colour 16 to 255 and truecolour stay manual (`browse-tui` only). Forced themes are named. Sources: followup-q0, followup-q1.
+- 2026-11-27: Verdict 9 (new): the follow-ups' unclosed gaps (no screen reader, no real phones, no grimoire player fonts, no deployed-site screenshots) are recorded as documented gaps. Sources: followup-q0, followup-q1, followup-q3.
+- 2026-11-27: CH-VID-18 (SHOULD, unchanged): player 3.19.0 is probed and matches 3.17.0. "3.19.0 was not probed" is removed, and the Tab order, Space behaviour and labelled buttons are stated. The upgrade check is now `ap-a11y.mjs`. Not MUST, because no accessibility tree or screen reader was run. Applied row 18 updated. Source: followup-q0.
+- 2026-11-27: Applied row 06: corrected from "Violated" to "Satisfied (grimoire)". `casts.js:16-19` records the version and sha256, and a re-check matches them. The wave-1 dive's "no sha256 is recorded" was wrong. The 3.19.0 upgrade digest was added to row 06 and Decay. CH-VID-06 text is unchanged. Source: followup-q0 F0 and Method.
+- 2026-11-27: Failure modes 3 and 6: three entries added (container versus text width; dim scored by palette entry; header theme checked under a forced theme). Sources: followup-q0, followup-q1, followup-q3.
+- 2026-11-27: Open questions: removed the measured-width question (answered by followup-q3) and the player 3.19.0 attributes and dim question (answered by followup-q0). Added two narrower ones, the screen-reader check and real-phone widths, which those answers left open. Owner decisions 1 and 7 updated.
+- 2026-11-27: Decay: new rows for the forced ocx theme pin, the dim opacity, and the measured W per surface. Rows 18 and 06/25 were updated with the 3.19.0 probe and digest. Sources: followup-q0, followup-q1, followup-q3.

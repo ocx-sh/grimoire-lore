@@ -12,8 +12,8 @@ Worktree `.agents/worktrees/product`, branch `product-ux-marketing`. Nothing pus
 | 2 Scout | `ux-topic-map/` (12), `marketing-topic-map/` (13 marketing + 13 `channel-*`) |
 | 3 Map | `ux-topic-map.md`, `marketing-topic-map.md`, `channel-topic-map.md` — each written by opus, challenged by a completeness critic, then revised |
 
-The maps were stopped the moment their first dives started. No dive wrote a
-file; phase 4 has not begun.
+The program was paused once after phase 3 and resumed the same day; phases 4
+and 5 have since run (see "Left, in order").
 
 ## Stored for the continuation
 
@@ -35,8 +35,9 @@ corrections to the frame.
 
 ## Left, in order
 
-1. **Phases 4 and 5 (dive, consolidate).** RUNNING since 2026-11-27, one run
-   per group. To restart a group, run the stored script with the contents of
+1. **Phases 4 and 5 (dive, consolidate).** DONE 2026-11-27: 23 topics, 552
+   rules, results in `product-resume/wave1-result-<group>.json`. To redo a
+   group, run the stored script with the contents of
    `product-resume/wave1-args-<group>.json` as `args` (dives may be given as
    slug strings; each brief is `product-resume/briefs/<topic>/<dive>.md`):
 
@@ -48,8 +49,13 @@ corrections to the frame.
    checks each dive against the output contract, and has a skeptic challenge
    each ruleset before an opus revision. 74 dives, 23 consolidations. A topic
    whose `<topic>.md` already exists is done; drop it from the args first.
-2. **Phase 6 (iterate).** Harvest "deserves another round" and "owner decision"
-   items from each consolidation; commission the first, report the second.
+2. **Phase 6 (iterate).** Wave 2 launched 2026-11-27: 58 follow-up questions
+   over 22 topics (`product-resume/wave2/<topic>/q<i>.md`), run by
+   `product-resume/followup-revise.js` (one run per group; args are
+   `{today, topics: [{slug, idFamily, group, q: [indices]}]}`). Each follow-up
+   writes `<topic>/followup-q<i>.md`; one opus revision per topic folds them
+   in. The 24 questions that need a human, a credential or an eval harness and
+   the 105 owner decisions are in `product-owner-decisions.md`.
    Stop when a wave adds no new MUST rule and no new failure class.
 3. **Fold the frame corrections** from the three selection files into
    `product-frame.md` under "Corrections". Known already: only 2 of 10 fleet
