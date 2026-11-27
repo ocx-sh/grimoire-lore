@@ -65,7 +65,7 @@ ${CONTEXT}
 ${unitBlock(u)}
 
 You are AUTHORING this unit. Before writing, read in full:
-1. The plan: the decisions at the top, the collision table, and your unit's section.
+1. The plan: "Decisions", "Where every ID family goes", "Known duplicate rows", "Authoring contract for every unit" (binding on you), the collision table, your unit's section, and every artifact spec that section names (for a platform skill also "Platform skills: shared shape").
 2. ${C}/references/rule-distillation.md and ${C}/references/validation.md.
 3. The ai-config-authoring and grim-authoring skills (under ${W}/.claude/skills/ or ${W}/skills/).
 4. The pattern set, and copy its shape exactly (frontmatter keys, heading order, table columns, how a rule row carries its ID, severity and verification, how the rule links to its reference skill, how a SKILL.md routes to its depth files): ${W}/rules/go-quality.md, ${W}/skills/go-quality-reference/, and one procedural skill the plan names as the pattern (or ${W}/skills/docs-review/ if present).
@@ -95,7 +95,8 @@ Read the unit's plan section, every file the author wrote, and the source consol
 - a relative link that resolves to no file among this unit's files or the plan's artifact list;
 - a skill step an agent could not execute literally (no command, no check, no stated done condition), or a shipped script that fails its own self-test or --help (run it);
 - a non-zero exit of: python3 ${C}/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' <the unit's rule and skill paths> (run it; quote the findings that concern this unit's files).
-Everything else is a nit. ok=true only with zero blocking lines.`
+- any breach of the plan's "Authoring contract for every unit".
+A file or check script that another unit owns and that is not on disk yet is NOT a finding: other units are still writing. Everything else is a nit. ok=true only with zero blocking lines.`
 
 const repairPrompt = (u, rv) => `${authorPrompt(u)}
 
@@ -136,7 +137,7 @@ ${CONTEXT}
 
 ${unitBlock(u)}
 
-You are the INTEGRATION worker. Every other unit has been written: ${done.map(d => d.written.join(', ')).join('; ')}.${failed.length ? ` These units did NOT finish and their artifacts must be left out of every shared file: ${failed.join(', ')}.` : ''}
+You are the INTEGRATION worker. Every order-1 unit in ${R}/product-resume/authoring-units.json has been written, some in an earlier run; confirm each artifact on disk before you list it anywhere.${failed.length ? ` These units did NOT finish and their artifacts must be left out of every shared file: ${failed.join(', ')}.` : ''}
 Read the plan's sections on bundles, publish.toml, docs companions, the taskfile step and the collision table, then the existing shapes: ${W}/publish.toml, ${W}/bundles/go-essentials.toml, ${W}/docs/go-quality.md, the artifacts task in ${W}/taskfile.yml.
 Do exactly what the plan specifies for the shared files, copying the existing shape entry for entry: publish.toml entries for every new artifact that exists on disk, the bundle files, one docs/<name>.md companion per new artifact (description claims must match what the artifact actually contains: open it), the taskfile step, and each cross-edit to an existing rule or skill that the collision table lists (smallest edit that states the routing; bump that artifact's version in publish.toml the way the catalog does for a changed artifact).
 Then, from ${W}, run: python3 ${C}/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' over every new rule and skill, and report each finding. Do not run anything that publishes.

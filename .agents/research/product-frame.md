@@ -90,4 +90,77 @@ is a named reading heuristic or a platform limit with its source and date.
 
 ## Corrections
 
-None yet.
+### 2026-11-27 — grounding audits, the three selections, and the authoring plan
+
+Sources: `product-resume/selection-ux.json`, `selection-marketing.json`,
+`selection-channels.json` (their `frameCorrections`), the grounding audits
+under `product-audit/`, and `product-authoring-plan.md`.
+
+**The fleet.**
+
+- Only 2 of the 10 fleet sites have a true landing page. The other 8 open on
+  documentation, so "landing" was ambiguous; the marketing set scopes its
+  first-screen rules by a `doc_surface: pitch` declaration instead.
+- The larger GUI is the VS Code extension (42 files, about 25,000 lines, 183
+  host-to-webview message calls), not `grimoire-rs/grim-gui`, which is a
+  skeleton. The extension's UI is reached through a `typescript-quality`
+  routing row and the `editor-extensions.md` depth file.
+- Existing UI guidance lives in six `ocx-theme-*` skills (about 158 KB) outside
+  this catalog. Their portable rows are absorbed into `ux-quality-reference`.
+- An accessibility gate already exists on the main site (Lighthouse at 100,
+  axe in 47 specs), so the UX set extends a practice rather than starting one.
+- The fleet has no social channel and no voice guidance. There is no LinkedIn
+  Page, only personal profiles. A YouTube channel holds 2 Shorts of inferred
+  ownership and is linked from nowhere. Discord has 5 members.
+- Release notes come from git-cliff and cargo-dist, and only 9 of 18
+  repositories publish GitHub Releases.
+- No site runs analytics (0 of 413 pages), and the selection treats that as a
+  decision to record, not a gap to fill.
+- `og:image` appears on 0 of 298 built pages. The repositories carry 61
+  distinct one-line descriptions for 17 products, and six variants of
+  `product-context.md`.
+- Terminal casts (asciinema) are the fleet's demo practice; no video pipeline
+  exists.
+- The MkDocs sites run vendor UI, so `ux-quality` reaches them only through
+  `overrides/` and built HTML.
+
+**The world.**
+
+- Hacker News and Stack Overflow ban generated text, so their skills produce
+  fact sheets for a human, never paste-ready posts.
+- The EU AI Act Article 50 transparency duties apply from 2026-12-02, inside
+  the first refresh window of every artifact that cites them.
+
+**The falsifiers.**
+
+- "CLI and GUI share too little for one rule" fired. `ux-quality` stays the
+  rule for markup, and the CLI and agent surfaces became the skills `ux-cli`
+  and `ux-agent-interfaces`, because no rule glob reaches CLI source.
+- "Channel guidance decays faster than a skill can be refreshed" fired. Every
+  platform skill ships one dated `references/facts.md` in a shared registry
+  format with a per-row `refresh_days`, and catalog CI fails on an overdue row.
+- "No marketing surface beyond READMEs" did not fire: READMEs, manifests, site
+  heads, release bodies and the two landings are all measured surfaces.
+
+**The prefixes.** A third prefix, `channel-`, was added for the platform
+topics (agent boundary, GitHub, LinkedIn, YouTube, microblogs, communities,
+terminal video, launch). Published channel skills are named by platform, not
+by prefix.
+
+**The artifact set, hypothesis against final.**
+
+| Frame hypothesis | Final |
+|---|---|
+| Rule + reference `ux-quality` | Kept: `ux-quality` + `ux-quality-reference`, globs `.astro .tsx .jsx .vue .svelte .html .css .scss` |
+| (none) | Added: `ux-cli`, `ux-agent-interfaces` skills |
+| `ux-review` | Kept |
+| Rule + reference `marketing-copy` | Renamed `marketing-quality` + `marketing-quality-reference`, and absorbs the proposed `site-discoverability` rule |
+| `positioning-brief` | Kept |
+| `landing-page` | Dropped. Its checklist lives in `marketing-review`, and first-screen rules in `first-screen.md` |
+| (none) | Added: `release-notes`, `marketing-review`, `marketing-measurement` |
+| `linkedin-post`, `youtube-video`, `launch-plan` | Kept |
+| (none) | Added: `channel-publishing` (the shared boundary, a required skill rather than the proposed rule), `github-presence`, `microblog-post`, `terminal-demo`, `community-post` |
+| Bundle `product-essentials` (the whole set) | Split: `ux-essentials` and `product-essentials`, because grim refuses nested bundles |
+
+Net: 21 artifacts (2 rules, 2 reference skills, 15 skills, 2 bundles) against
+the frame's 9.
