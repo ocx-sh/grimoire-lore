@@ -5,7 +5,7 @@ summary: The SW-LANG family, owning Linux portability, the toolchain floor and f
 
 # Swift Language and Idioms
 
-Binds to Swift 6.4.0 (current), 6.3.3 (previous) and `swift:6.2.0` (the floor leg for libraries and the SDK), tools
+Binds to Swift 6.4.3 (current; rows measured 2026-10-10 ran on 6.4.0), 6.3.3 (previous) and `swift:6.2.0` (the floor leg for libraries and the SDK), tools
 6.2 for libraries and 6.4 for CLIs and servers, measured 2026-10-10 on Linux x86_64.
 
 This file owns what changes between a Swift 5 habit and a Swift 6.0 to 6.4 tree: Linux modules, the libc import, what
@@ -131,7 +131,7 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.swift' ':(e
 | SW-LANG-05 | Compile any API, attribute, flag or syntax that a release note, blog post, forum thread, WWDC session or earlier research table names, on the floor and the current image, before writing it into code, a rule or a skill. `cannot find ... in scope`, `has no member` and `unknown attribute` are the signals. | Release notes, blogs and tables name APIs that do not compile, and an agent copies them with full confidence. | `swift build` exits 0 on both images with the file compiled and not read. `swiftc -typecheck -swift-version 6 file.swift` proves a name exists, and `swift build` or `swiftc -emit-sil` proves a concurrency form compiles (region-isolation errors appear only after SIL). Watched red on 6.4 and 6.2.0: `withDeadline` (`cannot find 'withDeadline' in scope`), stdlib `FilePath` (`no type named 'FilePath' in module 'Swift'`), `CommandLine.executablePath` (`has no member`) and `@warn` (the attribute is `@diagnose`) each exit 1 (measured 2026-10-10). Owners: `FilePath` is `SW-IO-01`, `defaultSwiftSettings:` is `SW-PKG-01`, the `@warn` spelling is `SW-GATE-13`. | MUST |
 
 First compiler that accepts each form, compiled on 6.1.3, 6.2.0, 6.2.4, 6.3.3 and 6.4.0, plus 6.2.2 and 6.2.3 for the
-two patch-gated forms (measured 2026-10-10):
+two patch-gated forms (measured 2026-10-10; the `6.4.0` and `not in 6.4` rows hold unchanged on 6.4.3 and 6.3.3, measured 2026-11-27):
 
 | First compiler | Forms | Guard |
 |---|---|---|

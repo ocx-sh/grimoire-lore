@@ -7,7 +7,7 @@ consolidates:
   - swift-testing/test-style.md
   - swift-testing/isolation-and-seams.md
 date: 2026-10-10
-revised: 2026-10-10
+revised: 2026-11-27
 ---
 
 # Swift testing: consolidated ruleset (SW-TEST)
@@ -30,7 +30,7 @@ Dated 2026-10-10, Swift 6.4.0 era (prior line 6.3.3). Two sub-artifacts fed this
 
 Established by the revision as gaps, not answers; each is a fact to design around, not an open question.
 
-- **No coverage exclusion.** Four comment markers, `#sourceLocation`, `@_transparent` and `@_semantics` left every count unchanged on 6.3 and 6.4 (lines 1/12); `#if` build switches hide the code from the thing under test. [llvm-project#33625](https://github.com/llvm/llvm-project/issues/33625) is open since 2017 and an inline-marker PR was closed unmerged on 2026-06-13. Only file-level (jq prefix, `--ignore-filename-regex`) and function-name allowlists exist. Re-check at each LLVM bump (SW-TEST-22).
+- **No coverage exclusion.** Four comment markers, `#sourceLocation`, `@_transparent` and `@_semantics` left every count unchanged on 6.3 and 6.4 (lines 1/12); `#if` build switches hide the code from the thing under test. [llvm-project#33625](https://github.com/llvm/llvm-project/issues/33625) is open since 2017 and an inline-marker PR (203723) was closed unmerged on 2026-06-13 and replaced the same day by PR 203724, still open and unmerged (read 2026-11-27). Only file-level (jq prefix, `--ignore-filename-regex`) and function-name allowlists exist. Re-check at each LLVM bump (SW-TEST-22).
 - **No cross-suite serialization on a shipped toolchain.** `.serialized(for:)` is `@_spi(Experimental)` and does not compile from a shipped toolchain even with the SPI import (exit 1 on 6.3 and 6.4); the maintainer's pitch (2026-04-17) is unmerged; the built-in `.taskLocal(_:withValue:)` trait is Swift 6.5 only. Until then isolate by passing the value or a hand-written scoping trait. Re-check at 6.5 (SW-TEST-08, -18).
 - **The measured seam covers exit status and streams only.** Seven recorded cases cover 25/25 core lines and 19/19 core regions, but the replay closure ignores the argv it receives (read from `Replay.swift`; no plant), so a change to the flags the SDK sends passes all of them. SW-IO-26's timeout race, cancellation and kill ladder sit in the excluded spawn module here; `ocx-sdk-python` unit-tests its ladder through `popen_factory`, `clock` and `kill_grace` under its 100% gate, and no Swift equivalent was measured here (SW-TEST-20). The api/sdk-shape round answered it differently rather than closing it: its reference SDK drops the replacing runner and tests the timeout race, cancellation and kill ladder against a fake CLI out of process, because three of its planted reds (`red-a`, `red-b`, `red-c`) fail only against real children ([swift-api](swift-api.md) SW-API-13, K4, R8; not re-run here). Which design the SDK takes is Q-T8.
 - **100% regions has one real-code measurement, and it missed.** The fixture has 19 core regions and passes; swift-api's reference SDK (a swift-subprocess runner, 467 source lines) is 283/283 lines and 179/182 regions (`Discovery.swift` 27/29, `ProcessRunner.swift` 50/51; the three regions were not investigated; [swift-api](swift-api.md) R11, not re-run here), so a regions gate at 100 is red there. Generic specializations, `defer` and `catch` arms remain the suspects (Q-T7).
@@ -152,7 +152,7 @@ Index (24 rules, 14 MUST): grep or diff over test sources, 01-05 and 18-19; comp
 - Watched: yes for behaviour (V9: exit 1 at 60 s; exit 124 for both hangs); the static side is a reading heuristic.
 - Severity SHOULD. Floor: Swift 6.0 (ST-0004). From 09.
 
-**SW-TEST-14. Triage a flake in this order: `--no-parallel`, then `--repeat-until fail`; fix the isolation, never commit the flag.** First `swift test --no-parallel`; if green, apply SW-TEST-04/05 and 18/19. For an intermittent failure on 6.4+: `swift test --filter MyTests --repeat-until fail --maximum-repetitions 100`. `--num-workers` and `--parallel` do nothing for Swift Testing. A committed `--no-parallel` is acceptable only for suites that measure timing (SwiftLint, swift-build, Nuke performance). A test-process crash (`Program crashed`) exits 1, not 139.
+**SW-TEST-14. Triage a flake in this order: `--no-parallel`, then `--repeat-until fail`; fix the isolation, never commit the flag.** First `swift test --no-parallel`; if green, apply SW-TEST-04/05 and 18/19. For an intermittent failure on 6.4+: `swift test --filter MyTests --repeat-until fail --maximum-repetitions 100`. `--num-workers` and `--parallel` do nothing for Swift Testing. A committed `--no-parallel` is acceptable only for suites that measure timing (SwiftLint, swift-build, Nuke performance). A test-process crash (`Program crashed`) exits 1, not 139. Dated fact: 6.4.0's repetition policy counted a warning or known issue as a failure; fixed in 6.4.1 by swift-testing#1924 (read 2026-11-27, not re-measured here).
 - Check: `swift test --repeat-until fail --maximum-repetitions 50` exits 0 on the fixed suite and 1 on the racy one.
 - Watched: yes. V4, V5 (three plain runs green, one red; repeat exit 1; compliant twin exit 0; toolchain 6.3 `Unknown option '--repeat-until'`, exit 64); IS-V1 (a flaky cwd suite: `--maximum-repetitions 50 --repeat-until fail` exit 1 on 6.4 with 480 issues in 2.6 s, exit 64 on 6.3; `--no-parallel` 0/30 red on both).
 - Severity SHOULD. Floor: Swift 6.4 for repetition (ST-0024). From 06.
@@ -397,6 +397,11 @@ Revision 1, audit pass, 2026-10-10: the file was re-read against its sub-artifac
 - SW-TEST-18 (text added): a long Unix-domain socket path is not a reason to `chdir`; swift-nio's fallback is itself a violation (lines re-read at `e12881f2a691`); the remedy is the isolation dive's shorter root, not planted. The dive had this finding and the first revision dropped it.
 - Cross-references corrected: SW-CONC-16 to SW-CONC-27 (SW-TEST-17, the sanitizer conflict), SW-CLI-17 to SW-CLI-14 (the exit-test conflict, Applied row 07/11). The two SW-GATE hand-offs (E08 replaced by the SW-TEST-03 grep, step 3 carrying the interop prefix) are marked done.
 - Re-run from the final text: the SW-TEST-18 to -22 greps on the isolation dive's fixtures reproduce C16 to C20 (see the Verification runs preamble). Reverse hand-offs still open outside this file: SW-IO-24 and SW-IO-26 should cite SW-TEST-18 and SW-TEST-20, and SW-CONC-27 should drop "advisory only" (swift-gates already says so).
+
+Delta refresh, 2026-11-27: no rule ID changed, no ID added.
+
+- 2026-11-27: SW-TEST-14 gained the dated fact that 6.4.0's repetition policy counted a warning or known issue as a failure, fixed in 6.4.1 by swift-testing#1924; see [swift-quality delta decision](refresh-2026-11/swift-quality.md) (verdict item 6).
+- 2026-11-27: the "No coverage exclusion" gap (SW-TEST-22) gained the replacement llvm-cov PR 203724, still open and unmerged; the gap itself stands; see [swift-quality delta decision](refresh-2026-11/swift-quality.md) (verdict item 6).
 
 ## Sub-artifacts
 

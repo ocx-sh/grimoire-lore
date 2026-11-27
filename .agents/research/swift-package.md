@@ -7,6 +7,7 @@ consolidates:
   - swift-package/manifest-policy.md
   - swift-package/dependencies-and-resolution.md
 date: 2026-10-10
+revised: 2026-11-27
 ---
 
 # Swift manifest and dependencies (SW-PKG), consolidated
@@ -55,9 +56,9 @@ Conventions. A grep, awk, find or jq check's **output is the violation; empty ou
 ### A. The toolchain catches it (manifest evaluation, build or resolve exit status)
 
 **SW-PKG-01 (MUST, any tools version; 6.4 era).** Never write `defaultSwiftSettings:` or `.defaults` inside `swiftSettings`; apply shared settings with the loop of SW-PKG-18.
-- Why: SE-0540 is accepted with modifications (2026-09-06) but unshipped; implementation PR [#10033](https://github.com/swiftlang/swift-package-manager/pull/10033) was open and blocked on 2026-10-10 and the symbol is absent from `PackageDescription.swift` at `5546f44a3b52`. On 6.4 it is `error: extra argument 'defaultSwiftSettings' in call` (exit 1) [MP §8]. A helper variable that merely shares the name is legal.
+- Why: SE-0540 (retitled Default Target Settings) is implemented for Swift 6.5 and gated at tools 6.5; implementation PR [#10033](https://github.com/swiftlang/swift-package-manager/pull/10033) merged to `main` on 2026-10-20 and is on `release/6.5.x`, but is in no 6.4.x tag through 6.4.3 (read 2026-11-27); the symbol is absent from `PackageDescription.swift` at `5546f44a3b52`. On 6.4 it is `error: extra argument 'defaultSwiftSettings' in call` (exit 1) [MP §8]. A helper variable that merely shares the name is legal.
 - Check: `grep -rnE --exclude-dir='.build' 'defaultSwiftSettings *:|swiftSettings: *\[ *\.defaults' --include='Package.swift' . | grep -vE '(let|var) +defaultSwiftSettings'`; the build form is `swift build` exit 1.
-- Red: **yes**, [MP V25] (build exit 1 on 6.4, grep red); the dive's first form `^[^/]*\.defaults\b` also matched `traits: [.defaults, "Foo"]` and a same-named variable, so it is replaced; [CN R4] the refined form prints 2 lines on `plants/defset-red` and on `default/uses-default`, 0 on a `let defaultSwiftSettings` twin, a wrapped `traits: [.defaults, "Foo"]` and the skeletons. Re-run when #10033 ships; then the loop body moves into the argument unchanged.
+- Red: **yes**, [MP V25] (build exit 1 on 6.4, grep red); the dive's first form `^[^/]*\.defaults\b` also matched `traits: [.defaults, "Foo"]` and a same-named variable, so it is replaced; [CN R4] the refined form prints 2 lines on `plants/defset-red` and on `default/uses-default`, 0 on a `let defaultSwiftSettings` twin, a wrapped `traits: [.defaults, "Foo"]` and the skeletons. Re-run when the first Swift 6.5 release tag exists (none on 2026-11-27). The argument needs `// swift-tools-version: 6.5`, so only a manifest at tools 6.5 moves the loop body into it, and a tools-6.2 library keeps the loop.
 - Binds: every manifest.
 
 **SW-PKG-02 (SHOULD, tools 6.2).** The root manifest of a library, SDK, CLI or server carries `.treatWarning("StrictLanguageFeatures", as: .error)` in the shared settings, and CI builds on a toolchain that knows every listed feature name.
@@ -392,7 +393,7 @@ let package = Package(
     swiftLanguageModes: [.v6]
 )
 
-// Swift 6.4 has no per-package default settings (SE-0540 is accepted, not shipped): one loop sets them for every target.
+// Swift 6.4 has no per-package default settings (SE-0540 needs tools 6.5): one loop sets them for every target.
 for target in package.targets where [.regular, .executable, .test].contains(target.type) {
     target.swiftSettings =
         (target.swiftSettings ?? []) + [
@@ -441,7 +442,7 @@ Ranked by corpus frequency times blast radius. Agent failure itself is not measu
 
 | # | Mistake | Why it compiles or looks right | Mechanical check |
 |---|---|---|---|
-| 1 | Writes `defaultSwiftSettings:` / `.defaults` after reading WWDC26 or SE-0540 text | the proposal is accepted and documented; the manifest fails to compile on 6.4 | SW-PKG-01 grep; `swift build` exit 1 |
+| 1 | Writes `defaultSwiftSettings:` / `.defaults` after reading WWDC26 or SE-0540 text | the proposal is implemented for Swift 6.5 and documented; the manifest fails to compile on 6.4 | SW-PKG-01 grep; `swift build` exit 1 |
 | 2 | Reads the floor with `head -1 Package.swift` or `jq .swiftLanguageModes` and concludes "no mode declared"; edits `Package.swift` while a `Package@swift-X.swift` shadows it | tools-version may be on line 2; the key is `swiftLanguageVersions`; the edit has no effect | SW-PKG-06 command under `pipefail` (red runs MP V08, V09, CN R7) |
 | 3 | Keeps `swift package init`'s template: tools 6.4 on a library, the `ApproachableConcurrency` bundle, no mode | the template is what the tool printed | SW-PKG-12, 13, 16, 07 (MP V13, V14, V23) |
 | 4 | `from: "604.0.0"` for swift-syntax; closed range `"1.0.0"..."2.0.0"`; `from: "1.0"`; `exact:`, `branch: "main"` or `revision:` to silence a resolver conflict | the Xcode macro template writes the first; the others make the error go away | SW-PKG-10 and 09 jq (DR V6, V14, V15; CN R2, R9) |
@@ -476,7 +477,7 @@ Ranked by corpus frequency times blast radius. Agent failure itself is not measu
 2. **swift-syntax prebuilts (dependencies).** On a distro SwiftPM lists (ubuntu noble, fedora 41, rhel 9, debian 12), does an exact-prerelease pin defeat prebuilts where a range does not? The research image (Ubuntu `resolute`) is unlisted, so "defeats prebuilts" stays an inference from the version-keyed lookup [DR §6].
 3. **Unresearched P3 rows M-L-17..20 (dependencies).** Binary targets, registries, test-target-only settings and local `path:` dependencies; in particular whether a `path:` dependency blocks a version-tag consumer (it does not for `unsafeFlags`, MP V01) and what SW-PKG-09 should say about registry `id:` dependencies, which the jq filter does not read (tuist has 62).
 4. **Xcode and macOS (manifest, dependencies).** How the same manifests behave in Xcode 26.x (the xcodebuild lock flag `-onlyUsePackageVersionsFromResolvedFile`, `Package.resolved` under `xcshareddata`, traits support from 26.4, deployment floors from `platforms:`). All `unverified: read only`; needs a macOS runner.
-5. **Re-check when the ecosystem moves (manifest, dependencies).** Re-run SW-PKG-01, 18 and the loop when SE-0540 / PR #10033 ships; re-run SW-PKG-10 and 34 when SwiftPM supports multiple majors ([forum 86317](https://forums.swift.org/t/multiple-major-versions-of-a-package-in-swiftpm-opening-the-discussion/86317)); bump the `lo`/`hi` constants of SW-PKG-10 at each Swift release.
+5. **Re-check when the ecosystem moves (manifest, dependencies).** Re-run SW-PKG-01, 18 and the loop when the first Swift 6.5 release tag exists (SE-0540 / PR #10033, merged to `main` and `release/6.5.x`, in no 6.4.x tag through 6.4.3); re-run SW-PKG-10 and 34 when SwiftPM supports multiple majors ([forum 86317](https://forums.swift.org/t/multiple-major-versions-of-a-package-in-swiftpm-opening-the-discussion/86317)); bump the `lo`/`hi` constants of SW-PKG-10 at each Swift release.
 
 ## Sub-artifacts
 
@@ -492,8 +493,8 @@ Ranked by corpus frequency times blast radius. Agent failure itself is not measu
 4. https://docs.swift.org/swiftpm/data/documentation/packagedescription/swiftsetting/enableupcomingfeature(_:_:).json : "Targets will ignore any unknown upcoming features".
 5. https://www.swift.org/migration/data/documentation/swift-6-concurrency-migration-guide/featuremigration.json : `swift package migrate` and its failure with settings in a variable.
 6. https://www.swift.org/migration/data/documentation/swift-6-concurrency-migration-guide/enabledataracesafety.json : tools 6.0 enables mode 6; the per-target pattern.
-7. https://github.com/swiftlang/swift-evolution/blob/main/proposals/0540-default-target-settings.md : SE-0540, accepted with modifications 2026-09-06.
-8. https://github.com/swiftlang/swift-package-manager/pull/10033 : the SE-0540 implementation PR (open, blocked, 2026-10-08).
+7. https://github.com/swiftlang/swift-evolution/blob/main/proposals/0540-default-target-settings.md : SE-0540 (Default Target Settings), accepted with modifications 2026-09-06, "Implemented (Swift 6.5)" on 2026-11-27.
+8. https://github.com/swiftlang/swift-package-manager/pull/10033 : the SE-0540 implementation PR (open and blocked 2026-10-08; merged to `main` 2026-10-20, on `release/6.5.x`, in no 6.4.x tag through 6.4.3).
 9. https://raw.githubusercontent.com/swiftlang/swift/release/6.4.0/include/swift/Basic/Features.def : the 15 + 6 upcoming features and their groups (identical to `release/6.3`).
 10. https://raw.githubusercontent.com/swiftlang/swift/release/6.4.0/userdocs/diagnostics/strict-language-features.md : the silent-by-default rationale of `StrictLanguageFeatures`.
 11. https://raw.githubusercontent.com/swiftlang/swift-package-manager/main/Sources/PackageManagerDocs/Documentation.docc/ResolvingPackageVersions.md : `Package.resolved` does not pin libraries; `--force-resolved-versions`.
@@ -501,3 +502,7 @@ Ranked by corpus frequency times blast radius. Agent failure itself is not measu
 13. https://raw.githubusercontent.com/swiftlang/swift-syntax/main/Sources/SwiftSyntax/Documentation.docc/Macro%20Versioning.md : the range plus `canImport(SwiftSyntaxNNN)` guidance.
 14. https://forums.swift.org/t/macros-in-foundational-libraries/82587 : Apple's opt-out position and the trait-pruning criteria (2025-10-08).
 15. https://raw.githubusercontent.com/apple/swift-crypto/main/README.md : "1.x, 2.x, 3.x, 4.x, and 5.x are almost API compatible" and the underscore-is-outside-SemVer policy.
+
+## Revision log
+
+- 2026-11-27: SW-PKG-01 changed in place. SE-0540 is retitled Default Target Settings and implemented for Swift 6.5. Pull request 10033 merged to `main` on 2026-10-20 and is on `release/6.5.x`, but is in no 6.4.x tag through 6.4.3. The re-run trigger becomes the first Swift 6.5 release tag, and a tools-6.2 library keeps the loop. The skeleton comment, AI-agent failure mode 1, Open questions round item 5 and Key sources 7 and 8 match. Decision file: refresh-2026-11/swift-package.md.

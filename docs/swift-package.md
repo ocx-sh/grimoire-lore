@@ -18,7 +18,7 @@ So the first instruction is a command, not a rule. SW-PKG-06 lists the manifests
 
 Measured 2026-10-10 on Swift 6.4.0 and 6.3.3, SwiftLint 0.65.1 and Static Linux SDK 0.1.0, over a 40-repository upstream corpus. macOS, Xcode, Windows and Wasm rows are marked `unverified: read only`.
 
-Agents copy habits that no longer build. `defaultSwiftSettings:` fails on 6.4 with `extra argument` and exit 1, because its proposal is accepted and unshipped. 15 of 38 corpus manifests declare tools below 6.2, and below 6.2 a manifest loses `treatWarning`. `--static-swift-stdlib` links on a toy and exits 1 with an undefined `Mutex` symbol once any Foundation symbol is reachable. The path `.build/x86_64-swift-linux-musl/release` does not exist on 6.4.0, so a `cp` from it exits 1.
+Agents copy habits that no longer build. `defaultSwiftSettings:` fails on 6.4 with `extra argument` and exit 1, because its proposal needs tools 6.5. 15 of 38 corpus manifests declare tools below 6.2, and below 6.2 a manifest loses `treatWarning`. `--static-swift-stdlib` links on a toy and exits 1 with an undefined `Mutex` symbol once any Foundation symbol is reachable. The path `.build/x86_64-swift-linux-musl/release` does not exist on 6.4.0, so a `cp` from it exits 1.
 
 Gates fail quietly. `swift format lint` without `--strict` exits 0 on findings. The static `swiftlint` binary exits 0 on a violating tree and prints one `Skipping enabled rule` line. Only 15 of 40 corpus repositories run the API-breakage check in a way that can fail, and only 12 of 40 gate on warnings as errors. A misspelt upcoming-feature name is ignored with exit 0.
 

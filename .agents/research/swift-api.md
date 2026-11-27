@@ -7,6 +7,7 @@ consolidates:
   - swift-api/library-api-shape.md
   - swift-api/sdk-shape.md
 date: 2026-10-10
+revised: 2026-11-27
 ---
 
 # API and SDK shape (SW-API), consolidated 2026-10-10
@@ -180,8 +181,8 @@ Severity: MUST needs a normative or measured source plus a verification that was
 
 #### Caught by reading, with a scan
 
-**SW-API-24 (MUST). Copy the exit-status table from the ocx source at a pinned commit, never from the Python SDK, and walk 0...255 in a test.** Reading heuristic only, because no mechanical check can know the ocx repository's current table: diff the SDK's `code(forExitStatus:)` cases against `crates/ocx_exit/src/exit_code.rs`. Mapped statuses: 1 `failure`, 64 `usage`, 65 `dataError`, 69 `unavailable`, 74 `ioError`, 75 `tempFail` (the only retry-safe one), 77 `permissionDenied`, 78 `config`, 79 `notFound`, 80 `auth`, 81 `policyBlocked`, 82 `dirtyRcBlock`, 83 `transparencyLogUnavailable`, 84 `referrersUnsupported`, 85 `unsupportedKeyBackend`, 86 `forgeCapabilityUnavailable`, 87 `registryDeleteUnsupported`.
-- Why: `ocx-sdk-python@80136dde4162:src/ocx_sdk/_errors.py:28-51` stops at 86 while `ocx@5de9d777eb7d` assigns 87, so a table copied from Python silently loses a status.
+**SW-API-24 (MUST). Copy the exit-status table from the ocx source at a pinned commit, never from the Python SDK, and walk 0...255 in a test.** Reading heuristic only, because no mechanical check can know the ocx repository's current table: diff the SDK's `code(forExitStatus:)` cases against `crates/ocx_exit/src/exit_code.rs`. Mapped statuses (the ocx 0.6.5 table): 1 `failure`, 64 `usage`, 65 `dataError`, 69 `unavailable`, 74 `ioError`, 75 `tempFail` (the only retry-safe one), 77 `permissionDenied`, 78 `config`, 79 `notFound`, 80 `auth`, 81 `policyBlocked`, 82 `dirtyRcBlock`, 83 `transparencyLogUnavailable`, 84 `referrersUnsupported`, 85 `unsupportedKeyBackend`, 86 `forgeCapabilityUnavailable`, 87 `registryDeleteUnsupported`.
+- Why: `ocx-sdk-python@80136dde4162:src/ocx_sdk/_errors.py:28-51` stops at 86 while `ocx@5de9d777eb7d` assigns 87, so a table copied from Python silently loses a status. The pinned table is ocx 0.6.5's: 0.6.6 (2026-11-12) folded 83 to 87 into its next-action codes, so re-copy it from the current source before use (read 2026-11-27).
 - Verify: reading heuristic: `grep -n -e '= 8[0-9],' -e '= 9[0-9],' crates/ocx_exit/src/exit_code.rs` against the SDK's cases (numbers match one to one); the 0...255 test walks an independently typed expectation, and exit 87 is run through a real child.
 - Run: the 87 child and the 256-value walk are green in the package ([SDK] `childStatusMapsToCode`, `tableCoversEveryStatus`); the diff against the ocx repository was never automated.
 - Binds: SDK. Floor: ocx at the pinned commit.
@@ -334,6 +335,8 @@ Owner decisions (the default the program applies is stated):
 6. **Deprecation timeline.** One major from deprecation to removal is a decided policy ([LIB] §2.9), not a measured fact. Default: keep it.
 7. **Owner Q6 (128 + n) and Q7 (Windows).** Default stays: the SDK maps `128 + s` and keeps `signal`; every Windows row is unverified: read only.
 
+8. **ocx 0.6.6 exit-code fold.** 0.6.6 (2026-11-12) folded statuses 83 to 87 into its next-action codes and the new mapping is not stated. SW-API-24's table and SW-API-16's "88-127 `unknownStatus`" range need a re-measure against ocx 0.6.8. Default: the pinned table stays ocx 0.6.5's and is labelled so.
+
 Subareas that deserve another research round:
 
 - **SDK breadth and drift gate.** The fixture package covers four commands; the Python SDK has 64 result types and 70 command methods generated from `https://ocx.sh/schemas/reports/v1.json`. Question: are the Swift result types hand-written or generated from that schema, which command emits which output shape (`package test -- CMD` prints the child's stdout under `--format json`; report-then-fail commands keep stdout), and what test fails when ocx's schema drifts?
@@ -366,3 +369,7 @@ Renumbering map (dive-local to final). [LIB] 01 to SW-PKG-07 plus SW-API-01; 02 
 - https://github.com/ocx-sh/ocx/blob/5de9d777eb7d/crates/ocx_exit/src/exit_code.rs (ocx exit statuses 0-87, `#[non_exhaustive]`)
 - https://ocx.sh/schemas/reports/v1.json (ocx `--format json` report contract)
 - https://github.com/ocx-sh/ocx-sdk-python/tree/80136dde4162/src/ocx_sdk (the fleet's SDK baseline: `_process.py`, `_errors.py`, `_bootstrap.py`, `_results.py`, `_client.py`)
+
+## Revision log
+
+- 2026-11-27: SW-API-24 rationale and mapped-status label: the pinned table is ocx 0.6.5's, and ocx 0.6.6 folded 83 to 87 into its next-action codes. Open question 8 added for the unknown 0.6.6 mapping and the SW-API-16 "88-127" range. Decision: refresh-2026-11/swift-quality.md.

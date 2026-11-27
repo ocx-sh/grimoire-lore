@@ -26,14 +26,14 @@ Commands in this file were translated 2026-10-11 to the portable dialect (git-fe
 
 - Swift Testing ships in the toolchain from Swift 6.0, and `swift package init` emits it (checked on 6.3 and 6.4). Exit tests need 6.2
   and the `[n]` capture list 6.3. `Test.cancel` needs 6.3 (a 6.2.0 leg fails with `no member cancel`, use the `.enabled(if:)` trait there). `TestScoping` traits need 6.1. `--repeat-until` and `--maximum-repetitions` need 6.4 (on 6.3.3 `swift test` exits 64
-  with `Unknown option`). The interop variable acts only on a 6.4 or later toolchain.
+  with `Unknown option`, and 6.4.0's repetition policy counts a warning or known issue as a failure, fixed in 6.4.1 by swift-testing#1924, read 2026-11-27). The interop variable acts only on a 6.4 or later toolchain.
 - **Pinned defaults, the adopter may override:** interop is `complete`. Apple `measure {}` performance tests stay XCTest. Clocks and
   fakes are hand-written, with no swift-clocks and no mock framework, to hold the SDK's dependency budget. Legacy XCTest trees are not
   rewritten for their own sake. The SDK's coverage design is `SW-API-13` (fake CLI out of process, 100% lines over `Sources/`, nothing
   excluded), and `SW-TEST-20` to `SW-TEST-22` bind a CLI core and any SDK that keeps a replacing runner.
 - Gap: Swift has no line or region coverage exclusion. Four comment markers, `#sourceLocation`, `@_transparent` and `@_semantics` left
   every count unchanged on 6.3 and 6.4 (measured 2026-10-10). [llvm-project#33625](https://github.com/llvm/llvm-project/issues/33625)
-  is open since 2017 and the inline-marker PR 203723 closed unmerged on 2026-06-13. Re-check at 6.5 (`SW-TEST-22`).
+  is open since 2017 and the inline-marker PR 203723 closed unmerged on 2026-06-13, replaced the same day by PR 203724, still open and unmerged (read 2026-11-27). Re-check at 6.5 (`SW-TEST-22`).
 - Gap: `.serialized(for:)` is `@_spi(Experimental)` and does not compile from a shipped toolchain even with the SPI import (exit 1 on
   6.3 and 6.4). The built-in `.taskLocal(_:withValue:)` trait is Swift 6.5 only. Re-check at 6.5 (`SW-TEST-05`, `SW-TEST-08`).
 - Gap: the TSan filter of `SW-GATE-27` passes a real race that TSan reports only as `Swift access race`. No such plant exists, and
