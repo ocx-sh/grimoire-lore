@@ -142,7 +142,7 @@ ${CONTEXT}
 You are a DEEP-DIVE RESEARCHER. Read ${C}/prompt-contracts.md, sections "Shared Preamble", "Deep-Dive Researcher" and "Return Values", and follow that output contract exactly.
 Topic: ${t.label} (${t.slug}). It decides: ${t.question}
 Your subtopic commission (${d.slug}):
-${d.brief}
+${d.brief ? d.brief : `It is the file ${d.briefPath}. Read it in full before anything else; it is handed to you verbatim from the topic map.`}
 
 Start from the scout artifacts for this sub-program (${G.scouts.map(s => `${R}/${s}`).join(', ')}): read the rows your commission names, then go to the primary sources behind them and beyond them.
 Requirements on top of the contract:
@@ -208,7 +208,9 @@ if (critique && !critique.ok) {
   if (revised) map = revised
 }
 if (args.stopAfterMap) return { group: G.name, paused: 'after-map', map }
-let topics = map.selected
+// A saved selection may name a dive by slug alone; its brief is then the file
+// product-resume/briefs/<topic>/<dive>.md.
+let topics = map.selected.map(t => ({ ...t, dives: t.dives.map(d => typeof d === 'string' ? { slug: d, briefPath: `${R}/product-resume/briefs/${t.slug}/${d}.md` } : d) }))
 if (topics.length > MAX_TOPICS) {
   log(`${G.name}: ${topics.length} topics selected, dropped ${topics.slice(MAX_TOPICS).map(t => t.slug).join(', ')}`)
   topics = topics.slice(0, MAX_TOPICS)
@@ -224,7 +226,7 @@ const results = await pipeline(
       let r = await agent(divePrompt(t, d), { label: `dive:${t.slug}:${d.slug}`, phase: 'Dive', model: 'sonnet', schema: DIVE_SCHEMA })
       if (!r) return null
       const chk = await agent(`Model rationale: sonnet, contract check on one research artifact.
-Read ${r.path} in full. You change nothing. ok=false with one line per problem if any fail: frontmatter has date_researched and sources_fetched; it has "Normative guidance candidates" where every rule has a rationale, a severity and a verification; it has "Dated facts", "What an agent must not decide alone" and "Contested"; external claims carry inline URLs (sample ten, fail if more than two lack one); no platform limit, law or statistic without a URL and a date; it answers its commission: ${d.brief.slice(0, 400)}`,
+Read ${r.path} in full. You change nothing. ok=false with one line per problem if any fail: frontmatter has date_researched and sources_fetched; it has "Normative guidance candidates" where every rule has a rationale, a severity and a verification; it has "Dated facts", "What an agent must not decide alone" and "Contested"; external claims carry inline URLs (sample ten, fail if more than two lack one); no platform limit, law or statistic without a URL and a date; it answers its commission: ${d.brief ? d.brief.slice(0, 400) : 'the file ' + d.briefPath + ' (read it)'}`,
         { label: `check:${t.slug}:${d.slug}`, phase: 'Dive', model: 'sonnet', effort: 'low', schema: CHECK_SCHEMA })
       if (chk && !chk.ok) {
         const again = await agent(`${divePrompt(t, d)}

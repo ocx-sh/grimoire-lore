@@ -26,6 +26,7 @@ All under [product-resume/](product-resume/):
 | `selection-channels.json` | 8 topics, 25 dive briefs (CH-GH, CH-CORE, CH-LI, CH-YT, CH-VID, CH-COM, CH-LAUNCH, CH-MB) |
 | `critic-*.json` | what the critic found before each map was revised |
 | `groups.json` | the per-group arguments (territory, scout list, audits) |
+| `briefs/`, `wave1-args-*.json` | one brief file per dive, and the ready-to-pass arguments per group |
 | `map-dive-consolidate.js` | the Workflow script for phases 3 to 5; skips the map when given a selection |
 | `ground-scout-fanout.js` | the Workflow script that ran phases 1 and 2, kept for a later wave |
 
@@ -34,22 +35,19 @@ corrections to the frame.
 
 ## Left, in order
 
-1. **Phases 4 and 5 (dive, consolidate).** Run the stored script once per group,
-   three runs in parallel (the cap is 10 agents per run):
+1. **Phases 4 and 5 (dive, consolidate).** RUNNING since 2026-11-27, one run
+   per group. To restart a group, run the stored script with the contents of
+   `product-resume/wave1-args-<group>.json` as `args` (dives may be given as
+   slug strings; each brief is `product-resume/briefs/<topic>/<dive>.md`):
 
    ```
-   Workflow({
-     scriptPath: ".agents/research/product-resume/map-dive-consolidate.js",
-     args: { today: "<date>", group: <groups.json>.<group>, selection: <selection-<group>.json> }
-   })
+   Workflow({ scriptPath: ".agents/research/product-resume/map-dive-consolidate.js", args: <wave1-args-<group>.json> })
    ```
 
-   `group` is one of `ux`, `marketing`, `channels`. The script writes
-   `<topic>/<dive>.md` per dive and `<topic>.md` per topic, checks each dive
-   against the output contract, and has a skeptic challenge each ruleset before
-   an opus revision. Expect about 74 dives and 23 consolidations.
-   Read the three maps first if the selection should change; edit the JSON to
-   drop or add a topic.
+   The script writes `<topic>/<dive>.md` per dive and `<topic>.md` per topic,
+   checks each dive against the output contract, and has a skeptic challenge
+   each ruleset before an opus revision. 74 dives, 23 consolidations. A topic
+   whose `<topic>.md` already exists is done; drop it from the args first.
 2. **Phase 6 (iterate).** Harvest "deserves another round" and "owner decision"
    items from each consolidation; commission the first, report the second.
    Stop when a wave adds no new MUST rule and no new failure class.
