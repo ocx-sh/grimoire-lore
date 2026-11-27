@@ -13,7 +13,8 @@ reading past `${...}` substitutions, and classes it by its name source:
               with --list and read what the substitution holds.
   UNNAMED     nothing names it (UX-A11Y-03 and 04)
 Colours: in .css, and in colour-bearing lines of .ts, a hex value that is not a
-var(--vscode-*, fallback) fallback fails UX-A11Y-35. Comment lines are skipped.
+var(--vscode-*, fallback) fallback is a UX-A11Y-35 SHOULD finding (reported, house
+policy). Comment lines are skipped.
 
 Usage:
   scan_wv.py [DIR ...] [--list TAG ...] [--self-test]

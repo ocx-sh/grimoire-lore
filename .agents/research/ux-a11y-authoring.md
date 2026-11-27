@@ -61,7 +61,7 @@ custom widgets it must refuse to write.
    Deque's `button-name` page lists `<button title>` as a pass ([Deque](https://dequeuniversity.com/rules/axe/4.14/button-name)).
    MDN calls `title` "highly problematic" for touch and keyboard users ([MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/title), modified 2026-10-01).
    Decision: a control named only by `title` is a finding. It is detected by grep, because axe stays green on it.
-4. **Severity follows the WCAG level, with three deliberate exceptions.** A and AA criteria are MUST.
+4. **Severity follows the WCAG level, with three deliberate exceptions (exception (c) is SHOULD since 2026-11-27).** A and AA criteria are MUST.
    AAA criteria are SHOULD or CONSIDER. That matches the catalog's precedent in DOC-EX-17
    (`skills/docs-quality-reference/examples.md:75`). The exceptions are house policy, and each is
    stated as such. (a) A skip link is MUST on every template with repeated chrome: WCAG accepts
@@ -762,10 +762,10 @@ subtree is at least 1. In persistent navigation, the count of non-anchor `…__l
 
 ### Editor webviews
 
-**UX-A11Y-35 (MUST; the colour clause is house policy; the focus-colour clause is SHOULD).**
+**UX-A11Y-35 (MUST; the colour clause is house policy and SHOULD since 2026-11-27; the focus-colour clause is SHOULD).**
 Inside a VS Code webview:
 - MUST: apply UX-A11Y-01 to -34 in full.
-- MUST, house policy: take every colour from a `--vscode-*` variable. A hex value may appear only
+- SHOULD, house policy (was MUST until 2026-11-27): take every colour from a `--vscode-*` variable. A hex value may appear only
   as a `var()` fallback.
 - MUST: test the webview in the `vscode-high-contrast` theme.
 - SHOULD, until a rendered webview confirms the variable: draw focus from
@@ -2011,3 +2011,4 @@ existing rule.
   confusion tables was added, with the engine versions and the page-load date. Frontmatter:
   `followup-w3-q0.md` added to `consolidates`, `revision: 3`. Sub-artifacts: the follow-up is
   listed.
+- 2026-11-27, UX-A11Y-35: owner decision: house default softened to SHOULD. The colour clause (every colour from a `--vscode-*` variable) drops from MUST to SHOULD because it blocks on a preference, not on a WCAG criterion. The other clauses keep their severity, and the row stays MUST.

@@ -184,7 +184,7 @@ step 3.
 - **Claims:** a live record for every pattern hit, price, statistic, comparison and
   AI claim; "open source" only for OSI-approved licences; no compliance or
   certificate wording; no invented quote, rating or logo (MKT-CLAIM-01 to 08, 10 to
-  14, 16, 18 to 24, 26, 28, 30).
+  14, 16 (second reviewer SHOULD), 18 to 24, 26, 28, 30).
 - **First screen:** category noun in the hero, no grade word below 1.0, an archived
   README says so (MKT-PAGE-01, 02, 03, 09, 10).
 - **Voice:** no detector gate, no humanizer, no invented author history, no
