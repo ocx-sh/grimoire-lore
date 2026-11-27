@@ -34,7 +34,7 @@ Artifacts: ${u.artifacts.join(', ')}
 Files you may write (paths relative to ${W}; a trailing slash means the directory): ${u.files.join(', ')}
 Plan section that specifies it: "${u.spec}" in ${PLAN}
 Source consolidations (read each in full): ${(u.sources || []).map(s => `${R}/${s}.md`).join(', ') || 'none; see the plan section'}
-Rule families: ${(u.idFamilies || []).join(', ') || 'none'}`
+Rule families: ${(u.idFamilies || []).join(', ') || 'none'}${u.note ? `\nNote from the orchestrator (overrides the plan where they differ): ${u.note}` : ''}`
 
 const AUTHOR_SCHEMA = {
   type: 'object',
