@@ -12,8 +12,11 @@ consolidates:
   - cmake-audit/fleet-inventory-and-bazel-overlap.md
   - cmake-topic-map.md (rows M-A-01..07, M-B-01..11, conflicts 1-4, 16-18)
   - cmake-topic-map/era-recheck-2026-09-26.md
+  - refresh-2026-11/cpp-packaging.md
+  - refresh-2026-11/cmake-build.md
 date: 2026-09-26
 verified: 2026-09-26
+revised: 2026-11-27
 ---
 
 # Versions, floors and the configure gate
@@ -31,17 +34,21 @@ tree was deleted afterwards.
 1. **The configure gate is chosen per binary, and it is the lint layer.** On
    CMake ≥4.4 it is `-Werror=author`. On ≤4.3 it is `-Werror=dev`. A single
    invocation shared by legs on both sides of 4.4 uses `-Werror=dev`: 4.4.2
-   still honours it, with one stderr notice ([gate] §1). `-Werror=author` on a
+   still honours it, with one stderr notice ([gate] §1), and so do 4.5.0 and
+   4.5.1 (measured 2026-11-27). `-Werror=author` on a
    binary below 4.4 is a **silent no-op** (exit 0 on 3.31.12 and 4.3.4,
-   [gate] §1). That, not `-Werror=dev`, is the MUST-never. No maintained
-   semantic CMake linter exists ([floors] §7), so the gate plus named greps do
+   [gate] §1). That, not `-Werror=dev`, is the MUST-never. No semantic
+   CMake linter exists ([floors] §7), so the gate plus named greps do
    the linting and gersemi does the formatting.
 2. **The 4.4 gate is stricter than the 3.x gate.** Beyond author warnings it
    fails on absolute install destinations [M1], and on both lines it fails on
    every unset-policy warning [M4b] and on any **dependency** whose effective
    policy version is below 3.10 [M8]. A gate that passes on the floor leg can
    still fail on the newest leg, so CI runs both (binds: application consuming
-   packages, library shipping a package).
+   packages, library shipping a package). On 4.5 the gate also fails seven
+   directory-scope commands through the new `CMD_STRICT` and
+   `CMD_NON_TARGET_DIRECTIVE` categories, inside fetched subprojects too
+   (`CMK-CORE-06`, measured 2026-11-27 on 4.4.5 and 4.5.1).
 3. **The assumed floor stays 3.25, written as a three-dot range.** Debian 12
    ships exactly 3.25.1. Every other surveyed distro and CI image clears it.
    Ubuntu 22.04's apt 3.22.1 sits below every candidate floor, so lowering the
@@ -74,14 +81,14 @@ tree was deleted afterwards.
    (`cmake-policies(7)`, 4.4.2), so OLD is the silent escape an agent reaches
    for, and a grep has to catch it.
 7. **Bazel-wrapped dependencies are written against CMake 3.31.12 and
-   ≤4.0.7.** rules_foreign_cc 0.16.0 still defaults to 3.31.12, with a range
-   of 3.19.8–4.0.7 ([bzl-seam] headline), so a wrapped project's gate is the
+   ≤4.0.7.** rules_foreign_cc 0.16.0 and 0.17.0 still default to 3.31.12, with a
+   range of 3.19.8–4.0.7 ([bzl-seam] headline; 0.17.0 read 2026-11-27), so a wrapped project's gate is the
    `-Werror=dev` line and nothing 4.3+ applies. Cite `CMK-BZL` and `BZL-CC-24`
    here, and restate neither.
 
 ## The ruleset
 
-Fourteen rules: 9 MUST, 4 SHOULD, 1 CONSIDER. Rows are grouped by the check
+Fifteen rules: 10 MUST, 4 SHOULD, 1 CONSIDER. Rows are grouped by the check
 that catches them. The **gate canary** is referenced throughout: configure a
 three-line scratch project with the leg's exact binary and flags, where exit 1
 means the gate is live and exit 0 means it is inert.
@@ -105,6 +112,8 @@ message(AUTHOR_WARNING "gate canary")
   *Rationale:* `-Werror=author` is silently ignored on 3.31.12 and 4.3.4
   (exit 0). `-Werror=dev` errors on all three binaries, and on 4.4.2 it maps
   onto `author` and prints `The error=dev option is deprecated` ([gate] §1).
+  The canaries exit 1 under `-Werror=dev` on 4.4.5, 4.5.0 and 4.5.1 as well
+  (measured 2026-11-27).
   `-Werror=author` also promotes the `deprecated`, `experimental`, `policy` and
   `install-absolute-destination` children [M1] ([gate] §2).
   *Verify:* the gate canary on each leg's exact binary and flags: exit 0 is
@@ -112,13 +121,16 @@ message(AUTHOR_WARNING "gate canary")
   `grep -rn -e 'Werror=author' -e 'Werror=dev' .github/workflows`. Empty
   output means no gate exists (finding). A `Werror=author` hit on a leg that
   can resolve CMake below 4.4, such as a runner default of 3.31.6
-  ([floors] §1), is a finding.
+  ([floors] §1), is a finding. On 2026-11-27 `ubuntu-24.04` and `windows-2025`
+  ship 3.31.6, while `macos-15` and `ubuntu-latest` (now Ubuntu 26.04) ship 4.5,
+  so one unpinned workflow runs two gates.
 - **CMK-CORE-02 · MUST · presets schema 12 = CMake 4.4.** When a
-  `CMakePresets.json` raises `"version"` to 12, rename `warnings.dev` and
+  `CMakePresets.json` raises `"version"` to 12 or later, rename `warnings.dev` and
   `errors.dev` to `author` in the same edit. For one presets file that must
   gate 3.31 through 4.4, stay at schema ≤10 with `"errors": {"dev": true}`.
   *Rationale:* 4.4.2 rejects `dev` under schema 12 ("File version must be 11
-  or lower for warnings.dev support"). 3.31.12 accepts schema ≤10 and 4.3.4
+  or lower for warnings.dev support"), and so do 4.4.5 and 4.5.1, which also
+  rejects it under schema 13 (measured 2026-11-27). 3.31.12 accepts schema ≤10 and 4.3.4
   accepts ≤11 ([gate] §3). Schema 10 with `errors.dev` gates on all three
   binaries with no deprecation notice [M6].
   *Verify:*
@@ -152,14 +164,14 @@ message(AUTHOR_WARNING "gate canary")
 
 **Caught by a grep over CI and tool configuration**
 
-- **CMK-CORE-04 · SHOULD · gersemi 0.29.1 (2026-09-14).** Use `gersemi --check`
+- **CMK-CORE-04 · SHOULD · gersemi 0.29.2 (2026-10-01), which fixes 0.29.1's regression in formatting unknown commands.** Use `gersemi --check`
   as the only CMake formatting gate. Never add cmake-format or cmake-lint. Treat
   an existing `.cmake-format*` config or `cmake-format -i` job as something to
   migrate, never to extend. Never write "the linter catches this": name the
   gate category or the grep instead.
   *Rationale:* cmake-format and cmake-lint last released 0.6.13 on 2020-08-19,
-  and no maintained semantic linter exists (`marzer/check-cmake` last pushed
-  2025-08-07) ([floors] §7). Three exemplars still run the dead tool in CI
+  and no semantic linter exists (`marzer/check-cmake`, v0.6.0 of 2026-10-15,
+  matches patterns and has no model of CMake semantics) ([floors] §7). Three exemplars still run the dead tool in CI
   ([mod-test] §7). Adoption is 0 of 46, so this is SHOULD (owner default Q6).
   The `--definitions` and `# gersemi: hints` mechanics belong to `CMK-MOD`
   ([mod-test] §6).
@@ -182,6 +194,34 @@ message(AUTHOR_WARNING "gate canary")
   Empty output passes. A hit in a file that also sets `pipefail` is the
   finding. The pattern catches separated flags (`grep -E -q`), `rg -q` and
   `grep -m1`, which the first version missed (verify wave 2).
+
+**Caught by the gate on a CMake 4.5 leg**
+
+- **CMK-CORE-06 · MUST · CMake 4.5 or newer.** On a leg whose binary is CMake
+  4.5 or newer, expect the gate to fail every directory-scope command that has
+  a `target_*` equivalent (`include_directories`, `add_definitions`,
+  `add_compile_definitions`, `add_compile_options`, `link_directories`,
+  `link_libraries`, `add_link_options`), inside fetched and vendored
+  subprojects too. Migrate a hit in your own code (`CMK-TGT-03`). For a hit
+  only inside a dependency, pass `-Wno-error=non-target-directive` on that
+  leg's command line, with a comment naming the dependency and the exit
+  condition. Never put that exemption in a committed preset, and never relax
+  the gate itself (`-Wno-error=author`, `-Wno-error=dev`, or dropping it).
+  *Rationale:* 4.5.0 (2026-11-12) added `CMD_STRICT` under `CMD_AUTHOR` and
+  `CMD_NON_TARGET_DIRECTIVE` under `CMD_STRICT`. Both default to ignore, but
+  the gate promotes them through the parent chain. On 4.5.1 each of the seven
+  commands exits 1 under `-Werror=author`, a call inside an `add_subdirectory`
+  dependency too, while `set(CMAKE_CXX_STANDARD 17)` exits 0 and the same files
+  exit 0 on 4.4.5. `-Werror=author -Wno-error=non-target-directive` exits 0
+  (measured 2026-11-27). Unpinned `macos-15` and `ubuntu-latest` legs already
+  run 4.5, so a tree that is green on 4.4 turns red there with no edit. The
+  likely agent reaction is to drop or relax the whole gate.
+  *Verify:* the gate canary's configure on the 4.5 binary: exit 0 passes. Then
+  `git ls-files -z --cached --others --exclude-standard -- ":(glob)$CI_DIR/**" ':(glob)**/CMakePresets.json' | xargs -0 -r grep -H -n -e 'non-target-directive' -e 'nonTargetDirective' -e 'Wno-error=author' -e 'Wno-error=dev' --`.
+  Empty output passes. A `Wno-error=author` or `Wno-error=dev` hit is the
+  finding, and so is any presets-file hit. A CI hit on `non-target-directive`
+  passes only with an adjacent comment that names a dependency and an exit,
+  and only while `CMK-TGT-03`'s grep prints no own-code line.
 
 ### CMK-VER — versions, floors, policies and experimental gates (`versions-and-policies.md`)
 
@@ -219,8 +259,9 @@ message(AUTHOR_WARNING "gate canary")
   leg. Include one leg at the declared floor and one at `<max>`. Never rely
   on the runner image or the distro package.
   *Rationale:* image defaults differ by OS on the same day: 3.31.6 on
-  `ubuntu-24.04` and `windows-2025`, 4.4.2 on `macos-15`. Ubuntu 22.04's apt
-  ships 3.22.1 ([floors] §1). A floor that no leg runs is a claim, not a
+  `ubuntu-24.04` and `windows-2025`, 4.5 on `macos-15` and on `ubuntu-latest`,
+  which moved to Ubuntu 26.04 between 2026-10-19 and 2026-11-19 (as of
+  2026-11-27). Ubuntu 22.04's apt ships 3.22.1 ([floors] §1). A floor that no leg runs is a claim, not a
   contract ([prac] §9, argued; [ocx] §10, measured).
   *Verify:*
   `grep -rn -e 'get-cmake' -e 'setup-cmake' -e 'cmake==' .github/workflows`.
@@ -240,19 +281,20 @@ message(AUTHOR_WARNING "gate canary")
   floor, guard it with `if(CMAKE_VERSION VERSION_GREATER_EQUAL X.Y)` and the
   fallback idiom. Guard a policy with `if(POLICY CMPxxxx)`.
   *Rationale:* these are hard command floors with no OLD/NEW fallback
-  ([floors] rule 10). Features that exist only on `master`/4.5 do not exist on
-  4.4.3: presets schema 13, `CMD_STRICT`, `CMD_NON_TARGET_DIRECTIVE` and
-  `cmake_language(PRINT_TARGETS)` ([map] H2, conflict 3). The
+  ([floors] rule 10). A feature newer than the pinned binary does not exist on it: presets
+  schema 13, `CMD_STRICT`, `CMD_NON_TARGET_DIRECTIVE` and
+  `cmake_language(PRINT_TARGETS)` are absent from 4.4.5 and arrived with 4.5.0
+  (2026-11-12) ([map] H2, conflict 3). The
   `if(POLICY …)` guard is used by 20 of 43 repos ([shape] §1).
   *Verify:*
-  `grep -rn --include='CMakeLists.txt' --include='*.cmake' -e 'block(' -e 'return(PROPAGATE' -e 'FIND_PACKAGE_ARGS' -e 'OVERRIDE_FIND_PACKAGE' -e 'SET_DEPENDENCY_PROVIDER' -e 'PROJECT_IS_TOP_LEVEL' -e 'FILE_SET' -e 'CXX_MODULES' -e 'PACKAGE_INFO' .`.
+  `grep -rn --include='CMakeLists.txt' --include='*.cmake' -e 'block(' -e 'return(PROPAGATE' -e 'FIND_PACKAGE_ARGS' -e 'OVERRIDE_FIND_PACKAGE' -e 'SET_DEPENDENCY_PROVIDER' -e 'PROJECT_IS_TOP_LEVEL' -e 'FILE_SET' -e 'CXX_MODULES' -e 'PACKAGE_INFO' -e '[(]SBOM' -e 'add_custom_rule' -e 'PRINT_(PROPERTIES|TARGETS|VARIABLES)' -e 'PATH_IS_PREFIX' .`.
   A hit whose feature floor, from the table, is above the declared `<min>`
   and outside a version guard is the finding. Empty output passes. For
   generators, run
-  `grep -rn --include='CMakePresets.json' --include='*.yml' -e 'Visual Studio 9' -e 'Visual Studio 10' -e 'Visual Studio 11' -e 'Visual Studio 12' -e 'Visual Studio 18' -e 'FASTBuild' .`
+  `grep -rn --include='CMakePresets.json' --include='*.yml' -e 'Visual Studio 9' -e 'Visual Studio 10' -e 'Visual Studio 11' -e 'Visual Studio 12' -e 'Visual Studio 14' -e 'Visual Studio 18' -e 'FASTBuild' .`
   and settle each hit with `cmake --help` on that leg's binary.
 
-  | Feature | versionadded (4.4.2 source) |
+  | Feature | versionadded (read on 4.4.2, the 4.5 row on 4.5.1) |
   |---|---|
   | `string(JSON)` | 3.19 |
   | `PROJECT_IS_TOP_LEVEL` | 3.21 (below it, use the `CMAKE_SOURCE_DIR STREQUAL` shim) |
@@ -264,7 +306,8 @@ message(AUTHOR_WARNING "gate canary")
   | `Visual Studio 18 2026`, `FASTBuild` generators | 4.2 |
   | `install(PACKAGE_INFO)`, ungated | 4.3 |
   | `-Werror=author`, `block(SCOPE_FOR DIAGNOSTICS)`, presets schema 12 | 4.4 |
-  | removed: VS 10 2010 at 3.25, VS 11 2012 at 3.28, VS 9 2008 at 3.30, VS 12 2013 at 3.31 | — |
+  | `import std` and `install(SBOM)` ungated, `CMD_STRICT`, `CMD_NON_TARGET_DIRECTIVE`, `cmake_language(PRINT_TARGETS)` and its `PRINT_PROPERTIES` and `PRINT_VARIABLES` siblings, `add_custom_rule()`, `if(PATH_IS_PREFIX)`, `math(INCREMENT)`, `ctest --out-of-date`, presets schema 13 | 4.5 |
+  | removed: VS 10 2010 at 3.25, VS 11 2012 at 3.28, VS 9 2008 at 3.30, VS 12 2013 at 3.31, VS 14 2015 at 4.5 | — |
 
 **Caught by a grep over fetched and vendored trees**
 
@@ -319,7 +362,11 @@ message(AUTHOR_WARNING "gate canary")
   CMP0188 `FindGCCXML`, CMP0191 `FindCABLE`) are migrated to their
   replacements. The replacement details belong to `CMK-DEP` (M-G-16).
   *Rationale:* an unset policy is a gate error on 3.31.12 and 4.4.2 [M4b], but
-  an explicit OLD passes the gate silently on both [M4]. The OLD behaviour is
+  an explicit OLD passes the gate silently on both [M4]. CMP0177 OLD passes on
+  3.31.12 through 4.5.1, CMP0155 OLD passes through 4.3.4 and fails the gate
+  from 4.4.2 on even inside `if(POLICY)`, and CMP0126 OLD fails the gate on
+  every binary from 3.31.12 (the 4.5.1 results measured 2026-11-27 on 4.4.5
+  and 4.5.1). The OLD behaviour is
   "deprecated by definition and may be removed" (`cmake-policies(7)`, 4.4.2).
   *Verify:*
   `grep -rnE --include='CMakeLists.txt' --include='*.cmake' -e 'cmake_policy\([[:space:]]*SET[[:space:]]+CMP[0-9]+[[:space:]]+OLD' .`.
@@ -328,28 +375,40 @@ message(AUTHOR_WARNING "gate canary")
 
 **Caught by reading the change that moves a version**
 
-- **CMK-VER-08 · SHOULD · 77 policies introduced after 3.25, as of 4.4.2.**
+- **CMK-VER-08 · SHOULD · 77 policies introduced after 3.25 as of 4.4.2, and 84 as of 4.5.1.**
   Treat raising `<max>` or the floor as a behaviour change. List the policies
   that the new version adds (`cmake --help-policies` on the new binary) and
   review the DECIDE set before merging: CMP0155 (C++ ≥20 sources scanned for
   modules, 3.28), CMP0168–CMP0170 (FetchContent steps, `FetchContent_Populate`,
   `FULLY_DISCONNECTED`, 3.30), CMP0176 (`execute_process` UTF-8, 3.31) and
-  CMP0177 (`install` DESTINATION normalisation, 3.31).
+  CMP0177 (`install` DESTINATION normalisation, 3.31), CMP0220 (a language
+  enabled in a subdirectory, `block()` or `function()` propagates to its
+  ancestors, 4.5), CMP0221 (`cmake_host_system_information(DISTRIB_*)` reads
+  the host's os-release, never the sysroot's, 4.5) and CMP0225 (the default
+  `ExternalProject_Add` configure passes `CMAKE_INSTALL_PREFIX=<INSTALL_DIR>`,
+  4.5).
   *Rationale:* the range's upper bound flips every covered policy to NEW with
-  no diagnostic [M3]. The KEEP-NEW and DECIDE table is in [floors] §2.
+  no diagnostic [M3]. These nine are the ones that change a build quietly:
+  CMP0220 OLD does not warn, and CMP0225 also prepends the install directory to
+  `CMAKE_SYSTEM_PREFIX_PATH`, so it can change what a later `find_*()` call
+  returns (`cmake-policies(7)` at 4.5.1). The KEEP-NEW and DECIDE table is in
+  [floors] §2.
   *Verify:* reading heuristic. A diff that changes a `cmake_minimum_required`
   bound and names none of the DECIDE policies it crosses is the finding.
 
 **Caught by comparing a UUID with the pinned binary**
 
-- **CMK-VER-09 · MUST · the gate UUID can change at any minor.** Copy a
+- **CMK-VER-09 · MUST · the gate UUID can change, and a gate can be removed, at any minor.** Copy a
   `CMAKE_EXPERIMENTAL_*` UUID only from `Help/dev/experimental.rst` at the tag
   of the pinned binary. Re-check it on every CMake bump, and prove activation
   by building something that uses the feature, never by a configure exit code.
   Delete gates retired at 4.3.0 (`EXPORT_PACKAGE_INFO`, `FIND_CPS_PACKAGES`)
   on any ≥4.3 floor. `install(PACKAGE_INFO)` needs no gate on 4.3 and later.
   Only `CMAKE_INSTALL_EXPORTS_AS_PACKAGE_INFO` still needs
-  `MAPPED_PACKAGE_INFO`. An activated gate emits an `experimental` warning,
+  `MAPPED_PACKAGE_INFO`. On a 4.5 or newer binary, `CXX_IMPORT_STD` and
+  `GENERATE_SBOM` no longer exist: keep either only under
+  `if(CMAKE_VERSION VERSION_LESS 4.5)`, delete it on a 4.5 floor, and never
+  look for a new UUID. An activated gate emits an `experimental` warning,
   which the configure gate turns into an error. On ≥4.4, exempt it on that
   leg with `-Wno-error=experimental`. On ≤4.3 no child category exists, so
   build the feature on a leg of its own.
@@ -359,7 +418,9 @@ message(AUTHOR_WARNING "gate canary")
   also rotated. Only
   `EXPORT_PACKAGE_DEPENDENCIES` (`1942b4fa…`, present since 3.31.12) and
   `MAPPED_PACKAGE_INFO` (`ababa1b5…`) held. `master`'s `25d6f6aa…` and
-  `248471c2…` appear in no binary [M5]. A stale `CXX_IMPORT_STD` UUID
+  `248471c2…` appear in no binary [M5]. 4.5.0 (2026-11-12) removed
+  `CXX_IMPORT_STD` and `GENERATE_SBOM`, added `SYCL` and kept the other four
+  UUIDs, and 4.5.1 matches it (read at each tag on 2026-11-27). A stale `CXX_IMPORT_STD` UUID
   configures with exit 0 and no diagnostic on 3.31.12 (Ninja), and on
   4.4.2 under the Makefiles generator ([floors] §4). With Ninja, 4.3.4 and
   4.4.2 warn "is set to incorrect value", and that warning also falls under
@@ -370,7 +431,9 @@ message(AUTHOR_WARNING "gate canary")
   Empty output passes. For each hit, set `UUID=` to the literal and run
   `strings -n 6 "$CMAKE_BIN" | grep -c -e "$UUID"` against the pinned binary.
   A result of `0` means a stale gate (finding). The check was exercised
-  against 4.4.2: `451f2fe2…` gives 0 and `f35a9ac6…` gives 1.
+  against 4.4.2: `451f2fe2…` gives 0 and `f35a9ac6…` gives 1. On 4.5.1 both
+  count 0 because the gate is gone, so the fix there is the `VERSION_LESS 4.5`
+  guard or deletion, never a new UUID.
 
 ### Measured results handed to other families (not CMK-CORE or CMK-VER rules)
 
@@ -479,8 +542,9 @@ Ranked by how often each bites, most frequent first.
 9. **Bumping presets to schema 12 while keeping `dev`**, or using schema 12
    on a 3.31 or 4.3 leg. *Check:* the CMK-CORE-02 jq filter, plus the
    CMK-CI ceiling row.
-10. **Citing a 4.5 or `master` feature as current** (presets 13, `CMD_STRICT`,
-    `PRINT_TARGETS`). *Check:* `cmake --help-manual` on the pinned binary
+10. **Using a 4.5 feature without a `CMAKE_VERSION` guard** (presets 13,
+    `CMD_STRICT`, `PRINT_TARGETS`, `install(SBOM)`), or citing a `master`
+    feature as current. *Check:* `cmake --help-manual` on the pinned binary
     (CMK-VER-04).
 
 **Silent passes the index must name** (M-A-07): a green configure while
@@ -501,9 +565,18 @@ only warns elsewhere (VER-09); an explicit policy OLD (VER-07); `-Werror=author`
   `-Werror=uninitialized`/`--warn-uninitialized` on 3–5 real exemplar
   configures that include fetched dependencies? This needs sources that the
   sparse corpus lacks, so a full clone of fmt, spdlog and curl.
-- **Another round, `versions-and-gate`:** does `-Werror=dev` get removed or
-  change meaning in 4.5? Re-measure when 4.5.0 ships, because CMK-CORE-01's
-  mixed-matrix spelling depends on it.
+- **Owner:** move the top CI binary from 4.4.2 to 4.4.5, which behaved
+  identically on every measured point, or to 4.5.1, which needs `CMK-CORE-06`
+  handled first. Raising the pinned range to `3.25...4.5` flips CMP0220 to
+  CMP0226 to NEW for every adopter (`CMK-VER-08` names the three that matter).
+- **Another round, `versions-and-gate`:** on each CMake minor after 4.5,
+  re-measure `-Werror=dev` and `-Werror=author`, because CMK-CORE-01's
+  mixed-matrix spelling depends on them. The 4.5 manual calls `-Wdev` a
+  deprecated synonym of `-Wauthor` but does not say what `-Werror=dev` does;
+  4.5.1 kept it (measured 2026-11-27). Also confirm the split on 4.3.6.
+- **Another round, `versions-and-gate`:** what does a stale
+  `CMAKE_EXPERIMENTAL_CXX_IMPORT_STD` do on 4.5 (warn, error or nothing)? Not
+  measured.
 - **Another round, `dependency-seam` (wave-3 revision):** on 3.x there is no
   in-code scoped fix for a 3.5–3.9 dependency under the gate [M9]. Is a
   FetchContent `PATCH_COMMAND` that rewrites the floor, or
@@ -548,7 +621,7 @@ only warns elsewhere (VER-09); an explicit policy OLD (VER-07); `-Werror=author`
 11. <https://raw.githubusercontent.com/actions/runner-images/main/images/macos/macos-15-Readme.md>
     and the Ubuntu 24.04 README: the image-default CMake differs by OS.
 12. <https://pypi.org/pypi/cmake-format/json> (0.6.13, 2020-08-19) and
-    <https://pypi.org/pypi/gersemi/json> (0.29.1, 2026-09-14).
+    <https://pypi.org/pypi/gersemi/json> (0.29.1, 2026-09-14; 0.29.2, 2026-10-01).
 13. [seam] §5: `CMAKE_POLICY_VERSION_MINIMUM` scope (local, `-D` and
     environment forms), 4.4.2.
 14. [bzl-seam] headline: rules_foreign_cc 0.16.0 defaults to CMake 3.31.12,
@@ -630,6 +703,23 @@ Ledger: [cmake-versions-and-gate/verification-wave2.md](cmake-versions-and-gate/
   `CMakeLists.txt:5-8`, not `:7-9`. ModernCppStarter's formatter install is
   at `style.yml:29`, not `:20`. The nlohmann "fails loudly" comment is now
   called overstated rather than wrong.
+- 2026-11-27: CMK-CORE-01, CMK-CORE-02 and Verdict 1 and 2: `-Werror=dev` is
+  honoured through 4.5.1, schema rejection extends to "12 or later", and the
+  hosted-image CMake versions are restamped (`refresh-2026-11/cmake-build.md`).
+- 2026-11-27: new CMK-CORE-06 (4.5 directory-scope commands under the gate),
+  with its grep (`refresh-2026-11/cmake-build.md`).
+- 2026-11-27: CMK-CORE-04: check-cmake status and gersemi floor 0.29.2
+  (`refresh-2026-11/cmake-build.md`).
+- 2026-11-27: CMK-VER-03 (runner images), CMK-VER-04 (4.5 table row, VS 14 2015
+  removal, greps), CMK-VER-07 (CMP0177 and CMP0155 on 4.5.1), CMK-VER-08
+  (CMP0220, CMP0221, CMP0225, count 84) and CMK-VER-09 (4.5.0 gate removals,
+  `VERSION_LESS 4.5` guard) (`refresh-2026-11/cmake-build.md`).
+- 2026-11-27: Verdict 7 and the Open questions: rules_foreign_cc 0.17.0 read,
+  the 4.5 question answered, owner and measurement items added
+  (`refresh-2026-11/cmake-build.md`).
+- 2026-11-27: no change from `refresh-2026-11/cpp-packaging.md`. Its CMK-PKG
+  and Conan rows are not owned here, and its Gate sentence belongs to
+  `rules/cpp-packaging.md`.
 
 [gate]: cmake-versions-and-gate/gate-and-language-semantics.md
 [floors]: cmake-versions-and-gate/floors-policies-and-era.md

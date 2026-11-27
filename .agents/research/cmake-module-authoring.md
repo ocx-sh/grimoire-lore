@@ -5,7 +5,7 @@ model: opus
 id_family: CMK-MOD, CMK-TEST
 date: 2026-09-26
 verified: 2026-09-26
-revised: 2026-09-26
+revised: 2026-11-27
 consolidates:
   - cmake-module-authoring/module-contracts.md
   - cmake-module-authoring/module-testing-and-formatting.md
@@ -575,7 +575,8 @@ or directory that defines the project's own commands. Gate with
 - Verification: run `gersemi --check "$MODULE_DIR"` (CMakeLists.txt is found
   by the directory walk). Exit 0 passes. Any `Warning: unknown command` on
   stderr means the `definitions` list is incomplete.
-- Severity: SHOULD (owner default 6). Floor: gersemi 0.29.1, 2026-09-14.
+- Severity: SHOULD (owner default 6). Floor: gersemi 0.29.2, 2026-10-01
+  (measured on 0.29.1, released 2026-09-14).
 
 **CMK-MOD-16 — Parse each command's keywords with one top-level
 `cmake_parse_arguments(PARSE_ARGV 0 …)` per function.**
@@ -1045,6 +1046,7 @@ Fixtures and runners: `/home/mherwig/.cache/cmake-measure-scratch/verify-module-
 - 2026-09-26, verify wave 3: the CMK-MOD-17 `FetchContent_Declare` and `ExternalProject_Add` lookaheads changed from `\bURL\b` to `\sURL\s`. The old form reported `GIT_REPOSITORY ${URL}` as a URL fetch, a false finding. The new form keeps every planted violation red.
 - 2026-09-26, verify wave 3: CMK-MOD-18 no longer cites CMake issue 23443 as "the same hang". Its log shows `HEAD is now at ced8b31` before the stall, so the clone had finished, and no cause was diagnosed. The applied-table MOD-18 row was fixed to match. Added the 4.4 `CMAKE_EP_GIT_CLONE_RETRY_COUNT`/`_DELAY` variables (defaults of 2 retries and 0 s keep 3 attempts). Key source 15 no longer calls `gitclone.cmake.in` identical on 3.31.12 and 4.4.2.
 - 2026-09-26, verify wave 3: the CMK-MOD-19 corpus count "0 of the other 45 repos" is corrected. qtbase passes `ENCODING UTF8` in a vendored `RunCMake.cmake:168` test driver; [net] had searched only for `UTF-8`. Still no shipped module passes it. Severity is unchanged.
+- 2026-11-27, delta refresh: CMK-MOD-15 floor raised from gersemi 0.29.1 to 0.29.2 (released 2026-10-01), which fixes 0.29.1's regression in formatting unknown commands; the 0.29.1 measurements (C12 to C14, CMK-MOD-16's reading) stay as measurements. Decision: `refresh-2026-11/cmake-build.md` (CMK-MOD-15 entry). No other CMK-MOD or CMK-TEST rule changed.
 
 [map]: cmake-topic-map.md
 [mc]: cmake-module-authoring/module-contracts.md

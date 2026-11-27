@@ -12,7 +12,7 @@ The depth files and checks scripts ship in the [`cpp-packaging-reference`](cpp-p
 
 Loads on `**/conanfile.py`, `**/conanfile.txt`, `**/conandata.yml`,
 `**/conan.lock`, `**/conanws.yml`, `**/conanws.py`, `**/vcpkg.json`,
-`**/vcpkg-configuration.json` and `**/portfile.cmake`. The index is 209 lines
+`**/vcpkg-configuration.json` and `**/portfile.cmake`. The index is 211 lines
 and always present. A depth file is read only when the work calls for it.
 
 ## It starts with what a green configure does not prove
@@ -65,7 +65,7 @@ promise this set has no mechanism to back.
 
 Each is a default an adopter overrides once, repository-wide, never per leg.
 The one citable adoption figure is the ISO C++ 2024 survey, Conan at 19.34%
-and vcpkg at 19.10%. The 2025 edition publishes no percentages, so this set
+and vcpkg at 19.10%. The 2025 and 2026 editions publish no percentages, so this set
 quotes none either.
 
 ## What it does not cover

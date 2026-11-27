@@ -15,13 +15,13 @@ and the CMake 3.x remedy for an old dependency floor is CMK-DEP-30, both in
 (CMK-DEP-19). The presets schema ceiling is CMK-CI-01 in `presets-and-ci.md`.
 A shipped module's floor leg is CMK-TEST-01 in `testing.md`. The module-scanning
 remedy behind CMP0155 is CMK-TGT-18 in `targets.md`. A Bazel-wrapped build runs
-the wrapper's CMake (3.31.12 under rules_foreign_cc 0.16.0), and CMK-BZL-08 in
+the wrapper's CMake (3.31.12 under rules_foreign_cc 0.16.0 and 0.17.0), and CMK-BZL-08 in
 `bazel-seam.md` owns that floor.
 
 **Pinned, overridable once:** rules are written for a CMake 3.25 floor, and
 every `cmake_minimum_required` in this file reads `VERSION 3.25...4.4`. An
 adopter with another floor or a newer top CI leg changes both numbers once,
-repository-wide. Measured on CMake 3.31.12, 4.3.4 and 4.4.2 on 2026-09-26.
+repository-wide. Measured on CMake 3.31.12, 4.3.4 and 4.4.2 on 2026-09-26, and the 4.5 facts on 4.4.5 and 4.5.1 on 2026-11-27.
 Three passes in this family look green and are not: a two-dot range (CMK-VER-01),
 an explicit policy OLD (CMK-VER-07) and a stale experimental UUID (CMK-VER-09).
 None of them trips the configure gate. Run every command from the repository root.
@@ -43,7 +43,7 @@ operand. These are own-code checks, so they exclude `_deps` and build trees
 |---|---|---|---|---|
 | CMK-VER-01 | Write a version range with exactly three literal dots: `cmake_minimum_required(VERSION 3.25...4.4)`. Two dots are never a range. Floor: CMake 3.12. | `3.15..4.3` is one literal that collapses to `VERSION 3.15`. CMP0126 and CMP0140 stay unset with no diagnostic, even under the configure gate (measured 2026-09-26 on 3.31.12, 4.3.4 and 4.4.2). The manual says "the `...` is literal". Real repositories ship the two-dot form (yaml-cpp), so it gets copied. | See block CMK-VER-01. Empty output is the pass. Any hit is the finding. The pattern does not match the three-dot form. | MUST |
 | CMK-VER-02 | Declare the floor as `<min>...<max>`, where `<max>` is the newest CMake the project's CI runs, never simply the newest release. **pinned**: `3.25...4.4`, overridable once. Floor: CMake 3.12. | A bare floor leaves every later policy unset on a newer binary. Bare `3.25` gives empty CMP0143 through CMP0219 on 4.4.2, while `3.25...4.4` sets all of them NEW. The range sets NEW up to the lower of `<max>` and the running version, and the manual reads `<max>` as "updated to work with policies introduced by" it, which is a claim of testing. The rule is argued, so it is SHOULD. Raising an existing `<max>` flips every policy up to it: on 4.4.2, CMP0219 stopped re-escaping `macro()` arguments and uclouvain/openjpeg's `.pc` macro wrote `libdir=\/lib64` while the canary and the gated configure passed (measured 2026-09-26, 3.31.12 and 4.3.4 unaffected). | See block CMK-VER-02. Empty output is the pass. Any hit is a bare floor (finding). Then read `<max>` against the newest CI leg: a `<max>` above or below it is the finding, and after a raise every `configure_file()` output on the newest line is compared with the one before it. | SHOULD |
-| CMK-VER-07 | Resolve a gate error "Policy CMPxxxx is not set" by adopting NEW: migrate the code, then raise `<max>` or write `cmake_policy(SET CMPxxxx NEW)`. Never resolve it with `SET … OLD`. A temporary OLD sits behind `if(POLICY CMPxxxx)` with a comment giving the reason and the exit condition. Once a leg's binary reports that OLD as deprecated, the guarded OLD fails that leg's gate too, so its exit has arrived: migrate. Migrate off the removed Find modules (CMP0146 `FindCUDA`, CMP0148 `FindPythonInterp` and `FindPythonLibs`, CMP0167 `FindBoost`, CMP0188 `FindGCCXML`, CMP0191 `FindCABLE`), whose replacements CMK-DEP-19 owns. Floor: any CMake. Those removals landed at 3.27, 3.30 and 4.1. | An unset policy is a gate error. An explicit OLD passes the gate silently until the running binary deprecates that policy's OLD, which depends on the policy: CMP0177 OLD passes on 3.31.12 through 4.4.2, CMP0155 OLD passes through 4.3.4 and fails the 4.4.2 gate even inside `if(POLICY)`, and CMP0126 OLD fails the gate on every binary from 3.31.12 (measured 2026-09-26 on 3.31.12, 4.0.7, 4.2.7, 4.3.4 and 4.4.2). Ungated, each is only a warning with exit 0. So the gate misses exactly the newest OLDs. OLD is "deprecated by definition and may be removed" (`cmake-policies(7)`, 4.4.2). A starter template that sets CMP0155 OLD "at the moment", with no guard and no exit, propagates it into every project generated from it. | See block CMK-VER-07. Empty output is the pass. A hit with no `if(POLICY …)` guard and no adjacent reason-and-exit comment is the finding. | MUST |
+| CMK-VER-07 | Resolve a gate error "Policy CMPxxxx is not set" by adopting NEW: migrate the code, then raise `<max>` or write `cmake_policy(SET CMPxxxx NEW)`. Never resolve it with `SET … OLD`. A temporary OLD sits behind `if(POLICY CMPxxxx)` with a comment giving the reason and the exit condition. Once a leg's binary reports that OLD as deprecated, the guarded OLD fails that leg's gate too, so its exit has arrived: migrate. Migrate off the removed Find modules (CMP0146 `FindCUDA`, CMP0148 `FindPythonInterp` and `FindPythonLibs`, CMP0167 `FindBoost`, CMP0188 `FindGCCXML`, CMP0191 `FindCABLE`), whose replacements CMK-DEP-19 owns. Floor: any CMake. Those removals landed at 3.27, 3.30 and 4.1. | An unset policy is a gate error. An explicit OLD passes the gate silently until the running binary deprecates that policy's OLD, which depends on the policy: CMP0177 OLD passes on 3.31.12 through 4.5.1, CMP0155 OLD passes through 4.3.4 and fails the gate from 4.4.2 on even inside `if(POLICY)`, and CMP0126 OLD fails the gate on every binary from 3.31.12 (measured 2026-09-26 on 3.31.12, 4.0.7, 4.2.7, 4.3.4 and 4.4.2, and 2026-11-27 on 4.4.5 and 4.5.1). Ungated, each is only a warning with exit 0. So the gate misses exactly the newest OLDs. OLD is "deprecated by definition and may be removed" (`cmake-policies(7)`, 4.4.2). A starter template that sets CMP0155 OLD "at the moment", with no guard and no exit, propagates it into every project generated from it. | See block CMK-VER-07. Empty output is the pass. A hit with no `if(POLICY …)` guard and no adjacent reason-and-exit comment is the finding. | MUST |
 
 ```sh
 # CMK-VER-01
@@ -115,8 +115,8 @@ bytes are the authority.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| CMK-VER-04 | Before using a command, keyword, variable, generator or preset field, check its `versionadded` against the declared floor on the pinned binary or at the matching Git tag. Guard anything newer than the floor with `if(CMAKE_VERSION VERSION_GREATER_EQUAL X.Y)` and a fallback, and guard a policy with `if(POLICY CMPxxxx)`. Setting a variable that an older CMake never reads, such as `CMAKE_CXX_SCAN_FOR_MODULES`, needs no guard. Floor: per the table below. | These are hard floors with no OLD or NEW fallback. Features on `master` do not exist in 4.4.3: presets schema 13, `CMD_STRICT`, `CMD_NON_TARGET_DIRECTIVE` and `cmake_language(PRINT_TARGETS)` (read 2026-09-26). `-DCMAKE_POLICY_VERSION_MINIMUM=3.10` on 3.31.12 exits 0 with only "Manually-specified variables were not used". | Block CMK-VER-04 (1) finds features above a 3.25 floor. Empty output is the pass. A hit outside a version guard is the finding. A lower floor adds each table row above it as one more `-e`. Then see block CMK-VER-04 (2). Empty output is the pass. Settle each hit with `cmake --help` on that leg's binary. | MUST |
-| CMK-VER-09 | Copy a `CMAKE_EXPERIMENTAL_*` UUID only from `Help/dev/experimental.rst` at the tag of the pinned binary. Re-check it on every CMake bump, and prove activation by building something that uses the feature, never by a configure exit code. On a 4.3 or newer floor, delete the gates retired at 4.3.0 (`EXPORT_PACKAGE_INFO`, `FIND_CPS_PACKAGES`): `install(PACKAGE_INFO)` needs no gate from 4.3, and only `CMAKE_INSTALL_EXPORTS_AS_PACKAGE_INFO` still needs `MAPPED_PACKAGE_INFO`. An activated gate emits an `experimental` warning that the configure gate fails. On 4.4, exempt it on that leg with `-Wno-error=experimental`. On 4.3 or older no such child exists, so build the feature on an ungated leg of its own. Floor: the UUID can change at any minor. | `CXX_IMPORT_STD` is `d0edc3af…` on 3.31.12 (unchanged through 4.2.7, read at each tag), `451f2fe2…` on 4.3.4 and `f35a9ac6…` on 4.4.2. Four of six gates rotated between 4.3.4 and 4.4.2, and `master` carries UUIDs no release has. A stale UUID is silent on 3.31.12 and under the Makefiles generator, and with Ninja on 4.3.4 and 4.4.2 it only warns "is set to incorrect value" and exits 0 (measured 2026-09-26). | See block CMK-VER-09 (1). Empty output is the pass. For each hit, set `CMAKE_BIN` to the pinned binary's path, bind the literal, and count it in the binary: block CMK-VER-09 (2). A count of `0` is a stale gate (finding). `1` or more passes. On 4.4.2, `451f2fe2…` counts 0 and `f35a9ac6…` counts 1. | MUST |
+| CMK-VER-04 | Before using a command, keyword, variable, generator or preset field, check its `versionadded` against the declared floor on the pinned binary or at the matching Git tag. Guard anything newer than the floor with `if(CMAKE_VERSION VERSION_GREATER_EQUAL X.Y)` and a fallback, and guard a policy with `if(POLICY CMPxxxx)`. Setting a variable that an older CMake never reads, such as `CMAKE_CXX_SCAN_FOR_MODULES`, needs no guard. Floor: per the table below. | These are hard floors with no OLD or NEW fallback. A feature newer than the pinned binary does not exist on it: presets schema 13, `CMD_STRICT`, `CMD_NON_TARGET_DIRECTIVE` and `cmake_language(PRINT_TARGETS)` are absent from 4.4.5 and arrived with 4.5.0 (2026-11-12). `-DCMAKE_POLICY_VERSION_MINIMUM=3.10` on 3.31.12 exits 0 with only "Manually-specified variables were not used". | Block CMK-VER-04 (1) finds features above a 3.25 floor. Empty output is the pass. A hit outside a version guard is the finding. A lower floor adds each table row above it as one more `-e`. Then see block CMK-VER-04 (2). Empty output is the pass. Settle each hit with `cmake --help` on that leg's binary. | MUST |
+| CMK-VER-09 | Copy a `CMAKE_EXPERIMENTAL_*` UUID only from `Help/dev/experimental.rst` at the tag of the pinned binary. Re-check it on every CMake bump, and prove activation by building something that uses the feature, never by a configure exit code. On a 4.3 or newer floor, delete the gates retired at 4.3.0 (`EXPORT_PACKAGE_INFO`, `FIND_CPS_PACKAGES`): `install(PACKAGE_INFO)` needs no gate from 4.3, and only `CMAKE_INSTALL_EXPORTS_AS_PACKAGE_INFO` still needs `MAPPED_PACKAGE_INFO`. On a 4.5 or newer binary, `CXX_IMPORT_STD` and `GENERATE_SBOM` no longer exist: keep either only under `if(CMAKE_VERSION VERSION_LESS 4.5)`, delete it on a 4.5 floor, and never look for a new UUID. An activated gate emits an `experimental` warning that the configure gate fails. On 4.4, exempt it on that leg with `-Wno-error=experimental`. On 4.3 or older no such child exists, so build the feature on an ungated leg of its own. Floor: the UUID can change, and a gate can be removed, at any minor. | `CXX_IMPORT_STD` is `d0edc3af…` on 3.31.12 (unchanged through 4.2.7, read at each tag), `451f2fe2…` on 4.3.4 and `f35a9ac6…` on 4.4.2. Four of six gates rotated between 4.3.4 and 4.4.2, and `master` carries UUIDs no release has. 4.5.0 (2026-11-12) removed `CXX_IMPORT_STD` and `GENERATE_SBOM`, added `SYCL` and kept the other four UUIDs, and 4.5.1 matches it (read at each tag on 2026-11-27). A stale UUID is silent on 3.31.12 and under the Makefiles generator, and with Ninja on 4.3.4 and 4.4.2 it only warns "is set to incorrect value" and exits 0 (measured 2026-09-26). | See block CMK-VER-09 (1). Empty output is the pass. For each hit, set `CMAKE_BIN` to the pinned binary's path, bind the literal, and count it in the binary: block CMK-VER-09 (2). A count of `0` is a stale gate (finding). `1` or more passes. On 4.4.2, `451f2fe2…` counts 0 and `f35a9ac6…` counts 1. On 4.5.1 both count 0 because the gate is gone, so the fix there is the `VERSION_LESS 4.5` guard or deletion, never a new UUID. | MUST |
 
 ```sh
 # CMK-VER-04 (1)
@@ -126,6 +126,10 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.tx
     -e 'PACKAGE_INFO' \
     -e 'SCOPE_FOR[^)]*DIAGNOSTICS' \
     -e 'cmake_diagnostic' \
+    -e '[(]SBOM' \
+    -e 'add_custom_rule' \
+    -e 'PRINT_(PROPERTIES|TARGETS|VARIABLES)' \
+    -e 'PATH_IS_PREFIX' \
     -e 'cmake_pkg_config' --
 # CMK-VER-04 (2)
 git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakePresets.json' ':(glob)**/*.yml' ':(glob)**/*.yaml' \
@@ -134,6 +138,7 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakePresets.
     -e 'Visual Studio 10' \
     -e 'Visual Studio 11' \
     -e 'Visual Studio 12' \
+    -e 'Visual Studio 14' \
     -e 'Visual Studio 18' \
     -e 'FASTBuild' --
 # CMK-VER-09 (1)
@@ -142,7 +147,7 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.tx
 UUID=451f2fe2-a8a2-47c3-bc32-94786d8fc91b; LC_ALL=C tr -c ' -~' '\n' < "$CMAKE_BIN" | grep -c -F -e "$UUID"
 ```
 
-| Feature | `versionadded` (read on 4.4.2) |
+| Feature | `versionadded` (read on 4.4.2, the 4.5 row on 4.5.1) |
 |---|---|
 | `string(JSON)` | 3.19 |
 | `PROJECT_IS_TOP_LEVEL` | 3.21. Below it, compare `CMAKE_SOURCE_DIR` with `PROJECT_SOURCE_DIR` |
@@ -155,7 +160,8 @@ UUID=451f2fe2-a8a2-47c3-bc32-94786d8fc91b; LC_ALL=C tr -c ' -~' '\n' < "$CMAKE_B
 | `Visual Studio 18 2026` and `FASTBuild` generators | 4.2 |
 | `install(PACKAGE_INFO)` ungated, presets schema 11 | 4.3 |
 | `-Werror=author`, `block(SCOPE_FOR DIAGNOSTICS)`, `cmake_diagnostic`, presets schema 12 | 4.4 |
-| Removed generators: VS 10 2010 at 3.25, VS 11 2012 at 3.28, VS 9 2008 at 3.30, VS 12 2013 at 3.31 | removal |
+| `import std` and `install(SBOM)` ungated, `CMD_STRICT`, `CMD_NON_TARGET_DIRECTIVE`, `cmake_language(PRINT_TARGETS)` and its `PRINT_PROPERTIES` and `PRINT_VARIABLES` siblings, `add_custom_rule()`, `if(PATH_IS_PREFIX)`, `math(INCREMENT)`, `ctest --out-of-date`, presets schema 13 | 4.5 |
+| Removed generators: VS 10 2010 at 3.25, VS 11 2012 at 3.28, VS 9 2008 at 3.30, VS 12 2013 at 3.31, VS 14 2015 at 4.5 | removal |
 
 ## Caught by Reading the CI Matrix and the Bump Diff
 
@@ -164,8 +170,8 @@ directory, and CMK-VER-08 reads the diff that moves a version.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| CMK-VER-03 | Install a pinned CMake explicitly on every CI leg, with one leg at the declared floor and one at `<max>`. Never rely on the runner image or the distro package. A CMake version pinned by a committed tool lock counts as pinned. A shipped module's floor leg is CMK-TEST-01's, and this row does not restate it. Floor: any CMake. | Image defaults differ by OS on the same day: 3.31.6 on `ubuntu-24.04` and `windows-2025`, 4.4.2 on `macos-15`, and Ubuntu 22.04's apt ships 3.22.1 (as of 2026-09-26). A floor that no leg runs is a claim, not a contract. Lowering the floor would not rescue 22.04, so provision a CMake instead. | See block CMK-VER-03. Empty output is the finding, unless a leg installs from a committed tool lock that pins CMake: confirm the lock with `git ls-files` and read its CMake entry. With a pin found, read the matrix for a leg whose version equals the declared `<min>`. None is the finding. | SHOULD |
-| CMK-VER-08 | Treat raising `<max>` or the floor as a behaviour change. List the policies the new version adds (`cmake --help-policy-list` on the new binary, each read with `cmake --help-policy`) and review the DECIDE set before merging: CMP0155 (C++20 sources scanned for modules, 3.28), CMP0168 to CMP0170 (FetchContent steps, `FetchContent_Populate`, `FETCHCONTENT_FULLY_DISCONNECTED`, 3.30), CMP0176 (`execute_process` output decoded as UTF-8, 3.31) and CMP0177 (`install` DESTINATION normalisation, 3.31). Floor: 77 policies arrived after 3.25, as of 4.4.2. | The range's upper bound flips every covered policy to NEW with no diagnostic. The other policies past 3.25 are removals that fail loudly or platform plumbing, so these six are the ones that change a build quietly. | Reading heuristic. A diff that changes a `cmake_minimum_required` bound and names none of the DECIDE policies it crosses is the finding. | SHOULD |
+| CMK-VER-03 | Install a pinned CMake explicitly on every CI leg, with one leg at the declared floor and one at `<max>`. Never rely on the runner image or the distro package. A CMake version pinned by a committed tool lock counts as pinned. A shipped module's floor leg is CMK-TEST-01's, and this row does not restate it. Floor: any CMake. | Image defaults differ by OS on the same day: 3.31.6 on `ubuntu-24.04` and `windows-2025`, 4.5 on `macos-15` and on `ubuntu-latest`, which moved to Ubuntu 26.04 between 2026-10-19 and 2026-11-19, and Ubuntu 22.04's apt ships 3.22.1 (as of 2026-11-27). A floor that no leg runs is a claim, not a contract. Lowering the floor would not rescue 22.04, so provision a CMake instead. | See block CMK-VER-03. Empty output is the finding, unless a leg installs from a committed tool lock that pins CMake: confirm the lock with `git ls-files` and read its CMake entry. With a pin found, read the matrix for a leg whose version equals the declared `<min>`. None is the finding. | SHOULD |
+| CMK-VER-08 | Treat raising `<max>` or the floor as a behaviour change. List the policies the new version adds (`cmake --help-policy-list` on the new binary, each read with `cmake --help-policy`) and review the DECIDE set before merging: CMP0155 (C++20 sources scanned for modules, 3.28), CMP0168 to CMP0170 (FetchContent steps, `FetchContent_Populate`, `FETCHCONTENT_FULLY_DISCONNECTED`, 3.30), CMP0176 (`execute_process` output decoded as UTF-8, 3.31) CMP0177 (`install` DESTINATION normalisation, 3.31), CMP0220 (a language enabled in a subdirectory, `block()` or `function()` propagates to its ancestors, 4.5), CMP0221 (`cmake_host_system_information(DISTRIB_*)` reads the host's os-release, never the sysroot's, 4.5) and CMP0225 (the default `ExternalProject_Add` configure passes `CMAKE_INSTALL_PREFIX=<INSTALL_DIR>`, 4.5). Floor: 77 policies arrived after 3.25 as of 4.4.2, and 84 as of 4.5.1. | The range's upper bound flips every covered policy to NEW with no diagnostic. The other policies past 3.25 are removals that fail loudly or platform plumbing, so these nine are the ones that change a build quietly. CMP0220 OLD does not warn, and CMP0225 also prepends the install directory to `CMAKE_SYSTEM_PREFIX_PATH`, so it can change what a later `find_*()` call returns (`cmake-policies(7)` at 4.5.1). | Reading heuristic. A diff that changes a `cmake_minimum_required` bound and names none of the DECIDE policies it crosses is the finding. | SHOULD |
 
 ```sh
 # CMK-VER-03
@@ -193,16 +199,18 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflow
    pinned binary (CMK-VER-09).
 6. **Copying a two-dot range from a real repository** (yaml-cpp ships one). The
    CMK-VER-01 grep catches it.
-7. **Citing a 4.5 or `master` feature as current** (presets schema 13,
-   `CMD_STRICT`, `PRINT_TARGETS`). Read `cmake --help-manual` on the pinned
-   binary (CMK-VER-04).
+7. **Using a 4.5 feature without a `CMAKE_VERSION` guard** (presets schema 13,
+   `CMD_STRICT`, `PRINT_TARGETS`, `install(SBOM)`), or citing a `master`
+   feature as current. Read `cmake --help-manual` on the pinned binary
+   (CMK-VER-04).
 
 ## Re-check
 
-- D1: on the CMake 4.5 release, re-measure `-Werror=dev`, which the gate
-  spellings in this file assume (CMK-CORE-01), and add 4.5's rows to the
-  CMK-VER-04 table.
+- D1: on each CMake minor after 4.5, re-measure `-Werror=dev` and
+  `-Werror=author`, which the gate spellings in this file assume (CMK-CORE-01,
+  CMK-CORE-06), and add that minor's rows to the CMK-VER-04 table. 4.5.1 kept
+  both spellings (measured 2026-11-27).
 - D7: on every CMake release, re-read `Help/dev/experimental.rst` at the new
-  tag, because the CMK-VER-09 UUIDs rotate.
-- The count of policies past 3.25 (77 as of 4.4.2, 2026-09-26) grows with each
-  minor, so re-list the DECIDE set for CMK-VER-08.
+  tag, because the CMK-VER-09 UUIDs rotate and gates are removed.
+- The count of policies past 3.25 (77 as of 4.4.2, 84 as of 4.5.1) grows with
+  each minor, so re-list the DECIDE set for CMK-VER-08.
