@@ -279,6 +279,13 @@ verification, key every trusted key by its full 40-character fingerprint, and fi
 `checksum is missing from verification metadata` failure (the transitive-dependency trap) by
 re-running the bootstrap, never by hand editing the XML and never by disabling verification.
 
+On Gradle 9.9.2 and 8.14.8 and later (GHSA-7f7r-77ff-fr6f, 2026-11-19, verified 2026-11-27), a
+build that resolves a `-SNAPSHOT` or other changing module, direct or transitive, also fails with
+`Dependency verification failed` until that module is in the metadata. Route it the same way:
+re-run the bootstrap and review the diff. A snapshot accepted without verification belongs under
+`<trusted-artifacts>`, which is a reviewed change for the owner rather than a triage fix, and
+verification is never disabled to clear it.
+
 Locking pins *resolution*, never *legitimacy*: a malicious first resolution locks in as
 faithfully as a good one. Locking answers "did resolution change", verification answers "are
 these the publisher's bytes", and neither substitutes for the other.
