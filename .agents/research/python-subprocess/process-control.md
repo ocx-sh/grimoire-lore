@@ -4,6 +4,7 @@ topic: subprocess design, process groups, deadlock, encoding, exit codes, shell 
 agent: scout-subprocess-dive
 model: sonnet
 date_researched: 2026-08-23
+revised: 2026-11-27
 sources_count: 22
 scope: /home/mherwig/dev/ocx/test (190 files / 95k LOC) and /home/mherwig/dev/grimoire/test (76 files / 35k LOC) — the black-box pytest acceptance harness driving compiled Rust CLIs via subprocess, pexpect, and docker-compose against a real OCI registry
 ---
@@ -325,3 +326,9 @@ As of 2026-08-23:
 | `ocx/.github/workflows/verify-deep.yml`, `grimoire/.github/workflows/verify-deep.yml`, `ocx/test/taskfile.yml`, `grimoire/test/taskfile.yml`, `ocx/test/pyproject.toml` (local, read in full) | This project's own CI config and task definitions | current | The direct source for every claim in the CI-backstop-cost analysis: absent `timeout-minutes`, the `-v`-dropping `CLI_ARGS` templating, absent `addopts`, and the `!cancelled()`-gated artifact upload |
 | Live reproductions in `/tmp/.../scratchpad/subproc/` (this session, deleted after use) | Original reproduction scripts | 2026-08-23 | `parent_default.py`/`child.py` (timeout orphans a grandchild), `parent_pgroup.py`/`child2.py` (killpg fix reaps it), `deadlock_repro.py`/`deadlock_child.py` (64 KiB pipe-fill deadlock), each run and its output captured verbatim above |
 | ruff 0.16.1 (local install, run directly, not cited as a URL) | Static analysis tool | 2026 | Empirical confirmation of which subprocess mistakes are/aren't caught by `S602`, `S605`, `S607`, `PLW1510` |
+
+## Revision log
+
+- 2026-11-27: Summary bullet on `encoding=`/`errors=`, §4 and normative candidate 6 say `text=True` falls back to `locale.getpreferredencoding(False)`. That holds only below Python 3.15. Python 3.15.0 (2026-10-09) turns UTF-8 mode on by default (PEP 686), and `PYTHONUTF8=0` restores the locale default. The recommendation to pass `encoding=` explicitly stands, because every floor named here is below 3.15. Decision: PY-PROC-01 in [../refresh-2026-11/python-quality.md](../refresh-2026-11/python-quality.md).
+- 2026-11-27: The Summary bullet on PEP 787, §6 and the Contested section say PEP 787 targets 3.15 "at the earliest". PEP 787 is still Deferred and Python 3.15 shipped without it. The argv-list-only rule is unchanged. Decision: PY-PROC-04 in [../refresh-2026-11/python-quality.md](../refresh-2026-11/python-quality.md).
+- 2026-11-27: §9 says nothing in ruff checks for a missing `timeout=`. That was re-read against the ruff 0.17.6 rule docs and still holds (no subprocess-timeout rule added in 0.16.3 to 0.17.6). Decision: PY-PROC-07 in [../refresh-2026-11/python-quality.md](../refresh-2026-11/python-quality.md).

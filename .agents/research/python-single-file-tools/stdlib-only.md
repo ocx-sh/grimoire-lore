@@ -4,6 +4,7 @@ topic: PEP 723, argparse/tomllib/urllib as dependency-free equivalents, exit-cod
 agent: scout-canonical (dive)
 model: sonnet
 date_researched: 2026-08-23
+revised: 2026-11-27
 sources_count: 12
 scope: /home/mherwig/dev/ocx/.claude/hooks/ (9 scripts + hook_utils.py, duplicated verbatim in /home/mherwig/dev/grimoire/.claude/hooks/), /home/mherwig/dev/grimoire-lore/scripts/make-mark.py, /home/mherwig/dev/grimoire-lore/.claude/skills/research-lang/scripts/check-artifacts.py
 ---
@@ -271,3 +272,7 @@ As of 2026-08-23:
 | [docs.python.org/3/library/signal.html](https://docs.python.org/3/library/signal.html) | stdlib `signal` reference, "Note on SIGPIPE" | current | The documented `BrokenPipeError` recipe (catch it, redirect stdout to devnull, exit non-zero) that `check-artifacts.py` is missing |
 | [docs.python.org/3/library/argparse.html](https://docs.python.org/3/library/argparse.html) | stdlib `argparse` reference | current | `type=bool`'s `bool("False") is True` trap, exit code 2 on usage errors, `BooleanOptionalAction` |
 | [docs.python.org/3/library/pathlib.html](https://docs.python.org/3/library/pathlib.html) | stdlib `pathlib` reference | current | Grounds the `Path` -over- `os.path` recommendation this fleet already follows near-universally |
+
+## Corrections
+
+- 2026-11-27: Candidate 17 and Findings section 7 call the platform-default text encoding locale-dependent without a version scope. That holds only below Python 3.15. Python 3.15.0 (2026-10-09) turns UTF-8 mode on by default (PEP 686), and `PYTHONUTF8=0` restores the locale default. Every floor this file discusses (3.10 for the hook fleet, 3.11 for `check-artifacts.py`) is below 3.15, so the recommendation to state `encoding="utf-8"` explicitly stands unchanged. Decision: `../refresh-2026-11/python-quality.md`, changed rules PY-PROC-01 and PY-SOLO-03.

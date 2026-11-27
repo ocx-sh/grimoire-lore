@@ -4,6 +4,7 @@ topic: python-api-design
 agent: dive-python-api-design
 model: claude-sonnet-5
 date_researched: 2026-08-23
+revised: 2026-11-27
 sources_count: 18
 scope: >
   Public API surface of /home/mherwig/dev/ocx-sdk-python (src/ocx_sdk, 13 files,
@@ -355,9 +356,9 @@ awk '/^class [A-Za-z_][A-Za-z0-9_]*\((Exception|BaseException)\)/ { n = $0; sub(
 Watched red: a scratch file with both `class OcxError(Exception)` and `class NetworkError(Exception)` → only `NetworkError` flagged.
 Watched green: real `_errors.py`, empty output (16 exception classes, one root).
 
-**NG-13 — `griffe check <pkg> -s src` against the latest tag runs in CI on every PR, but is not treated as sufficient proof the public surface is stable — pair it with NG-1.**
+**NG-13 — `griffe check <pkg> -s src --against <last tag>` runs in CI on every PR, but is not treated as sufficient proof the public surface is stable — pair it with NG-1.**
 Rationale: verified directly (§7) that `griffe check` catches a full symbol removal but not an `__all__`-only drift; the two checks cover disjoint failure modes.
-Verification: `griffe check ocx_sdk -s src -f verbose`; exit 0 with no output is a pass, any output is a break. Confirmed both states by planting and reverting a full removal of `Ocx` from `__init__.py`.
+Verification: `griffe check ocx_sdk -s src --against <last tag> -f verbose`; exit 0 with no output is a pass, any output is a break. Confirmed both states by planting and reverting a full removal of `Ocx` from `__init__.py`. Never drop `--against`: since griffe 2.3.2 a checkout with no tags, such as a shallow CI clone, prints only `griffe: info: 'against' ref not specified and no tags found` to stderr and exits 0, a pass that compared nothing (watched on 2.4.1; 2.2.0 crashed with exit 1). The CI job fetches tags (`fetch-depth: 0`), and that stderr line in a job log is the finding.
 
 ## Applied to the SDK
 
@@ -437,3 +438,7 @@ As of 2026-08-23:
 | [sethmlarson.dev — Deprecations via warnings don't work for Python libraries](https://sethmlarson.dev/deprecations-via-warnings-dont-work-for-python-libraries) | Practitioner essay (Seth M. Larson, Python security/packaging contributor) | recent | Secondary; independent confirmation that `DeprecationWarning` is filtered out by default outside `__main__`, reinforcing why an explicit, correctly-`stacklevel`'d warning is not automatically visible to callers either |
 
 Also read directly (not web sources, primary evidence from the audited repos and this session's own tool runs, not re-listed above): `/home/mherwig/dev/ocx-sdk-python/src/ocx_sdk/*.py` (all 13 files, full read), `pyproject.toml`, `CHANGELOG.md`; `/home/mherwig/dev/index/bot/src/indexbot/errors.py`, `exit_codes.py`, `pyproject.toml`; this session's own `pyright`, `ruff`, and `griffe check` invocations against both repos.
+
+## Revision log
+
+- 2026-11-27: NG-13 (the `griffe check` verification behind PY-SURF-02) now always passes `--against <last tag>`, and the griffe 2.3.2 tagless exit 0 with a `no tags found` stderr line is named as the finding; see `../refresh-2026-11/python-quality.md`.

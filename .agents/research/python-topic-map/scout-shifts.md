@@ -5,6 +5,7 @@ agent: scout-shifts
 model: sonnet
 date_researched: 2026-08-22
 sources_count: 29
+revised: 2026-11-27
 ---
 
 ## Table of contents
@@ -210,3 +211,7 @@ Every row below is a QUESTION for the rule-writing phase, not a settled answer. 
 | https://syrupy-project.github.io/syrupy/ | Official syrupy docs | current, 2026 | Snapshot-testing plugin semantics (fails on missing snapshot, matchers for non-deterministic data) |
 
 Secondary/dated-blog sources used only for triangulating a fast-moving 2026 status claim (free-threading real-world benchmarks, `ty`/Pyrefly maturity, and the 2026 PyPI supply-chain incident pattern), never as the sole source for a version number or PEP claim: multiple 2026 free-threading benchmark writeups (Medium/personal blogs, cross-checked against each other for the "~5-10% single-thread overhead, 2-4x multi-core speedup" range); InfoWorld's `ty` beta coverage; danilchenko.dev's Pyrefly/ty/mypy comparison; CSOonline and Security Boulevard's 2026 PyPI supply-chain-campaign reporting; pydevtools.com's `pre-commit-uv`/`sync-with-uv` coverage; dasroot.net's `prek` writeup.
+
+## Corrections
+
+- 2026-11-27: The "Use X not Y" row for `tarfile.extractall()` / `extract()` and the "Extracting a tar archive with default settings is fine" entry under "Advice that is now wrong" present an explicit `filter="data"` as the safe form. That overclaims. Crafted link members bypassed both the `data` and `tar` filters (CVE-2026-82049, published 2026-09-14, fixed in 3.12.15 and 3.13.16; CVE-2026-11940, fixed in 3.12.14, 3.13.15 and 3.14.7). The filter is defence in depth, not the boundary, and a batch extract also rejects every member where `member.issym() or member.islnk()` before the call. See `../refresh-2026-11/python-quality.md` (PY-SEC-01).

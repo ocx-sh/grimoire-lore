@@ -33,7 +33,7 @@ The whole header, for a script with no dependencies:
 
 ```python
 # /// script
-# requires-python = ">=3.10"
+# requires-python = ">=3.12"
 # ///
 ```
 
@@ -114,7 +114,7 @@ acceptable only because this harness always sends EOF.
 
 | ID | Rule | Verification | Severity |
 |---|---|---|---|
-| PY-SOLO-03 | Every text `open()`, `Path.read_text()` and `Path.write_text()` states `encoding="utf-8"`. The platform default is locale-dependent, so the same file round-trips correctly on the developer's machine and corrupts on a runner whose locale is not UTF-8 — a failure that only appears once a non-ASCII commit message, filename or heading passes through. | see block PY-SOLO-03 — every hit is a finding. Two known false-positive classes to discard by eye: a call whose arguments wrap onto the next line (the lookahead is single-line), and a binary-mode open the mode-string guard misses. The `os.` lookbehind keeps `os.open`, which takes no encoding, out. Watched red against the audited fleet, isolating both bare-`open` append sites exactly | SHOULD |
+| PY-SOLO-03 | Every text `open()`, `Path.read_text()` and `Path.write_text()` states `encoding="utf-8"`. Below Python 3.15 the platform default is locale-dependent (3.15 defaults to UTF-8 unless `PYTHONUTF8=0`, per PEP 686, and every floor here is lower), so the same file round-trips correctly on the developer's machine and corrupts on a runner whose locale is not UTF-8 — a failure that only appears once a non-ASCII commit message, filename or heading passes through. | see block PY-SOLO-03 — every hit is a finding. Two known false-positive classes to discard by eye: a call whose arguments wrap onto the next line (the lookahead is single-line), and a binary-mode open the mode-string guard misses. The `os.` lookbehind keeps `os.open`, which takes no encoding, out. Watched red against the audited fleet, isolating both bare-`open` append sites exactly | SHOULD |
 | PY-SOLO-07 | A tool of this shape makes no network call. A hook firing on every tool event that reaches the network puts a remote host's availability on the critical path of every edit. Where one is genuinely unavoidable, it is `urllib.request` with an explicit `timeout=` — the default is to wait forever, which is indistinguishable from a hung editor. | see block PY-SOLO-07 (1) — any hit is a finding to justify, not a lint to satisfy. Then see block PY-SOLO-07 (2) — every hit is a violation outright. Both watched red on a planted `urlopen` with no timeout; both silent on the audited fleet | SHOULD |
 | PY-SOLO-08 | Concurrent invocations coordinate through one atomic primitive — `os.mkdir`, which raises `FileExistsError` atomically — never a check-then-create pair. Two invocations of a per-event hook overlap routinely, and `if not lock.exists(): lock.mkdir()` has a window between the two calls wide enough to lose. | see block PY-SOLO-08 — an existence check within three lines of a `mkdir` is the finding. Decisive: release N workers on one barrier and count acquisitions plus crashes; anything other than exactly one acquisition and zero crashes is the violation. Watched red at N=40 — the check-then-create shape produced 1 acquisition and 2 `FileExistsError` crashes, the atomic `mkdir` 1 and 0 | SHOULD |
 

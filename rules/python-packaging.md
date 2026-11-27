@@ -28,9 +28,9 @@ family. A manifest claim nothing executes is documentation, not a contract.
 
 | ID | Rule | Verification | Severity |
 |---|---|---|---|
-| PY-PKG-01 | The declared `requires-python` floor is installed in CI and the suite collects against it — a floor nothing runs is a guess, and two harnesses here declared `>=3.10` while failing collection on it. | From the project directory: `uv python install 3.10` then `uv run --python 3.10 python -m pytest --collect-only -q .`, substituting the declared floor. A collection error is the violation; clean collection is the pass. | MUST |
+| PY-PKG-01 | The declared `requires-python` floor is installed in CI and the suite collects against it — a floor nothing runs is a guess, and two harnesses here declared `>=3.10` while failing collection on it. | From the project directory: `uv python install 3.11` then `uv run --python 3.11 python -m pytest --collect-only -q .`, substituting the declared floor. A collection error is the violation; clean collection is the pass. | MUST |
 | PY-PKG-02 | Every `Programming Language :: Python ::` classifier names a version the CI matrix actually runs — a classifier is a public compatibility claim, and advertising 3.13 while testing only 3.12 ships an untested promise. | Read the classifier list, read the workflow's `matrix.python-version`, and name every classifier absent from the matrix. Each one named is the violation. | SHOULD |
-| PY-PKG-03 | An upper bound on `requires-python` appears only with an adjacent comment naming the incompatibility — an unexplained `<4.0` makes every future interpreter a resolver conflict for every consumer. | see block PY-PKG-03 then read each hit: a `<` with no adjacent reason is the violation. Empty output means no upper bound anywhere, which is the pass. | SHOULD |
+| PY-PKG-03 | An upper bound on `requires-python` appears only with an adjacent comment naming the incompatibility — an unexplained `<4.0` makes every interpreter past the cap a resolver conflict for consumers on pip-style resolvers and an install refusal for the project's own contributors; uv ignores the cap on a dependency, which hides the bound rather than removing it. | see block PY-PKG-03 then read each hit: a `<` with no adjacent reason is the violation. Empty output means no upper bound anywhere, which is the pass. | SHOULD |
 | PY-PKG-04 | A single source defines the version, and reading it at runtime never lets a packaging exception reach a consumer — `importlib.metadata.PackageNotFoundError` escaping the package is an internal detail becoming API. | Uninstall the distribution while keeping the source importable, then import the package. It must raise its own error type; a bare `PackageNotFoundError` is the violation. | SHOULD |
 
 ```sh
@@ -71,13 +71,15 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)**/pyproject.tom
 
 | ID | Rule | Verification | Severity |
 |---|---|---|---|
-| PY-PKG-10 | Publishing authenticates through Trusted Publishing (OIDC), never a long-lived token in a repository secret — a stored token outlives the job, the contributor, and usually the memory of who minted it. | see block PY-PKG-10 (1) and see block PY-PKG-10 (2) as two separate commands. Any hit in a publish job is the violation; empty output from both is the pass. | SHOULD |
+| PY-PKG-10 | Publishing authenticates through Trusted Publishing (OIDC), never a long-lived token in a repository secret — a stored token outlives the job, the contributor, and usually the memory of who minted it. | see block PY-PKG-10 (1), see block PY-PKG-10 (2) and see block PY-PKG-10 (3) as three separate commands. Any hit in a publish job is the violation; empty output from all three is the pass. | SHOULD |
 
 ```sh
 # PY-PKG-10 (1)
 git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' | xargs -0 -r grep -H -n -E -e PYPI_TOKEN --
 # PY-PKG-10 (2)
 git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' | xargs -0 -r grep -H -n -E -e password: --
+# PY-PKG-10 (3)
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' | xargs -0 -r grep -H -n -E -e 'UV_PUBLISH_(TOKEN|PASSWORD)' --
 ```
 
 ## Where Tool Config Lives

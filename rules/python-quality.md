@@ -63,7 +63,7 @@ rationale and verification.
 | 2 | No catch-all encloses the body of a tool whose exit code is consumed. A gate that crashes must not exit `0`. | PY-CORE-02 |
 | 3 | Exit values come from the pinned table; a status invented locally breaks a caller that already scripts against it. | PY-CLI-01 |
 | 4 | stdout carries the result; diagnostics, progress and errors go to stderr. Under a machine-output flag, stdout is the payload and nothing else. | PY-CLI-02 |
-| 5 | Every text `open()` and every captured subprocess names its `encoding=` — `text=True` alone rides the locale. | PY-PROC-01 |
+| 5 | Every text `open()` and every captured subprocess names its `encoding=` — `text=True` alone rides the locale on every floor below Python 3.15. | PY-PROC-01 |
 | 6 | Never read both `stdout` and `stderr` from a `Popen` without `communicate()` — the pipe buffer fills at 64 KiB and the wait never returns. | PY-PROC-03 |
 | 7 | No blocking primitive inside `async def`, and `ASYNC` is selected wherever `async def` appears. | PY-ASYNC-05 |
 | 8 | Every HTTP client states an explicit timeout, and no server-supplied URL is followed by an authenticated client before its host is checked. | PY-HTTP-02, PY-HTTP-05 |
