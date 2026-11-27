@@ -1,0 +1,3 @@
+clean	T1
+publish v1	T2	publish v1
+config get key	T0

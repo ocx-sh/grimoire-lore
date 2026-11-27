@@ -1,0 +1,55 @@
+{
+ "units": [
+  {
+   "id": "ux-cli",
+   "written": [
+    "skills/ux-cli/references/terminal-output.md"
+   ],
+   "rulesShipped": 0,
+   "mustShipped": 0,
+   "droppedMust": [],
+   "planDeviations": [
+    "Repair pass only: no rules added or removed. The UX-TEXT-05 awk check in terminal-output.md now sets a step flag when a snapshot has a help: or Try: line, and tests the last line only then. A snapshot with no next step (the UX-TEXT-31 case) passes. A snapshot whose help: is followed by a trailing note: fails. The refusal case (Try: then Override: last) still passes. I tested it on four toy snapshots. The comment above the block explains the rule. I did not cite UX-TEXT-31 by ID, because the cross-reference check showed it is defined in another unit's file, not in this skill's rule tables. The comment points to the `text.md` check for a stated ground instead. The plan text for the fix gave two options (gate on next step, or skip files whose last line is not a next step). I used the gate."
+   ],
+   "validator": "python3 .claude/skills/research-lang/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' skills/ux-cli: clean, exit 0. terminal-output.md is 163 lines, SKILL.md 156 lines. No rules/ux-cli*.md file exists on disk, so no rule file was validated.",
+   "repaired": true,
+   "ok": true,
+   "blocking": [],
+   "nits": [
+    "skills/ux-cli/references/destructive-commands.md:84: UX-ACT-13 Severity column says plain MUST. The consolidation says MUST for the no-write preview and SHOULD for the output format. The rule body keeps the split, so the column is a simplification.",
+    "skills/ux-cli/references/destructive-commands.md:112, first-run.md:91, terminal-output.md:125: example output contains the literal `/home/u/`. The plan's portability list names `/home/`. check-artifacts passes because it forbids only `/home/mherwig`. Use `/Users/u` or `~` if you want the list kept literally.",
+    "skills/ux-cli/SKILL.md:17: the table of contents (a Contents line) is present and correct. SKILL.md routes to UX-CLI-31 (first-run.md), which the plan's range 14 to 19 omits. The consolidation defines UX-CLI-31 and it is shipped with its severity, so this is fine.",
+    "Verified clean: check-artifacts exits 0 (clean) for skills/ux-cli. grep for mherwig, .agents/research, wave, worker, fleet repo names finds nothing. cli_matrix.py --self-test passes and --help works. All 31 UX-CLI rows plus UX-TEXT-05/07/12/23 and UX-ACT-12 to 17 are present with the consolidation's severity. Dated facts sampled against the consolidations all match. The repaired UX-TEXT-05 awk check was run on 5 toy snapshots and behaves as described: it passes a snapshot with no next step and the Try:/Override: refusal, and it fails a trailing note: and a first line that is not a bare error."
+   ]
+  },
+  {
+   "id": "ux-agent-interfaces",
+   "written": [
+    "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/skills/ux-agent-interfaces/SKILL.md",
+    "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/skills/ux-agent-interfaces/references/mcp-servers.md"
+   ],
+   "rulesShipped": 0,
+   "mustShipped": 0,
+   "droppedMust": [],
+   "planDeviations": [
+    "Repair pass only; no rules added or removed. Added a Contents line to SKILL.md (now 132 lines). Added a Dates and Versions row to mcp-servers.md for GitHub's MCP server counts (151 tools, 21 pass item 2, 4 pass item 3, median description 79 characters; github-mcp-server at 7edc2dd, read 2026-11-25) and cited it in the UX-AGENT-19 rationale. The 79-character median comes from the consolidation's C4 row; the 3-month refresh cadence is my choice, since the consolidation gives none.",
+    "The validator's 3 remaining findings are cross-skill citations, not defects in these files. UX-ACT-01 and UX-ACT-12 are cited in SKILL.md, and UX-ACT-16 in tool-approval.md. Per the plan, UX-ACT-01 is defined in ux-quality-reference/actions.md and UX-ACT-12 to 17 in ux-cli/references/destructive-commands.md. Other units own those files and they are not on disk yet. The citations stay; they should clear once those files land."
+   ],
+   "validator": "python3 .claude/skills/research-lang/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' skills/ux-agent-interfaces. It exited 1 with 3 findings, all cross-skill citations listed in planDeviations. The 'no table of contents' finding and the unsourced-statistic finding are fixed. SKILL.md is 132 lines, under the 500-line cap.",
+   "repaired": true,
+   "ok": false,
+   "blocking": [
+    "skills/ux-agent-interfaces/references/machine-output.md:18: Dates row opens 'No two of seven common CLIs agree on where the JSON flag may sit' and then says gh, docker, cargo and uv all accept it only after the subcommand. That contradicts itself, and the consolidation has no such claim. Its table says gh, docker, cargo and uv take the flag only after the subcommand, npm takes it anywhere, and ocx takes it only before. Correct text: 'gh, docker, cargo and uv accept the flag only after the subcommand, npm anywhere, ocx only before.'"
+   ],
+   "nits": [
+    "skills/ux-agent-interfaces/references/machine-output.md:148: UX-AGENT-13 rule text has a stray bold word, 'the exact words **pinned** \"requires the owner's approval\"'. The consolidation has none. Delete '**pinned**'.",
+    "check-artifacts.py exits 1 with 3 findings: UX-ACT-01 and UX-ACT-12 cited in SKILL.md, UX-ACT-16 in tool-approval.md. These are cross-skill citations whose definitions other units own, so they are not blocking.",
+    "All 13 UX-AGENT MUST rows (01, 03, 04, 05, 06, 09, 11, 12, 13, 14, 15, 18, 20) and UX-ACT 18 to 26 and 28 are present, with the same ID and severity as the consolidations. The remaining rows (AGENT-02, 07, 10, 16, 17, 19, 21 to 26 and ACT-27) also match.",
+    "The dated client limits and platform facts in mcp-servers.md and tool-approval.md match the consolidations' Decay rows (dates, commits, URLs). The GitHub MCP row (151 tools, 21 and 4 passes, median 79 characters, `7edc2dd`, read 2026-11-25) matches the consolidation's C4 and UX-AGENT-19 rows.",
+    "Budgets are fine: SKILL.md is 132 lines with a Contents line, and the depth files (205, 135 and 178 lines) have no cap. The frontmatter description matches the plan. Both check scripts pass `--help` and `--self-test`. The forbidden-string grep finds nothing."
+   ]
+  }
+ ],
+ "failed": [],
+ "integrated": []
+}

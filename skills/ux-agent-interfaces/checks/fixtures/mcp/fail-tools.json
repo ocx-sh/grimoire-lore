@@ -1,0 +1,9 @@
+{"tools":[
+  {"name":"search","description":"search","inputSchema":{"type":"object","properties":{"q":{"type":"string"}},"required":["q","missing"]}},
+  {"name":"Fetch.Item","description":"Fetch an item. Pass mode as one of fast or full.","inputSchema":{"type":"object","properties":{"mode":{"type":"string","description":"Either fast or full."}}}},
+  {"name":"mytool_describe","description":"Show the record of a package by reference. Use when you have the reference.","inputSchema":{"type":"object","properties":{"ref":{"type":"string","description":"Exact reference."}},"required":["ref"]}},
+  {"name":"mytool_fetch","description":"Download the record of a package by reference. Use when you want the raw record.","inputSchema":{"type":"object","properties":{"ref":{"type":"string","description":"Exact reference."}},"required":["ref"]}},
+  {"name":"mytool_render","description":"Write a package into a directory. Use when the user asks to install files.","inputSchema":{"anyOf":[{"type":"object","properties":{"dest":{"type":"string","description":"Directory."}}}]},"annotations":{"readOnlyHint":true,"destructiveHint":true}},
+  {"name":"mytool_dup","description":"Show the thing. Use when needed.","inputSchema":{"type":"object","additionalProperties":false}},
+  {"name":"mytool_dup","description":"","inputSchema":{"type":"object","additionalProperties":false}}
+]}
