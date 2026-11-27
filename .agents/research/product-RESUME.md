@@ -1,7 +1,7 @@
-# product (UX + marketing + channels) — resume state (paused 2026-11-27 on owner request)
+# product (UX + marketing + channels) — program state (finished 2026-11-27)
 
 Program frame: [product-frame.md](product-frame.md). Method: `.claude/skills/research-lang/`.
-Worktree `.agents/worktrees/product`, branch `product-ux-marketing`. Nothing pushed.
+Ran in a worktree on branch `product-ux-marketing`; landed on `main` together with the 2026-11 refresh.
 
 ## Done
 
@@ -33,42 +33,29 @@ All under [product-resume/](product-resume/):
 Each selection file also holds the map's proposed artifact set and its
 corrections to the frame.
 
-## Left, in order
+## Finished 2026-11-27
 
-1. **Phases 4 and 5 (dive, consolidate).** DONE 2026-11-27: 23 topics, 552
-   rules, results in `product-resume/wave1-result-<group>.json`. To redo a
-   group, run the stored script with the contents of
-   `product-resume/wave1-args-<group>.json` as `args` (dives may be given as
-   slug strings; each brief is `product-resume/briefs/<topic>/<dive>.md`):
+| Phase | Result |
+|---|---|
+| 4, 5 Dive, consolidate | 23 topics, results in `product-resume/wave1-result-<group>.json` |
+| 6 Iterate | Wave 2: 58 follow-ups over 22 topics (`wave2-result-<group>.json`). Wave 3, held out: claims, accessibility, interface states and AI features (`wave3-result-*.json`); it added no MUST rule. Final count: 569 rule IDs |
+| 7 Author | `product-authoring-plan.md`, 22 units in `product-resume/authoring-units.json`: rules `ux-quality` and `marketing-quality`, their two reference skills, 15 skills, bundles `ux-essentials` and `product-essentials` |
+| 8 Validate | `product-resume/phase8-result.json`: each artifact followed literally on a real repository (26 blocking and 81 minor defects, repaired), trigger evals on two model tiers (60 cases, none missed, three co-loads each) |
 
-   ```
-   Workflow({ scriptPath: ".agents/research/product-resume/map-dive-consolidate.js", args: <wave1-args-<group>.json> })
-   ```
+Scripts, kept for a later round: `map-dive-consolidate.js`, `followup-revise.js`
+(`args.wave` selects `wave<N>/`), `author-validate.js`, `validate-literal.js`,
+`list-descriptions.py`.
 
-   The script writes `<topic>/<dive>.md` per dive and `<topic>.md` per topic,
-   checks each dive against the output contract, and has a skeptic challenge
-   each ruleset before an opus revision. 74 dives, 23 consolidations. A topic
-   whose `<topic>.md` already exists is done; drop it from the args first.
-2. **Phase 6 (iterate).** Wave 2 launched 2026-11-27: 58 follow-up questions
-   over 22 topics (`product-resume/wave2/<topic>/q<i>.md`), run by
-   `product-resume/followup-revise.js` (one run per group; args are
-   `{today, topics: [{slug, idFamily, group, q: [indices]}]}`). Each follow-up
-   writes `<topic>/followup-q<i>.md`; one opus revision per topic folds them
-   in. The 24 questions that need a human, a credential or an eval harness and
-   the 105 owner decisions are in `product-owner-decisions.md`.
-   Stop when a wave adds no new MUST rule and no new failure class.
-3. **Fold the frame corrections** from the three selection files into
-   `product-frame.md` under "Corrections". Known already: only 2 of 10 fleet
-   sites have a landing page; the fleet has no social channel and no voice
-   guidance; the larger GUI is the VS Code extension, not `grim-gui`; the maps
-   added a third prefix, `channel-`.
-4. **Phase 7 (author).** Reconcile the three proposed artifact sets into one
-   (they overlap on `product-essentials` and on release announcements), then
-   write the rules, reference skills, skills and bundles.
-5. **Phase 8 (validate).** `check-artifacts.py`, trigger evals, and a literal
-   run of each skill on a real tree. Add the new sets to `taskfile.yml`.
-6. When the branch lands: delete `~/.cache/research-lang/exemplars/product`
-   and remove this worktree.
+## Left for the owner
+
+- `product-owner-decisions.md`: 105 owner decisions and 24 follow-ups that need
+  a human, a credential or an evaluation harness.
+- The "stillOpen" lists in the `wave2-result-*` and `wave3-result-*` files.
+- Two platform facts expire on 2026-12-01 and 2026-12-05; `task facts:stale`
+  reports them. It is outside `task ci` on purpose.
+- Not done: the baseline-without-the-artifact half of the trigger evals, and a
+  browser run of the `.mjs` checks by a reviewer (the machine lacks Chromium's
+  system libraries; only the authors' runs back them).
 
 ## Caveats carried forward
 
