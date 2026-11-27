@@ -59,7 +59,7 @@ flake-checker --no-telemetry --fail-mode --condition "numDaysOld < 30 && ((gitRe
 grep -c -e 'Error: Invalid(' -e 'Error: FlakeLock(' -- flake-checker.err   # 7 NIX-GATE-11, after exit 1: 0 = finding, 1+ = tool could not run
 nix shell --inputs-from . nixpkgs#lix --command nix flake check --no-build --extra-experimental-features flake-self-attrs   # 8 NIX-GATE-16 Lix leg: exit 0 pass
 nix eval --json --inputs-from . nixpkgs#nixVersions --apply 'v: builtins.filter (n: builtins.match "nix_2_[0-9]+" n != null && (builtins.tryEval (v.${n}.version or null)).success) (builtins.attrNames v)'   # 9 the first element is the floor
-nix shell --inputs-from . nixpkgs#nixVersions.nix_2_31 --command nix flake check --no-build   # 9 NIX-GATE-16 floor leg, nix_2_31 replaced by that element
+nix shell --inputs-from . nixpkgs#nixVersions.nix_2_34 --command nix flake check --no-build   # 9 NIX-GATE-16 floor leg, nix_2_34 replaced by that element
 ```
 
 Substitute each system the runner can build for `x86_64-linux` in step 6, and in
@@ -186,7 +186,7 @@ is not a review comment.
 | **pinned** A generated flake keeps every digest until its data file passes 20 MB. | NIX-GEN-17 |
 | **pinned** CppNix is the gate of record, Lix and the floor are advisory legs, and Determinate Nix is untested and never deliberately broken. | NIX-GATE-16, NIX-REL-12 |
 | **pinned** The project exports no modules, and the module rows ship for adopters who do. | the NIX-MOD family |
-| **pinned** The consumer floor is NIX-GATE-16's computed floor (today `nix_2_31` = 2.31.5), never a hardcoded version. | NIX-GATE-16, NIX-REL-12 |
+| **pinned** The consumer floor is NIX-GATE-16's computed floor (on nixos-unstable, 2026-11-27: `nix_2_34` = 2.34.9), never a hardcoded version. | NIX-GATE-16, NIX-REL-12 |
 
 Keep the Block list short enough that a blocked change is unusual. A rule set
 where everything blocks teaches the reader to negotiate with all of it.
