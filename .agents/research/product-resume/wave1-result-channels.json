@@ -1,0 +1,384 @@
+{
+ "group": "channels",
+ "mapPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/channel-topic-map.md",
+ "topics": [
+  {
+   "slug": "channel-github",
+   "idFamily": "CH-GH",
+   "dives": 4,
+   "blocked": 0,
+   "sources": 107,
+   "challenged": 14,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/channel-github.md",
+   "rules": 31,
+   "must": 22,
+   "conflictsResolved": [
+    "CH-GH-18: npm links demoted MUST to SHOULD; npm page re-tested 2026-11-27 with x-spiferack JSON request, still 403; images everywhere and PyPI links stay MUST",
+    "CH-GH-12: one exact allowed sentence; pass = every grep hit contains it verbatim (grep -vF), no hit for drafts/pre-releases",
+    "CH-GH-04: heuristic replaced by awk lint (write line needs APPROVAL-GATE marker earlier in same Markdown section) plus grep for implicit gh api -f POST; tested on sample",
+    "CH-GH-23: labelled catalog norm, sourced to documented counter definitions; fixed report form '<number> (<Cn>, <window>, read YYYY-MM-DD)' with two tested greps; 90-day series split to new CH-GH-31 SHOULD",
+    "CH-GH-24: inline minimal front matter (counter, read_command, baseline_window) as interim schema with two greps; counter order and 28-day baseline split to new CH-GH-32 SHOULD, marked catalog choice (dive's GHSV-17 was SHOULD)",
+    "CH-GH-25: split into agent workflow lint (MUST; minute-not-0 cron regex, workflow_dispatch, secrets ref, no token literal) and owner-only secret step; off-hour sourced by fetched quote 'High load times include the start of every hour'",
+    "CH-GH-29: retired (meta-process, nothing to check); Decay table keeps content",
+    "CH-GH-03: MUST now platform cap plus at least one topic with docs-exact regex; minimum 3, leading-char, category topic split to new CH-GH-30 SHOULD",
+    "CH-GH-28: grep excludes .agents; expiry 2026-12-05 stated",
+    "CH-GH-27: word-boundary regex, 'free' dropped, emoji in separate grep; tested against 'start' and 'free and open-source, star the repo'",
+    "CH-GH-07/10/12/19: every sub-check must pass, stated per rule and in preamble; CH-GH-19 gained jq check for repository/bugs/homepage",
+    "CH-GH-09, CH-GH-13: demoted to SHOULD (common knowledge, kept for lint)",
+    "CH-GH-05: 1222 x 640 labelled derived (640 x 1.91 = 1222.4, centre-crop assumption); safe area outside pass/fail",
+    "DOC-OBS-16 cross-reference: CH-GH-25 leaves its text unchanged and does not contradict it; its traffic/views branch can meet 30 days only from the CH-GH-25 archive"
+   ],
+   "anotherRound": [
+    "How does npmjs.com render relative README links and images today, measured with a real browser, so CH-GH-18 npm links can be graded?",
+    "Do LinkedIn and Meta centre-crop a 2:1 image to 1.91:1, which the derived CH-GH-05 safe area assumes?"
+   ],
+   "humanDecisions": [
+    "Create and test the traffic-archive secret for the flagships (CH-GH-25 owner step), and choose where the archive lives",
+    "Whether skills adopt the literal APPROVAL-GATE marker that the CH-GH-04 lint keys on",
+    "On 2026-12-05, confirm retirement of CH-GH-28 into failure mode 4"
+   ],
+   "failureModes": [
+    "CH-GH-04 awk lint passes a skill that writes through a tool other than gh (curl -X PUT to api.github.com) unless that pattern is added",
+    "CH-GH-23 grep 1 only checks lines naming a counter word; a bare number with no such word escapes",
+    "CH-GH-12 per-line check passes a line that holds the allowed sentence plus an extra claim",
+    "Lint commands were tested with /usr/bin/grep; the rtk hook rewrite of grep gave a false negative in this session, so agents must run the system grep"
+   ]
+  },
+  {
+   "slug": "channel-agent-boundary",
+   "idFamily": "CH-CORE",
+   "dives": 3,
+   "blocked": 0,
+   "sources": 170,
+   "challenged": 18,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/channel-agent-boundary.md",
+   "rules": 18,
+   "must": 15,
+   "conflictsResolved": [
+    "CH-CORE-01 scope: limited to the 15 matrix venues. GitHub and the package registries are out of scope, citing GitHub AUP section 4 (source 2026-07-09) and deferring to CH-GH-04, CH-GH-07 to CH-GH-22 and CH-GH-27. Added as conflict 12.",
+    "CH-CORE-01 patterns: added Reddit /api/submit and /api/comment (from the archived reddit routing.py:414 and api.py:449,2043), HN /submit and /comment, and the Product Hunt GraphQL endpoint. Also added a publishing secret-name pattern, because the literal-endpoint grep found 0 of the fleet's 1 automation path (notify-discord.yml holds its webhook in secrets.DISCORD_WEBHOOK).",
+    "CH-CORE-01 false positives: block cab-01 now excludes the facts/ and checks/ directories and ships a planted fail fixture and a pass twin. Watched red and green.",
+    "Conflict 2 and CH-CORE-02: the X requirement was re-fetched from docs.x.com/developer-guidelines.md on 2026-11-27 ('All automated accounts using the X API must meet these requirements: 1. Enable the Automated profile label'), so the hedge is removed. Bluesky's self-label is dated from its source commits (2026-03-19 and 2026-04-13) and marked as a 'best practice' that this rule makes required by choice. Mastodon's 'visual only' flag is noted, with the rule-6 text as the binding disclosure.",
+    "CH-CORE-02 verification: the Bluesky and Mastodon gates got commands (cab-02, watched on a real bot and a non-bot). The X label, bio, human-link and summoned-reply gates, plus the Bluesky opt-in and Discord no-self-bot gates, are marked 'unverified: attested by a human' and linted through gates_attested, attested_by, attested_at and spend_cap. The unrunnable trigger check was dropped.",
+    "CH-CORE-03: the reading heuristic is replaced by a fixed key schema and lint cab-03 (no pronouns, values of at most 20 words, blank motive). Watched: 5 failures on the plant, 0 on the twin.",
+    "CH-CORE-05: added a verbatim rules_quote line that cab-05 re-finds on the live page. A forged quote failed against the mastodon.social rules.",
+    "CH-CORE-07: case must be a registry trigger or exemption id, checked by cab-07. YT-F03 to YT-F09 are seeded. The heuristic was removed from verification.",
+    "CH-CORE-09: c2patool 0.27.23 and exiftool 13.64 were run on samples. The YouTube claim is cited to 15447836 ('C2PA 2.1 or higher', re-fetched). exiftool exits 0 on a missing tag, so the check tests for non-empty output. A C2PA-signed file lacked the XMP DigitalSourceType tag, so both must be written. The rule stays SHOULD.",
+    "CH-CORE-10: cut down to the gitleaks discord-webhook-url and google-oauth-refresh-token additions.",
+    "CH-CORE-11 and CH-CORE-16: CH-CORE-16 is retired and merged into CH-CORE-11, which now covers the no-registry case. 25 seed rows ship, so cab-11 can pass. Of those rows, 19 were re-fetched live and matched; the 6 LinkedIn rows are manual.",
+    "CH-CORE-12: lint cab-12 now checks the provenance enum, the source_date forms, the verified date, the refresh_days values, the url and a non-empty expect. Tested under gawk 5.2.1 and busybox awk.",
+    "CH-CORE-14: LinkedIn, producthunt.com, help.x.com, reddit.com, reddithelp.com and ftc.gov are exempt from the weekly fetch and get a manual path (UA 8.2; lychee.toml:27-32). 403, 429 and 999 report as UNREACHABLE.",
+    "CH-CORE-15: demoted to SHOULD because no failure was observed. Provenance is now checked against a human-kept host allowlist (cab-15).",
+    "Dropped list: the wrong swift-quality.md:38 citation is replaced by prompt-contracts.md:45-46 and the example shell-quality.md:199.",
+    "Applied to the fleet: re-measured with commands. 0 of 17 checkouts have an ai_use line. 0 sponsor markers in 16 repos. 0 of 442 media files carry C2PA or DigitalSourceType. No facts directory exists. CH-CORE-06/-07 changed to Unmeasured, and Dino Edition is marked as an owner judgement."
+   ],
+   "anotherRound": [
+    "What do Reddit's Responsible Builder Policy, the Product Hunt Terms of Service and the Discord Developer Policy say when read from the primary pages?",
+    "Can the X gates (Automated label, bio, human-account link) be read with the owner's own API key, so they move from human attestation to a command?",
+    "Does videos.list return containsSyntheticMedia and paidProductPlacementDetails for public videos under a plain API key, and what do the two fleet Shorts carry?",
+    "Did Bluesky ship a native automated-account label in 2026, beyond the bot self-label in the atproto tutorial?",
+    "Which registry fact classes actually fail expect after two refresh cycles, and should the 30/90/180 intervals move?"
+   ],
+   "humanDecisions": [
+    "Who keeps facts/hosts.txt, which decides which hosts may carry platform or authority provenance?",
+    "Who re-reads the MANUAL LinkedIn registry rows on their due dates? And does an agent fetch that a human starts in an interactive session count as a manual re-read under LinkedIn UA 8.2?",
+    "Should the Discord CI notifier become an automation: bot row (with runs_from and attested gates), or move to a separate developer channel?",
+    "What are the AI-use and paid-placement answers for the two @ocx-sh Shorts, and is Dino Edition realistic under YT-F03 to YT-F06?",
+    "Is the 20-word value cap on fact sheets acceptable as a starting value?",
+    "What spend caps apply before any metered API (X per-post pricing) is used?"
+   ],
+   "failureModes": [
+    "The literal-endpoint grep misses webhooks held in CI secrets. The fleet's only automation was found only by the secret-name pattern.",
+    "exiftool exits 0 when DigitalSourceType is absent, so an exit-code check passes falsely.",
+    "Signing before writing XMP: editing a C2PA-signed file afterwards breaks the hard binding.",
+    "Shell functions named grep and git in an interactive profile silently broke a fleet scan. Check scripts must call system binaries.",
+    "An agent can still write a forged saved copy of community rules. cab-05 re-fetches the live page, but a host that blocks scripts falls back to a human read.",
+    "The cab-07 lookup proves the case id exists and agrees with the value, not that the agent matched the right case. The human confirmation remains the backstop.",
+    "Not run in this revision: the cab-01 runs_from loop (no channels.yml exists yet), facts-stale.py and channels-lint.py (authored with the rule), and the gitleaks regexes. Existing table cells with escaped pipes (CH-CORE-10, CH-CORE-18) still break the rule-distillation.md:212 no-pipe-in-cell convention."
+   ]
+  },
+  {
+   "slug": "channel-linkedin",
+   "idFamily": "CH-LI",
+   "dives": 3,
+   "blocked": 0,
+   "sources": 69,
+   "challenged": 15,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/channel-linkedin.md",
+   "rules": 21,
+   "must": 15,
+   "conflictsResolved": [
+    "CH-LI-09 image plus typed URL: the default is now a text, document or video post with the URL after line 3. Image plus URL waits on manual case 11. The -21% since mid-May 2026 (Composeur summary of MagicPost's 1.2M-post study) is stated, and the rule now rests on measurability rather than reach.",
+    "CH-LI-07 and CH-LI-13: the van der Blom figures are removed (paywalled, unread). CH-LI-13 is demoted from MUST to SHOULD because it is a reach rule, not a policy. The fixture was re-run with the emoji pattern added: tp 14, fp 0, fn 0.",
+    "CH-LI-03: demoted to SHOULD. The 90-grapheme and 2-line outlier and the hook regex are dropped. It now holds the 140-grapheme lines-1-to-3 consensus budget (six of eight vendor pages; seven was a miscount). CH-LI-05 is retired and merged into it.",
+    "CH-LI-04: the regex now covers sells, sold, paid, sponsored by, my employer and my company, and was tested on 11 sentences. The offset test is now a command that uses check.py graphemes().",
+    "CH-LI-16: the C2PA a6282984 sentence is dropped. A human-set human_rewrite header field makes 'rewritten' checkable. The MUST is labelled a program default from the sibling rule, not a LinkedIn requirement.",
+    "CH-LI-08: the skeptic was wrong that a525082 is missing; it is cited in li-format-and-reach-evidence.md lines 114 and 251. The rule is reduced to three checks, and a broken two-character @-mention grep is fixed.",
+    "CH-LI-01: UA 8.2 items 2, 3, 13 and 15 were read verbatim from the served HTML with curl on 2026-11-27 (command recorded), so the dive's fetch-tool-summary caveat is resolved. The grep claim is narrowed to committed code, and a run-time tool-log check is added. The header requirement is split out to new CH-LI-21.",
+    "CH-LI-02: MUST kept for declaring a goal and an existing metric. The format match is split out to new CH-LI-22 as a SHOULD.",
+    "CH-LI-18: scoped to the skill and facts file. The tags are aligned to LI, LI-API, GOV, STD and 3P. It names scripts/facts-stale.py, the sibling spec at core-facts-and-channel-inventory.md:218, which does not exist yet.",
+    "CH-LI-20: reframed as an owner-decision route. 'Creator default' is removed, and 4x/7x is labelled an undated LI claim.",
+    "CH-LI-06: the styled-letter claim now cites Roselli (updated 20 Nov 2026, screen-reader versions listed) and is narrowed to what that test measured. The check is a tested grep -P.",
+    "CH-LI-11 and CH-LI-19: reduced to their non-obvious checks. CH-LI-19 limits now live in the facts file.",
+    "Applied rows: CH-LI-20 now reads 'No Page found, absence unproven'. CH-LI-02 is now a commitment that bars utm-clicks on fleet targets, not a counterfactual."
+   ],
+   "anotherRound": [
+    "Since mid-May 2026, does a URL typed in a text post on LinkedIn cost about 21% of impressions? Fetch the primary of MagicPost's 1.2M-post study instead of the Composeur summary.",
+    "Manual case 11: does a LinkedIn image post with a typed URL show the image, a clickable URL and no preview card? A human in a logged-in browser must answer it, and it gates CH-LI-09 visual: image.",
+    "Manual fold protocol at 1280 px, at 360 px and in the mobile app: is the 140-grapheme lines-1-to-3 budget right, and which unit does the 3,000 limit count?"
+   ],
+   "humanDecisions": [
+    "Should the AI-disclosure line be on by default in the author's name (CH-LI-16 MUST as a program default), given that LinkedIn only recommends it?",
+    "Create a LinkedIn company Page, given that no evidence compares Page and person on clicks?",
+    "Add an owned redirect or cookieless analytics so clicks can be counted, or keep impressions and GitHub referrers as the only metrics?",
+    "May colleagues be asked to share launches at all?"
+   ],
+   "failureModes": [
+    "The CH-LI-04 grapheme-offset command imports graphemes from check.py. It was not run end to end, because the dive appendix omits check.py's __main__ block. Only the regex was tested, on 11 sentences.",
+    "The CH-LI-18 staleness check depends on scripts/facts-stale.py, which does not exist yet. Until the sibling ships it, that half of the check is unrun.",
+    "If the -21% typed-URL figure holds in the primary, CH-LI-09 loses its reach basis. Only the measurability argument would remain.",
+    "Retiring CH-LI-05 and splitting CH-LI-01 and CH-LI-02 into CH-LI-21 and CH-LI-22 change what those IDs cover. Re-check any artifact that already quotes them."
+   ]
+  },
+  {
+   "slug": "channel-youtube",
+   "idFamily": "CH-YT",
+   "dives": 4,
+   "blocked": 0,
+   "sources": 146,
+   "challenged": 14,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/channel-youtube.md",
+   "rules": 28,
+   "must": 18,
+   "conflictsResolved": [
+    "CH-YT-16 split-versus-cut: one finding said split CH-YT-16 into a gate plus a judged SHOULD, another said cut the generic half. Resolved as cut. The promise-versus-content test had no machine check and is common practice, so CH-YT-16 is now only the anchored announcement-word gate plus a milestone_ref tag check.",
+    "The finding labelled 'CH-YT-02 and CH-YT-16' describes CH-YT-24. CH-YT-02 has no generic half and is unchanged. In CH-YT-24 the 'say the next step aloud' exhortation was cut, and the end-screen mechanics stay with a cta_at_s assertion.",
+    "CH-YT-06: the rule now MUSTs a first stamp at zero, three ascending stamps and a 10 s minimum. Writing the first stamp as 00:00 is a SHOULD house form, because whether 0:00 works is not stated (metadata dive line 73). chap.py now warns on 0:00 instead of failing; re-tested on fixtures.",
+    "CH-YT-12: reworded from 'gated features' to 'check the screen', with five recorded Feature eligibility lines including 'Related Video on a Short'. Chapters are not treated as gated (metadata dive line 220). The Conflicts row was updated to match.",
+    "CH-YT-20: added the precondition that the 'Related Video on a Short' line reads Enabled (metadata dive line 111). Its verify now asserts the manifest fields cta_at_s, duration_s and hook_covered_by_s.",
+    "Verdict 5, CH-YT-01 and failure mode 3 now give Help 2660027's real scope: browser uploads are documented, the API is silent, and API behaviour is unknown.",
+    "CH-YT-17 went from SHOULD to CONSIDER: its n=18 cell is 'no finding' under CH-YT-28. CH-YT-19 also went from SHOULD to CONSIDER for the same reason (n=24); the skeptic did not raise it, and it was applied for consistency. CH-YT-15 stays SHOULD: n=54 clears the bar, and the rationale now states that the finding is a null across 9 channels.",
+    "CH-YT-21: the invented 1,000-view bar is removed. The MUST now requires written approval, owner-set pass_median_engaged_views and pass_actions fields recorded before the first Short, and a recorded verdict.",
+    "CH-YT-26: the 100-view retention floor is labelled a house floor. In Help 9314415 the 100 views is a key-moments precondition.",
+    "CH-YT-10: the jq check now covers all 5 paths. The paths were confirmed by fetching the videos resource on 2026-11-27 and tested on pass and fail fixtures.",
+    "CH-YT-13, CH-YT-16 and CH-YT-19: the verify commands were replaced with runnable, word-anchored ones and tested on fixtures. The remaining limits are stated: a host string assembled from fragments is not caught, and '2.1.0' trips the 1.0 gate, which only forces the tag check.",
+    "CH-YT-08 has two refresh intervals: API facts 30 days and the Help 72431 spec 180 days. Both are named in the rule and split in the Decay table.",
+    "Applied table: the CH-YT-02 row now cites posture:228 and a runnable feed command with its output (38/53 chars, 683 chars, 691 bytes). The other rows cite config:467 and posture:228. Rules with nothing to check yet are marked 'Not applicable yet'."
+   ],
+   "anotherRound": [
+    "Do the downstream artifacts that cite CH-YT-06, 12, 16, 17, 19, 20, 21 and 24 still quote text these rules now say? The Reviser contract requires this re-check after a revision, and it is outside this task's write scope.",
+    "On a live channel, does the Feature eligibility screen list 'Add chapters' and 'Related Video on a Short', and at which tier? A read of Studio settings settles CH-YT-12 and CH-YT-20.",
+    "Does a first chapter stamp written 0:00 render as chapters? One private test upload settles whether CH-YT-06's SHOULD house form can be relaxed or promoted.",
+    "Do the milestone (n=18) and live/talk (n=24) cells reach n=25 with a wider window of company videos through the Data API? The answer decides whether CH-YT-17 and CH-YT-19 can return to SHOULD."
+   ],
+   "humanDecisions": [
+    "Set the Shorts pilot pass bar, the pass_median_engaged_views and pass_actions fields, before any pilot starts. The revised file no longer proposes a number.",
+    "Accept the CONSIDER demotion of CH-YT-19. The skeptic did not raise it; it was applied because the n=24 cell fails the file's own CH-YT-28 bar.",
+    "Decide whether the private ocx-sh/marketing repository holds an upload manifest or a pilot record. Its contents decide the CH-YT-01 and CH-YT-21 fleet rows, and they cannot be observed from public clones."
+   ],
+   "failureModes": [
+    "Stale platform memory: privacy default, Shorts thumbnails through the API, the 50 MB cap, view definitions (CH-YT-08, 09, 25, with a 30-day refresh)",
+    "Template drift across a series: copied descriptions, a reused episode number, re-skins (CH-YT-04, 22)",
+    "Assumed defaults on API uploads: Studio defaults, made-for-kids, language, dubbing (CH-YT-01, 10, 11)",
+    "Verdicts from cells under n=25 or borrowed from educator channels (CH-YT-17, 19, 26, 27, 28)",
+    "Announcement-word drift with no release tag behind it, and padded tags or hashtags (CH-YT-05, 16)",
+    "Silent format failures: a non-zero first chapter stamp, a byte overrun, a feature used without checking the eligibility screen, an end screen on a clip under 25 s (CH-YT-02, 06, 12, 20, 24)",
+    "Scripted youtube.com page reads and handle-search identity errors (CH-YT-13, 14)",
+    "Third-party audio or footage leading to claims (CH-YT-23)"
+   ]
+  },
+  {
+   "slug": "channel-terminal-video",
+   "idFamily": "CH-VID",
+   "dives": 4,
+   "blocked": 0,
+   "sources": 83,
+   "challenged": 12,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/channel-terminal-video.md",
+   "rules": 25,
+   "must": 20,
+   "conflictsResolved": [
+    "CH-VID-01/24/26 vs docs-quality DOC-EX-13 (MUST pinned): the pinned rule wins. CH-VID-01 now requires a scenario that can regenerate on demand and leaves the commit decision to DOC-EX-13. CH-VID-24 applies only to recordings DOC-EX-13 lets you commit, and writes to a scratch directory, never to the committed file. The grimoire fleet already fits: casts are tracked and regenerated only by the manual task test:demo, not by the docs build.",
+    "CH-VID-24/26 vs DOC-EX-11 (MUST pinned): CH-VID-24 is a non-required job, with a branch-protection check. CH-VID-26 gates only upload and publish jobs, never the example suite's required checks.",
+    "Verdict 1 vs DOC-EX-18: a VHS tape beside a page-bound scenario tree needs a recorded reason. The overlaps with DOC-EX-12, 14, 15 and 16 are listed as no conflict. CH-VID-18's controls: true is a stricter SHOULD than DOC-EX-16.",
+    "CH-VID-02 vs CH-VID-13: lazy loading on scroll is allowed because playback is user-started. The scroll-into-view clause of SC 2.2.2 now applies only to content that plays on scroll.",
+    "CH-VID-16: kept at MUST. The skeptic's grep was wrong, because vid-accessibility F7 and candidates 12-13 already carried trackKind, the captions field and the 202601 sunset. All three were re-fetched on 2026-11-27 and are now quoted in the rule with dates.",
+    "CH-VID-12: demoted MUST to SHOULD. The contrast script is now Appendix A, with a self-check and a negative test. It measured all 11 grimoire casts: fg 14.54:1, used palette entries 4.86-7.79:1, bright black 2.69:1 but unused.",
+    "CH-VID-03: the script-sanitization claim is now cited to the github/markup README, and agg --no-loop to agg usage. Both were fetched 2026-11-27.",
+    "CH-VID-26: split into a CI needs: assertion script, tested on gated and ungated fixtures, and a plain ask-the-owner line with no check.",
+    "CH-VID-05: cut to the Remotion licence-approval clause only.",
+    "CH-VID-18: names the probed player version (3.17.0). 3.19.0 is marked unprobed, with a re-probe required on upgrade.",
+    "CH-VID-04 and Decay: the LinkedIn help limits (15 min, 5 GB) are confirmed in the Internet Archive capture of 2025-11-16 (curl command given). The page's edit date is labelled unverifiable.",
+    "CH-VID-11: the check threshold is aligned to 2 s. CH-VID-09 is retired and folded into CH-VID-08 as a CONSIDER target line. CH-VID-07 is kept, with a DOC-EX-14 cross-reference.",
+    "Applied-to-fleet: every row is marked re-check, audit (file:line) or dive only. File:line or a command was added for rows 01, 02, 06, 07, 08, 11, 12, 13, 17, 18, 19, 22 and 26, all re-run read-only on 2026-11-27."
+   ],
+   "anotherRound": [
+    "Does asciinema-player 3.19.0 add a role, tabindex or aria-label to .ap-player, and how does it render SGR 2 (dim) against the fleet theme (#161826 background)?",
+    "What contrast do the ocx v3 casts get from the ocx player theme in terminal.mjs, since those casts carry no theme in their headers?",
+    "Does a human legibility test on a 360 px phone and a 720 px docs column confirm the OCR-derived 6 px floor?",
+    "What is the measured content width W of each fleet docs surface at phone and desktop sizes?"
+   ],
+   "humanDecisions": [
+    "Does DOC-EX-13 also cover a CI drift check that regenerates into a scratch directory? If yes, CH-VID-24 is retired for that repository.",
+    "Should CH-VID-12 go back to MUST for player embeds, where the cast theme is page text under SC 1.4.3?",
+    "Should the fleet's 180-column grimoire casts be re-recorded, and at which measured column width?",
+    "Should the 8 px target in CH-VID-08 become MUST?",
+    "Each upload or publication (asciinema upload, vhs publish, YouTube, LinkedIn, Shorts), per upload.",
+    "Where do the terminal-demo flatten, scan, contrast and transcript scripts live: a terminal-demo-reference skill, or the grimoire recorder exported as a tool?",
+    "Where does the source of the @ocx-sh Shorts live, and should they be re-rendered under CH-VID-10?",
+    "Should both site families use one asciinema-player version, and who owns its update?"
+   ],
+   "failureModes": [
+    "Scanning the raw .cast and reporting clean (CH-VID-20)",
+    "Treating VHS Hide as scrubbing (CH-VID-25)",
+    "Reporting axe as passing when the player never mounted",
+    "Trusting a 2xx caption upload as attached (CH-VID-16)",
+    "Recording in the live shell, then running sed over the cast (CH-VID-19, 01)",
+    "Sizing by FontSize instead of columns (CH-VID-08)",
+    "Cropping a landscape take into 9:16 (CH-VID-10)",
+    "Platform limits from memory, and third-party safe zones cited as official (CH-VID-04, 10)",
+    "Stale idioms: gitleaks detect, vhs:latest, byte-diffing regenerated GIFs (CH-VID-20, 06, 23)",
+    "Counting a noscript .cast link as the text alternative (CH-VID-14)",
+    "A looping autoplay README GIF (CH-VID-03, 13)",
+    "Wiring the recorder into the required gate, or committing a build-regenerated recording (CH-VID-24, 26, DOC-EX-11, DOC-EX-13)",
+    "Adding Remotion without licence approval (CH-VID-05)"
+   ]
+  },
+  {
+   "slug": "channel-communities",
+   "idFamily": "CH-COM",
+   "dives": 3,
+   "blocked": 0,
+   "sources": 51,
+   "challenged": 16,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/channel-communities.md",
+   "rules": 24,
+   "must": 19,
+   "conflictsResolved": [
+    "CH-COM-05(b): dropped the semver test. (b) now applies only to a repeat Show HN and needs a major overhaul that the maker attests, quoting a changelog line. showhn.html says new features are 'generally' not enough, so 'adds a new capability' was also cut from the rule text.",
+    "CH-COM-05(d) vs Applied row 05: both products now submit the repo root. ocx no longer submits the landing page ocx.sh. The row cites the README install lines (ocx-sh/ocx/README.md:22, grimoire-rs/grimoire/README.md:36).",
+    "CH-COM-04: the under-a-quarter share is now a SHOULD that is reported to the maker, not a gate, because Lobsters calls it a 'rule of thumb'. The 70-day, domain and restricted-tag gates stay MUST.",
+    "CH-COM-10, C9, Verdict 4: the hour advice is dropped. The agent recommends no posting time and reports the hour gap only as a labelled correlation.",
+    "CH-COM-13: the 90% word-count threshold is gone. The MUST is now a teaser grep. A paragraph floor is labelled as a heuristic, and matching the full body is a SHOULD clause.",
+    "CH-COM-15: the one-post-per-venue limit is demoted to a SHOULD clause, since no source sets it. The approver must be listed in the owner-written makers.txt, and the check is labelled human attestation.",
+    "CH-COM-14: labelled human attestation. provenance_by must be in makers.txt, and an agent-side tool-log check was added.",
+    "CH-COM-12: the Reddit Rule 5 citation is dropped. The Reddit and Lobsters affiliation clause is now a SHOULD, labelled as an inference.",
+    "CH-COM-07: 'Never' became 'prefer', and the severity stays SHOULD. The 2019 moderator comment is marked as possibly out of date beside the current 2026 tips.",
+    "CH-COM-02 and CH-COM-08: both verifications are now concrete commands over named files. CH-COM-08 gains a solicitation_paths plan line for chat, newsletter and social-draft templates.",
+    "CH-COM-23: the check is now the invite API's verification_level >= 1 plus the AUTO_MODERATION feature. The enum comes from docs.discord.com (fetched 2026-11-27). The settings an agent cannot see moved to the ask-a-human list. The check was run on the ocx server and prints true.",
+    "CH-COM-20: the check is now a pass/fail grep (2 or more distinct emails, or an escalation sentence). The wording moved to the ask-a-human list. The check was run on grim-gui and fails, which matches its violated row.",
+    "CH-COM-06: a site-name check was added. The superlative list is now the four words yli.html names. 'first' fails only in 'the first' or 'world's first', so 'first-class' passes. The check was tested on 5 sample titles.",
+    "CH-COM-11: demoted from MUST to SHOULD.",
+    "CH-COM-18 (new finding): a tag count alone passes on the unrelated Stack Overflow tag 'ocx' (380 ActiveX questions). The check now also requires the tag wiki to name the product.",
+    "Applied row 02, 04 and Verdict 3: these now rest on measured HN, Lobsters user and Lobsters domain lookups, each with a control. The HN handle 'grimoire' belongs to an unrelated account created 2008-02-05. ocx.sh and grimoire.rs are domains Lobsters has never seen. Personal accounts are marked as not looked up.",
+    "Applied row 07, 09-15: dev.to and Stack Overflow lookups were added. Hashnode is marked as not measured, because its profile route returns 200 for a made-up handle.",
+    "Applied rows 18, 21, 23: added the distribution-posture.md:226 citation, the grep -c discussions output (0), the Slack grep, and the invite API output (verification_level 1)."
+   ],
+   "anotherRound": [
+    "Is there an authenticated way to look up the Hashnode handles (for example the gql.hashnode.com API with a token), so presence can be measured rather than marked unknown?",
+    "Does the HN moderator guidance still penalize text-only posts in 2026, or did the 2026-03-28 tips edit supersede the 2019 comment cited in CH-COM-07?"
+   ],
+   "humanDecisions": [
+    "Who writes makers.txt, and which names it lists. CH-COM-05(b), 14 and 15 now depend on it.",
+    "Which personal HN, Lobsters and dev.to accounts the makers will use. These were not looked up, to avoid sending personal names to outside services."
+   ],
+   "failureModes": [
+    "An agent fills makers.txt, provenance or approver itself. Every attestation check then turns into self-attestation. The ruleset forbids this, but only the tool log can catch it.",
+    "Mixed severity cells such as 'MUST, except the (SHOULD) clause' in CH-COM-04, 12, 13 and 15 may be flattened to MUST when the rules are translated into published rules or skills.",
+    "The site-name check reads the second-level label of the URL's host. On a host with a two-part TLD (co.uk), it would test the wrong word."
+   ]
+  },
+  {
+   "slug": "channel-launch",
+   "idFamily": "CH-LAUNCH",
+   "dives": 2,
+   "blocked": 0,
+   "sources": 77,
+   "challenged": 16,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/channel-launch.md",
+   "rules": 15,
+   "must": 10,
+   "conflictsResolved": [
+    "CH-LAUNCH-06: the Show HN duty window had no number. Show HN says only 'The project must be something you've worked on personally and which you're around to discuss' (re-fetched 2026-11-27). The window is now an owner-set hn_duty_hours, and the no-gap check runs against it.",
+    "CH-LAUNCH-04: the gates dive excluded AlternativeTo (launch-venue-gates.md:84) without fetching its page. Its FAQ, fetched 2026-11-27, does not require a proprietary product ('We only list things someone would plausibly come to AlternativeTo looking for an alternative to'). AlternativeTo and selfh.st (which states no criteria) left the default exclusions and are now 'unverified, read on plan day'.",
+    "CH-LAUNCH-04: Uneed's own page names 'the launch-day upvote score a free launch needs to stay published' (inside its prefilled AI-prompt links) but gives no number. The score of 10 is labelled competitor-claimed and unconfirmed, and the exclusion list is SHOULD. The admission record stays MUST.",
+    "CH-LAUNCH-11 against GHSV-15: the old baseline at T+0 conflicted with GHSV-15's 28-day baseline. The rule now defers to GHSV-02, 03, 04, 15 and 16. The analytics clause moved to the fleet row, because analytics are marketing-sibling territory.",
+    "CH-LAUNCH-08 against Verdict 1: the order rests on practitioner and vendor anecdote, so the rule is now SHOULD. The strict and non-strict date orders are stated once. The venue-URL clause, which venues do state, moved to the new MUST rule CH-LAUNCH-15.",
+    "CH-LAUNCH-05: the old bare 'upvote' pattern fails the grimoire-vscode README, which names its own upvote feature (README.md:88,90,144), so the old 'satisfied' verdict was false under its own check. The pattern is tightened to an ask and was re-measured: 0 hits in 165 release bodies, the 17 READMEs and the grim 1.0 plan files.",
+    "Audit gap: the audits say no launch material exists, but grimoire-rs/grimoire holds a grim 1.0 launch plan (.agents/plans/meta-plan_promotion_1_0.md:161,225-240 and .agents/research/research_promotion_positioning.md:361-374, commit af55322b of 2026-11-17). The applied rows for 04, 06, 07, 08, 10, 11, 12 and 13 were re-measured against it (Verdict 11).",
+    "CH-LAUNCH-09 and CH-LAUNCH-10: MUST to SHOULD. The evidence is one vendor's practice, and the permutation p-value is circular, so it is dropped as support. N = 5 is marked an owner-adjustable heuristic. CH-LAUNCH-09 check 3 is now a concrete first-line regex, which passes 0 of 89 fleet bodies.",
+    "CH-LAUNCH-12 and 13: the unreadable tool-log check became a pre-action self-check plus a grep over the plan's actor rows. awesome-lint is dropped, because it lints lists. 'Every number has a URL' is now an awk test over a '## Venue facts' section. The 11.67 grep is dropped."
+   ],
+   "anotherRound": [
+    "What are Console.dev's actual submission rules? The fleet's grim 1.0 plan says Console.dev admits pre-1.0 tools only (research_promotion_positioning.md:366) and cites no URL, which makes it a deadline before the 1.0 tag.",
+    "Do users.rust-lang.org announcements, Changelog News and a DEV.to mirror count as launch-day community venues under CH-LAUNCH-06? The grim 1.0 plan puts all three on day 0.",
+    "Is there any measured outcome beyond stars (installs, retained users, contributors) for a developer CLI launched on Show HN versus PH versus DevHunt?",
+    "Which topic awesome lists (Rust CLI, package managers, AI-agent tooling, awesome-claude-code) have active maintainers, and what do their own contributing files require for an item?"
+   ],
+   "humanDecisions": [
+    "Set hn_duty_hours, the Show HN comment-duty length, for the grim 1.0 launch (CH-LAUNCH-06).",
+    "Choose the canonical-record surface: a new owned news page, or the GitHub Release page with a summary line (CH-LAUNCH-09).",
+    "Decide the grimoire.rs install-page order: grim's own installer first, or ocx first by design (CH-LAUNCH-03).",
+    "Decide whether PH is in scope at all, given that one PH day likely needs both people (CH-LAUNCH-06).",
+    "Decide whether grim-gui launches only after its first release (CH-LAUNCH-01).",
+    "Decide the launch-week item threshold N, if not 5 (CH-LAUNCH-10).",
+    "Give a verdict on each unverified venue (selfh.st, AlternativeTo, Console.dev, Terminal Trove) on plan day (CH-LAUNCH-04)."
+   ],
+   "failureModes": [
+    "A1 (hypothesised, not observed): writes 'upvote us' or 'help us hit #1' into launch drafts, README or Discord (CH-LAUNCH-05).",
+    "A2: proposes a launch week from advice-content recall and fills it with thin items (CH-LAUNCH-10).",
+    "A3 (observed in the scout rows): quotes limits, prices or best hours from memory (CH-LAUNCH-13).",
+    "A4: applies the sindresorhus list-submission gates to an item entry (CH-LAUNCH-12 check 4).",
+    "B5: puts the announcement post in the Show HN or PH URL field (CH-LAUNCH-15).",
+    "B6: links an install page whose first command installs a different product (CH-LAUNCH-03).",
+    "C7: hooks a Show HN draft onto every release, which here comes every 3 days (CH-LAUNCH-07).",
+    "C8: takes a commit-list Release body as the canonical record (CH-LAUNCH-09).",
+    "D9: reports a pass or fail through a stale local resolver (CH-LAUNCH-02).",
+    "D10: sets stars or PH rank as the goal (CH-LAUNCH-11).",
+    "D11 (observed in this revision): fails a page or README on a bare keyword, such as a footer 'Sign up' or a product feature named 'upvote' (CH-LAUNCH-02 step 4, CH-LAUNCH-05).",
+    "E12: batch-opens awesome-list PRs or ticks the human-attestation box (CH-LAUNCH-12).",
+    "E13: uses the org account on PH or leaves the 12:01 AM PT window unstaffed (CH-LAUNCH-14, 06).",
+    "E14: admits or excludes a venue by name without reading its scope (CH-LAUNCH-04)."
+   ]
+  },
+  {
+   "slug": "channel-microblog",
+   "idFamily": "CH-MB",
+   "dives": 2,
+   "blocked": 0,
+   "sources": 57,
+   "challenged": 13,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/channel-microblog.md",
+   "rules": 23,
+   "must": 15,
+   "conflictsResolved": [
+    "CH-MB-07 demoted MUST to SHOULD: the Mastodon premise was wrong, because a self-reply reaches every follower's Home (posting docs 204b38c, 2026-07-08: 'follow both you and the person you are replying to'). The bridge-drop claim had no source and was removed. X DedupConversationFilter shows that a thread's posts compete for one slot, not that the reply goes unseen. Verdict 2 was rewritten.",
+    "The https:// requirement was split out of CH-MB-07 into a new rule, CH-MB-22 (MUST). It rests on a measurement: ocx.sh/docs is a link on X and Bluesky and plain text on Mastodon (extract_url_without_protocol: false, d90d68b).",
+    "CH-MB-08 demoted to SHOULD because its only basis is a secondary report (roboin.io, grade C). The check now needs the literal tag version and a content word shared with the MKT-REL-14 summary line; the 40-character length and the \\d+\\.\\d+ regex are dropped. The citation now names distribution-posture.md:70, :104 (last sentence) and :268, plus the MKT-REL-14 '0 of 90' row. The skeptic was partly wrong: line 104 does state the summary finding in its last sentence.",
+    "CH-MB-06 demoted to SHOULD: the emoji-byte model is untested and not provably conservative, because it counts CJK and combining marks as 1. The publishing-reference quote was re-fetched on 2026-11-27. The page is undated and has no version.",
+    "CH-MB-13: the 308/541 figure is now labelled scout data. The terminal-screenshot clause moved to a new rule, CH-MB-23 (SHOULD), whose script checks for substrings of the recorded run. The W3C decision tree was re-fetched (updated 2024-05-13).",
+    "CH-MB-02 now validates against 280 and asks the owner if the account has Premium. CH-MB-09 marks the 3-post cap and the two-items test as project defaults; the habit claim was dropped. CH-MB-16 labels 0.8 as a project default and cites distribution-posture.md:21 for the two organisations.",
+    "CH-MB-14 now greps for the named limit values, whole words. CH-MB-15 has a scripted per-paragraph check that requires a URL, an ISO date and n=, with the added terms boost, hurts, reach, engagement and replies; it was tested on 3 sample paragraphs. CH-MB-19 lost its status line, which moved to the Applied table. CH-MB-20 is now three triggers that exit non-zero, verified by fixtures that must fail.",
+    "Last-change SHAs from the GitHub commits API (2026-11-27) were added to CH-MB-03 (f98b78a), -05 (d90d68b, tag v4.7.6), -14 (clone dce608b), -17 (650bf30, tag v4.6.0) and -18 (c8a1568). The default branch of the Mastodon documentation repo is now main."
+   ],
+   "anotherRound": [
+    "Does the Threads publishing API accept a 500-unit post under the emoji-byte model and reject 501, and how does it count CJK and combining marks? (This would restore CH-MB-06 to MUST.)",
+    "Does any scheduler or bridge in actual use (Bridgy Fed, Buffer, a GitHub Action) drop or delay a self-reply? This is the only remaining mechanical argument for CH-MB-07.",
+    "Can the 308 of 541 Bluesky alt-text figure be re-measured in a dive, with its command recorded?"
+   ],
+   "humanDecisions": [
+    "Whether the X account will have Premium, and if so whether posts may exceed 280 (CH-MB-02).",
+    "Whether to keep the project defaults: a 3-post thread cap, the two-items thread test (CH-MB-09), and the 0.8 similarity threshold (CH-MB-16).",
+    "Whether ocx and Grimoire share accounts (CH-MB-16, CH-MB-19)."
+   ],
+   "failureModes": [
+    "An agent copies a raw commit subject into post 1, or writes filler such as 'great update'. CH-MB-08 now catches this by requiring a shared summary word.",
+    "An agent writes a bare domain such as ocx.sh/docs, which is plain text on Mastodon. CH-MB-22 catches this.",
+    "An agent writes a terminal screenshot's alt text that describes the screen's look instead of quoting the command. CH-MB-23 catches this with a substring check against the recorded run.",
+    "An agent writes 'X does not hurt reach for links' or 'threads boost engagement' with no source. The scripted check in CH-MB-15 now catches this.",
+    "A validator keeps a hard-coded limit literal. CH-MB-14 now greps for the named values."
+   ]
+  }
+ ],
+ "failed": []
+}
