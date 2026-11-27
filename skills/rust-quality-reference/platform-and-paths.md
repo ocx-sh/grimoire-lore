@@ -181,14 +181,20 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.rs' ':(excl
 NTP, VM live migration, a container booting wrong — so a `duration_since`
 failure means "cannot prove freshness", never "panic". **Pinned:** one datetime
 crate, `chrono`, and RFC 3339 with a literal `Z` on every persisted timestamp,
-which renders chrono's offset-only serde inert.
+which renders chrono's offset-only serde inert. chrono is flagged unmaintained
+(RUSTSEC-2026-0543, issued 2026-11-17), which `unmaintained = "workspace"`
+(SEC-25) turns into a `cargo deny check` failure for a direct dependency. Its
+`[advisories].ignore` entry names that ID and the removal condition: the move
+to jiff 1.x (1.0 shipped 2026-11-15 and renamed `Zoned` to `ZonedDateTime`),
+made as one reviewed change that swaps the crate, never by adding jiff beside
+chrono.
 
 | ID | Rule | Verification | Severity |
 |---|---|---|---|
 | PLAT-27 | `Instant` for every elapsed-time, TTL, timeout, backoff and rate-limit decision. `SystemTime` only for values persisted or crossed a process boundary — `SystemTime` is not monotonic, and the stdlib documents that two sequential writes can read back out of order. | see block PLAT-27 — no surrounding code computes an elapsed duration for a TTL or timeout | MUST |
 | PLAT-28 | Never `.unwrap()`/`.expect()` a `SystemTime::duration_since` or `elapsed`. Match the `Err` and treat it as "cannot prove freshness" → stale, logged, non-fatal. | see block PLAT-28 — a multi-line scan with `[[:space:]]*` rather than `.*`, because the chain is usually broken across lines and `.` stops at the newline in a line-based grep; ocx has four such sites — every non-test hit is a panic-on-clock-step bug | MUST |
 | PLAT-29 | Filesystem mtime is never the sole gate for staleness. Use the content digest, a monotonic generation counter, or an explicit cache-entry record written atomically alongside the artifact. mtime is permitted only paired with a stronger check, or as a throttle window where being wrong costs one redundant operation. FAT buckets write time into 2 seconds, NTFS delays access-time writeback by up to an hour, and extraction resets mtime to *now* — the exact inverse of "unchanged". | see block PLAT-29 — every production hit paired with a digest/counter check, or an explicit throttle | MUST |
-| PLAT-30 | Exactly one datetime crate in the graph. Two crates modelling "instant in time" emit two serde representations of the same lockfile field; a binary linking one and reading a file written by the other either fails to parse or silently misinterprets. Adding `time` or `jiff` alongside chrono is a `cargo deny` bans finding, not a style nit. | `cargo tree -e normal -i chrono` resolves; `cargo tree -e normal -i jiff` and `cargo tree -e normal -i time` each print nothing — exactly one family | MUST |
+| PLAT-30 | Exactly one datetime crate in the graph. Two crates modelling "instant in time" emit two serde representations of the same lockfile field; a binary linking one and reading a file written by the other either fails to parse or silently misinterprets. Adding `time` or `jiff` alongside chrono is a `cargo deny` bans finding, not a style nit. | `cargo tree -e normal -i chrono` resolves; `cargo tree -e normal -i jiff` and `cargo tree -e normal -i time` each print nothing — exactly one family; `cargo deny check advisories` passes with RUSTSEC-2026-0543 ignored under a stated removal condition, never with `unmaintained` lowered | MUST |
 | PLAT-31 | Every persisted timestamp is RFC 3339 with an explicit `Z`. Never a local offset, never an unzoned string, never a bare epoch integer in a file a human will `cat` or a tool will diff — an epoch integer is opaque in a stale-cache report and discards sub-second precision. | Grep the golden fixtures for the `Z` suffix on every timestamp field; each field pins its format via `#[serde(with = …)]`, not the derive default | MUST |
 | PLAT-32 | Registry-supplied time values are untrusted readings of a remote clock, never a synchronization source. Never diff `Date`/`Last-Modified` against local `now()`; measure `max-age` and `Retry-After` against an `Instant` taken when the response arrived, and prefer `ETag` + `If-None-Match` when both are sent. RFC 9111 §4.2 is normative that clock skew must not corrupt freshness math. | see block PLAT-32 — the value feeds only relative or validator logic | MUST |
 

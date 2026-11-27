@@ -8,7 +8,7 @@ consolidates:
   - rust-testing/filesystem-seam-strategy.md
   - rust-testing/cargo-features-and-test-seams.md
 date: "2026-08"
-revised: "2026-08"
+revised: 2026-11-27
 ---
 
 ## Verdict
@@ -86,6 +86,10 @@ revised: "2026-08"
     mutually exclusive feature pairing in the graph on at once, and on ocx it is also the switch
     that enables `__testing`. `cargo-hack --each-feature` plus a pruned powerset replaces it
     (TEST-37).
+13. **Delta 2026-11 — integration tests locate the binary through `CARGO_BIN_EXE_<name>`.**
+    Cargo 1.100 (2026-11-12) moved intermediate artifacts to a new build-dir layout and documents
+    the layout as not a stable interface, so a test never assembles a path under `target/` or
+    derives one from `current_exe()` (TEST-42).
 
 ## The ruleset
 
@@ -483,6 +487,18 @@ wrong thing the first time someone edits it by hand.
 *Verify:* `grep -rn '"\./\|"tests/' --include=*.rs src/ tests/ | grep -v CARGO_MANIFEST_DIR` flags
 every candidate.
 
+**TEST-42 — SHOULD.** Integration tests reach the binary under test through
+`CARGO_BIN_EXE_<name>`, using `env!`, `assert_cmd::cargo::cargo_bin!`, or `Command::cargo_bin`,
+which reads that variable first. They never use a path assembled under `target/` or from
+`current_exe()`.
+*Rationale:* Cargo 1.100 (2026-11-12) moved intermediate artifacts to a new build-dir layout and
+states that the layout is not a stable interface. The assert_cmd fallback derives the path from
+`current_exe()`, which is the old layout ([Cargo CHANGELOG](https://doc.rust-lang.org/cargo/CHANGELOG.html)).
+The rule is phrased as "do not depend on the layout", not as "`cargo_bin` breaks on 1.100": the
+sources could not confirm a breakage, only that the layout is declared unstable.
+*Verify:* `git ls-files -z --cached --others --exclude-standard -- ':(glob)**/tests/**/*.rs' ':(exclude,glob)external/**' | xargs -0 -r grep -H -n -E -e 'target/debug/' -e 'target/release/' -e 'current_exe\(\)' --`;
+every hit carries a comment explaining why the variable cannot serve.
+
 ## Applied to OCX
 
 **Already satisfied.**
@@ -671,6 +687,10 @@ Ranked by how often each bites, most frequent first.
   runtime budget and any tmpfs-vs-disk speedup figure
   (`test-strategy-and-cli-testing.md` and `filesystem-seam-strategy.md` §3, both "Contested").
 
+- **Needs a live check — `assert_cmd` under the Cargo 1.100 build-dir layout.** Whether
+  `Command::cargo_bin` still resolves the binary correctly under the new layout is unconfirmed;
+  TEST-42 therefore asks only that tests not depend on the layout.
+
 ## Sub-artifacts
 
 - [rust-testing/test-strategy-and-cli-testing.md](rust-testing/test-strategy-and-cli-testing.md) —
@@ -701,7 +721,8 @@ Ranked by how often each bites, most frequent first.
 | [std::env::set_var](https://doc.rust-lang.org/std/env/fn.set_var.html) | The exact safety contract that makes env mutation in tests a data race (TEST-05) |
 | [nexte.st — Running tests](https://nexte.st/docs/running/) | Process-per-test model and the doc-test gap (TEST-22) |
 | [nextest retries docs](https://github.com/nextest-rs/nextest/blob/main/site/src/docs/features/retries.md) | Flaky-vs-failed reporting and the JUnit `<flakyFailure>` element (TEST-23) |
-| [assert_cmd](https://github.com/assert-rs/assert_cmd) | `Command::cargo_bin`, separate exit-code and stream assertions (TEST-10) |
+| [assert_cmd](https://github.com/assert-rs/assert_cmd) | `Command::cargo_bin` and the `cargo_bin!` macro (both current; the 2.1.0 deprecation was reverted in 2.1.3), separate exit-code and stream assertions (TEST-10, TEST-42) |
+| [Cargo CHANGELOG](https://doc.rust-lang.org/cargo/CHANGELOG.html) | The 1.100 build-dir layout, declared not a stable interface (TEST-42) |
 | [wiremock](https://docs.rs/wiremock/latest/wiremock/) | Async local HTTP mocking for the OCI client (TEST-07) |
 | [tempfile](https://docs.rs/tempfile/latest/tempfile/) | Drop-based cleanup and the owned-guard pitfall (TEST-06) |
 | [rstest](https://docs.rs/rstest/latest/rstest/) | `#[case]`/`#[fixture]` table-driven syntax (TEST-04) |
@@ -746,3 +767,10 @@ inside a rule, not what it requires.
 | **Narrowed** — open question on suite runtime | — | The mechanism half is settled (TEST-31, TEST-38); only the unmeasured number remains, and two claimed multipliers are flagged unsourced. |
 | **Opened** — human decision on `cap-std`'s scope | — | grimoire already rejected `cap-std` as "overkill" for a different problem (`grimoire/Cargo.toml:57-61`); whether that binds the unpack path is the owner's call. |
 | **Added** — five AI-agent failure modes (FileSystem-trait reflex, `cfg(test)`→`pub` widening plus the wrong `Cargo.toml` section, fabricated `MemoryFS` disk-full coverage, missing `EXDEV` fallback, `--all-features` reflex); list re-ranked | — | Both follow-up artifacts identified these as the default LLM answer, not an occasional slip. |
+
+**2026-11-27 — delta refresh.** Decision file: `refresh-2026-11/rust-quality.md`.
+
+- 2026-11-27: added TEST-42 (locate the binary under test through `CARGO_BIN_EXE_<name>`) and Verdict 13; decision file `refresh-2026-11/rust-quality.md`.
+- 2026-11-27: Key sources updated for TEST-42 (assert_cmd forms, Cargo 1.100 changelog row); decision file `refresh-2026-11/rust-quality.md`.
+- 2026-11-27: Open questions gained the `assert_cmd` build-dir-layout item behind TEST-42; decision file `refresh-2026-11/rust-quality.md`.
+- No existing TEST ID was contradicted; TEST-01 to TEST-41 are unchanged.

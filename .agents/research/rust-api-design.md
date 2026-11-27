@@ -5,6 +5,7 @@ model: opus
 consolidates:
   - rust-api-design/derive-discipline-and-standard-conversions.md
 date: 2026-08
+revised: 2026-11-27
 ---
 
 # API Design — Derive Discipline, Conversions, and Naming
@@ -18,7 +19,7 @@ date: 2026-08
 5. **Two existing OCX rules are wrong as written and are superseded here.** `quality-core.md`'s newtype rule says "Always implement `Display`, `Debug`, `From`" ([rules-inventory.md:88](ocx-codebase-audit/rules-inventory.md)) — an infallible `From` on an invariant-bearing newtype is precisely the hole that makes the newtype worthless (API-10). And the DRY section blesses `Debug, Clone, PartialEq, Serialize, Deserialize` as the boilerplate-killing derive line ([rules-inventory.md:221](ocx-codebase-audit/rules-inventory.md)) — that exact line is the LLM template that leaks secrets and manufactures unversioned wire formats (API-02, API-11).
 6. **One existing rule is right and we only add teeth**: "`From` impl hiding `.unwrap()` — `From` must be infallible; use `TryFrom`" ([rules-inventory.md:141](ocx-codebase-audit/rules-inventory.md)). API-09 keeps it verbatim and adds the `impl Into<`/`impl TryInto<` grep.
 7. **`Ord`-on-enum is the one hazard with no lint at all.** Declaration order *is* the semantics; an alphabetizing refactor silently reverses every `sort()`/`BTreeMap` ([derive-discipline §8](rust-api-design/derive-discipline-and-standard-conversions.md)). The only mechanical guard is a pinned comment plus an ordering assertion (API-07).
-8. **Lint enforcement lands in `[workspace.lints]`, not per-crate.** grimoire already has a lint table (`unsafe_code = "forbid"`, `unwrap_used`/`expect_used = "warn"`, [grimoire/Cargo.toml:79 via errors-async-security.md:35](ocx-codebase-audit/errors-async-security.md)); the ocx crates have none. API-14 adds three derive lints there and API-01's `#![warn(...)]` at each root.
+8. **Lint enforcement lands in `[workspace.lints]`, not per-crate.** grimoire already has a lint table (`unsafe_code = "forbid"`, `unwrap_used`/`expect_used = "warn"`, [grimoire/Cargo.toml:79 via errors-async-security.md:35](ocx-codebase-audit/errors-async-security.md)); the ocx crates have none. API-14 adds `derive_partial_eq_without_eq` there (the other two derive lints are deny by default and stay so) and API-01's `#![warn(...)]` at each root.
 9. **Dropped as things an LLM already gets right:** the `iter`/`iter_mut`/`into_iter` triad (models reproduce it reliably, and neither codebase exposes a custom collection), `#[derive(PartialEq, Eq, Hash)]` internal consistency (safe by construction — only hand-written halves are dangerous, which API-14 lints), and `derivable_impls` (a redundancy nudge, subsumed by API-08).
 
 ## The ruleset
@@ -42,7 +43,7 @@ date: 2026-08
 | **API-08** | `#[derive(Default)]` is allowed only when a doc comment names the concrete runnable state `T::default()` produces. Otherwise delete it and add a named constructor or a builder. | A zero state (`port: 0`, empty required `PathBuf`) type-checks and propagates as if valid; the failure lands at first use, far from the derive ([corrode.dev](https://corrode.dev/blog/pitfalls-of-safe-rust/)). | `grep -rn -B3 'derive(.*Default' --include='*.rs' src/ crates/` filtered to `*Config`/`*Settings`/`*Options` types; require a `///` justification or a `fn minimal()`/builder in the same `impl`. | MUST |
 | **API-11** | Do not derive `Serialize`/`Deserialize` reflexively. A type gets them only if it genuinely crosses a process/file/network boundary; a type with any `unsafe` method relying on a field invariant never derives `Deserialize`. | A reflexive derive turns every field into an unversioned wire format nobody designed, and on an invariant-bearing type it is a second, unchecked constructor (clippy `unsafe_derive_deserialize`, [clippy derive/mod.rs](https://raw.githubusercontent.com/rust-lang/rust-clippy/master/clippy_lints/src/derive/mod.rs)). | `cargo clippy --workspace -- -W clippy::unsafe_derive_deserialize` for the `unsafe` half; for the rest, review question per derive: "which file or wire message is this type written into?" | SHOULD |
 | **API-15** | Decide `#[non_exhaustive]` when the type is introduced, for every wire/manifest/config type — not only error enums. Internal, crate-private enums stay exhaustive so matches remain total. | Adding it later is a breaking change ([Cargo semver reference](https://doc.rust-lang.org/cargo/reference/semver.html)); ocx already uses it at 82 sites and grimoire at 66 with no stated rule ([errors-async-security.md:41](ocx-codebase-audit/errors-async-security.md)), while a sibling rule correctly wants internal enums exhaustive ([rules-inventory.md:928](ocx-codebase-audit/rules-inventory.md)). | Review gate on any new `pub enum`/`pub struct` in a serde-facing module: `#[non_exhaustive]` present, or a comment saying why the variant set is closed. | SHOULD |
-| **API-14** | Add `derive_partial_eq_without_eq`, `derived_hash_with_manual_eq` and `derive_ord_xor_partial_ord` at `warn` to the workspace `[lints.clippy]` table, and audit that table against the current clippy lint index each toolchain bump. | These are the mechanically-checkable halves of API-05/API-07; several live in `nursery`/`pedantic` so a bare `cargo clippy` never surfaces them, and clippy moves lints between groups release to release. | `grep -A10 '\[lints.clippy\]' Cargo.toml` shows all three; `cargo clippy --workspace` is then the gate. | MUST |
+| **API-14** | Add `derive_partial_eq_without_eq` at `warn` to the workspace `[lints.clippy]` table, and never lower `derived_hash_with_manual_eq` or `derive_ord_xor_partial_ord`, which are correctness lints, deny by default. Audit that table against the current clippy lint index each toolchain bump. | These are the mechanically-checkable halves of API-05/API-07; `derive_partial_eq_without_eq` lives in `nursery`, so a bare `cargo clippy` never surfaces it, and clippy moves lints between groups release to release. | `grep -A10 '\[lints.clippy\]' Cargo.toml` shows `derive_partial_eq_without_eq` at `warn` or stronger, and shows the other two absent or set to `deny`, never `warn` or `allow`; `cargo clippy --workspace` is then the gate. | MUST |
 
 ### Conversions and naming
 
@@ -74,7 +75,7 @@ date: 2026-08
 ### New commitments
 
 1. Add `#![warn(missing_debug_implementations)]` to every crate root in ocx, grimoire and ocx-mirror (API-01).
-2. Add the three derive lints to `[workspace.lints]` in each workspace, and create the table for the ocx crates that lack one (API-14).
+2. Add `derive_partial_eq_without_eq` at `warn` to `[workspace.lints]` in each workspace (leave the two correctness derive lints at their deny default), and create the table for the ocx crates that lack one (API-14).
 3. Add the API-02 secret-field grep to the pre-merge check set — it needs no Rust semantics, only a derive-line-plus-field-name match, so it runs on every diff touching a `struct` (API-02).
 4. Amend `quality-core.md`'s newtype bullet to require `TryFrom` + `#[serde(try_from)]` for invariant-bearing newtypes, and scope the DRY derive line away from secret-bearing and non-serialized types (API-10, API-11).
 5. Audit `ocx_lib`'s `Digest`-shaped newtypes for a public tuple field or a bare `derive(Deserialize)` — the audit never counted derive lines, so this is a measurement, not a known violation (API-10).
@@ -98,7 +99,6 @@ Ranked by how often it bites in practice.
 - **Which ocx/grimoire types actually violate API-05/API-10?** The codebase audit counted free functions, impl blocks, `#[non_exhaustive]` and error derives — never derive completeness or newtype field visibility. That is a scan to run, not a question to research.
 - **Which `secrecy` major version is pinned?** The sub-artifact notes the `Secret<T>` → `SecretBox`/`SecretString` + `ExposeSecret`/`ExposeSecretMut` API split; the audit records `secrecy::Secret` usage ([errors-async-security.md:85](ocx-codebase-audit/errors-async-security.md)), which is the *older* spelling. API-03's type names must be pinned to the version actually in `Cargo.toml` before it becomes an enforceable rule.
 - **Is `zeroize` used directly anywhere?** API-04 is written defensively; the audit found no direct `zeroize` usage independent of `secrecy`. If it is genuinely absent, API-04 stays as a guardrail on future code rather than a live finding.
-- **Does clippy still group `unsafe_derive_deserialize` under `nursery`?** It moves between groups release to release; API-14's periodic-audit clause exists because of this, but the current group is unverified as of this consolidation.
 
 ## Sub-artifacts
 
@@ -122,3 +122,8 @@ Ranked by how often it bites in practice.
 14. [std::marker::Copy](https://doc.rust-lang.org/std/marker/trait.Copy.html) — the explicit semver warning behind API-06.
 15. [Cargo Book — SemVer compatibility](https://doc.rust-lang.org/cargo/reference/semver.html) — `#[non_exhaustive]`-added-later as a breaking change (API-15).
 16. [Rust Reference — the `derive` attribute](https://doc.rust-lang.org/reference/attributes/derive.html) — confirms declaration-order comparison generation, the mechanism behind API-07.
+
+## Revision log
+
+- 2026-11-27: API-14 corrected. Only `derive_partial_eq_without_eq` (nursery) is set to `warn`; `derived_hash_with_manual_eq` and `derive_ord_xor_partial_ord` are correctness lints, deny by default, never lowered. Verification and the matching Verdict 8 and New commitments item 2 updated. Decision: `refresh-2026-11/rust-quality.md`.
+- 2026-11-27: Open question on the clippy group of `unsafe_derive_deserialize` removed. It is pedantic, not nursery, so the API-11 verification command is unchanged. Decision: `refresh-2026-11/rust-quality.md` (Open questions item 14).

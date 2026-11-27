@@ -7,7 +7,7 @@ consolidates:
   - rust-performance/perf-regression-and-budgets.md
   - rust-performance/cli-startup-latency.md
 date: 2026-08
-revised: 2026-08
+revised: 2026-11-27
 ---
 
 # Performance Engineering for the OCX/Grimoire Rust CLIs
@@ -31,9 +31,10 @@ Concrete positions, several of which overrule a sub-researcher:
    shared runners makes a 2% gate ~45% false-positive
    ([CodSpeed](https://codspeed.io/blog/benchmarks-in-ci-without-noise)). The only hard CI perf
    gate this project ships is a raw binary-size byte threshold.
-3. **iai-callgrind/Gungraun is rejected**, not deferred: Linux-only (Valgrind), mid-rename, and
-   a solution to a noise problem we avoid by not gating on wall-clock at all. Two sub-artifacts
-   both flag the rename churn; that is a second reason not to pin it.
+3. **iai-callgrind/Gungraun is rejected**, not deferred: Linux-only (Valgrind), its API still
+   breaking between minors (0.20.0, 2026-09), and a solution to a noise problem we avoid by not
+   gating on wall-clock at all. Two sub-artifacts both flag the churn; that is a second reason
+   not to pin it.
 4. **`panic = "abort"` is banned in the CLI binaries.** performance-practices §8 lists it as a
    standard release lever; `ocx/Cargo.toml:27-29` already documented why it is wrong here — 13
    `resume_unwind(join_err.into_panic())` sites lose spawned-task panic propagation *silently*,
@@ -236,7 +237,9 @@ measurement.
 *Rationale:* `flate2`'s features are additive and resolve by priority, and its own docs say
 `zlib-rs` "typically outperforms all the C implementations" while `miniz_oxide` is still the
 default ([flate2 docs](https://docs.rs/flate2/latest/flate2/)). An unpinned backend means
-throughput changes on a `cargo update`.
+throughput changes on a `cargo update`. A `default-features = false` pin also drops
+`runtime_detection`, a default since flate2 1.1.10 (2026-08-28), so the pinned feature list
+names it beside the backend.
 *Verify:* `grep -n 'flate2\|zstd\|async-compression' Cargo.toml` — each must carry an explicit
 `features = [...]` list. `ocx/Cargo.toml:121` (zstd `zstdmt`, with rationale) is the reference
 shape; `ocx/Cargo.toml:114` (`flate2 = "1.1.9"`, bare) is the counter-example.
@@ -299,8 +302,9 @@ statics; new module-level initialization work belongs in a `LazyLock`.
 **PERF-25 — Any startup-latency measurement uses `hyperfine --shell=none --warmup N`; never bare `time`, never a shell `for` loop.**
 *Rationale:* below ~5 ms hyperfine's shell-startup calibration-and-subtract correction is
 noisier than the thing being measured, which is exactly the regime a `--version`/`--help`
-invocation lives in; a hand-rolled loop re-adds the fork/exec cost to every sample
-([hyperfine](https://github.com/sharkdp/hyperfine),
+invocation lives in; a hand-rolled loop re-adds the fork/exec cost to every sample.
+hyperfine 2.0 (2026-10-07) made `--shell=none` the default and 1.x did not, so the flag stays
+spelled out ([hyperfine](https://github.com/sharkdp/hyperfine),
 [cli-startup-latency §7](rust-performance/cli-startup-latency.md)).
 *Verify:* `grep -rn 'hyperfine' . | grep -v -e '--shell=none' -e ' -N '` — a startup benchmark
 without it is a defect; PERF-03's cold/warm declaration still applies on top.
@@ -580,3 +584,9 @@ ID keeps its number and meaning; only PERF-17's rationale text changed.
 | "Applied to OCX" — three rows added to *Violated or absent*, two bullets to *Already satisfied*; the `tokio features = ["full"]` row's Rule column changed from "open question" to PERF-25/26 | — | The runtime-flavor row is no longer an open question: ocx is pinned by a documented precondition, grimoire is not. The `enable_all()` and no-progress-indicator gaps are new, both grep-verified in this pass. |
 | AI-agent failure modes #13 and #14 added | — | The four reflex startup "fixes", and the `current_thread` downgrade that panics only outside debug builds. |
 | Frontmatter: `cli-startup-latency.md` added to `consolidates`, `revised: 2026-08` added | — | File contract. |
+
+**2026-11-27 — delta refresh.** Decision file: [refresh-2026-11/rust-quality.md](refresh-2026-11/rust-quality.md). No ID added or renumbered.
+
+- 2026-11-27: PERF-18 amended in place. A `default-features = false` flate2 pin also drops `runtime_detection` (default since 1.1.10), so the pinned list names it. Decision: `refresh-2026-11/rust-quality.md`.
+- 2026-11-27: PERF-25 amended in place. hyperfine 2.0 (2026-10-07) made `--shell=none` the default, so the flag stays spelled out. Decision: `refresh-2026-11/rust-quality.md`.
+- 2026-11-27: Verdict item 3 (Gungraun rejection) now says "its API still breaking between minors (0.20.0, 2026-09)" instead of "mid-rename". Decision: `refresh-2026-11/rust-quality.md`.
