@@ -18,7 +18,7 @@ consolidates:
   - .agents/research/docs-audit/ux-observability-posture.md
   - .agents/research/docs-frame.md
 date: 2026-09-05
-revised: 2026-09-05
+revised: 2026-11-27
 wave: 2
 ---
 
@@ -111,7 +111,7 @@ the test file, not the page, and does not collide with `doc_type`.
 |---|---|---|---|---|---|---|
 | **DOC-EX-01** | Back every runnable documented example with one automated test in the same required gate as the unit tests. | Stops a documented command from drifting away from the tool it demonstrates. | Set-diff the fences whose info string is on the project's runnable tier list against the fences carrying a declared binding key. A non-empty difference fails. Reuses DOC-EX-05's tier list and DOC-EX-02's key. | MUST | measured, 66 bound scripts with zero orphans (`tested-examples-mechanism.md` §6) plus the tier list from markdownlint MD040 `allowed_languages` | tutorial, how-to, reference, troubleshooting |
 | **DOC-EX-02** | Bind a page to an out-of-page test with a declared key in the test header, never with a mirrored file path. | A mirrored path makes every test-tree move break every page that cites it. | List the declared keys in the test tree and the keys cited by pages, then diff the two lists. Both sides must come back empty. | MUST | measured, 66 live `# doc:` bindings and 0 orphans (`tested-examples-mechanism.md` §6) | tutorial, how-to, reference |
-| **DOC-EX-03** | Test an example with the language's own doctest runner unless it needs a real external system. | Prevents a bespoke harness being built for work an installed tool already does. | Before adding any doc-example test module, grep the dependency manifest, the generator config and CI for `sybil`, `cargo test --doc`, `mdbook test`, `twoslash`, `@shikijs/vitepress-twoslash` or a `deno` binary. A new harness with no external system in scope is the finding. | SHOULD | argued for the obligation, no normative source states it. Measured for the tools: Sybil in ocx-sdk-python `conftest.py:25-42`, Twoslash 0.3.9 and Deno 2.9.6 (`tested-examples-beyond-shell-python-rust.md` §1) | tutorial, how-to, reference |
+| **DOC-EX-03** | Test an example with the language's own doctest runner unless it needs a real external system. | Prevents a bespoke harness being built for work an installed tool already does. | Before adding any doc-example test module, grep the dependency manifest, the generator config and CI for `sybil`, `cargo test --doc`, `mdbook test`, `twoslash`, `@shikijs/vitepress-twoslash` or a `deno` binary. A new harness with no external system in scope is the finding. | SHOULD | argued for the obligation, no normative source states it. Measured for the tools: Sybil in ocx-sdk-python `conftest.py:25-42`, Twoslash 0.3.9 and Deno 2.9.8 (`tested-examples-beyond-shell-python-rust.md` §1) | tutorial, how-to, reference |
 | **DOC-EX-04** | Start a doc-example harness as one file that globs the example tree and runs each file as a subprocess. | Keeps a small project from copying the scale of a large worked example. | Run the shipped `checks/run_doc_examples.py` against its fixture pair, one passing and one deliberately broken. Exit codes must be 0 and 1. | SHOULD | measured, 55-line harness run in both directions (`tested-examples-beyond-shell-python-rust.md` §6) | all |
 | **DOC-EX-05** | Tag every code fence you add or change with a language from the project's declared tier list. | An untagged fence is invisible to every drift check, so it neither passes nor fails. | markdownlint MD040 with `allowed_languages` set to the tier list, run on changed lines only. | SHOULD | measured, 151 of 1,281 fleet fences untagged, 11.8 percent (`wave2-calibration-b.md` §4). Codified by markdownlint MD040 | all |
 | **DOC-EX-06** | Wrap a snippet that must not run in a paired marker that states why. | A bare skip flag reads later as an oversight rather than a decision. | Grep the open marker and require a `: <reason>` suffix, then require a matching close marker before the next open marker or end of file. | MUST | measured, 1 hit in 249 fleet pages, `ocx/website/src/docs/user-guide.md` (`wave2-calibration-b.md` §4). Codified by ocx's paired marker | how-to, reference, explanation, troubleshooting |
@@ -422,6 +422,13 @@ Wave 2, 2026-09-05. Every wave-1 ID keeps its number and its meaning.
 - DOC-EX-34 NEW. The WCAG 1.4.13 hover-and-focus rule, proposed as DOC-TYPE-29,
   is renumbered into this family for the same collision. DOC-TYPE-29 already
   carries the declaration-above-frontmatter ban. Severity unchanged at MUST.
+- 2026-11-27: DOC-EX-03 evidence cell names Deno 2.9.8 instead of 2.9.6, and the
+  Sybil key-source row names 10.2.0 instead of 10.1.0. Rule text, severity and
+  every other ID are unchanged. Decision file:
+  `refresh-2026-11/docs-quality.md` (DOC-EX-03 mechanism table row). The same
+  decision bumps `@shikijs/vitepress-twoslash` to 4.6.0 and corrects the Node
+  type-stripping versions, but those stamps live in the shipped skill file, not
+  here.
 
 ## Sub-artifacts
 
@@ -446,7 +453,7 @@ Wave 2, 2026-09-05. Every wave-1 ID keeps its number and its meaning.
 
 | URL | Why it matters here |
 |---|---|
-| [Sybil documentation](https://sybil.readthedocs.io/en/latest/) | The Python doctest runner DOC-EX-03 names first, current 10.1.0 |
+| [Sybil documentation](https://sybil.readthedocs.io/en/latest/) | The Python doctest runner DOC-EX-03 names first, current 10.2.0 |
 | [Sybil markdown parsers](https://sybil.readthedocs.io/en/latest/markdown.html) | Confirms the parser set behind the four fence tiers |
 | [`simplistix/sybil` src/sybil/sybil.py](https://github.com/simplistix/sybil/blob/main/src/sybil/sybil.py) | `should_parse` calls `pathlib.Path.match`, contradicting its own docstring — grounds DOC-EX-09 |
 | [Python `pathlib.PurePath.match`](https://docs.python.org/3/library/pathlib.html#pathlib.PurePath.match) | States that `**` acts as a non-recursive `*` in `match()` |

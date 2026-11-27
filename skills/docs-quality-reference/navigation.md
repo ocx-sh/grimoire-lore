@@ -116,7 +116,7 @@ exposes a zero-result hook.
 | MkDocs Material (lunr) | Watch the rendered no-results node, then POST to your own endpoint. | $0 on a serverless free tier of 100,000 requests a day, $5 a month past it | Nothing beyond the endpoint. Never override the shipped search worker. |
 | VitePress (minisearch) | Same watcher and POST, or call `pagefind.search()` if the site already migrated. | Same $0 to $5 band | The Pagefind route means replacing the built-in search UI, which is engineering, not money. |
 | mdBook (elasticlunr) | Same watcher and POST. | Same $0 to $5 band | `searcher.js` is internal. Patching it fails DOC-NAV-16. |
-| A site already running Umami or Plausible | A named custom event with properties, landing in the dashboard you already read. | $0 self-hosted, up to roughly $20 a month hosted | No second integration, and no endpoint of your own. |
+| A site already running Umami or Plausible | A named custom event with properties, landing in the dashboard you already read. Plausible carries properties on its Business plan only. | $0 self-hosted, up to roughly $20 a month hosted | No second integration, and no endpoint of your own. |
 | A static host that hides its access log | No sink. GitHub Pages logs visitor requests and never exposes that log to the owner. | Not available at any price | A log-line sink collapses back into standing up a function. |
 
 When no sink exists yet, defer the signal in DOC-OBS-12's shape rather than

@@ -4,7 +4,7 @@ topic: docs-observability
 family: DOC-OBS
 model: claude-opus-5[1m]
 date: 2026-09-05
-revised: 2026-09-05
+revised: 2026-11-27
 wave: 2
 consolidates:
   - .agents/research/docs-observability/minimum-instrumentation-set.md
@@ -95,9 +95,11 @@ Four documented gaps, stated rather than closed. No `checks/` directory exists
 anywhere on disk, so every rule naming a script is unshipped until the file
 lands. DOC-OBS-06's scheduled runbook harness is still unbuilt, so the rule now
 ships a greppable floor at SHOULD instead. No live GA4 DebugView session was run,
-so the GA4 non-satisfier rests on two vendors' own stated mechanisms. Umami's
-cloud pricing and DocSearch's free-tier analytics dashboard are both unconfirmed
-at the vendor's own page.
+so the GA4 non-satisfier rests on two vendors' own stated mechanisms. Plausible's
+own pricing page returned 404 on 2026-11-27, so its tier prices come from its
+homepage listing, and DocSearch's free-tier analytics dashboard is unconfirmed
+at the vendor's own page. Umami's pricing page confirms a $0 tier and a $20
+tier, read on the same day.
 
 ## The ruleset
 
@@ -134,10 +136,17 @@ checked against built output rather than against the raw markdown tree.
 root-relative links, so it reports rot that does not exist.
 
 **Verification.** One of two mechanisms must be present in CI. Either the
-generator's own strict build (`mkdocs build --strict`, `mdbook-linkcheck`), or
-`lychee --include-fragments <build-dir>` after the docs build, where
-`<build-dir>` is `site/`, `.vitepress/dist/` or `book/`. Grep for either with
-`grep -n 'mkdocs build --strict\|mdbook-linkcheck\|lychee.*--include-fragments'`
+generator's own strict build (`mkdocs build --strict`, `zensical build --strict`,
+`mdbook-linkcheck2`), or
+`lychee --root-dir "$PWD/<build-dir>" --include-fragments --config checks/lychee.toml <build-dir>`
+after the docs build, where `<build-dir>` is `site/`, `.vitepress/dist/` or
+`book/html/`. `mkdocs build --strict` fails on a broken anchor only once
+`validation.anchors: warn` is set, because anchors default to `info`. The
+`mdbook-linkcheck2` backend is enabled as `[output.linkcheck2]` in `book.toml`;
+the original `mdbook-linkcheck` fails on mdBook 0.5. `zensical build --strict`
+exits 1 on a broken link or anchor, both checked by default (beta 0.1.x in
+2026-11). Grep for any of them with
+`grep -n 'mkdocs build --strict\|zensical build --strict\|mdbook-linkcheck\|lychee.*--include-fragments'`
 over the repo's taskfiles and workflows. Prove it once: break one anchor and one
 root-relative link in a fixture, confirm a non-zero exit, revert.
 
@@ -452,11 +461,13 @@ real, nonzero traffic number for 30 consecutive days.
 unmeasured metric DOC-OBS-08 already forbids.
 
 **Verification.** The manifest names a custom-event-capable page-analytics signal
-reporting nonzero for 30 days (30 days, asserted default). Plausible, Umami and
-Fathom qualify. GoatCounter and Cloudflare Web Analytics do not, because neither
-carries a named event with properties. A repo with no generator and no site names
-`gh api repos/<owner>/<repo>/traffic/views` instead, and that call must return
-200.
+reporting nonzero for 30 days (30 days, asserted default). Umami on every plan
+and Plausible on its Business plan carry named events with properties. Fathom
+events carry only a name and a numeric value. GoatCounter and Cloudflare Web
+Analytics carry no properties. None of those three qualifies. A repo with no
+generator and no site names `gh api repos/<owner>/<repo>/traffic/views` instead,
+with a token holding push access, and that call must return 200. It returns the
+last 14 days only, so the manifest records a sample at least every 14 days.
 
 **Severity.** CONSIDER, capped because the 30-day threshold is argued and no
 source supplies it. **Evidence.** codified.
@@ -650,9 +661,10 @@ Ranked by how often the sub-artifacts and the audits saw it, not by severity.
 - **fabrication-grep-retighten** — DOC-OBS-08's tightened pattern strips fenced
   blocks and table rows and has not been re-run. Re-measure over the same 186
   pages. Under a 20% false-positive rate restores MUST.
-- **umami-cloud-pricing** — the vendor's own pricing page did not render to a
-  fetch, so the hosted-tier numbers behind DOC-OBS-16's vendor list are
-  second-hand. Re-confirm before any shipped rule cites a figure.
+- **plausible-pricing** — Plausible's own pricing page returned 404 on
+  2026-11-27, so its tier prices behind DOC-OBS-16's vendor list come from its
+  homepage listing. Re-confirm before any shipped rule cites a figure. Umami's
+  pricing is confirmed.
 - **ga4-debugview-last-mile** — the GA4 non-satisfier rests on two vendors' own
   stated mechanisms and no live session. A ten-minute DebugView check closes it.
 
@@ -729,6 +741,16 @@ Ranked by how often the sub-artifacts and the audits saw it, not by severity.
   `fabrication-grep-false-positive-rate` and `fork-detector-threshold`, all
   answered. `runbook-step-harness-cost` became `runbook-step-harness-price`,
   because the demotion answered the shipping question and left the pricing one.
+
+- **2026-11-27, DOC-OBS-01, verification corrected.** The lychee command passes
+  `--root-dir`, the MkDocs anchor caveat is stated, `mdbook-linkcheck2` replaces
+  `mdbook-linkcheck`, and `zensical build --strict` is added. Source:
+  `refresh-2026-11/docs-quality.md`.
+- **2026-11-27, DOC-OBS-16, verification corrected.** Fathom is dropped from the
+  qualifying list, Plausible properties need its Business plan, and
+  `traffic/views` needs push access and returns 14 days, so sampling is at least
+  every 14 days. The Umami pricing gap moves to Plausible. Source:
+  `refresh-2026-11/docs-quality.md`.
 
 ## Sub-artifacts
 
