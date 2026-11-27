@@ -148,15 +148,15 @@ version = "0.3.0"
 description = { readme = "docs/rust-quality.md", logo = "assets/lore-rust.svg" }
 
 [skills.rust-quality-reference]
-version = "0.1.0"
+version = "0.2.0"
 description = { readme = "docs/rust-quality-reference.md", logo = "assets/lore-rust.svg" }
 
 [rules.rust-cargo]
-version = "0.2.0"
+version = "0.3.0"
 description = { readme = "docs/rust-cargo.md", logo = "assets/lore-rust.svg" }
 
 [skills.rust-cargo-reference]
-version = "0.1.0"
+version = "0.2.0"
 description = { readme = "docs/rust-cargo-reference.md", logo = "assets/lore-rust.svg" }
 
 [bundles.rust-essentials]
@@ -168,15 +168,15 @@ description = { readme = "docs/rust-essentials.md", logo = "assets/lore-rust.svg
 # is a separate rule only because its glob genuinely differs — it loads on
 # manifests and lockfiles, not on source.
 [rules.python-quality]
-version = "0.3.0"
+version = "0.3.1"
 description = { readme = "docs/python-quality.md", logo = "assets/lore-python.svg" }
 
 [skills.python-quality-reference]
-version = "0.1.0"
+version = "0.2.0"
 description = { readme = "docs/python-quality-reference.md", logo = "assets/lore-python.svg" }
 
 [rules.python-packaging]
-version = "0.2.0"
+version = "0.2.1"
 description = { readme = "docs/python-packaging.md", logo = "assets/lore-python.svg" }
 
 [skills.python-packaging-reference]
@@ -201,23 +201,23 @@ description = { readme = "docs/python-essentials.md", logo = "assets/lore-python
 # exceptions in every paragraph. No `css-essentials` bundle: this set has no
 # sibling to bundle with, and a one-member bundle is a second name for one thing.
 [rules.css-theming]
-version = "0.2.0"
+version = "0.2.1"
 description = { readme = "docs/css-theming.md", logo = "assets/lore-css.svg" }
 
 [skills.css-theming-reference]
-version = "0.1.0"
+version = "0.2.0"
 description = { readme = "docs/css-theming-reference.md", logo = "assets/lore-css.svg" }
 
 [rules.typescript-quality]
-version = "0.3.0"
+version = "0.3.1"
 description = { readme = "docs/typescript-quality.md", logo = "assets/lore-typescript.svg" }
 
 [skills.typescript-quality-reference]
-version = "0.1.0"
+version = "0.2.0"
 description = { readme = "docs/typescript-quality-reference.md", logo = "assets/lore-typescript.svg" }
 
 [rules.typescript-packaging]
-version = "0.1.2"
+version = "0.2.0"
 description = { readme = "docs/typescript-packaging.md", logo = "assets/lore-typescript.svg" }
 
 [bundles.typescript-essentials]
@@ -235,11 +235,11 @@ description = { readme = "docs/typescript-essentials.md", logo = "assets/lore-ty
 # and the repository's own CI runner. `docs-review` is the on-demand trigger:
 # a rule only loads on an edit, so grading an untouched page needs a name.
 [rules.docs-quality]
-version = "0.4.0"
+version = "0.4.1"
 description = { readme = "docs/docs-quality.md", logo = "assets/lore-docs.svg" }
 
 [skills.docs-quality-reference]
-version = "0.1.0"
+version = "0.2.0"
 description = { readme = "docs/docs-quality-reference.md", logo = "assets/lore-docs.svg" }
 
 [skills.docs-plan]
@@ -247,7 +247,7 @@ version = "0.1.2"
 description = { readme = "docs/docs-plan.md", logo = "assets/lore-docs.svg" }
 
 [skills.docs-instrument]
-version = "0.1.2"
+version = "0.1.3"
 description = { readme = "docs/docs-instrument.md", logo = "assets/lore-docs.svg" }
 
 [skills.docs-review]
@@ -273,7 +273,7 @@ version = "0.2.0"
 description = { readme = "docs/code-docs.md", logo = "assets/lore-code-docs.svg" }
 
 [skills.code-docs-reference]
-version = "0.1.0"
+version = "0.2.0"
 description = { readme = "docs/code-docs-reference.md", logo = "assets/lore-code-docs.svg" }
 
 [skills.code-docs-cleanup]
@@ -296,11 +296,11 @@ description = { readme = "docs/code-docs-essentials.md", logo = "assets/lore-cod
 # pyproject or package.json, which the language sets own. `bazel-adopt` runs once per repository and
 # `bazel-diagnose` runs on a symptom; neither belongs on every edit.
 [rules.bazel-quality]
-version = "0.6.0"
+version = "0.6.1"
 description = { readme = "docs/bazel-quality.md", logo = "assets/lore-bazel.svg" }
 
 [skills.bazel-quality-reference]
-version = "0.1.0"
+version = "0.2.0"
 description = { readme = "docs/bazel-quality-reference.md", logo = "assets/lore-bazel.svg" }
 
 [skills.bazel-adopt]
@@ -308,7 +308,7 @@ version = "0.1.2"
 description = { readme = "docs/bazel-adopt.md", logo = "assets/lore-bazel.svg" }
 
 [skills.bazel-diagnose]
-version = "0.1.1"
+version = "0.1.2"
 description = { readme = "docs/bazel-diagnose.md", logo = "assets/lore-bazel.svg" }
 
 [bundles.bazel-essentials]
@@ -328,43 +328,43 @@ description = { readme = "docs/bazel-essentials.md", logo = "assets/lore-bazel.s
 # on every edit. The Bazel-Java depth file is offered to `bazel-quality`, not
 # published here, so no two rules glob `BUILD.bazel`.
 [rules.java-quality]
-version = "0.3.0"
+version = "0.3.1"
 description = { readme = "docs/java-quality.md", logo = "assets/lore-java.svg" }
 
 [skills.java-quality-reference]
-version = "0.1.0"
+version = "0.2.0"
 description = { readme = "docs/java-quality-reference.md", logo = "assets/lore-java.svg" }
 
 [rules.kotlin-quality]
-version = "0.3.0"
+version = "0.3.1"
 description = { readme = "docs/kotlin-quality.md", logo = "assets/lore-kotlin.svg" }
 
 [skills.kotlin-quality-reference]
-version = "0.1.0"
+version = "0.2.0"
 description = { readme = "docs/kotlin-quality-reference.md", logo = "assets/lore-kotlin.svg" }
 
 [rules.gradle-build]
-version = "0.2.0"
+version = "0.2.1"
 description = { readme = "docs/gradle-build.md", logo = "assets/lore-gradle.svg" }
 
 [skills.gradle-build-reference]
-version = "0.1.0"
+version = "0.2.0"
 description = { readme = "docs/gradle-build-reference.md", logo = "assets/lore-gradle.svg" }
 
 [rules.maven-build]
-version = "0.2.0"
+version = "0.3.0"
 description = { readme = "docs/maven-build.md", logo = "assets/lore-maven.svg" }
 
 [skills.maven-build-reference]
-version = "0.1.0"
+version = "0.2.0"
 description = { readme = "docs/maven-build-reference.md", logo = "assets/lore-maven.svg" }
 
 [skills.jvm-release]
-version = "0.1.1"
+version = "0.1.2"
 description = { readme = "docs/jvm-release.md", logo = "assets/lore-java.svg" }
 
 [skills.jvm-dependency-triage]
-version = "0.1.2"
+version = "0.1.3"
 description = { readme = "docs/jvm-dependency-triage.md", logo = "assets/lore-java.svg" }
 
 [bundles.jvm-essentials]
@@ -381,23 +381,23 @@ description = { readme = "docs/jvm-essentials.md", logo = "assets/lore-java.svg"
 # procedures: dependency triage (run occasionally) and modernisation (run once
 # per repository).
 [rules.cmake-build]
-version = "0.2.0"
+version = "0.3.0"
 description = { readme = "docs/cmake-build.md", logo = "assets/lore-cmake.svg" }
 
 [skills.cmake-build-reference]
-version = "0.1.0"
+version = "0.2.0"
 description = { readme = "docs/cmake-build-reference.md", logo = "assets/lore-cmake.svg" }
 
 [rules.cpp-packaging]
-version = "0.2.0"
+version = "0.2.1"
 description = { readme = "docs/cpp-packaging.md", logo = "assets/lore-cmake.svg" }
 
 [skills.cpp-packaging-reference]
-version = "0.1.0"
+version = "0.2.0"
 description = { readme = "docs/cpp-packaging-reference.md", logo = "assets/lore-cmake.svg" }
 
 [skills.cmake-dependency-triage]
-version = "0.1.1"
+version = "0.1.2"
 description = { readme = "docs/cmake-dependency-triage.md", logo = "assets/lore-cmake.svg" }
 
 [skills.cmake-modernize]
@@ -418,27 +418,27 @@ description = { readme = "docs/cmake-essentials.md", logo = "assets/lore-cmake.s
 # ships inside `bazel-quality` (0.3.0), not here, so no two rules glob
 # `BUILD.bazel`.
 [rules.go-quality]
-version = "0.3.0"
+version = "0.3.1"
 description = { readme = "docs/go-quality.md", logo = "assets/lore-go.svg" }
 
 [skills.go-quality-reference]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/go-quality-reference.md", logo = "assets/lore-go.svg" }
 
 [rules.go-modules]
-version = "0.2.0"
+version = "0.2.1"
 description = { readme = "docs/go-modules.md", logo = "assets/lore-go.svg" }
 
 [skills.go-modules-reference]
-version = "0.1.0"
+version = "0.2.0"
 description = { readme = "docs/go-modules-reference.md", logo = "assets/lore-go.svg" }
 
 [skills.go-release]
-version = "0.1.1"
+version = "0.2.0"
 description = { readme = "docs/go-release.md", logo = "assets/lore-go.svg" }
 
 [skills.go-upgrade]
-version = "0.1.1"
+version = "0.2.0"
 description = { readme = "docs/go-upgrade.md", logo = "assets/lore-go.svg" }
 
 [skills.go-diagnose]
@@ -457,23 +457,23 @@ description = { readme = "docs/go-essentials.md", logo = "assets/lore-go.svg" }
 # routed by task from the index, never globbed. The three skills are procedures
 # run once per adoption, per release or per incident.
 [rules.nix-quality]
-version = "0.2.0"
+version = "0.2.1"
 description = { readme = "docs/nix-quality.md", logo = "assets/lore-nix.svg" }
 
 [skills.nix-quality-reference]
-version = "0.1.0"
+version = "0.2.0"
 description = { readme = "docs/nix-quality-reference.md", logo = "assets/lore-nix.svg" }
 
 [skills.nix-flake-adopt]
-version = "0.1.1"
+version = "0.1.2"
 description = { readme = "docs/nix-flake-adopt.md", logo = "assets/lore-nix.svg" }
 
 [skills.nix-flake-release]
-version = "0.1.1"
+version = "0.1.2"
 description = { readme = "docs/nix-flake-release.md", logo = "assets/lore-nix.svg" }
 
 [skills.nix-diagnose]
-version = "0.1.1"
+version = "0.1.2"
 description = { readme = "docs/nix-diagnose.md", logo = "assets/lore-nix.svg" }
 
 [bundles.nix-essentials]
@@ -494,23 +494,23 @@ description = { readme = "docs/nix-essentials.md", logo = "assets/lore-nix.svg" 
 # upgrade, per incident or per release. The bundle also carries `code-docs` and
 # `code-docs-cleanup`, which are shared by every language set.
 [rules.swift-quality]
-version = "0.2.0"
+version = "0.2.1"
 description = { readme = "docs/swift-quality.md", logo = "assets/lore-swift.svg" }
 
 [skills.swift-quality-reference]
-version = "0.1.0"
+version = "0.2.0"
 description = { readme = "docs/swift-quality-reference.md", logo = "assets/lore-swift.svg" }
 
 [rules.swift-package]
-version = "0.2.0"
+version = "0.2.1"
 description = { readme = "docs/swift-package.md", logo = "assets/lore-swift.svg" }
 
 [skills.swift-package-reference]
-version = "0.1.0"
+version = "0.2.0"
 description = { readme = "docs/swift-package-reference.md", logo = "assets/lore-swift.svg" }
 
 [skills.swift-upgrade]
-version = "0.1.2"
+version = "0.1.3"
 description = { readme = "docs/swift-upgrade.md", logo = "assets/lore-swift.svg" }
 
 [skills.swift-diagnose]
@@ -518,7 +518,7 @@ version = "0.1.2"
 description = { readme = "docs/swift-diagnose.md", logo = "assets/lore-swift.svg" }
 
 [skills.swift-release]
-version = "0.1.2"
+version = "0.1.3"
 description = { readme = "docs/swift-release.md", logo = "assets/lore-swift.svg" }
 
 [bundles.swift-essentials]
@@ -545,31 +545,31 @@ description = { readme = "docs/swift-essentials.md", logo = "assets/lore-swift.s
 # upgrade, per incident or per release. The bundle also carries `code-docs` and
 # `code-docs-cleanup`, which are shared by every language set.
 [rules.csharp-quality]
-version = "0.2.0"
+version = "0.2.1"
 description = { readme = "docs/csharp-quality.md", logo = "assets/lore-dotnet.svg" }
 
 [skills.csharp-quality-reference]
-version = "0.1.0"
+version = "0.2.0"
 description = { readme = "docs/csharp-quality-reference.md", logo = "assets/lore-dotnet.svg" }
 
 [rules.dotnet-build]
-version = "0.2.0"
+version = "0.2.1"
 description = { readme = "docs/dotnet-build.md", logo = "assets/lore-dotnet.svg" }
 
 [skills.dotnet-build-reference]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/dotnet-build-reference.md", logo = "assets/lore-dotnet.svg" }
 
 [skills.dotnet-upgrade]
-version = "0.1.1"
+version = "0.1.2"
 description = { readme = "docs/dotnet-upgrade.md", logo = "assets/lore-dotnet.svg" }
 
 [skills.dotnet-diagnose]
-version = "0.1.1"
+version = "0.1.2"
 description = { readme = "docs/dotnet-diagnose.md", logo = "assets/lore-dotnet.svg" }
 
 [skills.dotnet-release]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/dotnet-release.md", logo = "assets/lore-dotnet.svg" }
 
 [bundles.dotnet-essentials]
@@ -587,19 +587,19 @@ description = { readme = "docs/dotnet-essentials.md", logo = "assets/lore-dotnet
 # port or incident. The bundle also carries `code-docs` and `code-docs-cleanup`,
 # which are shared by every language set.
 [rules.shell-quality]
-version = "0.2.0"
+version = "0.2.1"
 description = { readme = "docs/shell-quality.md", logo = "assets/lore-shell.svg" }
 
 [skills.shell-quality-reference]
-version = "0.1.0"
+version = "0.2.0"
 description = { readme = "docs/shell-quality-reference.md", logo = "assets/lore-shell.svg" }
 
 [rules.powershell-quality]
-version = "0.2.0"
+version = "0.2.1"
 description = { readme = "docs/powershell-quality.md", logo = "assets/lore-shell.svg" }
 
 [skills.powershell-quality-reference]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/powershell-quality-reference.md", logo = "assets/lore-shell.svg" }
 
 [skills.shell-integration]
@@ -607,7 +607,7 @@ version = "0.1.0"
 description = { readme = "docs/shell-integration.md", logo = "assets/lore-shell.svg" }
 
 [skills.installer-script]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/installer-script.md", logo = "assets/lore-shell.svg" }
 
 [skills.shell-port]
@@ -615,7 +615,7 @@ version = "0.1.1"
 description = { readme = "docs/shell-port.md", logo = "assets/lore-shell.svg" }
 
 [skills.shell-diagnose]
-version = "0.1.0"
+version = "0.1.1"
 description = { readme = "docs/shell-diagnose.md", logo = "assets/lore-shell.svg" }
 
 [bundles.shell-essentials]
