@@ -8,6 +8,7 @@ consolidates:
   - shell-alt-shells/fish.md
   - shell-alt-shells/nu-and-elvish.md
 date: 2026-10-11
+revised: 2026-11-27
 ---
 
 # zsh, fish, nushell and elvish
@@ -27,7 +28,7 @@ Script kinds a rule binds (as in the frame): **INST** installer or bootstrap, **
 4. **fish is supported 3.6.0 to 4.9.3** (INST, EMIT, DEV). It has no errexit; the gate is `fish --no-config --no-execute FILE` (exit 127) on the floor and the ceiling plus three greps, never `fish -c` and never ShellCheck or shfmt (FISH-01 to FISH-07).
 5. **fish cleanup is `fish_exit` plus three `--on-signal` handlers** that `rm`, remove themselves and re-raise, on a `set -g` variable (INST, EMIT); `set -q X` is true for an empty string, so an empty `OCX_HOME` sources `/env.fish` today (FISH-09, FISH-10).
 6. **Emitted fish config** is one `conf.d/<tool>.fish`, idempotent under re-source, with `fish_add_path --path` and no universal variables; values are quoted with `\` escaped first, then `'` (EMIT, RC; FISH-13, FISH-14).
-7. **nu is ~monthly breaking minors with no 1.0.** Every nu file declares `# nu-range: FLOOR..CEILING`; the gate is `nu-gate.nu --strict` on both ends, never bare `--ide-check` or `nu-check`; shared and emitted nu is written in the safe intersection and selects version files with a `const` and `source` (INST, EMIT, DEV; NU-01 to NU-06).
+7. **nu is ~monthly breaking minors with no 1.0.** Every nu file declares `# nu-range: FLOOR..CEILING`; the gate is `nu-gate.nu --strict` on both ends, never bare `--ide-check` or `nu-check`; shared and emitted nu is written in the safe intersection and selects version files with a `const` and `source` (INST, EMIT, DEV; NU-01 to NU-06). 2026-11 delta: nu 0.117.0 (2026-11-09) is the only alt-shell release in the window; only the gate and the hang check were re-run on it, so the floor-to-ceiling ranges stay 0.105.1..0.116.1, NU-04 gains `filter`, `type` as a command name and `get -i` as an error from 0.117.0, and NU-11 does not reproduce on 0.117.0 but stays MUST.
 8. **nu and elvish cleanup is capture, clean, then `exit` with the original status;** helpers raise an error and never `exit`; an external in tail position of `try` gets `| complete`; neither shell has `trap`, so no rule claims signal-safe cleanup (INST; NU-09, NU-11, NU-14, ELV-05, ELV-06).
 9. **elvish is 0.18.0 to 0.21.0** (latest release 0.21.0, 2024-08-14): gate = compile + deprecation + denylist, never `-compileonly` alone; `$edit:` compile messages are tolerated in rc files only; probe new commands with `resolve` (INST, EMIT, RC; ELV-01 to ELV-04).
 10. **None of the four is a CI step shell.** GitHub Actions has no `shell: zsh|fish|nu|elvish` (actionlint: "shell name is invalid"); run them from a `bash` step with `zsh -f`, `fish --no-config`, `nu --no-config-file` (ZSH-14; [SH-CI row 14](shell-ci.md)).
@@ -330,9 +331,10 @@ grep -rn -E --include='*.nu' -e 'try *\{ *\^' -e 'try *\{[^}]*\} *$' .
 - Why: a removed command falls through to whatever is on PATH: `"abc" | size` ran GNU binutils `size` and exited 0 with a wrong answer on 0.105.1 and 0.116.1 when an `a.out` was in the cwd ([nu-and-elvish.md §5](shell-alt-shells/nu-and-elvish.md)).
 - Check: N1 `--strict` (`unknown command treated as external`); `--allow` lists barewords that are intentional. Red: yes (default mode green is the blindness).
 
-**SH-NU-04 (MUST) binds INST, EMIT, DEV: write the safe intersection in shared and emitted nu.** The N3 first denylist (dated 2026-10-11) is the do-not-write list: broken on the whole range are `let-env`, `def-env`, `extern-wrapped`, `date format`, `fetch`, `unfold`, `str collect`, `str find-replace`, `register`, `with-env [..]`, `&&`, `do -s`; changed in the window are `$nu.home-path` and `$nu.temp-path` (hard error from 0.110.0), `str upcase`/`str downcase` (warning from 0.114.0), `get -i` (warning from 0.106.1; `--optional` unknown before 0.106.0), `into value` (0.108.0), `def run` (a builtin from 0.114.0, an error on 0.115/0.116), `random dice` (gone by 0.114.1). Name nothing `run` or after a parser keyword; prefix helpers with the tool name.
+**SH-NU-04 (MUST) binds INST, EMIT, DEV: write the safe intersection in shared and emitted nu.** The N3 first denylist (dated 2026-10-11) is the do-not-write list: broken on the whole range are `let-env`, `def-env`, `extern-wrapped`, `date format`, `fetch`, `unfold`, `str collect`, `str find-replace`, `register`, `with-env [..]`, `&&`, `do -s`; changed in the window are `$nu.home-path` and `$nu.temp-path` (hard error from 0.110.0), `str upcase`/`str downcase` (warning from 0.114.0), `get -i` (warning from 0.106.1, an error from 0.117.0; `--optional` unknown before 0.106.0), `into value` (0.108.0), `def run` (a builtin from 0.114.0, an error on 0.115/0.116), `random dice` (gone by 0.114.1), `filter` (removed in 0.117.0, use `where`), `type` as a command name (a parser keyword from 0.117.0). Name nothing `run` or after a parser keyword; prefix helpers with the tool name.
 - Why: the safe forms print byte-identical output on 0.100.0 to 0.116.1 ([nu-and-elvish.md §4, §6](shell-alt-shells/nu-and-elvish.md); [0.114 notes](https://www.nushell.sh/blog/2026-07-04-nushell_v0_114_0.html)).
-- Check: N3 first grep and N1 (`name_is_keyword` on 0.116.1). Red: yes (20 lines on `stale/`, 0 on `safe/`).
+- Scope: nu 0.100.0 to 0.116.1, plus the three 0.117.0 entries.
+- Check: N3 first grep and N1 (`name_is_keyword` on 0.116.1; on 0.117.0 `nu-gate.nu --strict` exits 1 on `filter`, `get -i` and `def type` and 0 on the safe twin, measured 2026-11-27). Red: yes (20 lines on `stale/`, 0 on `safe/`).
 
 **SH-NU-05 (MUST) binds INST, EMIT, DEV: a file that must run on the floor uses no name born after it.** `--optional` (0.106.0), `detect type` (0.108.0), `$nu.home-dir` and `$nu.temp-dir` (0.110.0), `finally` (0.111.0), `str uppercase` and `str lowercase` (0.114.0); read a `catch` record through `$e.msg` only (`$e.json` is gone from 0.114.0).
 - Why: introduced-in versions from [nu-and-elvish.md §4](shell-alt-shells/nu-and-elvish.md); violated by virtualenv's `activate.nu` (`get --optional` fails 0.105.1: 1 error, 0 on 0.116.0) and uv's template (3 and 2 errors on 0.105.1 and 0.116.0; [fleet-shell-shape.md:516,518](shell-audit/fleet-shell-shape.md)).
@@ -359,8 +361,8 @@ grep -rn -E --include='*.nu' -e 'try *\{ *\^' -e 'try *\{[^}]*\} *$' .
 - Check: `grep -rn -F --include='*.nu' -e ' finally ' .` against the `# nu-range:` floor. Measured (`tf-b..d` table), not a red/green gate.
 
 **SH-NU-11 (MUST) binds INST, DEV: never leave an external in tail position of `try`; put `| complete` inside.**
-- Why: with more than 65536 bytes of output the process hangs forever on nu 0.112.1 to 0.116.1 (0.105.1, 0.110.0, 0.111.0 finish); `gh search` (3 queries) found no upstream issue. Satisfied: `install.nu:148-151` documents the `complete` form.
-- Check: N5 (`NX/hang-run.sh 0.116.1 300000` HANG against the twin exit 0); N6 first grep is a reading heuristic that matches plant and twin alike. Red: yes for the hang; the grep is heuristic.
+- Why: with more than 65536 bytes of output the process hangs forever on nu 0.112.1 to 0.116.1 (0.105.1, 0.110.0, 0.111.0 and 0.117.0 finish); `gh search` (3 queries) found no upstream issue. Satisfied: `install.nu:148-151` documents the `complete` form.
+- Check: N5 (`NX/hang-run.sh 0.116.1 300000` HANG against the twin exit 0; red on 0.112.1 and 0.116.1, green on 0.117.0, measured 2026-11-27); N6 first grep is a reading heuristic that matches plant and twin alike. Red: yes for the hang; the grep is heuristic.
 
 **SH-NU-12 (MUST) binds INST, DEV: do not use bare `try` to ignore an error you must act on.** `try { ^cmd }` exits 0 on a failed command; use `try {..} catch {|e| ..}` and set the exit code, or `^cmd | complete` and read `.exit_code`.
 - Why: `try { ^sh -c "exit 7" }` exits 0 ([nu-and-elvish.md §9](shell-alt-shells/nu-and-elvish.md), probe tf-a).
@@ -422,7 +424,7 @@ grep -rn -w --include='*.elv' -e 'eawk' -e 'float64' -e 'except' .
 
 These two scripts do not exist in any repo; the set ships them as plumbing at authoring (map "Plumbing at authoring"), with their plants and twins. Copied verbatim from `NX/` on 2026-10-11.
 
-`nu-gate.nu` (runs on nu 0.100.0 to 0.116.1):
+`nu-gate.nu` (runs on nu 0.100.0 to 0.117.0):
 
 ```nu
 #!/usr/bin/env nu
@@ -435,7 +437,7 @@ These two scripts do not exist in any repo; the set ships them as plumbing at au
 #   (4) a call to a command the running nu itself files under category "removed" (date format, let-env)
 # --allow takes a comma-separated STRING: a list<string> flag given on the command line parses as nuon on nu <= 0.110
 # and is a type mismatch on nu >= 0.114.
-# Written in the safe intersection: it runs on nu 0.100.0 .. 0.116.1.
+# Written in the safe intersection: it runs on nu 0.100.0 .. 0.117.0.
 # --strict: ANY bareword external is red unless listed in --allow (catches `size`, which a binutils binary answers).
 # usage: nu nu-gate.nu [--strict] [--allow ocx,git] file.nu ...
 def main [--allow: string = "", --strict, ...files: path] {
@@ -577,9 +579,15 @@ Subareas that need another round (also in the receipt):
 - **zsh on macOS:** do 5.8 (macOS 12) and 5.9 (macOS 14) `/bin/zsh` match the Linux builds for `emulate`, `zsh -fn` and `nomatch`? Needs a macOS host.
 - **zsh 5.10:** re-run `errexit.zsh` and the `! f` probes on the 5.10 release (ZSH-07 cites the draft).
 - **fish 4.1 to 4.6:** which release fixed `||` after a missing command (between 4.0.2 and 4.7.0) and introduced `{ }`, `|&`, `string pad -C`? Only 3.6.0, 4.0.2, 4.7.0 and 4.9.3 were run.
-- **nu 0.117 and later:** does `nu-gate.nu` still parse `--ide-ast` JSON and the `removed` command category? Only 14 pinned binaries to 0.116.1 were run.
+- **nu 0.117 and later:** `nu-gate.nu --strict` and the hang check were re-run on 0.117.0 on 2026-11-27 and hold. The `nu-floor` and `nu-denylist` cells, the SH-EMIT-46 `env_change.PWD` probe and `where` with a closure on the 0.105.1 floor were not re-run on 0.117.0. Run `nu-floor` before adding the 0.117.0-born names (`record where`, `record each`, `find --only-matching`, `uniq --keep-last`, `join --anti`, `from dotenv`, `to dotenv`) to SH-NU-05. Releases after 0.117.0 are unmeasured.
 - **nu tail-position `try` hang:** no upstream issue found by 3 `gh search` queries; file one with the `hang-run.sh` reproducer?
 - **nu, elvish and fish on Windows:** `rc.elv` path, `$nu.data-dir`, fish are Linux-only here; run via the host (`cmd.exe`, not CI) before claiming Windows behaviour.
+
+## Revision log
+
+- 2026-11-27: SH-NU-04 gains `filter` (removed in 0.117.0), `type` as a command name (parser keyword from 0.117.0) and `get -i` as an error from 0.117.0, with a scope line and the 0.117.0 gate measurement. Decision: [refresh-2026-11/shell-quality.md](refresh-2026-11/shell-quality.md).
+- 2026-11-27: SH-NU-11 records that the hang does not reproduce on 0.117.0 (red on 0.112.1 and 0.116.1, green on 0.117.0) and stays MUST. Decision: [refresh-2026-11/shell-quality.md](refresh-2026-11/shell-quality.md).
+- 2026-11-27: the shipped `nu-gate.nu` heading and "runs on" comment move to 0.117.0 (the gate ran clean on itself on 0.117.0), matching the decision's `checks/nu-gate.nu` edit; the Verdict (item 7) and the "nu 0.117 and later" open question record what the delta settled. Decision: [refresh-2026-11/shell-quality.md](refresh-2026-11/shell-quality.md).
 
 ## Sub-artifacts
 

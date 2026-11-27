@@ -6,7 +6,7 @@ summary: The PS-ERR family. Native exit codes under ErrorActionPreference, the n
 # PowerShell Error Model
 
 Rows bind to Windows PowerShell 5.1.26100.9444, pwsh 7.4.7 and 7.6.6 on Linux and Windows, and PSScriptAnalyzer 1.25.0
-(measured 2026-10-11). pwsh 7.4 reaches end of support on 2026-11-10 and is a transitional column until then. The git-fed
+(measured 2026-10-11). pwsh 7.4 reached end of support on 2026-11-10, so its results are a measurement record and no longer a target. The git-fed
 cells run on GNU grep and busybox 1.37 with git, and macOS or BSD is `unverified: read only`.
 
 Owns what a script does when a command fails: the exit status of natives, what `Stop` does and does not stop, the 5.1

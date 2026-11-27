@@ -7,7 +7,7 @@ consolidates:
   - shell-security/injection-and-secrets.md
   - shell-security/argv-through-variables-and-credentials.md
 date: 2026-10-11
-revised: 2026-10-11
+revised: 2026-11-27
 ---
 
 # Security beyond quoting (SH-SEC)
@@ -194,7 +194,7 @@ chk s14-cargo-registry-token-with-registry-listing
 - *Why.* sudo-rs 0.2.8 (Ubuntu 25.10) and 0.2.13 (26.04) answer bare `-E`/`--preserve-env` with `warning: preserving the entire environment is not supported, '-E' is ignored`, exit 0, and run the command without the variable; `--preserve-env=VAR`, `-n`, `-S` and `--` behave as in sudo 1.9.15p5, but the denial text differs (`a password is required` against `interactive authentication is required`) [is §11]. `BASH_ENV` is dropped by both with and without `-E`. The sudo-rs README states the omission; the exit status makes it silent.
 - *Verify.* `s06-sudo`: any hit is a violation. Runtime `FX/sudo-flags.sh` in a container per sudo.
 - *Watched red.* The grep: yes (plant 3 lines including `sudo -nE`, twin 0). The sudo behaviour is a measurement, not a plant/twin.
-- *Scope.* INST, TOOL, CI on Linux. Whether a stock Ubuntu 25.10 or later makes sudo-rs the default `sudo` is unverified here (installing it made `/usr/bin/sudo` resolve to it through `update-alternatives` in the container).
+- *Scope.* INST, TOOL, CI on Linux. Ubuntu 25.10 made sudo-rs the default `sudo` (Ubuntu announcement of 2025-09-02, with classic sudo kept as `sudo.ws`), and 26.04 ships sudo-rs 0.2.13, the version measured here, so the dropped `-E` is the default behaviour on those images (installing it in a container also made `/usr/bin/sudo` resolve to it through `update-alternatives`).
 
 **SH-SEC-07 · MUST.** A lock is `mkdir`, `set -C` (noclobber) or `ln`, never `[ -e lock ] || touch lock`. Do not break a stale lock automatically: print the holder (`lock/pid`) and exit 75. Use `flock` only after `command -v flock` (SH-USER-06); a backgrounded child that inherits the lock descriptor keeps it held after the parent exits.
 - *Why.* 30 contenders released by a barrier, 5 rounds: test-then-create gave 8 to 30 winners per round on every shell; `mkdir`, `noclobber` and `ln` gave exactly one on 10 of 11 (posh 0.14.1 corrupts its own arguments under 30 concurrent busy-wait subshells and passes at N=6); stale takeover by `rmdir`+`mkdir` or `mv`-aside gave 1 to 7 winners on dash, ash 1.37 and bash 5.3 [is §9; BashFAQ/045]. `flock -n 9` held after the parent exited when a child inherited fd 9 (util-linux 2.39.3 and 2.41, busybox 1.37); Amazon Linux 2023 has no `flock`; macOS none (read only). Exit 75 is TempFail in `rules/rust-quality/cli-contract.md:37-41`.
@@ -479,3 +479,7 @@ Subareas needing another round:
 25. https://docs.docker.com/reference/cli/docker/login/ (`--password-stdin`)
 26. https://docs.docker.com/build/building/secrets/ (`--secret id=,env=`)
 27. https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions (`${{ secrets.X }}` expansion)
+
+2026-11-27, delta refresh (decision: `refresh-2026-11/shell-quality.md`).
+
+- **SH-SEC-06, scope bullet only.** The sentence "unverified here" about sudo-rs as the default `sudo` is replaced by Ubuntu's announcement that 25.10 made it the default, and by sudo-rs 0.2.13 in 26.04. Rule text, cells and measurements are unchanged. Sources: https://discourse.ubuntu.com/t/sudo-rs-is-now-default-for-questing-quokka/66497 , https://packages.ubuntu.com/search?keywords=sudo-rs&searchon=names&suite=resolute&section=all

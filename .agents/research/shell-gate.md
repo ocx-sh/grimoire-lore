@@ -7,7 +7,7 @@ consolidates:
   - shell-gate/lint-format-profile.md
   - shell-gate/verify-dialect.md
 date: 2026-10-11
-revised: 2026-10-11
+revised: 2026-11-27
 ---
 
 # The gate of record (SH-GATE)
@@ -345,7 +345,7 @@ Known limits of the script, not rules: a file name with a newline breaks the fam
 | POSIX sh, cheap independent parse | `dash -n FILE` | 2 / 0 |
 | zsh (5.0.8, 5.9) | `zsh -fn FILE` | 1 / 0 |
 | fish (3.6.0, 4.0.2, 4.7.0, 4.9.3) | `fish --no-execute FILE`; any non-zero is a failure | 127 / 0 |
-| nushell (0.105.1, 0.116.0) | `GATE_FILE=FILE nu --no-config-file -c 'if not (nu-check $env.GATE_FILE) { exit 1 }'` | 1 / 0 |
+| nushell (0.105.1, 0.116.0, 0.117.0) | `GATE_FILE=FILE nu --no-config-file -c 'if not (nu-check $env.GATE_FILE) { exit 1 }'` | 1 / 0 |
 | elvish (0.21.0) | `elvish -compileonly FILE` | 2 / 0 |
 | PowerShell | owned by the powershell-quality gate (PS-GATE): `Parser::ParseFile` with the `$e.Count` test, ParseError in the severity list, a real 5.1 host parse | 1 / 0 on 7.6.6 here |
 
@@ -368,7 +368,7 @@ Known limits of the script, not rules: a file name with a newline breaks the fam
 - *Scope.* The program's repos. An adopter that states another style in its own `.editorconfig` is compliant. Pin shfmt 3.13.1 or newer from the toolchain (the `-d` exit code is 1 on every version tested; `-l` exits 0 on 3.12.0 and earlier).
 
 **SH-GATE-13 · MUST.** Pin ShellCheck and shfmt the same way on laptops and CI: an exact version, or a floating tag only with a committed lockfile (`ocx.lock`). Do not install either with apt, apk, brew or webi, or take it from the runner image. shfmt is 3.13.0 or newer when the repo has `.zsh` files.
-- *Why.* Findings differ by version (SC2329 exists only from 0.11.0, SC3013 only until 0.10.0, SC2002 default-on only until 0.10.0); ubuntu-24.04 ships ShellCheck 0.9.0 and shfmt 3.8.0, ubuntu-26.04 ships 0.11.0 and 3.12.0, and `ubuntu-latest` moves between 2026-10-19 and 2026-11-19 (map). bats-core pins shfmt 3.5.1 and 3.13.1 would reformat 48 of its files.
+- *Why.* Findings differ by version (SC2329 exists only from 0.11.0, SC3013 only until 0.10.0, SC2002 default-on only until 0.10.0); ubuntu-24.04 ships ShellCheck 0.9.0 and shfmt 3.8.0, ubuntu-26.04 ships 0.11.0 and 3.12.0, and `ubuntu-latest` has been 26.04 since 2026-11-24 (runner-images PR 15381; ubuntu-24.04 stays available by its explicit label). bats-core pins shfmt 3.5.1 and 3.13.1 would reformat 48 of its files.
 - *Verify.*
   ```sh
   git ls-files -z --cached --others --exclude-standard -- ':(glob)**/ocx.toml' | xargs -0 -r -n 1 sh -c '[ -f "$(dirname "$1")/ocx.lock" ] || grep -H -n -E -e "(shellcheck|shfmt)[^[:space:]]*:(latest|[0-9]+)[^0-9.]" -- "$1"' sh
@@ -866,3 +866,8 @@ Ranked by how often the failure appears in the measured fleet and corpus; each h
 - Conflicts C16 to C24 added, four of them (C17, C18, C22, C24) corrections to this document's own first revision.
 - Open questions: subarea 1 narrowed to the two unrun hosts (Git Bash 5.2.15 answered); G9 (sibling-set `--include` and `rg` lines) and G10 (unrun hosts) added; nothing else answered.
 - Dive ID map extended with 21 to 34 and the retired 27 and 32; Applied tables, New commitments (7 to 9), AI-agent failure modes (17 to 23), Verification runs of the revision, Sub-artifacts and Key sources (15 to 25) extended.
+
+2026-11-27, delta refresh (decision file `refresh-2026-11/shell-quality.md`). No SH-GATE rule changes, and no ID is added or moved.
+
+- SH-GATE-13 rationale: the expired "`ubuntu-latest` moves between 2026-10-19 and 2026-11-19" is now "has been 26.04 since 2026-11-24", per the decision's Verdict item 1 and SH-CI-15 (`refresh-2026-11/shell-quality.md`).
+- Parse-gate table, nushell row: 0.117.0 added to the measured versions, because the decision re-ran the nu gate on 0.117.0 (Verdict item 5, `refresh-2026-11/shell-quality.md`). The 0.116.0 measurement stays.

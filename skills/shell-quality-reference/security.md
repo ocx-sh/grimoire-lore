@@ -85,7 +85,7 @@ files | xargs -0 -r grep -H -n -E -e '\[ -[ef] [^]]*(lock|[.]pid)[^]]*\][[:space
 - Scope SH-SEC-02: INST, TOOL, CI, GATE. Linux and same-user Windows (WinPS 5.1, `Get-CimInstance Win32_Process`) measured, macOS `unverified: read only`. `/proc/PID/environ` is mode 0400 (same uid and root), which is why the environment ranks last. The wget and `gh auth login --with-token` stdin forms were read, not run.
 - Scope SH-SEC-04: all kinds. The cwd-search claim was run on the interpreters named. `command -p` as a fix was run on bash only.
 - Scope SH-SEC-05: INST, TOOL, CI, LIB, sh and bash on Linux. `. .env` falls back to the cwd on exactly busybox ash 1.37, yash 2.52 and `bash 3.2 --posix`.
-- Scope SH-SEC-06: INST, TOOL, CI on Linux. Whether a stock Ubuntu 25.10 or later makes sudo-rs the default `sudo` is unverified here. The behaviour is a measurement, not a plant and twin.
+- Scope SH-SEC-06: INST, TOOL, CI on Linux. Ubuntu 25.10 made sudo-rs the default `sudo` (Ubuntu announcement of 2025-09-02, with classic sudo kept as `sudo.ws`), and 26.04 ships sudo-rs 0.2.13, the version measured here, so the dropped `-E` is the default behaviour on those images. The behaviour is a measurement, not a plant and twin.
 - Scope SH-SEC-07: any script that claims mutual exclusion, sh and bash, local filesystems (NFS not measured). Amazon Linux 2023 has no `flock`. macOS none (unverified: read only).
 - Scope SH-SEC-13: INST, TOOL, CI, git 2.43.0 to 2.54.0 on Linux. Windows Git Credential Manager and macOS Keychain helpers are `unverified: read only`.
 - Scope SH-SEC-14: TOOL, CI, cargo 1.93.1 to 1.99.0. Credential providers (`cargo:libsecret`, `cargo:macos-keychain`) were not run.

@@ -7,7 +7,7 @@ summary: The SH-GATE family. The ShellCheck and shfmt profile, suppression polic
 
 Rows bind to ShellCheck 0.9.0 to 0.11.0, shfmt 3.12.0 to 3.14.1 (3.13.0 or newer for `.zsh`), bash 3.2.57 to 5.3, GNU grep 3.11 and 3.12,
 BusyBox 1.37.0, uutils coreutils 0.10.0 and Git Bash 5.2.15 (measured 2026-10-11). macOS and BSD are `unverified: read only` on every cell.
-Until 2026-11-19 `ubuntu-latest` may still resolve to 24.04 (ShellCheck 0.9.0, shfmt 3.8.0), then to 26.04 (0.11.0, 3.12.0).
+`ubuntu-latest` has resolved to 26.04 (ShellCheck 0.11.0, shfmt 3.12.0) since 2026-11-24, and `ubuntu-24.04` keeps ShellCheck 0.9.0 and shfmt 3.8.0. The shfmt figures are from 2026-10-11, because the runner READMEs do not list shfmt.
 
 Owns the lint and format profile files, the suppression policy, `checks/shell-gate.sh` and its exit map, file discovery, the parse-only check of
 each shell family, tool pins, line endings, BOM, ASCII and file modes, actionlint for workflow shell, and the dialect of every verification
@@ -179,7 +179,7 @@ files() { git ls-files -z --cached --others --exclude-standard | xargs -0 -r sh 
 | POSIX sh, cheap second parse | `dash -n FILE` | 2 / 0 |
 | zsh, from 5.3.1 (also SH-ZSH-12) | `zsh -fn FILE`, never `zsh -n` on 5.0.8 | 1 / 0 |
 | fish 3.6.0 to 4.9.3 (also SH-FISH-01) | `fish --no-execute FILE`, any non-zero is a failure | 127 / 0 |
-| nu 0.105.1 to 0.116.0 (also SH-NU-02) | the `nu-check` wrapper in the gate script, strict form `nu-gate.nu --strict` | 1 / 0 |
+| nu 0.105.1 to 0.117.0 (also SH-NU-02) | the `nu-check` wrapper in the gate script, strict form `nu-gate.nu --strict` | 1 / 0 |
 | elvish 0.21.0 (also SH-ELV-02) | `elvish -compileonly FILE` as the floor, `elv-gate.sh` for the strict form | 2 / 0 |
 | PowerShell | `PS-GATE`: `Parser::ParseFile` plus a real 5.1 host parse | 1 / 0 |
 
