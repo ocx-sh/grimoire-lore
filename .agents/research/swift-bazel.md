@@ -6,6 +6,7 @@ id_family: BZL-SWIFT
 consolidates:
   - swift-bazel/rules-swift.md
 date: 2026-10-10
+revised: 2026-11-27
 ---
 
 # Bazel for Swift (BZL-SWIFT), consolidated
@@ -19,7 +20,7 @@ There is exactly one sub-artifact, so "where the sources disagreed" means the di
 ## Verdict
 
 1. **The file binds only if the repository already declares `bazel_dep(name = "rules_swift", ...)`** (BZL-SWIFT-01). Bazel is secondary for Swift: 5 of 40 exemplars carry Bazel files and only rules_swift builds with it as the main system [pkg axis 6]. An agent never adds `MODULE.bazel` or `BUILD.bazel` to a SwiftPM repository; SwiftPM and `Package.swift` stay the source of truth. Binds every code kind.
-2. **Bazel 8.x or 9.x, bzlmod only, `rules_swift` 4.x declared in the root** (BZL-SWIFT-02). A root that declares only `rules_swift_package_manager` silently resolves `rules_swift@3.6.0`, the last Bazel-7 line [CN R8]. Bazel 10 is unverified.
+2. **Bazel 8.x or 9.x, bzlmod only, `rules_swift` 4.x declared in the root** (BZL-SWIFT-02). A root that declares only `rules_swift_package_manager` 1.25.0 or older silently resolves `rules_swift@3.6.0`, the last Bazel-7 line [CN R8]; 1.26.0 (2026-11-19) declares rules_swift 4.2.1, but the root declaration still decides the pin. Bazel 10 is unverified.
 3. **One toolchain source per repository.** A host toolchain needs `common:linux --repo_env=CC=clang` in the checked-in rc (MUST, 04); CI and release builds SHOULD use the hermetic exec toolchain pinned by `.swift-version` (05). A shell-level `CC=clang` is what SwiftLint and swift-syntax do on Linux and what the rule rejects [CN R2].
 4. **Gate and feature promotions are scoped to first-party packages, not the workspace.** Decision against the dive (which put the gate in `build:ci --features=`): `package(features = SWIFT_FIRST_PARTY_FEATURES)` in each first-party BUILD file, the list defined once in a `.bzl` (07-11). Reason, measured: SwiftPM suppresses dependency warnings and its guards are root-only (SW-PKG-02 in [SP]), but rules_swift does not, so a workspace-wide `swift.treat_warnings_as_errors`, `swift.upcoming.InternalImportsByDefault` or `swift.werror.StrictLanguageFeatures` failed the build on a third-party rspm package (exit 1 on all three) while the package-scoped form built it and still failed the first-party plant [CN R4]. A repository with no external Swift code may keep the rc-level form. Binds library, SDK, CLI, server.
 5. **Feature spellings are the trap, and several fail green.** The Swift gate is `swift.treat_warnings_as_errors`; the unprefixed `treat_warnings_as_errors` is the C++ feature and left a planted Swift warning at exit 0 (MUST, 07). Swift 6 mode is `swift.enable_v6`; without it rules_swift passes `-swift-version 5`, and an invented name (`swift.enable_swift6`) stays in mode 5 and builds green (MUST, 08). Upcoming features are `swift.upcoming.<Name>`, never one joined `copts` string (MUST for the SW-PKG-07 three, 09).
@@ -55,7 +56,7 @@ Commands marked `P`, `B`, `L`, `K`, `H`, `W`, `E`, `U`, `I`, `D` are the exact s
 - Floor: none. Binds: every kind.
 
 **BZL-SWIFT-02 (MUST).** Configure rules_swift through `MODULE.bazel` only, on Bazel 8.x or 9.x: declare `bazel_dep(name = "rules_swift", version = "4.x")` in the root module even when `rules_swift_package_manager` is declared, keep no `WORKSPACE*` file that mentions `rules_swift`, and use no `rules_spm`.
-- Why: 4.2.1 is bzlmod-only (`bazel_compatibility = [">=8.0.0"]`, `rules_swift@50450ed24dde:MODULE.bazel:3-8`) and ships no `repositories.bzl`; a root that omits the dependency resolves rspm's `rules_swift@3.6.0`, the Bazel-7 line, with no error.
+- Why: 4.2.1 is bzlmod-only (`bazel_compatibility = [">=8.0.0"]`, `rules_swift@50450ed24dde:MODULE.bazel:3-8`) and ships no `repositories.bzl`; a root that omits the dependency resolves rspm 1.25.0's or older `rules_swift@3.6.0`, the Bazel-7 line, with no error; rspm 1.26.0 (2026-11-19) declares rules_swift 4.2.1, but the root declaration still decides the pin.
 - Check: `B1` `grep -rn -e '^[67]\.' --include='.bazelversion' .`; `B2` `grep -rn --include='WORKSPACE' --include='WORKSPACE.bazel' --include='WORKSPACE.bzlmod' -e 'rules_swift' .`; `B3` `grep -rn --include='MODULE.bazel' --include='BUILD.bazel' --include='BUILD' --include='*.bzl' -e 'rules_spm' .`; and `bazel mod graph --depth=1 | grep -e 'rules_swift@4\.'` (empty output means the root does not declare 4.x).
 - Red: yes. [CN R1] B1 `./.bazelversion:1:7.7.1`, B2 `./WORKSPACE:1:http_archive(name = "build_bazel_rules_swift", ...)`, B3 a `rules_spm` hit, each empty on the compliant trees; [CN R8] `mod graph` check hit with the root dependency, empty without it; [RS V19] a WORKSPACE-era load exit 1.
 - Floor: Bazel 8.0. Bazel 10 is `unverified`; a Bazel-7 repository can stay on `rules_swift` 3.6.1 only until Bazel 7 ends (Dec 2026, [RS Sources], bazel.build/release).
@@ -73,7 +74,7 @@ Commands marked `P`, `B`, `L`, `K`, `H`, `W`, `E`, `U`, `I`, `D` are the exact s
 - Binds: Linux CI and developer machines; macOS needs no `CC`. Exemplar split in Applied.
 
 **BZL-SWIFT-05 (SHOULD, for CI and release builds).** Use the hermetic toolchain in the root module: `swift.toolchain(name = "swift_toolchain", swift_version_file = "//:.swift-version")`, `use_repo` of `swift_toolchain` and one `swift_toolchain_<platform>` per build platform named in the bundled metadata of that version, and `register_toolchains` of both `@swift_toolchain//:cc_toolchain_exec_<platform>` and `@swift_toolchain//:swift_toolchain_exec_<platform>`; never only the `*_embedded_*` pair from `doc/standalone_toolchain.md`; prefer the version file to an inline `swift_version = "..."` so swiftly, CI and Bazel read one string (22).
-- Why: one pinned compiler on every machine, no `CC`, no `--action_env=PATH`; embedded-only or unregistered setups fail `target 'linux-toolchain' not declared`; a version outside the bundled list (4.2.1: 6.2.1 to 6.4.0) fails at extension evaluation (`6.4.1` exit 1).
+- Why: one pinned compiler on every machine, no `CC`, no `--action_env=PATH`; embedded-only or unregistered setups fail `target 'linux-toolchain' not declared`; a version outside the bundled list (4.2.1: 6.2.1 to 6.4.0; 4.3.0 adds 6.4.1 and 6.4.2) fails at extension evaluation (`6.4.1` on 4.2.1, exit 1).
 - Check: `H1` `grep -rn --include='MODULE.bazel' -e 'swift_version = ' .` (a hit is an inline version; allowed only when the CI image tag is the same string, rule 22); `H2` `grep -rl --include='MODULE.bazel' -e 'swift.toolchain(' . | xargs -r grep -L -e 'swift_toolchain_exec_'` (a listed file declares the toolchain without the exec registration; `xargs` exits 123 when it lists one).
 - Red: yes. [RS V17] embedded-only exit 1, unregistered exit 1, exec pair exit 0 on 8.8.0 and 9.2.0; [CN R1] H1 fires on `hermetic_bad` only, H2 prints `./MODULE.bazel` (exit 123) on `hermetic_bad` only; [CN R2] on the exemplars H1 fires on rules_swift itself (`MODULE.bazel:259`) and H2 is empty everywhere.
 - Caveat the docs omit: a bare Ubuntu 24.04 needs `libxml2`, `libncurses6`, `libsqlite3-0` before the toolchain runs [RS V17]. The extension is root-module only (`dev_dependency = True` for a library that needs it only for its own tests, as rules_swift does at `MODULE.bazel:256`). Binds CI and release; local development may stay on 04's host form on one pinned image.
@@ -295,3 +296,8 @@ All under `~/.cache/research-lang/swift-tools/fixtures/swift-bazel/`; logs in `l
 | R9 | `run.sh 8.8.0 feat -- query "attr(module_name, '^$', kind(swift_library, //...))"`; `attr(alwayslink, 0, ...)`; `run.sh 8.8.0 res -- query "attr(discover_tests, 0, kind(swift_test, //...))"` | `//:unset-name`; `//:no_always`; `//:nodiscover`; control on `//:Base` 0 lines |
 
 Re-read, not run: `swift_release_metadata.json` platform keys for 6.4.0; the rules_swift line citations in Applied (`.bazelrc:27,31,47,54`, `MODULE.bazel:3-8,255-260`, `swift_binary.bzl:69-90`, `features.bzl:343-382`, `compile_config.bzl:1385-1400`, `swift_toolchain.bzl:694`).
+
+## Revision log
+
+- 2026-11-27: BZL-SWIFT-02 (and Verdict point 2): the `rules_swift@3.6.0` resolution is bounded to rules_swift_package_manager 1.25.0 and older; 1.26.0 declares rules_swift 4.2.1 and the root declaration still decides the pin. Decision: refresh-2026-11/bazel-quality.md (edits 46 and 48).
+- 2026-11-27: BZL-SWIFT-05: rules_swift 4.3.0 adds Swift 6.4.1 and 6.4.2, and the `6.4.1` failure is scoped to 4.2.1. Decision: refresh-2026-11/bazel-quality.md (edit 47).

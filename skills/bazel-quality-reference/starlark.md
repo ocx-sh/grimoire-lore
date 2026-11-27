@@ -28,7 +28,7 @@ Contents: [The Gate](#the-gate) ·
 Severity maps onto the house tiers: MUST = Block, SHOULD = Warn. Every
 version-bound claim below was measured 2026-09-06 against Bazel 8.7.0, 8.8.0 and
 9.2.0 on Linux, and binds `buildifier_prebuilt` 8.2.0.2 through
-[8.5.1.4](https://github.com/keith/buildifier-prebuilt/releases) (latest),
+[8.5.1.4](https://github.com/keith/buildifier-prebuilt/releases) (latest on that date; 10.2.0 on 2026-11-27, read from release notes and source only),
 buildifier 8.2.0 and bazel_skylib 1.9.0; the Bazel-9 `load()` fixes are
 rules_python 2.3.3, rules_shell 0.8.0, rules_cc 0.2.22 and protobuf 36.1.bcr.1.
 9.2.0 is Active LTS and 8.8.0 is Maintenance, so a repository still pinned at 8.x
@@ -57,7 +57,7 @@ violation planted is the finding.
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
 | BZL-LARK-01 | Invoke the lint gate as a `buildifier()` target run through `bazel run` and propagate its exit status — never behind `\|\| true`, `continue-on-error` or a stdout scrape, and **never as `buildifier_test`**. | `mode = "diff"` with `lint_mode = "warn"` already exits nonzero on a pure lint finding with no diff to print, so an attribute name is no evidence a gate is soft. `buildifier_test` is worse than soft: its runner template's `${WORKSPACE+x}` test asks whether the variable is *set*, not whether it is non-empty, so `find -type f` walks a symlink-only runfiles tree, buildifier receives zero file arguments, and it reads empty stdin as valid Starlark. It passes with a deliberately broken `srcs`, measured identically on 8.7.0 and 9.2.0. | The section drill. Nonzero exit with EMPTY stdout still reads **pass for the gate**. A green run with the violation planted reads **finding**, and is the tell for a `buildifier_test`. | MUST |
-| BZL-LARK-31 | Gate the lint target on its exit status being nonzero, never on a literal number, and pin `buildifier_prebuilt` at 8.5.1.3 or later — 8.5.1.4 preferred. **pinned** | Two defects live in `runner.bash.template`, not in buildifier and not in Bazel, and both are properties of the pin. `${WORKSPACE+x}` is what makes `buildifier_test` false-pass, fixed at **8.5.1.3**. `find … -print \| xargs` remaps any invoked command's 1-125 exit to **123**, so a check for buildifier's documented 4 goes green on every finding; retired at **8.5.1.4**, where `find … -exec … {} +` lets the native 4 through. Below the floor the `test` form checks nothing; above it a `-eq 123` comparison passes everything. | `grep -n -e 'buildifier_prebuilt' -- MODULE.bazel` — a version below 8.5.1.3 is the finding; EMPTY output reads **rule does not apply** (not a consumer), never pass. Then `TARGET=path/to/target; grep -n -e 'WORKSPACE+x' -e 'xargs' -- "bazel-bin/${TARGET}.bash"` on the generated runner: a hit means that defect is live, EMPTY means both are gone. Then grep CI and task files for `123` or `-eq 4` compared against this gate; any hit is the finding. | MUST |
+| BZL-LARK-31 | Gate the lint target on its exit status being nonzero, never on a literal number, and pin `buildifier_prebuilt` at 8.5.1.3 or later — the newest release preferred (10.2.0 on 2026-11-27, whose runner template still carries both fixes by source read). **pinned** | Two defects live in `runner.bash.template`, not in buildifier and not in Bazel, and both are properties of the pin. `${WORKSPACE+x}` is what makes `buildifier_test` false-pass, fixed at **8.5.1.3**. `find … -print \| xargs` remaps any invoked command's 1-125 exit to **123**, so a check for buildifier's documented 4 goes green on every finding; retired at **8.5.1.4**, where `find … -exec … {} +` lets the native 4 through. Below the floor the `test` form checks nothing; above it a `-eq 123` comparison passes everything. | `grep -n -e 'buildifier_prebuilt' -- MODULE.bazel` — a version below 8.5.1.3 is the finding; EMPTY output reads **rule does not apply** (not a consumer), never pass. Then `TARGET=path/to/target; grep -n -e 'WORKSPACE+x' -e 'xargs' -- "bazel-bin/${TARGET}.bash"` on the generated runner: a hit means that defect is live, EMPTY means both are gone. Then grep CI and task files for `123` or `-eq 4` compared against this gate; any hit is the finding. | MUST |
 | BZL-LARK-29 | Never treat `.bazelignore` as a lint or format exclusion, and never report a tree as unlinted because it is listed there; exclude a tree with the lint target's own `exclude_patterns`. | The runner `cd`s to `$BUILD_WORKSPACE_DIRECTORY` and runs a plain shell `find .`; `.bazelignore` prunes Bazel's package graph and has no bearing on a `find`. Measured: a violation planted in a `.bazelignore`d tree and one planted in an in-graph `.bzl` produce the same nonzero exit, with nothing distinguishing them. Two failures follow — shipping lint debt into a tree believed unchecked, or "excluding" a tree by editing a file the gate never reads. | Plant one unused `load` inside a `.bazelignore`d tree and run the gate. Nonzero reads **the tree is in scope**; EMPTY output with exit 0 reads **the runner does not reach that tree** — confirm why before relying on it. Read the generated runner under `bazel-bin` for the `exclude_patterns` → `\! -path` expansion that decides reach. | MUST |
 | BZL-LARK-04 | Every `# buildifier: disable=<category>` names a category that still exists in `warn.go` and carries a one-line reason on the same or the preceding line; never write `load-on-top`, `out-of-order-load`, `same-origin-load` or `attr-package-metadata`. | Those four are gone from all three warning maps — the first three are unconditional formatter rewrites now — so the suppression is inert cruft that reads as protection and survives review forever. | see block BZL-LARK-04, then check each category against the four dead names and against `warn.go`'s three warning maps, which are ground truth where the rendered `WARNINGS.md` table drifts. EMPTY output reads **pass**. | MUST |
 
@@ -70,9 +70,17 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.bzl' ':(glo
 
 Every row here is a default-set buildifier category the same
 `bazel run //:buildifier.check; echo $?` already reports, and a default-set
-warning is a build-breaking finding rather than advice: 99 categories exist, 98
-are on by default, exactly one (`unsorted-dict-items`) is off. These five are
-promoted out of the 98 because each names a distinct failure an agent repeats.
+warning is a build-breaking finding rather than advice: at buildifier 8.2.0
+through 8.5.1, 99 categories exist, 98 are on by default, and exactly one
+(`unsorted-dict-items`) is off. buildtools 10.0.1 and later (now
+`bazel-contrib/buildtools`) drop `canonical-repository` and `external-path` and
+add `make-location`, on by default, so 10.2.0 counts 98 and 97. After a bump past
+10.0, every `$(location)` or `$(locations)` in a BUILD file (and from 10.2.0 in a
+`.bzl` file) fails the gate until it becomes `$(execpath)` or `$(rootpath)`;
+find them first with
+`grep -rn -E '\$\(locations? ' --include=BUILD --include=BUILD.bazel --include='*.bzl' .`.
+These five are promoted out of the default set because each names a distinct
+failure an agent repeats.
 Buildifier parses and lints; it never evaluates Starlark, so a clean run is
 evidence about format, style and the structural lints only.
 
@@ -212,7 +220,7 @@ search, or the pinned binary's own help output.
 ## Gaps
 
 - Every measurement ran on Linux with `linux-sandbox`. The mechanisms here are shell-, parser- and Go-source-level rather than kernel-level, but no row is confirmed on darwin or Windows.
-- `buildifier_prebuilt` 8.2.0.2 → 8.5.1.4: only the two template fixes named in BZL-LARK-31 are audited across those nine releases. `exclude_patterns` expansion, `lint_warnings` handling and the runfiles layout are unaudited across that span.
+- `buildifier_prebuilt` 8.2.0.2 → 8.5.1.4: only the two template fixes named in BZL-LARK-31 are audited across those nine releases. `exclude_patterns` expansion, `lint_warnings` handling and the runfiles layout are unaudited across that span. 10.0.1, 10.1.0 and 10.2.0 are audited for those two fixes by source read only, and the 10.2.0 notes name changed `exclude_patterns` handling (excluded directories pruned, a Windows fix) and new SARIF output.
 - One BUILD-level generated shape — a rule call with a nonexistent keyword argument — is expected to fail at package construction by the same mechanism as a bad builtin argument. Expected, not measured.
 - The class BZL-LARK-25 alone covers — a render that compiles, initialises and analyses cleanly and is wrong only when the target is built — has no fixture, so how much a real consumer build adds over `bazel build --nobuild` is reasoned rather than measured.
 - Nothing measures what converting an existing legacy-macro estate costs, or when the visibility and typing wins pay for the port.
