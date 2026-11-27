@@ -49,7 +49,9 @@ the natural `@NullMarked` carrier and it ends `JAVA-API-15`.
 One gate covers all four rows. It is japicmp, **pinned**: revapi is the
 better-designed tool and had 0 adopters in the 32-repository corpus as of
 2026-09-12, so the choice rests on measured practice and is flagged for
-re-taking, not for inheriting.
+re-taking, not for inheriting. For whoever re-takes it: the revapi project has
+had no commit since 2025-11-08, and the maintained Gradle plugin is
+palantir/gradle-revapi (2.5.0, 2026-10-27).
 
 ```bash
 ./gradlew :sdk:check                # japicmp runs here, not only on a release branch
@@ -60,12 +62,17 @@ mvn verify                          # Maven: japicmp-maven-plugin bound to an <e
 `oldVersion` is the last coordinate actually published to the registry, not the
 previous tag. Read the report, not only the exit status: japicmp classifies two
 of the breaks below as binary-compatible and will not fail the build on them.
+Run japicmp 0.27.0 (2026-11-04) or newer: earlier releases report no added type
+bound on a generic, no new superinterface of an interface and no changed
+`native` modifier. The `me.champeau.gradle.japicmp` plugin (0.4.6, the newest on
+2026-11-27) does not state which japicmp it bundles, so set the japicmp version
+explicitly.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
 | JAVA-API-01 | Never change a published method's parameter type or return type in place. Add an overload and leave the original signature untouched. | Widening a parameter and narrowing a return type both recompile cleanly, and both are a delete-plus-add at the bytecode level (JLS SE 25 §13.4.14 and §13.4.15). Un-recompiled callers get `NoSuchMethodError`. | The gate, with `oldVersion` set as above. Any binary-incompatible entry that is not in the allowlist fails the build, and an empty finding list is the pass. | MUST |
 | JAVA-API-02 | Bind the japicmp task to `check` or `verify`, make every publish task depend on it, and keep accepted breaks in a version-controlled allowlist carrying a reason string per entry. Never a bare skip flag and never `ignoreMissingClasses`. **Pinned.** | A published coordinate is immutable, so the only remedy after upload is a new version number, which is exactly the cost the gate exists to make deliberate. A gate that runs only on a release branch reports the break after the decision that caused it has shipped. | The `--dry-run` line above lists the japicmp task ahead of every upload task, and its absence there is the finding. Then see block JAVA-API-02 (the second pattern matches the Maven `<skip>true</skip>` element): any hit with no accompanying allowlist file is the finding, and empty output is the pass. | MUST |
-| JAVA-API-03 | A published interface never gains an abstract method without a `default` body. Where the implementation set must stay closed, seal the interface instead. | Linkage survives (JLS SE 25 §13.5.3), but invoking the new method on a pre-existing implementation throws `AbstractMethodError`, and every direct implementer fails to compile. A compatibility table that calls this change binary-compatible is right about linkage and misleading about consequence. | The gate reports the added interface method, classified binary-compatible, so read the report rather than the exit status. In the diff, every member added to a `public interface` carries `default` or the interface is `sealed`. An empty report section is the pass. | MUST |
+| JAVA-API-03 | A published interface never gains an abstract method without a `default` body. Where the implementation set must stay closed, seal the interface instead. | Linkage survives (JLS SE 25 §13.5.4, Interface Members), but invoking the new method on a pre-existing implementation throws `AbstractMethodError`, and every direct implementer fails to compile. A compatibility table that calls this change binary-compatible is right about linkage and misleading about consequence. | The gate reports the added interface method, classified binary-compatible, so read the report rather than the exit status. In the diff, every member added to a `public interface` carries `default` or the interface is `sealed`. An empty report section is the pass. | MUST |
 | JAVA-API-04 | Never change the value of a published `public static final` constant. | Callers keep the old inlined value until they are recompiled (JLS SE 25 §13.4.9). No `LinkageError`, no diagnostic, a silently wrong answer. It is the most dangerous row in this table because nothing signals it. | The gate lists the field change and classifies it binary-compatible. Treat any entry in that section as a break, and an empty section as the pass. | SHOULD |
 
 ```sh

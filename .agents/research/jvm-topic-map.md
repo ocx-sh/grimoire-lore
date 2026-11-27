@@ -6,6 +6,7 @@ date: 2026-09-05
 wave: "1 consolidated → 2 commissioned, 3 staged"
 sources_surveyed: 13
 candidates_deduplicated: 247
+revised: 2026-11-27
 ---
 
 # JVM topic map (phase 3)
@@ -3956,3 +3957,10 @@ The opus review pass (5 reviewers, ~1.45M tokens) ran verification commands agai
 ### Q6 resolved (2026-09-13): Bazel-Java ships in `bazel-quality`
 
 Owner said yes. `handoff/bazel-quality-java.md` moved to `rules/bazel-quality/java.md` (BZL-JAVA, 25 IDs, 15 MUST) with its routing row in the index, the manifest and source rows of "Where the Depth Is" and "Siblings" extended to the JVM sets, and the Bazel companions and bundle description updated to thirteen depth files and 353 depth rules. The `handoff/` directory is gone.
+
+## Revision log
+
+- 2026-11-27: M-R-07 (the "129 of 231 rules" figure) is superseded. detekt's default config on main activates 129 of 237 rules, so 108 are off; the newest tag `v2.0.0-alpha.6` carries 119 of 227. Decision: [refresh-2026-11/kotlin-quality.md](refresh-2026-11/kotlin-quality.md), rule index and KT-LINT-01.
+- 2026-11-27: Gradle issue [#24040](https://github.com/gradle/gradle/issues/24040) (lines citing it as an open friction item, including the wave-2 "Promote" row) is closed. Gradle 9.0.0 RC1 made the silent configuration-cache fallback the intended behaviour, and the closing comment says explicit credentials "disable the configuration cache", not "for a task". Decision: [refresh-2026-11/gradle-build.md](refresh-2026-11/gradle-build.md), GRADLE-CACHE-08.
+- 2026-11-27: The "default targeted at Gradle 11" claim (Frame correction 1 and the conflict 18 resolution) now cites the Gradle blog of 2026-08-19, not the 9.0.0 release notes, which never state it. Decision: [refresh-2026-11/gradle-build.md](refresh-2026-11/gradle-build.md), GRADLE-CACHE-08.
+- 2026-11-27: M-A-06 and the "Kafka runs Gradle 9.7.1" lines are stale as the current-release statement. Gradle 9.9.2 (2026-11-19) is current. The topic map's 9.7.1 figures were true on 2026-09-12 and are left as history. Decision: [refresh-2026-11/gradle-build.md](refresh-2026-11/gradle-build.md), rule index and GRADLE-TOOL-01.

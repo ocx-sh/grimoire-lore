@@ -20,7 +20,7 @@ read only when the work calls for it.
 Four defects pass `./gradlew build` and look identical to a pass, which is why
 this set opens by naming them rather than by stating a rule.
 
-The configuration cache may be off, because Gradle 9 disables it for a task and
+The configuration cache may be off, because Gradle 9 disables it and
 carries on rather than failing. `validatePlugins` never ran, so every
 task-annotation defect stayed a warning nobody reads. Nothing is pinned,
 because a version catalog constrains requests and pins nothing without a
@@ -35,7 +35,7 @@ and any report file is the finding.
 ## What is in it
 
 The index carries the gate, eighteen non-negotiables, and three cross-cutting
-rules it owns outright. 134 rules in total, 93 of them merge-blocking, spread
+rules it owns outright. 137 rules in total, 95 of them merge-blocking, spread
 over eight depth files: build structure and convention plugins, dependencies
 and the trust that backs them, configuration-cache and task correctness,
 toolchains and the wrapper, plugin authoring, distribution, publishing to

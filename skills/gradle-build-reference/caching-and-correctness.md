@@ -23,11 +23,15 @@ Contents: [Scope](#scope) ·
 
 ## Scope
 
-- **Measured against Gradle 9.0.0 through 9.7.1, verified 2026-09-12.** Corpus
+- **Measured against Gradle 9.0.0 through 9.7.1, verified 2026-09-12, and
+  re-checked against the 9.8.0 to 9.9.2 release notes on 2026-11-27.** Corpus
   counts below are over 32 surveyed public flagship repositories.
 - **The configuration cache is not on by default in Gradle 9.** 9.x is preferred
   with automatic graceful fallback, and the default-on target slipped from
-  Gradle 10 to Gradle 11 (verified 2026-09-12 against the 9.0.0 release notes).
+  Gradle 10 to Gradle 11 (Gradle blog,
+  [2026-08-19](https://blog.gradle.org/gradle-is-going-agentic), re-read
+  2026-11-27). The 9.9.2 user manual still says Gradle 10; the blog is the
+  newer source.
   Guidance that assumes it is already on skips the one line that turns it on.
 - **No linter reaches any of this.** There are exactly three gates: the real
   build run with `--configuration-cache`, the `validatePlugins` task, and reading
@@ -37,9 +41,10 @@ Contents: [Scope](#scope) ·
   by the team's own task code. Rows 01 to 05 are the smaller half of the problem.
 - **Rows 01 to 05 and 15 are contract-derived, not measured.** They describe task
   and plugin internals the 32-repo survey never source-grepped. They rest on
-  Gradle's documented requirements plus live trackers
-  ([#18520](https://github.com/gradle/gradle/issues/18520),
-  [#24040](https://github.com/gradle/gradle/issues/24040)), not on counted
+  Gradle's documented requirements plus two trackers
+  ([#18520](https://github.com/gradle/gradle/issues/18520), open, and
+  [#24040](https://github.com/gradle/gradle/issues/24040), closed in 9.0.0 RC1
+  by graceful degradation), not on counted
   counter-examples. Every row that does carry a count says so in its own cell.
 - `GRADLE-CACHE-07` is retired, and so is `GRADLE-CACHE-16`. Neither number is
   reused. Both said what `GRADLE-PLUG-01`, `GRADLE-PLUG-02` and `GRADLE-PLUG-10`
@@ -64,9 +69,9 @@ below are diff-review pre-filters, never substitutes for the run.
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
 | GRADLE-CACHE-01 | Never touch a `Project` from a task action: no `Task.getProject()`, no `project.copy {}`, no `project.exec {}`, no `project.logger`. Inject `FileSystemOperations` or `ExecOperations`, and bind every value read from `Project` to a `Property<T>` at configuration time. | A hard configuration-cache violation that still compiles, and the shape that saturates Groovy-era training data. | The gate run above. Pre-filter: see block GRADLE-CACHE-01, then read whether each hit sits inside a `doLast`, `doFirst` or `@TaskAction` body. Empty pre-filter output clears the pre-filter, not the rule. | MUST |
-| GRADLE-CACHE-02 | Never read a file, spawn a process, or resolve a `Configuration` at configuration time. Use `providers.fileContents(f).asText`, `providers.exec()` or `providers.javaexec()`, a `ValueSource` for anything else, and defer resolution into the task action behind a `FileCollection` or `Provider`. | An undeclared read or exec is an untracked cache input, and resolving at configuration time also defeats configuration avoidance. It stays legal ([#2298](https://github.com/gradle/gradle/issues/2298) is open), so no tool fails it for you. | The gate run above. Pre-filter: see block GRADLE-CACHE-02 and read each hit that is outside a task action. Empty pre-filter output clears the pre-filter, not the rule. | MUST |
+| GRADLE-CACHE-02 | Never read a file, spawn a process, or resolve a `Configuration` at configuration time. Use `providers.fileContents(f).asText`, `providers.exec()` or `providers.javaexec()`, a `ValueSource` for anything else, and defer resolution into the task action behind a `FileCollection` or `Provider`. | An undeclared read or exec is an untracked cache input, and resolving at configuration time also defeats configuration avoidance. It stays legal ([#2298](https://github.com/gradle/gradle/issues/2298) is open), so no tool fails it for you. Gradle 9.8.0 (2026-09-24) deprecates starting a process at configuration time, with the cache on or off, and Gradle 11 makes it an error, but until then it surfaces only in the deprecation summary. | The gate run above. Pre-filter: see block GRADLE-CACHE-02 and read each hit that is outside a task action. Empty pre-filter output clears the pre-filter, not the rule. | MUST |
 | GRADLE-CACHE-03 | Never enumerate `System.getenv()` or `System.getProperties()`. Read one named key, or use `providers.environmentVariablesPrefixedBy("PREFIX")`. | Gradle's own wording: every available property becomes one cache input. A single `.forEach {}` turns the whole ambient environment into cache-busting state. | see block GRADLE-CACHE-03 Any hit calling `getenv` with no argument is the finding. Empty output is the pass. | MUST |
-| GRADLE-CACHE-04 | Never register a `BuildListener` or `TaskExecutionListener` from a plugin or a build script. Use a Build Service implementing `OperationCompletionListener`, registered through `BuildEventsListenerRegistry`. | Flatly disallowed with no fallback flag, and still an unsolved migration gap for build-start and build-finish hooks ([#18520](https://github.com/gradle/gradle/issues/18520), open as of 2026-09-12). | see block GRADLE-CACHE-04 Any hit is the finding. Empty output is the pass. | MUST |
+| GRADLE-CACHE-04 | Never register a `BuildListener` or `TaskExecutionListener` from a plugin or a build script. Use a Build Service implementing `OperationCompletionListener`, registered through `BuildEventsListenerRegistry`. | Flatly disallowed with no fallback flag, and still an unsolved migration gap for build-start and build-finish hooks ([#18520](https://github.com/gradle/gradle/issues/18520), open as of 2026-11-27). | see block GRADLE-CACHE-04 Any hit is the finding. Empty output is the pass. | MUST |
 | GRADLE-CACHE-05 | Never hold live-JVM state in a task field or capture it in a task action: `ClassLoader`, `Thread`, `Socket`, `OutputStream`, `Lock`, `ReadWriteLock`, `Semaphore`, `CountDownLatch`, `CyclicBarrier`, `Phaser`. The same bar rejects `Gradle`, `Settings`, `SourceSet`, `Configuration` and `SourceDirectorySet` as inputs. A Build Service holds shared live state, and `FileCollection`, `FileTree` or `Provider<ResolvedComponentResult>` replace the coarse types. | These do not represent task inputs or outputs and cannot be serialized into a cache entry. `System.in`, `System.out` and `System.err` are the one documented exception, for `Exec` and `JavaExec`. | The gate run above names the offending field and its owning class. No report file is the pass. | MUST |
 
 ```sh
@@ -113,7 +118,7 @@ build twice.
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
 | GRADLE-CACHE-06 | Turn the cache on with `org.gradle.configuration-cache=true` in the root `gradle.properties`, never with a CI-only `--configuration-cache` flag, and leave `--configuration-cache-problems` at its default `fail`. `warn` is a migration aid with a tracked expiry, never a steady state. **pinned**: SHOULD for an existing build, raised to MUST for any module you publish. Override the raise once, in your own config, not per module. | CI overwhelmingly inherits the property (10 of 32) rather than re-asserting the flag (3 of 32), so reading `gradle.properties` first is the reliable heuristic. Gradle 9.0.0 also removed warn mode's old escape hatch: a task marked `notCompatibleWithConfigurationCache` now always discards the entry (verified 2026-09-12). | see block GRADLE-CACHE-06 (1 of 2) Here **empty output is the finding**: opt-in has not happened. Then see block GRADLE-CACHE-06 (2 of 2) and treat any hit with no linked tracking issue as the finding, with empty output the pass. | SHOULD |
-| GRADLE-CACHE-08 | Never read "the build went green" as "the build was cached". Gradle 9 silently disables the cache for a task rather than failing, in several documented cases. The named one is a `maven-publish` repository with an explicit `credentials {}` block ([#24040](https://github.com/gradle/gradle/issues/24040)). | Automatic graceful fallback means a permanently uncached task produces no error at all, so the only observable difference is a line of build output. | Run the identical invocation twice. The second run must print `Reusing configuration cache.` Absence of that line is the finding. Pre-filter for the known trap: see block GRADLE-CACHE-08 and check each hit for a literal credential block rather than `PasswordCredentials` or an environment-backed provider. | SHOULD |
+| GRADLE-CACHE-08 | Never read "the build went green" as "the build was cached". Gradle 9 silently disables the configuration cache rather than failing, in several documented cases. The named one is a `maven-publish` repository with an explicit `credentials {}` block, which [#24040](https://github.com/gradle/gradle/issues/24040) turned from a failure into this silent fallback in 9.0.0 RC1 ([PR 33830](https://github.com/gradle/gradle/pull/33830)). The issue is closed, and the fallback is the fix, not a bug awaiting one. | Automatic graceful fallback means a permanently uncached task produces no error at all, so the only observable difference is a line of build output. | Run the identical invocation twice. The second run must print `Reusing configuration cache.` Absence of that line is the finding. Pre-filter for the known trap: see block GRADLE-CACHE-08 and check each hit for a literal credential block rather than `PasswordCredentials` or an environment-backed provider. | SHOULD |
 
 ```sh
 # GRADLE-CACHE-06 (1 of 2)
@@ -130,7 +135,7 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.gradle.kts'
 
 ## Isolated Projects
 
-Incubating since Gradle 9.7.0 (2026-08-06, verified 2026-09-12). Two of its four
+Incubating since Gradle 9.7.0 (2026-08-06, re-verified on 9.9.2, 2026-11-27). Two of its four
 constraint categories are unenforced by Gradle's own admission, and `group` and
 `version` stay mutable while looking like identity.
 

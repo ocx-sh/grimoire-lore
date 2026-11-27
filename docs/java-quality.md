@@ -40,7 +40,7 @@ exactly like the wired one.
 ## What is in it
 
 The index carries the gate, sixteen non-negotiables, and three cross-cutting
-rules it owns outright. 103 rules in total, 72 of them merge-blocking, spread
+rules it owns outright. 105 rules in total, 73 of them merge-blocking, spread
 over nine depth files: the lint gate, errors and resources, security and
 untrusted input, concurrency and the process boundary, public API and its
 evolution, nullness flavours, records and pattern matching, JDK floors and

@@ -4,6 +4,7 @@ program: jvm
 date: 2026-09-05
 method: research-lang (two languages, three build systems, one build system's Java ruleset, and the SDK / plugin author's surface)
 status: active
+revised: 2026-11-27
 branch: cmake worktree (/home/mherwig/dev/grimoire-lore/.agents/worktrees/cmake) — the research lands on the `cmake` branch, not `main`
 ---
 
@@ -339,3 +340,11 @@ From the seven wave-3 consolidations and the convergence pass (`jvm-topic-map.md
 29. 70. CVE-2026-54512 and CVE-2026-54513 are two distinct bypass mechanisms in one advisory (generic-parameter substring check vs allowIfSubTypeIsArray() component check). Only a version bump closes both; a correctly configured PolymorphicTypeValidator closes neither (safety).
 30. 71. rule-distillation's '60-100 shipped rules' band is per rule set, not per program. This program ships four rule sets plus a Bazel handoff; 296 merged IDs across 21 families at roughly 70 shipped per rule set is inside the funnel. The binding budgets are the per-index line count (under 200) and the per-depth-file size the catalog already ships (this map).
 31. 72. A depth file's ID family does not decide its glob; the index it hangs from does. JAVA-PLAT rows whose edit site is a build file (source encoding, org.gradle.jvmargs, project.build.outputTimestamp, the floor numbers) cannot fire from **/*.java and belong to GRADLE-TOOL / MVN-BUILD (this map).
+
+## Revision log
+
+Delta refresh of 2026-11-27. The statements above stay as written; these entries record what the decision file contradicts.
+
+- 2026-11-27: Wave 1 correction 1 ("Latest verified is 4.0.0-rc-6") and wave 2 correction 29 ("maven-core 3.9.16 stable and 4.0.0-rc-6 as the top of the 4.0 line") are out of date. The top of the 4.0 line is `4.0.0-rc-7`, and there is still no plain `4.0.0`, so Maven 4 remains release-candidate only. Source: `refresh-2026-11/maven-build.md`.
+- 2026-11-27: Wave 2 correction 29 names only 3.9.16 as the stable line. Maven 3.10.0 went GA on 2026-09-27 and 3.10.2 (2026-11-18) is the newest stable release, beside the maintained 3.9.16. The same correction's phrase "Central's index" is also superseded: the search.maven.org Solr index lagged Central on 2026-11-27, so the check reads Central's `maven-metadata.xml` for `maven-core`. Source: `refresh-2026-11/maven-build.md` (Verdict item 2, Spillover round).
+- 2026-11-27: Wave 3 correction 63 (`.mvn/extensions.xml` 0/32 committed, so "no extensions" read off git is not a finding about the build that runs) is incomplete for Maven 3.10.0 and later, which also loads `~/.m2/extensions.xml` and `$MAVEN_HOME/conf/extensions.xml`; neither is ever in the tree. Source: `refresh-2026-11/maven-build.md` (`MVN-BUILD-15`).

@@ -21,5 +21,5 @@ Depth for the `java-quality` rule, installed with it. The rule index says which 
 | [lint-gate.md](lint-gate.md) | Error Prone, NullAway, -Xlint, Checkstyle, SpotBugs, Spotless, suppressions (JAVA-LINT) |
 | [nullness.md](nullness.md) | JSpecify annotations, @NullMarked, nulls reaching Kotlin (JAVA-NULL) |
 | [platform-and-versions.md](platform-and-versions.md) | JDK floor and --release, module-info, charset and locale, removed JDK APIs (JAVA-PLAT) |
-| [security-and-untrusted-input.md](security-and-untrusted-input.md) | Deserialization, XML hardening, path and command construction, randomness (JAVA-SEC) |
+| [security-and-untrusted-input.md](security-and-untrusted-input.md) | Deserialization, XML hardening, path and command construction, input-sized allocation, randomness (JAVA-SEC) |
 | [testing.md](testing.md) | JUnit floor, junit-platform.properties, parallel suites, coverage meaning (JAVA-TEST) |
