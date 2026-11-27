@@ -14,7 +14,8 @@ page are docs-quality's `DOC-TYPE-10` to `DOC-TYPE-15`; README structure is
 
 Set `CHECKS=.claude/skills/marketing-quality-reference/checks`
 (`$CLAUDE_CONFIG_DIR/skills/marketing-quality-reference/checks` when installed
-globally). Run from the repository root. `PAGE` is a built page (`dist/index.html`).
+globally). `DOCS=.claude/skills/docs-quality-reference/checks` is the docs-quality
+`checks/` directory, which owns the `doc_surface` key. Run from the repository root. `PAGE` is a built page (`dist/index.html`).
 
 Contents: [Dates and Versions](#dates-and-versions) · [Scope and the doc_surface Declaration](#scope-and-the-doc_surface-declaration) ·
 [First Screen Defined](#first-screen-defined) · [Scope and Declaration Rules](#scope-and-declaration-rules) ·
@@ -60,21 +61,13 @@ The pitch surfaces are: a page declared `pitch`, the first screen of the
 repository-root README of every repository that publishes a release or a package
 (a stranger reaches it without passing the site), and a page declared `offer`.
 
-**Carriers.** A page counts as declared when either reader finds the value:
-Markdown `<!-- doc_surface: pitch -->` in the first 12 lines after any front
-matter; MDX `{/* doc_surface: pitch */}` in the same place; any built page
-`<meta name="doc-surface" content="pitch">` in `<head>`; Starlight the page's
-`head:` field with a `meta` tag named `doc-surface`; `.astro` built meta only (a
-`//` comment in the frontmatter fence is dropped by the build).
+**Who owns the key.** `docs-quality` owns `doc_surface`: its enum (`pitch`, `home`, `offer`), its carriers (a source comment of the first 12 lines after any front matter, and the built `<meta name="doc-surface" content="V">` for any source, which is the only carrier an `.astro` page has), and its parsing. See the declaration section of docs-quality's page-types depth file, `DOC-TYPE-01` and `$DOCS/doc_declaration.py`. This file keeps only which first-screen rules each value brings. Starlight declares the meta in the page's `head:` field. A `//` comment in an `.astro` frontmatter fence is dropped by the build.
 
 **Why a declaration, and why built HTML.**
 
 - A README counts as a pitch whether or not a site exists. A stranger reaches the repository page from search, from a registry and from links without passing the site, and GitHub shows the README under the repository name with no other page in front of it. One strong exemplar redirects its pitch URL to the repository.
 - The declaration is the scope. The implicit test (the built `/` route renders a hero `<h1>`) is only the audit that finds an undeclared pitch, never the scope itself, because `DOC-TYPE-02` forbids reading a page's role from its path.
 - First-screen checks read the built HTML, not the source. A pitch keeps its words in a component: a source scan returned 0 findings on the one real pitch and 6 false findings on 5 hubs and docs homes. The declaration follows the same logic: a `//` comment in an `.astro` frontmatter fence never reaches the build, so a component-rendered pitch declares itself with the built meta.
-
-docs-quality does not read `doc_surface` yet: this file defines the key and the
-source value is checked by reading.
 
 ## First Screen Defined
 
@@ -89,9 +82,9 @@ Every rule reads the same two extractions, both in `positioning_check.py`, from 
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| MKT-PAGE-01 | Apply marketing first-screen rules only to a page declared `doc_surface: pitch`, to a page declared `doc_surface: offer`, and to the first screen of the repository-root README of a repository that publishes a release or a package. Never scope such a rule to `doc_type: landing`. On an `offer` page MKT-PAGE-03 and MKT-PAGE-06 to 10 do not apply: MKT-PAGE-12 and 13 take their place. | 1 of 12 measured `landing`-tagged pages is a pitch, because the tag fires on hubs. | `git grep -n -F -e 'doc_type: landing' -- "$RULE"` prints nothing for a marketing rule file `RULE`. A rule for offer pages names the value: `git grep -c -E -e 'doc_surface: *offer' -- "$RULE"` prints at least 1. README scope: block MKT-PAGE-01. Skip count: `python3 -I "$CHECKS"/positioning_check.py surface dist` prints `pitch=N home=M offer=K skipped_no_doc_surface=S`. | MUST |
-| MKT-PAGE-02 | Declare the page that renders a product site's `/` route with a hero as a pitch, with `<meta name="doc-surface" content="pitch">` in its built `<head>`, whatever its source. When its source is Markdown or MDX, also put `doc_surface: pitch` as a source comment in the first 12 lines after any front matter. Never put the declaration in an `.astro` frontmatter fence. Declare `home` on the docs entry page of every product the same way. Give a section hub no declaration. | Agents and checks cannot tell a pitch from a hub without a declaration. Astro drops JavaScript comments from the build; a meta added through `head` rendered in a real build. | After the build, `python3 -I "$CHECKS"/positioning_check.py surface dist --need index.html` exits 0. It fails a `/` page that has an `<h1>` and no meta, a doubled meta, and a value outside `pitch`, `home`, `offer`. It does not decide which value is right: MKT-PAGE-11 and the owner do. Grep arm: block MKT-PAGE-02. Source-side value validation is `unverified: reading heuristic` until docs-quality reads the key. | MUST |
-| MKT-PAGE-14 | Make the built `<meta name="doc-surface">` and the source comment of the same route name the same value. Never edit one without the other. | Two declarations of one fact drift: a measured page's source said `pitch` and its built meta said `home`. Markdown and MDX only: an `.astro` page has no source declaration. | `python3 -I "$CHECKS"/positioning_check.py surface-pair "$BUILT" "$SOURCE"` exits 0 when the values are equal or the source has none, and 1 on a mismatch. | SHOULD |
+| MKT-PAGE-01 | Apply marketing first-screen rules only to a page declared `doc_surface: pitch`, to a page declared `doc_surface: offer`, and to the first screen of the repository-root README of a repository that publishes a release or a package. Never scope such a rule to `doc_type: landing`. On an `offer` page MKT-PAGE-03 and MKT-PAGE-06 to 10 do not apply: MKT-PAGE-12 and 13 take their place. | 1 of 12 measured `landing`-tagged pages is a pitch, because the tag fires on hubs. | `git grep -n -F -e 'doc_type: landing' -- "$RULE"` prints nothing for a marketing rule file `RULE`. A rule for offer pages names the value: `git grep -c -E -e 'doc_surface: *offer' -- "$RULE"` prints at least 1. README scope: block MKT-PAGE-01. Skip count: `python3 -I "$DOCS"/doc_declaration.py --built dist` prints `pitch=N home=M offer=K skipped_no_doc_surface=S`. | MUST |
+| MKT-PAGE-02 | Declare the page that renders a product site's `/` route with a hero as a pitch, with `<meta name="doc-surface" content="pitch">` in its built `<head>`, whatever its source. When its source is Markdown or MDX, also put `doc_surface: pitch` as a source comment in the first 12 lines after any front matter. Never put the declaration in an `.astro` frontmatter fence. Declare `home` on the docs entry page of every product the same way. Give a section hub no declaration. | Agents and checks cannot tell a pitch from a hub without a declaration. Astro drops JavaScript comments from the build; a meta added through `head` rendered in a real build. | After the build, `python3 -I "$DOCS"/doc_declaration.py --built dist --need index.html` exits 0. It fails a `/` page that has an `<h1>` and no meta, a doubled meta, and a value outside `pitch`, `home`, `offer`. It does not decide which value is right: MKT-PAGE-11 and the owner do. Source side: `python3 -I "$DOCS"/doc_declaration.py --root .` fails a source comment whose value is outside the enum (`DOC-TYPE-01`, Markdown and MDX only). Grep arm: block MKT-PAGE-02. | MUST |
+| MKT-PAGE-14 | Make the built `<meta name="doc-surface">` and the source comment of the same route name the same value. Never edit one without the other. | Two declarations of one fact drift: a measured page's source said `pitch` and its built meta said `home`. Markdown and MDX only: an `.astro` page has no source declaration. | `python3 -I "$DOCS"/doc_declaration.py --pair "$BUILT" "$SOURCE"` exits 0 when the values are equal or the source has none, and 1 on a mismatch. | SHOULD |
 
 ## Hero Content Rules
 
@@ -119,7 +112,7 @@ Every rule reads the same two extractions, both in `positioning_check.py`, from 
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| MKT-PAGE-11 | Write no hero on a `doc_surface: home` page or on a hub: no tagline stack, no differentiator band, no proof section. In a product with no pitch page, the README is the pitch and the docs home stays `home`. Promote a docs home to a pitch only on the owner's decision. | Agents read "home page" as "marketing page". 8 of 10 measured docs sites have no pitch page, and their docs homes open on a plain description and a command, which works. | Block MKT-PAGE-11: no hero markup in the home source, and no `class="...hero..."` in any built page that declares `home`. The tagline stack is DOC-TYPE-10's second-lead-in test, read by hand. | SHOULD |
+| MKT-PAGE-11 | Write no hero on a `doc_surface: home` page or on a hub: no tagline stack, no differentiator band, no proof section. In a product with no pitch page, the README is the pitch and the docs home stays `home`. Promote a docs home to a pitch only on the owner's decision. | Agents read "home page" as "marketing page". 8 of 10 measured docs sites have no pitch page, and their docs homes open on a plain description and a command, which works. | Block MKT-PAGE-11: no hero markup in the home source, and no `class="...hero..."` in any built page that declares `home`. The tagline stack is `DOC-TYPE-10`'s second-lead-in test: `python3 -I "$DOCS"/landing_check.py "$HOME_SOURCE"` reports it as a `DOC-TYPE-10` finding, and a list or a caution box no longer counts toward it. | SHOULD |
 
 ## Offer Page Rules
 
@@ -175,7 +168,7 @@ gh api "repos/$SLUG" --jq .archived
 python3 -I "$CHECKS"/positioning_check.py readme-window README.md | head -1 | grep -i -c -E -e 'no longer (actively )?maintained' -e 'unmaintained' -e 'archived' -e 'moved to'
 # MKT-PAGE-11: no hero markup in the home source, then in every built page that declares home. All counts print 0.
 git grep -c -E -e '^hero:' -e 'template: *splash' -e '<(Hero|Landing)([^[:alnum:]_]|$)' -e 'class="[^"]*hero' -- "$HOME_SOURCE"
-python3 -I "$CHECKS"/positioning_check.py surface-list home dist --print0 | xargs -0 -r grep -c -e 'class="[^"]*hero'
+python3 -I "$DOCS"/doc_declaration.py --built dist --list home | xargs -r grep -c -e 'class="[^"]*hero'
 # MKT-PAGE-12: line 3 of the offer hero, four filters. Each must print 1 or more.
 python3 -I "$CHECKS"/positioning_check.py hero "$PAGE" | sed -n 3p > offer-hero.txt
 grep -i -c -E -e '(^|[^[:alnum:]_])(consult[[:alnum:]_]*|implementation|migration|engineering|development|support|training|audit|review|design)([^[:alnum:]_]|$)' offer-hero.txt
@@ -209,7 +202,7 @@ For MKT-PAGE-07. Every word maps to a source or is named as a house word.
 - **docs-quality keeps gating every `doc_type: landing` page** with `DOC-TYPE-10` to `DOC-TYPE-15`. No MKT-PAGE rule suspends a DOC-TYPE finding. MKT-PAGE-01 only bars **marketing** rules from those pages.
 - **Where both sets apply to one page, docs-quality governs the page.** MKT-PAGE adds requirements only on the pitch surfaces and on `offer` pages.
 - **Two families never share the first sentence.** docs-quality keeps length, calls to action, placeholders and adoption links. `MKT-POS` keeps sentence identity. MKT-PAGE keeps what the hero and the README opening must contain: the noun, the differentiator, the maturity status and the grade-word contradiction.
-- **docs-quality does not read `doc_surface` yet, and its landing check reads source.** It misses a component-rendered pitch, so MKT-PAGE-02's source-side validation and MKT-PAGE-11's tagline-stack test (`DOC-TYPE-10`'s second lead-in) stay reading checks.
+- **docs-quality owns `doc_surface` and reads the built route.** `DOC-TYPE-10` to `DOC-TYPE-12` skip a `pitch` page's source and run on its built route (`landing_check.py --built dist`), so a component-rendered pitch is checked. MKT-PAGE-11's tagline-stack test is `DOC-TYPE-10`'s lead-in test.
 
 Who owns what on a README, first to last. The built `<h1>` count belongs to `ux-quality`, and About text, social card and registry listing pages to the channel skills.
 

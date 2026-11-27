@@ -58,6 +58,12 @@ title: Install the CLI
 one of `first-steps`, `everyday`, `integration`, and only `tutorial`, `how-to`
 and `landing` require one. Both enums are pinned defaults.
 
+A page may also declare `doc_surface` as `pitch`, `home` or `offer`. It is
+optional and names a role, not a type. A component-rendered page declares it in
+its built `<meta name="doc-surface">`. Both carriers are read by
+`doc_declaration.py`, and `pitch` pages get DOC-TYPE-10 to DOC-TYPE-12 on their
+built route.
+
 Placement is inside the file's first 12 lines and never above an existing front
 matter block. One comment opener per markup family: `<!--` for markdown, `{/*`
 for MDX, `..` for reStructuredText, `%` for MyST, `//` for AsciiDoc. Never YAML

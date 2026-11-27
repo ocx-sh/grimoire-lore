@@ -20,7 +20,7 @@ grounding:
   - docs-audit/ux-observability-posture.md
   - docs-frame.md
 date: 2026-09-05
-revised: 2026-09-05
+revised: 2026-11-27
 wave: 2
 ---
 
@@ -124,7 +124,10 @@ lines, using the comment opener of its markup family.
 family, so every downstream check silently skips it.
 *Verify*: `checks/doc-declaration.sh <files>`. It accepts `<!--` for markdown,
 `{/*` for MDX, `..` for reStructuredText and `%` for MyST, and exactly nine
-type values. Measured 181 of 181 fleet pages failing today, 100 percent
+type values. It also reads the optional `doc_surface` key (`pitch`, `home`,
+`offer`) from the same comment, and from a built page's
+`<meta name="doc-surface">` through `--built DIST`. A value outside the enum
+fails. Measured 181 of 181 fleet pages failing today, 100 percent
 (`wave2-declaration-key.md` §11).
 *Evidence*: measured (three generators built and read, plus an MDX 3.1.1
 compile) plus normative (Diataxis, GitLab).
@@ -285,10 +288,16 @@ number exceeds every non-troubleshooting H2's line number. Measured 0 hits over
 
 **DOC-TYPE-10 — SHOULD — applies to: landing**
 Hold a landing page's lead-in positioning prose to one sentence and never stack
-two of them.
+two of them. On a page declaring `doc_surface: home`, that one sentence is the
+product's docs-home description, and its wording belongs to the positioning
+record. On a `pitch` page the rule runs on its built route.
 *Rationale*: a multi-paragraph marketing hero is the default a model writes and
-the outlier among fetched exemplars.
-*Verify*: word-count the block before the first heading or fenced block. Fail on
+the outlier among fetched exemplars. A docs home owes the description one slot,
+so the sentence has one owner for wording and this rule owns only its length.
+*Verify*: word-count the block before the first heading, fenced block, list item
+or admonition marker (the list and caution-box stop removed 5 false hits on 4
+hubs and one docs home). On a `pitch` page run
+`checks/landing_check.py --built dist` over the built route. Fail on
 more than one sentence terminator (SHOULD, measured across 5 fetched exemplars).
 Warn over 30 words (CONSIDER, argued from those same 5 pages). Measured 21 hits
 across 22 landing-classified pages of 248 (`wave2-calibration-a.md` §1).
@@ -296,7 +305,8 @@ across 22 landing-classified pages of 248 (`wave2-calibration-a.md` §1).
 argued number.
 
 **DOC-TYPE-11 — MUST — applies to: landing**
-Give every landing page a runnable command or a link menu before word 150.
+Give every landing page a runnable command or a link menu before word 150. A
+`pitch` page is read on its built route (`checks/landing_check.py --built dist`).
 *Rationale*: a page that opens with a stability caveat and never resolves to an
 action leaves the reader nothing to click.
 *Verify*: `checks/landing-cta.py`. Walk the body and take the first of three
@@ -313,7 +323,8 @@ inert on 8 of 9 sites. Kept at MUST, because the portability dive replaced that
 check and it now resolves on 9 of 9. The ledger's reason no longer holds.
 
 **DOC-TYPE-12 — SHOULD — applies to: landing**
-Cap a landing page at two button-style calls to action.
+Cap a landing page at two button-style calls to action. A `pitch` page is read
+on its built route.
 *Rationale*: an ungrouped stack of seven calls to action gives a reader no
 hierarchy to read.
 *Verify*: `checks/landing-cta.py`, the same script as DOC-TYPE-11. Count every
@@ -328,9 +339,11 @@ dropped. Re-fetching their own exemplars found 12, 18 and 30-plus task links.
 
 **DOC-TYPE-13 — SHOULD — applies to: landing**
 State who the docs are for, either through task-phrased link labels or one
-sentence naming the reader.
+sentence naming the reader. On a page declaring `doc_surface: home`, that
+sentence may be the lead-in sentence of DOC-TYPE-10.
 *Rationale*: a grid labelled with product nouns tells a reader nothing about
-whether they are in the right place.
+whether they are in the right place. A docs home has one slot for its
+description, so the reader and the description share it.
 *Verify*: `unverified: reading heuristic` for the classification clause. A
 reviewer classifies every grid label as task-phrased or product-noun. A script
 asserts only the true-zero case, that at least one grid or one reader-naming
@@ -944,6 +957,14 @@ Wave 2, 2026-09-05. One line per change.
   answered above or moved into the gap list.
 - **Applied to the fleet** now carries calibration hit counts and sampled
   false-positive rates on every measured row.
+
+- 2026-11-27, **DOC-TYPE-01, 10, 11, 12, 13** changed in place, same IDs and
+  severities: owner decision 2026-11-27, CR-1 to CR-4 (the marketing
+  consolidation `marketing-first-screen-copy.md`). `doc_surface` (`pitch`,
+  `home`, `offer`) joins the declaration with `doc_declaration.py` as its one
+  reader, DOC-TYPE-10 ends its lead-in at a list or admonition, DOC-TYPE-10 and
+  13 gain a `home` clause, and DOC-TYPE-10 to 12 run on a `pitch` page's built
+  route.
 
 ## Sub-artifacts
 

@@ -55,6 +55,29 @@ One opener per markup family, all four accepted by the same check:
 one of `first-steps`, `everyday`, `integration`, and it is required only on
 `tutorial`, `how-to` and `landing`. Both enums are pinned.
 
+A third key, `doc_surface`, is optional and names a role, not a type. A section
+hub and every other page declares none.
+
+- `pitch`: a product site root that renders a hero.
+- `home`: the docs entry page of a product.
+- `offer`: a page that sells a service engagement.
+
+A README is `doc_type: readme` and can also be a pitch, so type and surface are
+separate axes. The key uses the same openers as the other two. A component has
+no source comment to read, so its page declares the key in the built HTML with
+`<meta name="doc-surface" content="pitch">`. `doc_declaration.py` reads both
+carriers. A `//` opener is valid only outside a leading `---` fence.
+
+```bash
+python3 checks/doc_declaration.py --built dist --need index.html   # meta count, skip count
+python3 checks/doc_declaration.py --built dist --list home         # pages declaring home
+python3 checks/doc_declaration.py --pair dist/x/index.html docs/x.md  # meta and comment agree
+```
+
+`--built` prints `pitch=N home=M offer=K skipped_no_doc_surface=S`. It exits 1
+on a doubled meta, a value outside the enum, and, with `--need`, a page that
+has an `<h1>` and no meta.
+
 Three placements that break a build or a search index, all measured:
 
 ```text
@@ -84,7 +107,7 @@ from what that script returns.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| DOC-TYPE-01 | Declare a page's type in a `doc_type` comment line inside the file's first 12 lines, using the comment opener of its markup family. | An undeclared page is skipped by every type-scoped check, so the gate stays green while nothing is checked. | `checks/doc_declaration.py --root .` Nine values, four openers. Changed files first: 181 of 181 corpus pages fail today (248-page calibration corpus). | MUST, pinned |
+| DOC-TYPE-01 | Declare a page's type in a `doc_type` comment line inside the file's first 12 lines, using the comment opener of its markup family. | An undeclared page is skipped by every type-scoped check, so the gate stays green while nothing is checked. | `checks/doc_declaration.py --root .` Nine values, four openers. It also fails a `doc_surface` value outside `pitch`, `home` and `offer`, and reads the built `<meta name="doc-surface">` through `--built`. Changed files first: 181 of 181 corpus pages fail today (248-page calibration corpus). | MUST, pinned |
 | DOC-TYPE-02 | Read a page's type from its declaration comment only, never from its directory or file name. | A path classifier reads one repo cleanly and misclassifies 18 of 23 pages in the next one (measured, two repos of the same fleet). | `checks/doc_declaration.py --self-test` The fixture `pass-path-conflict.md` sits under a `reference/` path and declares `doc_type: how-to`, and the script must accept it. | MUST |
 | DOC-TYPE-28 | Never write the declaration as YAML front matter. | mdBook 0.5.3 renders the block as a horizontal rule plus a real `<h2>`, and that fake heading enters the search index with its own anchor. | `checks/doc_declaration.py --root .` fails a front matter `doc_type:` or `doc_tier:` key (measured on a built fixture, 9 index hits across 9 pages). | MUST |
 | DOC-TYPE-29 | Never place the declaration comment above an existing front matter block. | Front matter must start on line 1, so a comment above it turns the whole block into visible content on all three measured generators. | `checks/doc_declaration.py --root .` fails a file whose line 1 is the declaration and whose line 2 is `---` (measured on all three generators). | MUST |
@@ -123,12 +146,20 @@ targets never count as prose words.
 `checks/landing_check.py` walks the markdown body. It parses no front matter,
 because a front-matter parse resolved on only one of nine measured sites.
 
+A landing page that also declares `doc_surface: pitch` keeps its words in a
+component. A source scan returned 0 findings on the one real pitch. DOC-TYPE-10
+to DOC-TYPE-12 skip that page's source and run over its built route.
+`checks/landing_check.py --built dist` reads every built page whose meta says
+`pitch`. It takes the same `dist` directory as `doc_declaration.py --built`.
+
+DOC-TYPE-13 to DOC-TYPE-15 stay on the source.
+
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| DOC-TYPE-10 | Hold a landing page's lead-in positioning prose to one sentence and never stack two of them. | A multi-paragraph marketing hero is the default a model writes and the outlier among real landing pages. | `checks/landing_check.py <paths>` fails on more than one sentence terminator before the first heading or fence (measured across 5 fetched exemplars). It warns over 30 words (argued from those same 5 pages). Measured 21 hits over 22 landing pages. | SHOULD |
+| DOC-TYPE-10 | Hold a landing page's lead-in positioning prose to one sentence and never stack two of them. On a page declaring `doc_surface: home`, that one sentence is the product's docs-home description, and its wording belongs to the positioning record. | A multi-paragraph marketing hero is the default a model writes and the outlier among real landing pages. A docs home owes the description one slot, so the sentence has one owner for its wording and this rule owns only its length. | `checks/landing_check.py <paths>` fails on more than one sentence terminator before the first heading, fence, list item or admonition marker (measured across 5 fetched exemplars). The block ends at a list or a caution box, which removed 5 false hits on hubs and one docs home. It warns over 30 words (argued from those same 5 pages). On a `pitch` page the check reads the built route: `checks/landing_check.py --built dist`. Measured 21 hits over 22 landing pages before the list and admonition stop. | SHOULD |
 | DOC-TYPE-11 | Give every landing page a runnable command or a link menu before word 150. | A page that opens with a caveat and never resolves to an action leaves the reader nothing to do. | `checks/landing_check.py <paths>` takes the first of a fence, a link menu, or a block-level `<a href>` outside a list. It fails past 150 words (the same 150 DOC-NAV-06 uses). Measured on 9 real landing pages plus 2 controls: 3 fail, 0 report "cannot verify". | MUST |
 | DOC-TYPE-12 | Cap a landing page at two button-style calls to action. | An ungrouped stack of seven calls to action gives the reader no hierarchy to read. | `checks/landing_check.py <paths>` counts button entries and raw `<a href>` buttons, and fails over 2 (re-measured exemplars: 2, 1 and about 3, against one real page at 7). It warns separately when ungrouped task links pass roughly 8 with no labelled group (argued). | SHOULD |
-| DOC-TYPE-13 | State who the docs are for, through task-phrased link labels or one sentence naming the reader. | A grid labelled with product nouns tells a reader nothing about whether they are in the right place. | unverified: reading heuristic. Look for whether each grid label names a task or a product noun. `checks/landing_check.py <paths>` asserts only the true-zero case, that a grid or a reader-naming sentence exists at all. Measured 22 of 22 landing pages reach that true-zero case. | SHOULD |
+| DOC-TYPE-13 | State who the docs are for, through task-phrased link labels or one sentence naming the reader. On a page declaring `doc_surface: home`, that sentence may be the lead-in sentence of DOC-TYPE-10. | A grid labelled with product nouns tells a reader nothing about whether they are in the right place. A docs home has one slot for its description, so the reader and the description share it. | unverified: reading heuristic. Look for whether each grid label names a task or a product noun. `checks/landing_check.py <paths>` asserts only the true-zero case, that a grid or a reader-naming sentence exists at all. Measured 22 of 22 landing pages reach that true-zero case. | SHOULD |
 | DOC-TYPE-14 | Never publish placeholder text. | Scaffold copy reaches published sites, and three placeholder tiles shipped verbatim in one measured repo. | `checks/landing_check.py --root .` fails any page matching `lorem ipsum`, `placeholder text`, `TODO: write` or `coming soon`. Runs over every type, not only landing. Measured 0 hits over 186 pages today. | MUST |
 | DOC-TYPE-15 | Never state an adoption, popularity or trust claim without a link to its source. | No site in the calibration corpus carries social proof, so any such claim a model writes is invented. | `checks/landing_check.py --root .` requires an adjacent link on every hit, and the count-noun form of `trusted by`. Measured 3 hits over 248 pages under the loose pattern, 3 of 3 false positives from security-trust prose, and 0 under the tightened one. | MUST |
 

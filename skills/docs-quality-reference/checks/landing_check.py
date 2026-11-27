@@ -14,17 +14,26 @@ hero arrays and was inert on 8 of 9 fleet sites.
 DOC-TYPE-10 to DOC-TYPE-13 run only on pages declaring doc_type: landing.
 DOC-TYPE-14 and DOC-TYPE-15 run on every page.
 
+A page that also declares doc_surface: pitch keeps its words in a component, so
+a source scan cannot see them. DOC-TYPE-10 to DOC-TYPE-12 skip that page's
+source and run over its built route instead (--built DIST, the pages whose
+built <meta name="doc-surface"> says pitch). DOC-TYPE-13 stays on the source.
+
 Usage: landing_check.py [--root DIR] [PATH ...] [--format text|json] [--self-test]
+       landing_check.py --built DIST [--format text|json]
 Exit 0 clean, 1 findings, 2 usage or missing input.
 """
 
 from __future__ import annotations
 
+import argparse
 import re
 import sys
+from html.parser import HTMLParser
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import doc_declaration as dd
 import strip_prose as sp
 from strip_prose import Finding
 
@@ -159,7 +168,14 @@ def lead_in(body: str, offset: int) -> tuple[int, int, int]:
     start = heads[0] + 1 if heads and sp.HEADING.match(lines[heads[0]]).group(1) == "#" else 0
     end = len(lines)
     for i in range(start, len(lines)):
-        if sp.HEADING.match(lines[i]) or COMMAND_BLOCK.search(lines[i]):
+        # The lead-in ends where a list or an admonition starts: a hub's link
+        # list and a caution box are not positioning prose.
+        if (
+            sp.HEADING.match(lines[i])
+            or COMMAND_BLOCK.search(lines[i])
+            or LIST_ITEM.match(lines[i])
+            or sp.ADMONITION.match(lines[i])
+        ):
             end = i
             break
     block = sp.strip("\n".join(lines[start:end]))
@@ -188,15 +204,26 @@ def check(path: str, text: str, root: str) -> list[Finding]:
                     f"adoption claim {m.group(0)!r} with no link to its source",
                 )
             )
-    if sp.declaration(text).get("doc_type") != "landing":
+    decl = sp.declaration(text)
+    if decl.get("doc_type") != "landing":
         return out
 
     front, body, offset = split_front_matter(text)
+    # A declared pitch is judged on its built route for DOC-TYPE-10 to 12.
+    rules = ("13",) if decl.get("doc_surface") == "pitch" else ("10", "11", "12", "13")
+    return out + landing_findings(path, front, body, offset, rules)
+
+
+def landing_findings(
+    path: str, front: str, body: str, offset: int, rules: tuple[str, ...]
+) -> list[Finding]:
+    """DOC-TYPE-10 to 13 over one body. `rules` holds the numbers to run."""
+    out: list[Finding] = []
     ctas = front_matter_ctas(front)
     found = scan(body, offset)
 
     words, stops, line_no = lead_in(body, offset)
-    if stops > 1:
+    if "10" in rules and stops > 1:
         out.append(
             Finding(
                 path,
@@ -206,7 +233,7 @@ def check(path: str, text: str, root: str) -> list[Finding]:
                 "measured shape across five exemplars",
             )
         )
-    elif words > LEAD_IN_WORD_WARNING:
+    elif "10" in rules and words > LEAD_IN_WORD_WARNING:
         out.append(
             Finding(
                 path,
@@ -217,7 +244,7 @@ def check(path: str, text: str, root: str) -> list[Finding]:
         )
 
     action = found["action"]
-    if ctas == 0 and (action is None or action[1] > ACTION_WORD_BUDGET):
+    if "11" in rules and ctas == 0 and (action is None or action[1] > ACTION_WORD_BUDGET):
         where = f"word {action[1]}" if action else "nowhere on the page"
         out.append(
             Finding(
@@ -241,7 +268,7 @@ def check(path: str, text: str, root: str) -> list[Finding]:
         offset + len(body.split("\n")),
     )
     buttons = ctas + sum(1 for n in found["anchors"] if n <= hero_end)
-    if buttons > CTA_CAP:
+    if "12" in rules and buttons > CTA_CAP:
         out.append(
             Finding(
                 path,
@@ -252,7 +279,7 @@ def check(path: str, text: str, root: str) -> list[Finding]:
             )
         )
     ungrouped = sum(linked for _, total, linked in found["groups"] if linked == total)
-    if ungrouped > UNGROUPED_TASK_LINK_WARNING and len(found["groups"]) < 2:
+    if "12" in rules and ungrouped > UNGROUPED_TASK_LINK_WARNING and len(found["groups"]) < 2:
         out.append(
             Finding(
                 path,
@@ -263,7 +290,7 @@ def check(path: str, text: str, root: str) -> list[Finding]:
             )
         )
 
-    if not found["groups"] and not READER_SENTENCE.search(sp.strip(body)):
+    if "13" in rules and not found["groups"] and not READER_SENTENCE.search(sp.strip(body)):
         out.append(
             Finding(
                 path,
@@ -276,5 +303,172 @@ def check(path: str, text: str, root: str) -> list[Finding]:
     return out
 
 
+# --- built route (DOC-TYPE-10 to 12 on a declared pitch) ----------------------
+
+BLOCK_TAGS = {
+    "p", "div", "section", "article", "header", "footer", "main", "li", "ul", "ol",
+    "h1", "h2", "h3", "h4", "h5", "h6", "pre", "br", "table", "tr", "form",
+}  # fmt: skip
+INLINE_CONTEXT = {"p", "li", "h1", "h2", "h3", "h4", "h5", "h6"}
+
+
+class _Markdownish(HTMLParser):
+    """Turn <main> of a built page into the markdown shapes scan() reads.
+
+    Headings become `#`, list items `- `, links `[t](h)` inside text and a raw
+    `<a href>` line when the link stands alone, <pre> a fence, <aside> a
+    `:::` marker. Scripts and styles are dropped.
+    """
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.lines: list[str] = []
+        self.buf = ""
+        self.prefix = ""
+        self.in_main = False
+        self.skip = 0
+        self.pre = False
+        self.ctx: list[str] = []
+        self.href: str | None = None
+        self.link_text = ""
+        self.link_inline = False
+
+    def flush(self) -> None:
+        text = " ".join(self.buf.split())
+        if text:
+            self.lines += [self.prefix + text, ""]
+        self.buf = self.prefix = ""
+
+    def handle_starttag(self, tag: str, attrs: list) -> None:
+        a = dict(attrs)
+        if tag == "main":
+            self.in_main = True
+        if not self.in_main:
+            return
+        if tag in ("script", "style"):
+            self.skip += 1
+        if tag == "a" and a.get("href"):
+            self.link_inline = any(c in INLINE_CONTEXT for c in self.ctx)
+            if not self.link_inline:
+                self.flush()
+            self.href, self.link_text = a["href"], ""
+        elif tag == "aside":
+            self.flush()
+            self.lines += [":::note", ""]
+        elif tag == "pre":
+            self.flush()
+            self.lines.append("```")
+            self.pre = True
+        elif tag in BLOCK_TAGS:
+            self.flush()
+            if tag in INLINE_CONTEXT:
+                self.ctx.append(tag)
+            if tag == "li":
+                self.prefix = "- "
+            elif tag[0] == "h" and len(tag) == 2:
+                self.prefix = "#" * int(tag[1]) + " "
+
+    def handle_endtag(self, tag: str) -> None:
+        if not self.in_main:
+            return
+        if tag in ("script", "style"):
+            self.skip = max(0, self.skip - 1)
+        if tag == "a" and self.href is not None:
+            label = " ".join(self.link_text.split())
+            if self.link_inline:
+                self.buf += f"[{label}]({self.href})"
+            else:
+                self.lines += [f'<a href="{self.href}">{label}</a>', ""]
+            self.href = None
+        elif tag == "pre":
+            self.lines += ["```", ""]
+            self.pre = False
+        elif tag in BLOCK_TAGS:
+            self.flush()
+            if tag in INLINE_CONTEXT and tag in self.ctx:
+                self.ctx.remove(tag)
+        elif tag == "main":
+            self.flush()
+            self.in_main = False
+
+    def handle_data(self, data: str) -> None:
+        if not self.in_main or self.skip:
+            return
+        if self.href is not None:
+            self.link_text += data
+        elif self.pre:
+            self.lines.append(data.rstrip("\n"))
+        else:
+            self.buf += data
+
+
+def html_to_markdown(html: str) -> str:
+    p = _Markdownish()
+    p.feed(html)
+    p.flush()
+    return "\n".join(p.lines)
+
+
+def check_built(dist: Path) -> tuple[list[Finding], int]:
+    """DOC-TYPE-10 to 12 over every built page whose meta declares pitch.
+
+    Returns the findings and how many pages were read.
+    """
+    out: list[Finding] = []
+    read = 0
+    for page in sorted(dist.rglob("*.html")):
+        html = page.read_text(encoding="utf-8", errors="replace")
+        if dd.built_surface(html)[0] != ["pitch"]:
+            continue
+        read += 1
+        out += landing_findings(str(page), "", html_to_markdown(html), 1, ("10", "11", "12"))
+    return out, read
+
+
+def _built_self_test() -> int:
+    here = Path(__file__).resolve().parent / "fixtures" / "landing_check"
+
+    def expect(cond: bool, what: str) -> None:
+        if not cond:
+            raise SystemExit(f"built self-test FAILED: {what}")
+
+    hits, read = check_built(here / "built-pass")
+    expect(read == 1 and not hits, f"built-pass: {read} pages, findings {hits}")
+    hits, read = check_built(here / "built-fail")
+    rules = {h.rule for h in hits}
+    expect(read == 1 and {"DOC-TYPE-10", "DOC-TYPE-12"} <= rules, f"built-fail: {read}, {rules}")
+    md = html_to_markdown(
+        '<main><h1>T</h1><p>Hi <a href="/x">x</a></p><ul><li><a href="/y">y</a></li></ul>'
+        '<a href="/z">z</a><pre>cmd</pre><aside>n</aside></main>'
+    )
+    expect(
+        md.split("\n")[0] == "# T"
+        and "- [y](/y)" in md
+        and '<a href="/z">z</a>' in md
+        and "```" in md
+        and ":::note" in md,
+        f"html_to_markdown shapes: {md!r}",
+    )
+    print("built self-test ok: a pitch route is read, a clean one passes, a stacked one fails")
+    return 0
+
+
+def main() -> int:
+    if "--built" in sys.argv[1:]:
+        ap = argparse.ArgumentParser(description="DOC-TYPE-10 to 12 on built pitch pages")
+        ap.add_argument("--built", required=True, metavar="DIST")
+        ap.add_argument("--format", choices=("text", "json"), default="text")
+        args = ap.parse_args()
+        dist = Path(args.built)
+        if not dist.is_dir():
+            print(f"landing_check: no such directory: {dist}", file=sys.stderr)
+            return 2
+        findings, read = check_built(dist)
+        sp.emit(findings, args.format)
+        print(f"landing_check: {read} built pitch pages read", file=sys.stderr)
+        return 1 if findings else 0
+    return sp.run_cli(__doc__ or "", check, "landing_check", extra_self_test=_built_self_test)
+
+
 if __name__ == "__main__":
-    sys.exit(sp.run_cli(__doc__ or "", check, "landing_check"))
+    sys.exit(main())
