@@ -1,0 +1,17 @@
+{
+  "name": "mytool",
+  "nameWithOwner": "example/mytool",
+  "description": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "homepageUrl": "",
+  "repositoryTopics": [
+    {
+      "name": "MyTool"
+    },
+    {
+      "name": "mytool"
+    }
+  ],
+  "usesCustomOpenGraphImage": false,
+  "openGraphImageUrl": "https://avatars.githubusercontent.com/u/1",
+  "isPrivate": false
+}

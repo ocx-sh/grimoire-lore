@@ -1,0 +1,2 @@
+# Acronyms with five or more capitals that a title may carry
+ASCII

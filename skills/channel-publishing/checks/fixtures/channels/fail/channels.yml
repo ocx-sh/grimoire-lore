@@ -1,0 +1,106 @@
+channels:
+  - id: broken
+    platform: example
+    status: live
+  - id: yt-inferred
+    platform: youtube
+    handle: example
+    url: https://example.com/yt-inferred
+    status: active
+    ownership: inferred
+    verified_by: maintainer
+    owner_role: maintainer
+    automation: none
+    approved_by: owner
+    labels_required: [x]
+    credential: SOME_SECRET
+    last_checked: 2026-11-01
+    linked_from: [README.md]
+  - id: gone
+    platform: youtube
+    handle: example
+    url: https://example.com/gone
+    status: retired
+    ownership: proven
+    verified_by: not provable (403, 2026-11-01)
+    owner_role: maintainer
+    automation: none
+    approved_by: owner
+    labels_required: [x]
+    credential: SOME_SECRET
+    last_checked: 2026-11-01
+    linked_from: [README.md]
+  - id: malformed
+    platform: youtube
+    handle: example
+    url: https://example.com/malformed
+    status: active
+    ownership: proven
+    verified_by: not provable 403
+    owner_role: maintainer
+    automation: none
+    approved_by: owner
+    labels_required: [x]
+    credential: SOME_SECRET
+    last_checked: 2026-11-01
+    linked_from: []
+  - id: li-bot
+    platform: linkedin
+    handle: example
+    url: https://example.com/li-bot
+    status: active
+    ownership: proven
+    verified_by: maintainer
+    owner_role: maintainer
+    automation: bot
+    approved_by: owner
+    labels_required: [x]
+    credential: SOME_SECRET
+    last_checked: 2026-11-01
+    linked_from: []
+  - id: x-bot
+    platform: x
+    handle: example
+    url: https://example.com/x-bot
+    status: active
+    ownership: proven
+    verified_by: maintainer
+    owner_role: maintainer
+    automation: bot
+    approved_by: owner
+    labels_required: [x]
+    credential: SOME_SECRET
+    last_checked: 2026-11-01
+    linked_from: []
+    runs_from: example/mytool/.github/workflows/post.yml
+    gates_attested: [x-label]
+    attested_by: maintainer
+    attested_at: 2026-01-01
+  - id: old-row
+    platform: discord
+    handle: example
+    url: https://example.com/old-row
+    status: active
+    ownership: proven
+    verified_by: maintainer
+    owner_role: maintainer
+    automation: none
+    approved_by: owner
+    labels_required: [x]
+    credential: SOME_SECRET
+    last_checked: 2026-01-01
+    linked_from: []
+  - id: warn-row
+    platform: discord
+    handle: example
+    url: https://example.com/warn-row
+    status: active
+    ownership: proven
+    verified_by: maintainer
+    owner_role: maintainer
+    automation: none
+    approved_by: owner
+    labels_required: [x]
+    credential: SOME_SECRET
+    last_checked: 2026-07-01
+    linked_from: []

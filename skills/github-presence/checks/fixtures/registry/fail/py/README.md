@@ -1,0 +1,3 @@
+# mytool-py
+
+[LICENSE](LICENSE)

@@ -1,0 +1,36 @@
+format = "long"
+title = "Introducing mytool 1.0"
+description = "desc.txt"
+tags = ["mytool", "my tool"]
+chapters = "description"
+default_language = "en"
+default_audio_language = "en"
+made_for_kids = false
+synthetic = false
+paid_placement = false
+privacy = "private"
+thumbnail = "../thumb-long.png"
+duration_s = 600
+cta_at_s = 585
+milestone_ref = "v1.0.0"
+publish_date = "2026-11-20"
+ai_use = "no, case: no-ai"
+topic = "release"
+
+[package]
+platform = "youtube"
+account = "example-channel"
+action = "upload-private"
+labels = ["synthetic", "paid_placement"]
+ai_role = "script drafted with AI help, human voice"
+sponsored = false
+spend = 0
+open_asks = []
+approved_by = ""
+approved_at = ""
+
+[[audio]]
+source = "own"
+
+[[end_screen]]
+kind = "video"

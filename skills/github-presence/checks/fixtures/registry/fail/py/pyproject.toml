@@ -1,0 +1,7 @@
+[project]
+name = "mytool-py"
+version = "0.1.0"
+description = "Python bindings."
+
+[project.urls]
+"A project URL label that is far longer than thirty-two characters" = "https://example.com"

@@ -1,0 +1,9 @@
+{
+  "name": "mytool-vscode",
+  "version": "0.1.0",
+  "description": "Edit mytool manifests.",
+  "engines": { "vscode": "^1.90.0" },
+  "icon": "icon-small.png",
+  "keywords": ["mytool"],
+  "repository": { "type": "git", "url": "git+https://github.com/example/mytool.git", "directory": "ext" }
+}

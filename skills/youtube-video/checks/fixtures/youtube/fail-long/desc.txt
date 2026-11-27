@@ -1,0 +1,9 @@
+<b>Sponsored by nobody</b> Watch how a team pins versions with the new release workflow in mytool.
+
+Run it twice. Run it twice. Then read the lock file together with the manifest and the cache folder.
+
+00:05 Start
+00:30 Middle
+01:10 End
+
+#mytool #devtools #ci #release

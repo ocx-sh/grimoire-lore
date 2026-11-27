@@ -1,0 +1,7 @@
+{
+  "name": "mytool-sdk",
+  "version": "0.1.0",
+  "description": "SDK",
+  "keywords": ["sdk"],
+  "repository": "github:example/mytool"
+}

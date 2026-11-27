@@ -1,0 +1,40 @@
+approved_by = "owner"
+approved_at = "2026-12-01"
+pass_median_engaged_views = 50
+pass_actions = 5
+pass_set_at = "2026-12-01"
+start = "2026-12-02"
+end = "2027-03-01"
+measured_median_engaged_views = 80
+measured_actions = 7
+verdict = "pass"
+[[short]]
+id = "s02"
+published = "2026-12-02"
+[[short]]
+id = "s05"
+published = "2026-12-05"
+[[short]]
+id = "s08"
+published = "2026-12-08"
+[[short]]
+id = "s11"
+published = "2026-12-11"
+[[short]]
+id = "s14"
+published = "2026-12-14"
+[[short]]
+id = "s17"
+published = "2026-12-17"
+[[short]]
+id = "s20"
+published = "2026-12-20"
+[[short]]
+id = "s23"
+published = "2026-12-23"
+[[short]]
+id = "s26"
+published = "2026-12-26"
+[[short]]
+id = "s29"
+published = "2026-12-29"
