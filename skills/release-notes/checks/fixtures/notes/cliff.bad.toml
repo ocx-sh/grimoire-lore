@@ -1,0 +1,22 @@
+# template-owned file: change the upstream template
+[changelog]
+body = """
+{% if message %}{{ message | trim }}
+{% endif %}\
+## [{{ version }}]
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group }}
+{% for commit in commits %}
+- {{ commit.message | split(pat="\n") | first }}
+{%- endfor %}
+{% endfor %}
+"""
+[git]
+conventional_commits = true
+protect_breaking_commits = false
+commit_parsers = [
+  { message = "^(chore|ci)", skip = true },
+  { message = "^(chore|ci|style|test|build|release)(\\([^)]*\\))?!:", group = "Changed" },
+  { message = "^feat", group = "Added" },
+  { message = "^docs", group = "Documentation" },
+]

@@ -73,6 +73,26 @@ CHATBOT_RE = re.compile(
     re.IGNORECASE,
 )
 
+# DOC-PLAIN-08 exemption: a required AI-feature disclosure (UX-AI-01, UX-AI-07).
+# A line with a `data-ai-disclosure` attribute or an `<!-- ai-disclosure -->`
+# marker, and the paragraph that line starts, are skipped by the badge arm only.
+DISCLOSURE_RE = re.compile(r"data-ai-disclosure|<!--\s*ai-disclosure\s*-->")
+
+
+def _disclosure_lines(text: str) -> set[int]:
+    """1-based line numbers inside a disclosure element or marked paragraph."""
+    skip: set[int] = set()
+    inside = False
+    for line_no, line in enumerate(text.split("\n"), start=1):
+        if not line.strip():
+            inside = False
+        elif DISCLOSURE_RE.search(line):
+            inside = True
+        if inside:
+            skip.add(line_no)
+    return skip
+
+
 # DOC-PLAIN-11. The list Google's developer documentation style guide publishes.
 TIME_RE = re.compile(
     r"\b(as of this writing|currently|does not yet|eventually|in the future|"
@@ -158,6 +178,7 @@ def check(path: str, text: str, root: str) -> list[Finding]:
     prose = sp.strip(text)
     lines = prose.split("\n")
     out: list[Finding] = []
+    disclosure = _disclosure_lines(text)
 
     for line_no, line in enumerate(lines, start=1):
         for m in BANNED_RE.finditer(line):
@@ -169,7 +190,7 @@ def check(path: str, text: str, root: str) -> list[Finding]:
                     f"{BANNED_MARKS[m.group(0)]} in prose, rewrite the sentence",
                 )
             )
-        for m in CHATBOT_RE.finditer(line):
+        for m in CHATBOT_RE.finditer("" if line_no in disclosure else line):
             out.append(
                 Finding(
                     path,

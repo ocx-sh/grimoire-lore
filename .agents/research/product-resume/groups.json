@@ -1,0 +1,89 @@
+{
+ "ux": {
+  "name": "ux",
+  "prefix": "ux-",
+  "mapFile": "ux-topic-map.md",
+  "territory": "the design of software interfaces themselves: web applications and sites, the VS Code extension and other GUIs, command-line and terminal interaction above the already-pinned stream and exit-code contracts, interface text, accessibility, state handling, forms, navigation, onboarding flows inside the product, interfaces for AI features, and how a team measures whether an interface works.",
+  "siblings": "marketing (positioning, messaging, landing-page and README copy, SEO and answer engines, pricing pages, email and release communication, analytics, marketing law, brand assets) and channels (LinkedIn, YouTube, video production, microblogs, communities, launch venues, GitHub and registries as channels, audio and events, short-form video, blogs)",
+  "scouts": [
+   "ux-topic-map/accessibility.md",
+   "ux-topic-map/ai-products.md",
+   "ux-topic-map/canonical-guides.md",
+   "ux-topic-map/codified-systems.md",
+   "ux-topic-map/content-design.md",
+   "ux-topic-map/devtools.md",
+   "ux-topic-map/failure-corpus.md",
+   "ux-topic-map/onboarding-conversion.md",
+   "ux-topic-map/patterns-ia.md",
+   "ux-topic-map/practitioner.md",
+   "ux-topic-map/recent-shifts.md",
+   "ux-topic-map/research-measurement.md"
+  ],
+  "audits": [
+   "ui-code-posture.md",
+   "site-shape.md",
+   "cli-first-run.md",
+   "exemplar-design-systems.md",
+   "config-inventory.md"
+  ]
+ },
+ "marketing": {
+  "name": "marketing",
+  "prefix": "marketing-",
+  "mapFile": "marketing-topic-map.md",
+  "territory": "positioning and messaging for software products and for software services; the copy of landing pages, READMEs, service pages, pricing pages, release notes and email; search and answer-engine discoverability of a built site; pricing and packaging as far as an agent writes or builds it; owned-audience communication (email, newsletters, changelogs); measurement and attribution; the law and platform policy that binds marketing claims; brand voice, naming and the visual and demo assets that travel with a product. Platform-agnostic.",
+  "siblings": "ux (the design of the interface itself: accessibility, forms, states, navigation, in-product onboarding, CLI interaction, AI-feature interfaces) and channels (everything specific to one platform or venue: LinkedIn, YouTube, video production, microblogs, communities, launch venues, GitHub and registries as channels, audio and events, short-form video, blogs)",
+  "scouts": [
+   "marketing-topic-map/analytics-attribution.md",
+   "marketing-topic-map/brand-voice-assets.md",
+   "marketing-topic-map/canonical-guides.md",
+   "marketing-topic-map/codified-law-policy.md",
+   "marketing-topic-map/developer-marketing.md",
+   "marketing-topic-map/failure-corpus.md",
+   "marketing-topic-map/landing-conversion.md",
+   "marketing-topic-map/lifecycle-email.md",
+   "marketing-topic-map/practitioner.md",
+   "marketing-topic-map/pricing-plg.md",
+   "marketing-topic-map/recent-shifts.md",
+   "marketing-topic-map/seo-geo.md",
+   "marketing-topic-map/services-b2b.md"
+  ],
+  "audits": [
+   "messaging-inventory.md",
+   "distribution-posture.md",
+   "site-shape.md",
+   "exemplar-landing-pages.md",
+   "exemplar-readmes.md",
+   "config-inventory.md"
+  ]
+ },
+ "channels": {
+  "name": "channels",
+  "prefix": "channel-",
+  "mapFile": "channel-topic-map.md",
+  "territory": "everything specific to one distribution platform or venue for software products and services: LinkedIn (organic posts, company pages, people and founder-led content, ads), YouTube (packaging, retention, search, Shorts, policy), producing video about software, microblogs (X, Bluesky, Mastodon, Threads), communities (Hacker News, Reddit, Lobsters, Discord, own forums), launch venues and launch sequencing, GitHub and package registries as channels, podcasts, webinars and conference talks, short-form vertical video, and owned publishing (blog, syndication). Each platform's dated limits, formats, policies and norms, and the decisions they drive. LinkedIn and YouTube are the owner's named priorities and must each be a selected topic.",
+  "siblings": "ux (the design of the interface itself) and marketing (platform-agnostic positioning, messaging, landing-page and README copy, SEO and answer engines, pricing pages, email, analytics, marketing law, brand assets)",
+  "scouts": [
+   "marketing-topic-map/channel-audio-events.md",
+   "marketing-topic-map/channel-communities.md",
+   "marketing-topic-map/channel-github-as-channel.md",
+   "marketing-topic-map/channel-launch-platforms.md",
+   "marketing-topic-map/channel-linkedin-ads.md",
+   "marketing-topic-map/channel-linkedin-company-people.md",
+   "marketing-topic-map/channel-linkedin-organic.md",
+   "marketing-topic-map/channel-microblog.md",
+   "marketing-topic-map/channel-owned-publishing.md",
+   "marketing-topic-map/channel-short-form-video.md",
+   "marketing-topic-map/channel-video-production-software.md",
+   "marketing-topic-map/channel-youtube-packaging-retention.md",
+   "marketing-topic-map/channel-youtube-search-shorts-policy.md"
+  ],
+  "audits": [
+   "exemplar-youtube-channels.md",
+   "distribution-posture.md",
+   "exemplar-readmes.md",
+   "messaging-inventory.md",
+   "config-inventory.md"
+  ]
+ }
+}

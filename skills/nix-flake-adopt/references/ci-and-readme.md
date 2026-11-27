@@ -40,7 +40,7 @@ jobs:
           persist-credentials: false
       - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
         with:
-          install_url: https://releases.nixos.org/nix/nix-2.35.2/install
+          install_url: https://releases.nixos.org/nix/nix-2.35.6/install
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
       - uses: nix-community/cache-nix-action@7df957e333c1e5da7721f60227dbba6d06080569 # v7
         with:
@@ -92,7 +92,7 @@ jobs:
           persist-credentials: false
       - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
         with:
-          install_url: https://releases.nixos.org/nix/nix-2.35.2/install
+          install_url: https://releases.nixos.org/nix/nix-2.35.6/install
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
       - name: lix
         if: matrix.leg == 'lix'

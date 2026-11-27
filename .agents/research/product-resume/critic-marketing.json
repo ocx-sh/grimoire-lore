@@ -1,0 +1,27 @@
+{
+ "ok": false,
+ "missing": [
+  "site-shape.md smell 10: 8 of 17 nav entries are `planned: true`, so the nav advertises pages that do not exist. The map neither selects nor defers it. Fix: defer it or hand it to ux.",
+  "messaging-inventory.md smells 8 and 9: 4 of 10 docs sites have 0 page descriptions, and lore.ocx.sh's head description is 35 chars and says nothing. The map defers title-description as P2 with no stated reason, and the measured evidence is not cited there.",
+  "site-shape.md smell 1 and exemplar-landing-pages.md smell 9: 8 of 10 docs homes have no positioning or CTA, and doc hubs are tagged `doc_type: landing`, so a landing rule would fire on them. The map has no row, selection or deferral. It is a scoping condition the marketing-copy rule must state, or a hand-off to docs-quality.",
+  "messaging-inventory.md smell 4: Grimoire has 3 nouns and 4/5/8-item type lists. The canonical-sentence dive covers the category noun only. Add the vocabulary and type-list drift to that dive, or defer it with a reason.",
+  "exemplar-landing-pages.md smell 3 (grimoire.rs has 2 h1 elements) and distribution-posture.md smell 8 (9 of 10 www-setup release bodies carry hash-shaped words). Neither is named as selected or deferred. The first sits inside the hero dive's starting points only."
+ ],
+ "weakBriefs": [
+  "page-offer-terms: the fleet has no pricing page and no paid tier, and the map defers all of MKT-PRICE until a paid tier exists. The dive still needs an invented-offer rule for a surface that does not exist, plus a 12-page jurisdiction survey. Defer it, or cut it to the one-line never-invent-prices rule.",
+  "page-offer-terms and measure-consent-free-config: both ask for EU, UK and German statutory detail (PAngV, Art. 11a, DFA status, the Data (Use and Access) Act commencement date) to be fetched. Those are exactly the facts a worker will write from memory. The briefs name some primary sources but give no per-law fetch-or-omit instruction and no refresh-by field.",
+  "voice-ai-tells-author-facts: the 'author-only fact per section reduces slop' hypothesis has no measurement. The 200-comment HN coding is Show HN, which is channels evidence. No test shows the rule works, so the checkable rule is only a warning smell list.",
+  "proof-popularity-metrics: 'threshold below which a count is left out' is not derivable from any source named, so the worker will invent it."
+ ],
+ "overlaps": [
+  "proof-popularity-metrics vs measure-metric-validity: both cover star API restriction, registry download semantics, 14-day GitHub traffic and fleet download pulls. Merge them or split on which one owns the metric semantics.",
+  "claims-statistic-provenance vs measure-metric-validity: both define a record of definition, window, source and date. Specify one record schema and have the other reference it.",
+  "positioning-canonical-sentence vs page-repo-card: both own the README line 1 vs GitHub About description agreement and the `gh repo view` description check. Draw the line: canonical-sentence owns the drift check, repo-card owns the fields only.",
+  "seo-head-metadata-set vs page-repo-card: both cover the share image (1280x640 GitHub social preview vs og:image) and the og:description agreement.",
+  "proof-testimonials-reviews vs voice-ai-disclosure: both cover FTC AI avatars and endorsements, and AI-generated testimonials. Name which dive owns that.",
+  "proof-testimonials-reviews vs proof-case-study-contract: the same logo and badge consent questions and the same exemplar sample. Fold the case study into the testimonials dive.",
+  "claims-performance-benchmarks vs claims-statistic-provenance: the objective-claim test and the dated-evidence record are one deliverable seen from two sides.",
+  "Channels territory: page-repo-card (GitHub About, topics and social preview is channel-github-as-channel ground), proof-popularity-metrics (GitHub acceptable use, fake stars), the share-image sizes for LinkedIn/Facebook/X in seo-head-metadata-set, the HN comment sampling in voice-ai-tells-author-facts, and release-coverage-order's announcement ordering. Each should defer to channels in a single line.",
+  "UX territory: page-hero-construction's 2 h1 elements and the doc_type landing mis-tag are structure and a11y issues. Hand the h1 count to ux."
+ ]
+}

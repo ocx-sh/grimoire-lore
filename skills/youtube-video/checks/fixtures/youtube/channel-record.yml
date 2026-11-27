@@ -1,0 +1,16 @@
+# Dated channel record (CH-YT-12). Fixture values only.
+channel_id: UCabcdefghijklmnopqrstuv
+checked: 2026-11-20
+description: Short tutorials for mytool, a command-line tool
+links: https://example.com/install
+first_link: https://example.com/install
+audience: not made for kids
+dubbing: Publish manually (checked 2026-11-20)
+default_language: en
+contact_email: video@example.com
+verification_tier: Advanced
+custom_thumbnails: Enabled
+clickable_links: Enabled
+chapters: Enabled
+test_and_compare: not listed
+related_video_on_short: Enabled

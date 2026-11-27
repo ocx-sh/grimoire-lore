@@ -10,7 +10,7 @@ consolidates:
   - csharp-api/csharp-api-result-construction.md
   - csharp-api/csharp-api-behavioral-compat.md
 date: 2026-10-11
-revised: 2026-10-11
+revised: 2026-11-27
 ---
 
 # Public API surface, its evolution, and its errors (consolidated)
@@ -56,6 +56,8 @@ Citation keys. **[SS]** = [surface-shape](csharp-api/csharp-api-surface-shape.md
       - **Assertion form.** [EG #26] verifies with `grep ThrowsAsync<`, but [BC §2] measured that `ThrowsAsync<T>` over-fails on an allowed derived type. Decided: rows assert catch semantics.
 13. **A change to any pinned outcome is a MAJOR (≥1.0; minor at 0.y.z), even when the API only grew.** A new leaf thrown for an existing exit passed pack as "added lines only = minor" and was a major (`v3-major-leaf`), so CS-API-14 now reads the table diff too.
     - Exceptions are never snapshotted in this suite. That agrees with [snap] SNAP-2(c), and [BC §6] measured the snapshot red on the allowed change and green on 4 of 5 breaks.
+
+**Settled by the 2026-11 delta (union):** a C# 15 `closed` hierarchy with System.Text.Json inference cannot replace the internal-constructor union of CS-API-08. An unseen tag throws and `IgnoreUnrecognizedTypeDiscriminators` has no concrete base to fall back to (measured on SDK 11.0.100, 2026-11-27). The ApiCompat half stays open.
 
 **Documented gaps (accepted, not open questions):**
 - Nobody runs the fourth cell, the previous SDK against the current real ocx [BC §8].
@@ -134,7 +136,7 @@ Conventions:
 - Why:
   - An `internal` constructor closes the hierarchy on C# 14: a consumer subclass is `CS1729` ([SS] `j-hier-red`).
   - `[JsonPolymorphic]` silently merges unknown, missing and wrong-case tags [json].
-  - `closed` is `CS8652`/`CS0656` on SDK 10.0.401 [SS §11].
+  - `closed` is `CS8652` on SDK 10.0.401 [SS §11] and `CS0656` on SDK 11.0.100 targeting `net10.0`; it is legal only on `net11.0`, and there an unseen tag still throws, because `IgnoreUnrecognizedTypeDiscriminators` has no concrete base to fall back to, since the closed base is implicitly abstract (measured 2026-11-27).
   - Adding or removing a `union` case is DISALLOWED by library-change-rules, so every new ocx `type` would break consumers.
 - Check: for each `grep -rnE --include='*.cs' '^\s*public\s+abstract\s+class\s+(\w+)' src` hit, the type declares `internal <Name>()`; `grep -rnE --include='*.cs' '^\s*public\s+(closed|union)\b|\[JsonPolymorphic' src` prints nothing.
 - Red: **yes** for `CS1729` ([SS] `j-hier-red`) and `CS8652` (`h-closed-on-sdk10`); the greps were not watched.
@@ -412,7 +414,7 @@ Where results meet code:
 **CS-API-18 (MUST).** Nothing in `src` uses a `private` or `protected` constructor under `[JsonConstructor]`, a `private` or `protected` accessor under `[JsonInclude]`, or `[JsonRequired]` on a get-only property. No `NoWarn`, `#pragma` or `.editorconfig` line suppresses `SYSLIB1222` or `SYSLIB1038`.
 - Why:
   - The net8.0 (STJ 10.0.12) and net10.0 generators reject non-`internal` hidden members. That is `SYSLIB1222`/`SYSLIB1038`, an error under the unconditional TWAE, and a runtime throw if suppressed ([RC] V1, V2; same on SDK 8.0.425).
-  - .NET 11 RC1 accepts them (`sdk11/b3`, `b4j`). Its docs say so, and dotnet/runtime#77016 (2022) says the opposite about `internal`, so agents copy both wrong ways. Neither is usable while net8.0 is the floor [RC §2].
+  - .NET 11 accepts them on `net11.0` only (RC1 as of 2026-10: `sdk11/b3`, `b4j`; GA documents it, and SDK 11.0.100 still reported both on the `net10.0` target of the same project, measured 2026-11-27). Its docs say so, and dotnet/runtime#77016 (2022) says the opposite about `internal`, so agents copy both wrong ways. Neither is usable while net8.0 is the floor [RC §2].
   - `[JsonRequired]` on a get-only property throws `InvalidOperationException ... does not specify a setter` at first use (`b2j`).
 - Check (each prints nothing):
   - `rg -U -n --glob '*.cs' -e '\[JsonConstructor\][^\n]*\n\s*(private|protected)' -e '\[JsonInclude\][^\n]*(private|protected)\s+(set|init)' src`
@@ -687,7 +689,7 @@ Ranked by how often each bites, judged from three things: how common it is in th
 
 **Subareas that deserve another research round.**
 - **`csharp-api-behavioral-compat-windows`.** Run the [BC] fixture on the Windows host (SDK 10.0.102 via `cmd.exe`). Does the `FakeAsOcx` copy to `ocx.exe` launch `Ocx.Fake.dll`? Does `launch-missing-binary` map `Win32Exception` to `Reason=NotFound`? Does a killed child's `-1` stay out of `OcxCommandException`? CS-ERR-14 depends on all three, and none was run off Linux.
-- **`csharp-api-csharp15-unions`, after .NET 11 GA (Nov 2026).** Can a `closed` hierarchy with a registered `Unknown` arm replace the `internal`-constructor union pattern without breaking on new ocx tags? What does ApiCompat report for union case changes? This has not been run anywhere ([EG] Contested). Also re-check whether the .NET 11 generator's private-`[JsonConstructor]` support and its present-keys-only setters change CS-API-17/18 once the floor moves past net8.0 [RC Contested].
+- **`csharp-api-csharp15-unions`.** .NET 11 went GA on 2026-11-10. The inference half is answered: a `closed` hierarchy with System.Text.Json inference cannot replace the `internal`-constructor union, because an unseen tag throws (see the Verdict and CS-API-08). Still open: what does ApiCompat report for union case changes (not run anywhere, [EG] Contested), and can a custom `TypeClassifier` map unseen shapes to an `Unknown` case (undetermined). Also re-check whether the .NET 11 generator's private-`[JsonConstructor]` support and its present-keys-only setters change CS-API-17/18 once the floor moves past net8.0 [RC Contested].
 
 ## Sub-artifacts
 
@@ -746,3 +748,9 @@ Ranked by how often each bites, judged from three things: how common it is in th
     - Added owner decisions 5 (closed results) and 6 (CS-TEST-01 wording), and the round `csharp-api-behavioral-compat-windows`.
     - Documented gaps moved to the Verdict.
   - **Key sources:** added the STJ immutability page, `JsonSourceGenerator.Parser.cs` and compatibility categories. Dropped Azure's implementation page, SYSLIB0051 and Skeet; the sub-artifacts still cite them.
+
+- **2026-11-27, delta refresh** (decision file: `refresh-2026-11/csharp-quality.md`):
+  - **CS-API-08 changed in place:** Why-line for `closed` now states `CS8652` on SDK 10.0.401 and `CS0656` on SDK 11.0.100 for `net10.0`, legal only on `net11.0`, and the measured unseen-tag throw.
+  - **CS-API-18 changed in place:** the .NET 11 sentence now says acceptance is on `net11.0` only, with GA documented and SDK 11.0.100 still reporting both diagnostics on `net10.0`.
+  - **Verdict:** added the settled union finding. **Open questions:** the union round is narrowed to the ApiCompat half and the `TypeClassifier` question.
+  - **Frontmatter:** `revised` set to 2026-11-27.

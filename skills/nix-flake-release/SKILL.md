@@ -239,9 +239,9 @@ the pinned nixpkgs at every release, then run both advisory legs with
 global registry:
 
 ```sh
-# The floor is the first name printed (2026-09-27: nix_2_31). Substitute it for nix_2_31 on the next line.
+# The floor is the first name printed (2026-11-27 on nixos-unstable: nix_2_34). Substitute it for nix_2_34 on the next line.
 nix eval --json --inputs-from . nixpkgs#nixVersions --apply 'v: builtins.filter (n: builtins.match "nix_2_[0-9]+" n != null && (builtins.tryEval (v.${n}.version or null)).success) (builtins.attrNames v)' | jq -r '.[0]'
-nix shell --inputs-from . nixpkgs#nixVersions.nix_2_31 --command nix flake check --no-build
+nix shell --inputs-from . nixpkgs#nixVersions.nix_2_34 --command nix flake check --no-build
 nix shell --inputs-from . nixpkgs#lix --command nix flake check --no-build
 ```
 
@@ -332,7 +332,7 @@ nix run --no-write-lock-file "github:$OWNER/$REPO/$TAG" -- --version 2>/dev/null
 
 State the promise in the release notes in NIX-REL-12's terms: gated on CppNix
 at the version CI pins (2.35.2 on 2026-09-27), minimum the computed floor
-(`nixVersions.nix_2_31` = 2.31.5), Lix advisory, Determinate Nix untested, and
+(on nixos-unstable, 2026-11-27: `nixVersions.nix_2_34` = 2.34.9), Lix advisory, Determinate Nix untested, and
 flakes experimental per RFC 136. Update both numbers from steps 1 and 5 at each release. Never write "works with Nix".
 
 ### 8. A `package.nix` with a fetcher `src`: the nix-update contract

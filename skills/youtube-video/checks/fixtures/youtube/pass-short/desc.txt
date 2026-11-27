@@ -1,0 +1,8 @@
+Try it: https://example.com/install
+
+Pin a tool version with one command, then run it.
+
+Full walkthrough: the linked video.
+
+#mytool
+Track: Example Song by Example Artist (CC BY)

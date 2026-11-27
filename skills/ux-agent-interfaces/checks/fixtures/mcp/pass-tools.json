@@ -1,0 +1,12 @@
+{"jsonrpc":"2.0","id":2,"result":{"tools":[
+  {"name":"mytool_search","description":"Search the index for packages whose name or keywords match a query. Use when you do not yet know the exact reference. Use mytool_describe instead when you already have one reference. Returns at most 50 rows with total and truncated fields; set limit or cursor to read more. Read only.",
+   "inputSchema":{"type":"object","properties":{"query":{"type":"string","description":"Text to match against names and keywords."},"limit":{"type":"integer","description":"Maximum rows to return, 1 to 50."}},"required":["query"]},
+   "outputSchema":{"type":"object"},
+   "annotations":{"readOnlyHint":true,"destructiveHint":false,"idempotentHint":true,"openWorldHint":true}},
+  {"name":"mytool_describe","description":"Show the full record of one package. Use when you have an exact reference. Use mytool_search instead to find a reference. Returns the record as JSON.",
+   "inputSchema":{"type":"object","properties":{"ref":{"type":"string","description":"Exact package reference, such as registry/name:tag."}},"required":["ref"]},
+   "annotations":{"readOnlyHint":true,"destructiveHint":false,"idempotentHint":true,"openWorldHint":true}},
+  {"name":"mytool_status","description":"Report whether the local install matches the lock. Use before an update. Needs no arguments. Writes are enabled only when the server starts with --allow-writes.",
+   "inputSchema":{"type":"object","additionalProperties":false},
+   "annotations":{"readOnlyHint":true,"destructiveHint":false,"idempotentHint":true,"openWorldHint":false}}
+]}}

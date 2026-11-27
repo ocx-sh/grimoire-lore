@@ -1,0 +1,201 @@
+{
+ "today": "2026-11-27",
+ "group": {
+  "name": "channels",
+  "prefix": "channel-",
+  "mapFile": "channel-topic-map.md",
+  "territory": "everything specific to one distribution platform or venue for software products and services: LinkedIn (organic posts, company pages, people and founder-led content, ads), YouTube (packaging, retention, search, Shorts, policy), producing video about software, microblogs (X, Bluesky, Mastodon, Threads), communities (Hacker News, Reddit, Lobsters, Discord, own forums), launch venues and launch sequencing, GitHub and package registries as channels, podcasts, webinars and conference talks, short-form vertical video, and owned publishing (blog, syndication). Each platform's dated limits, formats, policies and norms, and the decisions they drive. LinkedIn and YouTube are the owner's named priorities and must each be a selected topic.",
+  "siblings": "ux (the design of the interface itself) and marketing (platform-agnostic positioning, messaging, landing-page and README copy, SEO and answer engines, pricing pages, email, analytics, marketing law, brand assets)",
+  "scouts": [
+   "marketing-topic-map/channel-audio-events.md",
+   "marketing-topic-map/channel-communities.md",
+   "marketing-topic-map/channel-github-as-channel.md",
+   "marketing-topic-map/channel-launch-platforms.md",
+   "marketing-topic-map/channel-linkedin-ads.md",
+   "marketing-topic-map/channel-linkedin-company-people.md",
+   "marketing-topic-map/channel-linkedin-organic.md",
+   "marketing-topic-map/channel-microblog.md",
+   "marketing-topic-map/channel-owned-publishing.md",
+   "marketing-topic-map/channel-short-form-video.md",
+   "marketing-topic-map/channel-video-production-software.md",
+   "marketing-topic-map/channel-youtube-packaging-retention.md",
+   "marketing-topic-map/channel-youtube-search-shorts-policy.md"
+  ],
+  "audits": [
+   "exemplar-youtube-channels.md",
+   "distribution-posture.md",
+   "exemplar-readmes.md",
+   "messaging-inventory.md",
+   "config-inventory.md"
+  ]
+ },
+ "selection": {
+  "mapPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/channel-topic-map.md",
+  "selected": [
+   {
+    "slug": "channel-github",
+    "label": "GitHub and package registries as the active channel",
+    "idFamily": "CH-GH",
+    "question": "Which repository, release and registry surfaces must every fleet repository set, to which published limits, and which GitHub and registry numbers may a team report, so GitHub works as the distribution channel it already is?",
+    "dives": [
+     {
+      "slug": "gh-repo-card",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/channel-github/gh-repo-card.md"
+     },
+     {
+      "slug": "gh-release-announcement",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/channel-github/gh-release-announcement.md"
+     },
+     {
+      "slug": "gh-registry-listings",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/channel-github/gh-registry-listings.md"
+     },
+     {
+      "slug": "gh-signal-validity",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/channel-github/gh-signal-validity.md"
+     }
+    ]
+   },
+   {
+    "slug": "channel-agent-boundary",
+    "label": "Cross-platform publishing boundary, labels and dated registries",
+    "idFamily": "CH-CORE",
+    "question": "On every public channel, what may an agent do by itself, which platform-native labels must it set and where, and how does a channel skill keep its platform facts and the organisation's channel list from going stale?",
+    "dives": [
+     {
+      "slug": "core-agent-action-boundary",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/channel-agent-boundary/core-agent-action-boundary.md"
+     },
+     {
+      "slug": "core-platform-labels",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/channel-agent-boundary/core-platform-labels.md"
+     },
+     {
+      "slug": "core-facts-and-channel-inventory",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/channel-agent-boundary/core-facts-and-channel-inventory.md"
+     }
+    ]
+   },
+   {
+    "slug": "channel-linkedin",
+    "label": "Person-led LinkedIn posts",
+    "idFamily": "CH-LI",
+    "question": "What must a person-led LinkedIn post about a developer tool contain, in which format and with which link placement and disclosure, so that LinkedIn distributes it and it breaks none of LinkedIn's rules?",
+    "dives": [
+     {
+      "slug": "li-limits-and-fold",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/channel-linkedin/li-limits-and-fold.md"
+     },
+     {
+      "slug": "li-format-and-reach-evidence",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/channel-linkedin/li-format-and-reach-evidence.md"
+     },
+     {
+      "slug": "li-policy-and-ai-content",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/channel-linkedin/li-policy-and-ai-content.md"
+     }
+    ]
+   },
+   {
+    "slug": "channel-youtube",
+    "label": "Small company YouTube channel",
+    "idFamily": "CH-YT",
+    "question": "What should a small developer-tool company channel publish, and how must each upload be packaged and configured, given that company channels draw about a twenty-ninth of educator-channel audiences?",
+    "dives": [
+     {
+      "slug": "yt-upload-metadata-contract",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/channel-youtube/yt-upload-metadata-contract.md"
+     },
+     {
+      "slug": "yt-format-portfolio",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/channel-youtube/yt-format-portfolio.md"
+     },
+     {
+      "slug": "yt-content-policy-and-series-risk",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/channel-youtube/yt-content-policy-and-series-risk.md"
+     },
+     {
+      "slug": "yt-measurement-and-testing",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/channel-youtube/yt-measurement-and-testing.md"
+     }
+    ]
+   },
+   {
+    "slug": "channel-terminal-video",
+    "label": "Terminal and product demo recordings",
+    "idFamily": "CH-VID",
+    "question": "Which recording pipeline should a software team use for product demos on each surface (docs site, README, YouTube, LinkedIn, Shorts), and which legibility, accessibility and secret-scrub gates must every recording pass?",
+    "dives": [
+     {
+      "slug": "vid-pipeline-choice",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/channel-terminal-video/vid-pipeline-choice.md"
+     },
+     {
+      "slug": "vid-legibility-thresholds",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/channel-terminal-video/vid-legibility-thresholds.md"
+     },
+     {
+      "slug": "vid-accessibility",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/channel-terminal-video/vid-accessibility.md"
+     },
+     {
+      "slug": "vid-scrub-and-reproducibility",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/channel-terminal-video/vid-scrub-and-reproducibility.md"
+     }
+    ]
+   },
+   {
+    "slug": "channel-communities",
+    "label": "Developer community venues",
+    "idFamily": "CH-COM",
+    "question": "On which developer communities may a software team announce its tool, and what does each venue's contract require of the post, the account and the maker?",
+    "dives": [
+     {
+      "slug": "com-hn-contract",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/channel-communities/com-hn-contract.md"
+     },
+     {
+      "slug": "com-venue-rules",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/channel-communities/com-venue-rules.md"
+     },
+     {
+      "slug": "com-own-community-home",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/channel-communities/com-own-community-home.md"
+     }
+    ]
+   },
+   {
+    "slug": "channel-launch",
+    "label": "Launch venues and launch shape",
+    "idFamily": "CH-LAUNCH",
+    "question": "Which eligibility and link-target gates must each launch venue's entry pass, and which launch shape and venue order does the measurable record support for a small developer-tool team?",
+    "dives": [
+     {
+      "slug": "launch-venue-gates",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/channel-launch/launch-venue-gates.md"
+     },
+     {
+      "slug": "launch-shape-evidence",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/channel-launch/launch-shape-evidence.md"
+     }
+    ]
+   },
+   {
+    "slug": "channel-microblog",
+    "label": "Microblog variants",
+    "idFamily": "CH-MB",
+    "question": "Which counting, link, alt-text, card and account-proof rules must each microblog variant pass, and where should a release post put its link?",
+    "dives": [
+     {
+      "slug": "mb-variant-validator",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/channel-microblog/mb-variant-validator.md"
+     },
+     {
+      "slug": "mb-link-and-thread-defaults",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/channel-microblog/mb-link-and-thread-defaults.md"
+     }
+    ]
+   }
+  ]
+ }
+}

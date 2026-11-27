@@ -5,6 +5,7 @@ phase: 5 (consolidation)
 model: opus
 date_consolidated: 2026-08-14
 last_revised: 2026-08-14 (wave 5 — starlark, rmcp, provenance)
+revised: 2026-11-27
 consolidates: 15 sub-artifacts under rust-ecosystem/, plus ecosystem-map.md
 grounded_by: ocx @ HEAD, grimoire @ HEAD, ocx-mirror @ HEAD (all read 2026-08-14)
 rule_prefix: ECO
@@ -213,10 +214,20 @@ shipped, not what a user's `install` received. ocx's `shim.rs` calls
 the attestation and the verify is a human PR-checklist item: a live SEC-32
 violation sitting inside the very feature that would fix it.
 
-**blake3, camino and jiff stay out.** All three were scout recommendations that
-collide with already-pinned decisions (`performance.md`: "No mmap, no BLAKE3";
-`platform-and-paths.md`: "Pinned: camino is not adopted"; PLAT-30: exactly one
-datetime crate).
+**blake3 and camino stay out.** Both were scout recommendations that collide
+with already-pinned decisions (`performance.md`: "No mmap, no BLAKE3";
+`platform-and-paths.md`: "Pinned: camino is not adopted"). jiff was the third
+in 2026-08, held out by PLAT-30 (exactly one datetime crate). The 2026-11 delta
+flipped it: chrono is flagged unmaintained by RUSTSEC-2026-0543 (2026-09-14)
+and jiff 1.0 shipped on 2026-11-15, so `jiff` 1.x is now the crate of record
+for date and time. PLAT-30 still holds, so the move is one tracked migration
+under a removal-condition ignore, never a second datetime crate in the graph.
+
+**The 2026-11 delta also moved three crate rows.** `zip` needs a floor of
+9.0.5, because eight October 2026 advisories are patched only in 9.x. `console`
+0.16 reads the colour variables itself, so the earlier "reads none of them"
+claim is withdrawn. `dirs` 7.0 changed where Windows preference files are
+looked up. See the Revision log for the rows.
 
 ## Crates of record
 
@@ -226,7 +237,7 @@ reach for instead, and why it is wrong here.
 
 | Job | Crate | Version line as of 2026-08 | Why this one | What it displaces |
 |---|---|---|---|---|
-| CLI parsing | `clap` (derive) + `clap_complete` | 4.6.6 (Aug 2026); `clap_builder` 4.6.2 | Unchallenged; already links `anstream`/`anstyle` for its own help rendering | `structopt` — folded into clap 3, own docs say "maintenance mode", last release 2022-01-18 |
+| CLI parsing | `clap` (derive) + `clap_complete` | 4.6.6 (Aug 2026); `clap_builder` 4.6.2 | Unchallenged; already links `anstyle` always, and `anstream` under its default `color` feature, for its own help rendering | `structopt` — folded into clap 3, own docs say "maintenance mode", last release 2022-01-18 |
 | Error types | `thiserror` (libs) + `anyhow` (binary boundary) | thiserror 2.0.18 in tree | The lib/binary split the error rules already enforce; thiserror 2 requires a direct dependency per deriving crate | `error-chain`, `failure` (long dead), `miette`/`eyre`/`snafu` (a third presentation layer over rules that already own presentation) |
 | Async runtime | `tokio`, `features = ["full"]` | 1.53.1 (Jul 2026); 1.52 pinned in tree | Load-bearing for hyper/reqwest; nothing else is a real option here | `async-std` — its own crates.io `description` reads "Deprecated in favor of `smol`"; `smol` would be a second runtime |
 | HTTP client | `reqwest`, `default-features = false, features = ["rustls"]` | 0.13.x (0.13.4 vendored) | The feature pin is load-bearing, not boilerplate: it is what keeps exactly one crypto provider in the graph | `ureq` (still sync-only by design after the 3.0 rewrite), raw `hyper` 1.x (no high-level `Client` since 1.0) |
@@ -241,22 +252,22 @@ reach for instead, and why it is wrong here.
 | Archive — gzip | `flate2` with the default pure-Rust `miniz_oxide` backend, pinned explicitly | 1.1.9 in tree | Default backend is pure Rust; PERF-18 requires the pin so a `cargo update` cannot silently pick up a C backend | `zlib`/`zlib-ng` feature variants — a C decoder on untrusted input for a format that does not need one |
 | Archive — zstd | `zstd` (C `zstd-sys`) | 0.13 in tree | The deliberate asymmetry: no equal-maturity pure-Rust decoder is in the graph. `ruzstd` exists and is unevaluated | — (revisit if `ruzstd` is shown production-ready) |
 | Archive — xz | **No winner yet.** Criterion: one decoder per format, and the pure-Rust one wins when both can serve every path | `lzma-rust2` 0.16.3 (released 2026-08-05) is the target; `liblzma` 0.4.8 (2026-08-09) is the incumbent on the async path | Both are actively maintained — this is not a "drop the dead one" call. The argument is one fewer C parser on untrusted input and one fewer cross-compilation liability across 8 triples | The choice is blocked on moving `SyncIoBridge` one layer earlier; until then, `deny.toml` cannot express it |
-| Archive — zip | `zip`, `default-features = false, features = ["deflate"]` | 8.6 in tree; floor 2.3.0 (SEC-07) | Pure-Rust deflate as configured. Never the crate's own `extract()` methods — those are the CVE-2025-29787 surface | `deflate-flate2-zlib`/`-zlib-ng` features |
+| Archive — zip | `zip` ≥ 9.0.5, `default-features = false, features = ["deflate"]` | floor 9.0.5 (2026-11 delta); 8.6 in tree as of 2026-08-14; SEC-07's older floor is 2.3.0 | Pure-Rust deflate as configured. Never the crate's own `extract()` methods — those are the CVE-2025-29787 surface. October 2026 added eight more advisories, patched only in 9.x: RUSTSEC-2026-0367, -0368, -0369, -0429, -0545, -0546, -0547 and -0548 (patched in 9.0.5); four sit in `extract()` itself or its symlink path | `ZipArchive::extract()`, `zip` 8.x, and the `deflate-flate2-zlib`/`-zlib-ng` features |
 | Hashing | `sha2` | current | Contractually mandatory: OCI digests are `sha256` (occasionally `sha512`) per spec | `blake3` — rejected by the pinned performance decision ("No mmap, no BLAKE3"); `crc32fast` (nothing needs it) |
-| Terminal styling and detection | `console` for rendering and TTY primitives; `anstyle-query` + `colorchoice` for env detection; `anstream`/`anstyle` stay clap-internal | console 0.16.x; anstream 1.0.0 (Feb 2026) | `console::Term`'s cursor/line primitives have no `anstream` equivalent, and `strip_ansi_codes`/`truncate_str` are already named by SEC-34/SEC-36. `console` does **not** read `NO_COLOR` itself — that glue is ours to write once | `ansi_term` (unmaintained since 2019), `owo-colors`, `colored`, `termcolor` — any of them is a third colour decision in one process |
+| Terminal styling and detection | `console` for rendering and TTY primitives; `anstyle-query` + `colorchoice` for env detection; `anstream`/`anstyle` stay clap-internal | console 0.16.x; anstream 1.0.0 (Feb 2026) | `console::Term`'s cursor/line primitives have no `anstream` equivalent, and `strip_ansi_codes`/`truncate_str` are already named by SEC-34/SEC-36. `console` 0.16 reads all four colour variables itself, in its own precedence: `CLICOLOR_FORCE` overrides `NO_COLOR`, and an empty `NO_COLOR` disables colour, which the NO_COLOR spec says it must not. The application resolves the chain once and calls `set_colors_enabled`, which overrides those defaults. `anstyle` always, and `anstream` under clap's default `color` feature, arrive transitively via `clap_builder` | `ansi_term` (unmaintained since 2019), `owo-colors`, `colored`, `termcolor` — any of them is a third colour decision in one process |
 | TUI | `ratatui` + `crossterm` | ratatui 0.30.2 (Jun 2026), crossterm 0.29 | Maintained continuation of tui-rs; 0.30 split the crate into a workspace and bumped MSRV to 1.86 / edition 2024 | `tui-rs` (crate `tui`) — last release 2022-08-14, README asks for a maintainer |
 | Progress | `indicatif` with `MultiProgress::suspend()` | 0.18.x | Auto-hides on a non-TTY or `TERM=dumb` with no manual gate, and `suspend()` is the primitive that stops a log line tearing a bar | Hand-rolled `\r…\x1b[K` writes; `tracing-indicatif`'s `IndicatifLayer` (see ocx's `adr_progress_architecture` concurrency objection before adopting) |
 | Tracing | `tracing` + `tracing-subscriber` (+ `tracing-log` to bridge) | tracing 0.1.44 (Dec 2025) | Structured spans over a multi-stage async pipeline | `log` + `env_logger` for new code; `metrics`, `opentelemetry` (OBS-12 bans OTel in a short-lived CLI) |
 | MCP server SDK | `rmcp`, `features = ["schemars", "transport-io"]` — **stdio only** | 3.1.2 (2026-08-07); grimoire locks 3.1.0 | Official SDK from the spec-owning org; `adr_multi_registry_mcp.md` rejected hand-rolled JSON-RPC. The feature pin is the security control: all five GHSA advisories are HTTP-transport or OAuth-scoped and grimoire compiles neither. `ServerHandler`'s default `discover()` makes the server Dual-era for free | Hand-rolled JSON-RPC; `transport-streamable-http-*`, `server-side-http`, `auth`, `auth-client-credentials-jwt`, `reqwest` — each pulls a second `hyper`/`reqwest`/`oauth2`/`jsonwebtoken` stack past ECO-04 |
 | Embedded scripting (ocx only) | `starlark` pinned `=0.13.0`, plus `allocative` (supertrait-required) and the three co-released siblings | 0.14.2 (2026-06-05); ocx pins 0.13.0 (2024-12-13) | Language and stdlib are I/O-free by construction — every capability comes from ocx's own host module. Upstream states it does not aim for API stability between releases and publishes all four crates from one workspace in one pass, so exact pins are deliberate. Zero advisories across all five crates (OSV + RustSec, 2026-08-14) | `rhai` (better built-in limits, wrong syntax, whole-corpus rewrite), `rune` (161K downloads, same churn risk), `mlua` (C library vs `unsafe_code = "forbid"`), plain TOML (cannot express the assertions) |
 | Signature / attestation verification | **None, deliberately** — SEC-32 requires the docs to say so. `sigstore` (sigstore-rs) is the crate if the deferred ADR lands | sigstore 0.14.0 (2026-05-22); self-declared unstable until 1.0 | Its README says it "does not handle verification of attestations yet" — the in-toto/DSSE envelope SLSA, PEP 740 and npm provenance all use — so it cannot verify the thing that matters most. If adopted: `default-features = false, features = ["cosign", "rustls-tls"]` (its default is `native-tls`, which SEC-14 bans) and its `oci-client = "0.17"` joins the ECO-13 check. Its own crypto already runs on `aws-lc-rs`, so no second provider | Adding it on defaults; shelling out to the `cosign` binary (chicken-and-egg pinning under SEC-21/22); `notation`; anything designed against ghcr.io's referrers endpoint (ECO-54) |
-| Config paths | `dirs` | 6.0.0 (Jan 2025) | One crate across the family. `directories::ProjectDirs` computes a *different* macOS path (reverse-DNS bundle ID) than `dirs`' base lookups, so switching relocates existing users' data | `directories` — better API, wrong migration cost |
+| Config paths | `dirs` | 7.0 (2026-09-05); 6.0.0 was Jan 2025 | One crate across the family. Now developed on Codeberg (the GitHub `dirs-dev/dirs-rs` repository is archived). 7.0 moved Windows `preference_dir` from LocalAppData to RoamingAppData, so an upgrade changes where existing preference files are looked up. `directories::ProjectDirs` computes a *different* macOS path (reverse-DNS bundle ID) than `dirs`' base lookups, so switching relocates existing users' data | `directories` — better API, wrong migration cost |
 | Temp files and atomic writes | `tempfile`, landing with `NamedTempFile::persist` | current | The create-in-temp-then-rename pattern needs no dedicated crate; SEC-11 already forbids predictable `.tmp` names | `atomicwrites` (low adoption), `format!("{}.tmp", …)` in a shared directory |
 | File locking | `fs4` | 1.1.0 (Apr 2026) | Actively-developed superset of fs2: `rustix` over `libc`, async-runtime support | `fs2` — last release 2018-01-06 |
 | Glob matching | `globset` | current | One matcher across the family; ocx's `glob` is the loser. Two glob crates in sibling tools means divergent pattern semantics for the same user-visible feature | `glob`, `walkdir`, `ignore` (no ignore-file semantics are in play) |
 | Retry / backoff | `backon` | 1.6.0 (Oct 2025) | The crate the ecosystem converged on for sync+async. PKG-16 owns the *policy* (retryable set, full jitter, `Retry-After` override); this is only the mechanism | `backoff` (frozen), `tokio-retry` (stalled), `tokio-retry2` (community fork) |
 | Rate limiting | **No winner.** Criterion: adopt only when ghcr.io throttling is actually observed | `governor` 0.10.4 (Dec 2025) is the crate if the trigger fires | A pre-emptive client-side limiter is a guess at someone else's quota, and a wrong guess is slower than the server's own 429 plus PKG-16's backoff | — |
-| Date / time | `chrono`, `default-features = false, features = ["clock"]` | 0.4.45 (Jun 2026) | PLAT-30 pins exactly one datetime crate in the graph; chrono is the incumbent with the serde surface | `jiff` — better DST semantics, but a second datetime crate emits a second serde representation of the same lockfile field |
+| Date / time | `jiff` 1.x | jiff 1.0 (2026-11-15), with a commitment to 1.x; chrono 0.4.45 (Jun 2026) | RUSTSEC-2026-0543 (2026-09-14) flags chrono unmaintained with no patched version, and its maintainer points to jiff. PLAT-30 still pins exactly one datetime crate in the graph, so moving existing chrono code is a tracked migration under a removal-condition ignore, never a reflex rewrite, and a second crate would emit a second serde representation of the same lockfile field. `chrono-tz` no longer tracks tz database updates | `chrono` (formerly `default-features = false, features = ["clock"]`, the incumbent as of 2026-08) |
 | UTF-8 paths | **None.** `std::path` + `dunce` | — | `camino` is a pinned non-adoption in `platform-and-paths.md` | `camino` |
 | Testing — CLI harness | `assert_cmd` + `predicates` | current | Exit code and stream assertions separately (TEST-10) | `trycmd`, `snapbox` — pinned non-adoptions |
 | Testing — property | `proptest` (+ `proptest-state-machine`) | current | TEST-14 pins it explicitly | `quickcheck` |
@@ -267,7 +278,7 @@ reach for instead, and why it is wrong here.
 | Benchmarking | `hyperfine` primary; `criterion` only once a hyperfine number justifies it | hyperfine 1.20.0 (Nov 2025) | Measures whole subcommands, which is what a user of `ocx add` feels. PERF-03/PERF-25 own the invocation flags | `criterion` as the default harness, `divan` |
 | Fuzzing | `cargo-fuzz` + `arbitrary` | current | TEST-18: structure-aware targets on hand-rolled parsers (tar headers, OCI manifests, reference strings) | `bolero`, `afl` |
 | Secrets in memory | `secrecy::SecretString` + `Zeroizing` for intermediates | current | Stops `Debug`/`Display` leaks and zeroizes on drop; explicitly does **not** cover clones, `String` conversions, or a heap dump | Nothing; the gap is covered by hand at each named boundary |
-| Credential storage | `docker_credential` (vendored fork) as tier 1; `keyring-core` + a platform backend crate as the unlanded tier 2 | keyring-core 1.0.0 (2026-04-21); keyring 4.1.6 (2026-08-01) is a legacy wrapper | Tier 1 inherits whatever the user already configured via `docker login` and stores nothing new | Monolithic `keyring` v2/v3 — that API shape no longer exists |
+| Credential storage | `docker_credential` (vendored fork) as tier 1; `keyring-core` + a platform backend crate as the unlanded tier 2 | keyring-core 1.x (1.0.0 on 2026-04-21; 1.1.0 on 2026-11-20); keyring 4.1.6 (2026-08-01) is a legacy wrapper | Tier 1 inherits whatever the user already configured via `docker login` and stores nothing new | Monolithic `keyring` v2/v3 — that API shape no longer exists |
 | Unused dependencies | `cargo-shear` | 1.13.4 (2026-08-11); MSRV floor rustc 1.95 | Biweekly cadence, `--fix`, `--format=github`. Already pinned by TOOL-05 | `cargo-machete` (0.9.2, 2026-04-15 — 4x the downloads, four months staler), `cargo-udeps` (nightly to run) |
 | Cross-compilation | `cargo-zigbuild` (Linux/musl) + `cargo-xwin`/`xwin` (Windows MSVC) + native runners (Darwin) | zigbuild 0.23.0 (2026-06-18); cargo-xwin 0.23.1 (2026-08-13); xwin 0.10.0 (2026-08-12) | Covers all eight shipped triples with no Docker daemon | `cross` — alive but structurally cannot build `apple-darwin` (no image exists) or `-msvc` |
 | Release pipeline | `dist` — crates.io package name is still **`cargo-dist`** | 0.32.0 (2026-05-21); both repos pin 0.31.0 | Generates the release workflow, per-target archives, checksums, installers, and interlocks with `cargo-auditable`/`cargo-cyclonedx` | `release-plz`, `cargo-release`, `cargo-workspaces` — dist + cocogitto + git-cliff already own version, tag, changelog, release. Also: `cargo install dist` installs a squatted 0.0.0 crate |
@@ -620,7 +631,8 @@ Ranked by how often it bites, not by severity.
     their naming pattern exactly.
 16. **Concluding `anstream`/`anstyle` are "not in use" because they are absent
     from `Cargo.toml`**, then either adding them redundantly or ignoring that
-    clap's own help output already routes through them.
+    clap's own help output already routes through `anstyle`, and through
+    `anstream` under clap's default `color` feature.
 17. **Serializing a report straight into an MCP tool result.**
     `serde_json::to_string(report)` is the obviously correct line, the tests
     pass, the JSON is valid — and it ships registry-controlled text into a
@@ -823,6 +835,8 @@ Deduplicated across all sixteen inputs, best-of only.
   "See also" successor lists, download trends; HTML-only, no API
 - [RUSTSEC-2025-0141](https://rustsec.org/advisories/RUSTSEC-2025-0141.html) —
   bincode's cessation, the second independent source behind ECO-03
+- [RUSTSEC-2026-0543](https://rustsec.org/advisories/RUSTSEC-2026-0543.html) —
+  chrono flagged unmaintained (2026-09-14), the basis for the date-and-time flip
 
 **TLS and cross-compilation**
 - [reqwest `async_impl/client.rs` @ v0.13.4](https://github.com/seanmonstar/reqwest/blob/v0.13.4/src/async_impl/client.rs) —
@@ -887,8 +901,9 @@ Deduplicated across all sixteen inputs, best-of only.
   breaking releases behind ECO-34
 - [docs.rs ratatui `Frame` @ 0.25.0](https://docs.rs/ratatui/0.25.0/ratatui/struct.Frame.html) —
   proves the non-generic shape predates the 0.26 wave
-- [docs.rs console](https://docs.rs/console/latest/console/) — confirms the
-  colour flags are explicit and the crate does not read `NO_COLOR` itself
+- [docs.rs console](https://docs.rs/console/latest/console/) — documents the
+  explicit colour switch; the 2026-11 delta read the 0.16 source and found that
+  the crate also reads the colour variables itself, with its own precedence
 - [no-color.org](https://no-color.org/) — presence of a non-empty value disables
 - [docs.rs toml_edit](https://docs.rs/toml_edit/latest/toml_edit/) — the
   comments/spaces/relative-order guarantee and the dotted-key exception
@@ -1008,6 +1023,20 @@ and the fix is an amendment to `crates-of-record.md` — item 1 on the promotion
 list. Consequence going forward: any cross-file ECO reference must name the file
 it means. `crates-of-record.md` also advertises "the 54-rule ECO set", which was
 an over-count of a 43-rule file until this wave; it is now accurate.
+
+### 2026-11-27 — delta refresh (2026-08-14 to 2026-11-27)
+
+Decision file: [refresh-2026-11/rust-cargo.md](refresh-2026-11/rust-cargo.md).
+No ECO ID is added, changed or dropped. The crates-of-record rows below changed
+in place, and the Verdict carries the settled positions.
+
+- Crates table, Date / time: flipped to `jiff` 1.x with `chrono` displaced, per RUSTSEC-2026-0543 and jiff 1.0 (refresh-2026-11/rust-cargo.md). PLAT-30 is unchanged. Verdict "blake3, camino and jiff" paragraph reworded to match.
+- Crates table, Archive — zip: floor moved to 9.0.5 and the eight October 2026 advisories named (refresh-2026-11/rust-cargo.md). ECO-24 is unchanged.
+- Crates table, Terminal styling: corrected the claim that `console` does not read `NO_COLOR`; it reads all four variables in its own precedence, and the application resolves the chain and calls `set_colors_enabled`. ECO-31 and ECO-32 are unchanged (refresh-2026-11/rust-cargo.md). Key sources `docs.rs console` line and Agent failure modes #16 updated to match.
+- Crates table, CLI parsing: `anstyle` always and `anstream` only under clap's default `color` feature (refresh-2026-11/rust-cargo.md).
+- Crates table, Config paths: `dirs` 7.0 (2026-09-05) moved Windows `preference_dir`; the Codeberg note was added (refresh-2026-11/rust-cargo.md).
+- Crates table, Credential storage: `keyring-core` 1.x, with 1.1.0 on 2026-11-20 (refresh-2026-11/rust-cargo.md). ECO-37 is unchanged.
+- Key sources: added RUSTSEC-2026-0543.
 
 ## Promotion list for published rules
 

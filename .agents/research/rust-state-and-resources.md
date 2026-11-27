@@ -8,7 +8,7 @@ consolidates:
   - rust-state-and-resources/ownership-shapes-clones-and-interior-mutability.md
   - rust-state-and-resources/cas-hardlinks-and-concurrent-publish.md
 date: 2026-08
-revised: 2026-08
+revised: 2026-11-27
 ---
 
 # Rust State and Resources
@@ -227,9 +227,15 @@ guarded data is the specific broken form.
 *Revised 2026-08:* the "identical bytes, last rename wins" rationale was an
 overclaim under hardlinks; the lock-free conclusion survives but for a different
 reason.
-*Verify:* `rg -n '\.lock_exclusive\(|lock_shared\(|LockedFile' <src>` — hits
-cluster on lockfile/index/pointer code, not blob writes; each lock target is in
-the locks directory unless its inode provably never rotates.
+*Revised 2026-11-27:* the verification's fs4 rename note was wrong. fs4 1.0
+renamed `lock_exclusive` to `lock` and `try_lock_exclusive` to `try_lock`,
+matching std `File::lock`/`try_lock`.
+*Verify:* `rg -n '\.lock_exclusive\(|\.try_lock_exclusive\(|\.try_lock\(|lock_shared\(|LockedFile' <src>`
+— the grep keeps the old and the current spellings, and a blocking `.lock()` on
+a `File` shares its spelling with `Mutex::lock`, so also read every `.lock()` on
+a value opened from a path. Hits cluster on lockfile/index/pointer code, not
+blob writes; each lock target is in the locks directory unless its inode
+provably never rotates.
 
 **STATE-10 — Either detect a network-filesystem cache directory and degrade
 explicitly, or document that the cache must be local.** CONSIDER
@@ -790,6 +796,10 @@ Ranked by how often each bites an unattended agent working in this codebase.
 - **AI-agent failure modes** gained in-place install-tree editing (3),
   force-overwriting an `AlreadyExists` (5), `st_nlink`-as-liveness (10), and
   Windows error-code branching (13); the list was re-ranked accordingly.
+- **2026-11-27 — STATE-9 verification corrected** per
+  `refresh-2026-11/rust-quality.md`: fs4 1.0 renamed `lock_exclusive` to `lock`
+  and `try_lock_exclusive` to `try_lock`, so the grep keeps both spellings and a
+  blocking `.lock()` on a `File` is read by hand. The rule text is unchanged.
 
 ## Sub-artifacts
 

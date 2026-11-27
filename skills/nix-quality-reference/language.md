@@ -33,7 +33,7 @@ compliant twins (flakes committed to the index with `git add -A`, built-in
 `derivation` only, so no nixpkgs fetch was needed and the store was warm for
 the one Lix fetch). The rows assume:
 
-- **CppNix 2.35.2** runs the gate. CppNix 2.31.5 (the consumer floor) behaves
+- **CppNix 2.35.2** runs the gate. CppNix 2.31.5 (the consumer floor on 2026-09-27) behaves
   the same on every row measured here.
 - **Lix 2.95.2** is the only implementation that rejects mixed-`rec` merges
   (NIX-LANG-05). CppNix through 2.35.2 accepts all four shapes silently

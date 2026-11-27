@@ -72,7 +72,7 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.py' | xargs
 | ID | Rule | Verification | Severity |
 |---|---|---|---|
 | PY-MODEL-04 | A closed set of string values is a `StrEnum`, not the same literal retyped in three modules. A typo in a bare literal is a silently-never-matching branch; a typo in a member name is an `AttributeError` at import. Legacy `class X(str, Enum)` becomes `StrEnum`. | `ruff check --select UP042 .` — but **`UP042` is inert below `target-version = "py311"`, and ruff infers that from `requires-python`**: a package declaring `>=3.10` while actually running 3.12 gets an empty, meaningless pass. Pin `target-version` to the interpreter in use or this check cannot go red. For the repeated-literal half, take each string that names a state, kind or outcome and run see block PY-MODEL-04 against it — three or more modules is the finding, one or two is not. | SHOULD |
-| PY-MODEL-05 | Every `datetime` is timezone-aware. A naive one compares and subtracts against an aware one by raising `TypeError`, and serializes to a timestamp nothing downstream can place. | `ruff check --select DTZ .` — empty output is the pass. `DTZ` is not in ruff's default selection, so a gate that omits the family reports nothing and looks identical to a clean run. | SHOULD |
+| PY-MODEL-05 | Every `datetime` is timezone-aware. A naive one compares and subtracts against an aware one by raising `TypeError`, and serializes to a timestamp nothing downstream can place. | `ruff check --select DTZ .` — empty output is the pass. Since ruff 0.17.0 only `DTZ002`, `DTZ003` and `DTZ004` are in the default selection, so a gate that does not select the whole family misses a naive `datetime(...)`, `datetime.now()` or `strptime()` and looks identical to a clean run. | SHOULD |
 
 ```sh
 # PY-MODEL-04
@@ -117,5 +117,6 @@ is making sure the families are actually selected.
    diff on the next three runs as proof it is deterministic.
 7. Serializing a `set` into an artifact. Iteration order varies per process,
    and only a cross-run comparison with a changed `PYTHONHASHSEED` shows it.
-8. Assuming a clean `ruff check` covers this file. `DTZ` and `B909` are opt-in;
-   with neither selected the command exits 0 over code that violates both.
+8. Assuming a clean `ruff check` covers this file. `B909` and every `DTZ` rule
+   except `DTZ002`–`DTZ004` are opt-in; with neither family selected the command
+   exits 0 over code that violates both.

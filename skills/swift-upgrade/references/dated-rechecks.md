@@ -99,7 +99,7 @@ probe filepath "cannot find type 'FilePath' in scope" "SE-0529 stdlib FilePath"
 probe typedtask "Please submit a bug report" "typed-throws Task closure crash"
 ```
 
-Expected output today, on 6.4.0 and on 6.3.3 (watched, measured 2026-10-10):
+Expected output today, on 6.4.3 and on 6.3.3 (watched 2026-11-27; the same four lines on 6.4.0, measured 2026-10-10):
 
 ```text
 STILL   SE-0526 withDeadline (exit 1)
@@ -132,8 +132,12 @@ Trigger: every toolchain and SwiftPM bump. Run probes 2 and 3 of the script.
 
 - SE-0540 `defaultSwiftSettings:` was accepted with modifications on 2026-09-06. The
   implementation, [swiftlang/swift-package-manager#10033](https://github.com/swiftlang/swift-package-manager/pull/10033),
-  was open and blocked on 2026-10-10 (read). STILL means the shared loop of SW-PKG-18
-  stays. FLIPPED means the loop body moves into the argument unchanged.
+  merged to main on 2026-10-20, is on `release/6.5.x` and is in no 6.4.x tag through
+  6.4.3 (read 2026-11-27). It is gated at `PackageDescription` 6.5, so a tools-6.2
+  library keeps the loop. STILL means the shared loop of SW-PKG-18 stays. FLIPPED
+  means a manifest at tools 6.5 or higher can move the loop body into the argument
+  unchanged. The probe manifest is at tools 6.2, so FLIPPED with a nonzero exit means
+  only the diagnostic text changed.
 - SE-0529 `FilePath` in the standard library was accepted with modifications and is
   not shipped. STILL means `FilePath` comes from `SystemPackage` (SW-IO-01). Whether
   the stdlib type and `SystemPackage.FilePath` are the same type on macOS is
@@ -172,7 +176,7 @@ On 6.4.0 this exits 1 with an `undefined reference` link error, and exits 0 with
 engine of 6.4.1 or later means [swift-build#1763](https://github.com/swiftlang/swift-build/pull/1763)
 is in the toolchain. That is the removal condition of the SW-REL-03 fallback: report it
 and stop pinning `--build-system native`. The fix was merged to main on 2026-09-22 and
-backported to the 6.4.x branches, and 6.4.0 was the only 6.4 tag on 2026-10-10 (read).
+backported to the 6.4.x branches. 6.4.0 was the only 6.4 tag on 2026-10-10, and 6.4.1, 6.4.2 and 6.4.3 were tagged since (read 2026-11-27).
 The green half on 6.4.1 is `unverified: read only`.
 
 ## U10.5 swift-syntax prebuilts and the tag list

@@ -25,8 +25,12 @@ Contents: [Dates and Defaults](#dates-and-defaults) · [The Guard Shape](#the-gu
 
 Measured 2026-09-27 against rustc and clippy 1.93.1, pyright 1.1.414 and
 TypeScript 7.0.2. The lint and type behaviour in the exhaustiveness and RAII
-rows was watched on planted edits at those versions. `checks/` is this skill's
-own directory; run each script from the repository root. Every grep here is
+rows was watched on planted edits at those versions. Re-read 2026-11-27:
+pyright 1.1.414 and TypeScript 7.0.2 are still the latest releases, and the
+rustc and clippy changelogs through 1.100.1 change none of the lints named here
+except `let_underscore_must_use`, which since clippy 1.99 decides `#[must_use]`
+as the compiler does, so the GRD-10 audit sample may read differently now.
+`checks/` is this skill's own directory; run each script from the repository root. Every grep here is
 triage: read each hit, and treat none as a finding for matching alone.
 
 Defaults an adopter may override once, with the reason recorded: the 3-line
@@ -198,7 +202,7 @@ NAME=ExampleGuard; git ls-files -z --cached --others --exclude-standard -- ':(gl
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
 | GRD-09 | Where a comment says a match must stay exhaustive, let the checker in the table above own it, and shrink the comment by GRD-08. In Rust, scope the deny to the fn or impl, never workspace-wide, and never write it as `#[expect]`, which silences the lint it names. | The compilers already reject a missed variant; the gap is a later wildcard or default arm. Workspace-wide, the wildcard lint flagged 41 to 232 sites per workspace, mostly test `_ => panic!` arms and legitimate wildcards on foreign `#[non_exhaustive]` enums. In Python, `case _: raise` satisfies pyright's coverage check. | The claim-without-deny `comm` line and the Python `case _:` read above. Then the planted proof per language: the checker must fail. | SHOULD |
-| GRD-10 | Mark every Drop-guard type `#[must_use]`, which catches a bare `acquire();` statement. Give each named guard binding one line naming the rename hazard: renamed to `_`, it releases at once. Enable rustc's `let_underscore_drop` in `[workspace.lints.rust]` only after triaging the workspace's existing `let _ =` sites; it is the lint that catches the `_` rename, which `#[must_use]` does not. Run clippy's `let_underscore_must_use` and `let_underscore_untyped` once as an audit, never as standing lints. | Renaming `_lock` or `_slot` to `_` is routine cleanup that drops the guard immediately. clippy's `let_underscore_lock` sees only std lock guards, never a domain wrapper. `let_underscore_drop` fires on every `let _ =` of a type that needs drop, every discarded `io::Result` included: 39 to 163 sites across three workspaces measured, and under `warnings = "deny"` every hit must clear before the enable lands. The two clippy lints read 70% noise in a 30-hit sample. | Planted proof: rename a guard binding to `_` on a scratch copy; `cargo clippy` must fail. To size the triage, on a scratch copy set `warnings = "deny"` to `"warn"` and run `cargo clippy --all-targets -- -W let_underscore_drop`. Never add `-A warnings`: it silences the `-W` in either order, and the run exits 0 with zero hits. | SHOULD |
+| GRD-10 | Mark every Drop-guard type `#[must_use]`, which catches a bare `acquire();` statement. Give each named guard binding one line naming the rename hazard: renamed to `_`, it releases at once. Enable rustc's `let_underscore_drop` in `[workspace.lints.rust]` only after triaging the workspace's existing `let _ =` sites; it is the lint that catches the `_` rename, which `#[must_use]` does not. Run clippy's `let_underscore_must_use` and `let_underscore_untyped` once as an audit, never as standing lints. | Renaming `_lock` or `_slot` to `_` is routine cleanup that drops the guard immediately. rustc's deny-by-default `let_underscore_lock` sees only std lock guards and clippy's only `parking_lot` ones, so neither sees a domain wrapper. `let_underscore_drop` fires on every `let _ =` of a type that needs drop, every discarded `io::Result` included: 39 to 163 sites across three workspaces measured, and under `warnings = "deny"` every hit must clear before the enable lands. The two clippy lints read 70% noise in a 30-hit sample. | Planted proof: rename a guard binding to `_` on a scratch copy; `cargo clippy` must fail. To size the triage, on a scratch copy set `warnings = "deny"` to `"warn"` and run `cargo clippy --all-targets -- -W let_underscore_drop`. Never add `-A warnings`: it silences the `-W` in either order, and the run exits 0 with zero hits. | SHOULD |
 
 ## What Agents Get Wrong Here
 

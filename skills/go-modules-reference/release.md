@@ -5,8 +5,9 @@ summary: The GO-REL family, covering reproducible release flags, CGO and VCS sta
 
 # Building, Stamping and Shipping Go Binaries
 
-Binds to Go 1.27.1, goreleaser 2.17.1, cosign 3.1.3, govulncheck v1.8.0 and syft
-(measured 2026-09-26).
+Binds to Go 1.27.4, goreleaser 2.20.3, cosign 3.1.6, govulncheck v1.8.0 and syft
+1.57.2 (measured 2026-09-26 on Go 1.27.1, goreleaser 2.17.1 and cosign 3.1.3;
+goreleaser and cosign re-measured 2026-11-27).
 
 Owns everything between `go build` and a published release asset: the flags a
 release binary is built with, what `go version -m` must show on it, how
@@ -37,8 +38,8 @@ not the `go` line.
   `vcs.modified`) and `GOAMD64`.
 - **go 1.24:** `Main.Version` is derived from the VCS tag, with `+dirty` on a
   modified tree. Before 1.24 the `--version` fallback prints `(devel)`.
-- **go 1.25 through 1.27.1:** [golang/go#74763](https://github.com/golang/go/issues/74763),
-  open and unfixed on 2026-09-26. A nested module with no `go.mod` at the git root
+- **go 1.25 and later (measured through 1.27.1):** [golang/go#74763](https://github.com/golang/go/issues/74763),
+  open with no fix CL on 2026-11-27, so no point release carries a fix. A nested module with no `go.mod` at the git root
   stamps `(devel)` with exit 0. GO-REL-14 is the layout workaround. Re-run its
   check on every new Go minor, and relax GO-REL-14 only when that build prints the tag.
 - **go 1.27.1 only:** git worktrees stamp fully, tag included. Older toolchains were not measured.
@@ -143,7 +144,7 @@ func versionString() string {
 `goreleaser release --snapshot --clean` needs no token and no signing identity.
 It exits 1 when syft is missing from `PATH` and `sboms:` is set. Asset names live
 in `dist/checksums.txt` or `dist/artifacts.json`. The build path is
-`dist/<id>_<os>_<arch>_v1/<bin>`, so `find dist -name` reports a correct asset as missing.
+`dist/<id>_<os>_<arch>_<variant>/<bin>` (`_v1` for amd64, `_v8.0` for arm64), so `find dist -name` reports a correct asset as missing.
 
 ```bash
 # asset-names: every line must print 1, and a 0 is the finding
@@ -155,10 +156,10 @@ done
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| GO-REL-07 | Start every goreleaser config with `version: 2`. Gate that with a grep, never with `goreleaser check`'s exit code. | goreleaser 2.17.1 `check` prints "yours is version: 0" and still exits 0 (measured 2026-09-26). It fails only on YAML syntax errors. | see block GO-REL-07, which lists configs that lack the line. Any output is the finding, and empty output is the pass. | MUST |
+| GO-REL-07 | Start every goreleaser config with `version: 2`. Gate that with a grep, never with `goreleaser check`'s exit code. | goreleaser 2.17.1 and 2.20.3 `check` print "yours is version: 0" and still exit 0 (measured 2026-09-26 and 2026-11-27). It fails on YAML syntax errors, and in a clone with no git remote 2.20.3 exits 1 on every config, `version: 2` included, so a local exit 1 proves nothing either. | see block GO-REL-07, which lists configs that lack the line. Any output is the finding, and empty output is the pass. | MUST |
 | GO-REL-08 | **pinned**: publish raw binaries, not archives. Set `archives: [{formats: [binary], name_template: "{{ .Binary }}-{{ .Os }}-{{ .Arch }}"}]`, `checksum.name_template: checksums.txt`, and `goos` linux, darwin, windows by `goarch` amd64, arm64. Tag releases `vX.Y.Z`. PR CI runs the snapshot whenever release config changes, then asserts the six names. | A downstream mirror or installer selects assets with anchored per-platform names and verifies them by GitHub's asset digest. goreleaser's default name is `<bin>_<version>_<os>_<arch>`, which matches none of them. | `asset-names`: six lines of `1` is the pass, and any `0` is the finding. | MUST |
-| GO-REL-09 | Emit a per-binary SPDX SBOM from goreleaser (`sboms: [{artifacts: binary}]`, syft). Never count it as covering a container image. | Go's embedded dependency list is `BuildInfo`, which survives `-s -w`, and the SBOM is its shippable twin. goreleaser's docs exclude images from SBOM cataloguing. | `grep -c -e '\.spdx\.sbom\.json$' dist/checksums.txt` prints `6` on the pass, one per platform. A lower count is the finding. | SHOULD |
-| GO-REL-10 | **pinned**: ship no container image unless one is asked for. When one is needed, build it with `ko build` (distroless static base, SPDX SBOM attached as an OCI referrer), not with goreleaser `dockers:`. | `dockers:` needs a Docker daemon and gets no SBOM. ko needs neither a Dockerfile nor a daemon. | see block GO-REL-10: a hit is the finding unless the owner asked for an image, and empty output is the pass. The ko path is unwatched (no Docker daemon in the measuring sandbox). | SHOULD |
+| GO-REL-09 | Emit a per-binary SPDX SBOM from goreleaser (`sboms: [{artifacts: binary}]`, syft). Never count it as covering a container image. | Go's embedded dependency list is `BuildInfo`, which survives `-s -w`, and the SBOM is its shippable twin. goreleaser's docs exclude images from SBOM cataloguing. | `grep -c -e '\.sbom\.json$' dist/checksums.txt` prints `6` on the pass, one per platform (the default document name ends `.sbom.json`, measured 2026-11-27). A lower count is the finding. | SHOULD |
+| GO-REL-10 | **pinned**: ship no container image unless one is asked for. When one is needed, build it with `ko build` (default base `cgr.dev/chainguard/static`, SPDX SBOM pushed under the image's `sha256-<digest>.sbom` tag and read back with `cosign download sbom`), not with goreleaser `dockers:` or `dockers_v2:`. | `dockers:` needs a Docker daemon and gets no SBOM, and `dockers_v2:` needs a Dockerfile and a buildx builder. ko needs neither a Dockerfile nor a daemon. | see block GO-REL-10: a hit is the finding unless the owner asked for an image, and empty output is the pass. The ko path is unwatched (no Docker daemon in the measuring sandbox). | SHOULD |
 
 ```sh
 # GO-REL-07
@@ -179,8 +180,8 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflow
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| GO-REL-11 | **pinned**: sign in CI only, keyless. The release job declares `permissions: {contents: write, id-token: write, attestations: write}` and runs `actions/attest-build-provenance` with `subject-checksums: dist/checksums.txt`. A `subject-path: dist/<tool>-*` matches only the SBOMs, because goreleaser 2.17.1 with `formats: [binary]` keeps each binary under `dist/<id>_<os>_<arch>_<variant>/` (measured 2026-09-26). goreleaser `signs:` runs cosign with `artifacts: checksum`, `signature: "${artifact}.sigstore.json"` and `args: [sign-blob, "--bundle=${signature}", "${artifact}", --yes]`. Never commit or store a signing key or a long-lived publish token. Never use `--output-signature` or `--output-certificate`. | Keyless signing outside CI blocks on an OAuth device flow that looks like a hang (`timeout 12 cosign sign-blob` exits 124). A stored key signs malicious builds for as long as it leaks. This reaches SLSA Build L2, not L3. | see block GO-REL-11, a presence check, where empty output is the finding. see block GO-REL-11, command 2: any hit is the finding, and empty output is the pass. Documented gap: after release, `gh attestation verify` and `cosign verify-blob --bundle` are the end-to-end proof, unwatched on the keyless path because it only runs under GitHub Actions OIDC. | MUST |
-| GO-REL-12 | Pin every `uses:` in every workflow of the repository to a 40-hex commit SHA with a `# vX.Y.Z` trailer, lint and docs workflows included, not only release workflows. `./` local actions are exempt. | Tags are mutable, and GitHub calls a full SHA the only immutable way to use an action. Unpinned refs appear in release and non-release workflows alike, so scoping by release status misses both ways. | `pin-check`: any output is the finding. | MUST |
+| GO-REL-11 | **pinned**: sign in CI only, keyless. The release job declares `permissions: {contents: write, id-token: write, attestations: write}` and runs `actions/attest` with `subject-checksums: dist/checksums.txt` (`actions/attest-build-provenance` v4 only wraps it, and an existing workflow may keep the wrapper). A `subject-path: dist/<tool>-*` matches no binary, only any SBOM named `<tool>-…`, because goreleaser 2.17.1 and 2.20.3 with `formats: [binary]` keep each binary under `dist/<id>_<os>_<arch>_<variant>/` (measured 2026-09-26 and 2026-11-27). goreleaser `signs:` runs cosign with `artifacts: checksum`, `signature: "${artifact}.sigstore.json"` and `args: [sign-blob, "--bundle=${signature}", "${artifact}", --yes]`. Never commit or store a signing key or a long-lived publish token. Never use `--output-signature`, `--output-certificate` or `--tlog-upload`. | Keyless signing outside CI blocks on an OAuth device flow that looks like a hang (`timeout 12 cosign sign-blob` exits 124). A stored key signs malicious builds for as long as it leaks. This reaches SLSA Build L2, not L3. cosign 3.1.3 and 3.1.6 accept `--output-signature` and `--tlog-upload=false` with a deprecation notice and then fail, the first without `--bundle` and the second under the default signing config (measured 2026-11-27). | see block GO-REL-11, a presence check, where empty output is the finding. see block GO-REL-11, command 2: any hit is the finding, and empty output is the pass. Documented gap: after release, `gh attestation verify` and `cosign verify-blob --bundle` are the end-to-end proof, unwatched on the keyless path because it only runs under GitHub Actions OIDC. | MUST |
+| GO-REL-12 | Pin every `uses:` in every workflow of the repository to a 40-hex commit SHA with a `# vX.Y.Z` trailer, lint and docs workflows included, not only release workflows. `./` local actions are exempt. | Tags are mutable, and GitHub's secure-use guide says to pin each action to a full-length commit SHA. Unpinned refs appear in release and non-release workflows alike, so scoping by release status misses both ways. | `pin-check`: any output is the finding. | MUST |
 
 ```sh
 # GO-REL-11
@@ -188,7 +189,7 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflow
   | xargs -0 -r grep -H -n -e 'id-token: *write' --
 # GO-REL-11, command 2
 git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.yml' ':(glob)**/*.yaml' \
-  | xargs -0 -r grep -H -n -e '--output-signature' -e '--output-certificate' -e 'COSIGN_PRIVATE_KEY' --
+  | xargs -0 -r grep -H -n -e '--output-signature' -e '--output-certificate' -e '--tlog-upload' -e 'COSIGN_PRIVATE_KEY' --
 ```
 
 ## What Agents Get Wrong Here

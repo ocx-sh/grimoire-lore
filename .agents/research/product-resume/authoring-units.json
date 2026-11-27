@@ -1,0 +1,593 @@
+[
+ {
+  "id": "ux-quality-index",
+  "order": 1,
+  "artifacts": [
+   "ux-quality",
+   "ux-quality-reference"
+  ],
+  "files": [
+   "rules/ux-quality.md",
+   "skills/ux-quality-reference/SKILL.md",
+   "skills/ux-quality-reference/verification.md",
+   "skills/ux-quality-reference/checks/page_structure.py",
+   "skills/ux-quality-reference/checks/axe-fixture.mjs",
+   "skills/ux-quality-reference/checks/ui-matrix.mjs",
+   "skills/ux-quality-reference/checks/wcag22-ids.txt",
+   "skills/ux-quality-reference/checks/fixtures/verify/"
+  ],
+  "kinds": [
+   "rule",
+   "reference-skill"
+  ],
+  "sources": [
+   "ux-a11y-authoring",
+   "ux-interface-states",
+   "ux-interface-text",
+   "ux-cli-interaction",
+   "ux-consequential-actions",
+   "ux-ai-features",
+   "ux-agent-facing-interfaces",
+   "ux-verification-claims"
+  ],
+  "idFamilies": [
+   "UX-VERIFY"
+  ],
+  "spec": "Unit: ux-quality-index"
+ },
+ {
+  "id": "ux-a11y-depth",
+  "order": 1,
+  "artifacts": [
+   "ux-quality-reference"
+  ],
+  "files": [
+   "skills/ux-quality-reference/widgets.md",
+   "skills/ux-quality-reference/focus-and-colour.md",
+   "skills/ux-quality-reference/motion-and-announcements.md",
+   "skills/ux-quality-reference/page-structure.md",
+   "skills/ux-quality-reference/checks/focus_outline.py",
+   "skills/ux-quality-reference/checks/wcag_contrast.py",
+   "skills/ux-quality-reference/checks/focus_diff.mjs",
+   "skills/ux-quality-reference/checks/colour_only.mjs",
+   "skills/ux-quality-reference/checks/fixtures/a11y/",
+   "skills/ux-quality-reference/checks/focus_opacity.mjs"
+  ],
+  "kinds": [
+   "reference-skill"
+  ],
+  "sources": [
+   "ux-a11y-authoring"
+  ],
+  "idFamilies": [
+   "UX-A11Y"
+  ],
+  "spec": "Unit: ux-a11y-depth",
+  "note": "The held-out round added UX-A11Y-37 and made focus_opacity2.mjs (the consolidation's Appendix A8) the lead generator for UX-A11Y-36 and UX-A11Y-37. Ship it as skills/ux-quality-reference/checks/focus_opacity.mjs under the plan's rules for .mjs checks (pinned versions in a header comment, printed in the output), and state in the depth file that its FAIL rows are leads and the pass condition is the crop review the consolidation describes."
+ },
+ {
+  "id": "ux-states-text-depth",
+  "order": 1,
+  "artifacts": [
+   "ux-quality-reference"
+  ],
+  "files": [
+   "skills/ux-quality-reference/states.md",
+   "skills/ux-quality-reference/forms.md",
+   "skills/ux-quality-reference/editor-extensions.md",
+   "skills/ux-quality-reference/text.md",
+   "skills/ux-quality-reference/checks/scan_wv.py",
+   "skills/ux-quality-reference/checks/text_scan.py",
+   "skills/ux-quality-reference/checks/fixtures/states/",
+   "skills/ux-quality-reference/checks/fixtures/text/",
+   "skills/ux-quality-reference/checks/form_fields.py"
+  ],
+  "kinds": [
+   "reference-skill"
+  ],
+  "sources": [
+   "ux-interface-states",
+   "ux-interface-text",
+   "ux-a11y-authoring"
+  ],
+  "idFamilies": [
+   "UX-STATE",
+   "UX-TEXT",
+   "UX-A11Y"
+  ],
+  "spec": "Unit: ux-states-text-depth",
+  "note": "The held-out round rewrote the Verify texts of UX-STATE-20, UX-STATE-27 and UX-STATE-36 to point at three Perl reference scripts (elem.pl, badtok.pl, unnamed.pl) that exist only in the consolidation's appendix. A published rule cannot point there. Port the three to ONE Python 3.11 standard-library script, skills/ux-quality-reference/checks/form_fields.py, with one subcommand per check, the same verdicts as the Perl on the appendix examples, fixtures under checks/fixtures/states/ and --self-test; the shipped rows cite that script."
+ },
+ {
+  "id": "ux-actions-ai-depth",
+  "order": 1,
+  "artifacts": [
+   "ux-quality-reference"
+  ],
+  "files": [
+   "skills/ux-quality-reference/actions.md",
+   "skills/ux-quality-reference/ai-features.md",
+   "skills/ux-quality-reference/checks/actions_scan.py",
+   "skills/ux-quality-reference/checks/model-output-cases.json",
+   "skills/ux-quality-reference/checks/fixtures/actions/"
+  ],
+  "kinds": [
+   "reference-skill"
+  ],
+  "sources": [
+   "ux-consequential-actions",
+   "ux-ai-features"
+  ],
+  "idFamilies": [
+   "UX-ACT",
+   "UX-AI"
+  ],
+  "spec": "Unit: ux-actions-ai-depth"
+ },
+ {
+  "id": "ux-cli",
+  "order": 1,
+  "artifacts": [
+   "ux-cli"
+  ],
+  "files": [
+   "skills/ux-cli/"
+  ],
+  "kinds": [
+   "skill"
+  ],
+  "sources": [
+   "ux-cli-interaction",
+   "ux-interface-text",
+   "ux-consequential-actions"
+  ],
+  "idFamilies": [
+   "UX-CLI",
+   "UX-TEXT",
+   "UX-ACT"
+  ],
+  "spec": "Unit: ux-cli"
+ },
+ {
+  "id": "ux-agent-interfaces",
+  "order": 1,
+  "artifacts": [
+   "ux-agent-interfaces"
+  ],
+  "files": [
+   "skills/ux-agent-interfaces/"
+  ],
+  "kinds": [
+   "skill"
+  ],
+  "sources": [
+   "ux-agent-facing-interfaces",
+   "ux-consequential-actions"
+  ],
+  "idFamilies": [
+   "UX-AGENT",
+   "UX-ACT"
+  ],
+  "spec": "Unit: ux-agent-interfaces"
+ },
+ {
+  "id": "ux-review",
+  "order": 1,
+  "artifacts": [
+   "ux-review"
+  ],
+  "files": [
+   "skills/ux-review/"
+  ],
+  "kinds": [
+   "skill"
+  ],
+  "sources": [
+   "ux-a11y-authoring",
+   "ux-interface-states",
+   "ux-interface-text",
+   "ux-cli-interaction",
+   "ux-consequential-actions",
+   "ux-ai-features",
+   "ux-agent-facing-interfaces",
+   "ux-verification-claims"
+  ],
+  "idFamilies": [
+   "UX-VERIFY"
+  ],
+  "spec": "Unit: ux-review"
+ },
+ {
+  "id": "marketing-quality-index",
+  "order": 1,
+  "artifacts": [
+   "marketing-quality",
+   "marketing-quality-reference"
+  ],
+  "files": [
+   "rules/marketing-quality.md",
+   "skills/marketing-quality-reference/SKILL.md",
+   "skills/marketing-quality-reference/claims.md",
+   "skills/marketing-quality-reference/trust-claims.md",
+   "skills/marketing-quality-reference/checks/claims_lint.py",
+   "skills/marketing-quality-reference/checks/fixtures/claims/"
+  ],
+  "kinds": [
+   "rule",
+   "reference-skill"
+  ],
+  "sources": [
+   "marketing-claims-evidence",
+   "marketing-positioning-record",
+   "marketing-first-screen-copy",
+   "marketing-voice-ai-authorship",
+   "marketing-discoverability",
+   "marketing-measurement",
+   "marketing-release-announcements"
+  ],
+  "idFamilies": [
+   "MKT-CLAIM"
+  ],
+  "spec": "Unit: marketing-quality-index"
+ },
+ {
+  "id": "marketing-positioning-voice-depth",
+  "order": 1,
+  "artifacts": [
+   "marketing-quality-reference"
+  ],
+  "files": [
+   "skills/marketing-quality-reference/positioning.md",
+   "skills/marketing-quality-reference/first-screen.md",
+   "skills/marketing-quality-reference/voice.md",
+   "skills/marketing-quality-reference/checks/positioning_check.py",
+   "skills/marketing-quality-reference/checks/fixtures/positioning/"
+  ],
+  "kinds": [
+   "reference-skill"
+  ],
+  "sources": [
+   "marketing-positioning-record",
+   "marketing-first-screen-copy",
+   "marketing-voice-ai-authorship"
+  ],
+  "idFamilies": [
+   "MKT-POS",
+   "MKT-PAGE",
+   "MKT-VOICE"
+  ],
+  "spec": "Unit: marketing-positioning-voice-depth"
+ },
+ {
+  "id": "marketing-discoverability-depth",
+  "order": 1,
+  "artifacts": [
+   "marketing-quality-reference"
+  ],
+  "files": [
+   "skills/marketing-quality-reference/discoverability.md",
+   "skills/marketing-quality-reference/checks/head_check.py",
+   "skills/marketing-quality-reference/checks/live_site_check.py",
+   "skills/marketing-quality-reference/checks/shingle.py",
+   "skills/marketing-quality-reference/checks/fixtures/seo/"
+  ],
+  "kinds": [
+   "reference-skill"
+  ],
+  "sources": [
+   "marketing-discoverability"
+  ],
+  "idFamilies": [
+   "MKT-SEO"
+  ],
+  "spec": "Unit: marketing-discoverability-depth"
+ },
+ {
+  "id": "marketing-procedures",
+  "order": 1,
+  "artifacts": [
+   "positioning-brief",
+   "marketing-review"
+  ],
+  "files": [
+   "skills/positioning-brief/",
+   "skills/marketing-review/"
+  ],
+  "kinds": [
+   "skill"
+  ],
+  "sources": [
+   "marketing-claims-evidence",
+   "marketing-positioning-record",
+   "marketing-first-screen-copy",
+   "marketing-voice-ai-authorship",
+   "marketing-discoverability"
+  ],
+  "idFamilies": [
+   "MKT-POS",
+   "MKT-VOICE",
+   "MKT-CLAIM",
+   "MKT-PAGE",
+   "MKT-SEO"
+  ],
+  "spec": "Unit: marketing-procedures"
+ },
+ {
+  "id": "marketing-measurement",
+  "order": 1,
+  "artifacts": [
+   "marketing-measurement"
+  ],
+  "files": [
+   "skills/marketing-measurement/"
+  ],
+  "kinds": [
+   "skill"
+  ],
+  "sources": [
+   "marketing-measurement",
+   "channel-github"
+  ],
+  "idFamilies": [
+   "MKT-MEAS"
+  ],
+  "spec": "Unit: marketing-measurement"
+ },
+ {
+  "id": "release-notes",
+  "order": 1,
+  "artifacts": [
+   "release-notes"
+  ],
+  "files": [
+   "skills/release-notes/"
+  ],
+  "kinds": [
+   "skill"
+  ],
+  "sources": [
+   "marketing-release-announcements",
+   "channel-github"
+  ],
+  "idFamilies": [
+   "MKT-REL",
+   "CH-GH"
+  ],
+  "spec": "Unit: release-notes"
+ },
+ {
+  "id": "channel-publishing",
+  "order": 1,
+  "artifacts": [
+   "channel-publishing"
+  ],
+  "files": [
+   "skills/channel-publishing/"
+  ],
+  "kinds": [
+   "skill"
+  ],
+  "sources": [
+   "channel-agent-boundary"
+  ],
+  "idFamilies": [
+   "CH-CORE"
+  ],
+  "spec": "Unit: channel-publishing"
+ },
+ {
+  "id": "github-presence",
+  "order": 1,
+  "artifacts": [
+   "github-presence"
+  ],
+  "files": [
+   "skills/github-presence/"
+  ],
+  "kinds": [
+   "skill"
+  ],
+  "sources": [
+   "channel-github",
+   "channel-communities",
+   "channel-agent-boundary"
+  ],
+  "idFamilies": [
+   "CH-GH",
+   "CH-COM"
+  ],
+  "spec": "Unit: github-presence"
+ },
+ {
+  "id": "linkedin-post",
+  "order": 1,
+  "artifacts": [
+   "linkedin-post"
+  ],
+  "files": [
+   "skills/linkedin-post/"
+  ],
+  "kinds": [
+   "skill"
+  ],
+  "sources": [
+   "channel-linkedin",
+   "channel-agent-boundary"
+  ],
+  "idFamilies": [
+   "CH-LI",
+   "CH-CORE"
+  ],
+  "spec": "Unit: linkedin-post"
+ },
+ {
+  "id": "youtube-video",
+  "order": 1,
+  "artifacts": [
+   "youtube-video"
+  ],
+  "files": [
+   "skills/youtube-video/"
+  ],
+  "kinds": [
+   "skill"
+  ],
+  "sources": [
+   "channel-youtube",
+   "channel-agent-boundary"
+  ],
+  "idFamilies": [
+   "CH-YT",
+   "CH-CORE"
+  ],
+  "spec": "Unit: youtube-video"
+ },
+ {
+  "id": "microblog-post",
+  "order": 1,
+  "artifacts": [
+   "microblog-post"
+  ],
+  "files": [
+   "skills/microblog-post/"
+  ],
+  "kinds": [
+   "skill"
+  ],
+  "sources": [
+   "channel-microblog",
+   "channel-agent-boundary"
+  ],
+  "idFamilies": [
+   "CH-MB",
+   "CH-CORE"
+  ],
+  "spec": "Unit: microblog-post"
+ },
+ {
+  "id": "terminal-demo",
+  "order": 1,
+  "artifacts": [
+   "terminal-demo"
+  ],
+  "files": [
+   "skills/terminal-demo/"
+  ],
+  "kinds": [
+   "skill"
+  ],
+  "sources": [
+   "channel-terminal-video",
+   "channel-agent-boundary"
+  ],
+  "idFamilies": [
+   "CH-VID"
+  ],
+  "spec": "Unit: terminal-demo"
+ },
+ {
+  "id": "community-post",
+  "order": 1,
+  "artifacts": [
+   "community-post"
+  ],
+  "files": [
+   "skills/community-post/"
+  ],
+  "kinds": [
+   "skill"
+  ],
+  "sources": [
+   "channel-communities",
+   "channel-agent-boundary"
+  ],
+  "idFamilies": [
+   "CH-COM",
+   "CH-CORE"
+  ],
+  "spec": "Unit: community-post"
+ },
+ {
+  "id": "launch-plan",
+  "order": 1,
+  "artifacts": [
+   "launch-plan"
+  ],
+  "files": [
+   "skills/launch-plan/"
+  ],
+  "kinds": [
+   "skill"
+  ],
+  "sources": [
+   "channel-launch",
+   "channel-communities",
+   "channel-github"
+  ],
+  "idFamilies": [
+   "CH-LAUNCH"
+  ],
+  "spec": "Unit: launch-plan"
+ },
+ {
+  "id": "integration",
+  "order": 2,
+  "artifacts": [
+   "ux-essentials",
+   "product-essentials"
+  ],
+  "files": [
+   "publish.toml",
+   "taskfile.yml",
+   "bundles/ux-essentials.toml",
+   "bundles/product-essentials.toml",
+   "docs/ux-quality.md",
+   "docs/ux-quality-reference.md",
+   "docs/ux-cli.md",
+   "docs/ux-agent-interfaces.md",
+   "docs/ux-review.md",
+   "docs/ux-essentials.md",
+   "docs/marketing-quality.md",
+   "docs/marketing-quality-reference.md",
+   "docs/positioning-brief.md",
+   "docs/release-notes.md",
+   "docs/marketing-review.md",
+   "docs/marketing-measurement.md",
+   "docs/channel-publishing.md",
+   "docs/github-presence.md",
+   "docs/linkedin-post.md",
+   "docs/youtube-video.md",
+   "docs/microblog-post.md",
+   "docs/terminal-demo.md",
+   "docs/community-post.md",
+   "docs/launch-plan.md",
+   "docs/product-essentials.md",
+   "assets/glyphs/ux.svg",
+   "assets/glyphs/product.svg",
+   "assets/lore-ux.svg",
+   "assets/lore-product.svg",
+   "rules/docs-quality.md",
+   "skills/docs-quality-reference/plain-english.md",
+   "skills/docs-quality-reference/observability.md",
+   "skills/docs-quality-reference/checks/prose.py",
+   "skills/docs-quality-reference/checks/fixtures/prose/",
+   "skills/docs-instrument/SKILL.md",
+   "skills/docs-instrument/references/reader-signals.md",
+   "rules/typescript-quality.md",
+   "skills/go-quality-reference/cli-contract.md",
+   "skills/rust-quality-reference/cli-contract.md",
+   "skills/python-quality-reference/cli-contract.md",
+   "skills/swift-quality-reference/cli-contract.md",
+   "skills/typescript-quality-reference/cli-contract.md",
+   "skills/installer-script/SKILL.md"
+  ],
+  "kinds": [
+   "rule",
+   "reference-skill",
+   "skill"
+  ],
+  "sources": [],
+  "idFamilies": [],
+  "spec": "Unit: integration"
+ }
+]

@@ -1,0 +1,6 @@
+{"version": 3, "term": {"cols": 40, "rows": 12, "type": "xterm-256color"}, "idle_time_limit": 2, "env": {"SHELL": "/bin/sh"}}
+[0.3, "o", "$ mytool serve\r\n"]
+[0.4, "o", "mytool 1.2.3\r\n"]
+[0.4, "o", "listening on localhost:50001\r\n"]
+[0.4, "o", "wrote /tmp/demo-zz99yy/out.json\r\n"]
+[0.4, "o", "started 2026-11-28T09:15:42Z\r\n"]

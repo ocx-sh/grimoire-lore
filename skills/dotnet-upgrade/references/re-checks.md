@@ -44,6 +44,9 @@ report the exact install command to the owner (DN-RULE-06).
 The former CS-PROC-23 (retired, not reused). `Process.RunAsync`, `Process.Run`, `RunAndCaptureText` and
 `ProcessStartInfo.KillOnParentExit` exist from .NET 11. No leg compiles a region behind
 `NET11_0_OR_GREATER` until a `net11.0` leg exists (CS-LANG-16), so the code waits.
+`KillOnParentExit` is supported on Windows, Linux and Android only, not on macOS: a replacement that relies
+on it guards each use with `OperatingSystem.IsWindows()`, `IsLinux()` or `IsAndroid()` and keeps another
+path for macOS. The platform analyzer (CA1416) warns at an unguarded use.
 
 ```sh
 # r1
@@ -89,12 +92,17 @@ was settable. Not probed: the grandchild of a killed child on Linux.
 
 The former CS-LANG-17 (retired, not reused). C# 15 syntax that needs no new runtime type (labeled `break` and `continue`) compiles
 into net8.0 code when `LangVersion` is one value for every leg, and `union` needs runtime types from
-.NET 11. Both are fenced with a per-TFM `LangVersion` and `NET11_0_OR_GREATER`.
+.NET 11. Both are fenced with a per-TFM `LangVersion` and `NET11_0_OR_GREATER`. At `LangVersion` 15 the
+`net11.0` leg also reads the shared source with two contextual keywords and one element form: a type or
+alias named `closed` or `union` needs an `@` escape (CS9380 for `closed`; a field of either type parses as
+a modifier or a union declaration, CS1519 or CS9370), and a method named `with` used as an element of a
+collection expression is written `@with`, or it binds as collection construction arguments.
 
 ```sh
 # r2
 . "${TMPDIR:-/tmp}/dotnet-upgrade/env.sh"; P="$L/probe"; test -f "$P/global.json" || { echo 'run r0 first'; exit 1; }
 git grep --untracked -nE -e 'class[[:space:]]+UnionAttribute' -e 'interface[[:space:]]+IUnion' -e 'IsClosedTypeAttribute' -- '*.cs'    # exit 1, no output: no local declaration (from the repository root)
+git grep --untracked -nP -e '\b(class|struct|interface|enum|record|using)\s+(closed|union)\b' -e '[\[,]\s*with\s*\(' -- '*.cs'    # exit 1, no output: each hit gets its @ escape in the commit that adds net11.0 (from the repository root)
 mkdir -p "$P/r2" && cd "$P/r2" || exit 1
 cat > Fence.csproj <<'EOF'
 <Project Sdk="Microsoft.NET.Sdk">

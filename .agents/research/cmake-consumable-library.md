@@ -16,7 +16,7 @@ inputs_also_read:
   - cmake-dependency-seam/cps-verification.md (rows 14, 19, 21, 22, 26, 27, 52)
 date: 2026-09-26
 verified: 2026-09-26
-revised: 2026-09-26
+revised: 2026-11-27
 measured_on: CMake 3.31.12, 4.3.4, 4.4.2 (ocx package exec kitware/cmake), gcc 15.2.1, Unix Makefiles and Ninja Multi-Config (ninja 1.13.2), pkg-config 2.3.0
 ---
 
@@ -394,8 +394,10 @@ hard-code `lib` or `lib64`, and never define or read `LIB_SUFFIX`,
 `SHARE_INSTALL_PREFIX`.**
 - Rationale: `CMAKE_INSTALL_LIBDIR` resolved to `lib64` on this host
   (measured), and to `lib/<multiarch-tuple>` on Debian when the prefix is
-  `/usr` (`GNUInstallDirs` doc at 4.4.2). Fedora 45's `%cmake` macro stops
-  injecting the five legacy variables (change page updated 2026-03-10).
+  `/usr` (`GNUInstallDirs` doc at 4.4.2). Fedora's change accepted for
+  Fedora 45 drops the five legacy variables from the `%cmake` macro (change
+  page updated 2026-03-10), and whether it landed in Fedora 45 is not
+  confirmed as of 2026-11-27.
   gflags still documents two of them as public knobs.
 - Verification:
   `grep -rn --include='CMakeLists.txt' --include='*.cmake' -e 'LIB_SUFFIX' -e 'LIB_INSTALL_DIR' -e 'INCLUDE_INSTALL_DIR' -e 'SYSCONF_INSTALL_DIR' -e 'SHARE_INSTALL_PREFIX' -e 'DESTINATION lib' -e 'DESTINATION "lib' -e 'ORIGIN/../lib' .`
@@ -722,15 +724,17 @@ link through the alias inside the build.**
 
 **CMK-TGT-03. In a library you author or modernise, use the `target_*`
 command instead of `include_directories`, `add_definitions`,
-`add_compile_options`, `link_directories` or `link_libraries`. In an
+`add_compile_options`, `link_directories`, `link_libraries` or
+`add_link_options`. In an
 untouched legacy tree, flag these; do not auto-rewrite them.**
 - Rationale: directory scope leaks into sibling targets and into
   `add_subdirectory` code. It does not reach install-tree consumers,
   because only `INTERFACE_*` properties export. Hence SHOULD. The calls
   cluster in llvm-project and in vcpkg port recipes.
 - Verification:
-  `grep -rnE --include='CMakeLists.txt' --include='*.cmake' -e '^[[:space:]]*include_directories\(' -e '^[[:space:]]*add_definitions\(' -e '^[[:space:]]*add_compile_options\(' -e '^[[:space:]]*link_directories\(' -e '^[[:space:]]*link_libraries\(' .`
-  Empty output = pass.
+  `grep -rnE --include='CMakeLists.txt' --include='*.cmake' -e '^[[:space:]]*include_directories\(' -e '^[[:space:]]*add_definitions\(' -e '^[[:space:]]*add_compile_options\(' -e '^[[:space:]]*link_directories\(' -e '^[[:space:]]*link_libraries\(' -e '^[[:space:]]*add_link_options\(' .`
+  Empty output = pass. On CMake 4.5 or newer the gated configure fails on
+  each of these commands, in fetched subprojects too (`CMK-CORE-06`).
 - Severity: SHOULD.
 - Floor: any.
 
@@ -898,7 +902,7 @@ and by how silent the failure is.
    an absolute `install(EXPORT … DESTINATION)`. *Check:* step (b) of the
    script (`set(_IMPORT_PREFIX "/`).
 5. **Writing `LIB_SUFFIX`, a literal `lib`, or `$ORIGIN/../lib`.** These are
-   "the lib64 fix" of older answers, and exactly what Fedora 45 stopped
+   "the lib64 fix" of older answers, and exactly what Fedora's `%cmake` is set to stop
    injecting. *Check:* CMK-INST-09's grep.
 6. **Using raw `find_package(X REQUIRED)` in a Config template.** spdlog does
    this on one line and gets it right two lines later, so copying from a
@@ -1189,3 +1193,10 @@ and by how silent the failure is.
   `set\(CMAKE_CXX_STANDARD` became `set[[:space:]]*\(CMAKE_CXX_STANDARD`.
   The old pattern missed 10 unpaired corpus setter files written
   `set (CMAKE_CXX_STANDARD …)`.
+- 2026-11-27 refresh (`refresh-2026-11/cmake-build.md`): CMK-INST-09 and failure
+  mode 5. The Fedora claim is softened from "stopped injecting" to a change
+  accepted for Fedora 45 whose landing is unconfirmed. The rule sentence is
+  unchanged.
+- 2026-11-27 refresh (`refresh-2026-11/cmake-build.md`): CMK-TGT-03 adds
+  `add_link_options` to the rule and the grep, plus a pointer to CMK-CORE-06
+  (CMake 4.5 fails these commands under the configure gate, measured there).

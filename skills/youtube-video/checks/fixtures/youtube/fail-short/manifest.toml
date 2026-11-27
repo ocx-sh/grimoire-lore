@@ -1,0 +1,31 @@
+format = "short"
+title = "Pin a tool version in one command"
+description = "desc.txt"
+tags = []
+chapters = "description"
+default_language = "en"
+default_audio_language = "en"
+made_for_kids = false
+synthetic = false
+paid_placement = false
+privacy = "private"
+thumbnail = "../thumb-short.png"
+duration_s = 200
+cta_at_s = 20
+related_video = "abc123XYZ_-"
+ai_use = "no, case: no-ai"
+
+[package]
+platform = "youtube"
+account = "example-channel"
+action = "upload-private"
+labels = ["synthetic", "paid_placement"]
+ai_role = "script drafted with AI help, human voice"
+sponsored = false
+spend = 0
+open_asks = []
+approved_by = ""
+approved_at = ""
+
+[[audio]]
+source = "own"

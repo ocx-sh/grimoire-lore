@@ -3,6 +3,7 @@ title: "Python topic map — deduplicated, adjudicated, prioritised for this cat
 phase: 3
 model: opus
 date: 2026-08-23
+revised: 2026-11-27
 agent: topic-map
 consolidates:
   - python-frame.md
@@ -930,3 +931,9 @@ up first.
 10. Rebuild the four lost AST checker scripts, or drop the four `exemplar-patterns` rules that depend on them?
 11. `release.yml` in three repos floats action tags where its sibling workflows SHA-pin, and interpolates `${{ }}` into `run:` — one cross-repo PR, or one per repo?
 12. May `zizmor --fix safe` run unattended as a bot-authored PR, or must a human apply and review each auto-fix?
+
+## Corrections
+
+- 2026-11-27: Row A3 says an unjustified cap "makes the SDK uninstallable on 3.14". That overstates the case. uv ignores an upper bound on a dependency's `Requires-Python`, so the cap hurts pip-style consumers and makes uv refuse interpreters past the cap for the project's own contributors (measured: `>=3.10,<3.12` refused 3.14.7). The same overstatement applies to PKG-P03's "resolver conflict" framing. See `refresh-2026-11/python-packaging.md` (PY-PKG-03).
+- 2026-11-27: Row PKG-P08 checks the publish workflow only for `password:` and `PYPI_TOKEN`. That check passes a workflow that sets `UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}`, which was measured as a false pass. The grep must also cover `UV_PUBLISH_(TOKEN|PASSWORD)`, and not `UV_PUBLISH_URL`, which carries no secret. See `refresh-2026-11/python-packaging.md` (PY-PKG-10).
+- 2026-11-27: Open question 1 and row A2 treat a `>=3.10` floor as merely wrong for the two harnesses. CPython 3.10 also reached end of life on 2026-10-01, so the worked floor example moves to 3.11 (PY-PKG-01). Whether a floor naming an end-of-life CPython is a finding of its own is a new owner question. See `refresh-2026-11/python-packaging.md` (PY-PKG-01, Open questions).

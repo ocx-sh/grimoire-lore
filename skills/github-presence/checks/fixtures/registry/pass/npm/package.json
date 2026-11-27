@@ -1,0 +1,7 @@
+{
+  "name": "@example/mytool-sdk",
+  "version": "0.1.0",
+  "description": "SDK for the mytool command-line tool.",
+  "keywords": ["mytool", "sdk", "cli"],
+  "repository": { "type": "git", "url": "git+https://github.com/example/mytool.git", "directory": "npm" }
+}

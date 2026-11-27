@@ -9,6 +9,7 @@ consolidates:
   - ocx-codebase-audit/exit-codes-and-cli.md
   - ocx-codebase-audit/rules-inventory.md
 date: "2026-08"
+revised: 2026-11-27
 ---
 
 # Error handling, diagnostics and panics
@@ -91,7 +92,7 @@ an agent silently violates — it drops the context rather than restructuring th
 | ERR-06 | A variant's `Display` says only what `source()` does not. Do not interpolate the source's text *and* return it from `source()`. | "Double reporting" — the same sentence appears twice whenever a reporter walks the chain. Named anti-pattern with real clap/handlebars regressions. | Read every `#[error("…: {source}")]` / `#[error("…: {0}")]` that also has `#[source]` — that shape is the violation; drop the interpolation. | MUST |
 | ERR-07 | Use `#[from]` only when the variant needs nothing beyond the source error. The moment a path, URL, digest or identifier matters, write an explicit named-field variant and `map_err` it in. | A `#[from]` field can hold only the source by construction; taking it anyway means the call-site context is dropped. | Review: for each `#[from] io::Error`-shaped variant, ask whether the message can name *which* file/URL. If not, it is under-specified. | MUST |
 | ERR-08 | Keep `Err` payloads small; box anything that pushes the enum past 128 bytes. | `Result<T, E>` is sized to its largest variant in *every* frame it propagates through, including the `Ok` path. | `cargo clippy --workspace --all-targets -- -D clippy::result_large_err`. | SHOULD |
-| ERR-09 | `[lints.clippy]` sets `unwrap_used`, `expect_used` and `panic` to at least `warn` for non-test code, with `allow-unwrap-in-tests`/`allow-expect-in-tests` in `clippy.toml`. | All three are restriction-group and **allow-by-default** — a clean clippy run proves nothing about panic policy without them. | `rg -A8 '\[lints\.clippy\]' Cargo.toml` shows all three names; then `cargo clippy --workspace --all-targets -- -D warnings`. | MUST |
+| ERR-09 | `[lints.clippy]` sets `unwrap_used`, `expect_used` and `panic` to at least `warn` for non-test code, with `allow-unwrap-in-tests`/`allow-expect-in-tests` in `clippy.toml` (`allow-unwrap-in-tests` reaches `tests/` integration-test crates only from Clippy 1.100, so an older pin flags `unwrap` there under `--all-targets`). | All three are restriction-group and **allow-by-default** — a clean clippy run proves nothing about panic policy without them. | `rg -A8 '\[lints\.clippy\]' Cargo.toml` shows all three names; then `cargo clippy --workspace --all-targets -- -D warnings`. | MUST |
 | ERR-10 | An `expect` message states the invariant that guarantees success, never the failure. Prefer `expect` over `unwrap` in production code. | `expect("parse failed")` adds nothing over `unwrap()`; `expect("hardcoded IP address is valid")` tells the next reader why the panic is unreachable. | `rg '\.expect\("' src/` and reject any message starting with a failure verb (`failed`, `could not`, `error`). | MUST |
 | ERR-11 | `main` returns `std::process::ExitCode`. `std::process::exit` never appears in library code, and in `main` only as the terminal statement. | `process::exit` skips destructors on every live stack — lockfile release, temp-dir cleanup and buffered-writer flushes are silently dropped. | `rg -n 'process::exit' src/` — every hit must be the last statement of a `main`. | MUST |
 | ERR-12 | One `#[repr(u8)] #[non_exhaustive] ExitCode` enum per workspace, sysexits-aligned (64/65/69/74/75/77/78), tool-specific codes in 79–127, with `From<ExitCode> for std::process::ExitCode`. Separate binaries with an ADR-justified separate taxonomy are the only carve-out. | Scripts and CI branch on failure class without parsing stderr; drift between binaries in one workspace breaks shared error handling. | `rg -n 'ExitCode::from\([0-9]' src/` empty (no hard-coded numerics at call sites); one `enum ExitCode` definition per workspace. | MUST |
@@ -289,3 +290,7 @@ Ranked by how often each bites, merging both sub-artifacts.
 | [std::sync::Mutex docs](https://doc.rust-lang.org/std/sync/struct.Mutex.html) | Poisoning is advisory; `into_inner()` / `clear_poison()` (1.77+). ERR-24. |
 | [miette docs](https://docs.rs/miette/latest/miette/) | What the span/label machinery actually buys — the bar ERR-25 says these tools do not clear. |
 | [rustc-dev-guide — Errors and Lints](https://rustc-dev-guide.rust-lang.org/diagnostics.html) | The `error:`/`note:`/`help:` lowercase, unpunctuated, matter-of-fact house style. ERR-05. |
+
+## Revision log
+
+- 2026-11-27: ERR-09 now states that the `allow-unwrap-in-tests` key reaches `tests/` integration crates only from Clippy 1.100; decision in `refresh-2026-11/rust-quality.md`. No other ID owned by this file changed, and no new IDs were added.

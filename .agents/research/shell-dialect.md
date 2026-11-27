@@ -8,6 +8,7 @@ consolidates:
   - shell-dialect/bash-version-gate.md
   - shell-dialect/userland-floor.md
 date: 2026-10-11
+revised: 2026-11-27
 ---
 
 # Dialect, version floors and userland (SH-DIAL, SH-USER)
@@ -125,7 +126,7 @@ Runs of this consolidation, all 2026-10-11, all in `DC/`:
 | `echo -n` | y | y | y | y | y | n (prints `-n`) | y | y | never |
 | `[[ ]]` | n | n | y | y | y | y | n | y | never in sh |
 
-Not in the matrix: `find -print0` and `xargs -0`: use, present wherever findutils is (absent on amazonlinux:2023 and opensuse/leap, FL §7); busybox 1.37 accepts them in the default Alpine build, the Kconfig option names were not fetched. `xargs -r`: use (X7). `realpath FILE` and `readlink -f`: Linux only (21 of 21 images; macOS 12.3 and 13.0 unverified: read only). `timeout`: probe, accept 124, 137 and 143 (busybox 143; uutils `-s KILL` 124, GNU 137). `function f` and a `-` in a function name: dash and posh reject them (FL §12). dash 0.5.12-7 (2024-05-17) backported pipefail, so Debian 13, Ubuntu 25.10, 26.04 and 26.10 have it and Debian 11/12, Ubuntu 20.04/22.04/24.04 do not; `dash --version` does not exist (exit 2). Upstream dash 0.5.13.5 has `$'..'` (2024-06-22) but no Debian or Ubuntu package does. `/bin/sh` on the 21 images: dash on 9, busybox ash on 3, bash on 9; the 12 non-dash images accept bashisms [FL §14].
+Not in the matrix: `find -print0` and `xargs -0`: use, present wherever findutils is (absent on amazonlinux:2023 and opensuse/leap, FL §7); busybox 1.37 accepts them in the default Alpine build, the Kconfig option names were not fetched. `xargs -r`: use (X7). `realpath FILE` and `readlink -f`: Linux only (21 of 21 images; macOS 12.3 and 13.0 unverified: read only). `timeout`: probe, accept 124, 137 and 143 (busybox 143; uutils `-s KILL` 124, GNU 137). `function f` and a `-` in a function name: dash and posh reject them (FL §12). dash 0.5.12-7 (2024-05-17) backported pipefail, so Debian 13, Ubuntu 25.10, 26.04 and 26.10 have it and Debian 11/12, Ubuntu 20.04/22.04/24.04 do not; `dash --version` does not exist (exit 2). Dash 0.5.13.x (upstream 0.5.13.6, 2026-11-11; `$'..'` since 2024-06-22) has `$'..'` and accepts pipefail. The Ubuntu 26.10 archive ships 0.5.13.5 (the `ubuntu:26.10` image still had 0.5.12-12ubuntu3 on 2026-11-27) and Alpine offers 0.5.13.1 as an optional package, but Debian 13, Ubuntu 24.04 and 26.04 stay on 0.5.12, so the sh floor still lacks `$'..'`. `/bin/sh` on the 21 images: dash on 9, busybox ash on 3, bash on 9; the 12 non-dash images accept bashisms [FL §14].
 
 **T2. Bash 3.2 failure classes** (BV F1, 47 probes on bash 3.2 to 5.3; first working version in brackets):
 
@@ -205,7 +206,7 @@ set -euo pipefail
 
 Universal on all 21 images: `readlink -f` of an existing file, `realpath`, `date -d @N`, `date -d 'YYYY-MM-DD HH:MM:SS'`, `stat -c`, `sort -V/-h`, `mktemp -d`, `sha256sum`, `base64 -d`, `install -D`.
 
-**T5. What is in the base image** (UF F1, 21 images): `sh` 21, `awk` 20 (mawk 9, gawk 8), `curl` 9, `perl` 9, `wget` 4, `python3` 3, `git` 1, `jq` 0, `rg` 0, `shasum` 0, `sha256sum` 21, `which` 13 (absent: Alma 8/9/10, AL2, AL2023, Arch, Fedora, Leap), `flock` 18, `xargs` and `find` 19, `tar` 19 (absent AL2, AL2023), `bash` 18 (absent: both Alpine tags, busybox:1.37). uutils is the default on Ubuntu 25.10 (0.2.2), 26.04 and 26.10 (0.10.0); `ubuntu-latest` moves to 26.04 in November 2026 [FL contested].
+**T5. What is in the base image** (UF F1, 21 images): `sh` 21, `awk` 20 (mawk 9, gawk 8), `curl` 9, `perl` 9, `wget` 4, `python3` 3, `git` 1, `jq` 0, `rg` 0, `shasum` 0, `sha256sum` 21, `which` 13 (absent: Alma 8/9/10, AL2, AL2023, Arch, Fedora, Leap), `flock` 18, `xargs` and `find` 19, `tar` 19 (absent AL2, AL2023), `bash` 18 (absent: both Alpine tags, busybox:1.37). uutils is the default on Ubuntu 25.10 (0.2.2), 26.04 and 26.10 (0.10.0); `ubuntu-latest` has been 26.04 since 2026-11-24. A 26.04 image without updates carries uutils 0.8.0 and 26.10 carries 0.12.0 (read 2026-11-27) [FL contested].
 
 **T6. Locale and collation** (`sort` of `b B a A _x -y é Z z 10 9 'a b' ab`, UF F5):
 
@@ -297,13 +298,13 @@ uutils also differs from GNU 9.4 on 37 of 304 cases (25.10) and 30 (26.04): erro
 - *Scope.* INST, RC, LIB shell=sh, EMIT sh targets; dash 0.5.12-2/-6ubuntu5, posh 0.14.1. A step that needs pipefail is a bash step.
 
 **SH-DIAL-09 · MUST.** Never write `$'..'` in `#!/bin/sh` or `shell=sh` code; use `printf`.
-- *Why.* dash 0.5.12-2/-6ubuntu5/-12, yash 2.52 and posh 0.14.1 print the literal `$a\tb` and exit 0: a silent wrong value. Upstream dash has it since 2024-06-22, no Debian or Ubuntu package does. Build a string with a literal tab or newline through `printf` (command substitution strips trailing newlines). [FL §6, V04]
+- *Why.* dash 0.5.12-2/-6ubuntu5/-12, yash 2.52 and posh 0.14.1 print the literal `$a\tb` and exit 0: a silent wrong value. Upstream dash has it since 2024-06-22. The Ubuntu 26.10 archive ships 0.5.13.5 and Alpine offers 0.5.13.1 as an optional package, but Debian 13, Ubuntu 24.04 and 26.04 stay on 0.5.12, so the sh floor still lacks it. Build a string with a literal tab or newline through `printf` (command substitution strips trailing newlines). [FL §6, V04]
 - *Verify.* d09: `shfiles | xargs -0 -r grep -nE -e "^[\$]'" -e "[[:space:]=(;&][\$]'"`; ShellCheck SC3003 on 0.11.0 (removed on master).
 - *Watched red.* Yes. X1: 1 plant line; FL V04: literal on dash, yash, posh, `a<TAB>b` on the other 8; twin `printf 'a\tb'` correct on 11 of 11. Fleet: 0 hits. Exemplar: `acmesh-official__acme.sh@807da6498377:acme.sh:7387` (`[ "$char" = $'\0' ]`, `#!/usr/bin/env sh`).
 - *Scope.* INST, RC, LIB shell=sh, EMIT sh targets (SH-EMIT-12 is the emitter-side twin).
 
 **SH-DIAL-10 · MUST.** Never use `read -d` in `#!/bin/sh` code. Use `find ... -exec cmd {} +` or `find ... -print0 | xargs -0 -r cmd`.
-- *Why.* `read -d` is `Illegal option -d` on every dash (including upstream 0.5.13.5), `-d' is not a valid option` on yash, `invalid option` on posh; the failure is a stderr line and an empty variable, not an exit. POSIX's own `find -print0 | while IFS= read -rd ""` example is therefore not dash-portable. [FL §7, V16]
+- *Why.* `read -d` is `Illegal option -d` on every dash (upstream 0.5.13.6 and Alpine's 0.5.13.1 too, measured 2026-11-27), `-d' is not a valid option` on yash, `invalid option` on posh; the failure is a stderr line and an empty variable, not an exit. POSIX's own `find -print0 | while IFS= read -rd ""` example is therefore not dash-portable. [FL §7, V16]
 - *Verify.* d10: `shfiles | xargs -0 -r grep -nE -e '(^|[[:space:];{(])read[[:space:]]+(-[a-zA-Z]+[[:space:]]+)*-[a-zA-Z]*d'`; ShellCheck SC3045.
 - *Watched red.* Yes. X1: 3 plant lines (two code lines and the comment naming `read -d`), 0 on the twin; FL V16. Fleet: 0.
 - *Scope.* INST, RC, LIB shell=sh; dash 0.5.12, yash 2.52, posh 0.14.1.
@@ -473,7 +474,7 @@ The command prints `file:line:text` for each hit; comment lines, lines with `com
 - *Scope.* All kinds; exit 123 is xargs reporting a child failure, so a check that ends in `xargs ... grep -L` is judged by output.
 
 **SH-USER-09 · MUST.** Put `LC_ALL=C` as a per-command prefix on each order-observable `sort`, `comm`, `join` (and an `ls` whose order is captured). Do not `export LC_ALL=C` in a script that handles UTF-8 text.
-- *Why.* uutils 0.10.0 uses ICU collation for any `*.UTF-8` or `*.utf8` locale name even when that locale is not installed, where GNU 9.4 silently falls back to bytes; on Ubuntu 26.04 (the `ubuntu-latest` image from November 2026) `LANG=en_US.UTF-8` sorts `a A b B` (T6). A blanket export changes `${#x}`, `wc -m`, `awk length` and `cut -c` on UTF-8 text. [UF F5]
+- *Why.* uutils 0.10.0 uses ICU collation for any `*.UTF-8` or `*.utf8` locale name even when that locale is not installed, where GNU 9.4 silently falls back to bytes; on the `ubuntu:26.04` image `LANG=en_US.UTF-8` sorts `a A b B` (T6). A blanket export changes `${#x}`, `wc -m`, `awk length` and `cut -c` on UTF-8 text. [UF F5]
 - *Verify.* u09: `files | xargs -0 -r grep -HnE -e '^[[:space:]]*(sort|comm|join)[[:space:]]' -e '[^[:alnum:]_./-](sort|comm|join)[[:space:]]' | grep -v -e ':[0-9]*:[[:space:]]*#' -e 'LC_ALL=C' -e 'userland-ok:[[:space:]]*[^[:space:]]'`; behaviour `sh sort-locale.sh` (exit 1 on 26.04 when it differs from C).
 - *Watched red.* Yes. X1: 5 plant lines, 0 on the twin; UF V7: ubuntu:24.04 exit 0 (bytes), ubuntu:26.04 exit 1, pinned run exit 0 on both; V7b: GNU 9.4 with `locales` installed also differs. Fleet: 6 lines in 5 trees, 1 false positive.
 - *Scope.* TOOL, CI, INST; GNU 9.4 and uutils 0.10.0. A `sort -u | wc -l` count is order-independent: waive it with a reason.
@@ -629,7 +630,7 @@ Owner decisions, each with the default that applies unless overridden:
 | Q1 | Enforce the SH-DIAL-03 header on all 190 files, or ratchet? | Ratchet: new and changed files only |
 | Q2 | The five bash-4 fleet scripts (SH-DIAL-06): pin with a guard, or rewrite to 3.2? | Pin with `# bash-floor: 4.4` and the guard; they are manual lanes and CI helpers |
 | Q3 | Does "in POSIX.1-2024" make `find -print0`, `xargs -0 -r`, `timeout` portable for `#!/bin/sh`? | Yes for `-print0`/`-0`/`-r`; `timeout` stays probe-first |
-| Q4 | Make `ubuntu:26.04` (uutils) a required leg of the oracle matrix before `ubuntu-latest` flips in November 2026? | Yes, informational until uutils 0.12 reaches an image, required after |
+| Q4 | Make `ubuntu:26.04` (uutils) a required leg of the oracle matrix now that `ubuntu-latest` has been 26.04 since 2026-11-24? | Yes, informational until uutils 0.12 reaches an image, required after |
 | Q5 | Allow a workflow-level `env: LC_ALL: C` in CI as a substitute for per-command pinning? | No: it changes `${#x}` and `wc -m` for UTF-8 steps; per-command only |
 | Q6 | Add the SC2317 allow-table row to SH-GATE-07? | Yes |
 | Q7 | Treat u07 (undeclared `jq`/`python3`) as warn for dev tooling, block for INST and shipped checks? | Yes |
@@ -638,7 +639,7 @@ Subareas that need another round:
 
 - **BSD and macOS userland on a real macOS host:** run `UF/gnuisms.sh` (POSIX sh, no setup) and the T4 and u01 patterns; every BSD cell here is read from Apple source.
 - **busybox build options:** are `find -print0`, `xargs -0` and `xargs -r` Kconfig-optional, and are they on in Alpine's build by design? (git.busybox.net returned 404 for the tag path.)
-- **uutils re-diff at 0.12 and Ubuntu 26.10:** which of the 30 differing cases remain, and does ICU collation still select on any `*.UTF-8` name?
+- **uutils re-diff at 0.12 and Ubuntu 26.10 (due since 2026-11-27, not run; `ubuntu:26.10` carries 0.12.0, upstream is 0.13.0):** which of the 30 differing cases remain, and does ICU collation still select on any `*.UTF-8` name?
 - **NFS behaviour of the `mkdir` lock** that replaces `flock` (SH-USER-06 table).
 - **When to leave shell** (M-A-17) and **sudo-rs in the userland** (M-D-15): not researched.
 - **FreeBSD `sh`, ksh93 and Git Bash on CI:** read-only or host-only today.
@@ -667,3 +668,9 @@ Subareas that need another round:
 13. https://documentation.ubuntu.com/release-notes/25.10/ : rust-coreutils (uutils) 0.2.2 as the Ubuntu 25.10 default.
 14. https://www.msys2.org/docs/filesystem-paths/ : MSYS2 automatic path conversion, `MSYS2_ARG_CONV_EXCL`, `MSYS_NO_PATHCONV`.
 15. https://busybox.net/ : BusyBox 1.37.0 and the unstable 1.38.0 news (ash `<<<`).
+
+## Revision log
+
+- 2026-11-27: SH-DIAL-09 rationale and T1 note: "no package ships `$'..'`" replaced by the dash 0.5.13.x packaging facts (Ubuntu 26.10 0.5.13.5, Alpine 0.5.13.1 optional, sh floor unchanged). Decision: refresh-2026-11/shell-quality.md.
+- 2026-11-27: SH-DIAL-10 rationale: re-measured on dash 0.5.13.6 and Alpine 0.5.13.1, still `Illegal option -d`. Decision: refresh-2026-11/shell-quality.md.
+- 2026-11-27: SH-USER-09 rationale, T5 and Q4: the expired `ubuntu-latest` "November 2026" move rewritten as 26.04 since 2026-11-24, uutils 0.8.0 and 0.12.0 versions added, re-diff marked due. Decision: refresh-2026-11/shell-quality.md.

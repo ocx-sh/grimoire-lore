@@ -44,7 +44,7 @@ Contents: [Caught by the Oldest CI CMake and by Git](#caught-by-the-oldest-ci-cm
 
 Run `cmake --list-presets` from the repository root with the lowest CMake any CI
 leg runs: its pin, or the runner image default where the leg pins nothing
-(3.31.6 on hosted `ubuntu-24.04` and `windows-2025` as of 2026-09-26). That
+(3.31.6 on hosted `ubuntu-24.04` and `windows-2025` as of 2026-11-27). That
 binary parses the root file and every include against its own schema ceiling,
 so it is the whole check for `CMK-CI-01`. Then two `git` commands for
 `CMK-CI-02`. Presets need CMake 3.19, below the 3.25 floor, so neither row needs
@@ -60,10 +60,10 @@ a version gate.
 | 6 | 3.25 | 10 | 3.31 |
 | 7 | 3.27 | 11 | 4.3 |
 | 8 | 3.28 | 12 | 4.4 |
-| 9 | 3.30 | 13 | not released (4.5, as of 2026-09-26) |
+| 9 | 3.30 | 13 | 4.5 |
 
 The table is `cmake-presets(7)` at v4.4.2, confirmed by 3.31.12 and 4.0.7 to 4.2.7
-accepting up to 10, 4.3.4 up to 11 and 4.4.2 up to 12 (measured 2026-09-26). The static fallback prints each root
+accepting up to 10, 4.3.4 up to 11 and 4.4.2 up to 12 (measured 2026-09-26), and at v4.5.1, confirmed by 4.4.5 accepting up to 12 and 4.5.1 up to 13 (measured 2026-11-27). Schema 13 adds `strict` and `nonTargetDirective` to `warnings` and `errors`, and the `${configurePresetName}` macro. The static fallback prints each root
 file's schema and the files it includes. Run the same `jq` on each included
 file, whose path is relative to the file that includes it. Empty output means
 no presets file. A `jq: parse error` means the file is not JSON as committed,
@@ -185,10 +185,11 @@ docker run --rm --network none -v "$PWD:/src" -w /src "$IMAGE" \
 
 ## Re-check
 
-- D1: the CMake 4.5 release adds schema 13 to the `CMK-CI-01` table and
+- D1: each CMake minor after 4.5 adds its schema to the `CMK-CI-01` table and
   re-checks the gate spelling in the probe (CMK-CORE-01).
-- The runner image default CMake (3.31.6 on `ubuntu-24.04` and `windows-2025`
-  as of 2026-09-26), on each runner-images release, because it sets the
-  `CMK-CI-01` ceiling for legs that pin nothing.
+- The runner image default CMake (3.31.6 on `ubuntu-24.04` and `windows-2025`,
+  4.5 on `macos-15` and `ubuntu-latest`, as of 2026-11-27), on each
+  runner-images release, because it sets the `CMK-CI-01` ceiling for legs that
+  pin nothing.
 - `CMK-CI-05` on a real hosted runner: `unshare -rn` failing and the container
   probe passing raises it to MUST, and `unshare` passing retires it.

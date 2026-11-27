@@ -27,13 +27,13 @@ Contents: [The Gate](#the-gate) · [Non-Negotiables](#non-negotiables) ·
 [Siblings](#siblings)
 
 **Before trusting any rule below, confirm the lint is type-aware — read
-[typescript-quality-reference/gate.md](../skills/typescript-quality-reference/gate.md) first.** Roughly
-fifty rules, including the whole `no-unsafe-*` family,
+[typescript-quality-reference/gate.md](../skills/typescript-quality-reference/gate.md) first.** More than
+sixty rules (64 at typescript-eslint 8.74.0), including the whole `no-unsafe-*` family,
 `no-floating-promises`, `no-misused-promises` and
 `switch-exhaustiveness-check`, need a type checker and are **off by
-default**. A config without `parserOptions.projectService` (or, in Biome, a
-rule key written outside its group) does not warn that those rules are
-inert — it just never fires them, and inert is indistinguishable from clean.
+default**. A config without `parserOptions.projectService` does not warn
+that those rules are inert — it just never fires them, and inert is
+indistinguishable from clean.
 Most of this rule set is unenforceable until that is wired.
 
 ## The Gate
@@ -98,8 +98,8 @@ else is defined in a depth file and only cited here.
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
 | TS-CORE-01 | Never reach green by weakening the check: no new `eslint-disable` or `biome-ignore`, no widened `ignores`, no lowered coverage threshold, no `.skip`, no edit to the gate's own config as part of a functional change. | The gate's whole value is that it can go red. A change that edits both the code and the check that judges it reports nothing and looks identical to a passing change. | `git diff --stat -- 'eslint.config.*' 'biome.json' 'tsconfig*.json' 'package.json'` — any hit in a change that is not itself a gate change is the violation. Then see block TS-CORE-01 — a union over the four spellings — for each source file in the diff; a line added by this change is the finding. Empty output is the pass. | MUST |
-| TS-CORE-02 | A verification enters a rule table, a CI job, or a review only after it has been watched go red against a deliberately planted violation. | A check that cannot fail launders an unchecked change as a checked one, and reads exactly like a passing one forever. TypeScript's failure modes here are specific: a rule inert for want of type information, a Biome key outside its group, a coverage block whose keys the runner does not read. | Copy the subject, break the thing the rule forbids, run the verification. A pass on the broken copy is the violation. | MUST |
-| TS-CORE-03 | State whether empty output means a pass or means the finding, in every verification that is not self-evidently one or the other. | Half the checks in this rule set are inverted — a missing `projectService`, an absent `typecheck` script, four rules absent after a Biome migration are each *the finding*, not the pass. | Read each verification cell: one whose empty output is ambiguous is the violation. | SHOULD |
+| TS-CORE-02 | A verification enters a rule table, a CI job, or a review only after it has been watched go red against a deliberately planted violation. | A check that cannot fail launders an unchecked change as a checked one, and reads exactly like a passing one forever. TypeScript's failure modes here are specific: a rule inert for want of type information, a coverage block whose keys the runner does not read. | Copy the subject, break the thing the rule forbids, run the verification. A pass on the broken copy is the violation. | MUST |
+| TS-CORE-03 | State whether empty output means a pass or means the finding, in every verification that is not self-evidently one or the other. | Half the checks in this rule set are inverted — a missing `projectService`, an absent `typecheck` script, rules absent after a Biome migration are each *the finding*, not the pass. | Read each verification cell: one whose empty output is ambiguous is the violation. | SHOULD |
 
 ```sh
 # TS-CORE-01
@@ -129,6 +129,7 @@ Depth files and checks scripts ship in the `typescript-quality-reference` skill 
 | Adding a log line, a catch that does not rethrow, a `.sort()`, or a formatted date | [typescript-quality-reference/observability.md](../skills/typescript-quality-reference/observability.md) |
 | Rendering HTML, binding a URL, editing a CSP or a generated client, growing the bundle | [typescript-quality-reference/browser.md](../skills/typescript-quality-reference/browser.md) |
 | Writing code that runs inside an editor or Electron extension host — `activate()`, a webview, the host bundle, a host-API double | [typescript-quality-reference/extension-host.md](../skills/typescript-quality-reference/extension-host.md) |
+| Writing what an extension's user sees: a notification, a progress indicator, an input box, a modal or webview markup | `ux-quality` (sibling set: its `editor-extensions.md`) |
 | Editing `package.json`, any `tsconfig*.json`, or a lint config file itself | `typescript-packaging` (sibling set — see below) |
 
 ## Severity

@@ -16,7 +16,7 @@ when the work calls for it.
 
 ## It starts with two things that review clean and run nothing
 
-`maven-enforcer-plugin` ships 37 built-in rules and zero of them active. A
+`maven-enforcer-plugin` ships dozens of built-in rules and zero of them active. A
 `<rules>` block with no `<execution>` declaring the `enforce` goal enforces
 nothing while reading as a configured gate, and that is the single most common
 shape this set finds.
@@ -34,7 +34,7 @@ unenforced, and the index says so in its first paragraph.
 ## What is in it
 
 The index carries the gate, eighteen non-negotiables, and three cross-cutting
-rules it owns outright. 51 rules in total, 39 of them merge-blocking, across
+rules it owns outright. 52 rules in total, 40 of them merge-blocking, across
 four depth files: dependencies, mediation and the enforcer; the lifecycle, its
 plugins, the toolchain and the wrapper; publishing to Central through the
 Portal; and the Ant legacy.
@@ -55,7 +55,7 @@ restatement.
 `verify` is the last Maven goal of every CI gate, never `install`, `test`,
 `package` or a hyphenated intermediate phase. The enforcer is bound by an
 `<execution>` declaring the `enforce` goal, not merely declared. Publishing
-goes through `central-publishing-maven-plugin`, pinned at 0.7.0 or later before
+goes through `central-publishing-maven-plugin`, pinned at 0.7.0 or later (0.12.0 or later on Maven 3.10) before
 any SNAPSHOT channel is relied on, because that is the release the capability
 landed in rather than a version that merely improved it.
 

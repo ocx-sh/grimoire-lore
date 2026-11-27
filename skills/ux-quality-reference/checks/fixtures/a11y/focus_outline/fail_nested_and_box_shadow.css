@@ -1,0 +1,4 @@
+/* planted: nested removal, and all:unset with a box-shadow only (forced colours drop it) */
+.nest { padding: 0; &:focus { outline: none; } }
+.bs { all: unset; }
+.bs:focus-visible { box-shadow: 0 0 0 2px red; }

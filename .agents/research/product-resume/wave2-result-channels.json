@@ -1,0 +1,213 @@
+{
+ "topics": [
+  {
+   "slug": "channel-github",
+   "idFamily": "CH-GH",
+   "followups": 2,
+   "unanswered": 0,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/channel-github.md",
+   "rules": 31,
+   "must": 22,
+   "newMust": [],
+   "newIds": [],
+   "changedIds": [
+    "CH-GH-05",
+    "CH-GH-18"
+   ],
+   "retiredIds": [],
+   "newFailureClasses": [
+    "A lint regex that is never run against a known-bad sample: the CH-GH-18 link grep's ./ and ../ branches had no trailing [^)]*, so it missed every ./docs/x.md link (0 hits against 9 real relative links on @grimoire-rs/indexer 0.8.0)",
+    "A safe-area rule built on an assumed platform crop that no source documents (centre crop of 2:1 to 1.91:1); Meta documents face-centred cropping and LinkedIn documents padding"
+   ],
+   "stillOpen": [
+    "Is a 1280 x 640 GitHub card cropped, padded or shown in full in LinkedIn and Meta link previews? This needs a logged-in Post Inspector or Sharing Debugger run by the owner, and it decides whether the CH-GH-05 margin is needed at all.",
+    "How does npmjs.com render a relative README link today, and does a rewritten link point to blob/HEAD or to the release tag? The owner must paste one href and one src from a desktop browser, and the answer decides whether CH-GH-18 npm links can become MUST.",
+    "Which public repositories are internal? This owner decision scopes the MUST rules CH-GH-01, CH-GH-03 and CH-GH-05.",
+    "What is the minimum token permission for the traffic endpoints? Three GitHub pages disagree, and CH-GH-25 cannot be run-checked until the owner tests a real token.",
+    "Does grimoire's single-call cargo-dist release step work with immutable releases on, and how is Latest chosen for an unflagged backport? Both need an owner-approved scratch repository, and they bear on the CH-GH-07 and CH-GH-10 MUSTs."
+   ]
+  },
+  {
+   "slug": "channel-agent-boundary",
+   "idFamily": "CH-CORE",
+   "followups": 2,
+   "unanswered": 0,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/channel-agent-boundary.md",
+   "rules": 19,
+   "must": 15,
+   "newMust": [],
+   "newIds": [
+    "CH-CORE-20"
+   ],
+   "changedIds": [
+    "CH-CORE-01",
+    "CH-CORE-02",
+    "CH-CORE-03",
+    "CH-CORE-06",
+    "CH-CORE-11",
+    "CH-CORE-12",
+    "CH-CORE-14",
+    "CH-CORE-15"
+   ],
+   "retiredIds": [],
+   "newFailureClasses": [
+    "clause misattributed to the wrong platform document (Discord self-bot ban cited to the Developer Policy, LLM ban cited to the Product Hunt terms)",
+    "third-party overclaim of platform behaviour repeated as fact (Bluesky readers can filter or hide bots; Bluesky requires the bot label)"
+   ],
+   "stillOpen": [
+    "Do the live Reddit Responsible Builder Policy and Discord Developer Policy pages still match RD-F01 to RD-F05 and DC-F01 to DC-F06, which were read from archive copies 91 and 9 days old? Only a human browser read can confirm this.",
+    "Will a human accept the 8 wave-2 hosts (including the broad github.com) into facts/hosts.txt? Until then the shipped seed rows fail cab-15 with 19 lines.",
+    "Does the Discord Terms of Service revision effective 2026-12-15 change any bot or webhook rule that CH-CORE-02 relies on?",
+    "Can the X gates (x-label, x-bio, x-human) be read with the owner's own API key, so the MUST in CH-CORE-02 stops resting on human attestation alone?"
+   ]
+  },
+  {
+   "slug": "channel-linkedin",
+   "idFamily": "CH-LI",
+   "followups": 1,
+   "unanswered": 0,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/channel-linkedin.md",
+   "rules": 22,
+   "must": 15,
+   "newMust": [],
+   "newIds": [
+    "CH-LI-23"
+   ],
+   "changedIds": [
+    "CH-LI-09",
+    "CH-LI-18"
+   ],
+   "retiredIds": [],
+   "newFailureClasses": [
+    "Single vendor link-reach figure (e.g. 'links cost 21%') picked from a conflicting set of baselines and stated as the effect"
+   ],
+   "stillOpen": [
+    "Does an image post with a typed URL show the image, a clickable URL and no card (manual case 11), and what does the fold measure at 1280 px, 360 px and in the app? This needs a human in a logged-in browser and gates CH-LI-03 grade and CH-LI-09 visual: image.",
+    "Which referrer host (linkedin.com, lnkd.in or none) does a click from a LinkedIn post produce in GitHub traffic referrers? CH-LI-02's github-referrers metric depends on it.",
+    "Does a salaried employee, or a maintainer of an unpaid open-source tool, trigger LinkedIn's Brand partnership label, or only the FTC text line? This affects CH-LI-17 and CH-LI-04 for every fleet post.",
+    "When does scripts/facts-stale.py ship? Until then, half of the CH-LI-18 MUST check cannot run."
+   ]
+  },
+  {
+   "slug": "channel-terminal-video",
+   "idFamily": "CH-VID",
+   "followups": 3,
+   "unanswered": 0,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/channel-terminal-video.md",
+   "rules": 26,
+   "must": 20,
+   "newMust": [],
+   "newIds": [
+    "CH-VID-27"
+   ],
+   "changedIds": [
+    "CH-VID-08",
+    "CH-VID-12",
+    "CH-VID-18"
+   ],
+   "retiredIds": [],
+   "newFailureClasses": [
+    "measuring the embed container or viewport instead of the drawn .ap-line text width as W",
+    "scoring SGR 2 dim text by its palette entry instead of the 50/50 opacity blend the player draws",
+    "checking contrast against the cast header theme when the embed forces another theme, or checking only one colour scheme"
+   ],
+   "stillOpen": [
+    "As written, CH-VID-08 (MUST) requires 52 columns or fewer for a 360 px phone docs embed, and no 80-column CLI output meets that. Does the CH-VID-14 text alternative count as the phone reading path instead, or does the strict phone cap stand?",
+    "Is the derived 6 px OCR floor confirmed by a human legibility test on a real phone and a 720 px docs column?",
+    "Do CH-VID-12 and CH-VID-27 rise to MUST for player embeds, where the cast theme is page text under SC 1.4.3? Both checks are mechanical now, so only the reading is open.",
+    "Does an accessibility-tree export or a screen reader confirm that the player's first Tab stop has no accessible name, which would justify raising CH-VID-18?"
+   ]
+  },
+  {
+   "slug": "channel-communities",
+   "idFamily": "CH-COM",
+   "followups": 1,
+   "unanswered": 0,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/channel-communities.md",
+   "rules": 25,
+   "must": 19,
+   "newMust": [],
+   "newIds": [
+    "CH-COM-25"
+   ],
+   "changedIds": [
+    "CH-COM-01",
+    "CH-COM-07",
+    "CH-COM-09"
+   ],
+   "retiredIds": [],
+   "newFailureClasses": [
+    "Polishes instead of reporting: after a failed title or text check, the agent offers a corrected Show HN title or edits the maker draft, which is AI-edited text under HN's 2026-03-28 tips edit (CH-COM-01, CH-COM-25)"
+   ],
+   "stillOpen": [
+    "Can the subreddit rules for r/programming, r/rust, r/commandline, r/selfhosted and r/opensource be read through an authorised route, so that Reddit can enter or leave the default plan on evidence?",
+    "Does Show HN submission text (Algolia story_text) relate to outcomes once URL type and project type are held fixed, so that CH-COM-07 can move to MUST or be dropped?",
+    "Which personal account is the maker voice for each product, and will the owner start the 70-day Lobsters lead time now?"
+   ]
+  },
+  {
+   "slug": "channel-launch",
+   "idFamily": "CH-LAUNCH",
+   "followups": 4,
+   "unanswered": 0,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/channel-launch.md",
+   "rules": 18,
+   "must": 10,
+   "newMust": [],
+   "newIds": [
+    "CH-LAUNCH-16",
+    "CH-LAUNCH-17",
+    "CH-LAUNCH-18"
+   ],
+   "changedIds": [
+    "CH-LAUNCH-04",
+    "CH-LAUNCH-06",
+    "CH-LAUNCH-12"
+   ],
+   "retiredIds": [],
+   "newFailureClasses": [
+    "Reads a two-lane venue (Console.dev Tools vs Betas) as one gate, setting a false deadline or exclusion (observed in fleet plan)",
+    "Carries a stale venue fact from an earlier pass without a fetched URL (users.rust-lang.org 'zero gatekeeping', category muted 2026-09-10; observed)",
+    "Schedules an editorial submission (Changelog News) as a launch-day event, or treats a reply-bearing forum as plain publishing (observed)",
+    "Targets an archived or zero-merge awesome list because it ranks high by stars (hypothesised)",
+    "Marks a list row fit despite failing its numeric gate, on an 'equivalent popularity' argument (hypothesised)",
+    "Publishes a DEV.to mirror without canonical or as a link-only stub, or verifies canonical with a front-matter grep that prints 0 on real mirrors",
+    "Unscoped 'awesome' grep false-fails a compliant plan's Venue facts lines (measured on fixtures)"
+   ],
+   "stillOpen": [
+    "What are Terminal Trove's submission rules and scope for a CLI? It is the only CLI-specific directory named by the scouts that is still unverified.",
+    "Does per-subreddit self-promotion wording (r/rust, r/commandline, r/programming) change the venue-order template, given the rules are unreadable without login?"
+   ]
+  },
+  {
+   "slug": "channel-microblog",
+   "idFamily": "CH-MB",
+   "followups": 2,
+   "unanswered": 0,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/channel-microblog.md",
+   "rules": 24,
+   "must": 15,
+   "newMust": [],
+   "newIds": [
+    "CH-MB-24"
+   ],
+   "changedIds": [
+    "CH-MB-07",
+    "CH-MB-13",
+    "CH-MB-20",
+    "CH-MB-21"
+   ],
+   "retiredIds": [],
+   "newFailureClasses": [
+    "H. Thread steps treated as one atomic publish (post 2 sent before post 1 returned its id, or post 1 deleted and re-posted when the reply fails)"
+   ],
+   "stillOpen": [
+    "Does the Threads publishing API accept exactly 500 under the emoji-byte model and reject 501, so that CH-MB-06 can return to MUST? This needs a test-account call, which this program may not make.",
+    "Do Ruby's and ICU's grapheme tables agree with Intl.Segmenter on recent emoji sequences, so that the Node emulation of Mastodon counting behind the MUST rule CH-MB-05 is exact at the limit?",
+    "Does the Bridgy Fed reply-before-parent drop, reported as 'hopefully fixed' on 2025-08-16, still occur in 2026-11? The answer sets whether the 60 s wait in CH-MB-24 is needed. It needs a live bridged account.",
+    "Which platforms will the owner open accounts on (M-MB-9)? Until at least one exists, the whole ruleset is conditional and nothing in it has been checked against a real post."
+   ]
+  }
+ ],
+ "failed": []
+}

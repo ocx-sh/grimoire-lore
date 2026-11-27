@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<url><loc>http://example.com/</loc><lastmod>2026-11-27</lastmod><priority>0.8</priority><changefreq>daily</changefreq></url>
+<url><loc>https://example.com/docs/a/</loc><lastmod>2026-11-27</lastmod></url>
+<url><loc>https://example.com/docs/b/</loc><lastmod>2026-11-27</lastmod></url>
+<url><loc>https://example.com/docs/missing/</loc><lastmod>2026-11-27</lastmod></url>
+</urlset>

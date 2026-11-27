@@ -1,0 +1,3 @@
+Watch how a team pins versions with the new release workflow in mytool.
+
+A different second paragraph about caches and mirrors, and nothing else.

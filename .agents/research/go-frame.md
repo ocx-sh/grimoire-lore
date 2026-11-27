@@ -2,6 +2,7 @@
 title: Go expertise (language, toolchain, modules, testing, release, ecosystem) — phase 0 frame
 program: go
 date: 2026-09-26
+revised: 2026-11-27
 method: research-lang (one language, its toolchain and module system, its lint and test ecosystem, its release and distribution tooling, and Bazel-for-Go as a complement to bazel-quality)
 status: active
 branch: go worktree (/home/mherwig/dev/grimoire-lore/.agents/worktrees/go) — research lands on branch `go`, not `main`
@@ -246,3 +247,8 @@ The owner set the goal as a fully autonomous run, so every map question for the 
 - A generic type alias needs go 1.23, including cross-package use (GO-LANG-03).
 - nogreenteagc is still accepted on 1.27.1 and is a real opt-out (GO-OBS C9).
 - A runtime-sized make above 32 B heap-allocates even when -m reports 'does not escape' (GO-OBS C7/C8).
+
+## Revision log
+
+- 2026-11-27: The era statement "Go 1.27.1 is current" no longer holds. Go 1.27.4 is current, and Go 1.26 still receives point releases (go1.26.11 on 2026-11-10). See refresh-2026-11/go-modules.md (Verdict, Confirmed unchanged).
+- 2026-11-27: The era statement "golangci-lint 2.14.0 and staticcheck 2026.2.1 are current" no longer holds. golangci-lint v2.15.0 (2026-10-16) and staticcheck 2026.2.2 are current, and the first staticcheck that supports the export data format Go 1.27.2 changed is 2026.2.2. See refresh-2026-11/go-modules.md (Changed rules, GO-GATE-08).

@@ -7,6 +7,7 @@ consolidates:
   - shell-installer/sh-contract.md
   - shell-installer/ps1-front-door.md
 date: 2026-10-11
+revised: 2026-11-27
 fixtures: /home/mherwig/.cache/research-lang/shell-tools/fixtures/installer-consolidation/ (this file's own runs R1-R11, outputs under out/); the two dives' kits sit beside it (sh-contract/, ps1-front-door/)
 ---
 
@@ -150,7 +151,7 @@ Wave-2 rules that bind installers and are not restated: SH-DIAL-04 (11-interpret
 - *Why:* cargo-dist 0.33.0 has no TLS flags, a fail-open hash check, a wrong Rosetta test and no trap ([sh] f14); [issue 2339](https://github.com/axodotdev/cargo-dist/issues/2339) shipped a corrupted installer (~108 lines lost).
 - *Check:* the commands in the checklist; rows 1, 3, 4, 6 re-run in R6.
 - *Watched:* yes on the real artifact: row 3 FAIL (rc 0, PWNED), row 4 hits `:1532`/`:1541`, row 1 no `--proto`/`--tlsv1` (`:1828,1830,1836`), row 6 guarded (`download_binary_and_run_installer "$@" || exit 1`).
-- *Scope:* cargo-dist 0.33.0 (v0.33.0 is the latest release, 2026-09-10 per [ps], 2026-09-11 per [sh]; main at 7f277b663b90 has the identical template, 2026-10-02).
+- *Scope:* cargo-dist 0.33.0 (v0.33.0 was the latest release when audited, 2026-09-10 per [ps], 2026-09-11 per [sh]; main at 7f277b663b90 had the identical template, 2026-10-02). cargo-dist v0.34.0 was published 2026-11-02 and, checked 2026-11-27, still extracts with no hash check on the ps1 side ([PR 2497](https://github.com/axodotdev/cargo-dist/pull/2497) open).
 
 #### Retired or merged SH-INST IDs
 
@@ -415,3 +416,7 @@ Ranked by measured corpus frequency (n of N audited installers or files), then b
 13. https://raw.githubusercontent.com/PowerShell/PSScriptAnalyzer/main/docs/Rules/AvoidUsingInvokeExpression.md : the token lint, severity and suppression.
 14. https://spin.atomicobject.com/security-spectrum-curl-sh/ : why same-origin checksums add little (2016-12-12).
 15. https://docs.github.com/en/repositories/releasing-projects-on-github/linking-to-releases : the `releases/latest/download` redirect contract.
+
+## Revision log
+
+- 2026-11-27: SH-INST-20 scope: "latest release" reworded to "latest when audited", with the cargo-dist v0.34.0 (2026-11-02) and PR 2497 still-open check added, per `refresh-2026-11/powershell-quality.md` (Confirmed unchanged, PS-SEC-01 evidence). No other SH-INST or PS-SEC rule changed; the PS-CORE-02, PS-COMPAT-01 and PS-GATE-05 edits in that decision belong to other files, and the 7.4.7 and 7.6.6 stamps here stay as measurement records.

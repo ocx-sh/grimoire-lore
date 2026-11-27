@@ -24,7 +24,9 @@ Contents: [Dates and Defaults](#dates-and-defaults) ·
 Generator behaviour read from source in September 2026: clap_derive sends the
 first paragraph to `-h` and the whole body to `--help`, and strips a trailing
 period. schemars copies the whole body into `description`. rmcp's `#[tool]`
-uses `description =` verbatim, else the function's doc comment. argparse,
+and `#[prompt]` use `description =` verbatim, else the function's doc comment.
+Since rmcp 3.12.0 (2026-11-26) that fallback also holds when another attribute
+follows the doc comment, and `#[doc(hidden)]` no longer suppresses it. argparse,
 click and commander print what they are given.
 
 - **Defaults an adopter may override:** the 200-character summary cap (clippy's
@@ -50,7 +52,7 @@ cross-references into links.
 | clap derive (`Parser`, `Args`, `Subcommand`, `ValueEnum`) | `///` on the item and every field | `about`/`help` attribute strings, builder `.help("…")` calls |
 | schemars `JsonSchema` | the whole doc body into `description`, with no short/long split | a `cfg_attr(…, derive(JsonSchema))` derive; `"description"` literals in a hand-written schema |
 | TS-to-JSON-Schema generator (ts-json-schema-generator, typescript-json-schema, a custom script) | the JSDoc on each exported type and property into `description` | all of it until `.code-docs.json` declares the source files: nothing in a `.ts` file says a generator reads it |
-| MCP server | every tool description and its argument schema | an rmcp `#[tool]` with no `description =` publishes the function's `///` |
+| MCP server | every tool and prompt description and its argument schema | an rmcp `#[tool]` or `#[prompt]` with no `description =` publishes the function's `///`, other attributes after it included |
 | argparse, click, typer | `help=`, `description=`, `epilog=`; click and typer command docstrings | strings built at runtime |
 | commander | `.description()`, `.summary()`, option and argument descriptions | strings passed through a helper |
 | GitHub Action | `action.yml`: the action's `description` and every input and output `description` | all of it: the manifest is not source, so a doc-comment scan never reads it |
@@ -142,7 +144,7 @@ form limits: a short line of about 70 characters, ASCII only.
 | commander | `helpInformation()` of the program and every `.commands` entry | stdin, `--lang ts` |
 | argparse | `format_help()` of the parser and every parser in each subparsers action's `choices` | stdin, `--lang python` |
 | JSON Schema | every emitted schema: the committed goldens, the binary's own schema export, or a TS generator's output | the directory; every `description` and `title` value is scanned and reported with its JSON pointer |
-| MCP | the tool list serialized in-process (rmcp: the router's `list_all()`), which covers `description =`, the `///` fallback and the argument schemas | the JSON on stdin |
+| MCP | the tool list serialized in-process (rmcp: the router's `list_all()`), which covers `description =`, the `///` fallback and the argument schemas; serialize the prompt list the same way when the server has `#[prompt]` functions | the JSON on stdin |
 | Python API reference | griffe, mkdocstrings' own loader, over the public API under the docs build's `filters`, every docstring included; the scanner's module docstring carries the walk | stdin, `--lang python`; never `inspect.getdoc()`, never a grep of built HTML (it counts `show_source` listings) |
 | GitHub Action | `action.yml` itself; the scanner reads only its description keys, block scalars included | the file, `--lang ts` |
 | VS Code extension | `package.json` and each contributed schema file; the JSON walk reads every `description`, `title` and `*Description(s)` key | the files, `--lang ts` |
@@ -251,8 +253,9 @@ Rust, rust-quality's DOC-10).
 
 ## Hover Truncates Nothing
 
-rust-analyzer, typescript-go and pyright render the whole doc block on hover,
-and the LSP 3.17 hover result has no length field (read September 2026). Never
+rust-analyzer, typescript-go and pyright render the whole doc block on hover
+(read September 2026), and the LSP 3.18 hover result has no length field (read
+November 2026; the 3.19 draft adds none). Never
 justify a summary, a cut or a split by hover truncation. The split matters for
 listings (SRF-04), and the whole body matters because clap long help and
 schemars copy all of it.

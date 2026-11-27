@@ -1,5 +1,7 @@
-# Build output of `grim-indexer build`.
-dist/
+# Build output of `grim-indexer build`. Anchored to the root: check fixtures
+# under `skills/*/checks/fixtures/` carry a planted `dist/` tree that must be
+# tracked, or their self-tests pass locally and fail in a clean clone.
+/dist/
 
 # NOT ignored: `public/` is this index's own asset layer - the logo and
 # favicon `index.config.json` names live there, and the build copies it into

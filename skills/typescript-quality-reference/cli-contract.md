@@ -11,6 +11,10 @@ byte lands on. It does **not** own error taxonomy — what an error class
 carries and how errors map to a value is `TS-ERR`; promise-rejection
 semantics are `TS-ASYNC`. Read this before touching anything that can end a
 process or write to stdout.
+Help layout, `--version`, typo suggestions, first-run messages, colour
+palette and animation choices, error wording and destructive-command
+confirmations belong to the `ux-cli` skill. Machine output for scripts and
+agents belongs to `ux-agent-interfaces`.
 
 Contents: [The Exit-Code Table](#the-exit-code-table-pinned) ·
 [Choosing and Setting a Status](#choosing-and-setting-a-status) ·

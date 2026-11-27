@@ -57,11 +57,14 @@ replace a working strict build with an external checker.
 
 | Generator | Strict build | Fallback |
 |---|---|---|
-| MkDocs Material | `mkdocs build --strict` | `lychee --include-fragments site/` |
-| mdBook | `mdbook-linkcheck` as a backend in `book.toml` | `lychee --include-fragments book/` |
-| VitePress | none shipped | `lychee --include-fragments .vitepress/dist/` |
-| Docusaurus | `onBrokenLinks: 'throw'` is the default, `onBrokenAnchors` defaults to warn, so raise it | `lychee --include-fragments build/` |
-| Starlight | verify once, then fall back | `lychee --include-fragments dist/` |
+| MkDocs Material | `mkdocs build --strict` | `lychee --root-dir "$PWD/site" --include-fragments site/` |
+| mdBook | `mdbook-linkcheck2` as an `[output.linkcheck2]` backend in `book.toml` (the original `mdbook-linkcheck` breaks on mdBook 0.5), verify once | `lychee --root-dir "$PWD/book" --include-fragments book/` |
+| VitePress | `vitepress build` fails on a dead internal link by default (`ignoreDeadLinks` is `false`, so keep it off) | `lychee --root-dir "$PWD/.vitepress/dist" --include-fragments .vitepress/dist/` |
+| Docusaurus | `onBrokenLinks: 'throw'` is the default, `onBrokenAnchors` defaults to warn, so raise it | `lychee --root-dir "$PWD/build" --include-fragments build/` |
+| Starlight | verify once, then fall back | `lychee --root-dir "$PWD/dist" --include-fragments dist/` |
+
+Every fallback passes `--root-dir` with an absolute path. Without it lychee
+flags each root-relative link in the built output as an error.
 
 The raw-markdown pass is separate and needs both a source root and an exclusion
 for every page whose anchors are generated at build time. `checks/links_raw.py`

@@ -52,10 +52,12 @@ go generate ./... && test -z "$(git status --porcelain)"
   | xargs -0 -r gopls check | grep -q -e 'yield may be called again'
 ```
 
-**Pinned** tool versions, measured 2026-09-26: Go 1.27.1, golangci-lint
-v2.14.0, govulncheck v1.8.0 and gopls v0.23.0, each installed at that exact
-version, never `latest`, and moved only through the `go-upgrade` skill
-(GO-GATE-08). Gate on each step's exit status, never on its stdout:
+**Pinned** tool versions, re-checked 2026-11-27: Go 1.27.4, golangci-lint
+v2.15.0 (bundling staticcheck 2026.2.2), govulncheck v1.8.0 and gopls v0.23.0,
+each installed at that exact version, never `latest`, and moved only through
+the `go-upgrade` skill (GO-GATE-08). The behaviour the rows describe was
+measured 2026-09-26 on Go 1.27.1 and golangci-lint v2.14.0, and those probes
+were not re-run on the new pins. Gate on each step's exit status, never on its stdout:
 golangci-lint prints `0 issues.` and exits 7 on a typecheck or wrong-root error.
 
 Chain the ten steps into one named target, `check` (**pinned** name: a Makefile
@@ -162,7 +164,7 @@ Rules marked **pinned** encode an agreed decision rather than a derivable fact:
 the `go` and `toolchain` floors, the stdlib-only SDK with go-cmp and goleak as
 its only test dependencies, cobra for multi-command CLIs, the sysexits-aligned
 exit-code table, 100% coverage for the SDK, Windows as a first-class CI leg,
-golangci-lint v2.14.0 with its three files, and the `check` target. "The SDK"
+golangci-lint v2.15.0 with its three files, and the `check` target. "The SDK"
 means a stdlib-only library that wraps the project's CLI binary (the reference
 wraps `ocx` as package `ocxsdk`), a shape an adopter renames once or drops. Each
 is a default an adopter may override, once, in `go.mod` or the copied config,

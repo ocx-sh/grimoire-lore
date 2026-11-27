@@ -9,7 +9,7 @@ consolidates:
   - go-cli/reference-skeleton.md
   - go-cli/group-help.md
 date: 2026-09-26
-revised: 2026-09-26
+revised: 2026-11-27
 toolchain: "Go 1.27.1, golangci-lint v2.14.0, staticcheck 2026.2.1, cobra v1.10.1, urfave/cli v3.13.0, termenv v0.16.0, colorprofile v0.4.3"
 fixtures:
   - /home/mherwig/.cache/research-lang/go-tools/fixtures/go-cli-consolidation/
@@ -51,7 +51,7 @@ this file. The target is `rules/go-quality/cli-contract.md`. It mirrors the Rust
 - **A group that also takes its own positional arguments** is GO-CLI-21's version of the root ambiguity above. `sealGroups` rejects every leftover token, so a group must not take positionals.
 - **A group with a no-op `Run` behind a count-only `Args`** (`ExactArgs(1)`, [openeverest#2816](https://github.com/openeverest/openeverest/issues/2816)) is `Runnable()`, so GO-CLI-21's tree-walk test passes it. This stays a reading heuristic and was not watched in a fixture ([G] candidate 5).
 - **The shipped consolidation fixture `go-cli-consolidation/cmd/skeleton` violates GO-CLI-20 and GO-CLI-21.** It calls `SetErr` without `SetOut` ([G] grep hit, re-run [W]). The fixture is left unmodified as evidence, and the copyable `cli-skeleton/` must take its shape from `go-cli-group-revision/fix` instead.
-- **The `TraverseChildren` typo gap has no upstream tracker.** Cobra's docs are silent (`command.go:815`), so GO-CLI-17 treats it as fleet-side regardless of upstream intent.
+- **The `TraverseChildren` typo gap has no upstream tracker.** Cobra's docs are silent (`command.go:815`), so GO-CLI-17 treats it as fleet-side regardless of upstream intent. The nearest tracked defect, [spf13/cobra#2528](https://github.com/spf13/cobra/issues/2528) (open since 2026-10-15), is a second reason to leave it unset: `TraverseChildren` can run a subcommand named after `--` and discard the positional arguments.
 - **The stderr order of a joined error is scheduler order.** A golden-stderr test on a concurrent batch must compare lines as a set. Only the exit code is deterministic under GO-CLI-18.
 - **colorprofile is pre-1.0 (v0.4.3).** If `envNoColor` becomes a non-empty check, GO-CLI-13's colorprofile ban relaxes to a version floor. Re-check on each bump.
 
@@ -359,3 +359,4 @@ Ranked by how often each one bites; the first four appear in every cobra `main` 
 - GO-CLI-21 (new, MUST) — seal every non-root group with a typed-usage `RunE` through one `sealGroups` walk, `completion` included. The dive placed this under GO-CLI-06. It got its own ID instead, mirroring GO-CLI-17's split: its mechanism and its tree-walk check are distinct. Dive candidates 2/3 are folded in, and candidate 5 is a reading heuristic, not watched.
 - Verdict 3/7 extended. "Documented gaps": the ExecuteC-commands entry was corrected (`completion` is not inert), and four entries were added: `help <typo>` → 0, a group with positionals, the no-op-`Run` variant, and the shipped skeleton violating GO-CLI-20/21. The dive's "contested" bare-group contract is settled in the Verdict by the watched grimoire precedent, not left open.
 - Exemplars: corrected the dive's `gh auth` claim. cli/cli's `rootHelpFunc` catches a nested typo (exit 1 through `hasFailed`), so only bare `gh auth` exits 0. restic `key` is the clean violator.
+- 2026-11-27 — Documented gaps, `TraverseChildren` bullet (supports GO-CLI-17): names spf13/cobra#2528 as the nearest tracked defect and a second reason to leave `TraverseChildren` unset; see [refresh-2026-11/go-quality.md](refresh-2026-11/go-quality.md). No rule text changed and no ID added.

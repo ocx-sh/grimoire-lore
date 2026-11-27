@@ -9,7 +9,7 @@ consolidates:
   - .agents/research/code-docs-routing/tests-as-guards-proof.md
   - .agents/research/code-docs-ratchet/gate-replays.md
 date: 2026-09-27
-revised: 2026-09-27
+revised: 2026-11-27
 ---
 
 # Guards: what a load-bearing comment is and what can own it
@@ -19,6 +19,10 @@ unless absolute; fleet paths are `repo:path:line` under `/home/mherwig/dev`. Eve
 here was researched or re-verified on 2026-09-27. Figures marked *re-measured* were
 re-run for this consolidation or its revision, not copied from a sub-artifact. The
 revision's re-measure scripts are in `/home/mherwig/.cache/research-lang/code-docs-scratch/guards-revise/`.
+Re-read 2026-11-27: pyright 1.1.414 and TypeScript 7.0.2 are still the latest releases, and
+the rustc and clippy changelogs through 1.100.1 change none of the lints named here except
+`let_underscore_must_use`, which since clippy 1.99 (PR 16633) decides `#[must_use]` as the
+compiler does, so the GRD-10 audit sample may read differently now. No planted edit was re-run.
 
 Contents: [Verdict](#verdict) · [The ruleset](#the-ruleset) ·
 [Applied to the fleet](#applied-to-the-fleet) · [AI-agent failure modes](#ai-agent-failure-modes) ·
@@ -220,7 +224,7 @@ grep -rn -A2 --include='*.py' --exclude-dir=.venv -e 'case _:' .
 - **Rule.** Mark every Drop-guard type `#[must_use]`. Give each named guard binding one line naming the rename hazard (renaming it to `_` releases it at once). Enable rustc's `let_underscore_drop` in `[workspace.lints.rust]` only after triaging the crate's existing `let _ =` sites. Run `clippy::let_underscore_must_use` and `clippy::let_underscore_untyped` once as audit commands, never as standing lints.
 - **Rationale.** Renaming `_render_lock` or `_slot` to `_` is a routine cleanup that drops the guard immediately (OCX-09, GRM-08).
   - `let_underscore_drop` catches that rename without `#[must_use]`. This was shown first on a lookalike crate and then on the real `render_toolchain.rs:892` and `update_check.rs:328` (owned-guards §4).
-  - clippy's `let_underscore_lock` never sees a domain wrapper type.
+  - rustc's deny-by-default `let_underscore_lock` sees only std lock guards and clippy's only `parking_lot` ones, so neither sees a domain wrapper.
   - The rustc lint fires on every `let _ =` of a type that needs drop. It returns early only when `!ty.needs_drop(…)` (rustc `let_underscore.rs`), so every discarded `io::Result` counts too.
   - That triage is sized now. The lint flags 163, 70 and 39 sites in ocx, grimoire and ocx-mirror, of which 44, 42 and 5 are prod code (*re-measured*). The raw `let _ = ` line counts are 209, 113 and 44.
   - The two clippy lints flag 156-178, 62-98 and 32-43 sites across the same repos. In the read of 30 hits, 70% were noise, mostly test fixtures, so they are not worth a standing lint.
@@ -368,6 +372,9 @@ Ranked by measured frequency; the last entry is an estimate.
   - Question: in scratch copies, implement three sketches and apply each site's harvested breaking edit. The sketches are OCX-20's tri-state enum, GRM-04's typestate, and OCX-23's `ContainedPath` or PY-04's Python equivalent. Does `cargo check` or pyright refuse the edit? How many lines and call sites does each type change cost?
   - Why it matters: it decides whether GRD-12 can move from SHOULD toward MUST, and whether Python's static-only enforcement counts as ownership.
 
+- **GRD-05 citation.** arXiv 2603.21642 is cited for "its mitigation strips imperative language", and its abstract covers MCP tool poisoning only. Read the full text before the next refresh. If it does not support the sentence, cite a source that does (arXiv 2611.28763 is a candidate) or state it as the pair's judgement.
+- **GRD-10 noise figure.** The "70% noise in a 30-hit sample" was measured on clippy 1.93.1. Re-sample on 1.100.1 if the figure is to be re-stamped.
+
 ## Sub-artifacts
 
 - [code-docs-guards/guard-shape.md](code-docs-guards/guard-shape.md): 20 fleet guards rewritten to human shape, the register rule, the seven-rule recogniser scored on 520 blocks, the marker decision and the phrasing check.
@@ -422,3 +429,9 @@ Ranked by measured frequency; the last entry is an estimate.
 - **Decisions for the eval.** E3 adds the red-test-only pointer, the noun-only exclusions and a `wrong-pointer` twin. The strata now use 16 comment-only sites, the reconstruction's misses and the type-ownable class. Sources: tests-as-guards-proof, gate-replays, owned-guards.
 - **Open questions.** Removed "lint-adoption blast radius" (owned-guards answered it) and "type-owned guards" (owned-guards answered it; the remaining gap is in Verdict 9). Updated guard-recognition's targets. Added the type-owner proof round.
 - **Frontmatter.** Added the three follow-ups to `consolidates` and set `revised: 2026-09-27`.
+
+2026-11-27, delta refresh (decision: `.agents/research/refresh-2026-11/code-docs.md`):
+
+- **GRD-10 Rationale.** Corrects the `let_underscore_lock` split: rustc's deny-by-default lint covers std guards and clippy's covers `parking_lot`, so neither sees a domain wrapper. The old sentence had it backwards.
+- **Intro stamp.** Adds the 2026-11-27 re-read sentence: pyright 1.1.414, TypeScript 7.0.2 and the rustc and clippy changelogs through 1.100.1 change none of the named lints except `let_underscore_must_use`. No measured figure moved.
+- **Open questions.** Adds the GRD-05 citation check and the GRD-10 noise-figure re-sample.

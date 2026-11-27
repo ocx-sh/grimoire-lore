@@ -1,0 +1,3 @@
+# one "<host> <provenance>" per line
+www.linkedin.com platform
+example.com platform

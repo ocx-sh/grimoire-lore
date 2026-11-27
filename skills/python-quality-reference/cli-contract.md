@@ -6,6 +6,10 @@ scripts and gates, and the Claude Code hook fleet. Read this before changing
 anything that can end a process, pick a status, or write to stdout. The file
 that does it is rarely named `main.py`, which is why this is routed to by
 subject rather than matched by path.
+Help layout, `--version`, typo suggestions, first-run messages, colour
+palette and animation choices, error wording and destructive-command
+confirmations belong to the `ux-cli` skill. Machine output for scripts and
+agents belongs to `ux-agent-interfaces`.
 
 Contents: [The Exit-Code Table](#the-exit-code-table-pinned) ·
 [Entrypoint and Exit Codes](#entrypoint-and-exit-codes) ·

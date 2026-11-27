@@ -1,0 +1,262 @@
+{
+ "units": [
+  {
+   "id": "ux-quality-index",
+   "written": [
+    "rules/ux-quality.md",
+    "skills/ux-quality-reference/SKILL.md",
+    "skills/ux-quality-reference/verification.md",
+    "skills/ux-quality-reference/checks/page_structure.py",
+    "skills/ux-quality-reference/checks/axe-fixture.mjs",
+    "skills/ux-quality-reference/checks/ui-matrix.mjs",
+    "skills/ux-quality-reference/checks/wcag22-ids.txt",
+    "skills/ux-quality-reference/checks/fixtures/verify/site-pass/ (sitemap.xml, page-list.txt, index.html, a/index.html)",
+    "skills/ux-quality-reference/checks/fixtures/verify/site-fail/ (sitemap.xml, page-list.txt, a/index.html, b/index.html)",
+    "skills/ux-quality-reference/checks/fixtures/verify/matrix/ (clean.html, wrapped-link.html, fixed-pill.html, ancestor-ring.html, no-ring.html)"
+   ],
+   "rulesShipped": 26,
+   "mustShipped": 22,
+   "droppedMust": [],
+   "planDeviations": [
+    "UX-A11Y-36 (MUST) and UX-A11Y-37 (SHOULD) are in the consolidation but not in the plan. I placed them in focus-and-colour.md, beside UX-A11Y-12 to 14. The rule cites UX-A11Y-36 in non-negotiable row 4 and routes 36 and 37 to that file. The orchestrator note names focus_opacity.mjs for them.",
+    "UX-A11Y-17 (CONSIDER) and UX-A11Y-35 (MUST) are also not in the plan's family map. UX-A11Y-35 is cited in row 9 and routed to editor-extensions.md, as the plan has it. UX-A11Y-17 is not cited, so it stays in focus-and-colour.md with the 12 to 21 range.",
+    "UX-STATE-35 (SHOULD) and UX-STATE-36 (SHOULD) are not in the plan. I routed both to forms.md, beside UX-STATE-20 to 27. UX-STATE-34 stays in states.md as the plan has it. The orchestrator note assigns form_fields.py to UX-STATE-36.",
+    "Non-negotiables went from the plan's 'about 18' rows to 20. I added UX-A11Y-36 to the focus row. I added UX-STATE-27 (autocomplete), UX-TEXT-28 (byte units) and UX-ACT-07 (MUST for DOM dialogs). I added a VS Code row (UX-A11Y-35, UX-STATE-28, 29, 31). I added a claims row (UX-VERIFY-27, 28, 29, 31) so that those MUST rules are not left uncited in the index.",
+    "The rule prose says 'UX-VERIFY rules 18 to 23' and never writes the IDs UX-VERIFY-18 to UX-VERIFY-23. The plan assigns those rows to ux-review/SKILL.md. Writing the tokens would fail the validator's dead-citation check until ux-review exists. After integration the tokens can be written.",
+    "UX-VERIFY-05 and UX-VERIFY-04 verifications were rewritten. Process substitution and $(...) are banned by the dialect. UX-VERIFY-05 is now a POSIX awk program, and UX-VERIFY-04 is a mode of page_structure.py (--sitemap, --page-list). I ran both red and green on GNU tools and on busybox awk and grep.",
+    "UX-VERIFY-15's fleet-specific regression check on named catalog routes was replaced with shipped fixtures under checks/fixtures/verify/matrix/. The wrapped link, the fixed pill and the ancestor ring are checked against ui-matrix.mjs. I ran all five fixtures with playwright-core 1.63.0 against Chrome for Testing 159. The wrapped link did not report as obscured. The fixed pill did. The ancestor ring was cleared as anc1.",
+    "ui-matrix-anc3.mjs, the measured draft, is not on disk. I wrote ui-matrix.mjs from the appendix script plus the two changes the rules specify: line-box sampling and the ancestor pass. It writes the noRingSelf, ancestorCleared and noRing fields. UX-VERIFY-16's own node -e check prints 'violations 0' on its output. I added --schemes (K11) and --motion block|advisory (K13) because the rules require them.",
+    "axe-fixture.mjs goes beyond the plan's stated scope in three ways. It adds --red-demo (UX-VERIFY-08), --html-dir with --css and --vars (UX-VERIFY-11), and --states (UX-VERIFY-05). The pins axe-core 4.14.1, @axe-core/playwright 4.14.1 and playwright-core 1.63.0 are the versions I checked on the npm registry on 2026-11-27. @axe-core/playwright 4.14.1 is not named in the consolidation. I took it from the registry.",
+    "The depth file runs 297 lines, above the pattern set's 185 to 241. The rule tables carry full rationale cells. A split would break the one-level, one-topic shape."
+   ],
+   "validator": "python3 .claude/skills/research-lang/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' rules/ux-quality.md skills/ux-quality-reference: exit 1 with 6 findings, none in my files. They are in other units' depth files, which cite UX-ACT-12, 18, 22, 23 and UX-TEXT-05, 07. Those rows are defined in ux-cli and ux-agent-interfaces, which are not in this run. A scratch copy with the extra --forbid strings (ocx.sh, grimoire.rs, ocx-sh/, grim-gui) gave the same 6 findings and nothing in my files. Rule body 141 lines. SKILL.md body 41 lines. verification.md has a table of contents. page_structure.py --self-test: ok.",
+   "repaired": false,
+   "ok": true,
+   "blocking": [],
+   "nits": [
+    "Reviewer note: the browser-based checks (ui-matrix.mjs on the five fixtures, axe-fixture.mjs --red-demo) could not run here because Chromium's shared libraries (libnss3, libnspr4) are missing. Only the author's own run backs those results. --help and --print-tags did work after installing the pins.",
+    "skills/ux-quality-reference/checks/axe-fixture.mjs:17 and ui-matrix.mjs: --help and --print-tags fail with ERR_MODULE_NOT_FOUND until playwright-core and axe are installed, because the imports are static. SKILL.md and verification.md Setup do say to install the pins first. Consider a dynamic import after the --help branch.",
+    "skills/ux-quality-reference/verification.md:32 and checks/axe-fixture.mjs:4: the @axe-core/playwright 4.14.1 pin is not in the consolidation. It carries a source (the npm registry) and a date (2026-11-27), so it ships as an author-measured fact. The UX-VERIFY-06 rule text also adds playwright-core to the pinned set, which the consolidation rule does not name.",
+    "skills/ux-quality-reference/SKILL.md:41: says 'The first four rows are the gate itself', but the fourth row is wcag22-ids.txt, which is a whitelist and not a gate step. 'The first three' would be accurate.",
+    "Check-artifacts.py exits 1 with 6 findings, all in other units' files: actions.md cites UX-ACT-12 and UX-ACT-18, ai-features.md cites UX-ACT-22 and UX-ACT-23, text.md cites UX-TEXT-05 and UX-TEXT-07. None concern this unit's rule, SKILL.md, verification.md, scripts or fixtures.",
+    "Verified clean: all 32 UX-VERIFY rules the plan assigns are present with unchanged IDs and severities (01 to 11, 13 to 16 and 24 to 31 MUST; 12, 17 and 32 SHOULD). Dated facts match the consolidation. No forbidden strings appear in this unit's files. The rule is 158 lines and SKILL.md is 50. Frontmatter matches the go-quality pattern. The paths globs match the plan. Every relative link resolves. SKILL.md routes to all 11 depth files. page_structure.py --self-test passes. site-pass is clean, and site-fail prints UX-VERIFY-04 findings."
+   ]
+  },
+  {
+   "id": "ux-a11y-depth",
+   "written": [
+    "skills/ux-quality-reference/widgets.md",
+    "skills/ux-quality-reference/focus-and-colour.md",
+    "skills/ux-quality-reference/motion-and-announcements.md",
+    "skills/ux-quality-reference/page-structure.md",
+    "skills/ux-quality-reference/checks/focus_outline.py",
+    "skills/ux-quality-reference/checks/wcag_contrast.py",
+    "skills/ux-quality-reference/checks/focus_diff.mjs",
+    "skills/ux-quality-reference/checks/colour_only.mjs",
+    "skills/ux-quality-reference/checks/focus_opacity.mjs",
+    "skills/ux-quality-reference/checks/fixtures/a11y/ (12 files: focus_outline/*, contrast/pairs_pass.txt, contrast/pairs_fail.txt, colour_only.html, focus_diff.html, focus_opacity/opacity.html, focus_opacity/scroll.html)"
+   ],
+   "rulesShipped": 35,
+   "mustShipped": 24,
+   "droppedMust": [],
+   "planDeviations": [
+    "UX-A11Y-36 (MUST) and UX-A11Y-37 (SHOULD) are in the consolidation but not in the plan. I placed both in focus-and-colour.md, next to UX-A11Y-12 to 14 (same family, same focus topic). UX-A11Y-35 is not mine (the plan sends it to editor-extensions.md). I only cite it. UX-A11Y-21 stays retired and appears only as a retirement note, and UX-A11Y-17 carries its content.",
+    "focus_opacity.mjs is the consolidation's focus_opacity2.mjs (Appendix A8), as the orchestrator note says. I changed only the header, which carries the pinned versions. I added a --help flag and a dynamic import of playwright. The script prints the playwright version and the engine version. The depth file says FAIL and LEAD rows are leads and the pass condition is the crop review. I ran the fixtures on 2026-11-27 in Chromium 159.0.8154.6, and they gave the output the consolidation records: opacity.html gave FAIL O2 and O10, LEAD O6, PROXY O7 and O9, INFO O8, exit 1. scroll.html gave a single FAIL (S2), and NOSETTLE=1 added the false FAIL for S4. A load error exits 2. Firefox and WebKit were not re-run. The depth file says so.",
+    "colour_only.mjs ports A6 (colour_only_v2, puppeteer) to Playwright, with the in-page logic unchanged. The fixture gives the recorded result: 2 FAIL lines per scheme and exit 1. focus_diff.mjs ports A5 to Playwright and adds output. For each stop it prints the computed outline and the ring contrast against the surface it sits on, plus ZERO and LOW rows. The plan assigns no measure.mjs (A4), and focus_diff.mjs now covers its focus[] part.",
+    "measure.mjs (A4) and focus_outline_v2.mjs (A7) are not assigned to any unit, so neither ships. UX-A11Y-20 is verified by an inline page.evaluate snippet in focus-and-colour.md that implements the circle test. The A7 fixes are merged into the stdlib focus_outline.py: CSS nesting resolved, .scss, all: unset and initial, the :not(:focus-visible) mouse-focus skip, ::-webkit sub-parts, a ring on ::before or ::after. The merged shape has no measurement of its own, and the depth file says so. The old pass condition was A1 exit 0 and A7 no FAIL. It is now: focus_outline.py exits 0 after triage. I fixed a substring bug in the :has() branch of the original A1.",
+    "The announcement harness (announce.test.mjs) lived only in a research sub-artifact, so it does not ship. UX-A11Y-22 and UX-A11Y-24 verify through source greps and an in-page DOM-contract snippet. Virtual-reader output stays labelled UNVERIFIED.",
+    "I rewrote every recursive grep in the dialect: git-fed markup(), styles(), motion() and find-fed built() shell functions with a canary, xargs -0 -r, portable options only, and every command with a pipe in a fenced block labelled with its ID. The consolidation's grep -A12 keyframes check became a listing of repeating animations plus a read, because -A is not portable. The error-container grep uses a generic class pattern, not the fleet's class names. The 10a to 10j detectors sit in a sub-table whose first cell is a row label, so UX-A11Y-10 keeps one ID. I ran every grep block against planted files under GNU tools and under busybox. The outputs were identical.",
+    "I dropped the consolidation's fleet names, paths and the 'Applied to the fleet' tables. Counts survive in the rationale cells without names, and the New commitments rows are folded in as 'unmeasured' notes. The consolidation's 'Decisions' (C2, C3, C5, C6, C8, C10 and the set-membership decision) are in short Decisions That Stand sections.",
+    "I used page_structure.py and scan_wv.py as the sibling units wrote them, checking their CLIs on disk. page_structure.py takes a built directory, and scan_wv.py takes directories. Both exit 1 on a finding. page_structure.py does not read UX-A11Y-30 or UX-A11Y-34, so page-structure.md gives greps for those.",
+    "motion-and-announcements.md (about 134 lines) and page-structure.md (about 148 lines) are shorter than the 185 to 241 pattern. Their rows had no more content to carry, and I added no padding. All four depth files keep a Dates and Versions section first and a What Agents Get Wrong Here section last."
+   ],
+   "validator": "python3 .claude/skills/research-lang/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' <scratch copy of skills/ux-quality-reference: my four depth files and checks/, plus stub SKILL.md and a stub editor-extensions.md that defines UX-A11Y-35> -> exit 0, \"clean\". The real skill directory has no SKILL.md yet, so I validated the scratch copy. Self-tests: focus_outline.py --self-test and wcag_contrast.py --self-test both print \"self-test ok\", exit 0. Body lines (frontmatter excluded): widgets 199, focus-and-colour 183, motion-and-announcements 130, page-structure 144, all with a Contents line.",
+   "repaired": false,
+   "ok": true,
+   "blocking": [],
+   "nits": [
+    "checks/focus_opacity.mjs:21, focus_diff.mjs:22, colour_only.mjs:20: with playwright not installed, the dynamic import crashes with a raw ERR_MODULE_NOT_FOUND stack and exit 1, not a one-line install hint and exit 2. I could not run the .mjs fixtures here because playwright is absent, so the recorded fixture outputs are unchecked by me.",
+    "Compared UX-A11Y-01 to 20, 22 to 34, 36 and 37 ID by ID with the consolidation: all present with the same severity, UX-A11Y-21 retired and UX-A11Y-35 only cited. Every date, URL and percentage in the four depth files appears in the consolidation. focus_outline.py and wcag_contrast.py pass --self-test, page_structure.py and scan_wv.py --help work, and the node --help flags work. The forbidden-string and fleet-name grep is clean. check-artifacts.py on skills/ux-quality-reference gave 5 findings, none in this unit's files: SKILL.md links text.md, which another unit owns, and actions.md and ai-features.md cite UX-ACT-12, 18 and 22, 23.",
+    "focus-and-colour.md UX-A11Y-20: the verification is an inline page.evaluate circle test, since the plan ships no measure.mjs. It is executable as written. The consolidation's small[] and spacingFail output is not reproduced, and the author reported this deviation.",
+    "motion-and-announcements.md (134 lines) and page-structure.md (148 lines) are shorter than the 185 to 241 pattern. Depth files have no cap and no content is missing."
+   ]
+  },
+  {
+   "id": "ux-states-text-depth",
+   "written": [
+    "skills/ux-quality-reference/states.md",
+    "skills/ux-quality-reference/forms.md",
+    "skills/ux-quality-reference/editor-extensions.md",
+    "skills/ux-quality-reference/text.md",
+    "skills/ux-quality-reference/checks/form_fields.py",
+    "skills/ux-quality-reference/checks/scan_wv.py",
+    "skills/ux-quality-reference/checks/text_scan.py",
+    "skills/ux-quality-reference/checks/fixtures/states/ (14 fixtures)",
+    "skills/ux-quality-reference/checks/fixtures/text/ (8 fixtures)"
+   ],
+   "rulesShipped": 64,
+   "mustShipped": 36,
+   "droppedMust": [],
+   "planDeviations": [
+    "UX-STATE-35 and 36 placed in forms.md; UX-TEXT-31 placed in text.md.",
+    "form_fields.py (orchestrator override): one Python 3.11 stdlib port of elem.pl, badtok.pl and unnamed.pl with subcommands unnamed, elem, badtok plus a fourth, pwtok (UX-STATE-36); same verdicts as the Perl on all fixtures; --self-test ok.",
+    "text_scan.py has 21 arms, more than planned; scan_wv.py also flags hex colours outside var(--vscode-*, fallback) for UX-A11Y-04.",
+    "UX-STATE-20 ships alongside UX-A11Y-03, each naming the other.",
+    "UX-TEXT-05, 07, 12, 23 not shipped here: owned by ux-cli.",
+    "Several verifications use inline POSIX awk or are marked 'unverified: reading heuristic' (UX-TEXT-21, 24 and part of UX-TEXT-01), because this unit owns no awk file.",
+    "UX-STATE-19 counts per route with awk (count per file, prints only counts over 1) so minified single-line pages are counted correctly.",
+    "Existing SKILL.md text_scan.py row lists only UX-TEXT-16, 17, 25, 28; it could list more arms. I do not own that file.",
+    "MUST count: 36 rows whose severity cell starts with MUST; UX-TEXT-17, UX-A11Y-35 and UX-TEXT-24 carry mixed MUST/SHOULD clauses."
+   ],
+   "validator": "python3 .claude/skills/research-lang/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' skills/ux-quality-reference skills/ux-cli skills/ux-agent-interfaces -> clean, exit 0 (run on the skill directory alone, 6 cross-unit citations to ux-cli/ux-agent-interfaces rules are flagged until those units are in the run); all three checks/*.py --self-test exit 0; body lines states 220, forms 156, editor-extensions 113, text 176, each with a Contents line",
+   "repaired": false,
+   "ok": true,
+   "blocking": [],
+   "nits": [
+    "Every UX-STATE, UX-TEXT and UX-A11Y-35 ID in the plan's scope is present with the severity it has in its consolidation. UX-TEXT-05, 07, 12 and 23 are absent because ux-cli owns them.",
+    "check-artifacts.py exits 1 with 6 findings, none a blocker for this unit. The two that touch this unit's files (text.md cites UX-TEXT-05 and UX-TEXT-07) clear once ux-cli lands. The other four are in actions.md and ai-features.md, which another unit owns.",
+    "skills/ux-quality-reference/text.md UX-TEXT-21 (MUST): the verify is marked 'unverified: reading heuristic' and leaves the quoted-label comparison script to the adopter. The consolidation's verify is a script, so a literal agent run has no finished check.",
+    "skills/ux-quality-reference/SKILL.md:45 lists form_fields.py but its text_scan.py row names only UX-TEXT-16, 17, 25 and 28. The script has 21 arms, so the row could name more.",
+    "scan_wv.py also flags hex colours outside var(--vscode-*, fallback) for UX-A11Y-04. This goes beyond the consolidation and is not a defect.",
+    "No path, fleet-name or research-program leaks in the four depth files, the three scripts or the fixtures. Contents lines are present in all four depth files, all URLs and ISO dates trace to the consolidations, and the sh blocks pass `bash -n`. form_fields.py, scan_wv.py and text_scan.py all pass --help and --self-test."
+   ]
+  },
+  {
+   "id": "ux-actions-ai-depth",
+   "written": [
+    "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/skills/ux-quality-reference/actions.md",
+    "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/skills/ux-quality-reference/ai-features.md",
+    "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/skills/ux-quality-reference/checks/actions_scan.py",
+    "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/skills/ux-quality-reference/checks/model-output-cases.json",
+    "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/skills/ux-quality-reference/checks/fixtures/actions/ (9 fixtures: fail-act04, fail-act05 x2, fail-act06 x2, fail-ai06, pass-clean-dialog, pass-unrelated-yes, pass-ai06-bom-only)"
+   ],
+   "rulesShipped": 34,
+   "mustShipped": 18,
+   "droppedMust": [],
+   "planDeviations": [
+    "All IDs in my families were already placed by the plan; no unplaced ID. UX-AI-21 and UX-AI-23 are retired in the consolidation and ship as one prose line ('retired, not reused'), in no table, per the plan.",
+    "actions_scan.py has two arms beyond the plan's UX-ACT-05/06: act04 (the UX-ACT-04 'not No' test) and ai06 (UX-AI-06 zero-width marks). Reason: the consolidation's grep -P and grep -r forms for those rows are not portable (no -P on busybox, no codepoint classes), and the rule contract forbids them. ai06 is opt-in via --only and never part of the default arms.",
+    "actions_scan.py --self-test also validates model-output-cases.json: each case carries naive_output (must break an assertion) and safe_output (must pass), so the cases file can go red and green. I added an iframe case (from UX-AI-10's measured list) beside the seven inputs UX-AI-12 names, plus a preload-hoist case (UX-AI-09) and the bare-URL case uses a 'require' assertion (UX-AI-11).",
+    "UX-AI-15 step 1: added -i. The consolidation's regex was case-sensitive and missed the canonical 'Confidence: 87%'. The consolidation's measured hit counts (SillyTavern 9, LibreChat 0) were taken without -i and were not re-run. UX-AI-15 step 3: rewritten as an awk over `git log --format=tformat:commit --name-only` because the consolidation's form used $(...), which the validator forbids. I ran it on a scratch repository (fresh exit 0, stale exit 1, refreshed exit 0).",
+    "UX-ACT-01 verification generalised from the fleet instance: the VS Code message-label awk now takes its closing-brace indentation from the switch line, and the inventory diff uses temp files instead of process substitution. Tested on a scratch tree. Fleet file paths, product names and the Applied-to-the-fleet table are not shipped (portability).",
+    "UX-ACT-06's token check uses a generic destructive-variant selector with a note to adapt it. It cites CSS-TOK-01 only, which exists in css-theming.",
+    "UX-AI rows whose consolidation verification put a regex alternation in a table cell now point to fenced blocks labelled with the row ID (validator forbids a raw pipe in a cell). Retained every fact, date, URL and severity, including the 'MUST (conditional)' on UX-AI-05 and UX-AI-24 and the CORROBORATED-only CA operative date.",
+    "The two depth files do not link each other or any other depth file. Cross-artifact references name the skill and the rule ID only (ux-cli, ux-agent-interfaces for UX-ACT-12 to 28)."
+   ],
+   "validator": "python3 .claude/skills/research-lang/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' --forbid 'ocx.sh' --forbid 'grimoire.rs' --forbid 'grimoire-rs/' --forbid 'ocx-sh/ocx' --forbid '@ocx-sh/' --forbid 'grim-gui' <scratch copy of skills/ux-quality-reference with a stub SKILL.md> skills/ux-cli skills/ux-agent-interfaces: exit 1, but every remaining finding is in another unit's widgets.md (unreferenced from my stub, UX-A11Y IDs cited but defined elsewhere); zero findings in actions.md, ai-features.md or my checks. SKILL.md does not exist yet in skills/ux-quality-reference, so the real directory could not be validated. python3 -I skills/ux-quality-reference/checks/actions_scan.py --self-test: exit 0 (9 fixtures plus the cases file). Body lines: actions.md 155, ai-features.md 216, no depth-file cap; both carry a Contents line, a Dates and versions section and a What Agents Get Wrong Here section.",
+   "repaired": false,
+   "ok": true,
+   "blocking": [],
+   "nits": [
+    "Checked all 11 UX-ACT and 23 active UX-AI rows against both consolidations: IDs, severities and 'MUST (conditional)' on UX-AI-05 and UX-AI-24 match, and every row has a verification. UX-AI-21 and UX-AI-23 ship as one retired line, as the plan says.",
+    "check-artifacts.py (run on a scratch copy with a stub SKILL.md) reports only forward citations of UX-ACT-12, UX-ACT-18, UX-ACT-22 and UX-ACT-23 (actions.md:8, ai-features.md:8, ai-features.md:85). Those rules belong to units not on disk yet, so this is not a finding. Run on the bare directory, it also reports ai-features.md as 'body 213 lines (max 200)'. That is a false positive: no SKILL.md exists yet, so the validator judges the depth file as a rule.",
+    "No forbidden strings in any of this unit's files. actions_scan.py --self-test exits 0 (9 fixtures plus the cases file), --help exits 0, and a bad --only arm exits 2.",
+    "Undefined variables in the Checks blocks: actions.md uses $CMD and $BUTTON_CSS and ai-features.md uses $RENDERER, none declared under Variables (actions.md:37, ai-features.md:42).",
+    "actions.md:59 drops 'one extra named flag per extra consequence' from the T3 CLI cell. The consolidation has it (UX-ACT-14 text), and UX-ACT-14 belongs to ux-cli.",
+    "ai-features.md:52 (UX-AI-05 test 1) drops the consolidation's allowance that a second session on the same day may skip the start notice only if the owner's record says so.",
+    "actions_scan.py holds literal invisible zero-width characters in its ZERO_WIDTH dict. Writing them as chr(0x200B) would make the file reviewable, and it would not change the behaviour.",
+    "ai-features.md:34 omits the Tian et al. model list (ChatGPT, GPT-4, Claude) and the ConfidenceBench author names. The facts kept are accurate.",
+    "UX-AI-18 cites UX-ACT-22 and UX-ACT-23 where the consolidation says 'UX-ACT (AAA-*)'. This is the correct translation of a dive-local ID."
+   ]
+  },
+  {
+   "id": "ux-review",
+   "written": [
+    "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/skills/ux-review/SKILL.md"
+   ],
+   "rulesShipped": 6,
+   "mustShipped": 5,
+   "droppedMust": [],
+   "planDeviations": [
+    "SKILL.md body is 445 lines, not the plan's 300 (hard budget 500 holds). The owned rows with fenced verifications, the report template and the MUST list account for the extra length.",
+    "UX-VERIFY-18 to 23 are one table (ID, Rule, Why, Verification, Severity) with ID-labelled fenced verification blocks. -20 to -23 were rewritten in the portable dialect: awk instead of process substitution or comm, grep -w instead of \\b, no $(...). -18 and -19 gained a small check block. Severities are MUST except -19, which is SHOULD.",
+    "Added a `rule:` field to the finding shape. The consolidation's fields (file, quote, sc, also, evidence, severity, fix) are otherwise unchanged, and its -20 and -21 checks ignore the extra line.",
+    "A CLI finding has no WCAG criterion and UX-VERIFY-31 bans WCAG wording for a CLI, so the skill uses `sc: n/a (CLI)` plus a `rule:` line. The consolidation does not cover this case.",
+    "Orchestrator note applied: form_fields.py (UX-STATE-20, 27, 36, subcommands unnamed, elem, badtok, pwtok) and focus_opacity.mjs (UX-A11Y-36, 37, ENGINE and SHOTS env) are run in the procedure. Their invocations were read from the shipped files.",
+    "Invocations of scripts not on disk when written are unverified: page_structure.py, ui-matrix.mjs (the JSON field names `cond`, `noRing`, `ancestorCleared`, `noRingSelf` come from the UX-VERIFY-16 verify command), axe-fixture.mjs (the step tells the agent to read its header), scan_wv.py, text_scan.py, focus_diff.mjs. The integration unit should re-check them against the shipped scripts.",
+    "The validator reports 10 `cites UX-VERIFY-nn, which no rule table defines` findings on skills/ux-review alone. The IDs 01 to 04, 09, 13, 16, 28, 31 and 32 are defined by ux-quality-reference/verification.md, which the ux-quality-index unit writes. A scratch copy with a stub verification.md table runs clean (exit 0). Re-run with the real file once it lands.",
+    "UX-VERIFY-02's Playwright four-tag fact is not repeated in SKILL.md. The Dates and versions table keeps axe coverage, the WebAIM survey, the WCAG 2.2 ID list and the matrix error rate, each with source, date and re-check. The Core Web Vitals, law and Playwright facts are left to verification.md."
+   ],
+   "validator": "python3 .claude/skills/research-lang/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' --forbid 'ocx.sh' --forbid 'grimoire.rs' --forbid 'grimoire-rs/' --forbid 'ocx-sh/ocx' --forbid '@ocx-sh/' --forbid 'grim-gui' on a scratch copy of skills/ux-review plus a stub ux-quality-reference/verification.md: exit 0 (clean). On the real skills/ux-review alone: exit 1 with 10 cross-reference findings, all UX-VERIFY IDs that verification.md will define.",
+   "repaired": false,
+   "ok": true,
+   "blocking": [],
+   "nits": [
+    "skills/ux-review/SKILL.md: body is 445 lines against the plan's 300 target. The 500 cap holds and a TOC is present. The author reported this.",
+    "skills/ux-review/SKILL.md: check-artifacts.py exits 1 with 10 'cites UX-VERIFY-nn, which no rule table defines' findings (01, 02, 03, 04, 09, 13, 16, 28, 31, 32). Those IDs are defined by ux-quality-reference/verification.md, which another unit owns and which is not on disk yet. Re-run once it lands.",
+    "skills/ux-review/SKILL.md:97-102 and 4b-4d: wcag22-ids.txt, scan_wv.py, text_scan.py and ui-matrix.mjs are not on disk yet. They belong to other units. page_structure.py, form_fields.py, focus_opacity.mjs, focus_outline.py, wcag_contrast.py and actions_scan.py are on disk and their invocations match --help and the file headers. The integration unit should re-check the missing ones.",
+    "skills/ux-review/SKILL.md:192: `sc: n/a (CLI)` is the author's addition. UX-VERIFY-21 asks for a WCAG ID or a heuristic number in sc:. The case is not covered by the consolidation, the author reported it, and the UX-VERIFY-21 whitelist command passes it because it has no digits.",
+    "skills/ux-review/SKILL.md:271: the `rule:` finding field is an addition to the consolidation's fields. The UX-VERIFY-20 and -21 checks ignore it. The author reported this.",
+    "I ran the UX-VERIFY-20 to 23 fenced checks and the two claim-scan greps against the step 9 report template. They behave as stated: the template is clean, and a planted unscoped 'found no' line is caught. UX-VERIFY-18 to 23 keep their IDs, severities (-19 SHOULD, the rest MUST) and consolidation text. The dated facts match: axe 4.14.1 on 2026-11-16, WebAIM survey 11 with 1,780 responses, WCAG 2.2 on 2024-12-12, and 86 IDs. Frontmatter and the description (621 characters) match the plan. There are no forbidden strings."
+   ]
+  }
+ ],
+ "failed": [],
+ "integrated": [
+  {
+   "id": "integration",
+   "written": [
+    "publish.toml",
+    "taskfile.yml",
+    "bundles/ux-essentials.toml",
+    "bundles/product-essentials.toml",
+    "docs/ux-quality.md",
+    "docs/ux-quality-reference.md",
+    "docs/ux-cli.md",
+    "docs/ux-agent-interfaces.md",
+    "docs/ux-review.md",
+    "docs/ux-essentials.md",
+    "docs/marketing-quality.md",
+    "docs/marketing-quality-reference.md",
+    "docs/positioning-brief.md",
+    "docs/release-notes.md",
+    "docs/marketing-review.md",
+    "docs/marketing-measurement.md",
+    "docs/channel-publishing.md",
+    "docs/github-presence.md",
+    "docs/linkedin-post.md",
+    "docs/youtube-video.md",
+    "docs/microblog-post.md",
+    "docs/terminal-demo.md",
+    "docs/community-post.md",
+    "docs/launch-plan.md",
+    "docs/product-essentials.md",
+    "assets/glyphs/ux.svg",
+    "assets/glyphs/product.svg",
+    "assets/lore-ux.svg",
+    "assets/lore-product.svg",
+    "rules/docs-quality.md",
+    "skills/docs-quality-reference/plain-english.md",
+    "skills/docs-quality-reference/observability.md",
+    "skills/docs-quality-reference/checks/prose.py",
+    "skills/docs-quality-reference/checks/fixtures/prose/pass-ai-disclosure.md",
+    "skills/docs-quality-reference/checks/fixtures/prose/fail-ai-badge.md",
+    "skills/docs-instrument/SKILL.md",
+    "skills/docs-instrument/references/reader-signals.md",
+    "rules/typescript-quality.md",
+    "skills/go-quality-reference/cli-contract.md",
+    "skills/rust-quality-reference/cli-contract.md",
+    "skills/python-quality-reference/cli-contract.md",
+    "skills/swift-quality-reference/cli-contract.md",
+    "skills/typescript-quality-reference/cli-contract.md",
+    "skills/installer-script/SKILL.md"
+   ],
+   "rulesShipped": 0,
+   "mustShipped": 0,
+   "droppedMust": [],
+   "planDeviations": [
+    "DEFECT, owner action needed: 'task lint' (ruff check) reports 385 errors and 'task format:check' reports 37 unformatted files, all in scripts the order-1 units wrote (worst: marketing-quality-reference/checks/claims_lint.py 36, ux-cli/checks/cli_matrix.py 35, linkedin-post/checks/li_draft_check.py 29, live_site_check.py 27, launch-plan link_target_check.py 27, ux-quality-reference focus_outline.py 25, positioning_check.py 23). Two fixture helper scripts are also linted (skills/ux-cli/checks/fixtures/cli/fakecli.py, skills/ux-agent-interfaces/checks/fixtures/json/pass_cli.py) because ruff.toml excludes only the code-docs fixtures. ruff.toml and those scripts are not mine to edit, so 'task ci' will be red on lint and format:check until the owners run 'ruff format' and fix or exclude, and add skills/*/checks/fixtures to ruff.toml exclude. The docs-quality-reference/checks/prose.py edit I made is ruff clean.",
+    "'task artifacts' with the default TS_CONSUMER='..' fails on the typescript step (9 dead-glob findings for typescript-quality and typescript-packaging, such as '**/.npmrc' and '**/biome.json'). It depends on what '..' contains in this worktree layout and is unrelated to my edits; 'task artifacts TS_CONSUMER=/nonexistent' passes in full (exit 0, 17 s), including my new steps.",
+    "Version bumps: none made. Per the orchestrator note, every cross-edited artifact already differs from afd517e in publish.toml (docs-quality 0.4.1, docs-quality-reference 0.2.0, docs-instrument 0.1.3, typescript-quality 0.3.1, go-quality-reference 0.1.1, rust, python, swift and typescript-quality-reference 0.2.0, installer-script 0.1.1). publish.toml diff is 103 added lines and 0 changed.",
+    "Taskfile override applied: the facts staleness check is the separate task 'facts:stale', outside ci and verify. 'artifacts' carries the date-independent half instead: facts_check.py --today 2000-01-01 over skills/*/references/facts.md (row grammar, https URLs, date forms, intervals, expect patterns). 'task facts:stale' exits 0 today. The self-test loop and check-artifacts step glob only skills/<name>/checks/*.py and named skill dirs, never checks/fixtures/, so fixture Cargo.toml, package.json, pyproject.toml and workflow YAML are not read as project files.",
+    "Collision rows applied by content, not by line number: rows 1, 2, 3, 4, 5, 7. Row 2 detail: prose.py skips DOC-PLAIN-08 on a line carrying data-ai-disclosure or an <!-- ai-disclosure --> marker and on the paragraph that line starts, for the badge arm only; the exemption is also stated in the DOC-PLAIN-08 row of plain-english.md. Planted fixtures pass-ai-disclosure.md (clean) and fail-ai-badge.md (a badge outside the marked paragraph still fires), and prose.py --self-test passes. Row 1 uses a 3-line replacement bullet. The row 5 sentence was split into two sentences with 'belong to' wording, and the possessive after the backticked name was dropped. Row 3 adds the precondition to the docs-instrument step-7 table row (the plan's cited line), the head of 'Analytics vendors', and the DOC-OBS-16 verification cell.",
+    "Rows 6, 8 to 20 are owner-gated or no-edit in the plan and were not touched.",
+    "Glyphs: ux.svg is a pointer arrow, product.svg a megaphone, each a single path on a 24 by 24 viewBox, no third-party mark; make-mark.py derived lore-ux.svg and lore-product.svg. No SVG renderer was available (no rsvg, inkscape or cairosvg), so both were parsed as XML but not looked at. Eyeball them before release.",
+    "Not run: 'grim publish --dry-run' (exit 80, registry authentication failed on the existence check for ghcr.io/ocx-sh/lore/channel-publishing:0.1.0; no credentials here, and I did not log in), and the validation.md trigger evals (they need a model-run harness this unit has no access to), so no skill description is reported as failing or passing the trigger evals. Both remain open.",
+    "Companion counts (rows and MUST rows) were counted by script from the artifacts' tables: ux-quality-reference 159 rows, 101 MUST; marketing-quality-reference 108 rows, 67 MUST; per-skill figures in each docs file. 'ux-cli' states 41 rows only, because its non-negotiables table has 24 rows but the row count shows 25 MUST. Docs claims were checked against each artifact's own text; I ran prose.py over all 21 new docs and they are clean, though only docs/docs-*.md is gated.",
+    "ux-agent-interfaces and ux-cli docs say they are installed by the ux-essentials bundle (ux-cli is also pulled in by ux-review). ux-agent-interfaces is required by no other skill, so it ships only through the bundle or by name."
+   ],
+   "validator": "python3 .claude/skills/research-lang/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' over rules/ux-quality.md rules/marketing-quality.md and the 16 new skills plus skills/ux-quality-reference and skills/marketing-quality-reference (plus the plan's wider forbid list) -> exit 0, 'clean', 0 findings. Also: task artifacts TS_CONSUMER=/nonexistent -> exit 0 (all 36 new --self-test scripts pass); task test -> 31 tests OK; task facts:stale -> exit 0; the cross-edited rules, skills and cli-contract files -> check-artifacts clean. A first run over only the two reference skills with the minimal forbid set reported 7 unresolved cross-set rule IDs (UX-ACT-12, 18, 22, 23, UX-TEXT-05, 07, 23). Those IDs are defined in ux-cli and ux-agent-interfaces. With those skills in the same invocation, as in the taskfile step, the result is clean. 'task lint' and 'task format:check' are RED (see planDeviations)."
+  }
+ ]
+}

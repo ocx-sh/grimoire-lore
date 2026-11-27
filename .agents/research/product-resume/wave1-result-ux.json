@@ -1,0 +1,376 @@
+{
+ "group": "ux",
+ "mapPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/ux-topic-map.md",
+ "topics": [
+  {
+   "slug": "ux-verification-claims",
+   "idFamily": "UX-VERIFY",
+   "dives": 4,
+   "blocked": 0,
+   "sources": 82,
+   "challenged": 13,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/ux-verification-claims.md",
+   "rules": 32,
+   "must": 28,
+   "conflictsResolved": [
+    "K17 (new): only the objective matrix checks block (hscroll, viewport meta, scheme luminance, forced-colours text, unnamed, capped, lost>1). newClipped, noRing and fullyObscured are advisory and go to Needs human review until the matrix error rate is measured. Applies to UX-VERIFY-13 to -16.",
+    "K18 (new): UX-VERIFY-24 now covers accessibility and conformance claims only. User-outcome claims moved to UX-VERIFY-28, where 'users will' matches only before an outcome verb. The 'intuitive' and 'user-friendly' ban is dropped: no source was found, and the WordPress docs word list (modified 2026-10-14) recommends 'intuitive'.",
+    "K12 revised: the WCAG 2.2 AA choice now rests on the W3C Recommendation alone. EN 301 549 V4.1.1 is not yet cited in the OJ; the Commission page, updated 2026-11-23, still lists V3.2.1.",
+    "UX-VERIFY-01: the rationale leads with the measured jsdom result. arXiv 2503.15885 is labelled suggestive, with the QualWeb non-improvement (0.105 to 0.112) and the equal-weight metric stated.",
+    "UX-VERIFY-02 and -27: fetch dates are recorded (Playwright page has no date, fetched 2026-11-27; web.dev last updated 2024-10-31, re-fetched 2026-11-27 with thresholds unchanged). Both re-check curl commands were tested and are set to run at publish time.",
+    "UX-VERIFY-13 to -16 and -21: the script and wcag22-ids.txt are publication preconditions in the UX review skill. The -13 to -16 Verify lines are review only until the script ships. -21 now gives a tested jq command that builds the 86-ID list.",
+    "UX-VERIFY-20 and -22: Verify lines are now runnable shell commands over labelled report sections, tested on a sample report. The hedge grep excludes the quote: field and code spans.",
+    "UX-VERIFY-04 and -05: Verify lines are now concrete commands (a sitemap diff, and a component-to-spec loop). The -05 loop on ocx-sh/website flagged 5 of 10 open-state component files as candidates.",
+    "UX-VERIFY-19: each row has a grep pattern for the added diff lines, and 'step markers' is defined.",
+    "UX-VERIFY-32 is demoted to SHOULD. UX-VERIFY-10 is restated as a pointer to the owner-approval gate.",
+    "Fleet rows 07, 11, 13/15 and 13 rows 6 and 7 now carry file:line or the exact command with its result. Row 14 moved to an Unresolved table with source paths Landing.astro:34 and CommandBar.astro:141. The T: and G: prefixes are expanded to full paths.",
+    "Catalog consistency: the rules/docs-quality.md:184-186 edit is added to the change list as publication precondition 3. No css-theming contradiction was found."
+   ],
+   "anotherRound": [
+    "Matrix error rate: on 20 or more routes, how often do newClipped, noRing (after the ancestor pass) and fullyObscured disagree with a human viewing the same page, and which of these checks may then block?",
+    "Is the EN 301 549 V4.1.1 citation in the Official Journal under Directive 2019/882 published yet (re-check 2026-12-31)?"
+   ],
+   "humanDecisions": [
+    "Ship checks/ui-matrix.mjs (with the ancestor pass) and wcag22-ids.txt in the UX review skill, and land the docs-quality.md:184-186 cross-reference, before this ruleset is published. These are preconditions.",
+    "Whether the 5 open-state components that UX-VERIFY-05 flagged in ocx-sh/website (EcosystemMenu, SiteHeader, Breadcrumbs, starlight Header, PageFrame) need open-state scans, or are scanned under other spec names."
+   ],
+   "failureModes": [
+    "Item 27 (new): the agent reports an advisory matrix hit (newClipped, noRing or fullyObscured) as a confirmed defect, or fails a PR on it, before a screenshot or a human confirms it. The CI job uses the script's overall exit code, which includes the heuristic checks.",
+    "The agent writes the 'users will' regex too broadly and flags UI-behaviour text such as 'users will be prompted'. UX-VERIFY-28 now scopes the pattern to outcome verbs.",
+    "The hedge grep fires on verbatim quotes. UX-VERIFY-22 now excludes the quote: field and code spans."
+   ]
+  },
+  {
+   "slug": "ux-a11y-authoring",
+   "idFamily": "UX-A11Y",
+   "dives": 4,
+   "blocked": 0,
+   "sources": 80,
+   "challenged": 12,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/ux-a11y-authoring.md",
+   "rules": 34,
+   "must": 24,
+   "conflictsResolved": [
+    "UX-A11Y-29: demoted from MUST to SHOULD and labelled house policy. The axe rules landmark-one-main, region and landmark-no-duplicate-banner are in the best-practice table (axe-core 4.14 rule-descriptions, fetched 2026-11-27). This matches -31. Verdict 4 now says that structure rules backed only by best-practice rules are SHOULD.",
+    "UX-A11Y-35: split by clause. The hex-free colour clause stays MUST as declared house policy (Verdict 4c), grounded in the VS Code webview UX line 'Ensure all elements in the view are themeable' (page updated 2026-11-25). The --vscode-focusBorder clause is now SHOULD. The VS Code source confirms the name ('vscode-' + id.replace('.', '-') in themeing.ts, main, fetched 2026-11-27), but no rendered webview has confirmed it. The 'expose as a command' clause was dropped because it had no check. The hex grep now filters out comment lines, and a full run gives 0. The missing high-contrast test is now listed as Violated, because 0 tracked files mention vscode-high-contrast.",
+    "UX-A11Y-12: the prose Verify was replaced by focus_outline.py (Appendix A1). It has a self-test, a focus-ok: exemption marker and a stated scope limit. Fleet run: in theme src, 7 of 8 focus-selector removals pass. In the webview, 2 of 3 pass. The 2 flagged sites are reviewed exceptions documented in source comments: overlay.css:96 and sidebar.css:355.",
+    "UX-A11Y-19: the greyscale reading check was replaced by colour_only.mjs (Appendix A6). It diffs computed styles against peers that carry no state, and it counts a 3:1 lightness difference as a cue, which Understanding 1.4.1 (updated 2025-09-16) allows. axe link-in-text-block (wcag2a) and an aria-invalid message check were added. On 5 built pages it found 0 FAIL and 1 INFO.",
+    "UX-A11Y-33: the 'never decide set membership yourself' clause was moved to the ask-a-human list, because it had no pass or fail. A reverse check was added: one URL that carries two link texts.",
+    "UX-A11Y-22 and UX-A11Y-24: the missing cache directory (ux-announce-harness) is no longer cited. Both now cite the in-repo source in announcements-and-motion.md 'Harness source', with setup steps. Results are labelled simulated and not re-run. -24 gained a source check that needs no harness.",
+    "UX-A11Y-03, -04, -13, -15, -16, -20 and -35: the scripts that lived only in the cache are inlined in a new Appendix. These are scan_wv.py verbatim, plus measure.mjs and diff.mjs (renamed focus_diff.mjs) with only the import line changed. A generic wcag_contrast.py was added because the audit's contrast.py has the fleet's pairs hard-coded. -13 had wrongly said measure.mjs did the pixel diff; it now cites focus_diff.mjs for that.",
+    "UX-A11Y-26: the 0.34 s threshold is now derived in Why from the WCAG flash definition (Understanding 2.3.1, updated 2025-09-17): 1/3 s per full cycle, rounded up, or 1/6 s with alternate. The Verify is labelled a heuristic and names the cases it cannot see.",
+    "UX-A11Y-17 and UX-A11Y-21: folded into one CONSIDER note at 17. 21 is retired and its number is not reused. 02, 03 and 04 are kept because each has a measured violation. 05 is kept at MUST as WCAG Level A with an axe rule, and the log notes that no fleet violation was measured.",
+    "UX-A11Y-10: one ID kept, because citations use it. Each row now has a sub-ID from 10a to 10j and a runnable detector. Rows 10f, 10g and 10h use the DOM queries Q1 and Q2 and the test T1, all tested on a fixture. 10d uses a grep for links that carry menuitem. 10j uses an html-validate command.",
+    "New commitments: every row is labelled unmeasured, and the new Verdict 12 lists them. Their severity rests on the WCAG or APG source. The Choice row is labelled as measured in a harness copy only.",
+    "UX-A11Y-13 Applied row: the asciinema pre.ap-term-text failure is now confirmed by pixels, by computed style (outline-style none, no box-shadow) and by source (asciinema-player.css:111-124 sets outline: none unconditionally, with 0 :focus rules). The second ocx-cmdbar trigger is explicitly not cited. Its 0-pixel result reproduced on 2026-11-27, and its cause is still unknown. The Verify now treats a 0-pixel stop as a lead until the computed style confirms it."
+   ],
+   "anotherRound": [
+    "Why does the second ocx-cmdbar__trigger give 0 changed pixels in focus_diff.mjs when its siblings give 1858-2124? The result reproduced on 2026-11-27. Is it a harness artefact (clip, scroll or timing) or a real missing ring?",
+    "How many false positives and false negatives do focus_outline.py (BEM ancestor heuristic) and colour_only.mjs (class-list peers) give on Primer and Radix, before they ship as published checks?",
+    "Does the Applied row for UX-A11Y-22 still hold? It says the webview results state has 0 role or aria-live, but W:render.ts:1219 now renders .result-summary with role=status and aria-live. Re-measure and correct that row.",
+    "What is the computed value of --vscode-focusBorder in a rendered webview? It is needed to promote the focus-colour clause of UX-A11Y-35 to MUST."
+   ],
+   "humanDecisions": [
+    "Accept the house-policy MUST for hex-free colours in the VS Code webview (UX-A11Y-35, Verdict 4c), or demote it to SHOULD to keep the strict WCAG-level severity convention.",
+    "Approve adding /* focus-ok: */ markers at ocx-sh theme overlay.css:96 and grimoire-rs/vscode sidebar.css:355 (both shared or fleet code), so that focus_outline.py exits 0.",
+    "When the rule is published, approve shipping the six Appendix scripts in the reference skill's checks/ directory. They add a puppeteer-core and Chromium dependency for adopters."
+   ],
+   "failureModes": [
+    "A static focus check sees only removals on focus selectors. An outline: none with no condition on a focusable element (the vendored asciinema player) passes source checks and is caught only by the browser pass.",
+    "A pixel-diff focus harness can report 0 changed pixels for a stop that may have a ring. Treating that as a violation without reading the computed style gives a false finding.",
+    "Checks that cite scripts in a local cache become unrunnable once the cache is cleared. The announce harness directory was already gone."
+   ]
+  },
+  {
+   "slug": "ux-interface-states",
+   "idFamily": "UX-STATE",
+   "dives": 4,
+   "blocked": 0,
+   "sources": 74,
+   "challenged": 15,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/ux-interface-states.md",
+   "rules": 34,
+   "must": 22,
+   "conflictsResolved": [
+    "UX-STATE-24 applied row: changed from satisfied to partial. The focus clause is met (settings/main.ts:316-320), but the registry form has several fields (settings/render.ts:563-590) and no error summary.",
+    "UX-STATE-24 verify: the source count of .focus() calls is replaced by a test. It records focusin events and asserts document.activeElement after a failed submit.",
+    "UX-STATE-05 verify: aria-busy no longer counts. role=status, role=alert or aria-live must be on the element that holds the state text, or on its container (el.closest).",
+    "UX-STATE-07: narrowed to partial and capped states, with grep triggers (paged-source tokens, .slice(0, CONSTANT)). The stale clause moved to the new UX-STATE-34 as a CONSIDER because its sourcing is weak.",
+    "UX-STATE-26 verify: two grep -rl lists, one for optional markers and one for required markers. The check fails when both are non-empty.",
+    "UX-STATE-22: demoted from MUST to SHOULD. GOV.UK validation is now quoted verbatim for the submit-time part (fetched 2026-11-27). The blur clause is a MAY.",
+    "UX-STATE-10: the invented expectedWaitMs alternative is dropped. The 1000 ms delay is labelled a convention taken from guidance, not a measurement. It stays MUST because the fleet sidebar shows the check runs.",
+    "UX-STATE-19: the count is tied to one named banner component. GOV.UK govuk-notification-banner and Primer React Banner were both confirmed by fetching their pages.",
+    "UX-STATE-27: demoted to SHOULD. The grep now also matches name= and id= patterns, with a step that reads each hit.",
+    "UX-STATE-08 verify: generic transport-spy test. host.send is kept only as the fleet example.",
+    "UX-STATE-15: the logs-link clause becomes SHOULD and cites the VS Code notifications page ('Show a link to see more details (like logs)', page date 2026-11-25).",
+    "UX-STATE-13: demoted to SHOULD because the rule is untested in the fleet. The ruleset header now names the 8 rules that have no instance.",
+    "UX-STATE-25: the rationale leads with the GOV.UK January 2024 change, quoted from the page. WCAG 3.3.7 is now described as supporting.",
+    "Verdict item 3: now reads 'TUI-23 plus the 3 s determinate tier, pending CR-1'.",
+    "Applied rows 11, 15, 20, 29 and 33: file:line evidence added from a re-read at 9230dcd. Row 29 lists all 11 call sites. Row 33 corrected: CLAUDE.md:34-43 records no reason for the webview, and extension.ts:481 has no comment."
+   ],
+   "anotherRound": [
+    "Does the UX-STATE-24 focusin test (exactly one focus move, activeElement equals the summary or the first invalid field) separate a pass from a fail when run on the registry form and on a form built to fail?",
+    "Do the trigger greps for UX-STATE-07 and UX-STATE-34 (paging tokens, .slice(0, CONSTANT), cache reads) find the right views in a second codebase outside the fleet, or does the noise of MAX_ constants make them unusable?",
+    "Which real codebase with forms that collect user data can prove the UX-STATE-22, 26 and 27 checks run, so they can return to MUST?"
+   ],
+   "humanDecisions": [
+    "Whether the extension records why the sidebar is a webview view rather than a native tree view (UX-STATE-33). Today neither extension.ts:481 nor CLAUDE.md gives a reason.",
+    "Whether the registry form gets a 'There is a problem' summary with links to its fields, to close the partial status of UX-STATE-24.",
+    "Whether the 1000 ms show-delay is adopted as the house convention. It is guidance, not a measurement (UX-STATE-10)."
+   ],
+   "failureModes": [
+    "The agent counts aria-busy or an unrelated live region as an announcement (UX-STATE-05).",
+    "The agent leaves a multi-field form with a single error line and no summary (UX-STATE-24).",
+    "The agent counts .focus() calls in source instead of testing where focus actually ends up (UX-STATE-24).",
+    "The agent invents a pass condition such as expectedWaitMs that no codebase has (UX-STATE-10).",
+    "The agent checks only type=email|tel|password, so a plain-text name or address field has no autocomplete (UX-STATE-27).",
+    "The agent applies a fleet-specific test such as host.send to a codebase that does not have it (UX-STATE-08)."
+   ]
+  },
+  {
+   "slug": "ux-interface-text",
+   "idFamily": "UX-TEXT",
+   "dives": 3,
+   "blocked": 0,
+   "sources": 62,
+   "challenged": 11,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/ux-interface-text.md",
+   "rules": 30,
+   "must": 15,
+   "conflictsResolved": [
+    "Skeptic finding 2 (keep a MUST subset of UX-TEXT-17: please, emoji, oops) and finding 10 (demote -16/-17 to SHOULD and merge them) conflict. Each term now takes the severity its source gives. The MUST part (emoji, oops/whoops/uh-oh/yikes) cites Primer and VS Code 'do not'. please, sorry, apologise and a trailing ! are SHOULD.",
+    "The skeptic proposed please as MUST. GOV.UK says 'usually no need' and Microsoft lists exceptions, so it was moved to SHOULD with owner-listed exceptions. Verdict 6 was rewritten to match.",
+    "UX-TEXT-16 was demoted to SHOULD but not merged with -17. They are checked by different greps on different syntax, so the duplicate 'click here' was removed from -17 instead. No ID was retired.",
+    "UX-TEXT-24 vs Verdict 9: whole-string assembly rests on translation sources, as UX-TEXT-26 does. It now matches -26: SHOULD, MUST once translation is adopted.",
+    "UX-TEXT-23 vs UX-TEXT-05: -05 takes precedence. The ocx_console separator '{text} \u2014 run `{command}`' (user_interface.rs:87) is fixed as a 'help:' line, not by swapping the dash.",
+    "Verdict 7 said 'sentence counts are sourced'. Only UX-TEXT-13's count is sourced (Atlassian, vendor data). UX-TEXT-22's two-sentence threshold is now labelled a calibration, and its verify keys on the docs link VS Code asks for."
+   ],
+   "anotherRound": [
+    "With no rule loaded, do coding agents actually write emoji, a trailing '!', 'Oops', 'please' or 'Learn more' when they author a toast, an error or a link? A scored agent-output sample would decide whether UX-TEXT-16 and -17 change behaviour.",
+    "Does the full text of Barik et al. (FSE 2018) support the resolution-over-structure finding? Only the abstract was read: what are the method and the effect size?",
+    "Can one string-position extractor per language (Rust Display at the boundary, VS Code notification calls, aria/alt/title attributes) replace the candidate-list greps in UX-TEXT-02, -08 and -24 with real pass/fail checks?"
+   ],
+   "humanDecisions": [
+    "Which cases, if any, may use 'please' or an apology in product strings (UX-TEXT-17 SHOULD part, Verdict 6)?",
+    "Is translation on the roadmap? It moves both UX-TEXT-24 and UX-TEXT-26 to MUST.",
+    "Does grimoire.path.executable (package.json:310, 3 sentences, no link) count as long under the UX-TEXT-22 calibration, or is it accepted as written?"
+   ],
+   "failureModes": [
+    "A fixed verb list in a verify check fails correct next steps such as create, add, check or rename (UX-TEXT-02, now removed).",
+    "'sort | uniq -d' over stderr flags correct repeated note:/help: lines, and it misses a path printed twice inside one line (UX-TEXT-08, now a snapshot gate plus candidate greps).",
+    "A zero-hit count was used as the reason for MUST severity, which overstated hedged sources and banned 'successfully', a word WCAG 4.1.3 uses as a good example.",
+    "A narrow regex was presented as the check for a broad rule. The UX-TEXT-24 grep misses template-literal splices, for example render.ts:722.",
+    "An abstract-only citation was presented as independent evidence (Barik et al.).",
+    "Applied counts were given without file:line. Re-measuring found grim has 4 true (s) strings, not 5, and a second UX-TEXT-22 candidate the row had missed."
+   ]
+  },
+  {
+   "slug": "ux-cli-interaction",
+   "idFamily": "UX-CLI",
+   "dives": 4,
+   "blocked": 0,
+   "sources": 73,
+   "challenged": 21,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/ux-cli-interaction.md",
+   "rules": 30,
+   "must": 16,
+   "conflictsResolved": [
+    "UX-CLI-01 vs Verdict 5: no source states exit 0 or stdout for bare invocation (GNU covers only --help). UX-CLI-01 keeps the measured-harm MUST (no REPL, prompt, stdin or network). Exit 0 and stdout identical to -h moved to new UX-CLI-28 (SHOULD), checked with diff -B because grim adds one trailing blank line (measured).",
+    "UX-CLI-13 vs shell-integration: the eval-at-startup MUST contradicted SH-EMIT-34, which bans `source <(...)` for bash and accepts a stored file. It also rested on the warning for clap_complete's dynamic mode, which is behind unstable-dynamic. The clause was removed. Registration now lives in new UX-CLI-30 (SHOULD), which points at shell-integration Step 6.",
+    "UX-CLI-21 vs dive A-05 and CLI-08: the opt-out moved to new UX-CLI-29 (SHOULD), the dive's rating. CI and machine output are pointers to CLI-08, not new content. The ocx CI=1 animation now counts only against CLI-08 (CR-4).",
+    "UX-CLI-27 and Verdict 9 (FORCE_COLOR=0): I re-fetched bixense on 2026-11-27. It defines no special value 0; the 'other than 0' wording comes from the gh manual, so the skeptic's premise was corrected. force-color.org (updated 2026-11-11) forces colour on any non-empty value, 0 included, and Node reads 0 as disable. Rule: NO_COLOR wins, and FORCE_COLOR=0 forces nothing, a deliberate break from force-color.org.",
+    "UX-CLI-05 vs dive HELP-05: the root example block is now 2 to 5 lines (was 2 or 3). Every count is labelled a house heuristic.",
+    "UX-CLI-23: demoted MUST to SHOULD, because the dive calls its check a reading heuristic and no mechanical pass/fail exists.",
+    "UX-CLI-14 vs Verdict 4: the check no longer runs installer output in a shell. It matches the line's shape and runs only the product binary with -h, and it does not check whether the headline succeeds.",
+    "UX-CLI-22: the allow-list check (decorative-colour.allow, owner-approved) replaces the counter that could never pass. ocx about now fails until the owner decides.",
+    "UX-CLI-06 and 07: dropped the leaf budget, which could not fail, and the unsourced 3-or-more-operations clause. The duplicate-name clause is now a review step backed by dup-scan.sh."
+   ],
+   "anotherRound": [
+    "Does UX-CLI-08's no-network clause have a usable check on macOS (sandbox-exec, not run here) and on Windows, using the local Windows harness under /mnt/c/Users/ecom/?",
+    "Can the help-layout parser shared by the five check scripts avoid treating prose under a 'commands:' line as subcommands (seen in gh attestation download -h) without the 4-level depth cap?",
+    "Can a cargo-dist installer print a custom final line, or must grim's 35-line wrapper (docs/public/install.sh:35) add it after delegating?",
+    "What do NVDA, JAWS and Orca speak for the ocx and grim bars and for grim tui? This needs a human tester and is carried over unchanged."
+   ],
+   "humanDecisions": [
+    "Headline command for ocx (exec, package exec or init) and for grim (add or init).",
+    "Whether to honour FORCE_COLOR at all, and whether FORCE_COLOR=0 should force nothing (rule's choice) or follow force-color.org and force colour.",
+    "Rows of decorative-colour.allow, starting with ocx about 38;5;203.",
+    "Name and default of the animation opt-out (UX-CLI-29).",
+    "Whether the UX-CLI-19 first-run gate may block a release (it only reports by default).",
+    "Deprecations: update/upgrade, the -g meaning that changes below the root (10 paths), and ocx package exit 2 to 64.",
+    "Whether grim tui gets a linear mode."
+   ],
+   "failureModes": [
+    "Trusting framework defaults: no version in #[command], a required subcommand gives exit 2, external_subcommand swallows the suggester, a global flag without global = true, tracing without with_ansi, a help_template without {after-help}.",
+    "Writing text nothing executes: stale examples, hints such as ocx install, and installer last lines. The fix is the append -h test.",
+    "Assuming one switch covers another: NO_COLOR stopping animation, a stdout TTY gate for a stderr bar, a missing TERM=dumb gate.",
+    "Adding a name without an inventory: update next to upgrade, or a short flag with a second meaning below the root.",
+    "Acting on CLI output as an instruction: running a plugin install hint built from a typo, or piping an installer's last line (rm -rf for ocx) into a shell.",
+    "Copying exemplar anti-patterns: a REPL on bare invocation, prefix matching, seconds from one host hard-coded as a budget.",
+    "Claiming accessibility from memory: 'fully accessible', citing WCAG 4.1.2 or 1.4.12, misreading crossterm's 38;5;N slot form.",
+    "Writing a check that cannot fail: a case-sensitive grep for 'did you mean', git status in a directory that is not a repository, `env --color=never`, grep -c on multi-line version output."
+   ]
+  },
+  {
+   "slug": "ux-consequential-actions",
+   "idFamily": "UX-ACT",
+   "dives": 3,
+   "blocked": 0,
+   "sources": 44,
+   "challenged": 22,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/ux-consequential-actions.md",
+   "rules": 28,
+   "must": 24,
+   "conflictsResolved": [
+    "UX-ACT-16 vs pinned exit codes (CLI-04): MUST now binds only new commands; shipped repeat codes (ocx remove 79, init 64/78) are SHOULD until the owner decides; Verdict 8 rewritten with AWS TerminateInstances and clig.dev as sources and the git and kubectl counter-evidence.",
+    "UX-ACT-12/17 vs CLI-09: CLI-09 applies only once a command gains a prompt; a refusal needs no --yes/--no-input; --yes is defined only for prompting commands.",
+    "UX-ACT-22 version mismatch: the permission-modes page is undated (re-fetched; v2.1.326 is only a HIPAA-default note), and all behaviour was measured on 2.1.332; Decay row fixed.",
+    "UX-ACT-04 rationale overclaim: the VS Code Esc result without isCloseAffordance is stated as unsourced; the rule holds because a confirm-label comparison is safe whatever Esc returns.",
+    "UX-ACT-11: Raskin re-attributed (effort distracts, does not reliably prevent loss), matching confirmations-and-modals.md:214.",
+    "UX-ACT-20: unsourced 'makes prompts unclear' dropped; rationale now cites the measured annotation-blindness of Claude Code.",
+    "UX-ACT-27: demoted to SHOULD; OWASP LLM06 re-fetched, and it lists 'Log and monitor' as damage limitation, not prevention.",
+    "UX-ACT-23: MUST for full arguments, absolute paths and an equal Deny (MCP SHOULD, MCP security best practices, VS Code); marking model-chosen arguments demoted to SHOULD.",
+    "UX-ACT-13: MUST only for no-write preview, same validation path and described changes (kubectl, clig.dev); the 'would <verb>' line, 'nothing to do' and exit 0 are SHOULD, labelled house convention.",
+    "UX-ACT-05/07: MUST narrowed to the grep-checkable or DOM-testable clauses; habit-level and VS Code-unmeasured parts are SHOULD with concrete checks.",
+    "UX-ACT-10: demoted to SHOULD (does not apply to the fleet, no runnable pattern).",
+    "UX-ACT-21 / Verdict 5: 'highest yield' ranking deleted; the rule centres on the dry run before approval.",
+    "UX-ACT-01/02/12/25/26 Verify made binary: verb-free clap help walk plus package.json commands plus message.type labels; a fixed 'Consequence:' line; a single 5 s bound with a 'Try:'/'Override:' line order; a trifecta CSV with an awk one-liner; a deterministic unit test of the approval decision.",
+    "UX-ACT-06 vs css-theming: Verify now requires the destructive variant to resolve to var(--ocx-...) tokens (CSS-TOK-01).",
+    "UX-ACT-19/26 scoped to authors of approval logic, so a repository without such logic records 'not applicable' instead of a vacuous pass.",
+    "Applied row 03 reworded: uninstallNotice shows a notice only for no-op outcomes and with no action item (sidebar.ts:673-676, details.ts:1012-1015, grim.ts:1102-1114).",
+    "Applied rows 12, 13, 15, 16, 17, 20, 22, 28 now carry file:line, dive line references, or the exact command plus output line; row 22 names all 14 settings files."
+   ],
+   "anotherRound": [
+    "In a VS Code native modal, which item is focused first and does Enter or Esc trigger the destructive item when no item has isCloseAffordance (Extension Development Host run on forceRetry, vote, switchReplacement)? A result would let UX-ACT-07's VS Code clause become MUST.",
+    "Does any client (Claude Code, VS Code) change approval behaviour when a server sets readOnlyHint: true? This would settle UX-ACT-20's benefit.",
+    "How often do agents add --force or --yes after a refusal without asking, counted in real transcripts? This would justify or drop UX-ACT-21's MUST and the failure-mode ranking.",
+    "What do network-bound fleet mutators (grim add/install/update/release/publish, ocx add/pull/update/upgrade) do on a repeat run and with stdin closed against a local registry?"
+   ],
+   "humanDecisions": [
+    "Repeat-run exit codes for existing commands (ocx init/remove, grim init, ocx direnv init, grim config registry add/rm): keep the pinned nonzero codes or move to exit 0 with 'unchanged'/'already absent' (UX-ACT-16 is SHOULD for them until decided).",
+    "Adopt the three house conventions introduced for checkability: the 'Consequence:' help line (UX-ACT-02), the 'Try:'/'Override:' refusal lines (UX-ACT-12), and docs/agent-trifecta.csv (UX-ACT-25). Each changes fleet help or error text and has no external source.",
+    "If the VS Code Enter-on-open check shows Enter runs the destructive item: reorder items, add an isCloseAffordance cancel item, or accept it.",
+    "Carried over: the tiers for ocx clean --force, grim release --force and vote; removing the switchReplacement T0 modal and the grimInfo modal; the @ocx-sh/theme ConfirmDialog API change; the grim_render write root; whether grim release --force needs --confirm; and --allow-writes in shared sessions."
+   ],
+   "failureModes": [
+    "Adds --force/--yes after a refusal or follows a hint that names one (UX-ACT-21, UX-ACT-12).",
+    "Puts bypassPermissions, --dangerously-skip-permissions or mcp__server__* in CI or settings (UX-ACT-22).",
+    "Supplies --confirm=<name> itself, which turns a T3 safeguard into a formality (UX-ACT-21, UX-ACT-22).",
+    "Reads exit 0 with empty output as done (UX-ACT-15).",
+    "Wraps a failing repeat removal in || true, which hides real errors (UX-ACT-16).",
+    "Assumes --dry-run exists and behaves the same everywhere (UX-ACT-13).",
+    "Writes confirm('Are you sure?') or accepts a component default of 'Confirm' (UX-ACT-05, UX-ACT-06).",
+    "Adds a modal to a reversible or informational action (UX-ACT-03, UX-ACT-08).",
+    "Tests choice !== 'No', so dismissal proceeds (UX-ACT-04).",
+    "Makes the destructive button the initial focus or the Enter default (UX-ACT-07).",
+    "Treats a UI dialog or a tool annotation as the write gate (UX-ACT-18, UX-ACT-19, UX-ACT-24).",
+    "Marks a writing tool readOnlyHint: true, or omits annotations (UX-ACT-20).",
+    "Follows instructions in tool results; contained by UX-ACT-24, and UX-ACT-26 keeps such text out of the approval decision.",
+    "Presents model-chosen arguments or relative paths in an approval (UX-ACT-23).",
+    "Places the prompt after a variadic --allowedTools flag so the flag swallows it (measurement pitfall).",
+    "A verb-filtered inventory script silently misses mutators such as rate, export, lock and hook revoke (UX-ACT-01 Verify now has no filter)."
+   ]
+  },
+  {
+   "slug": "ux-ai-features",
+   "idFamily": "UX-AI",
+   "dives": 3,
+   "blocked": 0,
+   "sources": 65,
+   "challenged": 18,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/ux-ai-features.md",
+   "rules": 21,
+   "must": 8,
+   "conflictsResolved": [
+    "UX-AI-06: the broken grep `\\\\u200[bcd]` (rc 1 on a planted U+200B) is replaced with `\\x{200B}|\\x{200C}|\\x{200D}|\\x{2060}|\\x{FEFF}`. Tested on planted U+200B, U+2060 and U+FEFF with GNU grep 3.11. Stays MUST.",
+    "UX-AI-08: demoted MUST to SHOULD. The regex is narrowed to AI Act terms. Fail now means a hit that names no Art. 50(1)/(2)/(4)/(5) paragraph. Tested on a planted file, and WCAG and GDPR lines no longer hit.",
+    "UX-AI-01: now asserts a `data-ai-disclosure` element in the input's viewport with a disclosure phrase regex, tested to reject 'AI-powered search'. Utah and Maine are corrected: Utah's duty is on request and its safe harbour needs 'outset and throughout'; Maine covers trade and commerce only. Added a precedence line over DOC-PLAIN-08.",
+    "Verdict 2: the claim that one rule covers four jurisdictions is dropped. The Utah safe harbour now needs UX-AI-01 plus UX-AI-03.",
+    "UX-AI-19: demoted to SHOULD and its basis labelled 'simulated, not real AT'. The contradiction is gone: the ban covers the element that receives tokens, and the opt-in log receives sentences only. The +5 is dropped; the pass thresholds are now the measured 1 and 50.",
+    "UX-AI-15 and C8: reverted to SHOULD. PAIR is labelled vendor. The grep now covers `* 100` and `Math.round`, and the uncheckable exception is removed.",
+    "UX-AI-13: demoted to SHOULD. The grep for a single word is replaced by a unit test: the delimiter wraps the chunk with its origin and survives an embedded closing delimiter. The per-chunk source mandate is dropped.",
+    "UX-AI-14: demoted to SHOULD. Its basis is now the logic; Liu et al. is background only. Pass is the unit test only.",
+    "UX-AI-18: demoted to SHOULD and scoped to AI SDK 5 or later, with the source labelled vendor. The check is now `grep -o | sort -u | wc -l` = 7. It absorbs the Stop/Regenerate line.",
+    "UX-AI-20: demoted to SHOULD with vendor labels. Added a sentinel-error test that works on any stack; the redactToolErrors check is marked AI SDK only.",
+    "UX-AI-16: demoted to CONSIDER with the transfer caveat. The grep no longer contains 'not sure' and runs over system prompts only.",
+    "UX-AI-21 and UX-AI-23: retired in place, IDs not reused. Suggestion click-to-send is routed to UX-ACT.",
+    "UX-AI-22: restated as an instruction. The two-click limit is dropped and Microsoft is labelled vendor. Carbon and PAIR are also labelled vendor in UX-AI-03 and -17.",
+    "UX-AI-05: the rule text now says the NY effective date is computed and unverified, and that the test checks code, not legal scope.",
+    "UX-AI-09 and -12: the basis now rests on primary sources: NVD CVE-2025-32711 (2025-06-11), arXiv 2509.10540 (2025-09-06) and Noma ForcedLeak (2025-09-25, security vendor). Willison is labelled secondary.",
+    "C11: measured that prose.py flags 'AI-generated' in .md files but not in .tsx files. The conflict is narrowed to UX-AI-07, and precedence lines are added to -01 and -07. The docs-quality exemption is a publishing gate, because this task may write only this file.",
+    "Applied: the UX-AI-13 row now prints its command, revision 72d3fce1 and rc=1 output. The UX-AI-01 not-applicable row cites server.rs:15 (stdio). The commitment row is relabelled 'Plan, not a measurement'.",
+    "Severity scheme: MUST is restricted to LEGAL and MEASURED rows (01, 02, 05, 06, 07, 09, 10, 12). The count moved from 15 MUST / 8 SHOULD to 8 MUST / 12 SHOULD / 1 CONSIDER / 2 retired."
+   ],
+   "anotherRound": [
+    "How do NVDA, JAWS, VoiceOver and TalkBack treat per-sentence appends to a role=log region at streaming rate, and can UX-AI-19 return to MUST?",
+    "Is there a fetched study measuring whether a chat model's stated confidence is calibrated (decides whether UX-AI-15 returns to MUST)?",
+    "What is the official effective date of NY GBL art. 47 Part U, and what does the chaptered California SB 243 text say?"
+   ],
+   "humanDecisions": [
+    "Publishing gate: ship ux-ai-reference only in the same change that adds a DOC-PLAIN-08 exemption for data-ai-disclosure components and <!-- ai-disclosure --> blocks in docs-quality; this revision could not write docs-quality.",
+    "Should grim_fetch and other grim MCP tools wrap publisher text in a third-party data boundary (UX-AI-13, now SHOULD)?",
+    "Ship ux-ai-reference inside ux-essentials or as an opt-in skill, given that 13 of 21 active rules are dormant for the fleet?",
+    "Does the fleet intend to ship a human-facing LLM feature (docs Ask AI, VS Code chat participant)?"
+   ],
+   "failureModes": [
+    "Agent ships marked/markdown-it/react-markdown defaults, so model output triggers live remote image fetches (UX-AI-09, -12).",
+    "Agent writes a zero-width check with \\\\u200b escapes, which PCRE never matches, so a planted mark passes (UX-AI-06).",
+    "Agent obeys DOC-PLAIN-08 and strips a required AI label from a published markdown page (C11).",
+    "Agent writes 'required by the AI Act' or claims compliance in copy (UX-AI-08).",
+    "Agent puts the token-receiving message container in aria-live, giving 500 simulated announcements (UX-AI-19).",
+    "Agent allow-lists a user-content host, an open redirect or an expired domain in img-src (UX-AI-09)."
+   ]
+  },
+  {
+   "slug": "ux-agent-facing-interfaces",
+   "idFamily": "UX-AGENT",
+   "dives": 3,
+   "blocked": 0,
+   "sources": 48,
+   "challenged": 17,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/ux-agent-facing-interfaces.md",
+   "rules": 25,
+   "must": 13,
+   "conflictsResolved": [
+    "C1 (UX-AGENT-15, Verdict 7): kept MUST; the overrule of E8 is now backed by fetched, quoted MCP 2026-07-28 Error Handling text plus the 2026-07-28 schema's open `arguments?: { [key: string]: unknown }` type, so an inputSchema violation is not a 'malformed request'; the interpretive step and the unread 2025-11-25 schema are stated",
+    "C3/C6/UX-AGENT-04/09: the always-present `retryable` and the error-document `schema_version` are SHOULD until Rust CLI-04 is revised (owner decision 4); always sending `retryable` already conforms to the optional `retryable?`",
+    "C4/UX-AGENT-19: demoted to SHOULD; the 2,048 cap is old-client compatibility (Claude Code before v2.1.296); the D2 regex is only a pre-filter, and item 2 needs a reviewer or LLM-judge reading",
+    "C8/UX-AGENT-10: held at SHOULD until owner decision 3; the HTTP retry set is aligned with and cites catalog GO-NET-11 (408, 429, 5xx except 501), which replaces the unsourced 4xx clause",
+    "C9 (new): correctable-errors E6's claim that ocx prints prose only on exit 64 is wrong; a re-run shows `ocx --format json about --bogus 2>/dev/null | jq -e .error` exits 0",
+    "UX-AGENT-06 split: MUST covers bounded output plus total/truncated/continuation; the Claude Code 50,000-char spill moved to the new UX-AGENT-26 (SHOULD, vendor, MCP text results only)",
+    "UX-AGENT-16, 22, 25 and the combinator clause of 20 demoted to SHOULD, and the verb ban and full-name length of 18 restored to SHOULD; 08 retired and folded into 04",
+    "UX-AGENT-13 and 05: the verification is now executable (the hint-command block flags only `ocx install`; exact allowlisted approval words; the unknown-property fixture), with the greps demoted to locators"
+   ],
+   "anotherRound": [
+    "Do non-Claude MCP clients (Codex, Copilot in VS Code, Cursor, Gemini CLI) pass isError text and protocol errors to the model, and where do they truncate?",
+    "Does a class-and-verdict prefix on MCP error text change a model's next action compared with the same text without it (paired probe on the R4 conditions)?",
+    "How often do catalog skills and recorded transcripts mix streams, parse message text or retry without a cap, and what is the false-positive rate of the UX-AGENT-25 locator greps?",
+    "Did the MCP 2025-11-25 schema already type CallToolRequest arguments as an open object, so the C1 reading also holds for clients on that revision?",
+    "Does OpenAI's 'Root objects must not be anyOf' rule apply to strict-mode function parameters, i.e. can the top-level combinator rejection be reproduced against a named client?"
+   ],
+   "humanDecisions": [
+    "Owner decision 3: reword the Rust (cli-contract.md:37) and Go (cli-contract.md:27) exit-69 rows so connection refused or reset is 75, or keep them and reverse UX-AGENT-10's clause; UX-AGENT-10 stays SHOULD until then",
+    "Owner decision 4: revise Rust CLI-04 to make `retryable` required and add `schema_version` to the error envelope; until then UX-AGENT-09(c) and UX-AGENT-04's error-document clause are SHOULD",
+    "Owner decision 1: keep the two envelope spellings (grim CLI-04, ocx SW-CLI-29) and add the missing fields, or converge on one",
+    "Owner decision 2: give `conflict` its own exit code 83 or keep 65 with a distinct slug",
+    "Owner decision 5: add `--json` as an alias in grim",
+    "Owner decision 6: whether a release-time tool-selection eval is wanted, and at what budget"
+   ],
+   "failureModes": [
+    "Habit transfer: writes `<cli> <sub> --json` after the subcommand (ocx exit 64; grim has no --json)",
+    "Pipes 2>&1 into jq and mixes logs or ANSI WARN lines into the JSON",
+    "Branches on message prose ('not found', seconds in text) instead of class or retry_after_seconds",
+    "Follows a hint literally: --force after a conflict, insecure = true for a remote host, a non-existent `ocx install`",
+    "Retry misjudgement: retries a deterministic TLS failure labelled 75, gives up on a 429 labelled 69, loops on login after a 401 caused by a typo",
+    "Waits forever on a stalled peer with no tool deadline",
+    "False completeness: concludes from a truncated listing or floods context (4.47 MB gh listing)",
+    "MCP channel loss: reads -32603 as a server bug, or the client never shows the protocol error to the model",
+    "Invents tool names after `tool not found` for a gated tool",
+    "Author-side defaults: anyhow to -32603, one-line descriptions, empty parameter descriptions, no outputSchema, top-level oneOf",
+    "Emits a boolean only when true, so false cannot be told from unknown",
+    "Quotes a Claude Code limit from memory (the 2,048 cut changed at v2.1.296)"
+   ]
+  }
+ ],
+ "failed": []
+}

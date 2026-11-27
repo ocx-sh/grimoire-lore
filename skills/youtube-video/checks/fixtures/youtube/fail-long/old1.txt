@@ -1,0 +1,9 @@
+Watch how a team pins versions with the new release workflow in mytool.
+
+Then read the lock file together with the manifest and the cache folder.
+
+00:00 Start
+00:30 Middle
+01:10 End
+
+#mytool #devtools

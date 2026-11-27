@@ -1,0 +1,43 @@
+format = "long"
+title = "We launch the new pinning workflow in mytool: a long and wordy title that goes past one hundred characters Ep 3"
+description = "desc.txt"
+tags = ["mytool"]
+chapters = "description"
+default_language = "en"
+default_audio_language = "en"
+made_for_kids = false
+synthetic = "no"
+paid_placement = false
+privacy = "public"
+thumbnail = "../thumb-small.png"
+duration_s = 600
+cta_at_s = 100
+ai_use = "yes, case: YT-F07"
+series = "pinning"
+episode = 3
+concept = "pin a tool version"
+
+[package]
+platform = "youtube"
+account = "example-channel"
+action = "upload-private"
+labels = ["synthetic"]
+ai_role = "none"
+sponsored = true
+open_asks = []
+approved_by = ""
+approved_at = ""
+
+[[audio]]
+source = "spotify"
+
+[[end_screen]]
+kind = "video"
+[[end_screen]]
+kind = "video"
+[[end_screen]]
+kind = "video"
+[[end_screen]]
+kind = "video"
+[[end_screen]]
+kind = "video"

@@ -25,6 +25,7 @@ consolidates:
   - typescript-audit/runtime-posture.md
   - typescript-frame.md
 date: 2026-08-29
+revised: 2026-11-27
 tools_surveyed: 99
 ---
 
@@ -53,8 +54,9 @@ sub-artifacts; this document uses eight and says so.
 2. **Do not move any typescript-eslint repo past `typescript@^6.0.x`.**
    `@typescript-eslint/eslint-plugin@8.68.0`'s peer range is
    `>=4.8.4 <6.1.0` — an `npm install` failure on TS 7, and on TS 6.1 too
-   (`oxc-project.md` §3). TS 7.0's absent programmatic API is the cause; 7.1 has
-   no ship date, only a `7.1.0-dev.20260829.1` nightly.
+   (`oxc-project.md` §3). TS 7.0's absent programmatic API is the cause; as of
+   2026-11-27 7.1 is a beta (since 2026-10-20) with no GA, and the peer range is
+   still `<6.1.0`.
 3. **tsgolint is the right destination and the wrong thing to do today.** It
    drives `typescript-go` directly, so it is immune to the API gap, and it is
    stable at 59-of-61 rule parity since 2026-07-22 — but it *requires* TS 7,
@@ -160,7 +162,7 @@ did not source.
 | `rollup-plugin-visualizer` | Rollup/Vite treemap | 7.1.1, 2026-08-14 | **keep conditionally** | — | SPAs *until* the Vite 8 bump | none now |
 | Vue 3.5 reactivity | −56% memory, 10x array tracking | 3.5.42 | **keep ≥3.5** | pre-3.5 internals | `creeptd-ng/web` | none |
 | npm | package manager | 12.0.0, 2026-07-08 | **keep** | — | 6 repos | none; audit script reliance |
-| pnpm | package manager | 11.0, 2026-04-28 | **keep**, bump 9→11 | — | `creeptd-ng` root | medium — `.npmrc`→`pnpm-workspace.yaml` |
+| pnpm | package manager | 12.0.0, 2026-08-26; 12.24.0 current on 2026-11-27 | **keep**, bump 9→12 | — | `creeptd-ng` root | medium — `.npmrc`→`pnpm-workspace.yaml` |
 | pnpm/bun workspaces alone | linking + script running | — | **keep** | Turborepo/Nx | `kate-middlechild` | none |
 | VitePress auto static/dynamic split | build-time hydration cut | built-in | **keep** (nothing to configure) | — | `ocx-catalog` docs site | none |
 | oxlint | Rust linter, 865+ rules | 1.80.0, 2026-08-24 | **watch** — pilot on the largest repo only | ESLint syntax rules | none yet | medium |
@@ -237,7 +239,7 @@ itself as watch, with one timed pilot on `ocx-catalog` if anyone wants a number.
 `peerDependencies.typescript: >=4.8.4 <6.1.0` — a hard install failure on TS 7,
 verified against `npm view` (`oxc-project.md` §3). TS 7.0 shipped 2026-07-08
 with no stable programmatic API; 7.1 is expected to carry "a new (and
-different)" one with no announced date ([TS 7.0 announcement](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/)).
+different)" one, and was still a beta without a GA on 2026-11-27 ([TS 7.0 announcement](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/)).
 tsgolint sidesteps this by driving `typescript-go` directly rather than
 importing the `typescript` package, and reached stable on 2026-07-22 at 59 of
 typescript-eslint's type-aware rules ([oxc stable blog](https://oxc.rs/blog/2026-07-22-type-aware-linting-stable)) —
@@ -878,3 +880,9 @@ scouts landed. A seventh wave-1 scout not named in the brief,
     evidence is `grimoire-indexer`'s 346 MB install, and that is an architecture
     question about a runtime `astro` dependency before it is a bundler question.
     `isolatedDeclarations` is the no-regret half and is adopted now.
+
+## Revision log
+
+- 2026-11-27: Verdict item 2 and decision (a) evidence: TypeScript 7.1 is a beta since 2026-10-20 with no GA, replacing "no ship date, only a nightly"; the peer range stays `<6.1.0`, so TS-TOOL-01 is unchanged. Decision file: refresh-2026-11/typescript-quality.md (types.md TS 7 paragraph), refresh-2026-11/typescript-packaging.md (compiler stamp).
+- 2026-11-27: Toolchain table, pnpm row: the baseline rated 11.0 current, but pnpm 12.0.0 shipped 2026-08-26 and 12.24.0 is current; the bump target becomes 12. Decision file: refresh-2026-11/typescript-packaging.md (spillover item on pnpm currency, routed through the unrouted-spillover list).
+- 2026-11-27: No TS-TOOL rule ID was changed or added; no decision contradicts a TS-TOOL rule.

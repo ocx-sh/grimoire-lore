@@ -43,10 +43,13 @@ a `descriptionFormat`. Preset membership changes between majors: confirm with
 `npx eslint --print-config src/index.ts` rather than assuming.
 
 **Pin `typescript` to a version your linter supports.** TypeScript 7.0 (stable
-2026-07-08) is a Go rewrite that shipped with no stable programmatic API until
-7.1 — typescript-eslint, `ts-morph`, and anything else importing `typescript`
-as a library can break on upgrade, and a linter that fails to build a program
-tends to report zero findings rather than an error.
+2026-07-08) is a Go rewrite with no programmatic API; 7.1 adds one
+(`typescript/sync`, `typescript/async`, `typescript/ast`) but was still a beta
+on 2026-11-27. typescript-eslint 8.74.0 still declares `typescript` as
+`>=4.8.4 <6.1.0` and reaches 7.1 only through the experimental
+`projectService.EXPERIMENTAL_backend` (8.73.0 and later), and `ts-morph` has no
+7.x support. A linter that fails to build a program tends to report zero
+findings rather than an error.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|

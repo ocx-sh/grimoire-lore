@@ -1,0 +1,64 @@
+# One row per channel. The fixture is valid on 2026-11-27.
+channels:
+  - id: github-org
+    platform: github
+    handle: example
+    url: https://github.com/example
+    status: active
+    ownership: proven
+    verified_by: maintainer, logged in, 2026-11-01
+    owner_role: maintainer
+    automation: none
+    approved_by: ""
+    labels_required: []
+    credential: ""
+    last_checked: 2026-11-01
+    linked_from: [README.md]
+  - id: discord-server
+    platform: discord
+    handle: example
+    url: https://discord.gg/abc123
+    status: active
+    ownership: proven
+    verified_by: maintainer, logged in, 2026-11-01
+    owner_role: community lead
+    automation: bot
+    approved_by: project owner, 2026-10-20
+    labels_required: [bot-application]
+    credential: DISCORD_WEBHOOK
+    last_checked: 2026-11-01
+    linked_from:
+      - README.md
+      - site/nav.json
+    runs_from: example/mytool/.github/workflows/notify.yml
+    gates_attested: [dc-nobot, dc-offtopic]
+    attested_by: community lead
+    attested_at: 2026-11-01
+  - id: youtube
+    platform: youtube
+    handle: "@example"
+    url: https://www.youtube.com/@example
+    status: planned
+    ownership: inferred
+    verified_by: not provable (403, 2026-11-01)
+    owner_role: maintainer
+    automation: none
+    approved_by: ""
+    labels_required: []
+    credential: ""
+    last_checked: 2026-11-01
+    linked_from: []
+  - id: bluesky
+    platform: bluesky
+    handle: ""
+    url: ""
+    status: none
+    ownership: proven
+    verified_by: owner decision, 2026-10-15
+    owner_role: maintainer
+    automation: none
+    approved_by: ""
+    labels_required: []
+    credential: ""
+    last_checked: 2026-10-15
+    linked_from: []

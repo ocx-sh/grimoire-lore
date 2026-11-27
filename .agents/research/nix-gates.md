@@ -7,6 +7,7 @@ consolidates:
   - nix-gates/format-and-lint.md
   - nix-gates/check-ci-and-impls.md
 date: 2026-09-27
+revised: 2026-11-27
 era: "CppNix 2.35.2 + nixpkgs 26.11pre rev 8d5d270900d3 + nixfmt 1.5.0, nixfmt-tree 2.6.0 (treefmt v2.6.0), deadnix 1.3.2, statix 0.5.8-unstable-2026-07-17 (molybdenumsoftware fork), nixf-diagnose 0.1.4, flake-checker 0.2.15, Lix 2.95.2, nixVersions.nix_2_31 = 2.31.5 — measured 2026-09-27"
 fixtures: /home/mherwig/.cache/research-lang/nix-tools/fixtures/nix-gates/
 ---
@@ -67,8 +68,8 @@ Four of the dives' factual claims did not survive the runs (see Conflicts).
    advisory, run with `--fail-mode` and stderr classification (V17).
 9. **Implementations:** CppNix is the gate of record. A, B and D flakes add
    a non-blocking **Lix 2.95** leg and a non-blocking **floor** leg. The floor
-   is computed from the pinned nixpkgs (V20, today `nix_2_31`), never
-   remembered. The Lix leg is the only check that caught a real divergence
+   is computed from the pinned nixpkgs (V20; `nix_2_31` on `8d5d2709`, `nix_2_34` on
+   nixos-unstable `2786a2a72088` as of 2026-11-27), never remembered. The Lix leg is the only check that caught a real divergence
    (V19). It stays non-blocking because Lix's only other measured divergence
    is a warning, and Lix's flake support is frozen and being moved into a
    plugin.
@@ -93,7 +94,7 @@ nix flake check --all-systems --no-build                                        
 nix build .#default --print-build-logs                                          # 6 GATE-10; every own package, not only default
 flake-checker --no-telemetry --fail-mode flake.lock                             # 7 GATE-11; advisory, stderr-classified
 nix shell nixpkgs#lix --command nix flake check --no-build                      # 8 GATE-16; advisory
-nix shell nixpkgs#nixVersions.nix_2_31 --command nix flake check --no-build     # 9 GATE-16; floor from V20's expression
+nix shell nixpkgs#nixVersions.nix_2_34 --command nix flake check --no-build     # 9 GATE-16; floor from V20's expression, nix_2_34 replaced by that element
 ```
 
 ### NIX-GATE — caught by `nix fmt` and a grep (format)
@@ -327,22 +328,24 @@ with a version comment.**
 
 **NIX-GATE-13 — Install upstream CppNix with `cachix/install-nix-action`,
 and pin the Nix version with
-`install_url: https://releases.nixos.org/nix/nix-<version>/install`. Use a
+`install_url: https://releases.nixos.org/nix/nix-<version>/install`, for example `nix-2.35.6`. Use a
 Determinate installer only when Determinate Nix is the stated intent, and then
 `determinate-nix-action` at an exact tag, never `nix-installer-action`.**
 - Rationale: `nix-installer-action` installs Determinate Nix by default, and
   its README calls upstream mode "not a supported configuration". The SHA pin
   fixes the Nix version only implicitly (v31.11.1 hardcodes
-  `nix_version=2.35.2` at `install-nix.sh:105`), so the next action bump
-  silently changes Nix.
+  `nix_version=2.35.2` at `install-nix.sh:105`, and five releases between
+  2026-10-14 and 2026-11-20 moved the hardcoded Nix to 2.36.0), so the next
+  action bump silently changes Nix.
 - Verification (Q19):
   `grep -rn -e '@main' -e 'nix-installer-action' -e 'magic-nix-cache-action@v[0-9]\b' .github/workflows`.
   Empty output passes. Then read that `install_url` is present.
 - Watched red: **yes** (V18).
 - Severity: **MUST**.
 - Floor: install-nix-action v31.11.1 (`13d8dd58da0234aa297dedd986986ccb8e7f3e24`,
-  2026-08-13, resolved via the GitHub API). The installed version must be at
-  or above the CVE-2026-39860 fix for its line (NIX-SEC, M-H-05).
+  2026-08-13, resolved via the GitHub API). The installed Nix must carry every
+  fix NIX-SEC-06's table names for its line, which 2.35.2 no longer does
+  (NIX-SEC, M-H-05).
 
 **NIX-GATE-14 — Cache the Nix store in CI with `nix-community/cache-nix-action`
 (v7, SHA-pinned, `primary-key` on `hashFiles('flake.lock')`). Never use
@@ -359,7 +362,7 @@ substituter until owner Q2 decides.**
 - Floor: cache-nix-action v7 (`7df957e333c1`, 2026-01-08).
 
 **NIX-GATE-15 — Run the gate on `ubuntu-24.04`, `ubuntu-24.04-arm` and one
-Apple-silicon macOS runner (`macos-15` or `macos-14`) when the flake declares
+Apple-silicon macOS runner (`macos-15` or `macos-26`) when the flake declares
 `aarch64-darwin`. Do not add an Intel macOS or a Windows runner.**
 - Rationale: x86_64-darwin throws on nixpkgs 26.11, and no exemplar runs
   Nix CI on Windows. jj's matrix is the working reference
@@ -368,7 +371,7 @@ Apple-silicon macOS runner (`macos-15` or `macos-14`) when the flake declares
   set of OS halves of the declared systems.
 - Watched red: n/a (a reading heuristic).
 - Severity: **SHOULD**.
-- Floor: GitHub-hosted runners as of 2026-09.
+- Floor: GitHub-hosted runners as of 2026-11 (`macos-14` retired 2026-11-02, re-check when a label is retired).
 
 ### NIX-GATE — caught by the implementation legs
 
@@ -378,21 +381,24 @@ floor. The floor is the oldest non-stub `nixVersions.nix_2_*` in the pinned
 nixpkgs, computed rather than remembered. No flake relies on a
 Determinate-only feature.**
 - Rationale: Lix 2.95 rejects rec/non-rec attribute merges that CppNix accepts
-  silently. nixpkgs prunes old versions release by release: `nix_2_24` and
-  `nix_2_30` both throw `has been removed. use nix_2_31`.
+  silently. nixpkgs prunes old versions release by release: on nixos-unstable `2786a2a72088` and `release-26.11`, `nix_2_24` to
+  `nix_2_33` throw `has been removed. use nix_2_34` (source read 2026-11-27), and
+  `nix_2_31`, the floor on 2026-09-27, is among them.
 - Verification:
   - Lix: `lix-leg-violation/` passes Q5 on CppNix 2.35.2 and 2.31.5 (exit 0)
     but fails on Lix 2.95.2 with exit 1:
     `error: attribute 'meta.minor' cannot be merged, because one set is marked as recursive and the other isn't`.
     The twin passes all three.
   - Floor: `nix eval --json 'github:NixOS/nixpkgs/<rev>#nixVersions' --apply 'v: builtins.filter (n: builtins.match "nix_2_[0-9]+" n != null && (builtins.tryEval (v.${n}.version or null)).success) (builtins.attrNames v)'`,
-    whose first element is the floor (V20).
+    whose first element is the floor (V20). On `2786a2a72088` the source defines only
+    `nix_2_34` (2.34.9), `nix_2_35` (2.35.6) and `nix_2_36` (2.36.0), so its first
+    element is `nix_2_34` (read from source 2026-11-27, not run).
 - Watched red: **yes** (V19, V20). The Axis 7 rerun on jj, zig-overlay and
   yazi across all three implementations agrees (V21).
 - Severity: **SHOULD** (the legs). No Determinate-only feature is a MUST
   owned by map conflict 11 and NIX-FLK (`schemas`).
-- Floor: this rule *is* the floor rule. Today the floor is 2.31.5, which is
-  above the CVE-2026-39860 patch for its line (2.31.4).
+- Floor: this rule *is* the floor rule. On nixos-unstable `2786a2a72088` the floor is `nix_2_34` = 2.34.9, the 2.34
+  fix in NIX-SEC-06's table (2026-11-27). It was `nix_2_31` = 2.31.5 on `8d5d2709`.
 
 ### Verification runs (this consolidation, 2026-09-27)
 
@@ -593,3 +599,9 @@ Ranked by how often the corpus and the runs show them.
 - Magic Nix Cache free-tier end of life: https://determinate.systems/blog/magic-nix-cache-free-tier-eol/
 - flake-checker README (exit behaviour, CEL conditions): https://github.com/DeterminateSystems/flake-checker
 - Lix 2.95 release (`rec-set-merges`, `floating-without-zero`): https://lix.systems/blog/2026-03-25-lix-2.95-release/
+
+## Revision log
+
+- 2026-11-27: NIX-GATE-13 (`install_url` example becomes 2.35.6, bump history added, installed-Nix floor tied to NIX-SEC-06's table), per `refresh-2026-11/nix-quality.md`.
+- 2026-11-27: NIX-GATE-15 (`macos-14` becomes `macos-26`, runner labels re-dated), per `refresh-2026-11/nix-quality.md`.
+- 2026-11-27: NIX-GATE-16 and gate step 9 (floor `nix_2_34` = 2.34.9, stub text `use nix_2_34`), and Verdict item 9, per `refresh-2026-11/nix-quality.md`. The 2026-09-27 measured stamps are kept as dated records.

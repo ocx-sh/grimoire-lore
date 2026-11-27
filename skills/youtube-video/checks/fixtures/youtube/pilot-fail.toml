@@ -1,0 +1,13 @@
+approved_by = "owner"
+approved_at = "2026-12-01"
+pass_median_engaged_views = 50
+pass_set_at = "2026-12-20"
+start = "2026-12-02"
+end = "2027-03-01"
+measured_median_engaged_views = 10
+measured_actions = 0
+verdict = "pass"
+
+[[short]]
+id = "s1"
+published = "2026-12-02"

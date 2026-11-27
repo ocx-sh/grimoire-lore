@@ -1,0 +1,9 @@
+Install mytool and pin a tool version in one command: https://example.com/install
+
+In this video you pin a tool version, run it, and check the lock file.
+
+00:00 What pinning does
+01:00 Pin a version
+04:00 Check the lock file
+
+#mytool #devtools

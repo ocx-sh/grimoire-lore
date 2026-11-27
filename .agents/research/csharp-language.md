@@ -16,6 +16,7 @@ grounding:
   - csharp-json.md
   - csharp-process.md
 date: 2026-10-11
+revised: 2026-11-27
 fixtures: /home/mherwig/.cache/research-lang/dotnet-tools/fixtures/consolidate-csharp-language/ (re-run with run-all.sh)
 ---
 
@@ -42,7 +43,7 @@ Citation keys:
    - **Reason:** it is the only mechanical check for dotnet/runtime's "DO continue to validate all arguments" rule. [CL] measured it firing on exactly the two unguarded public dereferences and on nothing else.
 3. **C# 14 on `net8.0` (CS-BUILD-04's recorded decision, which Microsoft calls unsupported) is safe for syntax and loud for runtime-bound features. It is silent only where binding changes.**
    - The one measured silent miscompile is `arr.Reverse();`: an in-place reversal on net8.0 and a discarded no-op on net10.0. It is banned with RS0030 ([C14] §5).
-4. **C# 15 / .NET 11 is fenced by the SDK 10.0.401 pin itself.** A `NET11_0_OR_GREATER` region may not exist until some leg builds net11.0, because the compiler never sees it ([C14] §10).
+4. **C# 15 / .NET 11 is fenced by the pair's floor (SDK 10.0.401 pin, `net8.0;net10.0`, LangVersion 14).** A `NET11_0_OR_GREATER` region may not exist until some leg builds net11.0, because the compiler never sees it ([C14] §10). .NET 11 went GA on 2026-11-10 (SDK 11.0.100), and the fence stands. On SDK 11.0.100 a `net10.0` target accepts the syntax-only C# 15 features under `LangVersion` 15 or `preview`, while `closed` fails with `CS0656` and `union` with `CS0518` (measured 2026-11-27).
    - This sets the timing for CS-PROC-23, which stays the shape rule for later.
 5. **Idioms are policed by mechanism, not by taste.** Ungated: `var`, `new()` and primary constructors on internal types. Gated: anything that hides mutable state, aliases data, fails open, or blinds the analyzers.
 6. **A copied generated-code marker turns the whole gate off for that file. The `.editorconfig` must override the heuristics, scoped to `obj/`.**
@@ -204,13 +205,15 @@ Every pure-syntax C# 14 feature compiled and ran identically on 8.0.31 and 10.0.
 - Status by TFM: net8.0 and net10.0 behave identically, including STJ source generation ([C14] row 1, F13).
 - Why:
   - A member named `field` silently rebinds: LV13 printed `41`, LV14 printed an empty line ([C14] row 11).
+  - On a `net11.0` target a type named `closed` is `CS9380` and a field typed `closed` is `CS1519` (SDK 11.0.100, measured 2026-11-27), a `union` that starts a declaration is `CS9370` (Roslyn breaking changes for .NET 11), and a type named `union` is only `CS8981`, so the name clause has its own check, L11d.
   - CS9264 (not CS8618) reports the missing initializer, so a CS8618 text search misses it ([NUL] §1.9).
   - `field ??=` is the same unsynchronised read-check-write as a hand-written lazy field, and it is the dominant corpus use (8 repos; testfx has 24 sites) ([C14] §12).
 - Check:
   - `CS9258` (warning, so an error), `CS9273`/`CS9272` (error) and `CS9264` (warning, so an error) under the gate. None of the three may appear in `NoWarn` or a `.globalconfig`.
   - `grep -rnE --include='*.cs' --exclude-dir=obj --exclude-dir=bin -e '\b(private|internal|public|protected)[[:space:]]+[A-Za-z0-9_<>?,]+(\[\])?[[:space:]]+field[[:space:]]*[;=]' src` prints nothing.
   - `grep -rnE --include='*.cs' --exclude-dir=obj --exclude-dir=bin -e 'field[[:space:]]*\?\?=' src` lists the `??=` sites. Each hit must sit in a type documented as single-threaded.
-- Watched: **yes**. The diagnostics in [C14] rows 11-14 and [IDM] row 19; the member grep in [IDM] row 24; the `??=` grep in [CL] greps FL (red: a hit; green: empty).
+  - L11d, no type, and no member with a modifier, named `union`, `closed` or `extension`, with or without `@` (strings and comment lines skipped; a C# 15 `union` or `closed` declaration is the CS-API-08 scan): `grep -rnP --include='*.cs' --exclude-dir=obj --exclude-dir=bin '"(?:[^"\\]|\\.)*"(*SKIP)(*F)|//.*(*SKIP)(*F)|\b(?:class|record|struct|interface|enum)\s+@?(?:closed|union|extension)\b|^\s*(?:(?:public|private|protected|internal|static|readonly|const|new|override|virtual|abstract|sealed|required)\s+)+[\w<>,?.\[\] ]*[\w>?\]]\s+@?(?:closed|union|extension)\s*[;={(]' src tests | grep -vE ':[0-9]+:[[:space:]]*(//|\*)'` prints nothing.
+- Watched: **yes**. The diagnostics in [C14] rows 11-14 and [IDM] row 19; the member grep in [IDM] row 24; the `??=` grep in [CL] greps FL (red: a hit; green: empty). L11d (measured 2026-11-27, GNU grep 3.11): red printed 8 lines (a `class closed`, a `record union`, a `struct @extension`, an `interface union` and four members with a modifier named `union`, `closed` or `extension`), green nothing for `public closed class Shape`, `public union Pet(Cat, Dog);`, an `extension(string s)` block, a comment, a string literal, `unionCount` and `IsClosed`.
 
 **CS-LANG-12 (MUST). Public extension blocks contain methods only. Extension properties, static extension members and operators are `internal`.**
 - A static `extension(BclType)` block that polyfills a BCL member missing on net8.0 is `internal`, has identical semantics, and carries a `// BCL since net<N>` comment.
@@ -248,15 +251,16 @@ Every pure-syntax C# 14 feature compiled and ran identically on 8.0.31 and 10.0.
 A `CS8652` ("currently in Preview") or `CS9327` ("not available in C# 14.0") is fixed by deleting the syntax, never by touching `LangVersion`. The `LangVersion` value itself is CS-BUILD-04's.
 - Why:
   - `EnablePreviewFeatures` stamps `[RequiresPreviewFeatures]`, and every consumer then fails with CA2252 (error by default in .NET 10) ([C14] row 24).
-  - `LangVersion=preview` on SDK 10.0.401 silently accepts C# 15 syntax ([C14] row 26).
+  - `LangVersion=preview` on SDK 10.0.401 silently accepts C# 15 syntax ([C14] row 26). On SDK 11.0.100 a `net10.0` target accepts the syntax-only C# 15 features (labeled `continue`, `[with(...)]`) under `LangVersion` 15 or `preview`, while `closed` fails with `CS0656` and `union` with `CS0518`, because their attribute types ship only in the `net11.0` reference assemblies; there `CS8652` names the feature `updated memory safety rules` (measured 2026-11-27).
   - The corpus has `latest` in 15 repos and `preview` in 7 ([shape] §5).
 - Check:
   - `grep -rEin --include='*.csproj' --include='*.props' --include='*.targets' --include='*.rsp' -e '<EnablePreviewFeatures>[[:space:]]*true' -e 'updated-memory-safety-rules' .` prints nothing.
   - `grep -rEn -e 'LangVersion=|EnablePreviewFeatures=' .github/workflows` prints nothing.
+  - Re-checked on SDK 11.0.100 (measured 2026-11-27): a `net10.0` project built labeled `continue` with 0 errors under `LangVersion` 15 and failed `closed` with `CS0656`. A `LangVersion` 15 in a project file is `CS-BUILD-04`'s check, and the per-TFM build is the check for the syntax.
 - Watched: **yes** ([C14] rows 24-26: CA2252 red, consumer `hi` green; grep red 2 files, green none).
 
 **CS-LANG-16 (MUST). Write no `#if NET11_0_OR_GREATER` region while `TargetFrameworks` has no `net11.0`.**
-- Why: no leg compiles the region. A body with a misspelled API and an undefined type built `0 Error(s)` on net8.0;net10.0 ([C14] row 20). SDK 10.0.401 cannot add the leg (`NETSDK1045`, `CS1617`, row 16). CS-PROC-23 code therefore waits for an SDK 11 GA pin.
+- Why: no leg compiles the region. A body with a misspelled API and an undefined type built `0 Error(s)` on net8.0;net10.0 ([C14] row 20). SDK 10.0.401 cannot add the leg (`NETSDK1045`, `CS1617`, row 16). SDK 11.0.100 (GA 2026-11-10) can add the leg, and on `net8.0;net10.0` it still built such a region with 0 errors (measured 2026-11-27). Adding the `net11.0` leg, with its SDK 11 pin, and the .NET 11 process APIs of CS-PROC-23 are a `dotnet-upgrade` re-check.
 - Check: `grep -rlE --include='*.cs' --exclude-dir=obj 'NET11_0_OR_GREATER' src | grep -q . && ! find src -name '*.csproj' -print0 | xargs -0 -r -n1 dotnet msbuild -nologo -getProperty:TargetFrameworks | grep -q 'net11\.0' && echo FAIL` prints nothing.
 - Watched: **yes**. [C14] row 21 ran `net11gate.sh`: red `FAIL: 1 file(s) use NET11_0_OR_GREATER but TargetFrameworks has no net11.0`, green `OK`. [CL] `net11/check.sh` ran this exact one-liner: red `FAIL`, green empty.
 
@@ -289,7 +293,7 @@ A `CS8652` ("currently in Preview") or `CS9327` ("not available in C# 14.0") is 
 - **Never enable IDE0290** (`use primary constructor`).
 
 - Why:
-  - The capture is a hidden, non-`readonly` field. `start++` built clean under the full gate ([IDM] row 1), and `readonly` parameters do not exist even on RC1 preview (`CS9190`).
+  - The capture is a hidden, non-`readonly` field. `start++` built clean under the full gate ([IDM] row 1), and a `readonly` parameter does not exist on RC1 or on GA (`CS9190` on SDK 11.0.100, measured 2026-11-27).
   - The `?? throw` plus capture double-store has no diagnostic ([IDM] row 5).
   - IDE0290 ignores mutation and proposes exactly the hazard ([IDM] row 6).
   - The corpus has 1,130 primary constructors ([shape] §3.4).
@@ -471,8 +475,8 @@ Ranked by frequency × cost. Frequencies are corpus counts from [shape] §0, §3
 - **csharp-language-ns2-deltas (only if decision 1 = yes).** Questions:
   - Do C# 14 implicit span conversions bind differently on netstandard2.0 + `System.Memory` at LV14 (the CS-LANG-08 class)?
   - How much does nullable flow diverge against the oblivious ns2.0 BCL? Is `ReferenceAssemblyAnnotator` worth it?
-- **csharp-language-sdk11-ga (after 2026-11-10).** Re-measure on the GA SDK:
-  - C# 15 `union`/`closed` and the per-TFM LangVersion fence (CS-LANG-17).
+- **csharp-language-sdk11-ga (GA reached 2026-11-10; partly re-measured on SDK 11.0.100 on 2026-11-27: CS-LANG-15, CS-LANG-16, CS-LANG-19, L11d).** Still to re-measure on the GA SDK:
+  - C# 15 `union`/`closed` on a native `net11.0` build and the per-TFM LangVersion fence (CS-LANG-17).
   - The C# 15 vs "C# 16" labelling of the memory-safety items.
   - The CS9272/CS9273 split.
   - The expression-tree `op_Implicit` break.
@@ -504,3 +508,11 @@ Ranked by frequency × cost. Frequencies are corpus counts from [shape] §0, §3
 13. https://raw.githubusercontent.com/dotnet/roslyn/main/src/Compilers/Core/Portable/SourceGeneration/GeneratedCodeUtilities.cs: the exact generated-code heuristics and the `generated_code` override.
 14. https://raw.githubusercontent.com/dotnet/csharplang/main/proposals/csharp-12.0/primary-constructors.md: capture semantics, and why no `readonly` parameter exists.
 15. https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/ide0028: collection-expression options, including "might change semantics".
+
+## Revision log
+
+- 2026-11-27: CS-LANG-15 rationale and check: SDK 11.0.100 behaviour on `net10.0` (`CS0656`, `CS0518`, `CS8652` wording) and the re-check; `LangVersion` 15 in a project file is CS-BUILD-04's. Decision: `.agents/research/refresh-2026-11/csharp-quality.md`.
+- 2026-11-27: CS-LANG-16 rationale: GA exists; the `net11.0` leg with its SDK 11 pin and the .NET 11 process APIs are a `dotnet-upgrade` re-check. Decision: `.agents/research/refresh-2026-11/csharp-quality.md`.
+- 2026-11-27: CS-LANG-11 rationale and check: `CS9380`, `CS1519`, `CS9370` and `CS8981` facts; check cell L11d added, watched red (8 lines) and green (0 lines). Decision: `.agents/research/refresh-2026-11/csharp-quality.md`.
+- 2026-11-27: CS-LANG-19 rationale: `readonly` parameter absent on GA (`CS9190`). Decision: `.agents/research/refresh-2026-11/csharp-quality.md`.
+- 2026-11-27: Verdict item 4 and the open question `csharp-language-sdk11-ga`: .NET 11 GA reached, partly re-measured. Decision: `.agents/research/refresh-2026-11/csharp-quality.md`.

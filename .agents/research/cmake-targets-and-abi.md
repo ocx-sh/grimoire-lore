@@ -17,6 +17,7 @@ inputs_also_read:
   - ../../rules/bazel-quality/cpp.md (BZL-CC-18, BZL-CC-27 cited, not restated)
 date: 2026-09-26
 verified: 2026-09-26
+revised: 2026-11-27
 measured_on: CMake 3.31.12 and 4.4.2 (plus 4.3.4 for one UUID read) via ocx package exec kitware/cmake, gcc 15.2.1, Unix Makefiles and Ninja Multi-Config (ninja 1.13.2)
 ---
 
@@ -68,7 +69,10 @@ root. It needs `ocx` and `/usr/sbin/gcc`.
    downgraded the dive's MUST to SHOULD as "build cost only". Verify wave 3
    reversed that: on Ninja with a Clang that has no `clang-scan-deps`, the
    configure passes and the build fails (exit 127, measured on 3.31.12 and
-   4.4.2), so it stays **MUST** (CMK-TGT-18). `import std` stays gated in 4.4.
+   4.4.2), so it stays **MUST** (CMK-TGT-18). `import std` stays gated through
+   4.4 and is ungated from 4.5.0 (2026-11-12). A target that uses `import std`
+   keeps scanning on, so CMK-TGT-18 does not apply to it. The 4.5 half of
+   CMK-TGT-19 is read from `cmake-cxxmodules(7)`, not built.
 6. **Visibility and reproducibility are SHOULD, and sanitizers are
    CONSIDER.** On Linux and macOS, ELF exports every symbol by default
    (measured). Four Google flagship libraries rely on
@@ -110,7 +114,7 @@ empty output = pass unless the row says otherwise.
 |---|---|---|
 | CMK-TGT-01 | unchanged | Name `PUBLIC`/`PRIVATE`/`INTERFACE` in every `target_link_libraries` call (MUST for libraries, SHOULD for tests). |
 | CMK-TGT-02 | unchanged | Namespaced `ALIAS` matching the export name (SHOULD). |
-| CMK-TGT-03 | unchanged | `target_*` over directory-scoped commands. Flag in legacy trees; never auto-rewrite (SHOULD). |
+| CMK-TGT-03 | **amended** (2026-11-27) | `target_*` over directory-scoped commands. The list of flagged commands ends "`link_directories`, `link_libraries` or `add_link_options`", and the grep gains an `add_link_options` line. On CMake 4.5 or newer the gated configure fails on each of these commands, in fetched subprojects too (`CMK-CORE-06`; `add_link_options()` exits 1 under `-Werror=author` on 4.5.1, measured 2026-11-27). Flag in legacy trees; never auto-rewrite (SHOULD). |
 | CMK-TGT-04 | **amended** | Severity split in place. **Overwriting** `CMAKE_<LANG>_FLAGS`, `_FLAGS_<CONFIG>` or `CMAKE_<KIND>_LINKER_FLAGS` = **MUST**, because it drops a toolchain's `_INIT` `-fPIC` and the shared link fails (shared-static §6; CMK-BZL-03 M6). **Appending** = SHOULD. The grep adopts BZL-03's `-i` and the linker variables, including `MODULE`. |
 | CMK-TGT-05 | **amended** | The guard is `if(NOT DEFINED CMAKE_CXX_STANDARD)`. `PROJECT_IS_TOP_LEVEL` may be added with `AND` and never replaces it. Reading heuristic: a `set(CMAKE_CXX_STANDARD` whose enclosing `if()` lacks `NOT DEFINED CMAKE_CXX_STANDARD` is a finding. MUST. Floor: any. Conan's unconditional `set()` is in every Conan 2 release checked (2.6.0, 2.7.0, 2.32.0). Only the "has been modified" STATUS line needs Conan 2.7.0 (CMK-CONAN-10). |
 | CMK-TGT-06 | **amended** | `CMAKE_CXX_STANDARD_REQUIRED ON` sits inside the same `NOT DEFINED` guard. Conan's `CppStdBlock` writes it too (`blocks.py`, Conan 2.32.0). MUST, as before. |
@@ -330,7 +334,7 @@ empty output = pass unless the row says otherwise.
 
 #### Caught by the build graph: C++20 modules
 
-**CMK-TGT-18 — When a target's C++ standard rises to 20 or later and the project has no named-module sources, set `CMAKE_CXX_SCAN_FOR_MODULES OFF` as a normal variable (never a cache entry), or set the target property. Prefer this over `cmake_policy(SET CMP0155 OLD)`.**
+**CMK-TGT-18 — When a target's C++ standard rises to 20 or later and the project has no named-module sources and no `import std` (`CMK-TGT-19`), set `CMAKE_CXX_SCAN_FOR_MODULES OFF` as a normal variable (never a cache entry), or set the target property. Prefer this over `cmake_policy(SET CMP0155 OLD)`.**
 - Binds: every C++ project on CMake 3.28 or later. A `3.25...4.4` range
   makes CMP0155 NEW, because the upper bound sets policies
   (`cmake_minimum_required` semantics).
@@ -341,7 +345,9 @@ empty output = pass unless the row says otherwise.
   "Scanning Without Modules" mitigation in `cmake-cxxmodules(7)`
   (standards §5). That manual says the variable "should **not** be in the
   cache", because a cache entry leaks into projects that consume this one
-  through `FetchContent`.
+  through `FetchContent`. From 4.5, `import std` works in any C++20 source
+  with scanning on, so a target that uses it keeps the scan (4.5 release
+  notes).
 - Rationale, the build break (measured by verify wave 3 on 3.31.12 and 4.4.2,
   Ninja 1.13.2, Clang 21 via `zig c++`, which has no `clang-scan-deps`):
   - the `CXX_STANDARD 20` target configures with exit 0, and CMake caches
@@ -358,7 +364,7 @@ empty output = pass unless the row says otherwise.
   grep -rl --include='*.ninja' -e 'CXX_SCAN__' -e 'CXX_DYNDEP__' build
   ```
   Empty = pass. A listed file, when the project has no
-  `FILE_SET CXX_MODULES`, is a finding. The glob must be `*.ninja`. Ninja
+  `FILE_SET CXX_MODULES` and no `import std`, is a finding. The glob must be `*.ninja`. Ninja
   Multi-Config writes the statements to `CMakeFiles/impl-<Config>.ninja`,
   where the earlier `build.ninja`-only grep counted 0 (measured).
 - Severity: **MUST** (measured build failure). The rule was SHOULD before
@@ -374,25 +380,37 @@ empty output = pass unless the row says otherwise.
     Visual Studio 17.4 or later.
   - Gate it on a compiler that supports modules: GCC 14+, Clang 16+ or
     MSVC 14.34+.
-  - Keep `import std` behind `CMAKE_EXPERIMENTAL_CXX_IMPORT_STD`, using the
-    UUID of the exact CMake binary (CMK-VER-09), on Ninja only.
-  - Gate `import std` on its own, stricter toolchains: Clang 18.1.2+
-    (libc++ or libstdc++), MSVC 14.36+ (VS 17.6+) or GCC 15+
-    (`cmake-cxxmodules.7.rst`, "import std Support", at 4.4.2).
+  - Below CMake 4.5, keep `import std` behind
+    `CMAKE_EXPERIMENTAL_CXX_IMPORT_STD`, using the UUID of the exact CMake
+    binary (CMK-VER-09), together with `CXX_MODULE_STD`. From 4.5 set
+    neither, because `import std` needs only C++20 or later with module
+    scanning on. Never test the removed `CMAKE_CXX_COMPILER_IMPORT_STD`,
+    which reads as false.
+  - Either way, use Ninja only, and gate `import std` on its own, stricter
+    toolchains: Clang 18.1.2+ (libc++ or libstdc++), MSVC 14.36+ (VS 17.6+)
+    or GCC 15+, and GCC 16+ on macOS (`cmake-cxxmodules.7.rst`, "import std
+    Support", at 4.4.2 and 4.5.0).
 - Binds: library shipping a package.
 - Rationale: the gates come from the compiler and generator matrix in
   `cmake-cxxmodules.7.rst` at v4.4.2. Two of 46 repos ship modules in
   production (fmt, nlohmann/json), both as extra targets ([shape] §5).
-  Kitware's "the experiment is over" covers named modules, not `import std`.
-  The 4.4.2 gate is `f35a9ac6…` (C7). BZL-CC-27 owns modules under Bazel.
+  Through 4.4, Kitware's "the experiment is over" covers named modules, not
+  `import std`. The 4.4.2 gate is `f35a9ac6…` (C7). 4.5.0 (2026-11-12) removed
+  the gate, `CXX_MODULE_STD`, `CMAKE_CXX_MODULE_STD` and
+  `CMAKE_CXX_COMPILER_IMPORT_STD`, and its manual notes that Ubuntu before
+  26.04 ships a broken `libstdc++.modules.json` (read, not built).
+  BZL-CC-27 owns modules under Bazel.
 - Verification:
   ```sh
-  grep -rn --include='CMakeLists.txt' --include='*.cmake' -e 'CXX_MODULES' -e 'CMAKE_EXPERIMENTAL_CXX_IMPORT_STD' .
+  grep -rn --include='CMakeLists.txt' --include='*.cmake' -e 'CXX_MODULES' -e 'CMAKE_EXPERIMENTAL_CXX_IMPORT_STD' -e 'CXX_MODULE_STD' -e 'CMAKE_CXX_COMPILER_IMPORT_STD' .
   ```
   Each of these is a finding:
   - a `FILE_SET … CXX_MODULES` target that is the only target, or that no
     option or `CMAKE_VERSION` guard gates;
-  - a gate UUID that differs from the value in the pinned binary.
+  - a gate UUID that differs from the value in the pinned binary;
+  - on a 4.5 or newer pin, a hit on the gate, `CXX_MODULE_STD` or
+    `CMAKE_CXX_COMPILER_IMPORT_STD` outside an
+    `if(CMAKE_VERSION VERSION_LESS 4.5)` branch.
 
   Empty = nothing to check. Behavioural check for the UUID: configure a C++
   project with the gate set. On 4.4.2, a wrong UUID prints
@@ -401,7 +419,7 @@ empty output = pass unless the row says otherwise.
   is experimental" (measured by verify wave 3; 3.31.12 accepted
   `d0edc3af…`).
 - Severity: SHOULD.
-- Floor: 3.28. `import std` is experimental through 4.4.
+- Floor: 3.28. `import std` is experimental through 4.4 and ungated from 4.5.
 
 #### Reading heuristic: sanitizers
 
@@ -481,8 +499,9 @@ Ranked by how often each one bites, weighted by how silent it is.
    static member (CMK-TGT-12), not the link result.
 5. **Raising the standard to C++20 without noticing that scanning turned on.**
    *Check:* the `build.ninja` count (CMK-TGT-18).
-6. **Citing "the experiment is over" for `import std`, or copying a gate
-   UUID from another CMake version.** *Check:* CMK-TGT-19's grep, against
+6. **Citing "the experiment is over" for `import std` on 4.4 or older,
+   copying a gate UUID from another CMake version, or keeping the gate and
+   `CXX_MODULE_STD` on 4.5.** *Check:* CMK-TGT-19's grep, against
    the UUID in the pinned binary (CMK-VER-09).
 7. **Believing symbol visibility is a Windows-only problem, or offering
    `CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS` as the portable fix.** *Check:*
@@ -640,6 +659,18 @@ Ledger: [cmake-targets-and-abi/verification-wave3.md](cmake-targets-and-abi/veri
 - verify wave 3: CMK-TGT-19 gains the `import std` toolchain gates
   (Clang 18.1.2+, MSVC 14.36+, GCC 15+) and a behavioural UUID check (the
   "set to incorrect value" warning on 4.4.2).
+- 2026-11-27: CMK-TGT-03 adds `add_link_options` to its command list and grep,
+  and points to CMK-CORE-06, because 4.5's gate fails it (measured on 4.5.1).
+  Decision: [refresh-2026-11/cmake-build.md](refresh-2026-11/cmake-build.md).
+- 2026-11-27: CMK-TGT-18 carves out `import std`: a target that uses it keeps
+  scanning on. Its rule text, rationale and verification are amended.
+  Decision: [refresh-2026-11/cmake-build.md](refresh-2026-11/cmake-build.md).
+- 2026-11-27: CMK-TGT-19 splits `import std` at 4.5. Below 4.5 the gate and
+  `CXX_MODULE_STD`, from 4.5 neither, and never the removed
+  `CMAKE_CXX_COMPILER_IMPORT_STD`. The grep gains the two new spellings, and
+  the floor reads "experimental through 4.4 and ungated from 4.5". Verdict 5
+  and agent mistake 6 are aligned. Decision:
+  [refresh-2026-11/cmake-build.md](refresh-2026-11/cmake-build.md).
 - verify wave 3: the TGT-05/06/07 exemplar cell is corrected. cmake_template
   satisfies TGT-05 only, at lines 11-13 rather than 10-12. It lacks
   `CMAKE_CXX_STANDARD_REQUIRED`, and it sets `CMAKE_CXX_EXTENSIONS` outside

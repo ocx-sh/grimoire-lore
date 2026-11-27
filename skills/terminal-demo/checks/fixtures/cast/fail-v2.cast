@@ -1,0 +1,9 @@
+{"version": 2, "width": 180, "height": 24, "timestamp": 1700000000, "env": {"SHELL": "/bin/bash", "TERM": "xterm", "HOME": "/home/alice"}}
+[0.2, "o", "alice@build.internal:/home/alice/src$ mytool list\r\n"]
+[0.5, "i", "x"]
+[3.9, "o", "done\r\n"]
+[4.0, "o", "\u001b[2J"]
+[4.1, "o", "\u001b[2J"]
+[4.2, "o", "\u001b[3J"]
+[4.3, "o", "\u001b[2J"]
+[4.4, "o", "\u001b[2J"]

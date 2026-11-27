@@ -187,6 +187,7 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.rs' | xargs
 | TEST-39 | Default to a hand-written fake behind a narrow trait; reach for `mockall` only when the trait already exists for a production reason and the fake would be pure boilerplate. Never expose a mock to another crate, and never set an expectation on a static method — those are process-global and unsynchronized, so they race nextest's per-test parallelism. | see block TEST-39 — a `Mock*` named from `tests/*.rs` must be behind a feature (TEST-34); any static-method expectation is a finding | MUST |
 | TEST-40 | Once a second crate needs the same fixtures or fakes, extract a `-testsupport` crate consumed only via `[dev-dependencies]` rather than growing a shared `test-util` feature — a crate absent from every `[dependencies]` section is structurally absent from the shipped graph. A single-crate workspace keeps the feature. | `cargo tree -e normal -p <shipped binary>` lists no `-testsupport` crate | SHOULD |
 | TEST-41 | Locate fixtures and golden files with `concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/…")`, never a bare relative path, and give every golden file an explicit regeneration command — cwd-equals-package-root is a `cargo test` launcher guarantee that neither a directly invoked binary nor rustdoc (workspace root) keeps. | see block TEST-41 — every hit without `CARGO_MANIFEST_DIR` is a candidate | MUST |
+| TEST-42 | Integration tests reach the binary under test through `CARGO_BIN_EXE_<name>` — `env!`, `assert_cmd::cargo::cargo_bin!`, or `Command::cargo_bin`, which reads that variable first — never through a path assembled under `target/` or from `current_exe()`. Cargo 1.100 (2026-11-12) moved intermediate artifacts to a new build-dir layout and documents the layout as not a stable interface. | see block TEST-42 — every hit carries a comment explaining why the variable cannot serve | SHOULD |
 
 ```sh
 CHECKS=.claude/skills/rust-quality-reference/checks
@@ -202,6 +203,8 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob).github/**' ':(g
 git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.rs' | xargs -0 -r grep -H -n -E -e 'automock' -e 'expect_' --
 # TEST-41
 git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.rs' | xargs -0 -r grep -H -n -E -e '"\./' -e '"tests/' --
+# TEST-42
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/tests/**/*.rs' ':(exclude,glob)external/**' | xargs -0 -r grep -H -n -E -e 'target/debug/' -e 'target/release/' -e 'current_exe\(\)' --
 ```
 
 ## What Agents Get Wrong Here
@@ -227,7 +230,8 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.rs' | xargs
 - [Rust Book §11.3 — Test Organization](https://doc.rust-lang.org/book/ch11-03-test-organization.html) — the unit/integration split and the `tests/common/mod.rs` rule
 - [`std::env::set_var`](https://doc.rust-lang.org/std/env/fn.set_var.html) — the safety contract that makes env mutation in tests a data race
 - [nexte.st — Running tests](https://nexte.st/docs/running/) and [nextest retries](https://github.com/nextest-rs/nextest/blob/main/site/src/docs/features/retries.md) — process-per-test, the doc-test gap, JUnit `<flakyFailure>`
-- [assert_cmd](https://github.com/assert-rs/assert_cmd) — `Command::cargo_bin`, separate exit-code and stream assertions
+- [assert_cmd](https://github.com/assert-rs/assert_cmd) — `Command::cargo_bin` and the `cargo_bin!` macro (both current; the 2.1.0 deprecation was reverted in 2.1.3), separate exit-code and stream assertions
+- [Cargo CHANGELOG](https://doc.rust-lang.org/cargo/CHANGELOG.html) — the 1.100 build-dir layout, declared not a stable interface (TEST-42)
 - [tempfile](https://docs.rs/tempfile/latest/tempfile/) — drop-based cleanup and the owned-guard pitfall
 - [matklad — How to Test](https://matklad.github.io/2021/05/31/how-to-test.html) — the Neural Network Test
 - [proptest getting-started](https://proptest-rs.github.io/proptest/proptest/getting-started.html) and [vs quickcheck](https://proptest-rs.github.io/proptest/proptest/vs-quickcheck.html) — round-trip patterns, strategy values vs type generators

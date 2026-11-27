@@ -10,6 +10,8 @@ CHECKS=.claude/skills/rust-cargo-reference/checks
 git ls-files -z --cached --others --exclude-standard -- ':(glob)**/Cargo.toml' ':(exclude,glob)external/**' | xargs -0 -r grep -l -E -e '^\[lints\]' --
 # LINT-02
 git ls-files -z --cached --others --exclude-standard -- ':(glob).github/**' ':(glob).cargo/**' ':(glob)taskfiles/**' | xargs -0 -r grep -H -n -E -e 'RUSTFLAGS' --
+# LINT-02 (2)
+git ls-files -z --cached --others --exclude-standard -- ':(glob).cargo/**' | xargs -0 -r grep -H -n -E -e '^[[:space:]]*(build\.)?warnings[[:space:]]*=[[:space:]]*"deny"' --
 # LINT-07
 git ls-files -z --cached --others --exclude-standard -- ':(glob)**/Cargo.toml' ':(exclude,glob)external/**' | xargs -0 -r grep -H -n -E -e 'unsafe_code' --
 # LINT-08
@@ -36,6 +38,12 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflow
 git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' | xargs -0 -r grep -H -n -E -e 'uses: .*@' -- | grep -v -E -e '^[^:]+:[0-9]+:.*uses: .*@[0-9a-f]{40}'
 # CI-04
 git ls-files -z --cached --others --exclude-standard -- ':(glob).github/**' ':(glob)taskfiles/**' | xargs -0 -r grep -H -n -E -e '^[[:space:]]*(- )?(run: )?cargo [bctn][a-z]+' -- | grep -v -E -e '^[^:]+:[0-9]+:.*--locked'
+# CI-13
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/**' ':(glob)taskfiles/**' | xargs -0 -r grep -H -n -E -e 'CARGO_RESOLVER_INCOMPATIBLE_PUBLISH_AGE' --
+# CI-14
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' | xargs -0 -r grep -H -n -E -e 'allow-unsafe-pr-checkout:[[:space:]]*true' --
+# CI-14 (2)
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' | xargs -0 -r grep -l -E -e 'pull_request_target|workflow_run' -- | tr '\n' '\0' | xargs -0 -r grep -H -n -E -e 'ref:.*(github\.event\.(pull_request\.head|workflow_run\.head)|github\.head_ref)' --
 ```
 
 ## Release and Distribution

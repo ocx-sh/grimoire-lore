@@ -1,0 +1,6 @@
+name: ci
+on: push
+jobs:
+  b:
+    steps:
+      - run: echo draft only > post.md

@@ -23,7 +23,7 @@ The verbatim strings live in [references/error-catalog.md](references/error-cata
 implementation, Lix is an advisory leg, Determinate Nix is untested but never
 deliberately broken (frame Q6). The consumer floor is the oldest non-stub
 `nixVersions.nix_2_*` in the pinned nixpkgs, computed, never remembered (frame
-Q8, today 2.31.5).
+Q8, on nixos-unstable `2786a2a72088` on 2026-11-27: `nix_2_34` = 2.34.9).
 
 Contents: [Stop condition](#stop-condition) ·
 [Never weaken the check](#never-weaken-the-check) ·
@@ -152,11 +152,12 @@ CppNix-gated MUSTs (NIX-FLK-19). Lix 2.95.2 exits 0 on a string `formatter`, a
 CppNix rejects. Re-run on CppNix before you report green:
 
 ```sh
-nix shell --inputs-from . nixpkgs#nixVersions.nix_2_31 --command nix flake check --no-build --no-write-lock-file --option allow-import-from-derivation false .
+nix shell --inputs-from . nixpkgs#nixVersions.nix_2_34 --command nix flake check --no-build --no-write-lock-file --option allow-import-from-derivation false .
 ```
 
-Exit 0 passes. Exit 1 prints the CppNix error. `nix_2_31` is the 2026-09-27
-floor (NIX-GATE-16 computes it). A lock older than the floor has no such
+Exit 0 passes. Exit 1 prints the CppNix error. `nix_2_34` is the 2026-11-27
+floor on nixos-unstable `2786a2a72088` (NIX-GATE-16 computes it), and
+`nix_2_31` was the 2026-09-27 floor at `8d5d2709`. A lock older than the floor has no such
 attribute (numtide/blueprint's 25.05 pin stops at `nix_2_26`: `does not provide
 attribute`): drop `--inputs-from .` there, and the flake still evaluates
 against its own lock. The reverse also holds: a

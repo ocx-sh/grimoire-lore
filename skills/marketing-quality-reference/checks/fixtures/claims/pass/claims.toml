@@ -1,0 +1,15 @@
+[[claim]]
+id = "client-count"
+class = "count"
+claim = "10 clients"
+surface = ["README.md"]
+value = 10
+unit = "supported clients"
+source = "README.md:5"
+source_type = "own-measurement"
+method = "count of client names in the README install sentence"
+check = "printf 10"
+definition = "clients the installer writes config for at the released version"
+observed = 2026-11-27
+refresh_by = "next-release"
+subject_version = "mytool 0.1.0"

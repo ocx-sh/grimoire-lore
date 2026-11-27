@@ -8,7 +8,7 @@ consolidates:
   - go-io/subprocess-contract.md
   - go-io/process-group-sweep.md
 date: 2026-09-26
-revised: 2026-09-26
+revised: 2026-11-27
 target: "go-quality/io.md (GO-IO), per go-topic-map.md › Artifact set decision"
 fixtures:
   - /home/mherwig/.cache/research-lang/go-tools/fixtures/go-io-consolidation/
@@ -114,7 +114,7 @@ Severity follows the house tiers ([cfg] §1.6): MUST blocks, SHOULD is fixed unl
   - [c] `g305/`: G305 also fires on an `IsLocal`-guarded `filepath.Join(dest, hdr.Name)`, exit 1. It is not guard-aware, so the compliant form avoids the Join.
   - [fa] `extract`: the behavioural proof for naive, `islocal` and `root`.
 - **Severity:** MUST.
-- **Floor:** 1.24 for `os.Root`, 1.25 for the full method set.
+- **Floor:** 1.24 for `os.Root`, 1.25 for the full method set. On Windows, `Root.Mkdir` and `Root.MkdirAll` follow a junction out of the root before go1.27.2 and go1.26.9 (CVE-2026-56857), which includes the 1.27.1 the rows were measured on. A Windows build that extracts through this rule uses go1.27.2, go1.26.9 or later. `go version -m <binary>` names the toolchain that built it, and a Windows binary below those releases that calls `Root.MkdirAll` is the finding.
 
 **GO-IO-03 — Bound every decompression of external data before copying.**
 - **How:**
@@ -549,3 +549,4 @@ Every GO-IO ID from 01 to 20 keeps its number and meaning. None was renumbered, 
   - **MUST count:** unchanged at 14, because GO-IO-21 is a SHOULD.
   - **Open questions:** no change. Wave 3 answered only `io/process-group-sweep`, which the first edit had already removed. Its unanswerable parts are gaps in Verdict 9, not open questions.
   - **Re-run:** [r] re-ran [pgs]'s `reuse/`, `pdeathsig/` and `darwinvet/` commands. All reproduced.
+- **2026-11-27, delta refresh:** GO-IO-02 Floor gains the Windows toolchain floor for `Root.Mkdir` and `Root.MkdirAll` (CVE-2026-56857, fixed in go1.27.2 and go1.26.9), per `refresh-2026-11/go-quality.md`. No rule ID was added, renumbered or removed.

@@ -1,0 +1,22 @@
+# Publishing-credential rules for CH-CORE-10. Merge both [[rules]] blocks into
+# the repository's own .gitleaks.toml. The gitleaks defaults have neither rule.
+#
+# Allowlist fixture placeholders by path, never by value. Add the path list to
+# the repository's own config, for example:
+#   [allowlist]
+#   paths = ['''tests/fixtures/''']
+title = "publishing credentials"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "discord-webhook-url"
+description = "Discord webhook URL, which embeds the webhook's secret token"
+regex = '''https://(?:ptb\.|canary\.)?discord(?:app)?\.com/api/(?:v\d+/)?webhooks/\d{17,20}/[A-Za-z0-9_\-]{60,80}'''
+keywords = ["webhooks"]
+
+[[rules]]
+id = "google-oauth-refresh-token"
+description = "Google OAuth refresh token, used for YouTube uploads"
+regex = '''\b1//[0-9A-Za-z_\-]{40,}'''

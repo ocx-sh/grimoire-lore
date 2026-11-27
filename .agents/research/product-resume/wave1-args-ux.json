@@ -1,0 +1,212 @@
+{
+ "today": "2026-11-27",
+ "group": {
+  "name": "ux",
+  "prefix": "ux-",
+  "mapFile": "ux-topic-map.md",
+  "territory": "the design of software interfaces themselves: web applications and sites, the VS Code extension and other GUIs, command-line and terminal interaction above the already-pinned stream and exit-code contracts, interface text, accessibility, state handling, forms, navigation, onboarding flows inside the product, interfaces for AI features, and how a team measures whether an interface works.",
+  "siblings": "marketing (positioning, messaging, landing-page and README copy, SEO and answer engines, pricing pages, email and release communication, analytics, marketing law, brand assets) and channels (LinkedIn, YouTube, video production, microblogs, communities, launch venues, GitHub and registries as channels, audio and events, short-form video, blogs)",
+  "scouts": [
+   "ux-topic-map/accessibility.md",
+   "ux-topic-map/ai-products.md",
+   "ux-topic-map/canonical-guides.md",
+   "ux-topic-map/codified-systems.md",
+   "ux-topic-map/content-design.md",
+   "ux-topic-map/devtools.md",
+   "ux-topic-map/failure-corpus.md",
+   "ux-topic-map/onboarding-conversion.md",
+   "ux-topic-map/patterns-ia.md",
+   "ux-topic-map/practitioner.md",
+   "ux-topic-map/recent-shifts.md",
+   "ux-topic-map/research-measurement.md"
+  ],
+  "audits": [
+   "ui-code-posture.md",
+   "site-shape.md",
+   "cli-first-run.md",
+   "exemplar-design-systems.md",
+   "config-inventory.md"
+  ]
+ },
+ "selection": {
+  "mapPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/ux-topic-map.md",
+  "selected": [
+   {
+    "slug": "ux-verification-claims",
+    "label": "UX-VERIFY: verification and claims",
+    "idFamily": "UX-VERIFY",
+    "question": "What must an agent run on an interface change, and what may it claim afterwards about accessibility, performance and usability?",
+    "dives": [
+     {
+      "slug": "automated-a11y-coverage",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/ux-verification-claims/automated-a11y-coverage.md"
+     },
+     {
+      "slug": "rendered-interaction-matrix",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/ux-verification-claims/rendered-interaction-matrix.md"
+     },
+     {
+      "slug": "evidence-and-claims",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/ux-verification-claims/evidence-and-claims.md"
+     },
+     {
+      "slug": "conformance-targets-law",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/ux-verification-claims/conformance-targets-law.md"
+     }
+    ]
+   },
+   {
+    "slug": "ux-a11y-authoring",
+    "label": "UX-A11Y: accessibility authoring",
+    "idFamily": "UX-A11Y",
+    "question": "Which accessibility properties must an agent build into interface code and page templates by default, and which ARIA and custom widgets must it refuse to write?",
+    "dives": [
+     {
+      "slug": "native-widgets-and-keyboard",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/ux-a11y-authoring/native-widgets-and-keyboard.md"
+     },
+     {
+      "slug": "focus-contrast-target-size",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/ux-a11y-authoring/focus-contrast-target-size.md"
+     },
+     {
+      "slug": "announcements-and-motion",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/ux-a11y-authoring/announcements-and-motion.md"
+     },
+     {
+      "slug": "page-structure-and-consistency",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/ux-a11y-authoring/page-structure-and-consistency.md"
+     }
+    ]
+   },
+   {
+    "slug": "ux-interface-states",
+    "label": "UX-STATE: interface states",
+    "idFamily": "UX-STATE",
+    "question": "Which states must every view, async action and form render, with which indicator at which wait, and how does a rule detect a missing state?",
+    "dives": [
+     {
+      "slug": "loading-and-progress",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/ux-interface-states/loading-and-progress.md"
+     },
+     {
+      "slug": "empty-error-notification",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/ux-interface-states/empty-error-notification.md"
+     },
+     {
+      "slug": "form-state-machine",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/ux-interface-states/form-state-machine.md"
+     },
+     {
+      "slug": "editor-extension-surfaces",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/ux-interface-states/editor-extension-surfaces.md"
+     }
+    ]
+   },
+   {
+    "slug": "ux-interface-text",
+    "label": "UX-TEXT: interface text",
+    "idFamily": "UX-TEXT",
+    "question": "What must runtime interface text contain, and which words and string constructions must an agent never ship?",
+    "dives": [
+     {
+      "slug": "error-message-anatomy",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/ux-interface-text/error-message-anatomy.md"
+     },
+     {
+      "slug": "labels-and-wordlists",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/ux-interface-text/labels-and-wordlists.md"
+     },
+     {
+      "slug": "strings-that-survive",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/ux-interface-text/strings-that-survive.md"
+     }
+    ]
+   },
+   {
+    "slug": "ux-cli-interaction",
+    "label": "UX-CLI: CLI interaction",
+    "idFamily": "UX-CLI",
+    "question": "Above the pinned stream, colour, prompt and exit contracts, what does a CLI owe a first-time human and an everyday user?",
+    "dives": [
+     {
+      "slug": "help-structure",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/ux-cli-interaction/help-structure.md"
+     },
+     {
+      "slug": "discoverability-recovery",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/ux-cli-interaction/discoverability-recovery.md"
+     },
+     {
+      "slug": "first-run-and-handoff",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/ux-cli-interaction/first-run-and-handoff.md"
+     },
+     {
+      "slug": "terminal-accessibility",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/ux-cli-interaction/terminal-accessibility.md"
+     }
+    ]
+   },
+   {
+    "slug": "ux-consequential-actions",
+    "label": "UX-ACT: consequential actions",
+    "idFamily": "UX-ACT",
+    "question": "When does an action need confirmation, undo, a dry run, typed confirmation, human approval or nothing, whether it is clicked, typed or called by an agent?",
+    "dives": [
+     {
+      "slug": "confirmations-and-modals",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/ux-consequential-actions/confirmations-and-modals.md"
+     },
+     {
+      "slug": "cli-destructive-commands",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/ux-consequential-actions/cli-destructive-commands.md"
+     },
+     {
+      "slug": "agent-action-approval",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/ux-consequential-actions/agent-action-approval.md"
+     }
+    ]
+   },
+   {
+    "slug": "ux-ai-features",
+    "label": "UX-AI: AI features",
+    "idFamily": "UX-AI",
+    "question": "What must a human-facing LLM interface disclose, show and refuse to render, and which of those duties are now law?",
+    "dives": [
+     {
+      "slug": "ai-disclosure-and-labelling",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/ux-ai-features/ai-disclosure-and-labelling.md"
+     },
+     {
+      "slug": "output-trust-and-safety",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/ux-ai-features/output-trust-and-safety.md"
+     },
+     {
+      "slug": "conversation-mechanics",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/ux-ai-features/conversation-mechanics.md"
+     }
+    ]
+   },
+   {
+    "slug": "ux-agent-facing-interfaces",
+    "label": "UX-AGENT: agent-facing interfaces",
+    "idFamily": "UX-AGENT",
+    "question": "When the caller is an agent, what must a tool, CLI or MCP server provide?",
+    "dives": [
+     {
+      "slug": "tool-names-and-descriptions",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/ux-agent-facing-interfaces/tool-names-and-descriptions.md"
+     },
+     {
+      "slug": "machine-output-contracts",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/ux-agent-facing-interfaces/machine-output-contracts.md"
+     },
+     {
+      "slug": "correctable-errors-and-retries",
+      "briefPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/product-resume/briefs/ux-agent-facing-interfaces/correctable-errors-and-retries.md"
+     }
+    ]
+   }
+  ]
+ }
+}

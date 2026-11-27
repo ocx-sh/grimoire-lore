@@ -181,13 +181,13 @@ Named holes, so a reader can tell a gap from a clearance.
 - **No page in the calibration corpus declares a type.** Every type-scoped check
   is inert until the backfill lands, and zero real tutorials exist to test the
   tutorial contract against.
-- **Page-level accessibility is governed nowhere here.** Alt text, contrast,
-  keyboard order, table semantics, the sidebar and the search widget are out of
-  scope. Only the terminal player and the tooltip are covered, in `examples.md`.
+- **The rendered page's accessibility belongs to `ux-quality`.** An image in
+  Markdown still needs an `alt` (UX-TEXT-20). The terminal player and the
+  tooltip stay in `examples.md`.
 - **Vale was never exercised**, and the sentence-case heuristic, the tell-density
   threshold and the marketing wordlist have no measured false-positive rate.
 - **No validated freshness interval exists**, which is why no rule gates on a
-  page's age, and the Markdown twin has no measured implementation anywhere.
+  page's age, and no study measures a Markdown twin's effect on agents.
 - **Versioned docs, translations, and print or offline output** were not studied
   by any family. Neither was reStructuredText, whose carriers rest on primary
   documentation with no built fixture.

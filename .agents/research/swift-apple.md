@@ -6,6 +6,7 @@ id_family: SW-APPLE
 consolidates:
   - swift-apple/reading-heuristics.md
 date: 2026-10-10
+revised: 2026-11-27
 ---
 
 # Swift on Apple platforms, read-only (SW-APPLE): consolidated ruleset
@@ -16,14 +17,15 @@ Date 2026-10-10. Toolchains: Swift 6.4.0 and 6.3.3 on Linux x86_64 only; Xcode 2
 
 1. **A read-only depth file, 16 rules, 7 MUST** (`swift-quality/apple.md`, family SW-APPLE). It is the Apple-app half of SW-CONC-11/-12/-13 and SW-GATE-10's E12; it never restates their isolation semantics. Binds Apple apps and app-internal packages; library, SDK, CLI and server code is bound only by SW-APPLE-02 (manifest clause), -04 and -05 where it ships for Apple platforms.
 2. **Read the setting, never infer it.** The effective `SWIFT_VERSION`, strict-concurrency level, default isolation and approachable flag are read from the target block, its xcconfig and the project block before any advice (SW-APPLE-14). An unset language mode is Swift 5 [Linux-run] (CP1: a racy global exits 0 silently), Apple's release notes never document the two Swift 6.2 settings, and "Xcode 27 projects default to Swift 5" has one source (Massicotte, 2026-06-10): treated as unverified.
-3. **The oracle for setting names is swift-build's `Swift.xcspec`** (183 `SWIFT_*` names). A name outside it, or a SwiftPM spelling (`MainActor.self`, `main-actor`) or prose boolean (`Enabled`) in an xcconfig, is a hallucination (SW-APPLE-01).
+3. **The oracle for setting names is swift-build's `Swift.xcspec`** (186 `SWIFT_*` names since the 2026-11-27 re-read at `d417bbcdd46b`; 183 at `2187330e13e7`). A name outside it, or a SwiftPM spelling (`MainActor.self`, `main-actor`) or prose boolean (`Enabled`) in an xcconfig, is a hallucination (SW-APPLE-01).
 4. **Default `MainActor` isolation is an app-target decision bound to Swift 6 mode** (SW-APPLE-02, -15): app target, UI-only packages and UI test targets; never libraries, SDKs, CLIs, daemons or servers (SW-CONC-11). A MainActor default under Swift 5 mode turns the isolation errors into warnings (CP2-mode5). Extensions follow their role: background work stays `nonisolated`, UI-only extensions may take the default.
 5. **Approachable concurrency: apps set `SWIFT_APPROACHABLE_CONCURRENCY = YES`; manifests spell the members** (SW-APPLE-05). Settled by reading swift-build: the xcspec `Condition` gates only the setting's own command line, so in Swift 6 mode the YES still feeds NonisolatedNonsendingByDefault and InferIsolatedConformances.
 6. **New observable state is `@Observable` in `@State private`**; `ObservableObject` is superseded, not deprecated, and survives only below the Observation floor (iOS 17 / macOS 14 / watchOS 10 / visionOS 1) or in a named incremental migration (SW-APPLE-06). `@ObservedObject` never takes an initial value (SW-APPLE-07). SwiftUI hygiene greps are SHOULD and scoped to new and touched code: the strict exemplars still carry 277 and 76 `.foregroundColor(` calls.
 7. **The deployment floor is the truth for availability and locks.** `Mutex` iff every shipped iOS target is at least 18; `OSAllocatedUnfairLock.withLock` below it (SW-APPLE-04; closes the open question in swift-concurrency.md). A guard at or below the floor is dead code (SW-APPLE-11). Only the iOS floor is mechanical: the macOS clause was struck after it false-positived on element-x-ios.
 8. **Combine is not deprecated.** New in-process state flow uses Observation or `AsyncSequence`; Combine stays at framework seams, bridged with `.values`; nothing is mass-migrated (SW-APPLE-13; answers M-J-10).
 9. **A generated Xcode project is edited at its generator** (`project.yml`, `target.yml`, `Project.swift`), never in the `.pbxproj`; Xcode MCP write tools are forbidden there, read tools are fine (SW-APPLE-03, -16).
-10. **Dropped:** the `print(` ban (project logging policy, not an Apple fact) and the candidate that duplicated SW-CONC-13 for apps. **Deferred** (unchanged from the map): M-J-06 to M-J-09 until an app consumer exists.
+10. **Documented gap: the JSON project format.** Xcode 27.2 adds a JSON-based `.xcproj` project format (release note 184661114, read 2026-11-27). No block here reads it, so a project in that format escapes SW-APPLE-01 to -03. When `git ls-files -- '*.xcproj' '*.xcproj/*'` prints a path, read its settings by hand. Its schema is unverified: read only.
+11. **Dropped:** the `print(` ban (project logging policy, not an Apple fact) and the candidate that duplicated SW-CONC-13 for apps. **Deferred** (unchanged from the map): M-J-06 to M-J-09 until an app consumer exists.
 
 ### Conflicts resolved
 
@@ -81,12 +83,12 @@ Rows are grouped by the check that catches them: build configuration (greps and 
 
 **SW-APPLE-01 (MUST). Every `SWIFT_*` name in a `.pbxproj`, `.xcconfig` or generator YAML exists in the oracle, and values are spelled exactly: `SWIFT_DEFAULT_ACTOR_ISOLATION` is `MainActor` or `nonisolated`, `SWIFT_APPROACHABLE_CONCURRENCY` is `YES` or `NO`; the SwiftPM spellings `MainActor.self`, `main-actor`, `.mainActor` and prose booleans `Enabled`, `ON`, `true` do not appear.**
 - Why: a name or value that does nothing looks like a setting that works; the compiler rejects `main-actor` and `MainActor.self` (CP2-badv1/2, exit 1) and swift-build reads a Boolean by its first character, so `Enabled` is false.
-- Verify (output is the violation; the oracle is `swiftlang/swift-build` names regenerated by `grep -rhow 'SWIFT_[A-Z0-9_]*' --include='*.xcspec' --include='BuiltinMacros.swift' Sources | sort -u | grep -v -x -e SWIFT_RESPONSE_FILE_PATH_ -e SWIFT_STRICT_CONCURRENCY_IN_SWIFT_VERSION` from a checkout, 183 names, reproduced byte-identical in AC-6):
+- Verify (output is the violation; the oracle is `swiftlang/swift-build` names regenerated by `grep -rhow 'SWIFT_[A-Z0-9_]*' --include='*.xcspec' --include='BuiltinMacros.swift' Sources | sort -u | grep -v -x -e SWIFT_RESPONSE_FILE_PATH_ -e SWIFT_STRICT_CONCURRENCY_IN_SWIFT_VERSION` from a checkout, 183 names at 2187330e13e7, reproduced byte-identical in AC-6; 186 names at d417bbcdd46b, read 2026-11-27: SWIFT_CLANG_INLINES_ARE_PRIVATE_EXTERN, SWIFT_ENABLE_CAS_SANDBOX and SWIFT_ENABLE_PRESCAN_CACHING are new):
   - names: `grep -rhow -e 'SWIFT_[A-Z0-9_]*' --include='*.pbxproj' --include='*.xcconfig' --include='project.yml' --include='target.yml' . | sort -u | grep -v -x -F -f swift-quality/checks/swift-settings-oracle.txt`
   - isolation: `grep -rnE -e 'SWIFT_DEFAULT_ACTOR_ISOLATION *[=:]' --include='*.pbxproj' --include='*.xcconfig' --include='project.yml' --include='target.yml' . | grep -vE -e '[=:] *"?(MainActor|nonisolated)"?[; ]*$'`
   - approachable: `grep -rnE -e 'SWIFT_APPROACHABLE_CONCURRENCY *[=:]' --include='*.pbxproj' --include='*.xcconfig' --include='project.yml' --include='target.yml' . | grep -vE -e '[=:] *"?(YES|NO)"?[; ]*$'`
 - Run: RED/GREEN. RH-02 plant 3 names, RH-03a/b plant 1 line each, twin empty; the YAML-aware forms above AC-9: plant 3 lines (`SWIFT_APPROACHABLE_CONCURENCY`, `MainActor.self`, `Enabled`), twin empty, empty on element-x-ios and IceCubesApp.
-- Known limits: the oracle is swift-build at 2187330e13e7, and Xcode's closed engine may add names, so a hit is "verify against current swift-build, then delete or add". The silent-acceptance claim for pbxproj names is unverified: read only.
+- Known limits: the oracle is swift-build at d417bbcdd46b (2187330e13e7 before 2026-11-27), and Xcode's closed engine may add names, so a hit is "verify against current swift-build, then delete or add". The silent-acceptance claim for pbxproj names is unverified: read only.
 - Binds: Apple apps. Floor: Xcode 26 names.
 
 **SW-APPLE-02 (MUST). A target that sets `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor` sets `SWIFT_VERSION` to 6 (`6` or `6.0`) in the same build-configuration block or in an xcconfig it references; `-swift-version` and `-language-mode` never appear in `OTHER_SWIFT_FLAGS`. (SHOULD clause for manifests: every manifest with `defaultIsolation` also spells `.swiftLanguageMode(.v6)` or `swiftLanguageModes: [.v6]`.)**
@@ -144,7 +146,7 @@ Rows are grouped by the check that catches them: build configuration (greps and 
 - Binds: Apple apps and app-internal packages. Floor: iOS 17 (macro), iOS 26 (`Observations`).
 
 **SW-APPLE-10 (SHOULD). New and touched code does not use the superseded SwiftUI API: `NavigationView`, `.foregroundColor(`, `.cornerRadius(`, `.tabItem`, `.navigationBarItems`, `edgesIgnoringSafeArea`, `.accentColor(`, `UIScreen.main`, and the one-parameter `.onChange(of:) { value in }` or `perform:` form. Replacements: `NavigationStack`/`NavigationSplitView`, `.foregroundStyle`, `.clipShape(.rect(cornerRadius:))`, `Tab`, `.toolbar`, `ignoresSafeArea`, `.tint`, a trait or context screen, `{ old, new in }`.**
-- Why: DocC lists `NavigationView`, `.foregroundColor`, `.cornerRadius`, `.tabItem`, `.accentColor`, `.navigationBarItems`, `.edgesIgnoringSafeArea`, `.alert(isPresented:content:)` at `deprecatedAt` 27.2 and `UIScreen.main` at 26.0, all still `deprecated: false` on 2026-10-10, so these greps are agent hygiene, not compiler-warning mirroring; `.onChange(of:perform:)` is firmly deprecated at iOS 17 (AC-8). Exemption: a floor below the replacement's introduction (NavigationStack 16, foregroundStyle 15, Tab 18); existing code is not rewritten wholesale.
+- Why: DocC lists `NavigationView`, `.foregroundColor`, `.cornerRadius`, `.tabItem`, `.accentColor`, `.navigationBarItems`, `.edgesIgnoringSafeArea`, `.alert(isPresented:content:)` at `deprecatedAt` 27.3, an SDK only in Xcode 27.3 beta (27.2 on 2026-10-10), and `UIScreen.main` at 26.0, none with a `deprecated` flag set (read 2026-11-27), so these greps are agent hygiene, not compiler-warning mirroring; `.onChange(of:perform:)` is firmly deprecated at iOS 17 (AC-8). Exemption: a floor below the replacement's introduction (NavigationStack 16, foregroundStyle 15, Tab 18); existing code is not rewritten wholesale.
 - Verify (output is the violation): `grep -rn -e 'NavigationView' -e '\.foregroundColor(' -e '\.cornerRadius(' -e '\.tabItem' -e '\.navigationBarItems' -e 'edgesIgnoringSafeArea' -e '\.accentColor(' -e 'UIScreen\.main' --include='*.swift' .` and `grep -rn -e '\.onChange(of:[^{]*{[[:space:]]*[A-Za-z_][A-Za-z0-9_]*[[:space:]]*in' -e 'onChange(of:[^)]*perform:' --include='*.swift' .`.
 - Run: RED/GREEN. RH-06e plant 4 lines, RH-06f plant 1 line, twins empty.
 - Binds: Apple apps. Floor: see text.
@@ -227,7 +229,7 @@ Fixture root: `/home/mherwig/.cache/research-lang/swift-tools/fixtures/apple-con
 | AC-8 | DocC availability re-fetch (floors table) | `Mutex` iOS 18.0 / macOS 15.0 / watchOS 11.0 / visionOS 2.0; `OSAllocatedUnfairLock` 16.0 / 13.0 / 9.0 / none; `Observable()` and `Bindable` 17.0 / 14.0 / 10.0 / 1.0; `Observations` 26.0 everywhere; `Tab` 18.0 / 15.0 / 11.0 / 2.0; `NavigationStack` 16.0; `.onChange(of:perform:)` introduced 14.0, deprecated 17.0; `rect(cornerRadius:style:)` and `clipShape` 13.0; `tint(_:)` 15.0 |
 | AC-9 | YAML-aware settings greps (SW-APPLE-01) | `check-yml.sh`: `yml-plant` (`target.yml`) prints `SWIFT_APPROACHABLE_CONCURENCY`, `SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor.self`, `SWIFT_APPROACHABLE_CONCURRENCY: Enabled`; `yml-twin` empty; on `reading-heuristics/plant` 3 names + 1 + 1, twin empty; element-x-ios and IceCubesApp empty |
 
-Not run, and so unverified: read only: every SwiftUI and Combine compile claim, every pbxproj semantic claim about Xcode (precedence order, what Xcode does with an unlisted enumeration value, silence on unknown `SWIFT_*` names), the `Mutex`/`OSAllocatedUnfairLock` floor errors, whether the iOS 27.2 SDK warns on the superseded SwiftUI API, the Xcode 27 template's language-mode default, and every Xcode MCP claim.
+Not run, and so unverified: read only: every SwiftUI and Combine compile claim, every pbxproj semantic claim about Xcode (precedence order, what Xcode does with an unlisted enumeration value, silence on unknown `SWIFT_*` names), the `Mutex`/`OSAllocatedUnfairLock` floor errors, whether the iOS 27.3 SDK warns on the superseded SwiftUI API, the Xcode 27 template's language-mode default, and every Xcode MCP claim.
 
 ## Applied to the exemplars and the future consumers
 
@@ -305,7 +307,7 @@ Ranked by how often they bite. The order is a judgement from exemplar frequency 
 **Subareas that deserve another research round**
 
 1. **Xcode build-system semantics (needs a macOS runner and Xcode).** Does an unknown `SWIFT_*` name or an unlisted enumeration value warn, error or vanish; what is the real precedence order target block, xcconfig, project block; does Xcode's closed engine match swift-build on the `Condition` reading in conflict 3; what does the Xcode 27 project template set for `SWIFT_VERSION` (the single-source Swift 5 claim)?
-2. **Deployment-floor compile errors on Apple.** Does `Mutex` below iOS 18 fail in the way SW-APPLE-04 assumes, and does the iOS 27.2 SDK warn on `NavigationView`, `.foregroundColor`, `.cornerRadius` and `.tabItem` (DocC says `deprecatedAt` 27.2, `deprecated: false` today)? That decides whether SW-APPLE-10 can be gated by the compiler instead of grep.
+2. **Deployment-floor compile errors on Apple.** Does `Mutex` below iOS 18 fail in the way SW-APPLE-04 assumes, and does the iOS 27.3 SDK warn on `NavigationView`, `.foregroundColor`, `.cornerRadius` and `.tabItem` (DocC says `deprecatedAt` 27.3, no `deprecated` flag set on 2026-11-27)? That decides whether SW-APPLE-10 can be gated by the compiler instead of grep.
 3. **Combine and Observation under Swift 6 isolation.** Are `sink` closures a data-race hazard in a MainActor-default target, and does `Observations` match a Combine pipeline for non-SwiftUI consumers (shared with swift-concurrency.md's "Darwin libdispatch and the Apple runtime" round)?
 4. **SwiftUI view shape in the wild.** The `body` length threshold (100) and the `AnyView` rule rest on two apps; a third app and a SwiftUI library (TCA's SwiftUI surface) would test them.
 
@@ -330,3 +332,7 @@ Ranked by how often they bite. The order is a judgement from exemplar frequency 
 13. [element-x-ios `AGENTS.md` at 14e33866ced2](https://github.com/element-hq/element-x-ios/blob/14e33866ced2/AGENTS.md): per-target isolation, the generator rule, Xcode 27 agent skills.
 14. [Matt Massicotte, WWDC26 Q&A](https://massicotte.org/blog/wwdc26-unanswered-qa/) (2026-06-10): the only source for "Xcode 27 defaults to Swift 5" and the case against MainActor default.
 15. [Tuist `SettingsMapper.swift` at 2f6ac74754bf](https://github.com/tuist/tuist/blob/2f6ac74754bf/cli/Sources/TuistLoader/SwiftPackageManager/SettingsMapper.swift): independent confirmation of the manifest-to-setting mapping.
+
+## Revision log
+
+- 2026-11-27: SW-APPLE-10 rationale and the two iOS SDK questions moved from `deprecatedAt` 27.2 to 27.3 (a beta SDK); SW-APPLE-01 oracle 183 to 186 names (re-read at d417bbcdd46b); the `.xcproj` gap added to the Verdict (item 10). Decision: refresh-2026-11/swift-quality.md.

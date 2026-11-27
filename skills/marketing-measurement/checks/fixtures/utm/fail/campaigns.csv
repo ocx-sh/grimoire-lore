@@ -1,0 +1,4 @@
+url,source,medium,campaign,content,date,owner,post
+https://example.org/a?utm_source=linkedin&utm_medium=social&utm_campaign=launch-202611,linkedin,social,launch-202611,,2026-11-27,team,post-1
+https://example.org/a?utm_source=linkedin&utm_medium=social&utm_campaign=launch-202611,linkedin,social,launch-202611,,2026-11-28,team,post-3
+https://example.org/a?utm_source=hn&utm_medium=social&utm_campaign=Launch_202611,hn,social,Launch_202611,,2026-11-27,team,post-2

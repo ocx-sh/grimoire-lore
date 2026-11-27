@@ -5,7 +5,7 @@ summary: The PS-SEC family. Digest and signature checks before extraction, where
 
 # PowerShell Installer Security
 
-Rows bind to Windows PowerShell 5.1.26100.9444 (.NET Framework 4.8.1), pwsh 7.4.7 and 7.6.6 and PSScriptAnalyzer 1.25.0, all measured 2026-10-11. pwsh 7.4 ends support 2026-11-10. The git-fed cells run on GNU grep and busybox 1.37 with git, and macOS or BSD is `unverified: read only`.
+Rows bind to Windows PowerShell 5.1.26100.9444 (.NET Framework 4.8.1), pwsh 7.4.7 and 7.6.6 and PSScriptAnalyzer 1.25.0, all measured 2026-10-11. pwsh 7.4 reached end of support on 2026-11-10. The git-fed cells run on GNU grep and busybox 1.37 with git, and macOS or BSD is `unverified: read only`.
 
 Owns what an `install.ps1` or any script delivered by `irm | iex` must do to be safe to run: verify a download before it is extracted or run, the source of the expected digest, honest verification claims, zip-entry containment, `ServicePointManager.SecurityProtocol`, the one-liner's spelling, the iex-safe script shape (one guarded exit, no `Mandatory`, no `$PSScriptRoot`, no session leaks), `Invoke-Expression`, execution-policy advice and https-only overrides. Script kinds: INST is an installer or bootstrap, a repo script is not bound. Not owned here: encoding, BOM and the 5.1 runner-file writer (`PS-ENC`), `$ErrorActionPreference` and native exit codes (`PS-ERR`, `PS-NATIVE`), `#Requires`, `-UseBasicParsing` and the 5.1 syntax floor (`PS-COMPAT`), the analyzer wrapper and the ban on persistent policy changes (`PS-GATE`), `install.sh` (`SH-INST`) and CI steps (`SH-CI`). `PS-SEC-12` and `PS-SEC-13` are retired and not reused, and `PS-COMPAT-09` and `PS-ERR-05` are retired into `PS-SEC-06` and `PS-SEC-09`.
 

@@ -7,7 +7,7 @@ consolidates:
   - csharp-json/csharp-json-forward-compatible-binding.md
   - csharp-json/csharp-json-error-document-and-generic-unions.md
 date: 2026-10-11
-revised: 2026-10-11
+revised: 2026-11-27
 ---
 
 # Binding ocx JSON with System.Text.Json
@@ -99,9 +99,9 @@ Option availability. Every row marked "no" on net8 is closed by the package line
 | `UnmappedMemberHandling`, `SnakeCaseLower`, `required`, `JsonStringEnumConverter<T>`, `GetTypeInfo(Type)`, `TypeInfoResolverChain`, `static abstract` interface members | yes | yes | yes | yes |
 | `RespectNullableAnnotations`, `RespectRequiredConstructorParameters`, `AllowOutOfOrderMetadataProperties`, `JsonSerializerOptions.Web` | **no** | yes | yes | yes |
 | `AllowDuplicateProperties`, `JsonSerializerDefaults.Strict`, `JsonSerializerOptions.Strict`, `GetTypeInfo<T>()` (docs list it for net10+ only; do not use, CS-JSON-07) | **no** | **no** | yes | yes |
-| `InferClosedTypePolymorphism`, C# 15 `closed`, `JsonNamingPolicy.PascalCase`, non-public `[JsonInclude]` in source gen, open-generic `[JsonConverter(typeof(C<>))]` on generic types | no | no | no (`closed` = CS8652) | preview, GA Nov 2026 |
+| `InferClosedTypePolymorphism`, C# 15 `closed`, `JsonNamingPolicy.PascalCase`, non-public `[JsonInclude]` in source gen, open-generic `[JsonConverter(typeof(C<>))]` on generic types | no | no | no (`closed` = CS8652 on SDK 10.0.401 and CS0656 on SDK 11.0.100) | works only on `net11.0` (GA 2026-11-10, SDK 11.0.100); unavailable on these three targets |
 
-On .NET 11 RC1 the SDK 11.0.100-rc.1.26425.128 builds the generic converter at 0 warnings, and the RC1 runtime passes 198/198 cases [ED V9]. The open-generic attribute form is for generic model types. It does not apply to non-generic union bases, which keep `typeof(TaggedUnionConverter<X>)` [ED F8].
+On .NET 11 RC1 the SDK 11.0.100-rc.1.26425.128 builds the generic converter at 0 warnings, and the RC1 runtime passes 198/198 cases [ED V9]. This probe was not re-run on SDK 11.0.100 GA, and no `net11.0` leg exists. The open-generic attribute form is for generic model types. It does not apply to non-generic union bases, which keep `typeof(TaggedUnionConverter<X>)` [ED F8].
 
 ### Forward-compatibility policy (deliverable 2)
 
@@ -459,7 +459,7 @@ Ranked by how often each bites. Training data and exemplars push hardest toward 
 22. **Holding a `JsonElement` from a disposed `JsonDocument`** in the `Unknown` arm. → read `Raw` after the call in the C3 case.
 23. **Treating exit 0 from `PublishAot` as proof, or suppressing IL2026 to silence it.** → CS-JSON-04/17.
 24. **`GenerationMode = Serialization` "for performance".** The context then cannot deserialize. → CS-JSON-03 round-trip.
-25. **Adopting C# 15 `closed` or `InferClosedTypePolymorphism` as the modern union.** It is CS8652 on 10.0.401 and throws on unseen tags. → CS-JSON-07 rg.
+25. **Adopting C# 15 `closed` or `InferClosedTypePolymorphism` as the modern union.** It is CS8652 on 10.0.401 and CS0656 on SDK 11.0.100 for `net10.0`. On `net11.0` an unseen tag throws `JsonException`, and `IgnoreUnrecognizedTypeDiscriminators` has no concrete base to fall back to (measured 2026-11-27). → CS-JSON-07 rg.
 
 ## Failure classes
 
@@ -547,3 +547,8 @@ Ranked by how often each bites. Training data and exemplars push hardest toward 
     - Added owner decision 5 (the `PartialReport` type).
     - Folded the Windows exit-status gap into the crossplatform round. The gaps moved to Verdict 13.
   - **Failure modes and classes:** modes 3, 7, 8, 14, 18, 19 and 20 added, and the list re-ranked. Classes G (failure-path masking) and H (per-copy drift and over-modelling) added.
+
+- 2026-11-27, 2026-11 delta refresh (decision file `refresh-2026-11/csharp-quality.md`). No CS-JSON rule ID changes, none is added.
+  - Option availability table, `closed` row: `closed` is CS0656 on SDK 11.0.100 for `net10.0`, and the .NET 11 column is now GA (2026-11-10), usable on `net11.0` only.
+  - Option availability note: the union-converter probe on .NET 11 was not re-run on GA.
+  - AI-agent failure mode 25: CS0656 on SDK 11.0.100 and the measured unseen-tag throw on `net11.0`.

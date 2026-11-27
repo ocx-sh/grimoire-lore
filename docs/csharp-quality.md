@@ -47,7 +47,7 @@ Every rule carries an ID, a rationale, a runnable verification and a severity. A
 
 ## Pinned decisions
 
-Some rules encode an agreed decision rather than a derivable fact. They are marked pinned so a later reader does not re-argue them. The set targets `net8.0;net10.0` until .NET 8 reaches end of support on 2026-11-10, then `net10.0` alone, a move `dotnet-upgrade` executes. `LangVersion` is 14 on both targets.
+Some rules encode an agreed decision rather than a derivable fact. They are marked pinned so a later reader does not re-argue them. The set targets `net8.0;net10.0` until .NET 8 end of support, which came on 2026-11-10, then `net10.0` alone, a move `dotnet-upgrade` executes and that is now pending. `LangVersion` is 14 on both targets.
 
 Warnings are errors unconditionally, for humans too, and only NU1900 to NU1905 are exempt. A library ships no lock file, CI restores into an empty packages folder and no NuGet cache is kept. Coverage is a report on Linux x64 and Windows x64 with no threshold, and `ci-ok` is the only required check.
 

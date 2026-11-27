@@ -34,7 +34,7 @@ Six shipped files sit in the `dotnet-build-reference` skill's `checks/` director
 
 Some rules encode an agreed decision rather than a derivable fact. They are marked pinned.
 
-SDK 10.0.401 with `rollForward: latestFeature` and no prerelease. `LangVersion` 14 and `AnalysisLevel` `10.0-all`. Five analyzer packs and MinVer as `GlobalPackageReference` with exact versions: BannedApiAnalyzers 5.6.0, PublicApiAnalyzers 5.6.0 for packable projects, VS.Threading.Analyzers 18.7.23, IDisposableAnalyzers 4.0.8 and Meziantou.Analyzer 3.0.297 with mode `None`. Never StyleCop, Roslynator or the NetAnalyzers package.
+SDK 10.0.401 with `rollForward: latestFeature` and no prerelease. `LangVersion` 14 and `AnalysisLevel` `10.0-all`. Five analyzer packs and MinVer as `GlobalPackageReference` with exact versions: BannedApiAnalyzers 5.6.0, PublicApiAnalyzers 5.6.0 for packable projects, VS.Threading.Analyzers 18.7.23, IDisposableAnalyzers 4.0.8 and Meziantou.Analyzer 3.0.342 with mode `None`. Never StyleCop, Roslynator or the NetAnalyzers package.
 
 One root `.globalconfig`, never a second file to relax severities. A library ships no lock file, and `dotnet pack` runs with package validation and a nuspec budget. The repo-wide `none` list is exactly CA1303, CA1308, CA1716, CA1867 and VSTHRD003, each with a reason line. Each is a default an adopter overrides once, in the props. Overriding one is a decision, recorded with its reason. Ignoring one is a violation.
 

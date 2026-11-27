@@ -45,18 +45,18 @@ Contents: [The Gate](#the-gate) · [Non-Negotiables](#non-negotiables) ·
 [Severity](#severity) · [Siblings](#siblings)
 
 **Before trusting any tuple or layer claim, read the BUILT artifact for your own
-surface — and know that no DOM emulator can test a layered cascade.** happy-dom
-20.12.0 has zero `@layer` support: a layer block parses to `cssRules.length ===
-0`, and a bare `@layer a, b;` statement corrupts the parse of every rule *after*
-it in the same sheet. jsdom 30.0.1 parses `@layer` into correct CSSOM objects
-and applies none of it. Either way the assertion passes or fails for reasons
-unrelated to your CSS. Read [gate.md](../skills/css-theming-reference/gate.md) before wiring
+surface — and never accept a DOM emulator as the engine for a layered cascade.**
+happy-dom (20.12.0 to 21.0.4) has zero `@layer` support: a layer block parses to
+`cssRules.length === 0`, and a bare `@layer a, b;` statement drops the rule that
+follows it. jsdom up to 30.1.3 parses `@layer` and applies none of it. jsdom
+31.0.0 (2026-11-05) applies layer order, but nobody has measured it on forced
+colors or shadow-DOM Context. Read [gate.md](../skills/css-theming-reference/gate.md) before wiring
 anything.
 
-Every measured claim comes from Chromium 151.0.7922.34 and real production
-builds at the versions each depth file names. Firefox and WebKit were not
-tested. Where a claim is spec-derived rather than measured,
-[rules.md](../skills/css-theming-reference/rules.md) says so on the rule.
+Every measured claim comes from Chromium 151.0.7922.34 (stable was 158 at the
+2026-11-27 refresh; its release notes touch none of it; not re-measured) and real
+production builds at the versions each depth file names. Firefox and WebKit were
+not tested. Where a claim is spec-derived, [rules.md](../skills/css-theming-reference/rules.md) says so on the rule.
 
 ## The Gate
 
@@ -114,9 +114,9 @@ The globs load this file on `.scss`, `.sass` and `.less`, where CSS-TOK-01's
 defect wears a different syntax. Five lines, not an annex:
 
 - `$brand: #ff0000` interpolated into a declaration compiles to `color:#ff0000`
-  — reproduced in dart-sass 1.103.1 and less 4.9.0. `--brand` survives. A
-  breakpoint or z-index IS a legitimate `$var`: no consumer override path
-  through a media condition could ever exist.
+  — reproduced in dart-sass 1.103.1 and less 4.9.0; still baked in at 1.108.2
+  and 4.9.1. `--brand` survives. A breakpoint or z-index IS a legitimate `$var`:
+  no consumer override path through a media condition could ever exist.
 - `@use`/`@forward` order (Sass) and `@import` order (Less) fix `@layer`
   first-appearance order. Reordering two lines in an entry file, touching no
   `@layer` line at all, silently reverses which layer wins.
@@ -146,7 +146,7 @@ Read your row before changing a selector. An absent surface means nobody looked.
 | Angular ShadowDom | a real shadow root — plus a copy of every `None` style | no | [angular.md](../skills/css-theming-reference/angular.md) |
 | Tailwind v4 | utilities (0,1,0)–(0,2,0) in five native layers | yes, for what IT generates only | [tailwind.md](../skills/css-theming-reference/tailwind.md) |
 | CSS Modules (Vite) | `._name_hash_1` (0,1,0) — no inflation | no | [css-modules.md](../skills/css-theming-reference/css-modules.md) |
-| CSS Modules (Turbopack) | `.name-module___hash__name` (0,1,0) | no | [css-modules.md](../skills/css-theming-reference/css-modules.md) |
+| CSS Modules (Turbopack) | `.hash_name` (0,1,0) from Next 16.4; `.name-module___hash__name` before, and in dev | no | [css-modules.md](../skills/css-theming-reference/css-modules.md) |
 | Next / Nuxt / React Router | declaration order; the LAST tie wins, not "global" | no | [css-modules.md](../skills/css-theming-reference/css-modules.md) |
 | styled-components / Emotion | `.hash` (0,1,0), injected at end of `<head>` | no — `stylisPlugins` opt-in | [css-in-js.md](../skills/css-theming-reference/css-in-js.md) |
 | vanilla-extract | one hashed class per `style()` (0,1,0) | opt-in; the layer NAME is hashed | [css-in-js.md](../skills/css-theming-reference/css-in-js.md) |
@@ -181,7 +181,8 @@ specific holes, so a reader can tell a gap from a clearance:
   Vue/Svelte islands** and `is:global`/`is:inline` against an island's styles.
 - **Email clients and iframe isolation** — cited from support matrices, neither
   locally runnable — plus **Style Dictionary's `outputReferences`**, the **DTCG
-  format**, **Qwik `useStyles$`**, and **container style queries**.
+  format**, **Qwik `useStyles$`**, **container style queries** and **scoped
+  custom element registries**, both now shipping in all three engines.
 
 ## Where the Depth Is
 

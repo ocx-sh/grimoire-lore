@@ -64,7 +64,7 @@ Each row is an agreed default an adopter overrides once, in their own repository
 | Decision | Default (2026-10-10) | Override looks like |
 |---|---|---|
 | Floor by kind | Libraries and an SDK: tools 6.2, Swift 6 mode, floor leg `swift:6.2.0`. CLIs and servers: the current release (6.4) | A higher library floor, with a reason in the commit message (SW-PKG-12) |
-| Toolchain pin | `.swift-version` holds the exact patch (6.4.0 current, 6.3.3 previous) and the primary CI image derives from it | An exact image tag, with the bump shipped together with the regenerated format config (SW-GATE-08) |
+| Toolchain pin | `.swift-version` holds the exact patch (6.4.3 current on 2026-11-27, 6.3.3 previous) and the primary CI image derives from it | An exact image tag, with the bump shipped together with the regenerated format config (SW-GATE-08) |
 | Done test | `swift build --build-tests -Xswiftc -warnings-as-errors` exits 0 on the current and the floor toolchain | None. A leg that cannot meet it is a stop condition (S6) |
 | Hatch budget | 0 hatches added, judged against the U0 commit | A named stop condition (S1 or S2) with the gap recorded |
 | `migrate` scope | The five migratable names, one per run, from a clean tree | None. Other names exit 64 |

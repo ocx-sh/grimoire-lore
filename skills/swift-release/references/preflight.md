@@ -83,7 +83,10 @@ A glibc fallback may keep `--static-swift-stdlib` when the line also carries
 `--build-system native`, a comment naming
 [swift-build#1764](https://github.com/swiftlang/swift-build/issues/1764), and
 the removal condition "drop when the pinned toolchain contains
-swift-build#1763". On 2026-10-10 the fix is merged to main and the 6.4.x
-branches, and 6.4.0 is the only 6.4 tag, so the removal condition has not been
-met. The Swift Build engine is the 6.4 default, and the native engine is
+swift-build#1763". Read 2026-11-27: the fix is on the 6.4.1 release branch
+([swift-build#1772](https://github.com/swiftlang/swift-build/pull/1772)), and
+swift.org lists 6.4.1, 6.4.2 and 6.4.3, but no build has run on a patch
+release. The removal condition is met only once `swift build -c release
+--static-swift-stdlib` with a reachable Foundation symbol exits 0 on the
+pinned patch's default Swift Build engine. The Swift Build engine is the 6.4 default, and the native engine is
 deprecated with removal planned for 2026H2 (read 2026-10-10).

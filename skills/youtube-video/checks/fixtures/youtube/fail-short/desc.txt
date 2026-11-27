@@ -1,0 +1,7 @@
+Try it: https://example.com/install
+
+00:00 Start
+00:20 Middle
+00:40 End
+
+#mytool

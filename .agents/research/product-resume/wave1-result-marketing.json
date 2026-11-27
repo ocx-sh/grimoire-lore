@@ -1,0 +1,351 @@
+{
+ "group": "marketing",
+ "mapPath": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/marketing-topic-map.md",
+ "topics": [
+  {
+   "slug": "marketing-claims-evidence",
+   "idFamily": "MKT-CLAIM",
+   "dives": 4,
+   "blocked": 0,
+   "sources": 117,
+   "challenged": 14,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/marketing-claims-evidence.md",
+   "rules": 26,
+   "must": 22,
+   "conflictsResolved": [
+    "MKT-CLAIM-02 percent and multiplier arm: confirmed that a trailing \\b after % or \u00d7 never matches. Replaced it with [0-9]+([.,][0-9]+)? ?(%|\u00d7) plus a word-unit arm, added word numerals to the count arm, and strip <style> blocks (otherwise 4 CSS false positives at grimoire index.astro:118-120,312). Re-measured: fleet 4 hits (unchanged), 26 re-fetched exemplar pages 326 hits. The percent arm finds 32 of 32 real claims; the old draft found 7.",
+    "C3 social-proof arm: kept the bare arm on measured evidence. Fleet copy surfaces have 0 hits, including 6 SECURITY.md files. Exemplars have 18 of 20 hits real. The DOC-TYPE-15 regex caught only 2 of those 18, and its 3 false positives came from docs body pages, which this gate excludes.",
+    "MKT-CLAIM-01 vs 04 marker position: defined a marker per surface. It goes at the end of the line or alone on the line above. MDX uses {/* */} (mdxjs.com confirmed). JSON and remote surfaces bind through surface. The grep -v pipeline is replaced by a reference function tested on fixtures.",
+    "MKT-CLAIM-04 refresh_by: the schema and check A accept an ISO date or \"next-release\". The example row is marked illustrative.",
+    "Checks A to E are now defined in a table inside the ruleset, and each verify names its check inline.",
+    "MKT-CLAIM-16 / C12: the proof is now an approving GitHub review from a login that authored neither the pull request nor its commits. Commit author and signature are rejected as evidence: agents share the owner's name, and commit.gpgsign=true with ssh format in ocx, grimoire and grimoire-lore. approved_by is only a hint.",
+    "MKT-CLAIM-10: narrowed the grep to the named phrases plus a keep:absence marker. Fleet hits fell from 21 to 5, all limitation statements.",
+    "MKT-CLAIM-13: a bare plan, tier or trial no longer passes. A hit now needs a price-or-limit marker, an SPDX id or a number-with-unit limit. Measured: 0 fleet hits; 4 of 54 exemplar hits covered.",
+    "MKT-CLAIM-25 demoted to SHOULD as the conservative reading of an unsettled point (new C14). The settled 465.4 and 465.7(b) bars moved to the new MKT-CLAIM-26 (MUST), with text fetched from eCFR point-in-time 2026-11-01.",
+    "MKT-CLAIM-24: dropped 'ask for', grounded on the fetched text of 465.8(b) and 465.1(h), and marked 'trade' as an inference. The grep now names its files and fails on an empty file list.",
+    "MKT-CLAIM-14 and 09: common-knowledge superlatives and the six-word list now live only as lint patterns. Rule 09 is rewritten to the real behaviour: leave and report owner adjectives.",
+    "MKT-CLAIM-05: the expiry stays MUST. The intervals are labelled owner-tunable and unsourced, with an owner-only [defaults] table, and an agent may not lengthen an interval.",
+    "Applied row 03 corrected from violated to satisfied. Read live with gh repo view, the grimoire description enumerates ten clients and states no count. Verdict 10 updated to match.",
+    "Applied rows 02/08, 14, 15, 18, 20-26 and 24 now carry commands and counts re-run 2026-11-27. Row 15 is 21 by grep, against the dive's hand-scored 28.",
+    "The '3. Packages' cite moved from rules_ocx/README.md:42 to :80."
+   ],
+   "anotherRound": [
+    "What precision do the unclassified MKT-CLAIM-02 arms (outcome words, 131 exemplar hits; units, 85 hits) reach, and which real claims does the whole set miss on the exemplar corpus?",
+    "What do EU UCPD Annex I points 23a-23c and Directive 98/6/EC Art. 6a say, read from the Publications Office Cellar copy?",
+    "What do the UK DMCC Act 2024 fake-review ban and the current CAP Code substantiation rule require of an agent-written page?",
+    "Does 16 CFR Part 465 reach business-to-business testimonials?",
+    "What does comparative-advertising law require of a table that names competitors, such as the ocx drift table?"
+   ],
+   "humanDecisions": [
+    "Give agents their own GitHub identity (a bot account or a GitHub App), or accept that every MKT-CLAIM-16 sign-off class stays blocked. The shared owner login cannot approve its own pull requests.",
+    "Whether to tune the MKT-CLAIM-05 refresh_by defaults through a [defaults] table in claims.toml.",
+    "Add LICENSE files to grimoire-lore, arcana, index and e2e-index.",
+    "Keep, define or retire 'The Simple Package Manager', and replace or record 'fast' and 'instantly'.",
+    "Confirm, change or record the SECURITY.md '48 hours / 7 days' promise.",
+    "Lint roll-out mode (block from the first commit, or a ratchet) and where the lint lives.",
+    "security.txt on ocx.sh and grimoire.rs, and who owns its Expires renewal.",
+    "Whether either landing page carries a proof section.",
+    "The privacy.html:174 'non-commercial open-source' wording."
+   ],
+   "failureModes": [
+    "Filling a slot with invented numbers, prices, testimonials or remembered statistics",
+    "Training-data vocabulary: 'blazing fast', 'SOC 2 certified', 'AI-powered' for a tool that calls no model",
+    "Tightening drift: deleting absence statements or dropping mechanism tokens",
+    "Stale carry-over: counts and enumerated client lists surviving a release, deprecated SPDX ids, pre-relicensing memory",
+    "Exemplar imitation: undated quote walls, 'case study' with no baseline, vendor benchmark charts without hardware or version",
+    "Scope errors: 'free' in the hero with the paid boundary below the fold, 'open source' for open core",
+    "Gaming the gate: unresolved markers, allow entries for blocked classes, self-filled sign-off rows, lengthened refresh intervals, a marker on one line covering the next"
+   ]
+  },
+  {
+   "slug": "marketing-positioning-record",
+   "idFamily": "MKT-POS",
+   "dives": 3,
+   "blocked": 0,
+   "sources": 86,
+   "challenged": 17,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/marketing-positioning-record.md",
+   "rules": 18,
+   "must": 14,
+   "conflictsResolved": [
+    "MKT-POS-07: list regex replaced by a tested pattern that fails 3-item lists with and without Oxford comma; seeded fails added (grimoire Cargo.toml:21 fails); appositive false-fail documented",
+    "MKT-POS-14 / Verdict 8 / OQ 9: field name unified as competitor_version (MKT-CLAIM-04 keeps both sides in subject_version, name in definition)",
+    "MKT-POS-14: whole-page ban grep replaced by per-sentence denigration scan (exits 0 on ocx dist/index.html 2026-11-16 build)",
+    "MKT-POS-14: 90 days labelled MKT-CLAIM-05 project default, aligned to its next-minor trigger; MUST binds only refresh_by exists and is enforced",
+    "MKT-POS-14: generic sub-clauses moved to rationale; kept only checkable forms (ban scan, rendered competitor_strength, versions, observed)",
+    "MKT-POS-04: owner identity defined as CI variable POSITIONING_OWNERS checked with git log -G author list; inability to separate an agent committing as owner recorded as Verdict 11 gap",
+    "MKT-POS-03: check restated per field: value contains ASK-OWNER or sources.<field> names an existing path:line; [sources] table added to schema",
+    "MKT-POS-02/16: style required; parent, trend_words, sources, forbidden_allow, attributes optional with absent = empty; POS-16 skipped when parent empty",
+    "MKT-POS-12: per-glob loop replaces grep -c (CHANGELOG.md now tested); MUST load claim scoped to Claude Code; tested AGENTS.md pointer line added for other clients",
+    "MKT-POS-17: check now matches alternatives[0].name and a computable audience phrase; Stack Overflow citation dropped from rationale, Decay and Key sources",
+    "MKT-POS-05: verification relabelled as mechanical floor plus reading heuristic",
+    "MKT-POS-09: blank terms dropped, scan scoped to governed surfaces and docs prose, owner-approved forbidden_allow globs; fleet hits measured with the check",
+    "MKT-POS-18: bound to non_target (each entry on the page); falsifiability moved to rationale",
+    "MKT-POS-19: retired (no fetched primary source); awareness/switching removed from schema",
+    "MKT-POS-01: count reconciled to 7 product-context files in 7 of 17 directories with find command; brief-fields summary '6 of 17' flagged as wrong against its own table",
+    "Verdict 5: restated as 4-item list on 3 source surfaces and 6 of 8 listing surfaces wrong",
+    "Applied rows 02, 03, 09, 12: file:line evidence and dated curl command for live index.grimoire.rs meta added",
+    "Cross-references renumbered from claims-dive CLAIM-03/06/07/12/14 to consolidated MKT-CLAIM-02/05/06"
+   ],
+   "anotherRound": [
+    "Can the MKT-POS-04 owner gate be made agent-proof when agents commit under the owner's git identity (signed commits with a key the agent cannot use, a required human reviewer via branch protection or CODEOWNERS)?",
+    "Which of grim's target clients load path-scoped rules, and which read AGENTS.md, so the MKT-POS-12 fallback line is known to reach them?",
+    "Do national transpositions of 2006/114/EC, UK BPRs 2008 and Lanham Act 43(a) make MKT-POS-14 stricter for a named-competitor table?"
+   ],
+   "humanDecisions": [
+    "Addresses to put in the CI variable POSITIONING_OWNERS",
+    "Any forbidden_allow exemption (e.g. grimoire catalog/README.md:3, docs introduction.md:3 and concepts.md:3)",
+    "Whether each repo is a family component (sets parent)",
+    "ocx category noun and direction (consumer vs publisher)",
+    "Grimoire hero: lockfile h1 vs category in h1",
+    "Grimoire family object noun (AI-agent config proposed)",
+    "Whether grimoire-lore gets its own record",
+    "Accept MKT-CLAIM field requests competitor_version and competitor_strength and the MKT-CLAIM-05 comparison default",
+    "Docs-home lead verbatim sentence vs nouns, to align with MKT-PAGE"
+   ],
+   "failureModes": [
+    "Agent writes a fresh tagline per file (61 one-liners for 17 repos)",
+    "Agent types an enumerated list from memory (4 or 5 of 8 kinds)",
+    "Agent varies the object noun with forbidden synonyms",
+    "Agent edits README tagline but not manifest or site head",
+    "Rule never loads on README edit because globs omit it",
+    "Agent assumes .claude/rules reaches every client",
+    "Agent invents audience 'developers and teams' or alternative 'other tools'",
+    "Agent writes a Moore fill-in-the-blank statement as the positioning",
+    "Agent flips status to reviewed under the owner's git identity (undetected; Verdict 11)",
+    "Agent states competitor versions or features from training data or hedges with 'as of writing'",
+    "Agent lists only own wins in a comparison",
+    "Agent writes marketing disguised as when-not-to-use bullets",
+    "Agent copies the long About client list into og:description",
+    "Agent keeps h1 equal to meta and loses the slogan, or drops the category everywhere"
+   ]
+  },
+  {
+   "slug": "marketing-first-screen-copy",
+   "idFamily": "MKT-PAGE",
+   "dives": 2,
+   "blocked": 0,
+   "sources": 97,
+   "challenged": 14,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/marketing-first-screen-copy.md",
+   "rules": 11,
+   "must": 5,
+   "conflictsResolved": [
+    "MKT-PAGE-06: the regex now requires the product as subject, or a stage label at the start of the line. vscode README.md:9,13 ('experimental' qualifies features) now fails. On the re-run of the 9 READMEs, the same 5 fail and the same 4 pass.",
+    "MKT-PAGE-06 drops from MUST to SHOULD. No primary source requires a status line: SemVer section 4 describes the API, and repostatus.org only suggests a README badge, with no placement (re-fetched 2026-11-27).",
+    "MKT-PAGE-06 Applied now uses MKT-PAGE-01's release-or-package scope: 10 in-scope READMEs, 7 fail. rules_ocx, www-setup and website are added. grim-gui and grim-mirror are out of scope (no release, no crate).",
+    "MKT-PAGE-07: each vocabulary word now maps to repostatus, Kubernetes or SemVer. skeleton and unmaintained are labelled fleet words.",
+    "MKT-PAGE-08 drops to 'SHOULD, MUST once the MKT-CLAIM-01 lint ships', because the lint does not exist. Its check is now a runnable grep for class = \"maturity\" plus a tomllib comparison of subject_version.",
+    "MKT-PAGE-03 corrections: NN/g is restated accurately (it requires no H1 and no noun). The 22-of-25 figure is labelled LLM-rated. The record path is now .agents/positioning.toml. The extraction is piped explicitly through hero_text. A missing record gives exit 2, a stop and not a pass. A synonym fails. Vite and Bun are added as pass examples.",
+    "First-screen definition: the hero segment now starts at a <section> whose class contains 'hero', before <main>. On the built grimoire.rs page, the first <h1> inside <main> is the site title 'Grimoire'.",
+    "MKT-PAGE-09: the below-1.0 ban now rests on SemVer section 4 plus this topic's policy, not on the FTC. Negated forms are exempt. Channel names go to a reading check. The Applied row's '0 hits' was wrong: www-setup/README.md:25 matches the bare word 'stable'.",
+    "MKT-PAGE-10: MUST only when archived == true. The hero line and 'maintainer stopped' are SHOULD. Added the GitHub REST docs URL (API version 2026-03-10) and the full list of 17 repositories (vscode's real slug is grimoire-rs/grimoire-vscode).",
+    "MKT-PAGE-02 fails only when / renders an <h1> and its source has neither doc_surface value. The parts that need CR-3 are marked blocked.",
+    "MKT-PAGE-11 drops the either-or verification and adds a grep for hero markup. The owner-decision clause moves to the ask-first list. The tagline-stack check is marked blocked on CR-1.",
+    "MKT-PAGE-05 keeps its scope: the re-fetched Fletch article covers heroes and taglines, not the H1 alone. The mechanical grep now matches AI terms only, and 'agent' becomes a reading check. trend_words.hero replaces the invented ai_in_headline field. On Grimoire, Applied goes from Satisfied to pending the record.",
+    "MKT-PAGE-04 drops from SHOULD to CONSIDER and gets a worked ocx competitor-swap pair. Having no mechanical differentiator check is recorded as a gap in Verdict 10.",
+    "The Applied rows for 05, 07, 09, 10 and 11 now carry file:line references and exact commands.",
+    "Interim precedence: docs-quality governs every landing-tagged page until CR-1..CR-4 land. doc_surface does not appear in rules/docs-quality.md today."
+   ],
+   "anotherRound": [
+    "What must the first screen of a software-service offer page say? Measure at least 15 exemplar service pages.",
+    "Can the checks read a '// doc_surface: pitch' line in an .astro frontmatter fence, or should a pitch declare itself in the built HTML with a <meta> tag?",
+    "How many rendered README lines does GitHub show above the fold on desktop and on mobile, and do crates.io and npm render the same opening?",
+    "Does a human rater agree with the two LLM raters on the category rubric behind MKT-PAGE-03's 22-of-25 figure?",
+    "How often does MKT-PAGE-06's label arm fire on a wrapped source line that happens to start with a stage word? The test set was only 10 READMEs."
+   ],
+   "humanDecisions": [
+    "Approve the doc_surface enum (pitch, home) and CR-1..CR-4 in docs-quality. Until then, parts of MKT-PAGE-01, -02 and -11 stay blocked.",
+    "Decide whether to raise MKT-PAGE-06 (maturity line below 1.0) to MUST as fleet policy, against the upstream norm of silence and without a primary source.",
+    "Choose the category noun per product. ocx: 'package manager', 'binary distribution platform' or the job wording. Grimoire: 'package manager' or 'lockfile'.",
+    "Decide whether a repository with a public README but no release and no package (conventions, grim-gui, grim-mirror) is a pitch surface."
+   ],
+   "failureModes": [
+    "Takes scope from doc_type: landing or from the words 'home page', and writes hero copy on hubs and docs homes.",
+    "Hands over a pitch rendered by a component with no doc_surface declaration, so no check reads it.",
+    "Copies upstream silence on maturity, or moves the status to a footer or a '## Status' section.",
+    "Reads a feature-level 'experimental' as the product's status.",
+    "Writes a slogan H1 with a subhead that names no category, or puts a synonym of the recorded noun in the hero.",
+    "Writes 'stable' or 'production-ready' on the first screen of a 0.x tool.",
+    "Puts 'AI-powered' or 'agentic' in the H1 without a recorded justification.",
+    "Checks the .astro or .mdx source and misses words a component renders, or treats a Starlight site-title <h1> as the hero H1."
+   ]
+  },
+  {
+   "slug": "marketing-discoverability",
+   "idFamily": "MKT-SEO",
+   "dives": 3,
+   "blocked": 0,
+   "sources": 68,
+   "challenged": 17,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/marketing-discoverability.md",
+   "rules": 24,
+   "must": 17,
+   "conflictsResolved": [
+    "MKT-SEO-07: no platform source for the MUST. Demoted to a SHOULD house rule. It now cites the X cards markup reference, where twitter:image falls back to og:image, read from the Wayback snapshot of 2026-01-16 because the live URL redirects to docs.x.com/overview. The check also accepts twitter:image.",
+    "MKT-SEO-06: the unsourced PNG/JPEG MUST is now a MUST that the image type is not SVG. Source: X markup, 'SVG is not supported'. PNG or JPEG is a SHOULD labelled house heuristic (the X and LinkedIn format lists). og:image:alt is sourced to ogp.me ('should specify og:image:alt'). The image gate exits non-zero on failure and was tested on grimoire.rs og-card.png (pass) and index.grimoire.rs logo.svg (fail).",
+    "MKT-SEO-08: the Fact line now quotes ogp.me, fetched by the reviser: 'Any non-marked up webpage should be treated as og:type website.'",
+    "MKT-SEO-11: 'at most 5' is now 'no more than 5 (conservative)'. Google says 'at least five', and RFC 9309 \u00a72.3.1.2 says crawlers MAY stop past five. text/plain is cited to RFC 9309 \u00a72.3. Both awk checks now exit non-zero on failure, and the field check reads multi-line user-agent groups. Tested pass and fail.",
+    "MKT-SEO-17: replaced the '...' command and the random sample with live17.sh (in the appendix). The sample is fixed: the home page plus the first and last 5 sorted live URLs. It passes on grimoire.rs and fails on ocx.sh with TLS error 60.",
+    "MKT-SEO-15: the Python gate now accepts owner='unreviewed' without a decided date and prints those tokens as open items. Tested pass and fail. The MUST is labelled house convention.",
+    "MKT-SEO-24: demoted from MUST to SHOULD. The 0.5 threshold is labelled unvalidated, sets need at least 10 pages, and grimoire.rs is recorded as a control: 48 pages, 0 at or above 0.5.",
+    "MKT-SEO-05, 18, 20: 'grep and review' replaced by deny-lists that must print nothing. Documented allows: negated lines for 05 and 18, and a line linking a Google or Bing doc for 20. 05 no longer matches an unrelated '60 characters'. Each was tested on sample lines. The leftover judgement calls are labelled review items and are not gated.",
+    "MKT-SEO-21: dropped the unsourced 'name equals H1' check. Now cited to sd-policies (2026-07-10) and review-snippet (2026-09-08). Fixed an overclaim: the self-serving-review restriction covers LocalBusiness and Organization only. The dead FAQPage/HowTo/SoftwareApplication markup moved to the new MKT-SEO-25 (SHOULD).",
+    "MKT-SEO-19 vs machine-readers.md:69 and DOC-AGENT-04: the 'only' is removed, so the file is recommended with a named consumer and optional otherwise. test ! -f now applies only to Astro and MkDocs, which both have build hooks. A hand-kept public/ file is accepted on stacks without a hook, such as VitePress. A runnable link check was added. The DOC-AGENT-04 wording gap is handed to the docs-quality owner in one line.",
+    "MKT-SEO-14: retired as common knowledge. The preview hosts sh-ocx-preview-*.b-cdn.net send x-robots-tag noindex and return 404 for robots.txt, and no noindex page sits under a Disallow. MKT-SEO-09 lost its absolute-loc clause, which MKT-SEO-01 already gates, and dropped from MUST to SHOULD.",
+    "Fleet table rows 03, 04, 05, 11, 13, 14, 15, 18, 19, 20, 23 now carry fleet file:line, commands and outputs. On 31 vs 32: Cloudflare has 31 'Disallow: /' groups naming 32 tokens, because AwarioSmartBot and AwarioRssBot share one group (live lines 86-88). Row 23: first-party popstate grep found 0 files; the two history.*State hits in ocx-sh/index/dist are a TOC and a query sync."
+   ],
+   "anotherRound": [
+    "What does X render today for summary_large_image when a page has no image, and does a current docs.x.com page list the card image formats? This decides whether MKT-SEO-07 can return to MUST and whether MKT-SEO-06's SVG source can move off the archive.",
+    "Does LinkedIn's sharing module, not its ad spec, state which og:image file types it accepts?",
+    "Once ocx.sh TLS works, does a second generated set (the 170 /catalog/ pages) confirm or move MKT-SEO-24's 0.5 threshold?",
+    "Is the x-robots-tag noindex on *.b-cdn.net preview hosts a Bunny default or fleet configuration? If it is a default, a custom preview domain would lose it silently."
+   ],
+   "humanDecisions": [
+    "Catalog author: keep the names of the two allow-list files the revised gates introduce (structured-data-reviews.txt, back-button-allow.txt), and ship live17.sh and shingle.py under skills/<set>-reference/checks/.",
+    "Docs-quality owner: align the DOC-AGENT-04 wording ('Publish llms.txt', with no consumer condition) with MKT-SEO-19's consumer trigger, or leave both as they are."
+   ],
+   "failureModes": [
+    "An agent enforces a 60- or 160-character title or description limit as Google's (MKT-SEO-05 deny-list).",
+    "An agent emits a relative or SVG og:image, which X does not support (MKT-SEO-06).",
+    "An agent declares summary_large_image with no image (MKT-SEO-07, SHOULD).",
+    "A deny-list grep misses a false claim that is written with a negation (stated limit of MKT-SEO-18).",
+    "An agent runs the template-share floor on a set of 2 or 3 pages and gets inflated shares (MKT-SEO-24 minimum of 10 pages).",
+    "An agent reads robots.txt groups by their last user-agent line and miscounts the tokens (31 vs 32)."
+   ]
+  },
+  {
+   "slug": "marketing-release-announcements",
+   "idFamily": "MKT-REL",
+   "dives": 3,
+   "blocked": 0,
+   "sources": 47,
+   "challenged": 16,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/marketing-release-announcements.md",
+   "rules": 17,
+   "must": 13,
+   "conflictsResolved": [
+    "MKT-REL-02 vs DOC-TYPE-39: a restated subject fails. An explicit 'No migration needed' passes DOC-TYPE-39 but sends the agent back to the breaking definition.",
+    "Generator model vs DOC-TYPE-38: the template strips prefixes, regroups, filters scopes and adds Migration and summary lines. MKT-REL-10 now fails any verbatim Conventional Commits bullet.",
+    "MKT-REL-07: Kubernetes does not require a removal version, only an announcement and a warning. The removal version now rests on PEP 387 and RFC 8594 as a project choice.",
+    "Verdict 5 and 7: gnullvm (0c7c3ffc, 2026-11-15, v0.6.7), CHANGELOG.md:231 and tag types are now measured with inline commands. Tags are ocx 38/38 and grimoire 31/34 lightweight, not all. --with-tag-message is tested for the git-cliff lane (cliff-test/with-tag-message.out). The cargo-dist lane is marked unverified.",
+    "MKT-REL-15 vs MKT-REL-06: cut to the scope clause. A user-visible fix with an internal scope (ocx 9dd9e91e) would be silently skipped.",
+    "MKT-REL-17 retired: it had no runnable detector, and MKT-REL-11 already catches its one case.",
+    "MKT-REL-13 ownership: price and licence wording goes to marketing-claims-evidence MKT-CLAIM-03 and -12. The 15 days is labelled as derived from two dates.",
+    "MKT-REL-08 vs ocx AGENTS.md:21: ocx states a pre-1.0 practice of 'no warning schedule', so ocx removals are not violations. grimoire still violates."
+   ],
+   "anotherRound": [
+    "Does cargo-dist carry a --with-tag-message summary into announcement_github_body? A dry `dist plan` would answer it for the grimoire lane.",
+    "Does a full git-cliff regeneration read the summary back from an annotated tag? This was untested because creating a tag changes repository state.",
+    "Can MKT-REL-02 (c) and MKT-REL-08 be automated against the ocx interface-contract ledger (crates/ocx_schema/contract/) by diffing it between tags?"
+   ],
+   "humanDecisions": [
+    "Should ocx (AGENTS.md:33) move to the footer model, and does the 'no warning schedule' line at AGENTS.md:21 also exclude Migration footers in release notes?",
+    "Set the compatibility-policy windows (MKT-REL-08), and decide whether grimoire's 'frozen contracts' README line or its removal practice changes.",
+    "Should the release task use annotated tags and a SUMMARY input (MKT-REL-14)?"
+   ],
+   "failureModes": [
+    "Using the gnullvm rename or line 231 as evidence without the inline command. Both are now reviser measurements, not dive measurements.",
+    "Reading MKT-REL-14 as verified for cargo-dist repositories. It is tested only in the git-cliff lane.",
+    "A published artifact quoting the old MKT-REL-15 (imperative, under 72 chars) or the old MKT-REL-17 now has stale text. Re-check every artifact that cites MKT-REL-02, -06, -07, -10, -12, -13, -15 or -17.",
+    "The MKT-REL-12 prohibition regex is a heuristic. A prohibition phrased outside 'never/not ... edit/write/touch/hand ... CHANGELOG' slips past it.",
+    "The MKT-REL-13 draft check enforces fixed heading names, so a draft with equivalent content under other headings fails."
+   ]
+  },
+  {
+   "slug": "marketing-measurement",
+   "idFamily": "MKT-MEAS",
+   "dives": 3,
+   "blocked": 0,
+   "sources": 68,
+   "challenged": 13,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/marketing-measurement.md",
+   "rules": 20,
+   "must": 17,
+   "conflictsResolved": [
+    "MKT-MEAS-18 and Verdict 8: the file mixed two baselines (843 is the 10%-baseline grimoire figure). Both baselines are now named everywhere: 1,785 to 3,288 weeks at 5%, and 843 to 1,553 at 10%. The verify cites the computed 31,234, the ceiling of 31,233.44, and shows the weeks arithmetic (2n/19 = 3,287.8; 2n/35 = 1,784.8).",
+    "MKT-MEAS-19: the frozen 20-50 prompts and the 4+ weeks rest on one practitioner (Growth Unhinged, 2026-07-15). The days-of-7 window is only implied by Ahrefs. All three are demoted to SHOULD defaults, and the practitioner is cited. The MUST core keeps per-engine reporting, separate mention and link columns, and no conclusion from one run, and is labelled vendor data only.",
+    "MKT-MEAS-01: the verify regex now matches only script hosts, collector attributes and SDK package names. The md and mdx globs are dropped. The pass condition is that each hit's tool appears in the decision record. 0 false hits over the fleet's site sources (2026-11-27).",
+    "MKT-MEAS-02: computable pass. The two rg -v pipelines (attribution words or a decision-record link; 'propos' for Omnibus lines) must print nothing.",
+    "MKT-MEAS-03: four fixed checks replace 'shows no measurement host'. They are an external-host allowlist (empty by default), a build-against-live diff of same-origin scripts (catches the V4 CDN injection), an inline-beacon grep (0 hits on both builds) and the pixel grep.",
+    "MKT-MEAS-11: the grep -F check could not fail independently and duplicated -10. It is replaced by a cross-row check for variant campaign spellings and reused tag tuples, tested on a sample (exit 1 as expected).",
+    "MKT-MEAS-12: labelled 'vendor-sourced, low confidence'. It gains a grep for a select or required HDYHAU field. The report half is marked as a reading check. A Decay row was added.",
+    "MKT-MEAS-13: the rule now states the WebKit finding: stripping is documented only in Private Browsing and under advanced protection, and Safari 26.0 names no parameter. It cites both WebKit posts and adds a grep. The Decay row is kept, because the rule now carries the moving fact.",
+    "MKT-MEAS-14: the verify is now a regex limited to sentences with a figure. It matches a count noun next to an adoption word, or a figure stated as people. Each hit needs a link on the same line. Tested on seven sample lines.",
+    "Applied V1: lists all four vendors (adds GoatCounter) and separates the catalog paths from the fleet path. It adds grep -ci consent = 0 for all three catalog files. Verdict 9 is updated to match.",
+    "Applied V2: the evidence is now grep -cE '^[[:space:]]*font:' returning 0 for each mkdocs.yml. A bare grep font is unusable because the fontawesome icon names match it.",
+    "Applied S5: names the four landing files (Landing.astro and landing-content.ts for ocx.sh; index.astro and data/landing.ts for grimoire.rs). The grep was re-run with full paths, and each file returned 0."
+   ],
+   "anotherRound": [
+    "Is there any independent (non-vendor) study of how accurate self-reported attribution (HDYHAU) is, and whether a select list or free text works better? MKT-MEAS-12 stays low confidence until one is found.",
+    "Is there an independent, non-Ahrefs measurement of AI-answer citation churn and of a prompt-set method? Such a study would confirm or replace the MKT-MEAS-19 defaults.",
+    "What does Safari 26 actually do to utm_* parameters in default regular browsing, measured with a real browser and a HAR? No primary page states it."
+   ],
+   "humanDecisions": [
+    "Accept 'server-side or nothing' as the fleet stance, or name a tool, jurisdictions and consent route, and create the decision record (.agents/decisions/measurement.md) that MKT-MEAS-01, -02 and -03 now check against.",
+    "Which external script hosts, if any, go on the MKT-MEAS-03 allowlist. The default is empty.",
+    "Whether the Cloudflare-injected email-decode script on grimoire.rs (V4) is accepted and named, or turned off at the CDN.",
+    "Whether HDYHAU is ever required on a form (MKT-MEAS-12)."
+   ],
+   "failureModes": [
+    "Instrumentation reflex: the agent adds an analytics snippet, fills an empty GA placeholder, or follows the docs-instrument vendor table.",
+    "Counts promoted to people: '5k downloads' becomes '5k users', or a star count sits next to 'used by'.",
+    "Legal overclaim copied from vendor pages: 'cookieless so no banner', 'CNIL-approved', or the Omnibus treated as law.",
+    "Tag hygiene: UTMs on owned links, mixed-case or variant campaign names, invented parameters.",
+    "Privacy statement drift: the check runs on the build while the CDN injects scripts.",
+    "Statistics without a gate: an A/B winner called early, or a single AI-citation run reported as a change.",
+    "Platform facts from memory, for example 'Safari 26 strips UTMs'.",
+    "The localhost false negative: testing Plausible on localhost, seeing no beacon, and concluding it sends nothing."
+   ]
+  },
+  {
+   "slug": "marketing-voice-ai-authorship",
+   "idFamily": "MKT-VOICE",
+   "dives": 3,
+   "blocked": 0,
+   "sources": 61,
+   "challenged": 15,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/marketing-voice-ai-authorship.md",
+   "rules": 17,
+   "must": 7,
+   "conflictsResolved": [
+    "MKT-VOICE-03/-04 vs DOC-PLAIN-01: DOC-PLAIN-01 wins on every file its checker reads (docs-site home pages included); -03/-04 cover only copy it does not read; both rule texts say so",
+    "MKT-VOICE-14 vs DOC-PLAIN-22 and harness commit attribution: -14 now governs page content only; trailers are DOC-PLAIN-22's for docs changes; the DOC-PLAIN-22 vs harness-attribution clash moved to owner decisions",
+    "MKT-VOICE-17 vs DOC-EX-12: DOC-EX-12 cited as base rule, -17 is its application to pitch pages and README first screens",
+    "Verdict 3 overclaim: 'an instruction removes them' replaced with Freeburg Table 2 per-model prohibition results (Opus 4.6 0.00, GPT-5.4 0.00, DeepSeek V3 1.57, GPT-4.1 3.86; fetched 2026-11-27); diff grep is the gate",
+    "MKT-VOICE-06 MUST basis: HN counts no longer carry it, fabrication does; regex narrowed to past-tense experience claims (6/6 fail, 0/5 pass, 0 hits in 76 fleet copy files vs old regex 2 FP pass lines, 3 misses, 2 fleet code hits)",
+    "MKT-VOICE-08/-15 self-attestation: replaced git-author and self-written lines with an APPROVED review on headRefOid by a non-author non-bot login (gh query tested on grimoire-rs/grimoire#396); documented as Verdict 12 gap for solo-owner repos",
+    "MKT-VOICE-02/-10 unpassable greps: -02 scoped to invocation surfaces plus branch commit messages (0 hits on 18 fleet repos and catalog); -10 grep dropped, kept the instead non-empty check",
+    "MKT-VOICE-09 regex/baseline mismatch: check now uses explore.py's two patterns, reproducing 28.61 pre-2022 and 8.11 fleet",
+    "MKT-VOICE-11 unrunnable: stdlib HTML-text extractor added with positive pass and fail commands (3 real mark lines on built grimoire landing page vs 29 source hits); no longer waits on CR-V3",
+    "MKT-VOICE-05 retired to a catalog-maintenance note plus CR-V4 (ship measure.py); -13 and -18 demoted to CONSIDER; -12 and -17 checks made adopter-neutral; LinkedIn clause handed to channels"
+   ],
+   "anotherRound": [
+    "What do published software-vendor incident, outage and security notices measure for exclamation marks, apology count and a named next step (needed before MKT-VOICE-13 can leave CONSIDER)?",
+    "Does a pre-LLM baseline for landing pages, release notes and email support the em dash and register thresholds, and which markers still separate late-2026 model output now that some models drop the em dash on instruction?",
+    "Do US state or UK rules oblige a software marketer outside the EU to label AI-generated text or media on its own site?",
+    "Has a national authority or Commission Q&A said whether a software security advisory or incident post is public-interest text under Art. 50(4)?"
+   ],
+   "humanDecisions": [
+    "Adopt .agents/voice.toml for ocx and Grimoire and choose the pitch register",
+    "Approve or decline removing existing em dashes at grimoire index.astro:38,46,79 and grimoire README",
+    "Scope the three fleet docs-style 'no marketing open' lines (fleet config edit)",
+    "Name an editorial-responsibility contact or keep the no-Impressum stance and never publish agent-drafted in-scope text",
+    "For solo-owner repos, accept that MKT-VOICE-08 and -15 have no mechanical check, or add a second reviewer account",
+    "DOC-PLAIN-22 trailer ban vs harness commit-attribution lines: which wins per change type (docs-quality's rule)"
+   ],
+   "failureModes": [
+    "Default model style leaks into copy: em dashes, rule voice, no 'you'; prohibition only partly obeyed by some models (MKT-VOICE-03 or DOC-PLAIN-01, -09)",
+    "Habitual authorship marking: page footers (MKT-VOICE-14), co-author trailers on docs commits (DOC-PLAIN-22)",
+    "Fabricated authenticity: invented origin story, typed transcript, mockup as product, human-written badge (MKT-VOICE-06, -17, -16, -14)",
+    "Checker misuse: prose.py on .astro/.ts, stripping pitch for a docs rule (MKT-VOICE-11, -12)",
+    "Treating tells as a verdict: detector scores, stripping ensure/emoji, humanizers (MKT-VOICE-01, -02, -04, DOC-PLAIN-09/-10)",
+    "Wrong disclosure model: blanket or no labelling, 2026-12-02 as own deadline, self-review, C2PA as label, test signer (MKT-VOICE-15, -16, -18)",
+    "Self-attestation: agent writes its own Owner words / Editorial review line or commits status=reviewed as the owner (MKT-VOICE-06, -08, -15 forge checks; gap in solo-owner repos)",
+    "Word-list sprawl and synonym swaps (MKT-VOICE-10)",
+    "Wrong tone in failure notices (MKT-VOICE-13)"
+   ]
+  }
+ ],
+ "failed": []
+}

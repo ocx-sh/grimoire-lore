@@ -1,0 +1,4 @@
+[package]
+name = "mytool"
+version = "0.2.0"
+description = "Package manager for AI-agent config, installed into each coding agent in the format it reads."

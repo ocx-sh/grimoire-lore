@@ -264,7 +264,7 @@ artifact. Only a read from the artifact's side (step 4's C8 reads) sees all.
 |---|---|---|
 | `pkg_check_modules` beside `find_package` | The pkg-config row of C5 | `FindPkgConfig.cmake` searches `$ENV{PKG_CONFIG_PATH}` before the `CMAKE_PREFIX_PATH` directories (4.4.2) |
 | A Find module's `find_path` beside its `find_library` | `<NAME>_INCLUDE_DIR` and `<NAME>_LIBRARY*` | Each call searches on its own, and the module reports the header's version |
-| An ExternalProject configure beside the outer one | The inner tree's `CMakeCache.txt` | Its forwarded arguments. `CMAKE_ARGS` splits a list at `;`, so `-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}` passes the first entry only |
+| An ExternalProject configure beside the outer one | The inner tree's `CMakeCache.txt` | Its forwarded arguments. `CMAKE_ARGS` splits a list at `;`, so `-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}` passes the first entry only. CMake 4.5 note: with CMP0225 NEW, the default configure also passes `CMAKE_INSTALL_PREFIX=<INSTALL_DIR>` and prepends that directory to the inner tree's `CMAKE_SYSTEM_PREFIX_PATH`, which can change which copy its `find_*()` calls resolve. A prefix in `CMAKE_ARGS` or `CMAKE_CACHE_ARGS` still wins |
 | A manager's bootstrap configure (HunterGate) | Its `CMakeCache.txt` under the manager's root | Only its own command line and environment reach it |
 
 - **FM19. Taking a Find module's reported version as the linked copy's.**

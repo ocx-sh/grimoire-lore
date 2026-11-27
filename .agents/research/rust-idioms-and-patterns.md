@@ -11,6 +11,7 @@ grounded_by:
   - ocx-codebase-audit/rules-inventory.md
   - topic-map.md
 date: 2026-08
+revised: 2026-11-27
 ---
 
 # Rust Idioms and Code Shape
@@ -302,7 +303,7 @@ Ranked by how often it bites, most frequent first.
 7. **Scaffolded dispatch that never runs.** The agent emits the full `trait State { fn handle(&self, …); }` and every impl — it compiles and reads complete — then hits a self-borrow conflict wiring the real call site (`&mut self.state` while also needing `&mut self`), routes around it with a string/tag `match` to free functions, and never deletes the now-inert trait. Verified in the book's own reference code, twice, in two different patterns. Sharpest signal: a trait method with N impls and zero call sites. IDIOM-14.
 8. **`.clone()` where `mem::take` was the move.** A subspecies of failure mode 1 with a specific correct answer: the agent clones a field to get a value out from behind `&mut`, then overwrites the field two lines later. `redundant_clone` cannot see it — the clone *is* used. STATE-36.
 9. **Reaching for `RefCell`/`Arc<Mutex>`/`.clone()` when the borrow checker names two field paths.** The compiler has just pointed at the seam and the agent patches around it, because splitting a struct is a bigger diff than adding a wrapper. This is the single case where the smallest diff is reliably the wrong one. ARCH-23.
-10. **Citing a book title that fits a real series' naming pattern.** "Hands-On Design Patterns with Rust" does not exist — Packt's real series covers C++, Java, Kotlin, C#, and Julia, and an agent completes the pattern confidently. Resolve any title to an ISBN or a real repo before repeating it. Generalizes past books: the same completion instinct invents crate names, RFC numbers, and clippy lints (`clippy::pub_use`, already noted in `architecture.md`).
+10. **Citing a book title that fits a real series' naming pattern.** "Hands-On Design Patterns with Rust" does not exist — Packt's real series covers C++, Java, Kotlin, C#, and Julia, and an agent completes the pattern confidently. Resolve any title to an ISBN or a real repo before repeating it. Generalizes past books: the same completion instinct invents crate names, RFC numbers, and flags (`cargo publish --workspace --dependency-order` has no such flag, already noted in `architecture.md`). The inverse error is as common: `clippy::pub_use` is a real lint (restriction group, allow by default, since 1.62), so check a lint name against the Clippy index before calling it invented.
 
 ## Open questions
 
@@ -348,6 +349,8 @@ Ranked by how often it bites, most frequent first.
 | [Clippy lint index, `ptr_arg`](https://rust-lang.github.io/rust-clippy/master/index.html#ptr_arg) | Official Clippy docs | Establishes that IDIOM-13 is already mechanized by default, and that trait impls are exempt |
 
 ## Revision log
+
+- 2026-11-27: AI-agent failure mode 10 no longer lists `clippy::pub_use` as an invented lint. It is a real restriction lint (since 1.62), and the invented item is the `--dependency-order` flag; follows architecture.md item 12 in `refresh-2026-11/rust-quality.md`. No rule ID owned by this file (IDIOM-01..10, IDIOM-13..15, ARCH-23, ARCH-24, STATE-36, DOC-21) changed.
 
 ### 2026-08-14 — folded `book-length-pattern-treatments.md`
 

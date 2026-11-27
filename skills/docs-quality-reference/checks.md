@@ -147,7 +147,7 @@ pages only, and DOC-TYPE-14 and DOC-TYPE-15 on every page.
 | File | What it is | How to use it |
 |---|---|---|
 | `checks/markdownlint.jsonc` | The shipped markdownlint config, tuning MD001, MD003, MD025 with `front_matter_title` set to the empty string, MD036, MD040, MD041, MD045 and MD054 | `npx markdownlint-cli2 --config checks/markdownlint.jsonc 'docs/**/*.md'` |
-| `checks/lychee.toml` | An example built-output link checker config for DOC-OBS-01, with both measured traps handled | `lychee --include-fragments --config checks/lychee.toml 'site/**/*.html'` |
+| `checks/lychee.toml` | An example built-output link checker config for DOC-OBS-01, with both measured traps handled | `lychee --root-dir "$PWD/site" --include-fragments --config checks/lychee.toml 'site/**/*.html'` |
 | `checks/prose_marks.awk` | The DOC-PLAIN-01 mark scan: prints `N:LINE` for each stripped-prose line that holds an en dash, em dash, semicolon or curly quote. POSIX awk, so it needs no PCRE | Pipe `strip_prose.py` output into `LC_ALL=C awk -f checks/prose_marks.awk`, as the DOC-PLAIN-01 block shows |
 | `checks/vale.ini` | The optional tier-1 layer, packages pinned by org and repo, with the severity split noted | `vale --config checks/vale.ini docs/` |
 

@@ -12,7 +12,7 @@ consolidates:
   - nix-audit/ocx-index-and-fleet.md (§4)
   - nix-topic-map.md (section D rows M-D-01..19, M-D-23, M-D-25, M-D-26; M-C-01, M-G-16; conflicts 8, 13, 14, 20)
 date: 2026-09-27
-revised: 2026-09-27
+revised: 2026-11-27
 era: "CppNix 2.35.2 (run.sh), nixpkgs 26.11pre rev 8d5d2709 for every run added here (the dives and the w3 rerun used e158d9ed of 2026-09-26, same era); Lix 2.95.2 from the same nixpkgs rev; nixfmt 1.5.0 / nixfmt-tree 2.6.0, deadnix 1.3.2, nurl 0.4.1"
 fixtures: /home/mherwig/.cache/research-lang/nix-tools/fixtures/nix-packaging/ (this consolidation), fixtures/derivation-conventions/, fixtures/fleet-builders/, fixtures/verification-rerun-w3/ (lost to the rerun's environment fault, §0 there). At revision time run.sh, the toolchain profile, every fixture directory and the exemplar corpus were absent, so nothing recorded here could be re-run during the revision (P15).
 ---
@@ -113,22 +113,22 @@ Severity: **MUST** means a normative or measured source plus a verification watc
 - Severity: **MUST** for presence, **SHOULD** for grammar. Floor: nixpkgs grammar as of 26.11pre.
 
 **NIX-PKG-08 — Give `meta.license` as a `lib.licenses.<attr>` or a single SPDX id. Never pass a compound expression (`"Apache-2.0 OR MIT"`) to `lib.getLicenseFromSpdxId`; use a list of licenses instead. Evaluate your own packages in CI with `--option abort-on-warn true`.**
-- Rationale: a compound expression does not parse, and it prints a warning into every consumer's evaluation. The Rust ecosystem's default `MIT OR Apache-2.0` makes it the first thing an agent writes for an adopter's crate. The fleet's own three packages are single-licence `Apache-2.0` (`lib.licenses.asl20`, P16), and that must still be written by hand.
+- Rationale: a compound expression does not parse, and it prints a warning into every consumer's evaluation. The Rust ecosystem's default `MIT OR Apache-2.0` makes it the first thing an agent writes for an adopter's crate. The fleet's own three packages are single-licence `Apache-2.0` (`lib.licenses.asl20`, P16), and that must still be written by hand. Since 2026-11-03 nixpkgs-vet rejects a list `meta.license` in a new top-level package (nixpkgs-vet PR 316), so a nixpkgs copy of a list-licensed package changes it (NIX-REL-14).
 - Verification: `nix eval --option abort-on-warn true --json .#packages.x86_64-linux.<name>.meta.license`
 - Watched red: **yes** (V-dc §8). `meta-spdx-warn` prints `getLicenseFromSpdxId: No license with the given SPDX ID found: Apache-2.0 OR MIT` and exits 1; `meta-good` exits 0. NIX-GEN-14 holds the generator-side split.
 - Severity: **MUST**. Floor: `abort-on-warn` exists in CppNix 2.35.2. On other implementations, check before relying on it.
 
 ### NIX-PKG — D. Caught by a real build (GATE-10's `nix build`)
 
-**NIX-PKG-09 — Put build-time tools in `nativeBuildInputs` and link-time or runtime libraries in `buildInputs`, and set `strictDeps = true` from the first commit.**
+**NIX-PKG-09 — Put build-time tools in `nativeBuildInputs` and link-time or runtime libraries in `buildInputs`, and set `strictDeps = true` from the first commit, except inside `buildPythonPackage` and `buildPythonApplication` on a nixpkgs master revision from 2026-11-24 onward, which default it and warn when it is set (NIX-PKG-10).**
 - Rationale: under `strictDeps` only `nativeBuildInputs` reach `PATH`. nixpkgs-vet ratchets the setting one-way for by-name packages (RFC 140). Without it, a misplacement works natively and breaks cross builds.
-- Verification: `nix build .#<name>`
+- Verification: `nix build .#<name>`. A derivation without `strictDeps = true`, other than such a Python builder call, is a reading-heuristic finding.
 - Watched red: **yes** (V-dc §9). `strictdeps-bad` fails with `stdenv-linux/setup: line 1771: hello: command not found`, exit 1; `strictdeps-good` exits 0. P9 builds `buildRustPackage` with `strictDeps = true`, exit 0.
 - Severity: **MUST**.
 
-**NIX-PKG-10 — Set `__structuredAttrs = true`. Keep `env.*` scalar (string, bool, int or derivation), and put list-valued attributes at the top level of the derivation.**
-- Rationale: without structured attrs, a top-level list is space-joined and re-split, so `"--message=hello world"` becomes two arguments. That error is silent: exit 0 either way. `env` rejects lists with or without the flag.
-- Verification: a build that echoes `${#name[@]}`, plus eval of `env.<x> = [ … ]`, which fails with `The 'env' attribute set can only contain derivation, string, boolean or integer attributes`.
+**NIX-PKG-10 — Set `__structuredAttrs = true`, except inside `buildPythonPackage` and `buildPythonApplication`. On nixpkgs 26.11 these default it, and from nixpkgs master `ba375ac` (2026-11-24) they also default `strictDeps` and warn that an explicit `true` for either is redundant. Keep `env.*` scalar (string, bool, int or derivation), and put list-valued attributes at the top level of the derivation.**
+- Rationale: without structured attrs, a top-level list is space-joined and re-split, so `"--message=hello world"` becomes two arguments. That error is silent: exit 0 either way. `env` rejects lists with or without the flag. The redundancy warning reaches every consumer's evaluation log.
+- Verification: a build that echoes `${#name[@]}`, plus eval of `env.<x> = [ … ]`, which fails with `The 'env' attribute set can only contain derivation, string, boolean or integer attributes`. A list attribute without `__structuredAttrs = true` outside a Python builder is a reading-heuristic finding. So is an explicit `__structuredAttrs = true` or `strictDeps = true` inside `buildPythonPackage` or `buildPythonApplication` on a nixpkgs revision that carries the `is redundant` warning (read from source 2026-11-27, not watched).
 - Watched red: **yes** (V-dc §10). The count is 3 without the flag and 2 with it; the `env` list fails eval. P9 confirms `buildRustPackage` accepts the flag, exit 0.
 - Severity: **SHOULD**. MUST only for a by-name submission, where the vet ratchet applies.
 
@@ -185,7 +185,7 @@ Severity: **MUST** means a normative or measured source plus a verification watc
 - Severity: **SHOULD**: the missing-entry failure is loud and cannot ship. Floor: nixpkgs 26.11pre `import-cargo-lock.nix`.
 
 **NIX-PKG-16 — Build with the pinned nixpkgs `rustPlatform`, and add a check that its `rustc` is at least the `rust-toolchain.toml` channel. Never assume `buildRustPackage` reads `rust-toolchain.toml`. Do not put rust-overlay or fenix in `package.nix`. They may appear in a devShell (CONSIDER) for contributors who want the exact channel.**
-- Rationale: nothing in nixpkgs parses the file (`rust.section.md:1003-1090`: a non-default Rust needs rust-overlay or fenix via `makeRustPlatform`). A rust-overlay `package.nix` cannot be submitted to nixpkgs, and it adds an input every consumer locks (NIX-INP). The pins drift apart over time. They are not broken today: the pinned rustc is 1.98.1 against channel 1.95.0, and grimoire builds with both (V-fb #8-9).
+- Rationale: nothing in nixpkgs parses the file (`rust.section.md:1003-1090`: a non-default Rust needs rust-overlay or fenix via `makeRustPlatform`). A rust-overlay `package.nix` cannot be submitted to nixpkgs, and it adds an input every consumer locks (NIX-INP). The pins drift apart over time. They are not broken today: the pinned rustc was 1.98.1 at `8d5d2709` (1.99.1 on nixos-unstable `2786a2a72088`, read 2026-11-27) against channel 1.95.0, and grimoire builds with both (V-fb #8-9).
 - Verification: `ch=$(sed -n 's/^channel *= *"\(.*\)"/\1/p' rust-toolchain.toml); v=$(nix eval --raw --inputs-from . nixpkgs#rustc.version); nix eval --expr "builtins.compareVersions \"$v\" \"$ch\" >= 0" | grep -qx true`
 - Watched red: **yes** (P11). `rust-floor-ok` (channel 1.95.0, rustc 1.98.1) exits 0; `rust-floor-bad` (channel 99.0.0) exits 1.
 - Placement: ship the command as a CI step. The `checks.<system>.rust-toolchain-floor` form (a `runCommand` gated on the same `builtins.compareVersions`, w3 §7) is written but **unwatched**: w3 R7 never ran, and this revision's re-run was blocked (P15). Do not move it into `checks` until it goes red and green (map E25).
@@ -196,7 +196,7 @@ Severity: **MUST** means a normative or measured source plus a verification watc
 - Scope (*revised*: conditional, not target-independent): the recipe holds only while aws-lc-sys's `get_builder()` returns its `cc` builder. That requires pre-generated bindings for the target, no FIPS build, no `AWS_LC_SYS_CMAKE_BUILDER` override, and no sanitizer or `no_asm` (`aws/aws-lc-rs@37019d05477d:builder/main.rs:722-812`). If any condition fails, it runs `CmakeBuilder` (add `cmake`), plus bindgen when bindings are missing (add `rustPlatform.bindgenHook`). `Compiling cmake v0.1.58` in a log is the Rust wrapper crate, an unconditional `[build-dependencies]` entry, and does not show that the `cmake` binary ran. The trace reads aws-lc-rs `main` (aws-lc-sys 0.45.0); the fleet pins 0.43.0, so the mechanism holds but the line numbers are for `main`.
 - Verification: `nix build --no-link -L .#<name>`, then `cargo tree --target all -i clang-sys` from the workspace root. For a new target or feature set, first check that aws-lc-sys lists pre-generated bindings for it (reading level).
 - Watched red: **no clean pair**. The minimal builds succeeded (V-fb #8, w3 R3), the trace is a measurement (V-fb #10), and the builder selection is a source reading (w3 §6). Darwin, musl and aarch64 were not built.
-- Severity: **SHOULD**. Scope: x86_64-linux, nixpkgs 26.11pre.
+- Severity: **SHOULD**. Scope: x86_64-linux, nixpkgs 26.11pre. Floor: x86_64-linux, aws-lc-sys 0.43 built and 0.45.0's builder read (re-check at each aws-lc-sys minor). nixpkgs 26.11's `cargoSetupHook` links aws-lc from nixpkgs, so re-measure there (`dontCargoUseSystemLibs = true` opts out and is banned in a new top-level package since 2026-11-22).
 
 **NIX-PKG-18 — Python: `python3Packages.buildPythonPackage { pyproject = true; build-system = [ <backend> ]; }` with the backend `pyproject.toml` names (hatchling for ocx-sdk-python), not the setuptools the error message suggests. Reach for uv2nix/pyproject.nix only when the package has compiled runtime dependencies to reproduce from `uv.lock`.**
 - Rationale: without `pyproject` or `format`, nixpkgs 26.11pre refuses to evaluate, and its message suggests `build-system = [ setuptools ]`, the wrong backend for a hatchling project. uv2nix's value is a resolved wheel graph, and ocx-sdk-python has `dependencies = []`.
@@ -394,6 +394,7 @@ Ranked by how often each bites an agent working unsupervised.
 15. **Reading `Compiling cmake v…` as "needs cmake".** It is the Rust wrapper crate, compiled unconditionally. Check: the crate's builder selection for the target (PKG-17 scope), then a minimal build.
 16. **Exporting a Python library like an application.** Pasting FLK-13's `<name> = final.callPackage ./package.nix { }` overlay, or a top-level-only `packages` entry, leaves the library missing from every `python3NN.pkgs`. Check: PKG-21's two-interpreter probe from a consumer flake.
 17. **"Warm the vendor cache" as the CI speed-up.** Network fetches drop to zero while the compile stays at about 6 minutes. Check: compare the `Compiling` counts across two logs, not the fetch counts (PKG-20).
+18. **Setting `dontCargoUseSystemLibs = true` to get past a link failure on nixpkgs 26.11**, where `cargoSetupHook` now links aws-lc, openssl, zstd, libgit2 and other C libraries from nixpkgs. nixpkgs-vet rejects it in a new top-level package since 2026-11-22, so read the link error first (PKG-17, PKG-06).
 
 ## Open questions
 
@@ -408,6 +409,10 @@ Ranked by how often each bites an agent working unsupervised.
 - **packaging/rust-build-cost.** Does crane's `buildDepsOnly`/`buildPackage` split (or another dependency-artifact cache) bring ocx's metadata-only rebuild below PKG-20's 7m12s, and is it worth an extra input under NIX-INP?
 - **packaging/darwin-and-aarch64 (M-D-23).** Do aws-lc-sys, `security-framework-sys` and `core-foundation-sys` build on aarch64-darwin (SDK 14.4 floor, nixpkgs 25.11+) and on aarch64-linux with only `pkg-config`, on a native runner? Nothing here built off x86_64-linux, and this host (WSL, x86_64) cannot. The PKG-17 scope trace predicts the Linux aarch64 targets are covered by pre-generated bindings.
 - **inputs/self-submodules-remote.** Does `inputs.self.submodules` behave as P12 showed when fetched as `github:ocx-sh/grimoire/<rev>` (and now `github:ocx-sh/ocx/<rev>`) under the 2.31 floor, under Lix with the feature enabled, and under Determinate Nix? P12 ran only locally.
+
+**Open after the 2026-11 delta (see `refresh-2026-11/nix-quality.md`):**
+- Find the single-value `meta.license` form nixpkgs expects for a dual-licensed package now that nixpkgs-vet rejects a list (PKG-08's right example, NIX-REL-14's copy).
+- Re-measure on a 2026-11 nixpkgs revision: PKG-10's `is redundant` warning (watched red and green), `sha256 =` still building (PKG-01), the bare `--replace` exit code (PKG-12), PKG-22's red message after `importCargoLock`'s 2026-10-26 edit, and PKG-17's pkg-config-only aws-lc-sys build under the new `cargoSetupHook`.
 
 ## Sub-artifacts
 
@@ -453,3 +458,10 @@ Ranked by how often each bites an agent working unsupervised.
   - **Applied:** "0 git sources in either lock" struck for ocx (conflict 12); "unbuilt" struck for ocx and for ocx-sdk-python's `pythonImportsCheck`; ocx gains `inputs.self.submodules` (conflict 19); the PKG-16 check moves from `checks` to a CI step (conflict 18); the workspace template is added with its unused `finalAttrs` wrapper removed (conflict 13).
   - **Open questions:** "packaging/ocx-source-build" and "packaging/python-library-export" removed (answered). Added "ocx-determinism-and-closure" (M-D-24, R8/R9), "pkg16-checks-form" (E25, R7) and "rust-build-cost". The submodule owner question and the remote-submodules question now include ocx.
   - **MUST count:** 11 → 13.
+- 2026-11-27 (delta refresh, decisions in `refresh-2026-11/nix-quality.md`):
+  - **PKG-08:** rationale gains the nixpkgs-vet list-`meta.license` ratchet of 2026-11-03. Rule text unchanged.
+  - **PKG-09 and PKG-10:** exempt `buildPythonPackage` and `buildPythonApplication` (structured attributes default on 26.11, `strictDeps` default and an `is redundant` warning from nixpkgs master `ba375ac`, 2026-11-24). Reading-heuristic findings added, read from source and not watched.
+  - **PKG-17:** floor note that nixpkgs 26.11's `cargoSetupHook` links aws-lc from nixpkgs, and `dontCargoUseSystemLibs` is banned since 2026-11-22.
+  - **PKG-16:** rationale dates the pinned `rustc` (1.98.1 at `8d5d2709`, 1.99.1 on unstable).
+  - **AI-agent failure modes:** item 18 added (`dontCargoUseSystemLibs`). No new rule ID.
+  - **Open questions:** single-value dual-license form and the 2026-11 re-measurement list added.

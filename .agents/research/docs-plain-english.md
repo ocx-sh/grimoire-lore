@@ -4,7 +4,7 @@ topic: docs-plain-english
 family: DOC-PLAIN
 model: claude-opus-5
 date: 2026-09-05
-revised: 2026-09-05
+revised: 2026-11-27
 wave: 2
 consolidates:
   - docs-plain-english/readability-gate-per-page-type.md
@@ -161,7 +161,7 @@ because nine rules in this family run against its output.
 | DOC-PLAIN-18 | Launch a new rule at error on the lines a change adds or edits, and at warning whole-tree until its backfill lands. | The fleet's median page already fails several of these rules, so a whole-tree red gate blocks every open PR on day one. A diff-scoped red gate blocks none of them. | The introducing PR runs the check twice. Once against `git diff --name-only` at error, once against the whole tree at warning. A rule may launch at error on changed files with any number of standing violations. A rule may launch at error whole-tree only at zero current violations. | MUST | codified (GitLab requires existing occurrences fixed before an error rule lands, Fern's `filter_mode: added`) + measured (fleet baseline) | all |
 | DOC-PLAIN-19 | Never let an optional linter supply a rule's only verification. | Twelve adopting repos have no prose tooling, so a Vale-only check is an unchecked rule everywhere Vale is absent. | Every Verification cell resolves with grep, a shell script, or markdownlint alone. Vale rule names appear only as an additional option. Confirmed by `which vale` returning nothing in the wave-2 environment. | MUST, pinned | normative (the frame's tiered-gate decision 6) + measured (zero prose tooling fleet-wide) | all |
 | DOC-PLAIN-20 | Give every checkable construct exactly one owning tool and disable the other tool's equivalent. | Two linters can demand opposite fixes on the same construct, and a contributor fixing one breaks the other. | `unverified: reading heuristic`. A reviewer confirms each construct named in the rule set is active in exactly one tool's config. Link style is the known collision, owned here by markdownlint MD054. | SHOULD | measured (MD054 and GitLab's `ReferenceLinks.yml` demand opposite link styles) | all |
-| DOC-PLAIN-21 | Pin a third-party lint package by its exact org and repo, and read its severity split before wiring it into CI. | Two separately authored packages ship as `vale-ai-tells`, one with 17 tiered rules and one with about 111 rules all at error. | The config names an org/repo or a pinned archive URL. Print the resolved package's rule count and error share before enabling it. | SHOULD | measured (the real package collision, `krishnasunkam` versus `tbhb`) | all |
+| DOC-PLAIN-21 | Pin a third-party lint package by its exact org and repo, and read its severity split before wiring it into CI. | Two separately authored packages ship as `vale-ai-tells`, one with 17 tiered rules and one with 134 rules all at error. | The config names an org/repo or a pinned archive URL. Print the resolved package's rule count and error share before enabling it. | SHOULD | measured (the real package collision, `krishnasunkam` versus `tbhb`) | all |
 | DOC-PLAIN-22 | State whether AI assistance drafted a documentation change, in the pull request, and never name the tool as an author. | An unlabelled AI draft reads as human-reviewed prose to the next person who trusts it. Naming the tool as an author breaks the accountability chain. | CI greps the PR body for an `AI assistance: yes\|no\|partial` key and fails when it is missing or empty. A second grep over the PR's commit trailers for `Co-Authored-By:.*([Cc]laude\|[Gg][Pp][Tt]\|[Cc]opilot\|[Gg]emini)\|assisted-by\|co-developed` returns zero hits. | MUST, pinned | argued (three real 2026 policies disagree) + pinned (this program adopts the Kubernetes shape, because Wikipedia's ban and GitLab's banner both assume a review team no adopting repo has) | all |
 | DOC-PLAIN-23 | Run this family only on published documentation, never on an agent's own notes. | Every rule here fires today on research corpora and agent config, where the findings are noise and nobody checked what they cost. | The shipped file list is `git ls-files` under a directory holding a generator config, plus repo-root `README.md` and `CHANGELOG.md`. Assert the list excludes `.agents`, `.claude`, `.serena`, `.worktrees`, `node_modules`, `dist`, `target` and build output. | MUST | normative (the frame's glob decision) + measured (a naive `find` loads 420 Lighthouse reports and 257 stale worktree files) | all |
 
@@ -346,6 +346,15 @@ Ranked by how often the sub-artifacts and the fleet measurements show it biting.
    directory per opted-in repo. Wave 2 confirmed Vale is absent everywhere and
    could not test it.
 
+### Needs a re-check against primary sources
+
+1. **DOC-PLAIN-22 trailer ban.** Did the kernel merge the removal of the
+   `Assisted-by:` requirement after the 2026-10-08 summit? Only The Register and
+   Slashdot report it, and the live kernel document still shows the old text.
+   Fedora's recommendation could not be read, because the page was blocked.
+   Re-check both primaries before rewording the pinned note. The rule text is
+   unchanged until then.
+
 ### Deserves another research round
 
 1. **sentence-case-heading-check-without-vale: can a proper-noun-aware
@@ -376,7 +385,7 @@ Wave 2, 2026-09-05. Twenty-two live rules, one retirement, two additions.
 - **Severity ledger applied, DOC-PLAIN-12.** SHOULD to CONSIDER. DOC-AGENT-10
   requires a cited ancestor for a wordlist and this list has none.
 - **Severity ledger applied, DOC-PLAIN-21.** CONSIDER to SHOULD. A supply-chain
-  pin is not advice, and the wrong twin ships about 111 rules at error.
+  pin is not advice, and the wrong twin ships 134 rules at error.
 - **Severity ledger applied, DOC-PLAIN-06 retired.** The rule named no failure it
   catches and applied only to the two page types the floor already exempts. The
   row stays in place and the number is never reused. Calibration worker B
@@ -439,6 +448,9 @@ Wave 2, 2026-09-05. Twenty-two live rules, one retirement, two additions.
 - **No disagreement with the severity ledger stands.** Every severity correction
   it proposed for this family is applied as written.
 
+- 2026-11-27: DOC-PLAIN-21 rationale and the `tbhb` Key sources row now say 134 rules at error, not about 111. Decision: `refresh-2026-11/docs-quality.md`.
+- 2026-11-27: DOC-PLAIN-22 text held unchanged. The kernel `Assisted-by:` question is added to Open questions. Decision: `refresh-2026-11/docs-quality.md`.
+
 ## Sub-artifacts
 
 - [readability-gate-per-page-type.md](docs-plain-english/readability-gate-per-page-type.md)
@@ -487,7 +499,7 @@ Wave 2, 2026-09-05. Twenty-two live rules, one retirement, two additions.
 | [en.wikipedia.org — Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing) | The five-layer tell taxonomy and the 57 and 64 percent single-instance accuracy finding |
 | [en.wikipedia.org — MOS:REPEATLINK](https://en.wikipedia.org/wiki/Wikipedia:Manual_of_Style/Linking) | Repeat linking is correct on a long page with self-contained sections, the basis of DOC-PLAIN-16's reference exemption |
 | [github.com/krishnasunkam/vale-ai-tells](https://github.com/krishnasunkam/vale-ai-tells) | The 17-rule mechanical implementation with its 6-error, 11-suggestion split by judgment cost |
-| [github.com/tbhb/vale-ai-tells](https://github.com/tbhb/vale-ai-tells) | The same-name package with about 111 rules all at error, the evidence behind DOC-PLAIN-21 |
+| [github.com/tbhb/vale-ai-tells](https://github.com/tbhb/vale-ai-tells) | The same-name package with 134 rules all at error, the evidence behind DOC-PLAIN-21 |
 | [errata-ai/Readability — FleschReadingEase.yml](https://raw.githubusercontent.com/errata-ai/Readability/master/Readability/FleschReadingEase.yml) | The exact formula, the `< 70` condition, and the absent `level` field |
 | [design.homeoffice.gov.uk — readability](https://design.homeoffice.gov.uk/accessibility/written-content/readability) | The reading-age-9 figure and its stated citizen-facing rationale, the reason it is rejected here |
 | [grafana.com — lint prose](https://grafana.com/docs/writers-toolkit/review/lint-prose/) | A real running config at `MinAlertLevel = suggestion`, softer than any published guide recommends |

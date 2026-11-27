@@ -1,0 +1,9 @@
+[project]
+name = "mytool-py"
+version = "0.1.0"
+description = "Python bindings for the mytool command-line tool."
+readme = "README.md"
+
+[project.urls]
+Homepage = "https://example.com"
+Source = "https://github.com/example/mytool"

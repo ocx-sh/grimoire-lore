@@ -1,10 +1,10 @@
 # swift-settings-oracle.txt: the SWIFT_* build-setting names Xcode's build engine knows, one per line (SW-APPLE-01).
-# 183 names read from swiftlang/swift-build at commit 2187330e13e7 (Swift.xcspec and BuiltinMacros.swift), read 2026-10-10.
+# 186 names read from swiftlang/swift-build at commit d417bbcdd46b (Swift.xcspec and BuiltinMacros.swift), read 2026-11-27 (183 at 2187330e13e7, read 2026-10-10).
 # Use: names in a project that this file does not list are misspelt or invented (a typo reads as a setting that works):
 #   git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.pbxproj' ':(glob)**/*.xcconfig' ':(glob)**/project.yml' ':(glob)**/target.yml' | xargs -0 -r cat -- | grep -o -E -e '[A-Za-z0-9_]*SWIFT_[A-Za-z0-9_]*' | grep -E -e '^SWIFT_[A-Z0-9_]*$' | sort -u | awk 'NR == FNR { ok[$0] = 1; next } !($0 in ok)' swift-settings-oracle.txt -
 # A hit means "verify against the current swift-build, then fix the name or add it here". Xcode's closed engine may add names
 # this open copy lacks. The pipeline also finds 2 interpolation fragments (SWIFT_RESPONSE_FILE_PATH_ and
-# SWIFT_STRICT_CONCURRENCY_IN_SWIFT_VERSION) that are not settings: the last grep -v of the regeneration removes them (185 raw names, 183 kept).
+# SWIFT_STRICT_CONCURRENCY_IN_SWIFT_VERSION) that are not settings: the last grep -v of the regeneration removes them (185 raw names and 183 kept at 2187330e13e7, 186 kept at d417bbcdd46b).
 # Regenerate on each swift-build bump, from a checkout of swiftlang/swift-build (comment lines start with #, so
 # `grep -v '^#' swift-settings-oracle.txt` must be byte-identical to this output):
 #   git ls-files -z --cached --others --exclude-standard -- ':(glob)Sources/**/*.xcspec' ':(glob)Sources/**/BuiltinMacros.swift' | xargs -0 -r cat -- | grep -o -E -e '[A-Za-z0-9_]*SWIFT_[A-Za-z0-9_]*' | grep -E -e '^SWIFT_[A-Z0-9_]*$' | LC_ALL=C sort -u | grep -v -x -e SWIFT_RESPONSE_FILE_PATH_ -e SWIFT_STRICT_CONCURRENCY_IN_SWIFT_VERSION
@@ -26,6 +26,7 @@ SWIFT_AUTOLINK_EXTRACT_OUTPUT_PATH
 SWIFT_BRIDGING_HEADER_IS_INTERNAL
 SWIFT_CLANG_CXX_LANGUAGE_STANDARD
 SWIFT_CLANG_CXX_STANDARD_LIBRARY_HARDENING
+SWIFT_CLANG_INLINES_ARE_PRIVATE_EXTERN
 SWIFT_COHORT_ARCHS
 SWIFT_COLOR_DIAGNOSTICS
 SWIFT_COMPILATION_MODE
@@ -52,6 +53,7 @@ SWIFT_EMIT_SIL_FILES
 SWIFT_ENABLE_APP_EXTENSION
 SWIFT_ENABLE_BARE_SLASH_REGEX
 SWIFT_ENABLE_BATCH_MODE
+SWIFT_ENABLE_CAS_SANDBOX
 SWIFT_ENABLE_COMPILE_CACHE
 SWIFT_ENABLE_DEFAULT_SEARCH_PATHS_IN_HEADER_SEARCH_PATHS
 SWIFT_ENABLE_EMBEDDED
@@ -65,6 +67,7 @@ SWIFT_ENABLE_LAYOUT_STRING_VALUE_WITNESSES
 SWIFT_ENABLE_LIBRARY_EVOLUTION
 SWIFT_ENABLE_OPAQUE_TYPE_ERASURE
 SWIFT_ENABLE_PREFIX_MAPPING
+SWIFT_ENABLE_PRESCAN_CACHING
 SWIFT_ENABLE_PROJECT_PREFIX_MAPPING
 SWIFT_ENABLE_TESTABILITY
 SWIFT_ENFORCE_EXCLUSIVE_ACCESS

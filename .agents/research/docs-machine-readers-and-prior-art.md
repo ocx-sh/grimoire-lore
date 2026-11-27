@@ -18,7 +18,7 @@ grounded_in:
   - docs-frame.md
   - docs-topic-map/wave1-critique.md
 date: 2026-09-05
-revised: 2026-09-05
+revised: 2026-11-27
 wave: 2
 ---
 
@@ -41,11 +41,16 @@ already encode, so this program adopts rather than reinvents.
    fleet sites build from Markdown source, so the twin is the pre-render file
    copied into the build output. Cloudflare and Mintlify built HTML-to-Markdown
    converters because their content was not Markdown. This fleet's is.
-3. **The twin has no known implementation, and that is a documented gap.** No
-   fleet generator emits a per-page `.md` twin into build output without a
-   custom plugin. Wave 2 demoted DOC-AGENT-01 to SHOULD for exactly that reason.
-   The requirement returns to MUST when one working configuration exists on
-   MkDocs Material, VitePress and mdBook.
+3. **The twin has a working configuration on two of three generators, and
+   VitePress is a documented gap.** No fleet generator emits a per-page `.md`
+   twin into build output without a third-party plugin. Wave 2 demoted
+   DOC-AGENT-01 to SHOULD for exactly that reason. On 2026-11-27 MkDocs Material
+   (`mkdocs-llms-source` 1.2.0) and mdBook (`mdbook-llms` 0.4.1) each have one
+   working plugin configuration. VitePress does not: `vitepress-plugin-llms`
+   1.15.0 regenerates each twin, emitted no twin for the root `index.md`, and
+   dropped the text inside a raw `<details>` block, so it fails the DOC-AGENT-01
+   diff and DOC-AGENT-03. The requirement returns to MUST when one working
+   configuration exists on all three. The severity stays SHOULD.
 4. **Progressive disclosure was never in conflict with agent byte cost.** It is
    one collapse mechanism scored against two audiences. Collapse for the human
    render, flatten for the twin, from one source. The build step, not the
@@ -125,14 +130,17 @@ could have read directly. A conversion pipeline buys nothing when the source is
 already Markdown.
 *Verification:* A build-time script lists every URL in the generated
 `sitemap.xml` or nav, asserts a `.md` sibling exists in the build output for
-each, and fails the build on any gap. The count of `docs/**/*.md` source files
-equals the count of `.md` files in the build output directory.
+each, and fails the build on any gap. The count of `docs/**/*.md` source files,
+excluding `SUMMARY.md`, equals the count of `.md` files in the build output
+directory. `SUMMARY.md` is excluded because mdBook correctly emits no twin of it.
 *Measured:* twin present on 0 of 9 real sites. Markdown-source precondition
 holds on 9 of 9.
-*Severity:* SHOULD · *Evidence:* measured demand, no implementation
-· *Applies to:* all
-*Note:* demoted from MUST by the wave-2 severity ledger gate G5. No fleet
-generator has a known twin implementation. MUST returns when one ships.
+*Severity:* SHOULD · *Evidence:* measured demand, working configuration on
+two of three generators · *Applies to:* all
+*Note:* demoted from MUST by the wave-2 severity ledger gate G5. As of
+2026-11-27 MkDocs Material and mdBook have a working twin plugin configuration
+and VitePress does not. MUST returns when one working configuration exists on
+all three.
 
 **DOC-AGENT-02.** RETIRED, merged into DOC-AGENT-01.
 *Reason:* Copying the source rather than converting the HTML is DOC-AGENT-01's
@@ -518,10 +526,6 @@ DOC-AGENT-18 at CONSIDER.
 
 ### Deserves another research round
 
-- **twin-generation-mechanics**. Can MkDocs Material, VitePress and mdBook each
-  emit a per-page `.md` twin into the build output without a custom plugin, and
-  what is the smallest working configuration for each? Nobody has measured this.
-  This gap is the reason DOC-AGENT-01 now ships at SHOULD.
 - **twin-drift**. What check proves a twin still matches its page when the twin
   is generated rather than copied? DOC-AGENT-03 covers collapsed content only.
   Nothing covers a twin that silently goes stale.
@@ -580,6 +584,19 @@ DOC-AGENT-18 at CONSIDER.
   Fleet tables now carry the calibration hit counts.
 - **No ledger disagreement.** Every severity change the ledger proposed for this
   family is applied as written.
+
+- **Delta refresh, 2026-11-27.** Folded
+  `.agents/research/refresh-2026-11/docs-quality.md`. No rule ID, severity or
+  number changes.
+- **DOC-AGENT-01 verification** now excludes `SUMMARY.md` from the source count,
+  because mdBook correctly emits no twin of it
+  (`.agents/research/refresh-2026-11/docs-quality.md`).
+- **DOC-AGENT-01 note and Verdict item 3** now record a working twin plugin
+  configuration on MkDocs Material and mdBook, and a failing one on VitePress.
+  Severity stays SHOULD (`.agents/research/refresh-2026-11/docs-quality.md`).
+- **Open question twin-generation-mechanics removed.** The delta measured it. The
+  VitePress gap moved into Verdict item 3
+  (`.agents/research/refresh-2026-11/docs-quality.md`).
 
 ## Sub-artifacts
 

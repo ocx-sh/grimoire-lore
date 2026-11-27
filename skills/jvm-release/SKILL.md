@@ -247,12 +247,17 @@ signal at all.
 | Publisher | Spelling |
 |---|---|
 | nmcp | `publishingType = "AUTOMATIC"` |
-| vanniktech | `publishToMavenCentral(automaticRelease = true)` |
+| vanniktech | `publishToMavenCentral(automaticRelease = true, validateDeployment = DeploymentValidation.PUBLISHED)`, or `mavenCentralDeploymentValidation=PUBLISHED` in `gradle.properties`. Required from 0.36.0 on, where the default wait stops at `VALIDATED` |
 | central-publishing-maven-plugin | `<autoPublish>true</autoPublish>` with `<waitUntil>published</waitUntil>` |
 
 A job that deliberately stops at `VALIDATED` is allowed, on one condition: its
 summary says "validated, not published" in those words. Silence is the defect,
 not the choice.
+
+**Check:** `git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.gradle.kts' ':(glob)**/*.gradle' ':(glob)**/gradle.properties' | xargs -0 -r grep -H -n -e 'automaticRelease' -e 'mavenCentralAutomaticPublishing' -e 'DeploymentValidation' -e 'mavenCentralDeploymentValidation' --`
+A vanniktech build on 0.36.0 or later that turns on automatic release with no
+`PUBLISHED` deployment validation exits at `VALIDATED`, which is the finding
+unless its summary says "validated, not published".
 
 Credentials in the same job are read through `providers.gradleProperty(...)` or
 `providers.environmentVariable(...)`, never bound to a string literal in a
@@ -301,6 +306,18 @@ reported.
 
 The job is done when the deployment reports `PUBLISHED`, or failed when it
 reports `FAILED`. Nothing else is a terminal state.
+
+Central also enforces monthly publishing limits per organisation, and Sonatype
+began rate limiting on 2026-10-01. Exceeding a limit opens a 30-day grace
+period, after which a new release that would keep the organisation over that
+limit is no longer accepted. From the same date a commercial-nature artifact
+needs Maven Central Publisher Pro, whatever the volume. Neither affects
+artifacts already published.
+
+**Check:** before a release, or a burst of releases, open Publishing, then
+Usage Center, in the Portal. A metric over its limit with the grace period
+running is the finding, and so is a commercial-nature artifact without
+Publisher Pro.
 
 Treat the version number as spent from the moment a deployment reaches
 `VALIDATED`. Whether a validated-but-unpublished deployment can be dropped and
@@ -359,7 +376,7 @@ POM elements and the same state machine.
 | Signing | `signing { sign(publishing.publications) }` with `useInMemoryPgpKeys` | `maven-gpg-plugin` |
 | POM under review | `build/publications/*/pom-default.xml`, generated | The POM itself, plus the deployed copy |
 | ABI gate placement | japicmp or `apiCheck` bound to `check`, publish tasks depend on it | japicmp bound to `verify`, ahead of `deploy` |
-| Exit semantics | `publishingType = "AUTOMATIC"` or `automaticRelease = true` | `<autoPublish>true</autoPublish>` and `<waitUntil>published</waitUntil>` |
+| Exit semantics | `publishingType = "AUTOMATIC"`, or `automaticRelease = true` with `validateDeployment = DeploymentValidation.PUBLISHED` | `<autoPublish>true</autoPublish>` and `<waitUntil>published</waitUntil>` |
 | Reproducible archives | Gradle archive settings, owned by the build rules | `<project.build.outputTimestamp>` as an explicit ISO-8601 UTC instant in every publishing POM |
 | Last CI goal before the release job | The project's own `check` target | `verify`, never `install`, `test`, `package` or a hyphenated intermediate phase |
 

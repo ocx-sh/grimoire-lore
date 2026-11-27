@@ -1,0 +1,45 @@
+reviewed = "2026-11-27"
+sources = [
+  "https://developers.openai.com/api/docs/bots",
+  "https://docs.perplexity.ai/guides/bots",
+]
+cdn = []
+
+[token."OAI-SearchBot"]
+class = "search"
+decision = "allow"
+
+[token."Claude-SearchBot"]
+class = "search"
+decision = "allow"
+
+[token."PerplexityBot"]
+class = "search"
+decision = "allow"
+
+[token."ChatGPT-User"]
+class = "user-fetch"
+decision = "allow"
+
+[token."Claude-User"]
+class = "user-fetch"
+decision = "allow"
+
+[token."Perplexity-User"]
+class = "user-fetch"
+decision = "allow"
+
+[token."GPTBot"]
+class = "training"
+decision = "block"
+owner = "unreviewed"
+
+[token."ClaudeBot"]
+class = "training"
+decision = "block"
+owner = "A. Owner"
+decided = "2026-11-01"
+
+[token."Google-Extended"]
+class = "training"
+decision = "allow"

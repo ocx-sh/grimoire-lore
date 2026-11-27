@@ -1,0 +1,2 @@
+mytool install node@22
+Installed node 22.11.0 in 1.2 s

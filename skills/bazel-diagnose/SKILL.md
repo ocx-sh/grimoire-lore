@@ -240,6 +240,9 @@ destabilise an action key.
    majors. The rewind path has a **hard-coded ceiling** of 20 losses per action
    (`MAX_REPEATED_LOST_INPUTS`, byte-identical 8.7.0 through 9.2.0), which is why
    the failure text reads `lost input too many times (#21)` (BZL-CACHE-12).
+   From 9.3.0 `--rewind_lost_inputs` defaults to `true` (release notes, not
+   re-measured), so `retries=0` on such a pin is exactly the rewind-on,
+   retries-`0` configuration, and a lost-input failure is never a missing opt-in.
 4. **Decide the exposure, not the flag.** `--remote_download_outputs` defaults to
    `toplevel` on 8.7.0, 8.8.0 and 9.2.0; `minimal` has the identical eviction
    exposure for intermediates; only `all` removes it, and only because it
@@ -307,8 +310,11 @@ and tags as measured, and the glob failure family.
 2. **Compare the two environments before the two runs.** The test contract is
    identical on Bazel 8 and 9 except for one thing: 9.0.0 adds a mandatory
    implicit toolchain requirement on
-   `@bazel_tools//tools/test:default_test_toolchain_type` (BZL-TEST-28). Any
-   other "Bazel 9 changed tests" claim is fabricated.
+   `@bazel_tools//tools/test:default_test_toolchain_type` (BZL-TEST-28). From
+   9.3.0 a missing execution platform for that toolchain no longer fails
+   analysis: `bazel build` stays green and the test fails only when it runs, so
+   a test red only under `bazel test` checks it first. Any other
+   "Bazel 9 changed tests" claim is fabricated.
 3. **Check the cheap structural causes in order** — each has a distinct
    signature, listed with its confirming output in
    [references/flaky-test.md](references/flaky-test.md): a timeout at the

@@ -61,7 +61,7 @@ caught by reading `MODULE.bazel` and by `bazel run @rules_go//go -- version`.
 | BZL-GO-03 | Never hand-write a `use_repo(go_deps, ...)` name. Run `bazel mod tidy` behind BZL-MOD-10's diff gate. Names are reverse-domain with underscores: `rsc.io/quote` is `io_rsc_quote`, `honnef.co/go/tools` is `co_honnef_go_tools`. | A forward-order guess (`rsc_io_quote`) or a missing entry is an unresolved-repository build break. Only the root module's direct dependencies need an entry. | `bazel mod tidy && git diff --exit-code MODULE.bazel`: **exit 0 with an empty diff is the pass.** Watched on 9.2.0: with `io_rsc_quote` deleted and committed, the build failed (`unknown repo 'io_rsc_quote'`), tidy restored the entry and the diff gate exited 1. On the tidied commit it exited 0. | MUST |
 | BZL-GO-04 | Library or SDK: declare an analyzer or tool module, such as `honnef.co/go/tools` for nogo, through a `use_extension(..., "go_deps", dev_dependency = True)` proxy with `go_deps.module(path, version, sum)`, and list every one of its requirements by hand. Never add a `tools.go` blank import or a `tool` line to feed nogo. A CLI may use `tool`, which gazelle 0.47.0 and later surfaces as `GO_TOOLS`. | A `require` in `go.mod` leaks into every consumer's build list (GO-MOD-11), and `//:go.mod` also picks the SDK. `go_deps.module` does not walk the module's own `go.mod`: declaring only honnef failed with `unknown repo 'org_golang_x_exp_typeparams'`. | see block BZL-GO-04: **empty output is the pass** in a library or SDK. Then `bazel build` of a nogo-validated target must succeed, and a planted SA9010 violation must fail it. | MUST for an SDK, SHOULD for a library |
 | BZL-GO-12 | Fix one external module's BUILD generation with a per-module `go_deps.gazelle_override`, and upstream it to gazelle's `default_gazelle_overrides.bzl`. Never use `go_deps.gazelle_default_attributes`. | Per gazelle's `bzlmod.md`, `gazelle_default_attributes` switches off the public registry overrides for **every** module, so fixing one module silently breaks others. | see block BZL-GO-12: **empty output is the pass.** The grep was watched red, the precedence it guards is doc-derived (gazelle 0.54.0, read 2026-09-26). | SHOULD |
-| BZL-GO-13 | When a Go module's version looks wrong under Bazel, look in three places in order: a `bazel_dep` that provides that Go module always wins, then `go_deps.config(check_direct_dependencies = ...)`, then the rulesets' own `go.mod` files (BZL-GO-11). `replace` in `go.mod` takes effect only in the root Bazel module. | A plain-`go` mental model answers none of the three. The attribute is `check_direct_dependencies`, not `checks`, and its default only prints a warning. `"error"` fails the build. | Reading heuristic, in the order stated. see block BZL-GO-13: **empty output means the default warning applies**, not that versions agree. Doc-derived, gazelle 0.54.0 source read 2026-09-26. | CONSIDER |
+| BZL-GO-13 | When a Go module's version looks wrong under Bazel, look in three places in order: a `bazel_dep` that provides that Go module always wins, then `go_deps.config(check_direct_dependencies = ...)` (`checks = ...` on the gazelle 2.x line), then the rulesets' own `go.mod` files (BZL-GO-11). `replace` in `go.mod` takes effect only in the root Bazel module. | A plain-`go` mental model answers none of the three. On gazelle 0.x (0.54.0) the attribute is `check_direct_dependencies`, not `checks`; on the 2.0.0 beta line (2.0.0-beta.2, 2026-10-08) `checks` replaces it and the old name prints a deprecation message. On both, the default only prints a warning. `"error"` fails the build. | Reading heuristic, in the order stated. see block BZL-GO-13: **empty output means the default warning applies**, not that versions agree. Doc-derived, gazelle 0.54.0 source read 2026-09-26 and the 2.0.0-beta source read 2026-11-27. | CONSIDER |
 
 ```sh
 # BZL-GO-01
@@ -71,7 +71,7 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)**/go.mod' | xar
 # BZL-GO-12
 git ls-files -z --cached --others --exclude-standard -- ':(glob)**/MODULE.bazel' | xargs -0 -r grep -H -n -e 'gazelle_default_attributes' --
 # BZL-GO-13
-git ls-files -z --cached --others --exclude-standard -- ':(glob)**/MODULE.bazel' | xargs -0 -r grep -H -n -e 'check_direct_dependencies' --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/MODULE.bazel' | xargs -0 -r grep -H -n -e 'check_direct_dependencies' -e 'checks *=' --
 ```
 
 ## nogo Is an Extra Layer
@@ -146,7 +146,12 @@ rules_go never runs the `go` command, so `debug.ReadBuildInfo` carries no
 default `bazel build` is fastbuild, and rules_go 0.63.0 turns Bazel's
 `--strip=sometimes` into link `-s -w` for it. The release recipe, measured
 byte-identical across two clones in differently named directories with separate
-output bases (`linux_amd64` only), is one checked-in rc line:
+output bases (`linux_amd64` only, rules_go 0.63.0), is one checked-in rc line.
+rules_go 0.64.0 dropped the fixed `-buildid=redacted` link flag and 0.65.0
+derives Go build IDs from the linked binary
+([PR 4728](https://github.com/bazel-contrib/rules_go/pull/4728)), so re-run
+BZL-GO-14's two-clone `sha256sum` check before claiming byte identity on 0.64
+or later:
 
 ```bash
 build:release -c opt --strip=never --stamp --workspace_status_command=tools/status.sh

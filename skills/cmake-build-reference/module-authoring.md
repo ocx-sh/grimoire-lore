@@ -216,7 +216,7 @@ git ls-files -z --cached --others --exclude-standard -- ":(glob)${MODULE_DIR:-.}
 
 ## gersemi on the Module's Own Commands
 
-The gate is the index's tracked-files form, `git ls-files -z -- '*CMakeLists.txt' '*.cmake' | xargs -0 -r gersemi --check` (gersemi 0.29.1, released
+The gate is the index's tracked-files form, `git ls-files -z -- '*CMakeLists.txt' '*.cmake' | xargs -0 -r gersemi --check` (gersemi 0.29.2 or later, released 2026-10-01; measured on 0.29.1, released
 2026-09-14). **pinned**: gersemi is SHOULD, never MUST, and binds only a module project
 that runs it, a default the adopter overrides once. The awk command below checks
 CMK-MOD-16. **Empty output passes. Each printed line is a parse nested in a control
@@ -228,7 +228,7 @@ find "${MODULE_DIR:-.}" -name '*.cmake' -not -path '*/build*/*' -print0 | xargs 
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| CMK-MOD-15 | A module project that runs gersemi commits a `.gersemirc` whose `definitions` key lists every file or directory defining the project's own commands, and gates with `gersemi --check`, never `--diff`. | Without definitions gersemi leaves custom calls unformatted and prints `unknown command` warnings, and `--diff` exits 0 even when it would reformat. `.gersemirc` is the only file name gersemi discovers, so it is what makes the editor and CI format alike. Floor: gersemi 0.29.1. | The gersemi gate above. Exit 0 passes. Any `Warning: unknown command` on stderr means the `definitions` list is incomplete. | SHOULD |
+| CMK-MOD-15 | A module project that runs gersemi commits a `.gersemirc` whose `definitions` key lists every file or directory defining the project's own commands, and gates with `gersemi --check`, never `--diff`. | Without definitions gersemi leaves custom calls unformatted and prints `unknown command` warnings, and `--diff` exits 0 even when it would reformat. `.gersemirc` is the only file name gersemi discovers, so it is what makes the editor and CI format alike. Floor: gersemi 0.29.2. | The gersemi gate above. Exit 0 passes. Any `Warning: unknown command` on stderr means the `definitions` list is incomplete. | SHOULD |
 | CMK-MOD-16 | Parse each command's keywords with one top-level `cmake_parse_arguments(PARSE_ARGV 0 …)` per function, split a multi-verb dispatch function into one function per verb, and put `# gersemi: hints { KEYWORD: command_line }` above the parse for each keyword that forwards argv. | gersemi 0.29.1 reads any top-level parse and none nested in an `if()`, `foreach()` or `while()`, with no warning: every token lands on its own line. Without the hint a forwarded command line is split one token per line too. The signature and the correctness case for `PARSE_ARGV` are CMK-LANG-04 in `language.md`. Floor: `PARSE_ARGV` needs 3.7, gersemi 0.29.1. | The awk command above: empty passes. Then block CMK-MOD-16 lists the hints: a keyword that forwards argv with no hint is the finding. | SHOULD |
 
 ```sh
@@ -264,7 +264,7 @@ git ls-files -z --cached --others --exclude-standard -- ":(glob)${MODULE_DIR:-.}
 11. **Treating `cmake_language` as one scope rule**, or reading `command is not
     scriptable` as a typo after porting project code into `-P`. CMK-MOD-20.
 
-Re-check: D8, gersemi releases after 0.29.1 (the `--diff` exit code and nested-parse
+Re-check: D8, gersemi releases after 0.29.2 (the `--diff` exit code and nested-parse
 detection behind CMK-MOD-15 and -16). D1, CMake 4.5 and the gate spelling on the
 CMK-MOD-11 configure. CMK-MOD-19's Windows half stays read-only until a Windows host
 can measure it (as of 2026-09-26).

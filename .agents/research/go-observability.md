@@ -9,7 +9,7 @@ consolidates:
   - go-audit/exemplar-runtime-posture.md (§4, Gaps)
   - go-topic-map.md (conflict 9; section J rows M-J-01..09, M-J-12 in part; M-P-03; wave-2 contradiction 5 and 17; wave-4 orchestrator additions)
 date: 2026-09-26
-revised: 2026-09-26
+revised: 2026-11-27
 versions: Go 1.27.1 (GOTOOLCHAIN=local), golangci-lint 2.14.0 (sloglint, gosec, depguard, perfsprint, prealloc), goleak v1.3.0, automaxprocs v1.6.0, benchstat (golang.org/x/perf)
 fixtures: /home/mherwig/.cache/research-lang/go-tools/fixtures/logging-and-diagnosis/ (dive 1), /home/mherwig/.cache/research-lang/go-tools/fixtures/performance-hygiene/ (dive 2), /home/mherwig/.cache/research-lang/go-tools/fixtures/go-observability-consolidation/ (this file; the revision's runs are the rev-* directories)
 ---
@@ -73,7 +73,8 @@ meaning. The revision re-ran [perf]'s load-bearing claims and recorded six more 
   average over larger services, and no guidance narrows it by program size ([perf] Contested). GO-OBS-20 is the whole
   answer until a binary exists.
 - **The `nogreenteagc` removal date.** The 1.26 notes forecast removal in 1.27. On 1.27.1 the flag is still accepted and
-  still a real opt-out ([C-16] stamps `go1.27.1-X:nogreenteagc`). No 1.27 note or tracked issue gives a new date.
+  still a real opt-out ([C-16] stamps `go1.27.1-X:nogreenteagc`). The flag is still accepted on 1.27.4 and on tip
+  (2026-11 refresh). No 1.27 note or tracked issue gives a new date.
   go-upgrade re-checks it on each bump (GO-LANG-16).
 
 ## The ruleset
@@ -174,7 +175,7 @@ Verification runs entry.
   - [C-1] planted the obvious case in compliant code. A test that calls `signal.NotifyContext` and then `stop()` fails
     the stdlib detector (`os/signal.signal_recv()` / `os/signal.loop()`, exit 1). goleak passes the same test (exit 0).
   - An SDK that wraps a CLI and forwards signals, or a CLI's `main` package tests, would hit this on day one. Adding the
-    ignore list back means re-implementing goleak, and goleak v1.3.0 has no transitive dependencies.
+    ignore list back means re-implementing goleak, and goleak v1.3.0 adds no runtime dependency to a consumer (its `go.mod` requires testify, but only for goleak's own tests).
   - GO-CONC-11 keeps its text. The SDK's test-only dependencies are **go-cmp and goleak**, which is the map's default for
     contradiction 5. The stdlib detector does not ship in the support directory.
 - **C4. GO-GATE-09 lists `sloglint` as "self-gating" at its defaults, and [GC] rated it MUST from 0 hits on 8 repos.
@@ -550,3 +551,9 @@ Added by the revision. These are ranked among themselves and slot in after item 
 - 2026-09-26: Open questions: removed M-J-07, M-J-09 and M-J-12's pin half, which are answered. Renamed the remainder
   `deferred-telemetry` and added the cross-family handoff.
 - 2026-09-26: Applied-to-exemplars, fleet commitments, failure modes 12-18, Sub-artifacts and Key sources extended.
+- 2026-11-27: C3 corrected: "goleak v1.3.0 has no transitive dependencies" was imprecise, since its `go.mod` requires
+  testify for its own tests; it adds no runtime dependency to a consumer. No rule ID changed. Source:
+  refresh-2026-11/go-quality.md (Spillover, go-observability consolidation).
+- 2026-11-27: Documented gap on `nogreenteagc` extended: still accepted on Go 1.27.4 and on tip, no removal date
+  (refresh-2026-11/go-quality.md, Confirmed unchanged). GO-OBS-01..22 are otherwise unchanged; the pinned versions in
+  `versions` stay as the 2026-09-26 measurement.

@@ -1,0 +1,6 @@
+name: post
+on: push
+jobs:
+  p:
+    steps:
+      - run: curl -X POST https://api.linkedin.com/rest/posts

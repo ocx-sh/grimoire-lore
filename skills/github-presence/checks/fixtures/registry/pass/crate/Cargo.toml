@@ -1,0 +1,9 @@
+[package]
+name = "mytool"
+version = "0.1.0"
+description = "Install and pin developer binaries from the command line."
+keywords = ["cli", "installer", "binaries"]
+categories = ["command-line-utilities"]
+license = "Apache-2.0"
+repository = "https://github.com/example/mytool"
+readme = "README.md"

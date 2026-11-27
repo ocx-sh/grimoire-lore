@@ -210,8 +210,9 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)**/CMakeLists.tx
 
 ## Re-check
 
-- D1: on the first CMake 4.5 release, re-run the `-P` gate measurement behind
-  `CMK-TEST-02` and the smoke gate spelling behind `CMK-TEST-09` (both follow
+- D1: the `-P` gate measurement behind `CMK-TEST-02` still exits 1 under both
+  spellings on 4.5.1 (measured 2026-11-27). On each CMake minor after 4.5, re-run
+  it and the smoke gate spelling behind `CMK-TEST-09` (both follow
   `CMK-CORE-01`).
 - The corpus census of consumed-library test gates and of CI scripts outside
   `.github` (as of 2026-09-26) adds exemplars only. No row's text depends on it.

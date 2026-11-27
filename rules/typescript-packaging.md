@@ -21,7 +21,7 @@ repository: https://github.com/ocx-sh/grimoire-lore
 
 What a repository claims about itself in files no compiler checks. Owns
 `TS-CFG` (compiler options and `extends` topology) and `TS-PKG` (manifest,
-engines, exports, bin, scripts, dependency placement, publish verification).
+engines, exports, bin, scripts, dependency placement, publish verification, publish credentials).
 Code rules live in the `typescript-quality` sibling, which never loads while
 you are editing any of the files above.
 
@@ -53,7 +53,7 @@ its reason in a comment in the config that carries it.**
 |---|---|---|---|
 | **Node-loaded package** — has a `bin`, or anything outside the repo imports it | Node | `nodenext` / `nodenext` | The universal set, plus `exactOptionalPropertyTypes` (a public surface is where "absent" and "present but `undefined`" actually differ) and `declaration` wherever types ship |
 | **Bundled app or editor extension** — one bundler always intervenes and no external importer exists | the bundler | `esnext` / `bundler` | The universal set, plus `noEmit: true` |
-| **Type-stripped runtime** — Bun, or `node --experimental-strip-types` | the runtime's stripper | `esnext` / `bundler` | The universal set, plus `erasableSyntaxOnly` and `noEmit: true`. These runtimes strip types and never check them, so a standalone `tsc --noEmit` step is the only type gate |
+| **Type-stripped runtime** — Bun, or Node running `.ts` directly (type stripping is on by default, with no flag, from 22.18.0; Node 26 removed `--experimental-transform-types`) | the runtime's stripper | `esnext` / `bundler` | The universal set, plus `erasableSyntaxOnly` and `noEmit: true`. These runtimes strip types and never check them, so a standalone `tsc --noEmit` step is the only type gate |
 | **Monorepo** | per package | per package | The floor lives in one base file; each member's *resolved* config is what counts, not the base |
 
 Universal set, all outside `strict`: `noUncheckedIndexedAccess`,
@@ -77,11 +77,13 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*tsconfig*.js
 
 ## Version-Gated Flags
 
-Compiler versions as of 2026-08-29: TS 7.0 is the current stable release,
-6.0 is a common working floor, and two-majors-behind repos are normal. Any
+Compiler versions as of 2026-11-27: TS 7.0.2 is the current stable release
+(7.1 is in beta since 2026-10-20; assume none of its keys), 6.0.3 is a common
+working floor, and two-majors-behind repos are normal. Any
 rule resting on a flag below binds only where the pin clears its release.
 An unknown `compilerOptions` key is a hard `tsc` error, not a silent ignore —
-so an over-new flag fails loudly, which is the good case.
+so an over-new flag fails loudly, which is the good case. Only a real
+`tsc -p <tsconfig> --noEmit` run reports it; `--showConfig` prints unknown keys and removed values without an error.
 
 | Key | Needs | On an older compiler |
 |---|---|---|
@@ -90,8 +92,8 @@ so an over-new flag fails loudly, which is the good case.
 | `noUncheckedSideEffectImports` | 5.6 | Unknown-option error; build fails |
 | `strictBuiltinIteratorReturn` (inside `strict`) | 5.6 | `strict` implies one fewer flag — a rule citing it does not hold below 5.6 |
 | `erasableSyntaxOnly` | 5.8 | Unknown-option error; build fails |
-| `importsNotUsedAsValues`, `preserveValueImports` | removed in 6.0 | Hard `TS5102` and exit 2 — never write either; `verbatimModuleSyntax` replaced both |
-| `"moduleResolution": "node"` / `"node10"` | deprecated 6.0, removed 7.0.2 | `TS5107` then `TS5108`, with no `ignoreDeprecations` escape. Legal values are `node16`, `nodenext`, `bundler` |
+| `importsNotUsedAsValues`, `preserveValueImports` | removed in 6.0 | Hard error, `TS5102` on 6.x and `TS5023` (unknown option) on 7.x — never write either; `verbatimModuleSyntax` replaced both |
+| `"moduleResolution": "node"` / `"node10"` | deprecated 6.0, removed 7.0.2 | `TS5107` on 6.x, which `"ignoreDeprecations": "6.0"` silences; `TS5108` on 7.x, with no escape. Legal values are `node16` (only with `module: node16`), `nodenext`, `bundler` |
 
 ## The Manifest
 
@@ -100,14 +102,20 @@ checkable from the repo root with `jq` and `ls`.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| **TS-PKG-10** | Never declare an `engines.node` floor on a Node line that has reached end of life, and back the floor with a CI leg pinned to the **literal** declared version — not "latest of that major". | `engines.node` is advisory-only without `engine-strict`, and the manifest linters only check the field's *presence*, never its currency. Nothing in a normal pipeline verifies the number is true. Node 20 reached EOL on 2026-03-24. | `jq -r '.engines.node' package.json`, compared against [nodejs.org/en/about/previous-releases](https://nodejs.org/en/about/previous-releases); then confirm the CI matrix contains that exact version string, not just its major. | MUST |
+| **TS-PKG-10** | Never declare an `engines.node` floor on a Node line that has reached end of life, and back the floor with a CI leg pinned to the **literal** declared version — not "latest of that major". | `engines.node` is advisory-only without `engine-strict`, and the manifest linters only check the field's *presence*, never its currency. Nothing in a normal pipeline verifies the number is true. Node 20 reached end of life on 2026-04-30; its last release shipped 2026-03-24. Node 25 is also end of life; Node 26 entered LTS on 2026-10-28 (26.13.0). | `jq -r '.engines.node' package.json`, compared against [nodejs.org/en/about/previous-releases](https://nodejs.org/en/about/previous-releases); then confirm the CI matrix contains that exact version string, not just its major. | MUST |
 | **TS-PKG-14** | Every script in `scripts` must run against a config that exists. Delete a script whose tool has no config rather than leaving it declared. | A `lint` script naming a linter with no config file anywhere is a gate that reads as present, fails if anyone runs it, and is therefore never run. This is the silent-pass class, in manifest form. | `jq -r '.scripts.lint // empty' package.json` returning a command, with `ls eslint.config.* biome.json biome.jsonc 2>/dev/null` printing nothing, is the violation. Repeat for every script naming a config-driven tool. | MUST |
 | **TS-PKG-12** | Test, build and type-only packages go in `devDependencies`. Never `dependencies`. | Everything in `dependencies` is installed into every consumer of the package, and a test-only DOM shim there is both a several-megabyte tax and an unaudited dependency in a production tree. | see block TS-PKG-12 — a union of literal names; every line printed is the violation and empty output is the pass. The list is a starting heuristic, not exhaustive: read the whole key list once. | SHOULD |
-| **TS-PKG-13** | Exactly one lockfile kind per workspace, and it is the one the CI install command produces. | Two committed lockfiles for one tree means one of them is stale and nobody knows which — and a contributor installing with the unused manager gets a resolution CI has never seen. | `git ls-files --cached --others --exclude-standard -- package-lock.json pnpm-lock.yaml yarn.lock bun.lock bun.lockb` — more than one line is the violation. Then `jq -r '.packageManager // empty' package.json` must name the manager that produces the surviving one. | SHOULD |
+| **TS-PKG-13** | Exactly one lockfile kind per workspace, and it is the one the CI install command produces. | Two committed lockfiles for one tree means one of them is stale and nobody knows which — and a contributor installing with the unused manager gets a resolution CI has never seen. | see block TS-PKG-13. The first command printing more than one line is the violation, and so is any `npm-shrinkwrap.json` line: npm 12 neither reads nor writes that file, so rename it to `package-lock.json`. The second command reads both pin fields and must print only the manager that produces the surviving lockfile; empty output means no pin, and two different managers is the violation. | SHOULD |
 
 ```sh
 # TS-PKG-12
 jq -r '.dependencies // {} | keys[]' package.json | grep -E -e '^@types/' -e '^@testing-library/' -e jsdom -e vitest -e jest -e playwright -e eslint -e prettier -e '^typescript$' -- -
+```
+
+```sh
+# TS-PKG-13
+git ls-files --cached --others --exclude-standard -- package-lock.json npm-shrinkwrap.json pnpm-lock.yaml yarn.lock bun.lock bun.lockb
+jq -r '.packageManager // empty, (.devEngines.packageManager // empty | if type=="array" then .[].name else .name end)' package.json
 ```
 
 ## Publishing a `bin` Package
@@ -140,7 +148,8 @@ the declaration.
 | **TS-PKG-08** | For a package deliberately without a `"."` export, suppress the missing-root-entrypoint finding per package with a comment naming the CLI-only shape — never add a root export to silence it. | A root export added to satisfy a linter creates a real, unintended, permanently supported public API surface out of whatever file was nearest. | The `publint` ignore list carries that one code plus the comment. A new `"."` key in `exports` appearing in the same diff as a linter complaint is the violation. | SHOULD |
 | **TS-PKG-09** | The pack-smoke's dependency walk extracts dynamic `import()` and `require()` specifiers, not only static `import … from`. | A dependency reachable only through a lazy `import()` is invisible to a static scan and can sit in `devDependencies` until a consumer's install breaks — a shipped incident, not a hypothesis. | The extraction handles both call forms, and the walk resolves bare specifiers against a sandbox `node_modules` populated only from `dependencies` and `peerDependencies`. | SHOULD |
 | **TS-PKG-15** | Read the published file list once per release — via a `files` allowlist, or the pack listing itself. | The default publish set is "everything not ignored". A fixture directory, a source map, or a stray dotfile ships silently and is unpublishable-back once it is on a registry. | `npm pack --dry-run` and read the printed listing. Any path you did not intend to ship is the violation; `publint`'s `USE_FILES` flags the missing allowlist. | MUST |
-| **TS-PKG-11** | Do not add a dual CJS/ESM build to support `require()` consumers once `engines.node` is at or above 20.19.0 / 22.12.0. | `require(esm)` is unflagged and warning-free from exactly those versions. A dual build adds real build, test and resolution surface for a problem that no longer exists at the package's own declared floor. The one surviving constraint is top-level `await`, which still raises `ERR_REQUIRE_ASYNC_MODULE`. | Compare `jq -r '.engines.node' package.json` against those thresholds, then see block TS-PKG-11 for top-level await on a `require()`-reachable path. | SHOULD |
+| **TS-PKG-11** | Do not add a dual CJS/ESM build to support `require()` consumers once `engines.node` is at or above 20.19.0 / 22.12.0. | `require(esm)` is unflagged from exactly those versions, and warning-free from 20.19.0 / 22.13.0. A dual build adds real build, test and resolution surface for a problem that no longer exists at the package's own declared floor. The one surviving constraint is top-level `await`, which still raises `ERR_REQUIRE_ASYNC_MODULE`. | Compare `jq -r '.engines.node' package.json` against those thresholds, then see block TS-PKG-11 for top-level await on a `require()`-reachable path. | SHOULD |
+| **TS-PKG-16** | Publish from CI through npm trusted publishing (OIDC): the publish job has `id-token: write`, no long-lived publish token comes from a secret, and only `push`, `release` or `workflow_dispatch` triggers it. A trusted publisher created after 2026-09-03 is stage-only by default, so the job runs `npm stage publish` and a maintainer approves the version with 2FA. | npm rejects OIDC tokens from `issue_comment` and `pull_request_target` runs, so such a trigger fails on release day, not in review. A secret-held publish token outlives the job and works wherever it leaks; an OIDC token is minted per run. The shape agents write from older training, `npm publish` with `NPM_TOKEN`, is what a stage-only publisher rejects, and npm is targeting removal of direct publishing with 2FA-bypass tokens (a target, not a date, as of 2026-11-27). Staged publishing needs npm CLI 11.15.0+ and Node 22.14.0+ (as of 2026-11-27). OIDC alone does not make a publish benign: in the 2026-05-11 TanStack compromise, attacker code from a poisoned Actions cache took the job's OIDC token from runner memory and published 84 versions through the trusted-publisher binding, which is why approving a staged version is a human step. | see block TS-PKG-16 — it lists the publish and credential lines of every workflow that publishes for real. Each listed workflow must show an `id-token: write` line; any `issue_comment`, `pull_request_target` or `NPM_TOKEN` line is the violation, and so is a `NODE_AUTH_TOKEN` line unless it feeds only a read-only install. Empty output means no workflow publishes. | SHOULD |
 
 ```sh
 # TS-PKG-02
@@ -150,6 +159,11 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflow
 ```sh
 # TS-PKG-11
 git ls-files -z --cached --others --exclude-standard -- ':(glob)src/**/*.ts' | xargs -0 -r grep -H -n -E -e '^await ' -e '^const .* = await ' --
+```
+
+```sh
+# TS-PKG-16
+git ls-files -z --cached --others --exclude-standard -- ':(glob).github/workflows/**' | xargs -0 -r grep -H -E -e 'npm (stage )?publish' -- | grep -v -e '--dry-run' | cut -d: -f1 | sort -u | xargs -r grep -H -n -E -e 'npm (stage )?publish' -e 'id-token: *write' -e 'NPM_TOKEN' -e 'NODE_AUTH_TOKEN' -e 'issue_comment' -e 'pull_request_target' --
 ```
 
 ## Editing a Lint Config

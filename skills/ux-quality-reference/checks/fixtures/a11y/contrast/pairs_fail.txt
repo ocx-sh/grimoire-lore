@@ -1,0 +1,4 @@
+// planted: each pair is under 4.5
+#aaa #fff light-gray-on-white
+#7a7a7a #ffffff just-under
+#00000040 #ffffff alpha-black-25

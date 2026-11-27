@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /private/
+Disallow: /drafts/
+
+User-agent: OAI-SearchBot
+Allow: /
+
+Sitemap: https://example.com/sitemap-index.xml

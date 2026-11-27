@@ -6,6 +6,7 @@ id_family: SW-CORE
 consolidates:
   - swift-procedures/upgrade-and-diagnose.md
 date: 2026-10-10
+revised: 2026-11-27
 ---
 
 # SW-CORE: the index core and the two procedures
@@ -41,7 +42,7 @@ Everything below was run on 2026-10-10 on Linux x86_64 in the `swift:6.4` (6.4.0
 7. **A diagnosis never edits the check to make the symptom stop** (SW-CORE-17); the fix is accepted only when the same measurement clears. Binds every kind.
 8. **Capture before kill** (SW-CORE-18): backtracer on, `set -m` launch, `SIGQUIT` before `SIGKILL`, signal the test runner not the driver. Linux 6.3 and 6.4 measured; macOS `unverified: read only`.
 9. **TSan is authoritative in diagnosis and advisory in CI** (SW-CORE-19): report kind first (`data race` versus `Swift access race`), five plain runs as fallback. Binds servers, daemons and the SDK's process layer.
-10. **Four dated probes must still fail at every toolchain bump** (SW-CORE-14): SE-0526, SE-0540, SE-0529, T-V42. All four STILL on 6.4 and 6.3.
+10. **Four dated probes must still fail at every toolchain bump** (SW-CORE-14): SE-0526, SE-0540, SE-0529, T-V42. All four STILL on 6.4 and 6.3 (2026-10-10), and again on 6.4.3 and 6.3.3 (2026-11-27).
 11. **Scope fences.** `swift-release` is SW-REL (M-P-03), not this family; the review skill (M-P-04, P3) is not authored.
 12. **Count.** 21 rules: 8 MUST (01 to 05, 10, 16, 17), 13 SHOULD. Eleven conflicts with earlier consolidations are resolved below; four fix defects in text already settled (SW-PKG-32, SW-CONC-07, SW-GATE-10 generated exclusions and canary).
 
@@ -188,9 +189,9 @@ find . -name 'Package*.swift' -not -path '*/.build/*' -print0 | xargs -r -0 awk 
 - Binds: every package that used `migrate`.
 
 **SW-CORE-14 (SHOULD, Swift 6.2).** At every toolchain or SwiftPM bump run the four dated probes; each must still fail with its pinned message, and a probe that compiles reports FLIPPED and means the cited rules are stale. SE-0526 `withDeadline` (SW-CONC-24), SE-0540 `defaultSwiftSettings:` (SW-PKG-01, -18), SE-0529 stdlib `FilePath` (SW-IO-01), T-V42 typed-throws `Task` frontend crash (SW-CONC-03). Also re-read the swift-syntax tag list (SW-PKG-10 range).
-- Why: the three proposals are Accepted with modifications, not shipped, and the fourth crashes the compiler; an agent writing from proposal text produces code that does not build.
+- Why: SE-0526 and SE-0529 are accepted with modifications, SE-0540 is implemented for Swift 6.5 (status set 2026-11-16), none ships in a release toolchain, and the fourth crashes the compiler; an agent writing from proposal text produces code that does not build.
 - Check, per probe package: `swift build --scratch-path "$SWIFT_SCRATCH/recheck-<probe>"` exits 1 with `cannot find 'withDeadline' in scope`, `extra argument 'defaultSwiftSettings' in call`, `cannot find type 'FilePath' in scope`, `Please submit a bug report`. Sources: `try await withDeadline(.now + .seconds(1)) { 1 }`; `Package(... defaultSwiftSettings: [.swiftLanguageMode(.v6)])`; `let p: FilePath = "/tmp/x"` with no import; `Task { () throws(E) in throw E() }` in Swift 6 mode. Twin: `Task { throw E() }` compiles (FLIPPED).
-- Red: yes, R18 (four STILL on 6.4 and 6.3, twin FLIPPED); R26 (604.0.0 latest release, 605 prereleases).
+- Red: yes, R18 (four STILL on 6.4 and 6.3, twin FLIPPED; watched STILL on Swift 6.4.0 and 6.3.3, measured 2026-10-10, and on 6.4.3 and 6.3.3, measured 2026-11-27, the `Task { throw E() }` twin not re-run); R26 (604.0.0 latest release, 605 prereleases).
 - Binds: every kind at each bump.
 
 **SW-CORE-15 (SHOULD, any Swift).** Stop and report instead of adding a hatch when a stop condition fires: S1 the errors sit in a dependency you do not own; S2 the applicable rung needs an API above the platform or tools floor (`Mutex` on an Apple floor below the OS that ships `Synchronization`, `weak let` below 6.3, `sending` below 6.0); S3 a diagnostic reproduces as a frontend crash; S4 a fix-it changes public async signatures; S5 two consecutive classes leave the count unchanged or higher; S6 the re-gate differs between the current and the floor toolchain (report both, add no `#if compiler` split).
@@ -341,7 +342,7 @@ Ranked by how often the shortcut compiles and passes, then by cost. Every row ha
 | 10 | Launches with a bare `&`, sends `kill -QUIT`, concludes "no dump"; or `kill -9` first | SIGQUIT was inherited as ignored; the evidence died | SW-CORE-18 `SigIgn` mask |
 | 11 | Calls a race from a `Swift access race` report on `Mutex` code, or none from rc 0 | Both are false on this toolchain pair | SW-CORE-19 report kind, five-run count |
 | 12 | Chases `unable to type-check this expression in reasonable time` with casts or a raised solver limit | Masks the real `Double` plus `Float` error | SW-CORE-20 split first |
-| 13 | Writes `defaultSwiftSettings:`, `withDeadline`, stdlib `FilePath`, or a typed-throws `Task` from proposal text | Accepted proposals are not shipped; the last crashes the frontend | SW-CORE-14 probes |
+| 13 | Writes `defaultSwiftSettings:`, `withDeadline`, stdlib `FilePath`, or a typed-throws `Task` from proposal text | Accepted or implemented proposals are not in a release toolchain; the last crashes the frontend | SW-CORE-14 probes |
 | 14 | Hard-codes `swift:6.4` beside a different `.swift-version` | Both builds pass | SW-CORE-09 pin grep |
 | 15 | Invents `swift test --timeout` or `--deadlock-detect` | Not in `swift test --help` | `swift test --help` |
 
@@ -374,7 +375,7 @@ Fetched in this session on 2026-10-10 unless marked "dive" (read by the sub-arti
 2. https://raw.githubusercontent.com/swiftlang/swift-package-manager/main/Sources/Commands/PackageCommands/Migrate.swift : `--target`, `--to-feature`, `updateManifest` through `AddSetting.editSwiftSettings` (SW-CORE-12).
 3. https://raw.githubusercontent.com/swiftlang/swift-migration-guide/main/Guide.docc/FeatureMigration.md : the guide's `--targets` spelling and "in active development" (conflict 2).
 4. https://raw.githubusercontent.com/swiftlang/swift-evolution/main/proposals/0526-deadline.md : SE-0526, Accepted with modifications (SW-CORE-14).
-5. https://raw.githubusercontent.com/swiftlang/swift-evolution/main/proposals/0540-default-target-settings.md : SE-0540, Accepted with modifications.
+5. https://raw.githubusercontent.com/swiftlang/swift-evolution/main/proposals/0540-default-target-settings.md : SE-0540, Accepted with modifications on 2026-10-10; implemented for Swift 6.5 as of swift-evolution commit 6d9f877 (2026-11-16).
 6. https://raw.githubusercontent.com/swiftlang/swift-evolution/main/proposals/0529-filepath-in-stdlib.md : SE-0529, Accepted with modifications.
 7. https://github.com/swiftlang/swift-syntax (`git ls-remote --tags`) : 604.0.0 latest release, 605 prereleases (R26).
 8. https://raw.githubusercontent.com/swiftlang/swift-migration-guide/main/Guide.docc/MigrationStrategy.md : outside-in order, Swift 5 mode first (dive; SW-CORE-11).
@@ -385,3 +386,7 @@ Fetched in this session on 2026-10-10 unless marked "dive" (read by the sub-arti
 13. https://github.com/apple/containerization/blob/3e7bc39e66b3/.github/workflows/containerization-build-template.yml : the derived-image pattern (SW-CORE-09).
 14. https://github.com/grpc/grpc-swift-2/blob/ac33066eb6ed/dev/check-generated-code.sh : regenerate and `git diff --exit-code` (SW-CORE-05).
 15. https://github.com/swiftlang/swift-testing/blob/c7d68ca20cd7/Sources/Testing/ExitTests/ExitTest.swift : the one deliberate `SWIFT_BACKTRACE=enable=no` (SW-CORE-18).
+
+## Revision log
+
+- 2026-11-27: SW-CORE-14 rationale corrected (SE-0540 is implemented for Swift 6.5, not merely accepted) and verification extended with the 6.4.3 and 6.3.3 STILL result; Verdict 10, failure-mode row 13 and Key sources 5 aligned. Decision: refresh-2026-11/swift-quality.md. No other ID changed; the 2026-10-10 measurements on 6.4.0 stay dated.

@@ -63,7 +63,7 @@ Error texts to match, all observed:
 | `lost inputs with digests: …` | 8.7.0, default retries |
 | `Lost inputs no longer available remotely: <file>` | 9.2.0, default retries |
 | `Found transient remote cache error, retrying the build...` | Both majors, default retries — the self-heal line |
-| `Unexpected lost inputs (pass --rewind_lost_inputs to enable recovery)` | 9.2.0, retries `0` |
+| `Unexpected lost inputs (pass --rewind_lost_inputs to enable recovery)` | 9.2.0, retries `0`, rewinding off (its default through 9.2.0); from 9.3.0 expect it only where an rc line turns rewinding off (not measured) |
 | `lost input too many times (#21) for the same action` | Rewind engaged and exhausted |
 
 `BUILD_LOG=path/to/build-log; grep -n -E -e 'lost inputs' -e 'Lost inputs no longer available remotely' -e 'Found transient remote cache error' -e 'Unexpected lost inputs' -- "${BUILD_LOG}"`
@@ -101,10 +101,19 @@ reaches it is untested here.
   default**; setting it to `0` converts a self-healing build into a generic
   failure, and raising it does not address the cause. (BZL-CACHE-12)
 - `--rewind_lost_inputs` — a separate, lower-level Skyframe mechanism, default
-  `false`. Present and empirically functional on **8.7.0** despite rendering in
+  `false` through 9.2.0 and `true` from 9.3.0 (release notes, PR 31416; not
+  measured here). Present and empirically functional on **8.7.0** despite rendering in
   no help surface there (`UNDOCUMENTED` through 9.1.0, `REMOTE`-documented at
   9.2.0). A help-surface grep that finds nothing on 8.7.0 must not be reported as
   "the flag does not exist" (BZL-FLAG-11).
+- On 9.3.0 or later rewinding is on unless an rc line turns it off, and the
+  release notes say a Build without the Bytes build recovers from an eviction
+  through it. A lost-input failure there reads as rewind exhausting its
+  ceiling (`#21`); a lane that also sets
+  `--experimental_remote_cache_eviction_retries=0` has that setting as the
+  finding (BZL-CACHE-12). Neither is a missing opt-in. Read the default off the
+  pin: `bazel help build --long 2>&1 | grep -A2 -e 'rewind_lost_inputs'`. Not
+  re-measured on 9.3.x.
 - The ceiling is **hard-coded**: `MAX_REPEATED_LOST_INPUTS = 20` in
   `ActionRewindStrategy.java`, byte-identical from 8.7.0 through 9.2.0. The 21st
   loss fails, which is why the text reads `(#21)` and never `(#20)`. The tunable

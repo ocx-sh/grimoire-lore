@@ -11,7 +11,8 @@ summary: The surface where the roles reverse — the host owns the vocabulary, n
 > `dist/webview/*.css` in a real extension. Each claim below is marked
 > *(source-read)* or *(measured elsewhere)*. Treat the whole file as the
 > best available account, not as verified behaviour, and verify against your
-> own `engines.vscode` before acting on it.
+> own `engines.vscode` before acting on it. Source re-read at tag 1.148.0
+> (stable 2026-11-25): no line behind these claims changed since 1.104.0.
 >
 > **Explicitly open:** whether the injected `<style id="_defaultStyles">`
 > survives a CSP with no `unsafe-inline` — nobody has opened devtools on it.
@@ -81,8 +82,9 @@ undocumented — and `prefers-reduced-motion` does NOT see VS Code's own
 ## Deprecations
 
 `data-vscode-theme-name` is deprecated in source; use `data-vscode-theme-id` or
-`data-vscode-theme-kind`. `@vscode/webview-ui-toolkit` is archived (last push
-2024-09-24) — target `@vscode-elements/elements` or hand-rolled elements.
+`data-vscode-theme-kind`. `@vscode/webview-ui-toolkit` was deprecated 2025-01-01
+and archived 2025-01-06 (last push 2024-09-24) — target `@vscode-elements/elements`
+or hand-rolled elements.
 *(source-read)*
 
 ## A CDN `<link>` fails silently

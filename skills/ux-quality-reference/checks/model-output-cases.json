@@ -1,0 +1,83 @@
+{
+  "$comment": "Adversarial inputs for UX-AI-12. Feed each case's markdown to the product's own model-output renderer. Fail the test when the rendered HTML matches any global_forbid or case forbid regex, or fails to match any require regex. Regexes are JavaScript and Python compatible. Apply them with the case-insensitive flag. naive_output is a rendering that must fail the case, and safe_output one that must pass it, so the file checks itself (actions_scan.py --self-test). canary.example is a reserved name that never resolves.",
+  "version": 1,
+  "flags": "i",
+  "canary_host": "canary.example",
+  "global_forbid": [
+    "<img\\b[^>]*\\bsrc\\s*=\\s*[\"']?(https?:)?//",
+    "<link\\b[^>]*\\brel\\s*=\\s*[\"']?preload",
+    "<script\\b",
+    "<iframe\\b",
+    "<[a-z][^>]*\\son[a-z]+\\s*=",
+    "\\bhref\\s*=\\s*[\"']?\\s*(javascript|data|vbscript):"
+  ],
+  "cases": [
+    {
+      "id": "remote-inline-image",
+      "rules": ["UX-AI-09", "UX-AI-12"],
+      "markdown": "![x](https://canary.example/p.png)",
+      "naive_output": "<p><img src=\"https://canary.example/p.png\" alt=\"x\"></p>",
+      "safe_output": "<p>[image blocked: x]</p>"
+    },
+    {
+      "id": "reference-style-image",
+      "rules": ["UX-AI-09", "UX-AI-12"],
+      "note": "A regex for ![](...) misses this form. The URL sits in a definition line, not in the image.",
+      "markdown": "![x][r]\n\n[r]: https://canary.example/p.png",
+      "naive_output": "<p><img src=\"https://canary.example/p.png\" alt=\"x\"></p>",
+      "safe_output": "<p>[image blocked: x]</p>"
+    },
+    {
+      "id": "preload-hoist",
+      "rules": ["UX-AI-09", "UX-AI-12"],
+      "note": "A renderer can add a preload link beside the image. The same input as the remote image, a different symptom.",
+      "markdown": "![x](https://canary.example/p.png)",
+      "naive_output": "<link rel=\"preload\" as=\"image\" href=\"https://canary.example/p.png\"><p>x</p>",
+      "safe_output": "<p>[image blocked: x]</p>"
+    },
+    {
+      "id": "bare-url-with-query",
+      "rules": ["UX-AI-11", "UX-AI-12"],
+      "note": "Link text can hide the data in the URL. A rendered link shows its host as visible text outside the attribute.",
+      "markdown": "[docs](https://canary.example/c?q=secret)",
+      "require": [">[^<]*canary\\.example[^<]*<"],
+      "naive_output": "<p><a href=\"https://canary.example/c?q=secret\">docs</a></p>",
+      "safe_output": "<p><a href=\"https://canary.example/c?q=secret\" rel=\"noopener noreferrer\">docs</a> (canary.example)</p>"
+    },
+    {
+      "id": "javascript-link",
+      "rules": ["UX-AI-10", "UX-AI-12"],
+      "markdown": "[x](javascript:alert(1))",
+      "naive_output": "<p><a href=\"javascript:alert(1)\">x</a></p>",
+      "safe_output": "<p>x</p>"
+    },
+    {
+      "id": "data-link",
+      "rules": ["UX-AI-10", "UX-AI-12"],
+      "markdown": "[x](data:text/html;base64,PHNjcmlwdD4=)",
+      "naive_output": "<p><a href=\"data:text/html;base64,PHNjcmlwdD4=\">x</a></p>",
+      "safe_output": "<p>x</p>"
+    },
+    {
+      "id": "raw-img-onerror",
+      "rules": ["UX-AI-10", "UX-AI-12"],
+      "markdown": "<img src=x onerror=alert(1)>",
+      "naive_output": "<img src=x onerror=alert(1)>",
+      "safe_output": "<p>&lt;img src=x onerror=alert(1)&gt;</p>"
+    },
+    {
+      "id": "raw-script",
+      "rules": ["UX-AI-10", "UX-AI-12"],
+      "markdown": "<script>alert(1)</script>",
+      "naive_output": "<script>alert(1)</script>",
+      "safe_output": "<p>&lt;script&gt;alert(1)&lt;/script&gt;</p>"
+    },
+    {
+      "id": "raw-iframe",
+      "rules": ["UX-AI-10", "UX-AI-12"],
+      "markdown": "<iframe src=\"https://canary.example/f\"></iframe>",
+      "naive_output": "<iframe src=\"https://canary.example/f\"></iframe>",
+      "safe_output": "<p>&lt;iframe src=\"https://canary.example/f\"&gt;&lt;/iframe&gt;</p>"
+    }
+  ]
+}

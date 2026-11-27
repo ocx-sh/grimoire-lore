@@ -5,7 +5,7 @@ toolchain itself is being bumped. It holds the one-pin pattern and the order in 
 a bump touches things. The pin policy itself is SW-GATE-08, the derivation is
 SW-CORE-09, and the floor leg is SW-LANG-03.
 
-Measured 2026-10-10 on Swift 6.4.0 (current) and 6.3.3 (previous). The CI shape below
+Measured 2026-10-10 on Swift 6.4.0 (then current) and 6.3.3 (previous); 6.4.3 is current on 2026-11-27 (read). The CI shape below
 is read from a public project and not run here.
 
 Contents: [One pin, derived everywhere](#one-pin-derived-everywhere) ·
@@ -17,7 +17,7 @@ Commands in this file were translated 2026-10-11 to the portable dialect (git-fe
 
 ## One pin, derived everywhere
 
-`.swift-version` holds the exact patch, for example `6.4.0`. The primary CI image is
+`.swift-version` holds the exact patch, for example `6.4.3`. The primary CI image is
 built from that file, so a bump is one edit and a floating tag such as `swift:6.3`
 cannot split two legs onto different patches (`swift:6.3` floated to 6.3.3 during
 this research). A literal `swift:` tag is allowed on a matrix leg that exists to test

@@ -1,0 +1,22 @@
+# Provenance allowlist for CH-CORE-15: one "<host> <provenance>" per line.
+# A human keeps this file. A host listed as platform or authority may back a
+# rule threshold. The match is a whole host, so adding a host admits every page on it.
+# Pass it as: facts_check.py --hosts hosts.txt FILE...
+#
+# Hosts read by a human before listing, 2026-11-27.
+www.linkedin.com platform
+developers.google.com platform
+support.google.com platform
+docs.x.com platform
+developers.facebook.com platform
+atproto.com platform
+docs.joinmastodon.org platform
+mastodon.social platform
+#
+# Not listed, waiting on the owner (see "What an agent asks a human" in SKILL.md):
+# support.reddithelp.com, www.reddit.com, www.producthunt.com, api.producthunt.com,
+# help.producthunt.com, support-dev.discord.com, discord.com, github.com
+# (github.com admits every repository on GitHub).
+#
+# Registries also cite other hosts (docs.github.com, news.ycombinator.com and more).
+# facts_check.py --hosts prints each one until the owner lists it or drops the row.

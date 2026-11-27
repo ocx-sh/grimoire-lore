@@ -68,20 +68,25 @@ every query reads as a missing page.
 
 ## Analytics vendors
 
-Only needed when the repo wants page traffic. Confirm current pricing at the
-vendor's own page before citing a number. Two rows below were read from
-third-party trackers rather than the vendor.
+Only needed when the repo wants page traffic. Satisfy MKT-MEAS-01 to 04 in
+the `marketing-measurement` skill first: an owner-approved decision record, and
+no client script before consent where the audience requires it. Confirm
+current pricing at the vendor's own page before citing a number. The Umami tier
+and the Plausible and Fathom event cells were confirmed at the vendor's own
+pages on 2026-11-27. The other prices were not re-checked there.
 
 | Vendor | Self-host | Hosted entry cost | Named custom events |
 |---|---|---|---|
-| Plausible | free, AGPL | about 9 a month at the smallest tier | yes, on every plan |
-| Umami | free, MIT | a free hobby tier is reported, unconfirmed at the vendor's own page | yes, including the free tier |
+| Plausible | free, AGPL | about 9 a month at the smallest tier | named events yes; properties need the Business plan (about 19 a month) |
+| Umami | free, MIT | free Hobby tier, 100K events a month | yes, including the free tier |
 | GoatCounter | free, source available | free for reasonable public usage | no, click tracking only |
-| Fathom | not offered | about 45 a month | yes, on every plan |
+| Fathom | not offered | about 45 a month | name and numeric value only, no properties |
 
-A vendor with no named custom event cannot carry the zero-result signal or the
-feedback vote. That rules out GoatCounter and the free tier of the large
-edge-network analytics product, both of which answer page views only.
+A vendor with no named custom event, or with events that carry no properties,
+cannot carry the zero-result signal or the feedback vote. That rules out
+GoatCounter and the free tier of the large edge-network analytics product, both
+of which answer page views only. It also rules out Fathom, whose events carry no
+properties. Plausible carries both signals only on the Business plan.
 
 A repository with no site at all still has one signal at zero cost. The forge's
 own repository traffic endpoint returns 14 days of views, unique visitors and

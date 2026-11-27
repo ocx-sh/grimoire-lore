@@ -1,0 +1,58 @@
+# LinkedIn facts
+
+Every LinkedIn limit, policy clause, fold figure and reach effect the skill uses sits in this file and nowhere else. Cite a row by its id, in square brackets, such as `[LI-F01]`.
+
+## Dates and versions
+
+- Fetched and verified: 2026-11-27. Every `verified` date is the agent's own fetch date, because LinkedIn Help pages show only a relative age ("Last updated: N ago"). The age is recorded as `relative:<text>@<fetch date>`.
+- Refresh cadence: `refresh_days` is 180 for hard limits and 90 for policy, behaviour, label triggers and third-party figures. This skill has no 30-day row. The checker `facts_check.py` in `channel-publishing` fails on the first row past `verified + refresh_days`. Re-fetch the page; never extend the date.
+- Every row on `linkedin.com` or `ftc.gov` is a manual row. LinkedIn bars automated access, so no scheduled job fetches it. A human re-reads the page, compares it with `expect`, and edits `value` and `verified`. An agent may read a `linkedin.com/help/` or `linkedin.com/legal/` page with a plain HTTP client to prepare that edit, and never loads member content.
+- Re-check events: a LinkedIn client redesign (fold rows), MagicPost's stated December 2026 re-check of its July 27 changes (reach rows), and the Marketing API sunset on 15 Jan 2027 (LI-F16).
+- Provenance: `platform` is LinkedIn's own page or developer documentation, `authority` a regulator or standards body, `independent` an unaffiliated practitioner, `vendor` a vendor's data. A `vendor` row is a claim, never a limit, and never a threshold in `li_draft_check.py` (CH-CORE-15).
+- Reach figures compare each creator with their own posts unless a row says otherwise. None counts clicks. They conflict with each other (see LI-F31 to LI-F36), so quote a range with its baselines and its source, never one number (CH-LI-23).
+
+Manual case 11 asks a human to post an image with a typed URL in the composer and confirm that it shows the image, a clickable URL and no preview card. The checker reads the line below. Replace `not run` with `pass <YYYY-MM-DD>` only after a human ran it.
+
+case11: not run
+
+## Rows
+
+| id | platform | fact | value | url | source_date | verified | refresh_days | provenance | expect |
+|---|---|---|---|---|---|---|---|---|---|
+| LI-F01 | linkedin | post text limit | 3,000 characters | https://www.linkedin.com/help/linkedin/answer/a528176 | relative:2 months ago@2026-11-27 | 2026-11-27 | 180 | platform | 3,?000 characters |
+| LI-F02 | linkedin | link preview image | 1200 x 627 px at 1.91:1 | https://www.linkedin.com/help/linkedin/answer/a525301 | relative:2 years ago@2026-11-27 | 2026-11-27 | 180 | platform | 1200 \(w\) x 627 \(h\) |
+| LI-F03 | linkedin | document post | 100 MB and 300 pages | https://www.linkedin.com/help/linkedin/answer/a518909 | relative:3 years ago@2026-11-27 | 2026-11-27 | 180 | platform | 100 ?MB and 300 pages |
+| LI-F04 | linkedin | image post | 20 images, 5 MB each | https://www.linkedin.com/help/linkedin/answer/a527229 | relative:1 day ago@2026-11-27 | 2026-11-27 | 180 | platform | 20 images |
+| LI-F05 | linkedin | video post | up to 15 minutes, 5 GB | https://www.linkedin.com/help/linkedin/answer/a7174587 | relative:2 years ago@2026-11-27 | 2026-11-27 | 180 | platform | 15 minutes |
+| LI-F06 | linkedin | poll | question 140, option 30 characters | https://www.linkedin.com/help/linkedin/answer/a527270 | relative:1 year ago@2026-11-27 | 2026-11-27 | 180 | platform | 140 characters |
+| LI-F07 | linkedin | an image post carries a URL or an image, not both | not both at the same time | https://www.linkedin.com/help/linkedin/answer/a527229 | relative:1 day ago@2026-11-27 | 2026-11-27 | 90 | platform | either a URL link or an image |
+| LI-F08 | linkedin | link card source tags and image | og:title, og:image, og:description, og:url; image at least 1200x627, at most 5 MB, about 1.91:1 | https://www.linkedin.com/help/linkedin/answer/a521928 | relative:3 years ago@2026-11-27 | 2026-11-27 | 180 | platform | og:image |
+| LI-F09 | linkedin | Post Inspector refresh applies to new posts only | existing posts keep the old preview | https://www.linkedin.com/help/linkedin/answer/a6233775 | relative:3 years ago@2026-11-27 | 2026-11-27 | 180 | platform | Post Inspector |
+| LI-F10 | linkedin | supported image types | GIF, JPEG, PNG, WEBP; SVG is not listed | https://www.linkedin.com/help/linkedin/answer/a564109 | relative:2 months ago@2026-11-27 | 2026-11-27 | 180 | platform | [Ww][Ee][Bb][Pp] |
+| LI-F11 | linkedin | document title | clear, concise, accurate; no length limit stated | https://www.linkedin.com/help/linkedin/answer/a517910 | relative:3 years ago@2026-11-27 | 2026-11-27 | 180 | platform | clear, concise |
+| LI-F12 | linkedin | automatic alt text | LinkedIn may add alt text itself; it is LinkedIn's guess, not the author's | https://www.linkedin.com/help/linkedin/answer/a519856 | relative:3 years ago@2026-11-27 | 2026-11-27 | 180 | platform | automatically add alt-text |
+| LI-F13 | linkedin | a poll cannot be edited once created | no edit | https://www.linkedin.com/help/linkedin/answer/a527270 | relative:1 year ago@2026-11-27 | 2026-11-27 | 180 | platform | can.t be edited once |
+| LI-F14 | linkedin | Images API alt text length | maximum 4,086 characters, recommended under 120 | https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/images-api | 2026-06-19 | 2026-11-27 | 180 | platform | 4,?086 |
+| LI-F15 | linkedin | Documents API has a title field and no alt text field | 100 MB and 300 pages | https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/documents-api | 2026-06-19 | 2026-11-27 | 180 | platform | 100 ?MB and 300 pages |
+| LI-F16 | linkedin | Marketing API version 202601 sunset | 2027-01-15 | https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/posts-api | 2026-05-07 | 2026-11-27 | expires:2027-01-15 | platform | 202601 |
+| LI-F17 | linkedin | User Agreement 8.2 items 2, 3, 13 and 15 bar scraping, bypassing use limits, bots that create, comment on, like or share posts, and overlays | effective 2025-11-03 | https://www.linkedin.com/legal/user-agreement | 2025-11-03 | 2026-11-27 | 90 | platform | November 3, 2025 |
+| LI-F18 | linkedin | accounts that use such tools risk restriction | restricted or shut down | https://www.linkedin.com/help/linkedin/answer/a1341387 | relative:2 years ago@2026-11-27 | 2026-11-27 | 90 | platform | restricted or shut down |
+| LI-F19 | linkedin | engagement pods and automated comments are not allowed | stated 2026-03-13 | https://news.linkedin.com/2026/authentic-content-and-conversations | 2026-03-13 | 2026-11-27 | 90 | platform | aren.t allowed |
+| LI-F20 | linkedin | no agreeing ahead of time to like or re-share | policy text, undated | https://www.linkedin.com/legal/professional-community-policies | none | 2026-11-27 | 90 | platform | ahead of time to like or re-share |
+| LI-F21 | linkedin | AI-assisted content is welcome when it reflects a real person's view; LinkedIn recommends saying so when AI was relied on heavily | recommendation, not a field | https://www.linkedin.com/help/linkedin/answer/a1481496 | relative:1 month ago@2026-11-27 | 2026-11-27 | 90 | platform | reflects a real person.s perspective |
+| LI-F22 | linkedin | Brand partnership label for content shared in exchange for value; public posts only; resets to Off for each post | set by a human, no API field found | https://www.linkedin.com/help/linkedin/answer/a1627083 | relative:3 years ago@2026-11-27 | 2026-11-27 | 90 | platform | exchange for value |
+| LI-F23 | linkedin | LinkedIn may limit mentions of members you are not connected with | no cap stated | https://www.linkedin.com/help/linkedin/answer/a525082 | relative:2 years ago@2026-11-27 | 2026-11-27 | 90 | platform | limit your ability to mention |
+| LI-F24 | linkedin | LinkedIn may limit reposting from non-connections | no cap stated | https://www.linkedin.com/help/linkedin/answer/a525047 | relative:3 weeks ago@2026-11-27 | 2026-11-27 | 90 | platform | [Rr]epost |
+| LI-F25 | linkedin | reach reduction for low-quality video is temporary and no reset by reposting is offered | temporary | https://www.linkedin.com/help/linkedin/answer/a10728043 | relative:7 months ago@2026-11-27 | 2026-11-27 | 90 | platform | temporary |
+| LI-F26 | github | GitHub traffic referrers cover the last 14 days and need write access | 14 days | https://docs.github.com/en/rest/metrics/traffic | none | 2026-11-27 | 180 | platform | 14 days |
+| LI-F27 | linkedin | fold on mobile, third-party estimate (3P, 6 of 8 vendor pages, March to November 2026, no disclosed method); LinkedIn states no fold | about 140 characters | https://authoredup.com/blog/linkedin-character-limit | 2026-11-05 | 2026-11-27 | 90 | vendor | 140 |
+| LI-F28 | linkedin | fold on mobile, outlier (3P, Pollen, 12 Mar 2026) | about 210 characters | https://www.justpollen.com/blog/linkedin-character-limit | 2026-03-12 | 2026-11-27 | 90 | vendor | 210 |
+| LI-F29 | linkedin | fold on mobile, outlier (3P, Supergrow preview tool, undated) | 2 lines, about 90 to 140 characters | https://www.supergrow.ai/tools/linkedin-post-preview | none | 2026-11-27 | 90 | vendor | 2 lines |
+| LI-F30 | linkedin | a screen reader handles Unicode styled letters badly (independent test; NVDA 2024.4.2, VoiceOver macOS 15.3.1 and iPadOS 18.3.1, Narrator Windows 11 24H2 did not announce them, JAWS 2025 spelled them) | do not use styled letters | https://adrianroselli.com/2025/03/dont-use-fake-bold-or-italic-in-social-media.html | 2026-11-20 | 2026-11-27 | 180 | independent | JAWS |
+| LI-F31 | linkedin | a preview card as the only visual: -35% impressions (3P, MagicPost, 865,980 posts, same-creator control, 29 Oct 2026) | -35% | https://magicpost.in/blog/linkedin-external-links-reach | 2026-10-29 | 2026-11-27 | 90 | vendor | 35% |
+| LI-F32 | linkedin | a URL typed in a text post is not distinguishable from zero: -2%; carousel and video -1% (3P, MagicPost, 865,980 posts, 29 Oct 2026) | -2% | https://magicpost.in/blog/linkedin-external-links-reach | 2026-10-29 | 2026-11-27 | 90 | vendor | On text posts |
+| LI-F33 | linkedin | a URL in an image post: -5% (3P, MagicPost, 865,980 posts, 29 Oct 2026) | -5% | https://magicpost.in/blog/linkedin-external-links-reach | 2026-10-29 | 2026-11-27 | 90 | vendor | image posts |
+| LI-F34 | linkedin | a link in the first comment against the body: -2%, no measurable difference; clicks on it are not counted (3P, MagicPost, 865,980 posts, 29 Oct 2026) | -2% | https://magicpost.in/blog/linkedin-external-links-reach | 2026-10-29 | 2026-11-27 | 90 | vendor | [Cc]omment |
+| LI-F35 | linkedin | typed URL in text -12% before mid-May 2026 and -21% since; card -39% then -19%; "link in the comments" line -8% then -16% (3P, MagicPost, 687,000 posts, same-creator average baseline, pitch control not stated, 6 Oct 2026) | -21% | https://magicpost.in/studies/linkedin-algorithm-changes | 2026-10-06 | 2026-11-27 | 90 | vendor | 687,?000 |
+| LI-F36 | linkedin | an in-body URL carries no penalty: 858 against 795 median impressions (3P, MagicPost, 1.2M-post article, pooled medians, 5 Jun 2026) | no penalty | https://magicpost.in/blog/linkedin-algorithm-2026 | 2026-06-05 | 2026-11-27 | 90 | vendor | carries no penalty |
+| LI-F37 | linkedin | the FTC says an endorsement disclosure goes with the endorsement message itself and not behind a "more" tap or only on a profile (FTC, Disclosures 101 for social media influencers, Nov 2019) | placement in the post's first lines | https://www.ftc.gov/business-guidance/resources/disclosures-101-social-media-influencers | none | 2026-11-27 | 90 | authority | endorsement message itself |

@@ -30,17 +30,19 @@ Contents: [What the Gate Does Not Catch](#what-the-gate-does-not-catch) ·
 
 - **The single most characteristic agent-written Java failure is silent in every
   default configuration measured.** `CatchingUnchecked`, `UnusedException` and
-  `InterruptedExceptionSwallowed` are all in Error Prone 2.36.0's
-  `DISABLED_CHECKS` (read from `BuiltInCheckerSuppliers.java`, verified
-  2026-09-12). The docs site's severity field does not tell you what runs. The
+  `InterruptedExceptionSwallowed` are all in Error Prone's `DISABLED_CHECKS` at
+  every release from 2.36.0 through 2.53.0 (read from
+  `BuiltInCheckerSuppliers.java`, verified 2026-11-27). The docs site's severity field does not tell you what runs. The
   promotion itself is `JAVA-LINT-02`'s row, stated there once and not restated
   here: this family states the code shape, `JAVA-LINT` states the flag.
-- **Three SonarJava keys below are cited from the catalogue, not verified.**
-  `S2095`, `S1181` and `S2142` were not independently checked as of 2026-09-12.
-  Before treating SonarQube as this family's gate, confirm each key is
-  Community-tier and rendered as an Issue rather than a Security Hotspot. A
-  Security Hotspot is invisible to the usual "no new Issues" quality gate, which
-  is exactly how `JAVA-ERR-07` loses its Sonar coverage.
+- **Two of the three SonarJava keys below are verified, and one is not.**
+  `S1181` (a code smell) and `S2142` (a bug) are open-source `sonar-java` rules
+  in the default `Sonar_way` profile, so they are Community-tier Issues (read
+  2026-11-27). `S2095` left the open-source plugin in June 2024 for a separate
+  symbolic-execution plugin and its tier is unverified, so confirm it on the
+  server before treating SonarQube as this family's gate. A Security Hotspot is
+  invisible to the usual "no new Issues" quality gate, which is why each key's
+  type matters.
 - **Error Prone measured 11/32 in the reference corpus and SpotBugs as a real
   gate 2/32 (2026-09-12), so 21/32 run neither.** Assume the rules below are
   enforced by reading unless the build file proves otherwise, and never reach
@@ -64,7 +66,7 @@ pass. Until that grep is clean, every row here is enforced by reading.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| JAVA-ERR-01 | A caught `InterruptedException`, including one caught implicitly by a wider `catch (Exception)` or `catch (Throwable)`, must either call `Thread.currentThread().interrupt()` or propagate. Never log it like any other exception. | Swallowing it clears cooperative cancellation for every caller up the stack. Two distinct mistakes hide here: calling `Thread.interrupted()`, which *clears* the bit, instead of `currentThread().interrupt()`, and never noticing the interrupt was caught at all. A blocking call inside a Gradle `ValueSource` or `BuildService` that swallows the interrupt breaks build cancellation. | `InterruptedInCatchBlock` (Error Prone 2.36.0 `ENABLED_WARNINGS`, verified 2026-09-12) catches only the first mistake. The second needs `-Xep:InterruptedExceptionSwallowed:ERROR`. Reading check: see block JAVA-ERR-01, then for each hit whose `try` block calls `await(`, `wait(`, `join(`, `sleep(`, `waitFor(` or `.get(`, require `interrupt()` or a rethrow in the body. Empty output is the pass. Kotlin side: `KT-ERR-02`, where no detekt rule exists at any version. | MUST |
+| JAVA-ERR-01 | A caught `InterruptedException`, including one caught implicitly by a wider `catch (Exception)` or `catch (Throwable)`, must either call `Thread.currentThread().interrupt()` or propagate. Never log it like any other exception. | Swallowing it clears cooperative cancellation for every caller up the stack. Two distinct mistakes hide here: calling `Thread.interrupted()`, which *clears* the bit, instead of `currentThread().interrupt()`, and never noticing the interrupt was caught at all. A blocking call inside a Gradle `ValueSource` or `BuildService` that swallows the interrupt breaks build cancellation. | `InterruptedInCatchBlock` (in `ENABLED_WARNINGS` from Error Prone 2.47.0, and in no set before it, verified 2026-11-27) catches only the first mistake. The second needs `-Xep:InterruptedExceptionSwallowed:ERROR`. Reading check: see block JAVA-ERR-01, then for each hit whose `try` block calls `await(`, `wait(`, `join(`, `sleep(`, `waitFor(` or `.get(`, require `interrupt()` or a rethrow in the body. Empty output is the pass. Kotlin side: `KT-ERR-02`, where no detekt rule exists at any version. | MUST |
 | JAVA-ERR-04 | Never construct a new exception from a caught one without passing it as the cause. `new SomeException("...: " + e.getMessage())` is always wrong. | It *looks* like the failure survived, because the message string does, while the stack trace, the exception type and every suppressed exception are discarded. A typed exception mapping a child process's exit code carries the underlying `IOException` or `InterruptedException` as its cause, never a reformatted string. | `-Xep:UnusedException:ERROR` catches the general shape. The specific one: see block JAVA-ERR-04. Any hit is the finding, and empty output is the pass. For a deliberate ignore, name the variable `unused` or `_`, which is the convention the check itself recognises. Kotlin side: `KT-ERR-04`, where detekt's `SwallowedException` covers it on by default. | MUST |
 | JAVA-ERR-02 | Do not catch `Throwable` or `Error`, except at one documented top-level boundary such as a framework's uncaught-exception hook. In test code this is not a style point: `fail()` and every `assert*` throw `AssertionError`, so `try { ...; fail(); } catch (Throwable t) { }` makes the test structurally unable to fail. | Production: masks `OutOfMemoryError` and `StackOverflowError`. Test: masks the assertion itself, which is the failure mode an agent writing a negative test reaches for by default. | `TryFailThrowable` (Error Prone `ENABLED_ERRORS`, on by default) covers the test shape only. Reading check for the production shape: see block JAVA-ERR-02. Any hit outside one documented boundary is the finding, and empty output is the pass. SonarJava `S1181` covers it where SonarQube runs, subject to the key caveat above. Kotlin side: `KT-ERR-01`, the same mistake wearing `runCatching` instead of a keyword and invisible to every lint. | MUST |
 
@@ -96,7 +98,7 @@ catch (InterruptedException e) { Thread.currentThread().interrupt(); throw new R
 ## On by Default in Error Prone
 
 `StreamResourceLeak`, `MustBeClosedChecker` and `CatchAndPrintStackTrace` all
-fire under a plain Error Prone run (2.36.0, verified 2026-09-12), so the gate
+fire under a plain Error Prone run (2.36.0 through 2.53.0, verified 2026-11-27), so the gate
 here is the compile itself and the only way to lose it is to turn it off:
 
 ```bash
@@ -112,8 +114,8 @@ above it, or it is the finding (`JAVA-LINT-03`).
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| JAVA-ERR-03 | Acquire every `Closeable` and `AutoCloseable` inside try-with-resources, including the `Stream` returned by `Files.walk`, `list`, `lines`, `find` and `newDirectoryStream`, and including a wrapping stream such as `ObjectInputStream` whose inner stream is closed separately. | `Stream<String>`'s type signature gives no hint that it holds an open file descriptor. The JDK's own `Files` javadoc says `lines` "encapsulates a `Reader`" and the other four "encapsulate one or more `DirectoryStream`s". Closing only the wrapped stream leaves the wrapper's own buffers and state unreleased. | `StreamResourceLeak` and `MustBeClosedChecker`, both on by default, plus SonarJava `S2095` where SonarQube runs (key unverified, see above). Do not name PMD `CloseResource` as a third option: SonarSource records `S2095` as having deprecated it, and PMD is enforced 0/32. Reading check: see block JAVA-ERR-03. A hit is not itself the finding, a hit whose line is not inside a `try (` header is. Empty output is the pass. Kotlin side: `KT-ERR-03`, where the type-level gap is worse. | MUST |
-| JAVA-ERR-07 | Library code, meaning anything that is not a CLI `main`, never calls `System.exit()` and never calls `printStackTrace()` in place of the configured logger. Translate a child process's exit code into a typed exception instead of re-raising it as your own. | A library must not own process lifecycle, and a `printStackTrace()` call writes past log aggregation and past every log level. Sharper for a build plugin than for the generic case: `System.exit()` from plugin code kills the Gradle daemon mid-build. | `CatchAndPrintStackTrace` (on by default) covers the second half and reports as an ordinary compiler diagnostic. SpotBugs `DM_EXIT` covers the first half where SpotBugs is in the gate. **Do not rely on SonarJava `S4507`**: it is a Security Hotspot, invisible to a "no new Issues" quality gate. Reading check: see block JAVA-ERR-07. Any hit is the finding, and empty output is the pass. Kotlin side: `KT-ERR-05`, one detekt rule over four call shapes, shipped `active: false`. | MUST for a library, an SDK or a build plugin. N/A for a CLI entry point |
+| JAVA-ERR-03 | Acquire every `Closeable` and `AutoCloseable` inside try-with-resources, including the `Stream` returned by `Files.walk`, `list`, `lines`, `find` and `newDirectoryStream`, and including a wrapping stream such as `ObjectInputStream` whose inner stream is closed separately. | `Stream<String>`'s type signature gives no hint that it holds an open file descriptor. The JDK's own `Files` javadoc says `lines` "encapsulates a `Reader`" and the other four "encapsulate one or more `DirectoryStream`s". Closing only the wrapped stream leaves the wrapper's own buffers and state unreleased. | `StreamResourceLeak` and `MustBeClosedChecker`, both on by default (from 2.51.0 `MustBeClosedChecker` also requires `Arena.ofConfined()` and `Arena.ofShared()` to be closed), plus SonarJava `S2095` where SonarQube runs (key unverified, see above). Do not name PMD `CloseResource` as a third option: SonarSource records `S2095` as having deprecated it, and PMD is enforced 0/32. Reading check: see block JAVA-ERR-03. A hit is not itself the finding, a hit whose line is not inside a `try (` header is. Empty output is the pass. Kotlin side: `KT-ERR-03`, where the type-level gap is worse. | MUST |
+| JAVA-ERR-07 | Library code, meaning anything that is not a CLI `main`, never calls `System.exit()` and never calls `printStackTrace()` in place of the configured logger. Translate a child process's exit code into a typed exception instead of re-raising it as your own. | A library must not own process lifecycle, and a `printStackTrace()` call writes past log aggregation and past every log level. Sharper for a build plugin than for the generic case: `System.exit()` from plugin code kills the Gradle daemon mid-build. | `CatchAndPrintStackTrace` (on by default) covers the second half and reports as an ordinary compiler diagnostic. SpotBugs `DM_EXIT` covers the first half where SpotBugs is in the gate. **Do not rely on SonarJava `S4507` without reading the server's analyzer version**: SonarJava retyped it from Security Hotspot to Vulnerability on 2026-06-11 (tag `former-hotspot`), and a server bundling an older SonarJava still renders it as a Hotspot, invisible to a "no new Issues" quality gate. Reading check: see block JAVA-ERR-07. Any hit is the finding, and empty output is the pass. Kotlin side: `KT-ERR-05`, one detekt rule over four call shapes, shipped `active: false`. | MUST for a library, an SDK or a build plugin. N/A for a CLI entry point |
 
 ```sh
 # JAVA-ERR-03
@@ -216,8 +218,8 @@ counterpart.
    better.** An agent that knows `ExecutorService` became `AutoCloseable` in JDK
    19 does not know `close()` has no timeout, so the bound disappears in what
    looks like a modernisation.
-8. **Citing deprecated SonarJava `S1148`, or citing `S4507` without knowing it is
-   a Security Hotspot.** Do not route this family through Sonar at all: use
+8. **Citing deprecated SonarJava `S1148`, or citing `S4507` without checking
+   whether the server's SonarJava still renders it as a Security Hotspot.** Do not route this family through Sonar at all: use
    `CatchAndPrintStackTrace` or the grep.
 9. **"SpotBugs is declared in the POM" read as "SpotBugs runs in CI."** A
    `<reporting>` block only `mvn site` invokes is not a gate, and neither is a

@@ -1,0 +1,6 @@
+name: notify
+on: release
+jobs:
+  n:
+    steps:
+      - run: curl -X POST "${{ secrets.DISCORD_WEBHOOK }}"

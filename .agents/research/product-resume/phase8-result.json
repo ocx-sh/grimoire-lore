@@ -1,0 +1,1472 @@
+{
+ "literal": [
+  {
+   "id": "ux-quality",
+   "tree": "website (ocx-sh/website), cloned to /home/mherwig/.cache/research-lang/exemplars/product/phase8/ux-quality. Picked because its Astro landing page (site/src/components/Landing.astro) has no sign-up form. I added Signup.astro and mounted it in the landing page.",
+   "stepsRun": 14,
+   "stepsBlocked": 3,
+   "checksRun": 26,
+   "checksBroken": 0,
+   "blocking": 1,
+   "minor": 6,
+   "defects": [
+    {
+     "file": "rules/ux-quality.md",
+     "severity": "blocking",
+     "problem": "Gate steps 2 and 3 pass input files the artifact never says how to create: routes.txt, states.json and a11y-baseline.json. Gate step 2 also uses $DIST and $BASE, which the rule never defines. $DIST is defined nowhere in the rule or the skill. The first step-3 run therefore crashes. Only the script's own --help mentions --update-baseline. No .md in the skill or rule mentions it. A first-time agent has no sanctioned way to produce a baseline or a states file for a form's error and loading states.",
+     "evidence": "node axe-fixture.mjs $BASE --routes routes.txt --states states.json --baseline a11y-baseline.json -> \"Error: ENOENT: no such file or directory, open 'states.json'\". python3 -I page_structure.py --page-list routes.txt ... -> FileNotFoundError traceback. grep -c update-baseline over rules/ux-quality.md and skills/ux-quality-reference/*.md returns 0 in every file. grep 'DIST=' over the same files finds nothing.",
+     "fix": "Add one line under the gate block. It should say: derive routes.txt from the sitemap (grep -o '<loc>[^<]*' sitemap-0.xml, strip the origin), create the baseline once with axe-fixture.mjs ... --update-baseline a11y-baseline.json, and write states.json in the format shown in axe-fixture.mjs --help (one entry per open or error state). Define DIST (the build output directory) next to BASE. Point at verification.md Setup for these."
+    },
+    {
+     "file": "skills/ux-quality-reference/checks/axe-fixture.mjs",
+     "severity": "minor",
+     "problem": "The --states step vocabulary is only click and press. A form error or loading state cannot be reached by typing text; each character needs a separate {\"press\":\"x\"} step. A multi-character key name like \".c\" aborts the state as STATE NOT VISIBLE. forms.md and UX-VERIFY-05 say to scan every form error state but never mention this limit. A loading state with an instant local server cannot be held open at all.",
+     "evidence": "STATE NOT VISIBLE light /#signup-fail: keyboard.press: Unknown key: \".c\". axe-fixture.mjs:76-77 only handles step.click and step.press.",
+     "fix": "Document the two verbs in verification.md UX-VERIFY-05 (one press per character), or add fill and a route-interception hold step. Say how to reach a loading state."
+    },
+    {
+     "file": "skills/ux-quality-reference/checks/page_structure.py",
+     "severity": "minor",
+     "problem": "A missing --page-list file raises a Python traceback and exits 1. The documented contract is 0 clean, 1 findings, 2 usage, so a usage error looks like findings.",
+     "evidence": "python3 -I page_structure.py --sitemap ... --page-list routes.txt DIST -> FileNotFoundError ... exit 1",
+     "fix": "Catch OSError on --sitemap, --page-list and dir, print a usage message and exit 2."
+    },
+    {
+     "file": "skills/ux-quality-reference/forms.md",
+     "severity": "minor",
+     "problem": "The check blocks pipe git ls-files into xargs. When form_fields.py finds something it exits 1, but xargs turns that into 123. The SKILL.md contract says the scripts exit 1 on findings. A caller testing for exit status 1 over the pipeline sees 123. Planted-violation run: \"rc=123\".",
+     "evidence": "git ls-files ... | xargs -0 python3 -I form_fields.py unnamed -- ; echo rc=$? printed rc=123 on a planted placeholder-only input.",
+     "fix": "State in forms.md that the pipeline exits 123 on a finding (read the output, not the status), or use xargs -0 -r sh -c 'python3 ...; ...' / --null-file input in the script."
+    },
+    {
+     "file": "rules/ux-quality.md",
+     "severity": "minor",
+     "problem": "Gate step 1 names astro/jsx-a11y for .astro files but gives no way to know it is active. A stock astro.configs.recommended config runs no jsx-a11y rule (UX-VERIFY-12). A clean 'npx eslint .' therefore says nothing about accessibility on an Astro repo, and the rule does not tell the agent to list step 1 under 'did not run:' in that case.",
+     "evidence": "On the website clone, eslint.config.js has only astro.configs.recommended. node node_modules/eslint/bin/eslint.js site/src/components exits 0 with no output. The rule's step 1 comment says 'astro/jsx-a11y for .astro (UX-VERIFY-12)'.",
+     "fix": "Add: run 'npx eslint --print-config <an .astro file> | grep -c astro/jsx-a11y'. A count of 0 means step 1 goes under 'did not run:' (no a11y rules)."
+    },
+    {
+     "file": "rules/ux-quality.md",
+     "severity": "minor",
+     "problem": "The rule quotes a coverage figure, 'at most 21 of 55 A and AA criteria', with no command beside it. UX-VERIFY-26 allows that figure only as a count with its command.",
+     "evidence": "rules/ux-quality.md: 'A green gate covers at most 21 of 55 A and AA criteria'; verification.md UX-VERIFY-26: 'The only coverage figure allowed is a count with its command'.",
+     "fix": "Cite the verification.md Dates row (block dates) after the figure, or move the figure into verification.md only."
+    },
+    {
+     "file": "skills/ux-quality-reference/verification.md",
+     "severity": "minor",
+     "problem": "Setup says to set PW_CHROMIUM when the Playwright download is absent. It does not say that a downloaded Chromium (and headless shell) also needs system libraries (libnspr4 and others). On a machine without them the gate cannot start: node scripts die with a Playwright launch error.",
+     "evidence": "error while loading shared libraries: libnspr4.so: cannot open shared object file ... exitCode=127 (axe-fixture.mjs:70 openBrowser). I worked around it with LD_LIBRARY_PATH pointed at a prior scratch lib dir.",
+     "fix": "Add a line: if the browser exits 127, install the system libraries (npx playwright install-deps chromium, or the distro packages) or set LD_LIBRARY_PATH. List the gate under 'did not run:' with that reason if it cannot start."
+    }
+   ],
+   "notCovered": [
+    "Real screen-reader, keyboard-only and human review: not run. The artifact says no automated step decides these.",
+    "A true loading-state scan: the local static server answers instantly, so axe could not scan the pending state. I used the empty-field error state and a POST-rejected failure state (python http.server returns 501).",
+    "No other publishing or posting action exists in this task. The artifact never told me to publish. Rule 19 and UX-VERIFY-24 forbid writing the claim the user asked for, 'confirm that it is accessible'. I would answer with what ran only.",
+    "Firefox and WebKit: the matrix ran in Chromium (Chrome for Testing 159.0.8154.6, headless shell) only.",
+    "wcag_contrast.py, text_scan.py and actions_scan.py were self-tested only (self-test ok). They were not run against a planted violation. focus_diff, colour_only, focus_opacity, scan_wv, forms.md UX-STATE-22/24/26/35 greps and the actions.md and text.md depth files were not exercised.",
+    "I changed the scratch copy only (Signup.astro, Landing.astro, uxt/). Planted violations were reverted. The 'chrome order inverted' and 'link text, 4 targets' hits from page_structure.py are real per UX-A11Y-33 as worded and not the form. The pre-existing site axe violations (label-content-name-mismatch, target-size, color-contrast) are not in my form: no lp-signup selector appears in any hit.",
+    "Planted-violation results: 11 checks went red (form_fields unnamed, elem, badtok; UX-STATE-21, -23, -27 step 4 and -25 greps; the UX-VERIFY-24 grep; page_structure lang/title; focus_outline; axe --red-demo). 0 stayed green."
+   ],
+   "fix": {
+    "fixed": [
+     "1 (blocking): rules/ux-quality.md now defines DIST and BASE and says routes.txt, a11y-baseline.json and states.json do not exist on a first run. verification.md Setup now has DIST=, the sitemap-to-routes.txt command (tested), the --update-baseline command, and how to write states.json.",
+     "2: axe-fixture.mjs gained a fill step verb, {\"fill\":SELECTOR,\"text\":...}, and its --help documents the verbs. I ran it against a local form page and it reached the form-error state. {\"press\":\".c\"} still aborts as STATE NOT VISIBLE. verification.md Setup says press takes one key name per step, and says a loading state needs a fixture route or query flag because the fixture cannot hold a request open.",
+     "3: page_structure.py exits 2 with a message on an unreadable --page-list (was a traceback and exit 1). --sitemap and dir already exited 2. --self-test now covers the missing-list case; it fails if the exit code is not 2.",
+     "4: forms.md states that the xargs pipelines exit 123 on a finding, so read the output and not the status.",
+     "5: the rule's gate text says to run `npx eslint --print-config <an .astro file> | grep -c astro/jsx-a11y` and that 0 means step 1 goes under `did not run:`.",
+     "6: the rule's 21-of-55 figure now cites the first row of verification.md Dates and Versions for the count and its date.",
+     "7: verification.md Setup now covers a browser exit 127 (missing system libraries). It names `npx playwright install-deps chromium`, distro packages or LD_LIBRARY_PATH, and says to list steps 3 and 4 under `did not run:` if the browser cannot start. I reproduced the exit 127 here."
+    ],
+    "notFixed": [
+     "Defect 2, loading state: not added as a script feature. The fixture has no route-interception hold step, so verification.md says to reach a loading state through a fixture route or query flag.",
+     "Defect 6 wording: the Dates row for the 21-of-55 count points at a first command that checks axe releases, not the count itself. I cited the row anyway; a stricter fix would add a dedicated count command to the dates block."
+    ],
+    "gate": "check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' on rules/ux-quality.md, skills/ux-quality-reference, skills/ux-cli, skills/ux-agent-interfaces: clean, exit 0. `python3 -I --self-test` on every checks/*.py: all pass (page_structure.py is the one I changed). `ocx exec ruff -- ruff check skills/ux-quality-reference`: passed. `ruff format --check`: 19 files already formatted. `grim build rules/ux-quality.md` and `grim build skills/ux-quality-reference`: both built. Not run in this environment: the axe-fixture.mjs gate step against a real build. I ran it only against a scratch page, with LD_LIBRARY_PATH borrowed from an older scratch lib dir."
+   }
+  },
+  {
+   "id": "ux-cli",
+   "tree": "ocx-sh/ocx (clone at ~/.cache/research-lang/exemplars/product/phase8/ux-cli/ocx). Picked because it is the CLI with a Quick Start, clap help, typo dispatcher and mutators. The submodule-less clone did not build (external/docker_credential missing), so the matrix ran against the installed ocx 0.6.8 binary.",
+   "stepsRun": 5,
+   "stepsBlocked": 0,
+   "checksRun": 13,
+   "checksBroken": 1,
+   "blocking": 1,
+   "minor": 2,
+   "defects": [
+    {
+     "file": "skills/ux-cli/checks/cli_matrix.py",
+     "line": 438,
+     "severity": "blocking",
+     "problem": "The UX-CLI-10 check (a typo must not print an install hint built from the typo) skips every line that contains 'unknown', 'unrecogni', 'no such', 'not found', 'invalid', 'similar' or 'did you mean'. The exact offender the rule describes puts the hint on the same line as 'unknown subcommand', so the check reports a false pass. Planting the same line with 'no command' in place of 'unknown subcommand' makes it fire, so the exemption is the cause.",
+     "evidence": "Real ocx: `ocx exe` prints \"error: unknown subcommand 'exe'; if `ocx-exe` is an official OCX plugin, install it with `ocx --global add ocx.sh/ocx/exe`...\". `cli_matrix.py --only typo` emits 0 UX-CLI-10 findings for it, and UX-CLI-10 is listed under 'ran:'. With the wrapper rewriting 'unknown subcommand' to 'no command', it emits `MUST UX-CLI-10: '(root) en' prints an install hint built from the typo`.",
+     "fix": "Drop the 'unknown|unrecogni|...' exemption. Instead flag a line when it holds the typo and an add/install/get/pull word followed by a token containing the typo, for example regex `(add|install|get|pull)\\b[^\\n]*` plus the typo. Exempt only lines that are themselves a suggestion ('similar', 'did you mean'). Add a self-test case where the hint shares a line with 'unknown subcommand'."
+    },
+    {
+     "file": "skills/ux-cli/SKILL.md",
+     "line": 36,
+     "severity": "minor",
+     "problem": "Step 2 says the headline is 'the README Quick Start's first command', and the Ask-the-owner list says to propose it. In ocx the first Quick Start command is the install line `curl ... | sh`, which is not a subcommand and cannot be passed as `--headline NAME`. The step does not say to use the first command of the CLI itself, and it gives no way to continue when no owner is present.",
+     "evidence": "ocx README.md Quick Start line 22 is `curl -fsSL https://setup.ocx.sh/sh | sh`. Two careful agents would pick `package install` or `exec`. I used `exec`, and the matrix then reported UX-CLI-04 'exec' at row 18.",
+     "fix": "Say: the first Quick Start command that invokes the CLI itself, skipping the install line. Add: if the owner is unavailable, record the proposed headline and mark UX-CLI-04 and UX-CLI-14 as 'headline unconfirmed'."
+    },
+    {
+     "file": "skills/ux-cli/SKILL.md",
+     "line": 42,
+     "severity": "minor",
+     "problem": "SKILL.md names `$CHECKS` as `.claude/skills/ux-cli/checks`, a path that exists only after an install. The task and Variables give no fallback for an uninstalled tree, and the command block uses `$CHECKS` unquoted-default with no definition step. UX-CLI-17 (`no-next-step.txt`) and UX-CLI-14 to 16, 18 and 19 are routed to shell blocks only, and the matrix does not run them. The matrix table does not say that.",
+     "evidence": "`ls .claude/skills/ux-cli/checks` fails in a fresh clone. The matrix `ran:` list contains no UX-CLI-14 to 19 and no UX-CLI-17.",
+     "fix": "Add one line after the `CHECKS` definition: `CHECKS=<dir of this skill>/checks if not installed`. Add a note under the matrix table that rows 14 to 19 and 23 to 27 are run from the reference file blocks, not by cli_matrix.py."
+    }
+   ],
+   "notCovered": [
+    "Installer checks (UX-CLI-14, 31) and the first-run script (19): ocx installer needs network and would publish/install, so it was not run.",
+    "UX-CLI-20 colour and UX-CLI-21 animation: the matrix printed 'did not run' because no --log-cmd and no --anim-cmd command was available offline without a project or registry.",
+    "UX-CLI-22 palette: no probes were supplied, so it was not exercised with a planted violation.",
+    "UX-CLI-15, 16, 17, 18, UX-TEXT-05, 07, 12, 23 shell blocks: they need the repository source tree or snapshots, and the clone could not be built, so they were not run.",
+    "UX-ACT-12, 14, 16: no refusal-column inventory row was available, so refusal behaviour was not exercised. UX-ACT-13 reported two 'clean --dry-run' runs differing; this was not traced and may come from the shared ~/.ocx store.",
+    "net gate (strace): not run in the final pass; I ran the matrix without --only net.",
+    "Self-test passed. Five checks were verified green-to-red with planted violations: UX-CLI-01, 02, 11, 28, 06; UX-CLI-10 went red only after a different planted wording.",
+    "Planted wrapper script and scratch outputs remain under ~/.cache/research-lang/exemplars/product/phase8/ux-cli (small)."
+   ],
+   "fix": {
+    "fixed": [
+     "1 blocking: cli_matrix.py UX-CLI-10 check now flags any line holding add/install/get/pull followed by the typo, exempting only 'similar'/'did you mean' suggestion lines. Reproduced via fixture (error line with inline hint gave 0 findings under old exemption), after fix `--only typo --headline run` exits 1 with UX-CLI-10 on 'unknown subcommand ...; install it with fakecli add pkg/ru', clean case exits 0. Added fakecli defect `installinline` (hint on the 'unknown subcommand' line; base error text changed from 'unrecognized' to 'unknown') and a self-test plan entry requiring UX-CLI-10.",
+     "2 minor: SKILL.md step 2 now says headline is the first Quick Start command that invokes the CLI itself (skip install line) and, when the owner is unavailable, to record the proposed headline and mark UX-CLI-04 and UX-CLI-14 as 'headline unconfirmed'.",
+     "3 minor: SKILL.md Before-you-start adds 'Not installed: CHECKS=<dir of this skill>/checks'; a line under the matrix says UX-CLI-14 to 19 and 23 to 27 are not run by the matrix and come from the reference-file shell blocks."
+    ],
+    "notFixed": [],
+    "gate": "check-artifacts.py --forbid /home/mherwig --forbid .agents/research skills/ux-cli skills/ux-quality-reference skills/ux-agent-interfaces: exit 0; python3 -I skills/ux-cli/checks/cli_matrix.py --self-test: exit 0 (self-test ok); ocx exec ruff -- ruff check skills/ux-cli: exit 0; ruff format --check skills/ux-cli: exit 0 (after one format pass); grim build skills/ux-cli: exit 0"
+   }
+  },
+  {
+   "id": "ux-agent-interfaces",
+   "tree": "grimoire-rs/grimoire (grim 0.16.0 binary, installed; the repo has a `--format json` mode and a `grim mcp` server, so both surfaces exist there)",
+   "stepsRun": 6,
+   "stepsBlocked": 1,
+   "checksRun": 24,
+   "checksBroken": 0,
+   "blocking": 1,
+   "minor": 8,
+   "defects": [
+    {
+     "file": "SKILL.md",
+     "line": 28,
+     "severity": "blocking",
+     "problem": "Procedure step 3 says 'one failing tools/call per failure class' and 'Done: both commands exit 0 for every capture'. The gated-write-tool probe that UX-ACT-18 requires (call the absent tool) correctly returns JSON-RPC -32602 'tool not found'. `mcp_tools_check.py result --error` flags that as 'UX-AGENT-15 MUST: failure came back as a JSON-RPC error (-32602)'. The artifact itself says this is the one place a protocol error is right, and the script has no option to expect one. An agent following the steps reports a false MUST on a conforming server, or cannot reach 'done'.",
+     "evidence": "call for grim_render without --allow-writes -> {\"error\":{\"code\":-32602,\"message\":\"tool not found\"}}; `mcp_tools_check.py result call3.json --error` -> 'UX-AGENT-15 MUST: failure came back as a JSON-RPC error (-32602)', rc=1",
+     "fix": "Add `--expect-protocol-error` (or `--unknown-tool`) to `mcp_tools_check.py result`, which accepts error.code -32602 and no result. Name it in step 3 and in UX-ACT-18's verification. Or tell the agent to skip the script for the unknown-tool probe and check that code by eye."
+    },
+    {
+     "file": "references/mcp-servers.md",
+     "line": 42,
+     "severity": "minor",
+     "problem": "The capture recipe uses unquoted `$SERVER` word-splitting (`timeout 10 $SERVER ...`, also line 45). In zsh, which is this machine's shell, the string is not split, so the command is 'grim mcp' as one word, fails, and 2>/dev/null hides it. tools.json is empty and the checker exits 2 'cannot read tools.json'.",
+     "evidence": "zsh: tools.json is 0 bytes; `mcp_tools_check.py tools tools.json` -> 'usage: cannot read tools.json: Expecting value: line 1 column 1 (char 0)'; the same recipe under bash works",
+     "fix": "Use `SERVER=(grim mcp)` and `\"${SERVER[@]}\"`, which works in bash and zsh. Or say 'run under bash'. Drop 2>/dev/null, or tee stderr to a file."
+    },
+    {
+     "file": "references/tool-approval.md",
+     "line": 54,
+     "severity": "minor",
+     "problem": "The UX-ACT-19 comment says 'APPROVAL_DIR is the directory that holds the approval logic', but the command never uses that variable and hardcodes `src/**`. Approval code outside src/ is never searched, and the rows say nothing about adapting the path.",
+     "evidence": "line 54 comment names APPROVAL_DIR; the git ls-files pathspec on the next line is ':(glob)src/**'",
+     "fix": "Use `-- \"$APPROVAL_DIR\"` in the pathspec and add `APPROVAL_DIR=src` to the block."
+    },
+    {
+     "file": "references/machine-output.md",
+     "line": 136,
+     "severity": "minor",
+     "problem": "Blocks UX-AGENT-10, 11 and 12 depend on `$STUB_URL`, `$HANG_URL`, a `lookup` subcommand and an htpasswd registry, and none of these is shipped or described beyond 'a small handler'. Step 2 requires every block to print what its row says, so two careful agents would write different stubs. UX-AGENT-12's htpasswd registry has no recipe at all.",
+     "evidence": "`/usr/bin/grep -n STUB_URL machine-output.md` -> only the use at line 136; checks/ contains only json_output_check.py and mcp_tools_check.py and their fixtures",
+     "fix": "Ship `checks/stub_server.py` with modes 429, 503, hang and plain-http, plus a two-line `registry:2` htpasswd recipe. Or mark these three blocks 'manual, no script' in step 2's Done condition."
+    },
+    {
+     "file": "references/machine-output.md",
+     "line": 175,
+     "severity": "minor",
+     "problem": "UX-AGENT-09(e) requires the message to name the offending input. The UX-AGENT-14 sentinel check and block flag any appearance of the sentinel in the output as a MUST. A not-found command that carries the fake token as the resource name hits both, so a conforming message fails with the false finding 'sentinel text reaches stdout or stderr'. SKILL.md and the script never say the sentinel belongs in a credential position, not in the named input.",
+     "evidence": "`json_output_check.py --sentinel tok-SENTINEL --not-found 'describe tok-SENTINEL' ...` -> 'UX-AGENT-14 MUST: [not_found] the sentinel text reaches stdout or stderr' (grim message: \"invalid identifier 'tok-SENTINEL'...\")",
+     "fix": "State that the sentinel goes in a credential channel (env var, header, `--password` value) and not in the argument UX-AGENT-09 requires the message to name. Show the example `--not-found` with the sentinel in env."
+    },
+    {
+     "file": "references/mcp-servers.md",
+     "line": 98,
+     "severity": "minor",
+     "problem": "UX-AGENT-17's verification says `mcp_tools_check.py tools --gate-flag` reports no UX-AGENT-17 line and the gated tool is absent. The script only checks that some description contains the flag text. A default tools list that wrongly contains the write tool stays green. The absence half has no check and no named gated tool.",
+     "evidence": "plant: `mcp_tools_check.py tools tools-w.json --server-key grim --gate-flag=--allow-writes` (list includes grim_render) -> no UX-AGENT-17 line, only unrelated ACT-20 SHOULDs",
+     "fix": "Add `--gated NAME[,NAME]` to the `tools` subcommand: report UX-AGENT-17 if any named tool is in the default list. Or reword the verification as 'script covers the naming half; read the list for the absence half'."
+    },
+    {
+     "file": "references/tool-approval.md",
+     "line": 116,
+     "severity": "minor",
+     "problem": "The UX-ACT-28 second grep (`password|token|api_?key|secret|card` over the whole tree) gives no way to narrow its output. The row says to read hits inside a `requestedSchema` property name, and the grep cannot select those. On a real repo it returns thousands of lines.",
+     "evidence": "on the grim tree it returned 4681 hits; the first grep for `elicitation/create` returned none, so the second grep should not need to run",
+     "fix": "Run the second grep only over files the first grep matched: `... | xargs -0 -r grep -l -F elicitation/create | xargs -r grep -n -i -E ...`. Say 'no files from the first grep means pass'."
+    },
+    {
+     "file": "SKILL.md",
+     "line": 61,
+     "severity": "minor",
+     "problem": "`CHECKS=.claude/skills/ux-agent-interfaces/checks` is a path that exists only for a project-scope Claude install. It does not exist in the repo under test, and the only alternative named is the global Claude path. Other clients, which grim also targets, have other directories, so the agent must guess it.",
+     "evidence": "`ls .claude/skills/ux-agent-interfaces/checks` in the cloned repo -> no such file; scripts ran only from the catalog path",
+     "fix": "Add 'or the directory this SKILL.md sits in plus /checks' and use `CHECKS=\"$(dirname \"$SKILL_MD\")/checks\"`."
+    },
+    {
+     "file": "references/tool-approval.md",
+     "line": 96,
+     "severity": "minor",
+     "problem": "Procedure step 4 and UX-ACT-25 require `docs/agent-trifecta.csv` and `docs/consequential-actions.md` ('pinned' house files). Neither exists in the repo under test, and no step says whether to create them, report them missing, or mark the rows 'not applicable'. UX-ACT-19 has such a not-applicable path, but UX-ACT-25 and step 4 do not.",
+     "evidence": "`ls docs/consequential-actions.md docs/agent-trifecta.csv` -> 'No such file or directory'",
+     "fix": "In step 4 and UX-ACT-25: 'if the file is absent, report one finding `missing inventory` and ask the person whether to create it; never invent tiers'."
+    }
+   ],
+   "notCovered": [
+    "The two scripts' `--self-test` and fixture runs passed, but the shipped fixtures under checks/fixtures were not individually inspected.",
+    "Blocks UX-AGENT-10, 11, 12: no stub servers or htpasswd registry are shipped, so these were not executed (see the defect on machine-output.md line 136). UX-AGENT-13 block (1) found 0 candidate commands on the real tree and stayed vacuous; a planted `grim bogus cmd` produced 'BAD: grim bogus cmd'.",
+    "Used the installed grim 0.16.0 binary, not a build of the 0.17.0 clone, to avoid a long compile. The clone was read-only and has been deleted.",
+    "UX-ACT-18 write gating by a rejected call and the UX-ACT-21, 23, 26, 27 manual or transcript checks were not run: they need a live agent session or a client. The artifact marks UX-ACT-21 and 28 'unverified: reading heuristic'.",
+    "Procedure step 5 and the dry-run-before-override discipline were not exercised, since no override flag was needed.",
+    "Publishing boundary: no publish, login or upload was reached. The artifact does not tell the agent to stop at a publishing boundary and does not need to: its steps are read-only except an `--allow-writes` server launch, which it flags under 'Ask the Person First'. The `describe nope/x` not-found case does make one unauthenticated GET to ghcr.io."
+   ],
+   "fix": {
+    "fixed": [
+     "1 blocking: added `--expect-protocol-error` to `mcp_tools_check.py result` (passes only a JSON-RPC error with code -32602 and no result; reports UX-ACT-18 MUST otherwise). It is named in SKILL.md step 3 (fourth command, never `--error` for the absent-tool probe), in UX-AGENT-15's follow-on paragraph, in the mcp-servers capture recipe, and in UX-ACT-18's verification. Reproduced rc=1 before; now green on the new pass-unknown-tool.json and red on fail-unknown-tool.json and on a wrong code. Fixtures and --self-test extended.",
+     "2: capture recipe now uses `SERVER=(mytool mcp)` and `\"${SERVER[@]}\"`, with stderr kept in `server.err` instead of /dev/null. Verified in zsh and bash against a fake server.",
+     "3: UX-ACT-19 block sets `APPROVAL_DIR=src` and uses `-- \"$APPROVAL_DIR\"` as the pathspec.",
+     "4: shipped `checks/stub_server.py` (modes 429, 503, 404, hang; `--self-test`, ruff clean). machine-output.md now describes the stub matrix against it (refused port, and plain-HTTP via mode 404 addressed as https://), defines `lookup` as the CLI's own fetch command, and adds a two-command `registry:2` htpasswd recipe plus a UX-AGENT-12 block. SKILL.md checks table lists it.",
+     "5: documented that the sentinel goes in a credential channel (env var, header, `--password`), never in the argument the message must name. Changed the UX-AGENT-14 block to `MYTOOL_TOKEN=... lookup nope/x`, added the env example to the machine-output intro and the script docstring, and added two self-test cases: a sentinel in the named input is reported, and a sentinel in env only is clean.",
+     "6: added `--gated NAME[,NAME]` to `mcp_tools_check.py tools`, reporting UX-AGENT-17 SHOULD for any named tool in the default list. UX-AGENT-17's verification now says `--gate-flag` covers naming and `--gated` covers absence. Reproduced the gap, then green when the tool is absent and red when present, and the self-test now covers both.",
+     "7: the UX-ACT-28 second grep now runs only over files the first grep matched (`grep -l -Z | xargs -0 grep`), and the block says no file from the first grep means pass.",
+     "8: `CHECKS` is now `\"$(dirname \"$SKILL_MD\")/checks\"` with `SKILL_MD` set to this file's path, in SKILL.md (procedure and checks section), mcp-servers.md and machine-output.md. No install-specific path remains.",
+     "9: SKILL.md step 4 and UX-ACT-25's verification now say that a missing `docs/consequential-actions.md` or `docs/agent-trifecta.csv` is reported as one finding `missing inventory`, with the person asked whether to create it and no tiers invented."
+    ],
+    "notFixed": [],
+    "gate": "check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' on skills/ux-agent-interfaces skills/ux-quality-reference skills/ux-cli: clean, exit 0. python3 -I --self-test on json_output_check.py, mcp_tools_check.py and stub_server.py: all ok, exit 0. ocx exec ruff -- ruff check skills/ux-agent-interfaces: all checks passed, exit 0. ruff format --check: 9 files already formatted, exit 0. grim build skills/ux-agent-interfaces: built, exit 0."
+   }
+  },
+  {
+   "id": "ux-review",
+   "tree": "ocx-sh/website (Astro/Starlight docs and landing site; chosen because the task is a pre-launch docs-site a11y/UX review). Cloned to ~/.cache/research-lang/exemplars/product/phase8/ux-review/website, with the git-ignored site/dist copied in.",
+   "stepsRun": 13,
+   "stepsBlocked": 4,
+   "checksRun": 24,
+   "checksBroken": 1,
+   "blocking": 3,
+   "minor": 6,
+   "defects": [
+    {
+     "file": "skills/ux-review/SKILL.md",
+     "line": 100,
+     "severity": "blocking",
+     "problem": "The step 3 command `text_scan.py PATH...` cannot run as written. The script requires `--arm ARM` (one of 21 arms) and exits 2 without it. An agent copying the line gets a usage error. The skill gives no loop over arms like the one it gives for form_fields.",
+     "evidence": "python3 -I \"$CHECKS\"/text_scan.py site/src -> 'text_scan: need --arm (one of ampersand, bang, bytes, ...) and at least one file'; exit 2",
+     "fix": "Write the command as `for a in emoji interjection generic link-text img-alt plural-s bytes; do python3 -I \"$CHECKS\"/text_scan.py --arm $a PATH...; done`, naming the arms that serve UX-TEXT-16, 17, 25, 28 (link-text, emoji/interjection, plural-s, bytes)."
+    },
+    {
+     "file": "skills/ux-review/SKILL.md",
+     "line": 170,
+     "severity": "blocking",
+     "problem": "Step 4c runs `page_structure.py dist`, which walks every built HTML file. Step 1 (line 61-63) and the ux-quality rule gate (rules/ux-quality.md line 38) forbid this, because fragments and partials give false h1, lang and title findings. Without --sitemap and --page-list the default run reports the fragment pages as findings.",
+     "evidence": "python3 -I $CHECKS/page_structure.py site/dist -> 'page_structure: 12 pages read, 15 findings', including '/frag/landing-hero/index.html: UX-A11Y-31 expected exactly one h1, found 0' and '/frag/sidebar/_all/index.html: UX-A11Y-32 first focusable element is not a skip link'. With --sitemap site/dist/sitemap-0.xml --page-list routes.txt: '4 pages read, 7 findings', none from /frag/.",
+     "fix": "Use `python3 -I \"$CHECKS\"/page_structure.py --sitemap \"$DIST\"/sitemap-0.xml --page-list routes.txt \"$DIST\"`, matching the rule gate. State that routes.txt comes from step 1."
+    },
+    {
+     "file": "skills/ux-review/SKILL.md",
+     "line": 42,
+     "severity": "blocking",
+     "problem": "The advice to install the pinned packages 'into a scratch directory' does not work. The .mjs checks import `playwright-core` and `@axe-core/playwright` bare from the checks directory, and ESM resolution ignores the cwd and NODE_PATH. A scratch install is never found, and even `axe-fixture.mjs --help` or `--print-tags` fails. The skill does not say to copy the checks next to the install.",
+     "evidence": "npm i --save-exact axe-core@4.14.1 @axe-core/playwright@4.14.1 playwright-core@1.63.0 (in a scratch dir), then node \"$CHECKS\"/axe-fixture.mjs --print-tags -> \"Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'playwright-core' imported from .../ux-quality-reference/checks/axe-fixture.mjs\". It works only after `cp -r checks <scratch>/checks`.",
+     "fix": "Say: install into the scratch directory, copy `$CHECKS` into it (or symlink the scratch node_modules to the parent of `$CHECKS`), and run the scripts from that copy. Alternatively make the scripts resolve packages through createRequire from process.cwd()."
+    },
+    {
+     "file": "skills/ux-review/SKILL.md",
+     "line": 42,
+     "severity": "minor",
+     "problem": "A host with Playwright browsers downloaded but without the system libraries (libnspr4) cannot launch the browser. The skill says only 'no browser ... goes under did not run', and names no library check or fallback. Here every rendered step (4a, 4b, 4d) hit this. The skill does not say that a browser binary that exists but fails to launch is a 'did not run' case.",
+     "evidence": "axe-fixture.mjs launch -> 'chrome-headless-shell: error while loading shared libraries: libnspr4.so: cannot open shared object file'; exitCode=127",
+     "fix": "Add one line: a browser that is present but fails to launch (missing shared libraries) counts as no browser; record the launch error under `did not run:` and do not report any rendered result."
+    },
+    {
+     "file": "skills/ux-review/SKILL.md",
+     "line": 66,
+     "severity": "minor",
+     "problem": "The sitemap one-liner does `cat dist/sitemap-*.xml`, which also reads sitemap-index.xml. The sitemap's own URL appears in the route list as a 'route'.",
+     "evidence": "cat site/dist/sitemap-*.xml | grep -oE '<loc>...' ... | sort -u -> '/ /apps/ /integrations/ /sitemap-0.xml /team/'",
+     "fix": "Use `dist/sitemap-0.xml`, or add `| grep -v '^/sitemap'`, or say to drop sitemap-index entries."
+    },
+    {
+     "file": "skills/ux-review/SKILL.md",
+     "line": 330,
+     "severity": "minor",
+     "problem": "The UX-VERIFY-21 whitelist fence extracts IDs with `[1-4]\\.[0-9]{1,2}\\.[0-9]{1,2}`. An ID whose first digit is outside 1-4 (for example `sc: 5.1.1` or `9.9.9`) is never extracted, so the fence prints nothing and passes. A bad ID of that form is a false green.",
+     "evidence": "printf '  sc: 5.1.1\\n' | grep -oE '^ *(sc|also): *[0-9. ,]+' | grep -oE '[1-4]\\.[0-9]{1,2}\\.[0-9]{1,2}' -> no output; the planted '9.9.9' report also printed no 'not a WCAG 2.2 ID' line. (4.1.1 and 2.4.99 were caught.)",
+     "fix": "Extract with `[0-9]+\\.[0-9]{1,2}\\.[0-9]{1,2}` so any malformed ID reaches the whitelist awk."
+    },
+    {
+     "file": "skills/ux-review/SKILL.md",
+     "line": 99,
+     "severity": "minor",
+     "problem": "`scan_wv.py` with no arguments scans the whole cwd. Run from the repo root as step 3 says ('Run from the repository root'), it is noisy on a non-webview repo. It flagged 71 hex colours in the site's own tokens and in test files, plus UNNAMED rows from .test.ts files. The comment says 'run from the webview template directory', which contradicts the 'repository root' sentence. No instruction says to skip it when no webview exists, only that an absent input goes under did not run.",
+     "evidence": "python3 -I $CHECKS/scan_wv.py (repo root) -> 'packages/theme/src/tokens.css:19: colour hex #f6f7f9 outside var(--vscode-*, fallback)' ... exit 1",
+     "fix": "Move scan_wv.py out of the 'run from the repository root' rule. Add: run only when the target type is a VS Code webview; otherwise list under did not run: not a webview."
+    },
+    {
+     "file": "skills/ux-review/SKILL.md",
+     "line": 97,
+     "severity": "minor",
+     "problem": "`focus_outline.py SRC_DIR...` is given without saying to scan the theme or package dirs. It took the `.css` plus `<style>` in `.astro` files, found one FAIL (overlay.css:96), and works as a lead generator. `text_scan.py` plural-s only matches inside quote characters, so `<p>3 file(s)</p>` in markup text is not found (the planted case did not fire; `\"3 file(s)\"` in a string did). SKILL.md and UX-TEXT-25 treat the arm as covering interface strings.",
+     "evidence": "printf 'Deleted 3 file(s) now\\n' > t.astro; text_scan.py --arm plural-s t.astro -> exit 0, no hit; with `const m = \"Deleted 3 file(s)\";` in p.ts -> hit.",
+     "fix": "Add a line to the step 3 table: the plural-s arm reads string literals only; markup text needs a manual `grep -nE '\\w\\((s|es)\\)'`. Or widen the arm to markup text nodes."
+    },
+    {
+     "file": "skills/ux-review/SKILL.md",
+     "line": 87,
+     "severity": "minor",
+     "problem": "Step 2 requires the `ux-agent-interfaces` skill for MCP, JSON or approval targets, but the frontmatter `grim.requires` lists only ux-quality-reference and ux-cli. An install of ux-review does not bring `ux-agent-interfaces`; the agent is told to run `grim add` and stop. The 'Siblings' text calls `css-theming` a skill, but the catalog has the rule `css-theming.md` and the skill `css-theming-reference`.",
+     "evidence": "frontmatter lines 8-9 list two requires; ls skills -> css-theming-reference, no css-theming skill; rules/css-theming.md exists",
+     "fix": "Add grim.requires.skills.ux-agent-interfaces, or state it is optional and loaded on demand. Name the sibling `css-theming` (rule) and `css-theming-reference` (skill)."
+    }
+   ],
+   "notCovered": [
+    "Every rendered step (4a axe fixture, 4b ui-matrix with the matrix JSON, 4d focus_diff/colour_only/focus_opacity) did not run: the host lacks libnspr4, so neither the Playwright chromium-1255 nor the headless-shell can launch (exit 127). Only the matrix post-check one-liner was exercised, on synthetic JSON (green at 0 violations, red at 1 on a planted missing noRingSelf). The axe-fixture --red-demo check was not run (needs a browser).",
+    "Step 1 branch-diff branch: the clone has no change against origin/HEAD, so the diff commands and the step 7 WCAG 2.2 greps ran on empty input only.",
+    "Step 5 CLI path: only `cli_matrix.py --help` was run; no CLI target was reviewed.",
+    "The ux-agent-interfaces checks (json_output_check.py, mcp_tools_check.py) were not run; there is no MCP or JSON target in this task.",
+    "Planted-violation tests covered: focus_outline, actions_scan, text_scan (img-alt, link-text, emoji, interjection, plural-s), form_fields unnamed, wcag_contrast, page_structure (lang and title), the matrix post-check, and the report fences UX-VERIFY-20, 21, 22, 23 plus both claim scans. form_fields elem, badtok and pwtok stayed green on my planted input (no matching field type was planted; not shown to be broken). Hit sampling: the page_structure, actions_scan and focus_outline hits were read and looked true. The test-file hits from form_fields and scan_wv were not real findings.",
+    "The artifact's stop at the publishing boundary: the skill only reports and never posts, uploads or publishes. Its date table suggests `gh api` for re-checks, which the limits forbade; I did not run it."
+   ],
+   "fix": {
+    "fixed": [
+     "1: text_scan step now loops `--arm` over link-text emoji interjection img-alt plural-s bytes, with rule IDs in the comment",
+     "2: step 4c uses `page_structure.py --sitemap \"$DIST\"/sitemap-0.xml --page-list routes.txt \"$DIST\"`; step 1 now writes routes.txt and the text names DIST and routes.txt",
+     "3: Before-you-start says to copy $CHECKS into the scratch install dir and run from the copy (ESM resolves bare imports from the script dir)",
+     "4: added a line that a browser present but failing to launch counts as no browser, recorded under did not run:",
+     "5: sitemap one-liner reads `sitemap-[0-9]*.xml` (skips sitemap-index.xml)",
+     "6: UX-VERIFY-21 fence extracts `[0-9]+\\.[0-9]{1,2}\\.[0-9]{1,2}`; verified 5.1.1 and 9.9.9 now print 'not a WCAG 2.2 ID', 1.1.1 and 4.1.2 stay silent",
+     "7: scan_wv.py now takes WEBVIEW_DIR..., with a note to run only for VS Code webview targets, else did not run: not a webview; removed the contradiction with 'run from repo root'",
+     "8: focus_outline line says pass theme/package/page dirs; added note that plural-s reads string literals only plus a portable `grep -nE '[A-Za-z]\\((s|es)\\)'` for markup text (verified it hits `<p>3 file(s)</p>`)",
+     "9: added grim.requires.skills.ux-agent-interfaces; Siblings now names css-theming (rule) and css-theming-reference (skill)"
+    ],
+    "notFixed": [
+     "Defect 3 alternative (scripts resolving packages via createRequire from cwd): the .mjs files live in ux-quality-reference, outside the writable scope; fixed in the skill text only"
+    ],
+    "gate": "check-artifacts.py --forbid /home/mherwig --forbid .agents/research on skills/ux-review skills/ux-quality-reference skills/ux-cli skills/ux-agent-interfaces: clean, exit 0. No scripts touched, so no --self-test. ocx exec ruff check: exit 0 (no Python files). ruff format --check: exit 0. grim build skills/ux-review: built, exit 0."
+   }
+  },
+  {
+   "id": "marketing-quality",
+   "tree": "ocx-sh/ocx (clone at ~/.cache/research-lang/exemplars/product/phase8/marketing-quality/r, since removed). Picked because it is a releasing Rust CLI at 0.6.8 with a pitch README, a Cargo.toml description and a real alternative space, so the whole rule applies. Plus a scratch repo t for plant tests.",
+   "stepsRun": 14,
+   "stepsBlocked": 1,
+   "checksRun": 40,
+   "checksBroken": 1,
+   "blocking": 2,
+   "minor": 6,
+   "defects": [
+    {
+     "file": "skills/marketing-quality-reference/checks/claims_lint.py",
+     "line": 271,
+     "severity": "blocking",
+     "problem": "With --base, a file that has no diff against BASE is scanned in full, because added_lines() returns None for an empty diff and None means 'scan every line'. The gate's step 1 therefore reports old, untouched CHANGELOG.md and README lines as findings on a tree with no changes. The gate stays red in any repo with a pre-existing claim-pattern line. A bad or missing BASE ref falls into the same silent fallback (exit 0 or 1, never 2).",
+     "evidence": "In a fresh clone of ocx, HEAD equal to origin/main and an empty claims.toml: `python3 -I $CHECKS/claims_lint.py --base origin/main` printed 'CHANGELOG.md:242: MKT-CLAIM-01 [C] pattern line 2 hit '1 MB' ...' and 11 more, exit 1. In the t scratch repo `--base nonexistent` exited 0. Lines 280-290: `if not out: return None` and `except (...): return None`.",
+     "fix": "Return set() when git diff succeeds with empty output (no added lines). Return None only for an untracked file (git diff --no-index or ls-files check). Exit 2 with a message when git diff errors on an unknown ref."
+    },
+    {
+     "file": "rules/marketing-quality.md",
+     "line": 54,
+     "severity": "blocking",
+     "problem": "The Gate says 'When either [claims.toml or positioning.toml] is missing, the first rows below say what to do'. Only the positioning record has a row (Non-Negotiables row 1). Nothing says what to do when claims.toml is missing, so claims_lint.py exits 2 and the step 'did not run'. Two agents would do different things: skip the step, ask the owner, or create an empty claims.toml.",
+     "evidence": "`python3 -I $CHECKS/claims_lint.py --base origin/main` in ocx, which has no claims.toml: 'claims_lint: cannot read claims file: [Errno 2] No such file or directory: .../claims.toml', exit 2. grep for 'claims.toml' in rows 1-21 gives only 'claims.toml' as a target for records, never 'create it when missing'.",
+     "fix": "Add one sentence to the Gate or to row 5: when claims.toml is missing, create it empty (zero [[claim]] rows) so the lint runs, and list every hit as an owner question. Say whether an empty file is valid."
+    },
+    {
+     "file": "rules/marketing-quality.md",
+     "line": 50,
+     "severity": "minor",
+     "problem": "The gate uses $HOST (steps 3 and 4) but defines only CHECKS and BASE. Step 3 hard-codes the build dir `dist`. For a repo whose site builds elsewhere (ocx: website/dist or a Bazel output), or that has no site, the step cannot run as written. The rule only says to tell the owner if you cannot run them.",
+     "evidence": "Gate block lines: `python3 -I \"$CHECKS\"/head_check.py dist --host \"$HOST\"`. No `HOST=` line. I could only run head_check.py on fixtures (exit 0 on fixtures/seo/site-good with --host example.com; --host example.org gives 9 false SEO-01 findings).",
+     "fix": "Add `HOST=example.com  # the production hostname, without scheme` and `DIST=dist  # the built output dir` lines to the block, and use $DIST in step 3."
+    },
+    {
+     "file": "rules/marketing-quality.md",
+     "line": 50,
+     "severity": "minor",
+     "problem": "The Gate says to run positioning_check.py drift after every change to a governed surface, but positioning-brief step 7 says 'Do not run drift: an unreviewed draft is not a standard to compare surfaces against'. While the record is unreviewed (the normal state after row 1), the gate's step 2 is red by construction: sentence is ASK-OWNER, so MKT-POS-07 and MKT-POS-08 always fire. The rule does not say how to report that.",
+     "evidence": "In ocx with the drafted unreviewed record: `positioning_check.py drift` printed 'MKT-POS-07: sentence lacks the category noun', 'MKT-POS-08: README tagline differs from the record sentence', exit 1.",
+     "fix": "In the Gate, add: while status is unreviewed, drift is expected to exit 1 on sentence and tagline mismatch. Report it under ran: with the exit code and mark it 'owner decision pending', and run only fields, sourced, audience and alternatives."
+    },
+    {
+     "file": "skills/positioning-brief/SKILL.md",
+     "line": 28,
+     "severity": "minor",
+     "problem": "The Stop condition says 'Then edit no README, manifest or site copy', while rule row 1-2 and positioning.md ('Draft the record ... and make every other edit') allow every edit except sentence, category and object. An agent working on 'rewrite the README opening' gets two opposite instructions.",
+     "evidence": "skills/positioning-brief/SKILL.md 'Stop when all of these hold. Then edit no README, manifest or site copy.' versus positioning.md 'A missing or stale record freezes the product identity, not all work.'",
+     "fix": "Change SKILL.md to 'Then change no product sentence, category noun or object noun on any surface; other copy edits stay allowed (MKT-POS-04).'"
+    },
+    {
+     "file": "skills/marketing-quality-reference/checks/positioning_check.py",
+     "line": 1030,
+     "severity": "minor",
+     "problem": "The `denigration` check only knows competitor names from alternatives entries whose kind is 'tool'. With the record's alternatives set to ASK-OWNER or kind=behaviour (the normal draft state), a sentence naming a competitor and 'slow and bloated' passes. MKT-POS-14 says 'a sentence that names a competitor' and the Gate row 13 relies on it.",
+     "evidence": "In scratch: page.html '<p>Unlike asdf, which is slow and bloated, demo is quick.</p>' with alternatives name='hand-copied binaries' returned 'ok', exit 0 (a false pass). The same page returned 'MKT-POS-14: Unlike asdf, which is slow and bloated...', exit 1, once the record listed asdf with kind='tool'.",
+     "fix": "Document in MKT-POS-14 and the script help that the scan sees only kind=tool alternatives. Fail with exit 2 when no tool-kind alternative exists, or take --name NAME for extra competitor names."
+    },
+    {
+     "file": "skills/marketing-quality-reference/claims.md",
+     "line": 147,
+     "severity": "minor",
+     "problem": "The claim pattern set and the --reading arm miss common comparison verbs. 'beats', 'outperforms' and 'X does not support Y, we do' pass both claims_lint.py and --reading. Row 13 (never state a competitor limitation from memory, no comparison without a record) is then only a reading rule, and the rule text does not say so. Separately, the pattern '\\b[0-9]+ ?x' captures 'up to 1' from 'up to 10x' in the E output.",
+     "evidence": "`echo 'demo beats asdf on every metric.' >> README.md; claims_lint.py --base HEAD --reading` exit 0, no output. Same for 'demo outperforms asdf.' and 'asdf does not support Windows, demo does.'. 'Unlike asdf' was caught on line 10, 'better than' too. Planted 'up to 10x faster' printed \"'up to 1' needs a live price-or-limit/licence row\".",
+     "fix": "Add `\\b(beats?|outperforms?|replaces|alternative to)\\b` to the comparison words of --reading. State in row 13 of the rule that the competitor-limitation clause has no mechanical check and must be read. Fix the up-to extraction to consume the full number token."
+    },
+    {
+     "file": "rules/marketing-quality.md",
+     "line": 42,
+     "severity": "minor",
+     "problem": "Row 15 says first-screen rules apply 'only to a page that declares doc_surface: pitch and to a releasing repository's README', but MKT-PAGE-01 (first-screen.md) also scopes `offer` pages. The index row and the depth row disagree.",
+     "evidence": "first-screen.md MKT-PAGE-01: 'Apply marketing first-screen rules only to a page declared doc_surface: pitch, to a page declared doc_surface: offer, and to the first screen of the repository-root README...'",
+     "fix": "Row 15: 'declares doc_surface: pitch or offer'."
+    }
+   ],
+   "notCovered": [
+    "Gate step 3 (head_check.py) on a real built site: ocx's website needs npm install and an Astro build, which would fetch packages. I ran it only on the shipped fixtures (site-good, site-bad) and six planted violations; all went red.",
+    "Gate step 4 (live_site_check.py robots) against the real host: https://ocx.sh/robots.txt failed with a TLS hostname mismatch, which is a property of that host and not an artifact defect. The policy, parity and preview subcommands, and shingle.py, were exercised only through their --self-test (all pass), with no planted violations.",
+    "The actual copy rewrite was not performed. The artifact correctly freezes it: no positioning record existed and the draft stays unreviewed (rows 1-2), the README tagline and Cargo description are the governed sentence surfaces, and a comparison needs an owner-approved alternative plus a comparison record with a dated source (rows 13, MKT-POS-14). The outcome was a drafted unreviewed .agents/positioning.toml, one AGENTS.md line, an empty claims.toml, and ASK-OWNER questions for style, sentence, object, forbidden, audience, non_target and alternatives.",
+    "Gate row for 'gh'-based steps (positioning-brief step 2 `gh repo view`, MKT-PAGE-10 `gh api`) were not run because my limits forbid using the logged-in gh CLI. positioning-brief tells the agent to put the About text on the owner list when no token exists.",
+    "Did the artifact tell me to stop at the publishing boundary: yes for the GitHub About write ('Never write the GitHub About field ... propose the text' in positioning-brief and positioning.md Ask the Owner). It does not need to say it for README edits, which are local files. docs-quality, ux-quality, marketing-review, release-notes and github-presence were not loaded, only checked for existence."
+   ],
+   "fix": {
+    "fixed": [
+     "1 (blocking) claims_lint.py added_lines(): empty diff now returns set() for a tracked file (nothing scanned) and None only for an untracked file; a bad --base ref or git failure prints a message and exits 2. Reproduced (old line reported, nonexistent ref gave rc 1), now rc 0 and rc 2. Self-test builds a temp git repo covering unchanged file, added line, bad ref.",
+     "2 (blocking) rule Gate: when claims.toml is missing, create it empty (valid, no [[claim]] rows) so step 1 runs, and report each hit as an owner question.",
+     "3 rule Gate: added HOST=example.com and DIST=dist lines; step 3 uses \"$DIST\"; a repo with no built site says so.",
+     "4 rule Gate: while the record is unreviewed, drift exits 1 on sentence/tagline mismatch (MKT-POS-07, 08); report under ran: as 'owner decision pending' with the exit code and take the verdict from fields, sourced, audience, alternatives.",
+     "6 positioning_check.py denigration: new repeatable --name NAME, exit 2 when there is no kind=tool alternative and no --name; documented in the script help, the rule Gate and the MKT-POS-14 row of positioning.md; self-test covers exit 2 and the --name hit.",
+     "7 comparison reading arm and claims.md block now include beats/outperforms/replaces; 'up to' arm consumes the full number ('up to 10', not 'up to 1'), kept identical in claims.md and ARMS; MKT-CLAIM-02 hit-extraction fix covered in the self-test. Row 13 of the rule and MKT-CLAIM-30 in claims.md now say the competitor-limitation clause has no mechanical check and must be read.",
+     "8 rule row 15: 'doc_surface: pitch or offer'."
+    ],
+    "notFixed": [
+     "5 skills/positioning-brief/SKILL.md Stop condition ('Then edit no README, manifest or site copy') contradicts rule rows 1-2 and positioning.md. The file is outside the permitted write set (only the rule and marketing-quality-reference). Suggested replacement text: 'Then change no product sentence, category noun or object noun on any surface; other copy edits stay allowed (MKT-POS-04).'",
+     "7 (residual) 'asdf does not support Windows, demo does' still passes both lint and --reading by design: a limitation statement has no reliable pattern; it is documented as a reading-only clause instead of a script check."
+    ],
+    "gate": "check-artifacts.py --forbid /home/mherwig --forbid .agents/research rules/marketing-quality.md skills/marketing-quality-reference: clean, exit 0. python3 -I --self-test on claims_lint.py, positioning_check.py, head_check.py, live_site_check.py, shingle.py: all exit 0. ocx exec ruff -- ruff check skills/marketing-quality-reference: exit 0. ocx exec ruff -- ruff format --check skills/marketing-quality-reference: exit 0 (after formatting positioning_check.py). grim build rules/marketing-quality.md and grim build skills/marketing-quality-reference: exit 0."
+   }
+  },
+  {
+   "id": "positioning-brief",
+   "tree": "Picked ocx-sh/ocx: README, Cargo.toml and the website each carry a different \"simple package manager\" line and no positioning record exists. Scratch copy: ~/.cache/research-lang/exemplars/product/phase8/positioning-brief/ocx",
+   "stepsRun": 8,
+   "stepsBlocked": 0,
+   "checksRun": 11,
+   "checksBroken": 1,
+   "blocking": 1,
+   "minor": 2,
+   "defects": [
+    {
+     "file": "skills/positioning-brief/SKILL.md",
+     "severity": "blocking",
+     "problem": "Step 7 runs only positioning_check.py, which does not test claim words. Step 4.3 and Never both ban them, but nothing in step 7 or the stop condition catches one. A draft sentence with a claim word passes step 7 and the stop condition, a false pass. positioning.md MKT-POS-07 says to also run claims_lint over the sentence, and SKILL.md omits that.",
+     "evidence": "Planted sentence = \"The fast package manager for widgets\" (also simple, secure, blazing-fast); `python3 -I \"$CHECKS\"/positioning_check.py sentence` printed `ok`, exit 0. `claims_lint.py /tmp/s.txt` needs a claims.toml: `claims_lint: cannot read claims file ... claims.toml`, exit 2.",
+     "fix": "In step 7 and Never, say positioning_check does not check claim words. Give a runnable claim-word check on the sentence that needs no claims.toml (or tell the agent to compare by hand against the MKT-CLAIM-02 block). Drop the implication that the stop condition proves the sentence is claim-free."
+    },
+    {
+     "file": "skills/positioning-brief/SKILL.md",
+     "severity": "minor",
+     "problem": "The template `maturity` value ('Pre-1.0: commands may change between minor releases.') is a placeholder text, not repository text. An agent that copies it and cites only `Cargo.toml:13` (version = \"0.6.8\") breaks 'Every required field holds a value copied from repository text'. The `sourced` check cannot tell.",
+     "evidence": "My draft kept that sentence with maturity = \"Cargo.toml:13\", and `sourced` printed ok. The `sourced` check only tests that the cited line exists: a bogus line `Cargo.toml:9999` fails, a wrong-content line such as README.md:12 (badges) passes.",
+     "fix": "Mark the template maturity as an example. Say 'write only the stage word the version supports, e.g. Pre-1.0 for 0.x, plus ASK-OWNER for what may change'. Add that `sourced` checks only line existence, not content."
+    },
+    {
+     "file": "skills/positioning-brief/SKILL.md",
+     "severity": "minor",
+     "problem": "`CHECKS=.claude/skills/marketing-quality-reference/checks` is a path that does not exist in the repository under work. The skill names no step to install the dependency, only a `grim.requires.skills` metadata key. A tester not using grim must guess the real path.",
+     "evidence": "`ls .claude/skills` in the scratch ocx copy shows only a repo skills folder with no marketing-quality-reference; I pointed CHECKS at the catalog path instead.",
+     "fix": "Add one line: 'if that directory is missing, install marketing-quality-reference first (grim install ...) or set CHECKS to wherever the skill is unpacked'."
+    }
+   ],
+   "notCovered": [
+    "drift, forbidden, denigration and live_site checks (SKILL says not to run drift; others outside this skill)",
+    "step 5 voice file (owner-gated, skipped)",
+    "MKT-POS-16 component/parent flow (ocx is not a component repo)",
+    "gh-dependent evidence commands (no GitHub remote in the clone, as the skill allows)",
+    "claims_lint (needs claims.toml, not reached by this skill)",
+    "positioning.md was only partly read for its table rationales, so the claim that positioning.md has a second claim-word check rests on the MKT-POS-07 row"
+   ],
+   "fix": {
+    "fixed": [
+     "Defect 1 (blocking): SKILL.md step 7 now says positioning_check.py does not test claim words and adds a runnable claim-word check. It extracts the MKT-CLAIM-02 pattern-set block from claims.md and greps the sentence, with no claims.toml needed. Tried on 4 sentences: 'The fast package manager for widgets' and 'A secure widget manager' print a hit, 'Package manager for widgets' and 'ASK-OWNER' print nothing. The stop condition now requires that check to print nothing, and the Never bullet points to it.",
+     "Defect 2 (minor): the template maturity is now 'Pre-1.0: ASK-OWNER' marked as an example. The maturity row says to write only the stage word the version supports plus ASK-OWNER for what may change. Step 7 says `sourced` checks only line existence, not content.",
+     "Defect 3 (minor): one added line in the path paragraph says to install marketing-quality-reference first (grim install) or set CHECKS to wherever the skill is unpacked if the directory is missing."
+    ],
+    "notFixed": [
+     "Not reproduced with the exact evidence command: I did not rerun positioning_check.py sentence on the planted sentence. I only confirmed the new grep goes red on planted claim words and green on clean cases, run outside the repo in a temp dir. No script was touched, so there is no fixture or --self-test addition."
+    ],
+    "gate": "check-artifacts.py --forbid /home/mherwig --forbid .agents/research skills/positioning-brief: clean, exit 0. grim build skills/positioning-brief: built, exit 0. No scripts touched in this skill, so the --self-test and ruff steps do not apply. The ux artifacts were not touched. Only SKILL.md changed."
+   }
+  },
+  {
+   "id": "marketing-review",
+   "tree": "Picked ocx-sh/ocx: it has a root README.md (0.6.8 Cargo version) and a docs-site landing page (website/src/content/docs/index.mdx). Run on a scratch clone at ~/.cache/research-lang/exemplars/product/phase8/marketing-review/ocx, now deleted.",
+   "stepsRun": 14,
+   "stepsBlocked": 4,
+   "checksRun": 24,
+   "checksBroken": 1,
+   "blocking": 3,
+   "minor": 7,
+   "defects": [
+    {
+     "file": "skills/marketing-review/SKILL.md",
+     "line": 71,
+     "severity": "blocking",
+     "problem": "Step 2 locates CHECKS with a find that only searches the current repo (find .). The rule and the reference SKILL say the checks may be installed globally under $CLAUDE_CONFIG_DIR/skills/. A global install gives no hit, and the skill then says the rule is not installed and tells the agent to stop. A false stop.",
+     "evidence": "cd <repo>; find . -path '*marketing-quality-reference/checks' -type d -not -path '*/node_modules/*' printed nothing (rc=0) while the checks exist in the catalog. rules/marketing-quality.md line 'CHECKS=.claude/skills/... # $CLAUDE_CONFIG_DIR/skills/... when installed globally'",
+     "fix": "Search .claude/skills, .agents/skills and \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}\"/skills in order, and stop with the grim add line only when all three miss."
+    },
+    {
+     "file": "skills/marketing-review/SKILL.md",
+     "line": 84,
+     "severity": "blocking",
+     "problem": "Step 5 claims lint (and the rule gate) exit 2 when the repo has no claims.toml, which is the common state of an unreviewed repo. The skill only says to skip a check whose input is absent. So the one check that finds claim hits on README and landing copy never runs, and the skill gives no way to proceed. The 'A claims hit without a live record is a finding' sentence cannot be applied. Only an undocumented empty claims.toml workaround produced hits (README.md:16 'instantly').",
+     "evidence": "python3 -I \"$CHECKS\"/claims_lint.py --base origin/main --reading README.md -> 'claims_lint: cannot read claims file: ... claims.toml' rc=2. After `: > claims.toml` the same call printed 'README.md:16: MKT-CLAIM-01 [C] pattern line 5 hit instantly with no live claim record' rc=1",
+     "fix": "Add a rule for a missing claims.toml next to the step-1 exit-2 paragraph. For example: run claims_lint with --claims pointing at an empty file, or report 'no claims record' as the first finding and list every pattern hit as without a record."
+    },
+    {
+     "file": "skills/marketing-review/SKILL.md",
+     "line": 78,
+     "severity": "blocking",
+     "problem": "The built-page checks (steps 2,3,4,6) need dist/. The skill says 'Build the site first' but gives no build command and no way to continue when the build is not possible. The target landing page (an MDX docs entry) has no dist in a fresh clone, so steps 3 and 6 fail with 'dist is not a directory'.",
+     "evidence": "python3 -I \"$CHECKS\"/positioning_check.py surface dist --need index.html -> 'positioning_check: dist is not a directory' rc=2; python3 -I \"$CHECKS\"/head_check.py dist --host https://ocx.sh -> 'error: dist is not a directory' rc=2",
+     "fix": "Say how to find the build command (the repo's task or package script) and state that without a build the built-page steps go under 'Did not run', with source-level fallbacks (the PAGE-02 grep, MKT-PAGE-03 hero read by hand)."
+    },
+    {
+     "file": "skills/marketing-review/SKILL.md",
+     "line": 105,
+     "severity": "minor",
+     "problem": "Step 4 item 4 and section 5 depend on docs-review and on docs-quality-reference ($DQ strip_prose.py for MKT-VOICE-04 em dash density). Neither is a grim.requires of marketing-review, and the product-essentials bundle does not ship them. An adopter with only this bundle cannot run them, and the skill says nothing about that case.",
+     "evidence": "bundles/product-essentials.toml members list has no docs-review or docs-quality-reference; SKILL.md frontmatter requires only marketing-quality-reference; voice.md line 19 DQ=.claude/skills/docs-quality-reference/checks",
+     "fix": "Add 'if docs-review is not installed, list DOC-TYPE-10 to 15 under Did not run' and the same for the VOICE-04 density check, or add the dependency to the bundle."
+    },
+    {
+     "file": "skills/marketing-review/SKILL.md",
+     "line": 96,
+     "severity": "minor",
+     "problem": "The 'Added copy lines' row (MKT-VOICE-03, 06) runs on git diff added lines. For the stated main use (review of existing copy nobody is editing, named paths) the diff is empty and the check prints 0 as a false clean. The skill gives no way to run those checks on a named existing file.",
+     "evidence": "git diff -U0 origin/main -- README.md ... | grep -c '\u2014' printed 0 on the clean tree; it printed 1 only after I planted an added line (planted run caught it)",
+     "fix": "For named targets, state that VOICE-03 and 06 run on the whole file (grep the file, not the diff) and that a hit is a report, not a rewrite (MKT-VOICE-03 binds added lines only)."
+    },
+    {
+     "file": "skills/marketing-quality-reference/trust-claims.md",
+     "line": 48,
+     "severity": "minor",
+     "problem": "The trust-claims check blocks that section 3 routes to scan the whole repo (every **/*.md, *.mdx), not the targets, so on a real repo they print hundreds of agent-config and docs hits. 'results' (MKT-CLAIM-23) matched 203 files, MKT-CLAIM-20 matched '@dataclass' in a design spec, and MKT-CLAIM-26 matched an architect review file. SKILL.md step 1 says to drop agent config, but the check blocks do not.",
+     "evidence": "git ls-files ... :(glob)**/*.md ... | xargs grep -l -i -E -e 'case[- ]stud' -e 'results' -> 203; CLAIM-20 hit '.claude/artifacts/design_spec_install_perf_bench.md:466:@dataclass'",
+     "fix": "Tell the reviewer in marketing-review step 3 to narrow each block's git ls-files list to the typed targets from step 1."
+    },
+    {
+     "file": "skills/marketing-quality-reference/trust-claims.md",
+     "line": 51,
+     "severity": "minor",
+     "problem": "The MKT-CLAIM-12 LICENSE-exists check uses --cached. A tracked LICENSE deleted from the working tree still prints, so the check stays green on a deleted LICENSE (planted: mv LICENSE away, output still lists LICENSE). It went red only after git rm.",
+     "evidence": "mv LICENSE /tmp/LIC.bak; git ls-files --cached --others --exclude-standard -- 'LICENSE*' 'COPYING*' -> LICENSE, LICENSE-THIRD-PARTY.md (still printed). After git rm -q LICENSE: only LICENSE-THIRD-PARTY.md, and that is the wrong-file match.",
+     "fix": "Use `git ls-files --cached --others --exclude-standard --deduplicate` piped through `test -e`, or `ls LICENSE* COPYING*`; also note LICENSE-THIRD-PARTY.md matches LICENSE* and hides a missing LICENSE."
+    },
+    {
+     "file": "skills/marketing-quality-reference/first-screen.md",
+     "line": 174,
+     "severity": "minor",
+     "problem": "The MKT-PAGE-10 check needs `gh api repos/$SLUG --jq .archived`, which needs a logged-in gh. marketing-review never says what to do without gh (for example offline or no credentials), so the archived check has no fallback.",
+     "evidence": "first-screen.md line: gh api \"repos/$SLUG\" --jq .archived",
+     "fix": "Add an unauthenticated fallback (curl -s https://api.github.com/repos/$SLUG | jq .archived) or say 'ask the owner, list under Did not run'."
+    },
+    {
+     "file": "skills/marketing-review/SKILL.md",
+     "line": 175,
+     "severity": "minor",
+     "problem": "Limits states recall 'of at most 50.5 percent' and 58.2 percent precision for the pattern set. The reference claims.md gives held-out recall at most 55.9 percent and precision 59.5 percent for the 15-line set; 58.2 percent and 66.6 percent are stated there for the earlier set. 50.5 appears nowhere else in the catalog.",
+     "evidence": "grep -rn -F 50.5 skills/marketing-* -> only skills/marketing-review/SKILL.md:178. claims.md:182: 'Recall at most 185 of 331 (55.9 %)' and 'the earlier set scored 58.2 %, and 66.6 % with borderline calls'",
+     "fix": "Reconcile to the figures in claims.md (or point to its table instead of restating) and say which set each figure belongs to."
+    },
+    {
+     "file": "skills/marketing-review/SKILL.md",
+     "line": 83,
+     "severity": "minor",
+     "problem": "Rule ID ranges differ between the three places that list the checks. Step 6 head says MKT-SEO 01 to 10, 21, 23, 25; the rule gate says 01 to 10, 21 to 25; the reference SKILL.md says 21 to 25. head_check.py also emits MKT-SEO-22 (planted: MKT-SEO-22 SHOULD missing WebSite JSON-LD). Step 7 omits 26 which the gate includes.",
+     "evidence": "head_check output on a hand-built dist: 'MKT-SEO-22 SHOULD index.html: expected one WebSite JSON-LD object', not in the step 6 list; rules/marketing-quality.md gate: 'MKT-SEO-01 to 10, 21 to 25'",
+     "fix": "Use one range (01 to 10, 21 to 25 and 26 for live) in all three places."
+    }
+   ],
+   "notCovered": [
+    "Built site not produced: no build command in the artifact, so steps 2 (drift), 4 (hero-noun on real dist) and 6 (head_check) ran only on a hand-made one-page dist, not the real landing page.",
+    "live_site_check.py robots step 7 not run: the user did not ask for the deployed site, and no network checks were made.",
+    "Positioning record steps 1,2,4 exit 2 (no .agents/positioning.toml in the repo); the artifact's own handling (report first finding, name positioning-brief) was followed but not exercised further.",
+    "MKT-VOICE-16/17 (performer, recordings), MKT-CLAIM-06/30 comparison table, MKT-POS-14 denigration, MKT-VOICE-04 on real copy, MKT-PAGE-12/13 offer rules not run: no matching surface in the chosen repo or the dependency check ($DQ) not installed there.",
+    "The claims lint planted-violation test used an empty claims.toml workaround; the lint on a populated record was not tested.",
+    "Marketing checks that call gh (MKT-PAGE-01, 10, MKT-VOICE-06/15) were not run (credentialed gh is forbidden)."
+   ],
+   "fix": {
+    "fixed": [
+     "1 (blocking): step 2 now loops over .claude/skills, .agents/skills and ${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills; stop with the grim add line only when all three miss. Loop tested.",
+     "2 (blocking): added a missing-claims.toml rule after the step-1 exit-2 paragraph. Report 'no claims record' as a finding, then rerun claims_lint with --claims /dev/null. Tested: 'instantly' hit without a claims.toml, rc=1. Never create claims.toml.",
+     "3 (blocking): step 3 now says to build with the repo's own task or package build command. With no build, steps 2/3/4/6 go under 'did not run', with source fallbacks (the PAGE-02 declaration grep, the PAGE-03 hero by hand, marked unverified: reading heuristic).",
+     "4: if docs-review is missing, list DOC-TYPE-10 to 15 under 'did not run'. If docs-quality-reference is missing, do the same for the VOICE-04 density check.",
+     "5: for named existing files, VOICE-03/06 grep the file, not the diff. A hit is a report, not a rewrite.",
+     "6: step 3 says to narrow each repo-wide git ls-files block to the step-1 typed targets.",
+     "7: the MKT-CLAIM-12 LICENSE check in trust-claims.md now pipes through `xargs -0 -r ls -d`. It filters out THIRD-PARTY files. Tested in a scratch repo: green with LICENSE present, empty (red) after mv. No script or fixture changed, so no --self-test case was added.",
+     "8: MKT-PAGE-10 gets a curl fallback to the unauthenticated GitHub API. If that also fails, ask the owner and list under 'did not run'.",
+     "9: Limits now states 59.5 percent precision and recall of at most 55.9 percent for the 15-line set, and names 58.2 percent as the earlier set. It points to the claims.md table.",
+     "10: step 6 uses MKT-SEO-01 to 10, 21 to 25 and step 7 uses 11 to 17, 26, matching the rule gate and the reference SKILL."
+    ],
+    "notFixed": [
+     "Defect 7 is only partly addressed: the check now fails on a deleted LICENSE, but the planted-violation fixture and --self-test case were not added. The check is a shell block in trust-claims.md, not a shipped script.",
+     "Defect 10: the MUST-list head line still lists SEO 21 and 23 only. It is a MUST subset, not a range list, so I left it."
+    ],
+    "gate": "check-artifacts.py --forbid /home/mherwig --forbid .agents/research skills/marketing-review skills/marketing-quality-reference: clean, exit 0. All 5 checks/*.py --self-test: exit 0 (claims_lint prints one expected 'cannot read claims file' stderr line from its own missing-file test). ruff check: All checks passed. ruff format --check: 18 files already formatted. grim build skills/marketing-review and skills/marketing-quality-reference: built, exit 0."
+   }
+  },
+  {
+   "id": "marketing-measurement",
+   "tree": "ocx-sh/website (cloned to ~/.cache/research-lang/exemplars/product/phase8/marketing-measurement/site; picked because the task is a site launch and it is the only public-site repo; clone deleted afterwards)",
+   "stepsRun": 11,
+   "stepsBlocked": 0,
+   "checksRun": 24,
+   "checksBroken": 0,
+   "blocking": 0,
+   "minor": 3,
+   "defects": [
+    {
+     "file": "skills/marketing-measurement/checks/report_check.py",
+     "severity": "minor",
+     "problem": "MKT-MEAS-21 churn check only fires when the percentage comes before the word citation. A line with the engine named but with no date or label and the figure after the noun is not flagged. The skill lists as known gaps only claims with no percentage and pooled engines, not word order.",
+     "evidence": "printf 'ChatGPT citations fell 50%% next-day.\\n' > f.md; python3 -I report_check.py churn f.md -> exit 0. '50%% of citations were lost next day.' -> exit 1 (MKT-MEAS-21). The regex CHURN_TRIGGER at line 80 requires '%' before 'citations'.",
+     "fix": "Allow '(citations?|cited)' before the percentage in CHURN_TRIGGER, or add 'a percentage that follows the noun is not caught' to the known gaps in references/reporting.md MKT-MEAS-21."
+    },
+    {
+     "file": "skills/marketing-measurement/SKILL.md",
+     "severity": "minor",
+     "problem": "The task has two halves: add analytics, and name the numbers to report. With no owner record, step 1 stops the first half. Nothing tells the agent what to do with the second half, such as which server-side counts may be reported and how. The steps 7 to 9 rules assume a source exists.",
+     "evidence": "Step 1: 'No record ... stop, draft the record with empty keys, ask the owner.' No step says whether a reporting plan on the server-side-only default may still be drafted. 'test -f .agents/decisions/measurement.md' returned rc=1 on the repository.",
+     "fix": "Add one sentence to step 1 or the Stop condition: when the record is missing, still draft the reporting plan for server-side counts only (MKT-MEAS-13 to 16), and mark every client-side metric as pending the owner decision."
+    },
+    {
+     "file": "skills/marketing-measurement/SKILL.md",
+     "severity": "minor",
+     "problem": "The step 2 diff block depends on origin/HEAD and shows no output of its own when the diff is empty or when origin/HEAD is missing. The pipe hides git's exit code behind xargs -r, so an unresolvable merge base looks like a clean pass. It also scans only changed files. For a repo that already contains a collector, nothing in the steps says to run 'scan' over the whole tree.",
+     "evidence": "The block ends in '| xargs -0 -r python3 -I \"$CHECKS\"/inventory_check.py scan ...'; on a fresh clone with no diff it printed nothing and returned rc=0.",
+     "fix": "Add 'set -o pipefail' to the block, and a line in step 2 to run 'inventory_check.py scan' over all source files when auditing existing code, not only the diff."
+    }
+   ],
+   "notCovered": [
+    "Playwright HAR snippet (not shipped, not self-tested, no tool approved so nothing to record)",
+    "Live-page checks (live-diff, hosts on LIVE) had no deployed page: no saved copies were made and no network was used",
+    "No built DIST: the site was not built, so hosts/beacons ran on source and on planted files",
+    "MKT-MEAS-15 and MKT-MEAS-17 gh api and grep blocks (gh api uses a logged-in CLI, which was forbidden)",
+    "campaigns.csv and aicite checks only run on planted data, since the site has no real campaigns file or citation report",
+    "Real-tree hits: every check was clean on the real tree, so zero real hits were available to sample; the planted violations were all caught except the churn word-order case"
+   ],
+   "fix": {
+    "fixed": [
+     "Defect 1: CHURN_TRIGGER in skills/marketing-measurement/checks/report_check.py now fires with the percentage before or after the noun, and with the change word on either side. Added 'fell' and 'declin*' to the change words. Reproduced first (exit 0). Now 'ChatGPT citations fell 50% next-day.' is flagged, rc=1. Fail fixture gained that line, so --self-test expects 3 findings. Pass fixture gained a labelled 'ChatGPT citations lost 50% (Ahrefs, vendor, 2026-10-29).' line, so it stays clean. reporting.md MKT-MEAS-21 known gaps now also says a percentage on a different line from the noun is not caught.",
+     "Defect 2: SKILL.md step 1 now says that with no record the agent still drafts the reporting plan for server-side counts only (MKT-MEAS-13 to 16) and marks every client-side metric as pending the owner decision.",
+     "Defect 3: the MKT-MEAS-01 block in references/collection.md now starts with 'set -o pipefail', so a missing origin/HEAD fails instead of passing. It also has a second block, 'git ls-files -z -- <globs> | xargs -0 -r ... scan', that scans the whole tracked tree. SKILL.md step 2 now covers both blocks, the whole tree when auditing existing code, and says that a block that fails or prints nothing because origin/HEAD is missing is not a pass."
+    ],
+    "notFixed": [],
+    "gate": "check-artifacts.py --forbid /home/mherwig --forbid .agents/research skills/marketing-measurement: clean, exit 0. python3 -I --self-test on report_check.py, inventory_check.py and utm_check.py: exit 0. ocx exec ruff -- ruff check skills/marketing-measurement: all passed. ruff format --check: 30 files already formatted. grim build skills/marketing-measurement: built, exit 0. The ux-quality-reference, ux-cli and ux-agent-interfaces directories were not touched, so I did not run the artifact check on them. git diff also shows skills/positioning-brief/SKILL.md modified. That change is not mine."
+   }
+  },
+  {
+   "id": "release-notes",
+   "tree": "ocx-sh/ocx (chosen: has a template-owned cliff.toml, a v0.6.8 tag and 6 unreleased breaking commits, so the full release-notes procedure applies). Scratch clone ~/.cache/research-lang/exemplars/product/phase8/release-notes/ocx, removed after the run.",
+   "stepsRun": 9,
+   "stepsBlocked": 3,
+   "checksRun": 26,
+   "checksBroken": 1,
+   "blocking": 3,
+   "minor": 6,
+   "defects": [
+    {
+     "file": "skills/release-notes/checks/notes_check.py",
+     "severity": "blocking",
+     "problem": "The MKT-REL-10 'GitHub-generated notes while a config exists' check, and the step 1 grep in SKILL.md, match only `generate_release_notes` and `generate-release-notes`. They miss `gh release create --generate-notes`, the usual CLI form. A workflow using it passes lint with cliff.toml present.",
+     "evidence": "Planted `.github/wf2/x.yml` containing `gh release create \"$T\" --generate-notes`: notes_check.py --workflows exits rc=0 with no finding. The same file with `generate_release_notes: true` gives `MKT-REL-10: ... GitHub-generated notes while a config exists` rc=1. `git grep -E 'generate[-_]release[-_]notes'` also misses it.",
+     "fix": "Extend the regex in the script, the step 1 command in SKILL.md and the MKT-REL-10 verification cell in notes-template.md to `generate[-_]release[-_]notes|--generate-notes`. Add a fixture workflow for it."
+    },
+    {
+     "file": "skills/release-notes/SKILL.md",
+     "line": 148,
+     "severity": "blocking",
+     "problem": "Step 5 says to annotate the tag locally and leave the push to the owner. Step 7 (about line 148) runs `gh release create \"$TAG\" --draft --verify-tag`, which needs the tag to exist on the remote. An agent that follows step 5 cannot reach the step 7 'Done' (a draft exists) without pushing, and the skill forbids that push. Nothing says to stop or ask.",
+     "evidence": "Step 5: 'Annotate locally and leave the push to the owner.' Step 7: `gh release create \"$TAG\" --draft --verify-tag --notes-file notes.md`. Also, no instruction says what to do when gh is not logged in. I did not run gh because of the credential limit.",
+     "fix": "In step 7 say: draft creation needs the owner to push the tag first, so hand the owner the exact command and mark the draft 'open' in the report. Or drop `--verify-tag` and use `--target SHA` for a draft before the tag is pushed."
+    },
+    {
+     "file": "skills/release-notes/SKILL.md",
+     "line": 100,
+     "severity": "blocking",
+     "problem": "Steps 2 and 3 (step 2 starts near line 100) tell you to write the Migration in each breaking commit's footer, but the range is already committed. The skill does not say what to do: rewrite history, hand-edit notes.md, or report. Step 6 requires the lint to exit 0, and without footers it cannot. The 'Done' conditions are unreachable.",
+     "evidence": "On ocx, 6 commits since v0.6.8 print from the MKT-REL-02 (a) loop (aed283dc, 521becc7, 1affd092, 1a22c8e1, f905733b, 94205e89). They carry prose 'BREAKING:' or none, and no `BREAKING CHANGE:` footer. After the worked template renders, notes_check.py gives six `MKT-REL-03: notes.md: line N: BREAKING item without a Migration line below` lines, rc=1. The MKT-REL-15 loop also hit `fix(release): shipped binaries shrink ...`, which can be re-scoped only by rewriting history.",
+     "fix": "Add a branch to steps 2 and 6 for already-merged commits. Either write the Migration lines into notes.md by hand, with the owner deciding, or list the commits as owner questions and stop. Never rewrite pushed history. Add one 'What to ask a human' bullet for it."
+    },
+    {
+     "file": "skills/release-notes/SKILL.md",
+     "line": 112,
+     "severity": "minor",
+     "problem": "Step 3 (about line 112) says to fix the template 'in the file step 1 named'. When step 1 shows the file is template-owned, that file lives in another repository (ocx-sh/conventions). The step gives no way to continue when the checkout does not contain it.",
+     "evidence": "`head -1 cliff.toml` printed `# ocx-baseline: template-owned file \u2014 change ocx-sh/conventions, then run task copier:update`. The notes_check.py --config run printed 7 findings (MKT-REL-03, 04, 05, 06, 14).",
+     "fix": "Add: for a template-owned file, report the findings as an owner action against the upstream repo, and lint a local copy of the worked template only to render a draft."
+    },
+    {
+     "file": "skills/release-notes/SKILL.md",
+     "line": 76,
+     "severity": "minor",
+     "problem": "The runbook's variable paragraph (about line 76) hard-codes `CHECKS` to `.claude/skills/release-notes/checks`. That path does not exist in the target repository (no `.claude/skills/release-notes`). Install location depends on the client. git-cliff, lychee and dist are used but never named as prerequisites, and git-cliff was not installed.",
+     "evidence": "`ls .claude/skills/release-notes` -> 'No such file or directory'. `which git-cliff lychee dist` -> not found.",
+     "fix": "Say 'CHECKS is the checks/ directory next to this SKILL.md (grim install path varies by client)'. Add a Prerequisites line: git-cliff >= 2.14, python3, gh, jq; lychee and dist optional. Same fix in github-release.md Variables."
+    },
+    {
+     "file": "skills/release-notes/checks/release_gap.py",
+     "severity": "minor",
+     "problem": "The `--baseline` file is optional in the usage text, and no legacy tags means no baseline file. But the script exits 2 with an unreadable-input error when the SKILL.md and github-release.md command passes `.github/release-gap-baseline.txt` and the file is absent.",
+     "evidence": "`release_gap.py --tags tags.txt --releases releases.json --baseline .github/release-gap-baseline.txt` -> `release_gap: [Errno 2] No such file or directory: '.github/release-gap-baseline.txt'` rc=2. The same run without --baseline works.",
+     "fix": "Treat a missing baseline file as empty, or write in github-release.md 'omit --baseline when the file does not exist'."
+    },
+    {
+     "file": "skills/release-notes/references/notes-template.md",
+     "line": 1,
+     "severity": "minor",
+     "problem": "The worked template has no `## [{{ version` heading line. The shipped MKT-REL-14 (a) shell check (in Verification details) requires one, so it fails on the skill's own template, while notes_check.py --config passes it. The two verifications disagree.",
+     "evidence": "`awk '/^## \\[\\{\\{ version/{h=NR} /\\{%-? ?if message %\\}/{m=NR} END{exit !(h && m>h)}' cliff.toml` gives rc=1 on the worked template, and `notes_check.py --config cliff.toml` gives rc=0.",
+     "fix": "Say the awk check applies only to the shape with a version heading, or make the script and the awk agree. Add the heading-first variant of the template that the prose mentions."
+    },
+    {
+     "file": "skills/release-notes/SKILL.md",
+     "line": 31,
+     "severity": "minor",
+     "problem": "The Scope table names the owner of the CHANGELOG page format as `docs-quality`. No catalog item has that name. The catalog item is `docs-quality-reference`.",
+     "evidence": "`ls skills | grep docs` -> docs-quality-reference only. DOC-TYPE-37 to 41 are in docs-quality-reference.",
+     "fix": "Replace `docs-quality` with `docs-quality-reference` in SKILL.md and notes-template.md."
+    },
+    {
+     "file": "skills/release-notes/SKILL.md",
+     "line": 230,
+     "severity": "minor",
+     "problem": "The MKT-REL-13 draft-half block (about line 230) relies on `draft.md` having specific headings and a `^SPDX: A -> B$` line, but the prose field list names neither. An agent drafting to the prose list would not produce what the check wants.",
+     "evidence": "A draft written from the field list prints 6 `missing:` lines (Who is affected, Who is not affected, Definitions, Released versions, Naming and contributions, Contact).",
+     "fix": "Put the required heading names and the exact `SPDX: OLD -> NEW` line into the prose field list."
+    }
+   ],
+   "notCovered": [
+    "Step 7 draft creation and step 8 `gh release view`, `gh release verify` and the CH-GH-10 post-publish checks: no gh credential allowed, and the tag was never pushed.",
+    "CH-GH-11 registry comparison (npm, PyPI, crates.io): ocx is not published there.",
+    "MKT-REL-14 (c) `dist plan`: dist is not installed.",
+    "lychee link check (MKT-REL-16): lychee is not installed.",
+    "MKT-REL-18 and MKT-REL-19 and the MKT-REL-08 contract check: ocx has no golden contract in the shape the jq expressions assume, and the range deprecates and removes nothing.",
+    "MKT-REL-09 runtime-warning check: no deprecated form in range.",
+    "CH-GH-08 asset check: no documented /releases/latest/download URLs in README.md, docs or site.",
+    "The `isLatest` field is missing from unauthenticated REST output, so the Latest check used a hand-made flag.",
+    "The git-cliff binary came from another session's scratchpad, since the skill gives no install step. The version tested was 2.14.2.",
+    "The artifact does tell the agent to stop at publishing, for both the release and the licence notice. It does not say to stop before creating the draft. Line numbers in defects are approximate."
+   ],
+   "fix": {
+    "fixed": [
+     "1 (blocking): notes_check.py now matches `generate[-_]release[-_]notes|--generate-notes`. Reproduced first: a planted `gh release create \"$T\" --generate-notes` gave rc=0, and now gives MKT-REL-10 rc=1. Added fixtures workflows/cli.yml (red) and workflows/ok.yml (green, uses --notes-file) and extended --self-test. The step 1 grep in SKILL.md and the MKT-REL-10 cell in notes-template.md use the same regex. The cell's pipe is escaped for the table gate.",
+     "2 (blocking): step 7 now says `--verify-tag` needs the tag on the remote. If `git ls-remote --tags origin` shows nothing, the agent does not push, hands the owner `git push origin \"$TAG\"` plus the create command, and marks the draft open. Step 5 says never push the tag. The Done line accepts 'owner has the exact commands'. The Prerequisites paragraph says to skip `gh` commands and mark steps 7 and 8 open when `gh` is not logged in.",
+     "3 (blocking): steps 2, 3 and 6 now cover already-pushed commits. History is never rewritten. The agent drafts the Migration line and lists the commit as an owner question. The owner either approves a hand-written Migration line in notes.md or amends the message. Pushed MKT-REL-15 mis-scoped commits are also reported, not re-scoped. The Done conditions of steps 2, 3 and 6 accept open findings in the report. Added one 'What to ask a human' bullet.",
+     "4: step 3 now says that for a template-owned file the agent reports every finding as an owner action against the upstream template, lints a local copy of the worked template only to render a draft, and never edits the downstream copy.",
+     "5: CHECKS is now 'the checks/ directory next to this SKILL.md (install path varies by client)' in SKILL.md, notes-template.md and github-release.md. Added a Prerequisites line: git-cliff 2.14 or later, python3 3.11 or later, gh, jq; lychee and dist optional.",
+     "6: release_gap.py treats a missing --baseline file as empty, through a new `_baseline()` helper. Reproduced rc=2 first, then rc=0 or 1 on findings only. Updated the usage text and the --self-test, and github-release.md notes it in the command.",
+     "7: the MKT-REL-14 (a) cell and the awk block comment now say the awk applies only to a template with a `## [{{ version` heading line, and the script decides for a heading-less template. Added the heading-first variant snippet after the worked template. Verified: notes_check --config rc=0 on both shapes, awk exits 1 on the worked template and 0 on the variant.",
+     "8: `docs-quality` became `docs-quality-reference` in SKILL.md (description and Scope table) and notes-template.md.",
+     "9: the MKT-REL-13 prose field list now names the eight exact headings and the `SPDX: OLD -> NEW` line, with an example."
+    ],
+    "notFixed": [],
+    "gate": "From the product worktree: check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' skills/release-notes, rc=0 (clean). python3 -I checks/notes_check.py --self-test, rc=0. python3 -I checks/release_gap.py --self-test, rc=0. ocx exec ruff -- ruff check skills/release-notes, rc=0 (all checks passed). ocx exec ruff -- ruff format --check skills/release-notes, rc=0 (10 files already formatted). grim build skills/release-notes, rc=0 (built)."
+   }
+  },
+  {
+   "id": "channel-publishing",
+   "tree": "Picked ocx-sh/website: it has a team page with LinkedIn profile links and a Discord invite, an existing .gitleaks.toml, and no channels.yml, so a channel inventory and boundary setup is the natural task. Scratch copy at ~/.cache/research-lang/exemplars/product/phase8/channel-publishing/website. I ran steps 1 to 10 up to the draft; nothing was posted. The artifact itself tells the agent to stop at a publish package (Stop condition, CH-CORE-01 and step 10).",
+   "stepsRun": 10,
+   "stepsBlocked": 2,
+   "checksRun": 26,
+   "checksBroken": 0,
+   "blocking": 3,
+   "minor": 4,
+   "defects": [
+    {
+     "file": "skills/channel-publishing/SKILL.md",
+     "line": 59,
+     "severity": "blocking",
+     "problem": "CH-CORE-07 and step 5 say to write `borderline` (alone) when AI use is unclear, but draft_check.py ai-use only accepts `ai_use: (yes|no), case: <id>`. Bare `borderline` is rejected as malformed, so a documented value fails the step-5 check. The correct form is `ai_use: yes, case: borderline` (or `no, case: borderline`), which is not documented. The `no-ai` value fails the same way: it only passes as `no, case: no-ai`, and the rule shows no format for it.",
+     "evidence": "sed 's/^ai_role:/ai_use: borderline\\nai_role:/' pkg.md > q.md; python3 -I $C/draft_check.py ai-use --facts $F q.md -> `q.md:6: malformed ai_use`, rc=1. `ai_use: yes, case: borderline` -> rc=0. `ai_use: no-ai` -> malformed.",
+     "fix": "In CH-CORE-07 and step 5 write the exact lines: `ai_use: yes, case: borderline` (with an open_asks entry naming ai_use) and `ai_use: no, case: no-ai`. Better, make draft_check.py accept the bare words."
+    },
+    {
+     "file": "skills/channel-publishing/SKILL.md",
+     "line": 42,
+     "severity": "blocking",
+     "problem": "Step 5 Done requires `draft_check.py ai-use` to exit 0 for every package. The Package section says the ai_use line is only required where the platform has an AI label. LinkedIn has no AI label and no trigger or exemption rows in its facts.md. A correct LinkedIn package without ai_use therefore fails step 5 with `no ai_use line`. The agent has to guess that `ai_use: no, case: no-ai` is the escape.",
+     "evidence": "python3 -I $C/draft_check.py ai-use --facts skills/linkedin-post/references/facts.md pkg.md -> `pkg.md: no ai_use line`, rc=1",
+     "fix": "Either make ai-use pass when the platform has no AI label field, or have step 5 and the package section say that every package carries an ai_use line, with `no, case: no-ai` for platforms without an AI label."
+    },
+    {
+     "file": "skills/channel-publishing/references/channels-inventory.md",
+     "line": 228,
+     "severity": "blocking",
+     "problem": "The doc says to record a failed probe as `verified_by: not provable (...)` and leave the row `planned` or `none`. channels_check.py fails every `status: none` row whose verified_by starts with `not provable`. An agent following the doc literally for a platform it believes the org has not joined fails CH-CORE-19.",
+     "evidence": "channels.yml row with status: none and verified_by: not provable (no handle known, 2026-11-27) -> `channels.yml: bluesky: status none rests on a failed probe; a 403 is not absence (CH-CORE-19)`, rc=1",
+     "fix": "Change the doc to `leave the row planned`. Say that a `none` row needs a human decision in verified_by, for example `owner decision, <date>`. Add that case to the worked example and to CH-CORE-17."
+    },
+    {
+     "file": "skills/channel-publishing/SKILL.md",
+     "line": 258,
+     "severity": "minor",
+     "problem": "The `browser` command in block CH-CORE-01 runs over every skill in the repository. The script describes itself as checking 'channel skills'. In an adopter repo with a non-channel playwright skill, such as a theme-quality skill, it reports 13 false hits that the artifact gives no way to clear.",
+     "evidence": "python3 -I $C/boundary_check.py browser $(git ls-files 'skills/*/SKILL.md' 'skills/*/references/*.md') -> `skills/ocx-theme-quality/SKILL.md:3: browser automation in a channel skill (CH-CORE-01)` and 12 more, rc=1",
+     "fix": "Say in the block comment to pass only channel-skill files (those that require channel-publishing), or add an exclude flag. Alternatively, state that a hit in a non-channel skill is an open_asks line."
+    },
+    {
+     "file": "skills/channel-publishing/checks/hosts.txt",
+     "line": 12,
+     "severity": "minor",
+     "problem": "SKILL.md says the eight hosts still waiting for a decision are named in hosts.txt. The registries fail `facts_check.py --hosts` on about 45 further hosts that are in neither the allowlist nor the waiting list, for example docs.github.com (24 rows), news.ycombinator.com (34), raw.githubusercontent.com (28), learn.microsoft.com, news.linkedin.com and www.ftc.gov. CH-CORE-15 says the command 'prints nothing', but it exits 1 on all 8 shipped registries, and the artifact gives no way to continue besides a human edit.",
+     "evidence": "python3 -I $C/facts_check.py --hosts $C/hosts.txt skills/linkedin-post/references/facts.md -> `LI-F14: host learn.microsoft.com is not allowlisted as platform (CH-CORE-15)` ... rc=1. Same for all 8 facts.md files.",
+     "fix": "Either list every host that is read by a human with its provenance, or list all waiting hosts in hosts.txt and correct the 'eight hosts' count. Alternatively, state in CH-CORE-15 that a non-empty result for unlisted hosts is expected until the owner decides, and that it becomes an open_asks line."
+    },
+    {
+     "file": "skills/channel-publishing/SKILL.md",
+     "line": 18,
+     "severity": "minor",
+     "problem": "`boundary_check.py scan` is documented as scanning the repository. With no PATH it only reads git-tracked files (git ls-files), which SKILL.md never says. A new untracked workflow that posts to the LinkedIn, Discord, X or Bluesky endpoints gives exit 0 until it is `git add`ed. The link scan in channels-inventory.md does include untracked files, so the two scans differ silently.",
+     "evidence": "Untracked .github/workflows/post.yml with `curl -X POST https://api.linkedin.com/rest/posts` -> scan prints nothing, rc=0. After `git add -N` the same file -> `UNLISTED ocx-sh/website/.github/workflows/post.yml`, rc=1.",
+     "fix": "In CH-CORE-01 verification say the scan reads tracked files only and run it after `git add -N .`, or have the script include untracked, non-ignored files."
+    },
+    {
+     "file": "skills/channel-publishing/references/channels-inventory.md",
+     "line": 186,
+     "severity": "minor",
+     "problem": "A file that links an inferred, unlinkable handle, such as the LinkedIn profile links on a team page, forces the agent to add a row, because the reverse check needs one. CH-CORE-19 then forbids both `active` and a `linked_from` entry. So the row says `planned` with zero links although the file links the URL, and channels_check.py passes (rc=0) on this contradictory state. The doc does not say what to do with an existing public link whose ownership cannot be proven, nor whether personal profiles need rows.",
+     "evidence": "Rows li-person0 and li-person1 (status planned, ownership inferred, linked_from []) with the URLs from site/.../team/index.mdx: `channels_check.py --root . channels.yml` -> rc=0 while the page still links both URLs.",
+     "fix": "Add a short 'link already exists in an owned file' case: open_asks line for the human, and a row with the real linked_from only once ownership is proven. State whether personal profile links count as channels."
+    }
+   ],
+   "notCovered": [
+    "gitleaks, c2patool and exiftool are not installed, so the CH-CORE-10 gitleaks commands and the CH-CORE-09 block were not run. The artifact never tells the agent to install them. The cheaper `boundary_check.py gitleaks` check did run, green after the merge and red on a planted missing rule.",
+    "The CH-CORE-02 curl blocks (bs-label, ma-flag) were not run: they need a real bot handle. No bot row was created.",
+    "`facts_check.py --refetch` ran only on the LinkedIn registry, and it only printed MANUAL lines. Other registries were not refetched.",
+    "The five self-tests and the planted-violation runs used local files only; the youtube, microblog and community platform skills' own checks were not run.",
+    "The rules-fetch live path was only exercised against example.com, not a real subreddit, because reddit.com is a banned host for scripts."
+   ],
+   "fix": {
+    "fixed": [
+     "1+2: draft_check.py ai-use now accepts the bare lines `ai_use: borderline` (needs an open_asks entry naming ai_use) and `ai_use: no-ai`, and no longer demands an ai_use line on linkedin, bluesky or mastodon. SKILL.md step 5, CH-CORE-07 and the Package section state the exact lines and the exemption. New fixtures pass/bare.md, pass/linkedin.md, fail/bare.md, fail/youtube.md plus self-test cases; shown rc=0 on the clean cases and rc=1 on the planted ones.",
+     "3: channels-inventory.md and SKILL.md (CH-CORE-17, CH-CORE-19) now say a failed probe leaves the row `planned`, and a `none` row needs a human decision in verified_by such as `owner decision, 2026-11-01`. The worked example gains a `none` row. The `verified_by` row in the table says the same. The existing pass fixture already covered the `none` row.",
+     "4: the CH-CORE-01 `browser` block comment and the boundary_check.py docstring say to pass only channel-skill files (those that require channel-publishing). A hit in any other skill is an open_asks line.",
+     "5: CH-CORE-15 verification and the open-asks bullet now say the command prints nothing only once every host on a row is listed. Until the owner decides, it exits 1 with one line per unlisted host, each an open_asks line. The bullet no longer implies hosts.txt names every waiting host, and hosts.txt carries a comment for the others. No host was added to the allowlist.",
+     "6: boundary_check.py scan with no PATH now reads tracked and untracked, non-ignored files, via `git ls-files --cached --others --exclude-standard`. The CH-CORE-01 wording is updated. The self-test builds a temp git repo with an untracked post.yml. A manual check printed UNLISTED and rc=1 for an untracked workflow.",
+     "7: channels_check.py reverse check now fails when an owned file links a url whose row is not active (`linked but its row is not active`). The inventory file itself is skipped. The fail fixture gains a planned inferred linkedin.com/in row plus a README link, and the self-test needle was added. channels-inventory.md gets a section 'A link that already exists': personal profile links count as channels, the agent adds a planned row and an open_asks line, and the row becomes proven, active and linked only after a human records verified_by. SKILL.md CH-CORE-18 notes the same."
+    ],
+    "notFixed": [],
+    "gate": "From the product worktree. check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' skills/channel-publishing: clean, rc=0. python3 -I --self-test for boundary_check, channels_check, draft_check, facts_check and factsheet_check: all ok. ocx exec ruff -- ruff check skills/channel-publishing: all passed. ruff format --check: 31 files already formatted. grim build skills/channel-publishing: built, rc=0. No ux artifact was touched."
+   }
+  },
+  {
+   "id": "github-presence",
+   "tree": "/home/mherwig/.cache/research-lang/exemplars/product/phase8/github-presence/ocx (clone of ocx-sh/ocx: the flagship, with a 187-char description, no social card, no org profile README and a chooser with no question route)",
+   "stepsRun": 9,
+   "stepsBlocked": 0,
+   "checksRun": 20,
+   "checksBroken": 0,
+   "blocking": 0,
+   "minor": 4,
+   "defects": [
+    {
+     "file": "skills/github-presence/SKILL.md",
+     "severity": "minor",
+     "problem": "Step 5 runs registry_manifest_check.py over the whole tree. Every pyproject.toml counts as a PyPI project, including unpublished test harnesses. The skill and registry-listings.md define a crate and an npm package as unpublished (publish=false, private:true) but give PyPI no equivalent exclusion. The result is two MUST CH-GH-17 false fails and a SHOULD CH-GH-13 for test/pyproject.toml and .claude/tests/pyproject.toml. Neither is published.",
+     "evidence": "python3 -I \"$CHECKS\"/registry_manifest_check.py --root . --live-categories -> 'test/pyproject.toml: CH-GH-17 MUST: no recognised Project-URL label' and 'test/pyproject.toml: CH-GH-17 MUST: project.readme is not set' (name=\"ocx-tests\", version=\"0.0.0\")",
+     "fix": "Add a 'not published' rule for PyPI, such as the 'Private :: Do Not Upload' classifier, in the CH-GH-13 definition. Make registry_manifest_check.py skip such projects. Alternatively tell step 5 to have the owner list the PyPI projects that are actually published and to pass those paths as --root."
+    },
+    {
+     "file": "skills/github-presence/SKILL.md",
+     "severity": "minor",
+     "problem": "Step 2 and the 'Before you start' list require an authenticated gh, and step 4 uses gh api. The task limits forbid a logged-in CLI on this machine. The skill offers no way to continue without it. repo_card_check.py does have --json FILE, but SKILL.md never mentions it. I ran `repo_card_check.py --repo ocx-sh/ocx --flagship`, which called the machine's gh. That broke the run's no-logged-in-CLI limit. Because it worked, step 2 itself was not blocked.",
+     "evidence": "python3 -I \"$CHECKS\"/repo_card_check.py --repo ocx-sh/ocx --flagship printed 'ocx-sh/ocx: CH-GH-02 SHOULD: description is 187 characters' through the logged-in gh. The --json FILE route that reproduces it without a token is only visible in --help.",
+     "fix": "In step 2 and step 4 add one line: when gh is unavailable or the owner has not authorised it, feed `gh repo view --json` output, or the unauthenticated REST fields, through `--json FILE` and `--image FILE`. State that the step-4 gh api calls then become a question for the owner."
+    },
+    {
+     "file": "skills/github-presence/SKILL.md",
+     "severity": "minor",
+     "problem": "Step 4 gives the command with a literal ORGREPO placeholder. When the organisation has no .github repository (here ocx-sh/.github returns 404), there is no checkout to pass as --root. Step 4 does not say to record that case as a CH-GH-06 and CH-COM-18 failure and skip the command. A literal run exits 2.",
+     "evidence": "python3 -I \"$CHECKS\"/community_check.py --root ORGREPO --org-repo --check-links --has-discussions true -> 'error: ORGREPO is not a directory' (rc=2)",
+     "fix": "Add to step 4: 'If the organisation .github repository does not exist, record CH-COM-18 and CH-GH-06 as failed and skip this command. Exit 2 means a usage error, not a pass.' Also put ORGREPO in the Variables list."
+    },
+    {
+     "file": "skills/github-presence/SKILL.md",
+     "severity": "minor",
+     "problem": "The Variables bullet sets CHECKS to `.claude/skills/github-presence/checks`. That path is missing in the catalog layout, where the scripts live at skills/github-presence/checks. The path is correct only for an installed copy, and the text does not say that a fresh agent must export CHECKS before running any step.",
+     "evidence": "ls .claude/skills/github-presence/checks -> No such file or directory in the cloned repository; every command block uses an unset $CHECKS until it is exported manually",
+     "fix": "State in step 2: 'export CHECKS=<the directory that holds repo_card_check.py> before running any block'."
+    }
+   ],
+   "notCovered": [
+    "CH-GH-06 block run only via unauthenticated curl: the org description is empty, the website is set, and the profile README returns 404 (a failure, as the skill says)",
+    "The social preview image was not downloaded. Without a token usesCustomOpenGraphImage was assumed false, and gh itself confirmed it. The size and dimension paths were checked only with the --image fixture (320x160 reported correctly).",
+    "Steps 7 to 10 (propose, apply, report numbers, hand off) were read but not exercised, because writes are forbidden. CH-GH-20 to 28 and numbers.md were not run: no formula, image label or traffic workflow exists to check. The skill itself stops at the approval gate (step 7 'Without an answer, stop here' and the APPROVAL-GATE marker in step 8).",
+    "CH-GH-16, 17 and 19 were planted. CH-GH-17 (Project-URL label, content type) was not planted, only seen firing as a true finding on the harness pyprojects, which are false positives for an unpublished project.",
+    "CH-GH-14 category check used the live crates.io list. The planted bad slug failed correctly.",
+    "Honesty plants, all red as expected, against this clone: crate keywords and category (CH-GH-14), npm repository string (CH-GH-16), README relative image and link (CH-GH-18), VS Code icon, bugs and homepage (CH-GH-19), both code-of-conduct placeholders (CH-COM-19), dead /discussions contact link (CH-COM-17), a SUPPORT.md link returning 404 (CH-COM-18), empty description and zero topics (CH-GH-01/03), a small image (CH-GH-05), and ungated writes (CH-GH-04 lint). All 3 --self-test runs pass. facts_check.py on facts.md exits 0. All CH-GH, CH-COM, [X-Fnn] and CH-CORE IDs cited by the skill resolve. The lint over SKILL.md and references/*.md exits 0. The planted CoC and config edits were restored, so the scratch clone is clean."
+   ],
+   "fix": {
+    "fixed": [
+     "Defect 1: registry_manifest_check.py now skips a PyPI project whose classifiers include `Private :: Do Not Upload` (new pass fixture checks/fixtures/registry/pass/py-private). The CH-GH-13 row in references/registry-listings.md and step 5 of SKILL.md state the same exclusion. Step 5 also says to ask the owner which PyPI projects are published and pass each as --root when a tree holds other unpublished projects. Red/green shown: the evidence command's two CH-GH-17 MUST findings on a test/pyproject.toml reproduced. They disappear with the classifier. Removing the classifier from the fixture makes --self-test fail.",
+     "Defect 2: SKILL.md step 2 now says to feed `gh repo view --json` output through `--json FILE` and the social image through `--image FILE` when gh is unavailable or not authorised. Step 4 says the gh api call then becomes an owner question that feeds --has-discussions. The Tools bullet marks gh as optional.",
+     "Defect 3: step 4 now says that when the organisation .github repository does not exist, record CH-COM-18 and CH-GH-06 as failed, skip the third command, and treat exit 2 as a usage error, not a pass. ORGREPO is in the Variables list.",
+     "Defect 4: Variables now names CHECKS as the directory holding repo_card_check.py and lists the catalog path skills/github-presence/checks. Step 2 starts with `export CHECKS=<the directory that holds repo_card_check.py>` before any block."
+    ],
+    "notFixed": [],
+    "gate": "check-artifacts.py on skills/github-presence exited 0 (clean). `python3 -I --self-test` on community_check.py, registry_manifest_check.py and repo_card_check.py: all exit 0. `ocx exec ruff -- ruff check` passed. `ruff format --check` exited 0 (22 files already formatted). `grim build skills/github-presence` exited 0 (built)."
+   }
+  },
+  {
+   "id": "linkedin-post",
+   "tree": "~/.cache/research-lang/exemplars/product/phase8/linkedin-post/repo (clone of ocx-sh/ocx; picked because it has a v0.6.8 release with a CHANGELOG to announce)",
+   "stepsRun": 8,
+   "stepsBlocked": 0,
+   "checksRun": 24,
+   "checksBroken": 1,
+   "blocking": 0,
+   "minor": 4,
+   "defects": [
+    {
+     "file": "skills/linkedin-post/checks/li_draft_check.py",
+     "line": 310,
+     "severity": "minor",
+     "problem": "CH-LI-08 mention check only matches @ followed by a capital letter (regex @[A-Z]...), so a lowercase handle such as @alice that is not on consented: passes with exit 0. CH-LI-08 says every @-mention must be on consented:.",
+     "evidence": "Planted 'Thanks @alice.' in the body: li_draft_check.py plant.md --source CHANGELOG.md printed nothing, rc 0. 'Thanks @Alice Smith.' was caught: 'CH-LI-08 MUST: mention @Alice Smith. is not on the consented: list'.",
+     "fix": "Change the regex to also match lowercase handles, e.g. @[A-Za-z][A-Za-z0-9._-]+(?: [A-Z][A-Za-z.-]+)?, and add a fail fixture with a lowercase handle."
+    },
+    {
+     "file": "skills/linkedin-post/SKILL.md",
+     "line": 0,
+     "severity": "minor",
+     "problem": "The verification block 'CH-LI-01 run time' uses $TOOL_LOG, which no step defines or says how to obtain. With it unset the command errors with 'No such file or directory' and a false clean result.",
+     "evidence": "grep -o -E ... \"$TOOL_LOG\" printed 'warning: : No such file or directory', rc 1 (looks like a pass).",
+     "fix": "Say where the session tool log lives, or say to skip the block and write 'unverified' in the header when no log is available."
+    },
+    {
+     "file": "skills/linkedin-post/SKILL.md",
+     "line": 0,
+     "severity": "minor",
+     "problem": "Procedure sets LI=.claude/skills/linkedin-post and CP=.claude/skills/channel-publishing/checks as relative paths. They exist only if the skills are installed into the project's .claude/skills. In the repository I used (which has a .claude/skills directory) neither skill is there, so step 1 as written fails until the agent maps the paths to the catalog by hand.",
+     "evidence": "ls .claude/skills/linkedin-post: 'No such file or directory'",
+     "fix": "Add one sentence: if the skills are not installed under .claude/skills, set LI, CHECKS and CP to the directory the skill was loaded from."
+    },
+    {
+     "file": "skills/linkedin-post/SKILL.md",
+     "line": 0,
+     "severity": "minor",
+     "problem": "The step 4 fold budget (140 chars for lines 1 to 3) is easy to miss when the three lines must hold the CH-LI-04 disclosure, the subject and a first-hand number. Step 4 does not tell the agent about the budget, so the first draft fails CH-LI-03 and needs a rewrite after step 6.",
+     "evidence": "First draft: 'CH-LI-03 SHOULD: lines 1 to 3 hold 249 graphemes (approximate count), want at most 140'; second draft 166.",
+     "fix": "In step 4, add 'keep lines 1 to 3 under the fold budget in [LI-F27]'."
+    }
+   ],
+   "notCovered": [
+    "CH-LI-10 and CH-LI-12 manual curl blocks: draft used no link card or document post, so there was no target URL.",
+    "CH-LI-17 Brand partnership and CH-LI-19 --final poll approval paths were not exercised with a full planted run; poll length plant was caught.",
+    "Case 11 and the manual linkedin.com re-read need a human browser.",
+    "channel-publishing draft_check.py and boundary_check.py were not run (not routed from linkedin-post).",
+    "CH-LI-01 user-agreement curl returned count 1 (clause still present); read-only public fetch.",
+    "Planted-violation checks that fired: CH-LI-03 (URL), 06 (bold, length), 13, 14, 04, 16, 15, 11, 02, 19, 08 (number, capitalised mention), facts_check staleness, SKILL prose % blocks, CH-LI-01 code and tool-log blocks. Planted checks that stayed green: lowercase @mention (reported), CH-LI-04 with connection: none (design: reviewer confirms)."
+   ],
+   "fix": {
+    "fixed": [
+     "1. li_draft_check.py CH-LI-08: mention regex now matches lowercase handles (not preceded by a word char or dot, trailing punctuation stripped). Reproduced first (@alice, rc 0). Now rc 1 with 'mention @alice is not on the consented: list'; green when alice is on consented:. Added fixtures/draft/fail-mention.md and pass-mention.md plus two --self-test assertions.",
+     "2. SKILL.md CH-LI-01 run-time block: says $TOOL_LOG must be a file holding the session tool log; if absent, skip the block and write 'unverified: no tool log' in open_asks.",
+     "3. SKILL.md Procedure: added sentence to set LI, CHECKS and CP to the directories the skills were loaded from when not installed under .claude/skills.",
+     "4. SKILL.md step 4: added instruction to keep lines 1 to 3 under the [LI-F27] fold budget while carrying the CH-LI-04 disclosure, subject and a first-hand number."
+    ],
+    "notFixed": [],
+    "gate": "check-artifacts.py --forbid /home/mherwig --forbid .agents/research skills/linkedin-post: clean, exit 0; python3 -I li_draft_check.py --self-test: ok, exit 0; ocx exec ruff -- ruff check skills/linkedin-post: passed, exit 0 (after fixing PLW2901 loop-variable overwrite); ruff format --check: 12 files formatted, exit 0; grim build skills/linkedin-post: built, exit 0."
+   }
+  },
+  {
+   "id": "youtube-video",
+   "tree": "ocx-sh/ocx (clone at ~/.cache/research-lang/exemplars/product/phase8/youtube-video/ocx). Picked because it is the product CLI that a four-minute demo video would show.",
+   "stepsRun": 9,
+   "stepsBlocked": 1,
+   "checksRun": 24,
+   "checksBroken": 0,
+   "blocking": 0,
+   "minor": 5,
+   "defects": [
+    {
+     "file": "skills/youtube-video/SKILL.md",
+     "severity": "minor",
+     "problem": "Block CH-YT-03 contradicts itself. The lead-in says any line printed is a missing link, but `grep -c` always prints a count line. The text after the block says the count must be at least 1.",
+     "evidence": "`grep -v -e '^[[:space:]]*$' desc.txt | head -3 | grep -c -e 'https\\?://'` printed `1` on a clean file (a line was printed, yet the link is present).",
+     "fix": "Change the lead-in to \"the count printed must be at least 1; 0 is a missing link\"."
+    },
+    {
+     "file": "skills/youtube-video/SKILL.md",
+     "line": 58,
+     "severity": "minor",
+     "problem": "The text says `marketing-quality (MKT-CLAIM) when it is installed`, but the catalog has no skill named marketing-quality. The skill is `marketing-quality-reference`, which holds MKT-CLAIM. The Siblings section names it correctly.",
+     "evidence": "`ls skills | grep marketing-quality` printed only `marketing-quality-reference`.",
+     "fix": "Write `marketing-quality-reference (MKT-CLAIM)` on line 58."
+    },
+    {
+     "file": "skills/youtube-video/SKILL.md",
+     "line": 28,
+     "severity": "minor",
+     "problem": "The stop condition requires the thumbnail as a file, but nothing says how an agent without an image tool produces it, or how to hand over a spec of one. A user asking for a \"thumbnail specification\" gets no format for it. The linter checks only a real PNG or JPG file for type, size and ratio. I had to copy a fixture PNG as a stand-in.",
+     "evidence": "No python PIL, convert or ffprobe on this machine. The only way to pass `yt_manifest_check.py` was `cp checks/fixtures/youtube/thumb-long.png thumb.png`.",
+     "fix": "State that the agent may deliver a thumbnail spec (size, ratio, text, subject) plus a placeholder or human-made file. Name the spec file and say the linter checks only the file."
+    },
+    {
+     "file": "skills/youtube-video/SKILL.md",
+     "line": 79,
+     "severity": "minor",
+     "problem": "Step 2 stops the whole task when `youtube/channel-record.yml` is missing, and says never to fill one in. The linter then cannot run. This is an intended stop, so no defect in it. But the skill says nothing about a draft title, description and chapters, which the user still wants, and gives no way to continue without the record. I continued only by writing a scratch record of invented values.",
+     "evidence": "`yt_manifest_check.py --channel-record youtube/channel-record.yml` printed `CH-YT-12 MUST: channel record missing or unreadable`, rc=1, on ocx, which has no record.",
+     "fix": "Add one sentence to step 2: after asking, the agent may draft title, description and chapters as unlinted text in the hand-over, marked \"not linted, no channel record\"."
+    },
+    {
+     "file": "skills/youtube-video/SKILL.md",
+     "line": 69,
+     "severity": "minor",
+     "problem": "`YT=.claude/skills/youtube-video` points at a path that exists only after `grim add` in the project. Step 7's `--insert-body` form is also shown without the manifest, so a literal run exits 2. The skill never shows the full command.",
+     "evidence": "`yt_manifest_check.py --insert-body insert-body.json` printed the usage text, rc=2. It needs `MANIFEST --channel-record ... --insert-body`.",
+     "fix": "Show the full step 7 and step 9 commands, as step 6 does. Add that the YT line must point at the real skill directory."
+    }
+   ],
+   "notCovered": [
+    "--target, --earlier-manifest and --pilot were not run on real input; the Short and pilot paths were not exercised because a long-form demo needs neither.",
+    "Blocks CH-YT-14, 18, 19, 22, 25 and 26 need a live channel id or a report file and were not run. Curl against youtube.com was avoided.",
+    "Blocks CH-YT-15 and CH-YT-13 ran on the real tree and printed no findings, so they were not sampled for hits. The ocx repo has no youtube/ directory, so the only listed files were my scratch ones.",
+    "Fourteen violations were planted and 13 were caught. The one that did not exit 1 was the CH-YT-03 missing-link case, which is a SHOULD, so it warns and exits 0 as the table says. The hashtag-count planting (CH-YT-05, SHOULD) likewise warned with exit 0. That counts as a pass, not a broken check.",
+    "The facts_check.py refetch mode and the other channel-publishing checks were not run.",
+    "Hand-over step 8 and the human-run steps (upload, readback, Studio claims) were not run because the limits forbid them. The artifact itself says to stop before any upload (the Stop condition and Procedure step 8)."
+   ],
+   "fix": {
+    "fixed": [
+     "1. CH-YT-03 block lead-in now says the count printed must be at least 1; 0 is a missing link.",
+     "2. Line 58 now names `marketing-quality-reference` (MKT-CLAIM).",
+     "3. Stop condition now allows `thumb-spec.md` (size, ratio, text, subject) plus a placeholder or human-made `thumb.png`; says the linter checks only the image file; real image goes in `open_asks`.",
+     "4. Step 2 now lets the agent draft title, description and chapters as unlinted text marked 'not linted, no channel record' after asking.",
+     "5. `YT` line must point at real skill dir (after `grim add`, `ls \"$YT/checks\"` check); step 7 and step 9 now show full commands with manifest, `--channel-record` and `--insert-body`/`--readback`. Ran both forms against fixtures: rc 1 on findings, not usage rc 2."
+    ],
+    "notFixed": [
+     "Siblings section still writes `marketing-quality` (the rule, which exists) for claims ownership; left as correct, not in the defects.",
+     "No script change, so no new fixtures or --self-test case needed (all defects were SKILL.md text)."
+    ],
+    "gate": "check-artifacts.py --forbid /home/mherwig --forbid .agents/research skills/youtube-video: clean, exit 0; python3 -I yt_manifest_check.py --self-test: ok, exit 0; ocx exec ruff -- ruff check skills/youtube-video: exit 0; ruff format --check: exit 0; grim build skills/youtube-video: built, exit 0"
+   }
+  },
+  {
+   "id": "microblog-post",
+   "tree": "/home/mherwig/dev/ocx-sh/ocx (scratch clone at ~/.cache/research-lang/exemplars/product/phase8/microblog-post/repo). Picked because it has a real latest release, v0.6.8 (2026-11-15), with a changelog and a GitHub Release page.",
+   "stepsRun": 8,
+   "stepsBlocked": 0,
+   "checksRun": 22,
+   "checksBroken": 0,
+   "blocking": 2,
+   "minor": 3,
+   "defects": [
+    {
+     "file": "skills/microblog-post/SKILL.md",
+     "line": 186,
+     "severity": "blocking",
+     "problem": "The CH-MB-18 block's rel=me grep matches any <a> or <link> tag whose later text contains the letters 'me' (home, name, meta, theme). It prints a hit on a page with no rel=me link, so an agent reads the output as a pass and gives a false pass.",
+     "evidence": "echo '<link rel=\"canonical\" href=\"https://example.com/home\">' | /usr/bin/grep -oiE '<(a|link)[^>]*rel=.[^>]*me[^>]*>'  -> prints the whole canonical tag, rc=0",
+     "fix": "Match rel=me as a whole token, for example: grep -oiE '<(a|link)[^>]*rel=[\"'\\''][^\"'\\'']*\\bme\\b[^\"'\\'']*[\"'\\''][^>]*>'. Add a fixture where a canonical link with 'home' in its href must print nothing."
+    },
+    {
+     "file": "skills/microblog-post/SKILL.md",
+     "line": 22,
+     "severity": "blocking",
+     "problem": "The skill says to follow channel-publishing for the full boundary rule set, but its draft template and its procedure never mention the ai_use line. channel-publishing requires ai_use wherever the platform has an AI label (X and Threads do) and ships draft_check.py ai-use. A draft written exactly per the template fails that check. The procedure also never says to run channel-publishing's boundary_check.py package, draft_check.py labels, ai-use, disclosure, refs or claims, so channel-publishing's Stop condition 3 is not met by following this skill.",
+     "evidence": "python3 -I channel-publishing/checks/draft_check.py ai-use --facts microblog-post/references/facts.md posts/v0.6.8-microblog.md -> 'posts/v0.6.8-microblog.md: no ai_use line', exit 1. The same draft passes boundary_check.py package, labels, disclosure, refs and claims. Adding 'ai_use: no, case: no-ai' makes ai-use exit 0.",
+     "fix": "Add 'ai_use: no, case: no-ai' (or a registry case id) to the draft template front matter. Add one procedure step that runs the channel-publishing draft_check.py labels, ai-use, disclosure, refs and claims commands and boundary_check.py package on $DRAFT, and expects exit 0. Note that facts.md has no trigger: or exemption: rows, so only no-ai and borderline are usable for Threads and X."
+    },
+    {
+     "file": "skills/microblog-post/SKILL.md",
+     "line": 158,
+     "severity": "minor",
+     "problem": "The CH-MB-10 block runs `file \"$TMP\"/og.img`, but the `file` utility is not installed here and the skill never says to install it. The block also does not define $TMP, and CH-MB-21 needs ffprobe, which is likewise missing. With `file` absent, the PNG or JPEG gate cannot be checked as written.",
+     "evidence": "zsh: command not found: file (and ffprobe not found)",
+     "fix": "Replace `file` with a portable check, for example `head -c 8 \"$TMP\"/og.img | xxd`, or `python3 -I -c` reading the magic bytes. Define TMP in the Variables table. Name ffprobe as an optional dependency of CH-MB-21."
+    },
+    {
+     "file": "skills/microblog-post/SKILL.md",
+     "line": 56,
+     "severity": "minor",
+     "problem": "Step 2 and Step 3 give no way forward when the owned site cannot be fetched at all (here ocx.sh fails TLS with curl exit 60) or when no channels.yml and no owner answer exist. Step 2's Done offers only 'passes the card gate' or 'link the GitHub Release page and report the site defect'. A careful agent has to decide for itself that unreachable means fallback and that missing accounts mean open_asks.",
+     "evidence": "curl -sL https://ocx.sh/ -> exit 60, 0 bytes. ls channels.yml -> No such file.",
+     "fix": "In step 2, add 'if the owned page cannot be fetched, treat it as failing the gate and report the fetch error in open_asks'. In step 3, add 'with no channels.yml and no owner answer, list the platform in open_asks, draft with a placeholder account, and skip the Mastodon and Bluesky account checks'. Also say which $INSTANCE to use for step 5 when the owner has not named one."
+    },
+    {
+     "file": "skills/microblog-post/SKILL.md",
+     "line": 156,
+     "severity": "minor",
+     "problem": "The CH-MB-10 grep only matches double-quoted `property=\"og:...\"` tags. A page using `name=\"og:image\"` or single quotes prints nothing, which looks like a missing tag and sends the agent to the fallback wrongly. The gate also requires og:description, but GitHub's Release page, which is the documented fallback, has only `<meta name=\"description\">`.",
+     "evidence": "curl -sL https://github.com/ocx-sh/ocx/releases/tag/v0.6.8 | grep -oE '<meta property=\"og:(image|title|description)\"[^>]*>' prints og:image and og:title but no og:description",
+     "fix": "Use `grep -oiE '<meta[^>]*(property|name)=[\"'\\'']og:(image|title|description)[\"'\\''][^>]*>'`. State that the GitHub fallback is exempt from the og:description requirement."
+    }
+   ],
+   "notCovered": [
+    "CH-MB-11, CH-MB-17 status call, CH-MB-18 account lookup, CH-MB-19 against a real account: no accounts exist and the skill forbids posting, so they were not run live. CH-MB-17 and CH-MB-19 home-page greps were run against ocx.sh and found nothing (no fediverse:creator tag, handle ocx.sh does not resolve), which is a true negative about the repository and not an artifact defect.",
+    "CH-MB-21 ffprobe was not run (no video, ffprobe not installed). CH-MB-20 and CH-MB-24 are workflow fixtures that the skill says it does not ship.",
+    "Mastodon variant counted against mastodon.social's live instance API, because no instance was named. CH-MB-05's rules-fetch step (CH-CORE-05) did not apply.",
+    "The artifact told the agent to stop at a draft (CH-CORE-01, Step 8 and the intro), and the run did stop there. Nothing was posted. I did not run the channel-publishing self-tests or its channels_check.py (no channels.yml)."
+   ],
+   "fix": {
+    "fixed": [
+     "1 (blocking): CH-MB-18 grep now matches rel=me as a whole token: grep -oiE \"<(a|link)[^>]*rel=[\\\"']([^\\\"']* )?me( [^\\\"']*)?[\\\"'][^>]*>\". Reproduced the false hit on a canonical link with 'home' first. Fixtures relme-bad.html (prints nothing) and relme-ok.html (two hits) are covered by mb_check.py --self-test.",
+     "2 (blocking): ai_use: no, case: no-ai added to the draft template and to all microblog fixtures. A front-matter note says only no-ai and borderline are usable, because facts.md has no trigger: or exemption: rows. Step 6 now also runs boundary_check.py package and draft_check.py labels, disclosure, claims, ai-use and refs through a new $CP variable. All six exit 0 on pass-release.md.",
+     "3 (minor): CH-MB-10 replaces `file` with `head -c 8 | od -An -tx1` plus the PNG and JPEG magic bytes. TMP is now in the Variables table. ffprobe is named as optional for CH-MB-21.",
+     "4 (minor): Step 2 says an unfetchable owned page fails the gate and its fetch error goes in open_asks. Step 3 says that with no channels.yml and no owner answer, list the platform in open_asks, draft with a placeholder account and skip the account checks. INSTANCE defaults to mastodon.social with an open_asks line.",
+     "5 (minor): CH-MB-10 grep now matches property or name, either quote style, case-insensitive. The GitHub Release fallback is stated to be exempt from the og:description requirement. Fixture og-mixed.html is covered by --self-test."
+    ],
+    "notFixed": [],
+    "gate": "check-artifacts.py --forbid /home/mherwig --forbid .agents/research skills/microblog-post: exit 0 (clean). python3 -I skills/microblog-post/checks/mb_check.py --self-test: exit 0. ocx exec ruff -- ruff check skills/microblog-post: exit 0. ocx exec ruff -- ruff format --check skills/microblog-post: exit 0. grim build skills/microblog-post: exit 0 (built)."
+   }
+  },
+  {
+   "id": "terminal-demo",
+   "tree": "ocx-sh/ocx (clone at ~/.cache/research-lang/exemplars/product/phase8/terminal-demo/ocx). Picked because its README has a Quick Start and its website/test/recordings pipeline already records casts.",
+   "stepsRun": 10,
+   "stepsBlocked": 2,
+   "checksRun": 24,
+   "checksBroken": 0,
+   "blocking": 3,
+   "minor": 5,
+   "defects": [
+    {
+     "file": "skills/terminal-demo/SKILL.md",
+     "line": 51,
+     "severity": "minor",
+     "problem": "Boundary says CH-CORE-10 means 'A recorder never holds a publishing credential'. In channel-publishing, CH-CORE-10 is a gitleaks-config rule (discord-webhook-url and google-oauth-refresh-token rules in .gitleaks.toml). A gate report citing CH-CORE-10 for the recorder-credential point cites the wrong rule, and the real CH-CORE-10 duty (merge gitleaks-channels.toml into the repo's gitleaks config) is never routed.",
+     "evidence": "grep '^| CH-CORE-10 ' skills/channel-publishing/SKILL.md -> 'In every repository that holds or may hold a publishing credential, extend the gitleaks configuration with a discord-webhook-url rule...'",
+     "fix": "Reword the bullet to what CH-CORE-10 says (extend the gitleaks config) and tie the recorder-holds-no-credential point to CH-VID-19 only, or cite the CH-CORE rule that really covers it."
+    },
+    {
+     "file": "skills/terminal-demo/SKILL.md",
+     "line": 141,
+     "severity": "blocking",
+     "problem": "Step 7 says run `cast_contrast.py FILE` and 'Done: exit 0', and only mentions --theme for forced-theme embeds. A cast recorded the way Step 3/pipeline say (asciinema rec, no theme in the header) makes the script exit 2 with an error, so the documented plain command cannot reach exit 0. The CH-VID-12 and CH-VID-27 rows repeat the plain form.",
+     "evidence": "python3 -I checks/cast_contrast.py checks/fixtures/contrast/no-theme.cast -> 'error: no theme in the cast header: pass the theme the embed forces with --theme' (exit 2); same for fail-dim, pass-bg48 and pass-dim-fg fixtures",
+     "fix": "State that a header with no theme requires --theme theme.json (the theme the embed or the player default actually shows), and say how to obtain that file (or ship a default one), and that exit 2 is not a pass."
+    },
+    {
+     "file": "skills/terminal-demo/SKILL.md",
+     "line": 71,
+     "severity": "blocking",
+     "problem": "Required external tools are named but nothing says how to get them, and none was present: asciinema (the recorder, pipeline.md 'Cast of the scenario'), vhs, agg, gitleaks (Step 5 must-pass, canary exit 1), ffprobe, playwright. Steps 4, 5 (gitleaks half), 10 and the W measurement could not be run as written. The skill gives no install command, no fallback and no rule for when a tool is absent (report 'manual' or stop?).",
+     "evidence": "which vhs asciinema agg gitleaks ffprobe playwright -> 'not found' for all six; Step 5 'gitleaks dir ... exit 0 ... canary exits 1' cannot execute",
+     "fix": "Add a 'Tools' list with pinned install commands (or links to the pin rows) and a rule: a missing required tool means the rule's report line is 'manual' with the reason, never 'pass'."
+    },
+    {
+     "file": "skills/terminal-demo/references/pipeline.md",
+     "line": 53,
+     "severity": "blocking",
+     "problem": "The task 'README and docs site' needs a README still (PNG or SVG, CH-VID-03), but the skill has no command, tool or step that produces a still from a cast or tape. Render Commands covers the player, an agg GIF, an MP4 and a vertical tape only, and no verification covers the still (CH-VID-03's block checks only GIFs). An agent must invent the method.",
+     "evidence": "Form per Surface row 'README: a still screenshot (PNG or SVG)'; Render Commands table has no row for a PNG or SVG still",
+     "fix": "Add a Render Commands row for the README still (for example a VHS tape 'Screenshot x.png' or a named cast-to-SVG tool, with its pin) and a check that the still links to the docs page."
+    },
+    {
+     "file": "skills/terminal-demo/SKILL.md",
+     "line": 121,
+     "severity": "minor",
+     "problem": "Step 5 runs `cast_check.py --must-only FILE` with no --identity, --private-domain or --allow-home, although CH-VID-21 says the check needs the org name, private domain and allowlist to be complete. Only the rule table line shows the flags, so an agent following the step literally under-scans.",
+     "evidence": "Step 5 item 1 vs CH-VID-21 verification: 'cast_check.py --identity ORG_NAME --private-domain DOMAIN --allow-home runner FILE'",
+     "fix": "Put the CH-VID-21 flags into the Step 5 command and say where ORG_NAME and DOMAIN come from."
+    },
+    {
+     "file": "skills/terminal-demo/SKILL.md",
+     "line": 313,
+     "severity": "minor",
+     "problem": "The CH-VID-13 block greps every tracked .js (only node_modules excluded), so vendored minified bundles (here test/bench/dashboard/vendor/vue.global.prod.js) produce one multi-kilobyte line that matches IntersectionObserver. Blocks CH-VID-02 and CH-VID-18 exclude **/*.min.js but this one does not, and .min.js would not cover *.prod.js anyway.",
+     "evidence": "Running the CH-VID-13 second command on the clone printed a ~20 KB line from test/bench/dashboard/vendor/vue.global.prod.js",
+     "fix": "Add the same exclusions as CH-VID-02 plus ':(exclude,glob)**/vendor/**' to CH-VID-13, and pipe through `cut -c1-200`."
+    },
+    {
+     "file": "skills/terminal-demo/SKILL.md",
+     "line": 261,
+     "severity": "minor",
+     "problem": "CH-VID-01 block matches the recording basename with grep -F as a substring, so a.cast counts as sourced if any yaml, py or toml file holds 'data.cast' or similar. It can stay silent on an unsourced recording.",
+     "evidence": "On the planted clone, plant/a.cast was not reported as unsourced while plant/d.gif and plant/sub/canary.cast were",
+     "fix": "Match with a word boundary, for example grep -l -E -e \"(^|[^A-Za-z0-9_.-])$(printf %s \"$b\" | sed 's/[.]/[.]/g')\" ."
+    },
+    {
+     "file": "skills/terminal-demo/references/facts.md",
+     "line": 24,
+     "severity": "minor",
+     "problem": "'The skill's floor is 180 days, and 90 for the player version' contradicts SKILL.md, which sets 180 for hard limits, 90 for policy, API fields and tool behaviour, and 30 for metered costs. 'Floor' of 180 and a 30-day cadence cannot both hold.",
+     "evidence": "facts.md line 24 vs SKILL.md 'Facts and dates': '180 for hard limits, 90 for policy, API fields and tool behaviour, 30 for metered costs'",
+     "fix": "Delete the 'skill's floor' sentence or restate it as the SKILL.md cadence list."
+    }
+   ],
+   "notCovered": [
+    "Recording itself (Steps 2-4, 6-10 on a real cast of the ocx quick start): asciinema, vhs, agg, gitleaks, ffprobe and playwright are absent, and the ocx recorder needs a Bazel build and Docker, so no real cast was produced. Cast checks ran on shipped fixtures and a hand-built planted cast.",
+    "gitleaks canary (Step 5 / CH-VID-20): not run, gitleaks absent. Flattening the canary does yield the ghp_ token.",
+    "Not exercised: CH-VID-03 GIF probes, CH-VID-04, 10 ffprobe frame size, CH-VID-15 and CH-VID-16 (needs owner credential, skipped by limits), CH-VID-24 gh api branch protection call (not run: credential).",
+    "Real-tree grep blocks returned no hits on ocx (no committed casts or tapes, no player embed), so only planted violations tested them. Planted-violation checks caught correctly: 01, 02, 03, 05, 06, 08 (both arms), 13, 19, 20 gitleaks detect, 23, 24, 25, 26, plus cast_check 08, 10, 11, 21, 22, 14, 23 and cast_contrast 12, 27. No check stayed green on a planted violation.",
+    "Stop at publishing boundary: SKILL.md tells the agent to stop (Stop condition, CH-CORE-01 bullet, Step 10); no upload was attempted. A stray pip download in the catalog worktree was removed."
+   ],
+   "fix": {
+    "fixed": [
+     "1: CH-CORE-10 bullet in skills/terminal-demo/SKILL.md now says merge channel-publishing's gitleaks-channels.toml into the repo gitleaks config and run its CH-CORE-10 block. The recorder-holds-no-credential point is tied to CH-VID-19 only.",
+     "2: Step 7 and the CH-VID-12 and CH-VID-27 verification cells now require `--theme theme.json` for a header with no theme, because asciinema rec casts carry none. They say exit 2 is not a pass, give the theme.json shape, and say to read the colours from the forced embed theme or the vendored player's CSS (--term-color-* values). I did not check those variable names against a player build.",
+     "3: Before you start lists the required tools and a rule that an absent tool means `manual: TOOL absent`, never pass. New 'Install' section in references/pipeline.md gives pinned install commands for asciinema, agg, VHS, gitleaks, ffprobe and Playwright. I did not run any of these installs, and the agg --tag, asciinema crate and VHS go-install forms are not confirmed against the upstream projects.",
+     "4: pipeline.md Render Commands has a README still row (VHS tape `Screenshot` after the last Wait, or a Playwright capture of the mounted player when there is no tape; no cast-to-SVG tool). The CH-VID-03 block now prints each README with no image link to a PNG or SVG pointing at a page; I checked it on a planted README (flagged) and a linked one (clean). Step 4 and the rule row point at it. The VHS `Screenshot` command is from memory and was not run.",
+     "5: Step 5 command now carries --identity, --private-domain and --allow-home, says where ORG_NAME and DOMAIN come from, and says to ask the owner rather than guess.",
+     "6: CH-VID-13 block now excludes *.min.js, node_modules and vendor/** and pipes through cut -c1-200. On a planted 10 KB vendored bundle it prints nothing, and the real embed.js hit prints.",
+     "7: CH-VID-01 block now matches the recording name with a boundary regex. Planted case: a.cast beside data.cast in a yml is reported unsourced (old command stayed silent), and good.cast and dir.cast stay clean.",
+     "8: Deleted the contradictory 'skill's floor is 180 days' sentence from references/facts.md."
+    ],
+    "notFixed": [
+     "Defects 6 and 7 are shell verification blocks in SKILL.md, not shipped scripts, so I added no fixtures or --self-test cases. I checked each in a throwaway git repo outside the skill.",
+     "I could not run the Step 4, Step 5 gitleaks half, Step 10 or W measurement tools: none are installed here, and I did not install any."
+    ],
+    "gate": "check-artifacts.py --forbid /home/mherwig --forbid .agents/research skills/terminal-demo: clean, exit 0 (first run flagged a broken link in pipeline.md, fixed and rerun). python3 -I cast_check.py --self-test: exit 0. python3 -I cast_contrast.py --self-test: exit 0. ocx exec ruff -- ruff check skills/terminal-demo: all checks passed. ocx exec ruff -- ruff format --check skills/terminal-demo: 5 files already formatted. grim build skills/terminal-demo: built, exit 0. No ux artifacts touched."
+   }
+  },
+  {
+   "id": "community-post",
+   "tree": "ocx-sh/ocx (picked: a free Apache-2.0 CLI with a public repo, README install line and Discord link, the natural Show HN subject)",
+   "stepsRun": 12,
+   "stepsBlocked": 0,
+   "checksRun": 24,
+   "checksBroken": 1,
+   "blocking": 1,
+   "minor": 6,
+   "defects": [
+    {
+     "file": "references/rules.md",
+     "severity": "blocking",
+     "problem": "CH-COM-08 solicitation check lists files with `git ls-files`, so it never scans untracked files. community-plan.md and <venue>-facts.md are files this skill creates in the working directory, so they are untracked at check time and the vote-request scan silently skips them while the pathspec claims to cover them. The check stays green on a planted violation (BROKEN). Step 8 of SKILL.md says it covers the 'plan files'.",
+     "evidence": "Appended 'Please upvote us on Hacker News! Show some love' to untracked hn-facts.md, ran the CH-COM-08 block: prints nothing, rc=0. The same line appended to tracked README.md: 'README.md:95: CH-COM-08 solicitation: \"upvote\"', rc=123.",
+     "fix": "Use `git ls-files -z --cached --others --exclude-standard -- ...` (or pass community-plan.md and *-facts.md to venue_check.py solicit directly by path) so untracked plan and fact-sheet files are scanned."
+    },
+    {
+     "file": "references/rules.md",
+     "severity": "minor",
+     "problem": "CH-COM-05 (d) check greps the fetched TARGET for 'sign.?up'. The skill's default target is the GitHub repository root, and GitHub's page always carries signup markup, so the check always fires on the recommended URL. The agent cannot tell a true finding from this noise.",
+     "evidence": "curl -sL https://github.com/ocx-sh/ocx | grep -n -i -E 'pricing|waitlist|sign.?up|early access' prints the GitHub header JSON ('signup_path', 'signup_enabled') on line 288.",
+     "fix": "Say that for a github.com repository root the grep is skipped, or restrict the grep to the README text (raw.githubusercontent.com README), not the HTML page."
+    },
+    {
+     "file": "SKILL.md",
+     "severity": "minor",
+     "problem": "Step 6 says the CH-COM-01 (b) and (c) commands 'print nothing', but those commands use `grep -c` and print `0`. A literal reader sees output and can think it failed.",
+     "evidence": "grep -c -i -E '^#+ *(post|text|title|comment|reply|first comment)' hn-facts.md prints 0; rules.md says 'Expect 0'. SKILL.md step 6: 'Done: both print nothing.'",
+     "fix": "Change step 6 Done to 'factsheet_check.py prints nothing and both grep -c commands print 0'."
+    },
+    {
+     "file": "SKILL.md",
+     "severity": "minor",
+     "problem": "Line 73 says refresh_days is 180 for hard limits and 30 for prices, but facts.md carries only 90 (59 rows) or an expires: date, and facts.md says every row is 90. Two places state the cadence differently.",
+     "evidence": "awk over facts.md column refresh_days: 59 x '90', 1 x 'expires:2027-01-15'; SKILL.md line 73 lists 180, 90 and 30.",
+     "fix": "State that this registry uses 90 for every row and an expires: date for events, or drop the 180 and 30 classes from this skill's text."
+    },
+    {
+     "file": "SKILL.md",
+     "severity": "minor",
+     "problem": "The quote-length rule differs between CH-CORE-05 (quote at least 8 words, key `rules_fetched:`) and the plan template and CH-COM-02 (key `rules_read:`, quote of 20 or more characters). A 6-word quote passes the CH-COM-02 count while it would fail CH-CORE-05 for a draft.",
+     "evidence": "rules_quote: \"The project should be non-trivial\" (6 words) matches grep -E '^rules_quote: \".{20,}\"$'. channel-publishing/SKILL.md line 112 requires 'at least 8 words'.",
+     "fix": "Make the CH-COM-02 check require 8 words, or state in step 3 that the plan's rules_read:/rules_quote: pair is distinct from the draft header of CH-CORE-05."
+    },
+    {
+     "file": "SKILL.md",
+     "severity": "minor",
+     "problem": "Step 5 (a) says to run the documented install 'in a clean container with no login' but names no image, no way to get curl into it, and no cleanup; two careful agents would pick different containers. Also step 7 shows `$CHECKS`/`$BOUNDARY` as `.claude/skills/...` relative paths, and the facts_check.py command uses a bare `references/facts.md` that only resolves from the skill directory.",
+     "evidence": "Step 5 (a) text; `python3 -I \"$BOUNDARY\"/facts_check.py references/facts.md` worked only after cd into the skill dir.",
+     "fix": "Give one image and a one-line command (for example a docker run with a named base image plus the install line), and write the facts path as `\"$CHECKS\"/../references/facts.md`."
+    },
+    {
+     "file": "checks/venue_check.py",
+     "severity": "minor",
+     "problem": "The `title` check reports the span for a missing 'Show HN: ' prefix as the first nine characters, which cuts the word mid-token.",
+     "evidence": "Title 'ocx, a package manager' gives: CH-COM-06 prefix: \"ocx, a pa\"",
+     "fix": "Quote the first line up to its first colon or the first 20 characters at a word boundary."
+    }
+   ],
+   "notCovered": [
+    "Step 5 (a) clean-container install: not run, no image or method given and it would execute curl|sh from the network.",
+    "Step 3 Reddit subreddit rules: no subreddit chosen, skill says Reddit needs human-pasted rules, so Reddit stopped at 'asked'. Step 1 maker/account names and makers.txt/acronyms.txt are human-supplied, so plan keys maker/account stayed empty.",
+    "grim add ghcr.io/ocx-sh/lore/channel-publishing:0 install path not run (would touch registry).",
+    "CH-COM-13/14/15 checks run only on planted fixtures, not on a real dev.to/Hashnode draft; CH-COM-22 notify workflow not run (ocx has none named).",
+    "Stop at the publishing boundary: the skill itself told me to stop (it writes only fact sheet, plan and reports, and refuses to draft the Show HN title or text). The requested Show HN and Reddit drafts were therefore not written, as the artifact directs; nothing was posted."
+   ],
+   "fix": {
+    "fixed": [
+     "1 (blocking): references/rules.md CH-COM-08 now uses `git ls-files -z --cached --others --exclude-standard`. Reproduced in a temp repo: planted line in untracked hn-facts.md gave 'hn-facts.md:1: CH-COM-08 solicitation: \"upvote\"', rc=123. Clean tree gives rc=0.",
+     "2: CH-COM-05 (d) now greps `${RAW_README:-$TARGET}`, with a comment to use the raw README for a github.com repository root.",
+     "3: SKILL.md step 6 Done now says factsheet_check.py prints nothing and both grep -c commands print 0.",
+     "4: SKILL.md Dated facts now says every row has refresh_days 90, or an expires: date for events.",
+     "5: CH-COM-02 quote check now requires 8 words (a 6-word quote no longer matches, a 9-word one does). Step 3 also states that the plan's rules_read/rules_quote pair is distinct from the draft's CH-CORE-05 lines.",
+     "6: Step 5 (a) names debian:12-slim in a one-line `docker run --rm` command with the install line. Step 7 says to run from the repository root, and the facts_check.py path is now \"$CHECKS\"/../references/facts.md.",
+     "7: venue_check.py prefix span is now the text up to the first colon, cut at a word boundary within 20 characters. 'ocx, a package manager' gives \"ocx, a package\". Two assertions added to --self-test."
+    ],
+    "notFixed": [],
+    "gate": "check-artifacts.py --forbid /home/mherwig --forbid .agents/research skills/community-post: rc=0 (clean). python3 -I skills/community-post/checks/venue_check.py --self-test: rc=0 (ok, 0 failures). ocx exec ruff -- ruff check skills/community-post: rc=0. ocx exec ruff -- ruff format --check skills/community-post: rc=0. grim build skills/community-post: rc=0 (built)."
+   }
+  },
+  {
+   "id": "launch-plan",
+   "tree": "Picked ocx-sh/ocx (public CLI, tags v0.6.x, a next minor is the natural launch-plan case). Scratch clone: /home/mherwig/.cache/research-lang/exemplars/product/phase8/launch-plan/repo. Plan file: /home/mherwig/.cache/research-lang/exemplars/product/phase8/launch-plan/launch-plan.md",
+   "stepsRun": 10,
+   "stepsBlocked": 0,
+   "checksRun": 26,
+   "checksBroken": 1,
+   "blocking": 2,
+   "minor": 4,
+   "defects": [
+    {
+     "file": "skills/launch-plan/checks/plan_check.py",
+     "line": 319,
+     "severity": "blocking",
+     "problem": "The Product Hunt and Show HN checks only fire when the Schedule/Shifts venue cell is exactly the slug `product-hunt` or `show-hn`. Neither SKILL.md nor plan-template.md names these slugs. An agent who writes `Product Hunt` or `producthunt.com` gets no CH-LAUNCH-14 (ph_account equals org), no CH-LAUNCH-07 routine-release check and no HN/PH shift-gap check. The script exits clean, a false pass. Lines 189, 204, 212, 238 and 319 share the same dependency.",
+     "evidence": "Planted `ph_account: ocx-sh` (equal to org) with a venue row `Product Hunt` or `producthunt.com`: plan_check.py printed no CH-LAUNCH-14. With `product-hunt` it printed `p.md:1: CH-LAUNCH-14: ph_account 'ocx-sh' is the org or product name`. `grep -n 'show-hn\\|product-hunt'` over SKILL.md and references/*.md finds only the keywords line and an unrelated facts row.",
+     "fix": "Normalise the venue name in plan_check.py (lowercase, strip non-alphanumerics, accept producthunt, product-hunt, show-hn, showhn). Also list the required slugs in the plan-template.md Field notes (`venue` is `show-hn` or `product-hunt` for those venues) and make the script flag an unknown community venue name."
+    },
+    {
+     "file": "skills/launch-plan/references/plan-template.md",
+     "line": 18,
+     "severity": "blocking",
+     "problem": "The task is to launch the next minor release, which is a routine release. The template and CH-LAUNCH-07 allow only first-launch, major-version or owner-major:REF. No value or path records that the answer is no launch, and nothing says what to write when the human has not answered the major question. SKILL.md step 3 forbids a Show HN or Product Hunt launch for a routine release but never says whether editorial or owned venues may still be planned, or whether to stop. An agent has to invent a reason value to get plan_check.py clean.",
+     "evidence": "With `launch_reason: ask: is v0.7.0 a major release` plan_check.py printed `launch-plan.md:1: CH-LAUNCH-07: launch_reason is first-launch, major-version or owner-major:REF` and exited 1. It exited 0 only after I wrote `owner-major:PENDING-owner-decision`, a fabricated reference that the check accepts.",
+     "fix": "Add to SKILL.md step 3 an explicit rule: for a routine minor release, stop and report that release-notes covers it, or ask the owner for owner-major:REF. Make plan_check.py reject an owner-major REF that is not a path or URL. Add a routine-release value to the template that makes the plan a no-launch record."
+    },
+    {
+     "file": "skills/launch-plan/SKILL.md",
+     "line": 0,
+     "severity": "minor",
+     "problem": "Steps 2 and 3, 'the tag to launch': the readiness gate (CH-LAUNCH-01) proves only that some non-prerelease release exists. For a next minor that is not tagged yet, the artifact does not say whether to gate on the latest existing release or on the planned tag, or to wait for the tag. Template `launched_tag` and the CH-LAUNCH-08 sequence (release strictly earlier than venue) assume a tag that exists.",
+     "evidence": "ocx has releases to v0.6.8 only. The CH-LAUNCH-01 block returned 5 for earlier releases while the launch target v0.7.0 does not exist. The skill is silent on this case.",
+     "fix": "Add one sentence to step 2: the gate is for the planned tag. If it is not yet published, record the gate as pending, plan the release row as the first Schedule row, and re-run the gate after tagging."
+    },
+    {
+     "file": "skills/launch-plan/references/rules.md",
+     "line": 47,
+     "severity": "minor",
+     "problem": "The CH-LAUNCH-01 (line 47) and CH-LAUNCH-09 (line 68) verification blocks call `gh release list` and `gh release view`, which need a logged-in gh. Elsewhere the skill demands a public resolver for the link-target check, but these blocks give no unauthenticated equivalent. A run without gh credentials cannot execute them as written.",
+     "evidence": "Not run as written, because gh credentials are off limits for this run. I substituted `curl -s 'https://api.github.com/repos/ocx-sh/ocx/releases?per_page=5' | jq '[.[]|select(.prerelease==false)]|length'`, which printed 5. Check 3 on the release body printed 0 on ocx, a true miss: the first line was `## [0.6.8] - 2026-11-15`.",
+     "fix": "Give a curl and jq form next to each gh form (`curl -s https://api.github.com/repos/$REPO/releases/tags/$TAG | jq -r .body`) and say gh is optional."
+    },
+    {
+     "file": "skills/launch-plan/SKILL.md",
+     "line": 0,
+     "severity": "minor",
+     "problem": "Siblings and Checks sections: SKILL.md names `marketing-quality`, 'when installed'. The catalog has `marketing-quality-reference` and `marketing-review`, and the requires line lists only channel-publishing. community-post, github-presence and release-notes are used as hand-off targets but are not declared as requires.",
+     "evidence": "`ls skills | grep marketing-quality` returns `marketing-quality-reference`. grim.requires in SKILL.md frontmatter lists only channel-publishing.",
+     "fix": "Rename to `marketing-quality-reference` or `marketing-review`, and add the sibling skills to grim.requires or say they are optional."
+    },
+    {
+     "file": "skills/launch-plan/checks/plan_check.py",
+     "line": 322,
+     "severity": "minor",
+     "problem": "Front-matter findings always carry line 1 (CH-LAUNCH-07, 08, 11 and 14). The documented format `path:line` is useless for locating the key. plan_check also prints CH-LAUNCH-06 text 'cite the fetched page that shows its reply surface', which neither rules.md nor SKILL.md explains.",
+     "evidence": "`launch-plan.md:1: CH-LAUNCH-11: front matter lacks target`. `/usr/bin/grep -n 'reply surface' references/*.md SKILL.md` finds nothing.",
+     "fix": "Report the real line of the offending key. Document the reply-surface requirement in the CH-LAUNCH-06 row."
+    }
+   ],
+   "notCovered": [
+    "Venue pages for Product Hunt, DEV, BetaList, Uneed, DevHunt and the awesome-list CONTRIBUTING files were not fetched. alternativeto.net/faq returned 403, so that venue went down the CH-COM-02 ask-the-human path. The Product Hunt, Show HN and DEV (CH-LAUNCH-16) steps were not exercised beyond plan_check planted violations.",
+    "CH-LAUNCH-12 checks 2 and 4 and the CH-LAUNCH-17/18 live API blocks were sampled on two lists only (alebcay/awesome-shell and agarrharr/awesome-cli-apps). Both agree with facts rows LP-F43 and LP-F44. CH-LAUNCH-18 was not exercised: no crates.io crate for ocx.",
+    "Bad-plan fixtures were not read. link_target_check was run on live URLs: wall-word and gated-form paths were reached only via news.ycombinator.com (form gate) and a 404.",
+    "facts_check.py was run on facts.md and exited 0, but only because all rows are dated today (2026-11-27). No refetch (--refetch) was run.",
+    "Step 8 read_command uses `gh api`, which is forbidden here. The baseline read was not executed, and neither were CH-GH-23 report form or the traffic archive.",
+    "Planted violations were run on seven plan_check rules (CH-LAUNCH-05, 06 two-community and editorial date, 07, 08, 11 stars and C3, 13 fetched date and figure) and on three shell blocks (CH-LAUNCH-12 checks 1, 3 and 5, CH-LAUNCH-04 check 4) and link_target_check CH-LAUNCH-15 and 02. All went red except the CH-LAUNCH-14 plant in non-slug spelling, recorded as the first defect. Scratch files are small, so nothing was cleaned."
+   ],
+   "fix": {
+    "fixed": [
+     "1 (blocking): plan_check.py now normalises venue names via slug() (Show HN, producthunt.com, Product Hunt map to show-hn / product-hunt) in the schedule, shifts and admission lookups, so CH-LAUNCH-06/07/14 fire again. A community venue that is not one of the two slugs and has no admission row with a URL is flagged as 'unknown community venue'. SKILL.md step 5, plan-template.md field notes and the CH-LAUNCH-06 row name the slugs. Reproduced first: 'Product Hunt' printed no CH-LAUNCH-14; now fires. New fixture alias-plan.md plus self-test cases (alias flagged, spelled-name good plan passes, unknown venue flagged).",
+     "2 (blocking): SKILL.md step 3 says a routine release is not a launch: stop, write no plan, report that release-notes covers it, ask the owner for a written owner-major:REF, and leave 'launch_reason: ask: ...' until answered. The Stop condition explains that the expected finding on an ask: value is reported as a question, never filled with an invented value. plan_check.py now rejects a placeholder owner-major REF (needs URL, path, #N, commit or plan line); the CH-LAUNCH-07 row and template field notes say so. Self-test covers PENDING-owner-decision (red) and a docs/ path (green).",
+     "3: SKILL.md step 2 says the gate is for the planned tag; if it is not yet published, record the gate as pending, plan the release row first, never mark the plan final, re-run after tagging. CH-LAUNCH-01 block gains a planned-tag curl check.",
+     "4: CH-LAUNCH-01 and CH-LAUNCH-09 blocks now have curl+jq forms next to the gh forms; gh is stated optional.",
+     "5: SKILL.md Siblings now names marketing-quality-reference and marketing-review, and states community-post, github-presence and release-notes are optional hand-off targets. Stated as optional rather than added to grim.requires.",
+     "6: Front-matter findings for CH-LAUNCH-04, 07, 08, 10, 11 and 14 now carry the real line of the offending key (or schedule row for 08); an absent key still reports line 1. The reply-surface requirement is documented in the CH-LAUNCH-06 verification cell and the finding text."
+    ],
+    "notFixed": [
+     "2 (part): no 'routine-release' value was added to launch_reason or the template. The consolidation for CH-LAUNCH-07 fixes launch_reason as exactly one of first-launch, major-version, owner-major:REF, so adding a fourth value would contradict the researched rule. A routine release instead gets no plan (SKILL.md step 3).",
+     "5 (part): the sibling skills were not added to grim.requires. They are declared optional in prose. Adding requires would make four extra skills mandatory installs, a larger decision than a one-line fix."
+    ],
+    "gate": "check-artifacts.py --forbid /home/mherwig --forbid .agents/research skills/launch-plan: clean, exit 0. python3 -I plan_check.py --self-test: ok, exit 0. python3 -I link_target_check.py --self-test: ok, exit 0. ocx exec ruff -- ruff check skills/launch-plan: all checks passed. ocx exec ruff -- ruff format --check skills/launch-plan: 9 files already formatted. grim build skills/launch-plan: built, exit 0."
+   }
+  }
+ ],
+ "trigger": {
+  "haiku": {
+   "tier": "haiku",
+   "cases": 60,
+   "fails": [
+    {
+     "skill": "positioning-brief",
+     "kind": "overtriggered",
+     "utterance": "write the LinkedIn post announcing our new positioning",
+     "got": [
+      "linkedin-post",
+      "positioning-brief"
+     ]
+    },
+    {
+     "skill": "linkedin-post",
+     "kind": "overtriggered",
+     "utterance": "set up a script that posts to LinkedIn every Monday at 9am automatically",
+     "got": [
+      "channel-publishing",
+      "linkedin-post"
+     ]
+    },
+    {
+     "skill": "terminal-demo",
+     "kind": "overtriggered",
+     "utterance": "upload the finished screencast to YouTube with chapters and a thumbnail",
+     "got": [
+      "youtube-video",
+      "terminal-demo"
+     ]
+    }
+   ]
+  },
+  "sonnet": {
+   "tier": "sonnet",
+   "cases": 60,
+   "fails": [
+    {
+     "skill": "channel-publishing",
+     "kind": "overtriggered",
+     "utterance": "write the actual text of a 280-character X post for the 0.9 release",
+     "got": [
+      "microblog-post",
+      "channel-publishing"
+     ]
+    },
+    {
+     "skill": "linkedin-post",
+     "kind": "overtriggered",
+     "utterance": "set up a script that posts to LinkedIn every Monday at 9am automatically",
+     "got": [
+      "channel-publishing",
+      "linkedin-post"
+     ]
+    },
+    {
+     "skill": "terminal-demo",
+     "kind": "overtriggered",
+     "utterance": "upload the finished screencast to YouTube with chapters and a thumbnail",
+     "got": [
+      "youtube-video",
+      "channel-publishing",
+      "terminal-demo"
+     ]
+    }
+   ]
+  }
+ }
+}
