@@ -12,6 +12,7 @@ grounding:
   - csharp-topic-map.md (API-11, API-12, OB-01, OB-02)
   - csharp-process.md, csharp-api.md, csharp-async.md, csharp-build.md, csharp-json.md (checked for agreement; cited, not restated)
 date: 2026-10-11
+revised: 2026-11-27
 fixtures: /home/mherwig/.cache/research-lang/dotnet-tools/fixtures/consolidate-csharp-observability/ (argv-order, cb, lib-floor, nuspec, bans, rg, mel-throw; transcript.txt in each)
 ---
 
@@ -342,13 +343,14 @@ Applications use the Microsoft table.
 
 **CS-OBS-29 (MUST) [ocx]. Do not inject, forward or scrub `TRACEPARENT`, `TRACESTATE` or `BAGGAGE` in the child environment.**
 - Why:
-  - ocx 0.6.5 and main read no trace context.
+  - ocx 0.6.5 and 0.6.8 (2026-11-15) read no trace context.
   - Injecting is dead data today and a silent behaviour change later.
+  - The OTel env-carrier spec is Stable since specification v1.63.0 (2026-11-23) and fixes no variable names; propagators choose them.
   - CS-PROC-06's scrub list stays at 7 keys.
   - The SDK span already parents to the caller ([LI] §10).
 - Check: `rg -n -g '*.cs' -i -e 'traceparent' -e 'tracestate' -e 'baggage' src` prints nothing.
 - Revisit when `rg -n -i traceparent ~/dev/ocx/crates` prints anything.
-- Watched: the rg gave 1 / 0 ([K] `rg` P4). ocx-side absence was checked by grep only ([LI] §10).
+- Watched: the rg gave 1 / 0 ([K] `rg` P4). ocx-side absence was checked by grep only ([LI] §10), and re-checked on the ocx v0.6.8 tag on 2026-11-27.
 
 ### `.globalconfig` fragment (CS-OBS-01..05)
 
@@ -438,7 +440,7 @@ Ranked by how often the shape appears in training data and in the surveyed repos
 | 17 | `Console.WriteLine` / `Debug.WriteLine` diagnostics left in the library | Quick debug aid | RS0030 (CS-OBS-16) |
 | 18 | `BeginScope($"op {id}")`, `_ = BeginScope(...)`, a scope per item | No analyzer | CS-OBS-09 rg |
 | 19 | Invented APIs: `RecordException`, `GetTracer`, `LogWarn`, `InstrumentAdvice` on net8 | OTel Java/JS spellings, .NET 9+ docs | The multi-TFM build (CS-OBS-23) |
-| 20 | Injects `TRACEPARENT` into the ocx child | The OTel env-carrier spec exists (RC) | CS-OBS-29 rg |
+| 20 | Injects `TRACEPARENT` into the ocx child | The OTel env-carrier spec exists (Stable) | CS-OBS-29 rg |
 
 ## Failure classes
 
@@ -460,7 +462,7 @@ Ranked by how often the shape appears in training data and in the surveyed repos
    - CS-BUILD-24 says `grep -c '<dependency'` over the nuspec prints `0`.
    - CS-JSON-14 adds `System.Text.Json` 10.0.12 to the net8.0 group, so that count is 1 ([K] `nuspec` green: `1 <dependency id="System.Text.Json"`).
    - My recommendation: CS-BUILD-24 should allow exactly `System.Text.Json` on net8.0. CS-OBS-13's check is written to hold either way.
-2. **Should ocx read `TRACEPARENT`?** The OTel env-carrier spec is a Release Candidate. If ocx adopts it, CS-OBS-29 flips to "inject from `Activity.Current`" and ocx's own spans join the caller's trace. Until then the SDK does nothing.
+2. **Should ocx read `TRACEPARENT`?** The OTel env-carrier spec is Stable (v1.63.0, 2026-11-23) but fixes no variable names. If ocx adopts it, CS-OBS-29 flips to "inject from `Activity.Current`" and ocx's own spans join the caller's trace. Until then the SDK does nothing.
 3. **Package id = telemetry name.** `Ocx.Sdk` is still open in CS-API (open question 2). Whatever the owner picks becomes `OcxTelemetry.SourceName` and is permanent.
 
 **Another research round:**
@@ -487,6 +489,10 @@ Ranked by how often the shape appears in training data and in the surveyed repos
 10. https://opentelemetry.io/docs/specs/semconv/registry/attributes/process/: `process.*` attributes, and command args "SHOULD NOT be collected by default".
 11. https://opentelemetry.io/docs/specs/semconv/general/recording-errors/: `error.type`, status, exceptions routed to logs.
 12. https://opentelemetry.io/docs/specs/otel/trace/api/: span-name generality, and `Ok` is final.
-13. https://opentelemetry.io/docs/specs/otel/context/env-carriers/: the `TRACEPARENT` env carrier (Release Candidate).
+13. https://opentelemetry.io/docs/specs/otel/context/env-carriers/: the `TRACEPARENT` env carrier (Stable since specification v1.63.0).
 14. https://github.com/dotnet/runtime/blob/main/src/libraries/Microsoft.Extensions.Logging/src/Logger.cs: MEL aggregates provider exceptions and rethrows them (observed in [K] `mel-throw`).
 15. https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html: what never to log, and log injection.
+
+## Revision log
+
+- 2026-11-27: CS-OBS-29 rationale and verification now cite ocx 0.6.8, the re-check on the v0.6.8 tag and the Stable OTel env-carrier spec (v1.63.0); open question 2, failure mode 20 and key source 13 updated to match. Decision: [csharp-quality delta refresh](refresh-2026-11/csharp-quality.md).

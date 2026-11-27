@@ -35,7 +35,7 @@ Contents: [Dates and Defaults](#dates-and-defaults) Â· [Decisions](#decisions) Â
 - Applicability tags open a Rule cell; an untagged row is `[always]`. `[consumer]` reads a wire format through a parser or serializer it does not
   implement. `[packable-library]` ships a nupkg. `[wrapper]` acquires and verifies a binary. A library that implements the serializer or the XML
   parser is not a `[consumer]`.
-- .NET 8 and 9 reach end of support on 2026-11-10. `net10.0`-only is the end state: `CS-SEC-09` then budgets zero dependencies.
+- .NET 8 and 9 reached end of support on 2026-11-10 and get no further security fixes (last releases 8.0.34 and 9.0.23). `net10.0`-only is the end state: `CS-SEC-09` then budgets zero dependencies.
 
 ## Decisions
 

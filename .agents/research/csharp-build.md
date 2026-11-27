@@ -12,6 +12,7 @@ grounding:
   - csharp-audit/exemplar-build-and-gates.md
   - csharp-topic-map.md
 date: 2026-10-11
+revised: 2026-11-27
 fixtures: /home/mherwig/.cache/research-lang/dotnet-tools/fixtures/consolidate-csharp-build/ (re-run with run-all.sh)
 ---
 
@@ -26,7 +27,7 @@ This file is the source for the `dotnet-build` rule (index plus the depth files 
    - **If they are in scope:** `netstandard2.0;net8.0;net10.0`, plus a `net472` Windows test leg.
    - **If those hosts need only the data types:** split the package into `Ocx.Models` (`netstandard2.0`) and an engine on `net8.0;net10.0`.
    - **Until the owner answers:** use `net8.0;net10.0`. It needs no polyfill. Both other answers are a one-line edit away: add ns2.0, or drop net8.
-2. **The SDK's first release will probably land after net8 EOS, which makes `net10.0` the probable end state.** No ocx release carries the machine-interface contract yet ([ocx-cli-contract §0](csharp-audit/ocx-cli-contract.md)). .NET 8 and 9 end support on 2026-11-10. This is a timing fact for the owner, not a guess at their answer.
+2. **The SDK's first release will probably land after net8 EOS, which makes `net10.0` the probable end state.** No ocx release carries the machine-interface contract yet ([ocx-cli-contract §0](csharp-audit/ocx-cli-contract.md)). .NET 8 and 9 ended support on 2026-11-10. This is a timing fact for the owner, not a guess at their answer.
 3. **Pin every value that would otherwise float:**
    - SDK `10.0.401` (`latestFeature`, no prereleases)
    - `LangVersion 14`
@@ -34,7 +35,7 @@ This file is the source for the `dotnet-build` rule (index plus the depth files 
    - exact analyzer package versions
    - `NuGetAuditMode all`
 
-   Measured: SDK 11 RC1 turns a floating `latest-all` into 5 new errors on clean code (gate:V1). An unpinned directory builds on 11 RC1 (pin:V1).
+   Measured: SDK 11 RC1 turned a floating `latest-all` into 5 new errors on clean code (gate:V1), and the `11.0` set in SDK 11.0.100 (GA 2026-11-10) adds eight rules (CS-BUILD-10). An unpinned directory builds on the newest installed SDK, 11 RC1 when measured (pin:V1).
 4. **TreatWarningsAsErrors is unconditional, Debug included.** An agent's "done" signal is a local Debug build (gate:V2).
 5. **The only exemption from TreatWarningsAsErrors is the six NuGet audit codes, NU1900–NU1905.** A separate audit job turns them back into errors.
 6. **Never pass `-warnaserror` on the command line.** C2 measured it overriding the audit exemption, so an advisory-feed outage fails the build.
@@ -78,7 +79,8 @@ Prefix `CS-BUILD`. Verification commands run from the repo root on bash.
 - **Rationale:**
   - ns2.1 is not implemented by .NET Framework.
   - 6.0 and 7.0 are EOL.
-  - A net9 consumer resolves the net8.0 asset (measured), and net9 ends on the same day as net8.
+  - A net9 consumer resolves the net8.0 asset (measured), and net9 ended support the same day as net8 (2026-11-10; net8.0 stays shippable for the consumers still on it and leaves only at a major, CS-BUILD-08).
+  - net11.0 needs SDK 11, which a `latestFeature` pin on SDK 10 cannot select (CS-BUILD-20), and .NET 11 (STS) ends support on 2028-11-14, the same day as .NET 10.
   - net462 ends 2027-01-13.
   - Libraries never get the SDK's EOL warning: NETSDK1138 fires for an Exe only (tfm#14).
 - **Verify:** `grep -rnE --include='*.csproj' --include='*.props' -e 'netstandard2\.1' -e 'netstandard1\.' -e 'net(5|6|7|9)\.0' -e 'net46[12]' .` prints nothing. Also commit tfm-reach's `gate.sh` as `eng/tfm-gate.sh`, with the project paths adjusted, and run `bash eng/tfm-gate.sh .`, which must exit 0.
@@ -97,7 +99,7 @@ Prefix `CS-BUILD`. Verification commands run from the repo root on bash.
 - **Never set:** `latest`, `preview`, `latestMajor` or `default`.
 - **C# 14 on `net8.0` is a recorded decision:** use compile-only features only (`field`, `extension` blocks, `?.=`). The compiler itself refuses runtime-bound features (`CS9240`).
 - **Rationale:**
-  - `latest` resolves to 14 on SDK 10 and to 15 on SDK 11 for the same project (tfm#17).
+  - `latest` resolves to 14 on SDK 10 and to 15 on SDK 11 for the same project (tfm#17; RC1 measured 2026-10-11; C# 15 shipped with SDK 11.0.100 on 2026-11-10).
   - SDK 8 rejects `14` with CS1617 (tfm#8).
   - Without the pin, the net8 leg defaults to C# 12, and shared C# 14 source fails there (tfm#3).
 - **Verify:**
@@ -120,7 +122,7 @@ Prefix `CS-BUILD`. Verification commands run from the repo root on bash.
 - **Rationale:**
   - Without `PrivateAssets="all"`, the polyfill packages leak as nuspec dependencies (tfm#11).
   - The trim and AOT properties are silently inert on ns2.0 (tfm#16).
-  - The three gaps above still fail with Polyfill 11.4.3 (tfm#5).
+  - The three gaps above still fail with Polyfill 11.4.3 (tfm#5, measured), and the Polyfill 12.0.0 source (2026-11-21) adds none of them (read 2026-11-27).
 - **Verify:**
   - `dotnet pack -c Release -o artifacts && unzip -p artifacts/*.nupkg '*.nuspec' | grep -i -e polyfill -e polysharp` prints nothing.
   - `unzip -p artifacts/*.nupkg '*.nuspec' | grep -A3 'targetFramework="net10.0"' | grep -c '<dependency'` prints `0`.
@@ -151,7 +153,7 @@ The reference files are the props block and the configs in `consolidate-csharp-b
 - No `AnalysisMode` alongside it; a per-category `AnalysisMode<Category>` is the only allowed sibling.
 - Bump the level in a dedicated commit after listing the new rule IDs. Use `comm -13 <(grep '^dotnet_diagnostic' analysislevel_10_all.globalconfig | sort) <(grep '^dotnet_diagnostic' analysislevel_11_all.globalconfig | sort)` in the SDK's `Sdks/Microsoft.NET.Sdk/analyzers/build/config`.
 - **Rationale:**
-  - A floating level broke clean code with 5 new errors on SDK 11 RC1 (CA1517, CA1876, CA1877, CA2027, CA2028).
+  - A floating level broke clean code with 5 new errors on SDK 11 RC1 (CA1517, CA1876, CA1877, CA2027, CA2028). The `11.0` set that SDK 11.0.100 ships adds eight rules, those five plus CA1878, CA2026 and CA2267, all of which a bump commit lists (dotnet/sdk analyzer release file, read 2026-11-27).
   - Without an explicit level, each TFM leg gets its own rule set (CA2022 fired on net10.0 only).
   - Typo'd values (`10.0-allx`, `10.0.401-all`) build with exit 0 and no CA rules.
 - **Verify:** `find src -name '*.csproj' -print0 | xargs -0 -r -n1 dotnet msbuild -nologo -getProperty:AnalysisLevel | grep -vE '^[0-9]+\.0-all$'` prints nothing.
@@ -169,7 +171,7 @@ The reference files are the props block and the configs in `consolidate-csharp-b
   - CA1062 only while every project is `Nullable=enable`.
   - CA1308 because OCI refs are lowercase.
 - Every other suppression is `#pragma warning disable <ID> // <reason>` … `restore`.
-- Known site-level false positive: CA1034 on C# 14 `extension(...)` blocks (SDK 10.0.401).
+- Known site-level false positive: CA1034 on C# 14 `extension(...)` blocks is a known false positive on SDK 10 (measured 10.0.401; the SDK 11 analyzers fix it, read 2026-11-27). Suppress it at the site while the build runs on SDK 10.
 - **Rationale:** `NoWarn` hides an ID in every file and records no reason. These five were the only API-shaped findings that were wrong for an ocx wrapper.
 - **Verify:**
   - `grep -rnE --include='*.props' --include='*.csproj' --include='*.targets' '<NoWarn>[^<]*(CA|IDE|RS|VSTHRD|MA|SA|RCS)[0-9]' .` prints nothing.
@@ -254,7 +256,7 @@ Never use `dotnet format` alone.
 - The shape: `{"sdk":{"version":"10.0.401","rollForward":"latestFeature","allowPrerelease":false,"errorMessage":"Install .NET SDK 10.0.401 or a later 10.0 feature band: https://dotnet.microsoft.com/download/dotnet/10.0"}}`.
 - Use `rollForward: disable` only together with committed lock files (CS-BUILD-25).
 - **Rationale:**
-  - No global.json, a version-less `allowPrerelease:true`, or `latestMajor` all select 11.0 RC1.
+  - No global.json, a version-less `allowPrerelease:true`, or `latestMajor` all select the newest installed SDK (11.0 RC1 when measured on 2026-10-11, the 11.0.100 GA since 2026-11-10).
   - `latestFeature` cannot reach 11.
   - Without `errorMessage`, a missing SDK prints "application 'build' does not exist" (exit 155).
 - **Verify:** `jq -e '(.sdk.version|test("^[0-9]+\\.[0-9]+\\.[0-9]+$")) and (.sdk.rollForward=="latestFeature" or .sdk.rollForward=="disable") and .sdk.allowPrerelease==false' global.json`
@@ -263,7 +265,7 @@ Never use `dotnet format` alone.
 **CS-BUILD-21 (MUST): assert the SDK at every entry point.**
 - Every build entry point first runs `jq empty global.json && dotnet --version | grep -qE '^10\.0\.[0-9]+$'`.
 - CI installs the SDK with `actions/setup-dotnet` `global-json-file: global.json`. A `dotnet-version: 8.0.x` line may only add the net8 *runtime* for test legs.
-- **Rationale:** an invalid global.json is ignored with exit 0, and the build runs on SDK 11 RC1. Such files include a trailing comma, `"10.0"`, `"10.0.x"`, `"latestFeatur"`, `"SDK"` or `"false"` as a string. The only signal is an info-level NETSDK1057 that `-warnaserror` does not catch.
+- **Rationale:** an invalid global.json is ignored with exit 0, and the build runs on the newest installed SDK (11.0 RC1 when measured, 2026-10-11). Such files include a trailing comma, `"10.0"`, `"10.0.x"`, `"latestFeatur"`, `"SDK"` or `"false"` as a string. The only signal is an info-level NETSDK1057 that `-warnaserror` does not catch.
 - **Verify:**
   - The assertion above exits 0.
   - `grep -rLn 'global-json-file' .github/workflows | xargs -r grep -ln 'dotnet '` prints nothing.
@@ -271,7 +273,7 @@ Never use `dotnet format` alone.
 
 **CS-BUILD-22 (MUST): never call `dnx`.**
 - Run tools with `dotnet tool run` from `.config/dotnet-tools.json`, or with `dotnet tool exec <id>@<exact version>`.
-- **Rationale:** `dnx` in SDK 10.0.3xx/4xx and 11 runs the newest installed SDK, ignoring global.json by design. It also floats the tool version.
+- **Rationale:** the `dnx` script from SDK 10.0.302, 10.0.400 and 11 on runs the newest installed SDK, ignoring global.json by design. It also floats the tool version (Microsoft breaking-change note "dnx scripts bypass global.json SDK selection", read 2026-11-27).
 - **Verify:** `grep -rnE '(^|[[:space:];&|(])dnx([[:space:]]|$)' .github eng` prints nothing.
 - **Watched:** yes (pin:V5).
 
@@ -429,7 +431,7 @@ The rank comes from corpus frequency, which is how often an agent sees the patte
 | 4 | Gates TWAE on `Release` or `$(CI)`, so the Debug loop passes and CI fails | simple-exec's recipe; the exemplar audit lists it as a "pattern worth encoding" | CS-BUILD-13 `-p:Configuration=Debug -getProperty:TreatWarningsAsErrors` |
 | 5 | Copies simple-exec's `dotnet_analyzer_diagnostic.severity = warning`, or bulk `category-*` lines, expecting them to raise or lower rules | simple-exec is the only `All`-mode exemplar, so agents copy it | CS-BUILD-11 grep (gate:V3) |
 | 6 | Adds `-warnaserror` to CI "to be strict", so an audit-feed outage reds every build | tfm-reach's own procedure wrote it | CS-BUILD-13 grep over `.github eng` (C2) |
-| 7 | Writes `"version": "10.0"` / `"10.0.x"` in global.json, or makes a typo. Both are ignored silently and the build runs on SDK 11 RC1 | the model generalises from `<TargetFramework>` | CS-BUILD-20 jq; CS-BUILD-21 `dotnet --version` |
+| 7 | Writes `"version": "10.0"` / `"10.0.x"` in global.json, or makes a typo. Both are ignored silently and the build runs on the newest installed SDK (11.0 RC1 when measured) | the model generalises from `<TargetFramework>` | CS-BUILD-20 jq; CS-BUILD-21 `dotnet --version` |
 | 8 | Concatenates arguments into `ProcessStartInfo.Arguments`, or calls `Process.Start("ocx", "install " + pkg)`, especially on ns2.0 because "ArgumentList isn't there" | the default shape in training data; nothing in the CA set flags it | CS-BUILD-15 BannedSymbols (C3) |
 | 9 | Uses `#if NET8_0` to mean "net8 and later" | — | CS-BUILD-05 `grep -P` (tfm#12) |
 | 10 | Picks the binary with `ProcessArchitecture` / `Is64BitProcess` / `IntPtr.Size`, or hard-codes an x86 fallback | — | CS-BUILD-07 grep (tfm#13) |
@@ -464,7 +466,7 @@ The rank comes from corpus frequency, which is how often an agent sees the patte
 
 **Subareas that deserve another research round:**
 - **csharp-build-tfm-reach (ns2.0 branch only, if the owner answers "in scope").** Do Polyfill's `Process.Kill(bool entireProcessTree)` and `WaitForExitAsync` actually kill the tree and honour cancellation on .NET Framework 4.7.2/4.8? tfm#5 proved only that they compile. Also measure `RuntimeInformation.OSArchitecture` for a .NET Framework process under x64 emulation on Windows-on-Arm64 (tfm §9, not measured).
-- **csharp-build-analyzer-gate, at .NET 11 GA (November 2026).** Re-diff `analysislevel_11_all.globalconfig` against RC1. CA1878 and CA2026 are listed but have not been seen firing. The diff should land before the dotnet-upgrade skill writes the `10.0-all → 11.0-all` bump. Also re-check whether CA1034 on extension blocks is fixed in a 10.0.x servicing band, so the site pragmas can go.
+- **csharp-build-analyzer-gate, at .NET 11 GA (November 2026).** Check the eight-rule `11.0` list (read 2026-11-27 from the dotnet/sdk `main` release file, not the GA tag) against the `analysislevel_11_all.globalconfig` shipped in SDK 11.0.100. CA1878, CA2026 and CA2267 are listed but have not been seen firing. The diff should land before the dotnet-upgrade skill writes the `10.0-all → 11.0-all` bump.
 - **csharp-build-sdk-and-restore-pinning.** Measure the .NET 11 defaults (MSBuild server and NativeAOT CLI) for state leakage across an agent session's repeated `dotnet` invocations (pin §9, not exercised). It matters once SDK 11 is pinned.
 
 ## Sub-artifacts
@@ -477,7 +479,7 @@ The rank comes from corpus frequency, which is how often an agent sees the patte
 
 1. https://learn.microsoft.com/en-us/dotnet/standard/library-guidance/cross-platform-targeting: "start with net8.0+", "consider" ns2.0.
 2. https://learn.microsoft.com/en-us/dotnet/standard/net-standard: which runtimes implement ns2.0 and ns2.1; the 4.7.2+ recommendation.
-3. https://dotnet.microsoft.com/en-us/platform/support/policy/dotnet-core: .NET 8/9 EOS 2026-11-10, .NET 10 to 2028-11-14.
+3. https://dotnet.microsoft.com/en-us/platform/support/policy/dotnet-core: .NET 8/9 EOS 2026-11-10, .NET 10 and .NET 11 to 2028-11-14.
 4. https://github.com/dotnet/core/blob/main/release-notes/10.0/supported-os.md: per-OS and per-arch reach for the 8 ocx targets.
 5. https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/configure-language-version: a newer LangVersion than the TFM's is unsupported; do not use `latest`.
 6. https://github.com/SimonCropp/Polyfill: the polyfilled API list, `PolyArgumentExceptions`, the visibility rules.
@@ -489,4 +491,9 @@ The rank comes from corpus frequency, which is how often an agent sees the patte
 12. https://learn.microsoft.com/en-us/nuget/concepts/auditing-packages: the audit defaults, NU1900–NU1905, the audit-pipeline split, the audited-count assertion.
 13. https://learn.microsoft.com/en-us/nuget/consume-packages/central-package-management: CPM, and "Transitive Pinning and Pack".
 14. https://learn.microsoft.com/en-us/nuget/consume-packages/package-source-mapping: precedence and the global-packages-folder caveat.
-15. https://github.com/dotnet/sdk/commit/cf67b960b0d90c4a8a84452f2dace93ab66e7fa3: `dnx` runs the newest SDK "despite any global.json".
+15. https://learn.microsoft.com/en-us/dotnet/core/compatibility/sdk/11/dnx-scripts-bypass-global-json: `dnx` scripts bypass global.json SDK selection (replaces dotnet/sdk commit cf67b96).
+
+## Revision log
+
+- 2026-11-27: CS-BUILD-02, CS-BUILD-04, CS-BUILD-06, CS-BUILD-10, CS-BUILD-12, CS-BUILD-20, CS-BUILD-21 and CS-BUILD-22 corrected in place, plus Verdict 2 and 3, the Open questions and the agent-error row 7, per `refresh-2026-11/dotnet-build.md`: net9 end of support in the past tense, the net11.0 reason, SDK 11 GA facts beside the RC1 measurements, the eight-rule `11.0` list, CA1034 scoped to SDK 10, the Polyfill 12.0.0 read, and the `dnx` re-source.
+- 2026-11-27: CS-BUILD-15 and CS-PKG-05 are not owned by this file (it pins no Meziantou.Analyzer and carries no pack rule), so they are unchanged here; see `refresh-2026-11/dotnet-build.md`.

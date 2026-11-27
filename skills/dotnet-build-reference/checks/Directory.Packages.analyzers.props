@@ -8,7 +8,7 @@
     PublicApiAnalyzers is conditional on IsPackable: without PublicAPI.Shipped.txt it still reports RS0016 and RS0037 for every public member
     (12 RS0016 and 8 RS0037 on a project with no API files, measured 2026-10-11, SDK 10.0.401), so set <IsPackable>false</IsPackable> on every
     project that is not shipped (tests, samples, canaries) and commit both API files in every packable one (CS-API-11).
-    Versions read 2026-10-11; a bump is its own commit that lists the new rule IDs (CS-BUILD-10).
+    Versions read 2026-10-11, Meziantou.Analyzer 3.0.342 re-read 2026-11-27; a bump is its own commit that lists the new rule IDs (CS-BUILD-10).
     Adopting this in an existing repository: delete every PackageReference to MinVer or to one of these five packs first (a second
     declaration is NU1504); expect thousands of diagnostics on a mature tree (6,062 on a serializer library, 2,910 on an application,
     measured 2026-10-11), so adopt one project at a time and seed PublicAPI.Shipped.txt from the current surface with the PublicApiAnalyzers
@@ -30,7 +30,7 @@
     <GlobalPackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="5.6.0" Condition="'$(IsPackable)' == 'true'" />
     <GlobalPackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="18.7.23" />
     <GlobalPackageReference Include="IDisposableAnalyzers" Version="4.0.8" />
-    <GlobalPackageReference Include="Meziantou.Analyzer" Version="3.0.297" />
+    <GlobalPackageReference Include="Meziantou.Analyzer" Version="3.0.342" />
     <GlobalPackageReference Include="MinVer" Version="8.0.0" />
   </ItemGroup>
 </Project>

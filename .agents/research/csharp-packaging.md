@@ -11,6 +11,7 @@ grounding:
   - csharp-audit/exemplar-build-and-gates.md
   - csharp-audit/exemplar-cli-wrappers-and-sdks.md
 date: 2026-10-11
+revised: 2026-11-27
 feeds:
   - "dotnet-build/packaging.md (rules CS-PKG-*)"
   - "dotnet-release skill (procedure R1-R14)"
@@ -106,10 +107,10 @@ Commands assume the SDK layout `src/Ocx.Sdk`, `artifacts/` and `.github/workflow
 - **Verify:** `ls artifacts/Ocx.Sdk.*.snupkg && ! ls artifacts/*.symbols.nupkg 2>/dev/null`.
 - **Watched:** NR V6.
 
-**CS-PKG-05 (SHOULD) Pack releases as `SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) dotnet pack ...` on SDK >= 10.0.401.**
-- **Rationale:** a fixed timestamp is the only setting that gives byte-identical nupkg and snupkg across clones. SDK 8.0.425 ignores it, and 11.0 RC1 is still non-identical by default (NR V5).
-- **Verify:** pack a fresh clone in a second directory, then `test "$(sha256sum artifacts/*.nupkg | cut -d' ' -f1)" = "$(sha256sum ../clone2/artifacts/*.nupkg | cut -d' ' -f1)"`.
-- **Watched:** NR V5.
+**CS-PKG-05 (SHOULD) Pack releases with the commit time passed both ways, `T=$(git log -1 --format=%ct); SOURCE_DATE_EPOCH=$T dotnet pack ... -p:DeterministicTimestamp=$T`, on SDK >= 10.0.401.**
+- **Rationale:** a fixed timestamp is the only setting that gives byte-identical nupkg and snupkg across clones. SDK 10.0.401 honoured `SOURCE_DATE_EPOCH` (NR V5). NuGet 8.0.0 (SDK 11.0.100) and its 7.9.x backport for a later 10.0.4xx patch no longer read the variable and default `DeterministicTimestamp` to `false`, so only the property fixes the time there (NuGet.Client#7652 and #7661, NuGet 8.0 release notes, read 2026-11-27; the Learn deterministic-packages page that says otherwise predates the change). SDK 8.0.425 ignores the variable, and 11.0 RC1 is still non-identical by default (NR V5).
+- **Verify:** pack a fresh clone in a second directory with the same two settings, then `test "$(sha256sum artifacts/*.nupkg | cut -d' ' -f1)" = "$(sha256sum ../clone2/artifacts/*.nupkg | cut -d' ' -f1)"`.
+- **Watched:** NR V5, variable only, on SDK 10.0.401. The property form on SDK 10.0.404 and 11.0.100 is `unverified: not run`.
 
 **CS-PKG-06 (MUST) Derive the version from the git tag with `<PackageReference Include="MinVer" Version="8.0.0" PrivateAssets="all" />` and `<MinVerTagPrefix>v</MinVerTagPrefix>`.** No project file sets `Version`, `VersionPrefix`, `PackageVersion`, `AssemblyVersion`, `FileVersion` or `InformationalVersion`.
 - **Rationale:** one source of truth. MinVer sets `AssemblyVersion` to `{major}.0.0.0` (Microsoft guidance), and SourceLink appends `+commit` to InformationalVersion (NR §6, V8).
@@ -395,7 +396,7 @@ Gate configuration that CS-BIN-04, -10, -11, -12, -16 rely on:
 | R2 | `actions/setup-dotnet@<sha>` with `global-json-file: global.json` (newest SDK, never the floor: SDK 8 fails NETSDK1045 on net10.0 and ignores `SOURCE_DATE_EPOCH`) | `test "$(dotnet --version)" = "$(python3 -I -c 'import json;print(json.load(open("global.json"))["sdk"]["version"])')"` |
 | R3 | `dotnet restore --locked-mode` | exit 0 |
 | R4 | `dotnet build -c Release --no-restore` and `dotnet test -c Release --no-build` | exit 0 |
-| R5 | `SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) dotnet pack src/Ocx.Sdk -c Release -o artifacts --no-build` (`GITHUB_ACTIONS=true` is set by the runner) | exit code 0, which includes CP#### package validation (CS-PKG-09); `ls artifacts/*.snupkg` (CS-PKG-04) |
+| R5 | `T=$(git log -1 --format=%ct); SOURCE_DATE_EPOCH=$T dotnet pack src/Ocx.Sdk -c Release -o artifacts --no-build -p:DeterministicTimestamp=$T` (`GITHUB_ACTIONS=true` is set by the runner) | exit code 0, which includes CP#### package validation (CS-PKG-09); `ls artifacts/*.snupkg` (CS-PKG-04) |
 | R6 | version/tag consistency | the CS-PKG-07 `test` line; `! ls artifacts/Ocx.Sdk.0.0.0*` |
 | R7 | metadata completeness | CS-PKG-01 nuspec check; CS-PKG-15 no-binary check |
 | R8 | provenance | `dotnet tool restore && for p in artifacts/*.nupkg; do dotnet tool run dotnet-validate package local "$p" \|\| exit 1; done` (CS-PKG-10) |
@@ -475,7 +476,7 @@ Ranked by how often an agent produces the defect unprompted. The rank is a judge
 16. **Ships all 8 binaries under `runtimes/*/native` in the SDK package, or only under `linux-musl-*`.** Caught by CS-PKG-15, the CS-BIN-19 count, and the `-r linux-x64` publish test.
 17. **A credential in `DefaultRequestHeaders` on an auto-redirecting client.** Caught by lint G7 and the redirect-leak test.
 18. **`HOME` read on Windows, `SpecialFolder.LocalApplicationData` used as the Linux cache, `Directory.CreateDirectory(path)` with no mode.** Caught by the CS-BIN-03 rg and lint G10.
-19. **`DeterministicTimestamp=true` presented as "reproducible packages".** Caught by the CS-PKG-05 two-clone `sha256sum`.
+19. **`DeterministicTimestamp=true`, or `SOURCE_DATE_EPOCH` without the property, presented as "reproducible packages".** Caught by the CS-PKG-05 two-clone `sha256sum`.
 20. **`PackageValidationBaselineVersion` set to the version being released at v1.0.0 (NU1102), or gating on `ls *.nupkg`.** Caught by CS-PKG-09.
 21. **Signing with a SHA-1 thumbprint or a self-signed certificate, or calling `dotnet validate` an SDK verb.** Caught by the CS-PKG-13 grep and the pinned tool manifest.
 
@@ -512,8 +513,14 @@ Ranked by how often an agent produces the defect unprompted. The rank is a judge
 - **Cache-root ownership:** is a `geteuid()` + `stat` check worth a P/Invoke? `geteuid` has no struct, but `stat` layouts differ per OS and architecture. Alternatively, accept the documented gap. Python checks ownership; C# currently cannot.
 - **.NET 11 GA re-measure (Nov 2026):**
   - ZipArchive CRC verification (RC1 catches 14 of 20 flips).
-  - Pack `DeterministicTimestamp` defaults (RC1 is still non-identical).
+  - Pack `DeterministicTimestamp` on SDK 10.0.404 and 11.0.100: the source reading says NuGet 8.0.0 defaults it to `false` and ignores `SOURCE_DATE_EPOCH` (see CS-PKG-05), but the property form has not been run. Pack the fixture in four modes on 10.0.401, 10.0.404 and 11.0.100, confirm that the property gives equal hashes and the variable alone does not on 11.0.100, and find the first 10.0.4xx patch that carries NuGet.Client#7661.
   - `TarExtractOptions`/`ZipExtractionOptions` as a possible relaxation of CS-BIN-10, once the floor moves past net10.
+
+## Revision log
+
+- 2026-11-27: CS-PKG-05 (rule, rationale, verification, watched note) now passes the commit time as `SOURCE_DATE_EPOCH` and as `-p:DeterministicTimestamp`, because NuGet 8.0.0 no longer reads the variable; the property form is marked `unverified: not run`. Decision: [refresh-2026-11/dotnet-build.md](refresh-2026-11/dotnet-build.md).
+- 2026-11-27: dotnet-release step R5 (the pack command), agent failure mode 19, and the .NET 11 GA re-measure open question follow the CS-PKG-05 change. Decision: [refresh-2026-11/dotnet-build.md](refresh-2026-11/dotnet-build.md).
+- 2026-11-27: csharp-quality delta [refresh-2026-11/csharp-quality.md](refresh-2026-11/csharp-quality.md) changes no CS-PKG or CS-BIN rule; its spillover items were checked and the text here was already correct.
 
 ## Sub-artifacts
 

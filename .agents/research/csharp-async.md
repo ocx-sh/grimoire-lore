@@ -19,7 +19,7 @@ grounding:
   - csharp-api.md (Verdict 1, 3; CS-API-01; CS-ERR-02/05/06), csharp-json.md (CS-JSON-10), csharp-packaging.md (CS-BIN-06/12), csharp-process.md (CS-PROC-09/10/13/22), csharp-observability.md (CS-OBS-27/28)
 target_file: csharp-quality/async.md
 date: 2026-10-11
-revised: 2026-10-11
+revised: 2026-11-27
 ---
 
 # The async contract of a .NET library
@@ -142,7 +142,7 @@ Analyzer firing levels below come from the SDK's own globalconfigs and $CA §2 /
 - Tests, samples and apps carry no ConfigureAwait.
 - The rule stays on .NET 11 runtime-async.
 - Rationale, observed deadlocks:
-  - A consumer that blocks on `.Result` under a single-threaded `SynchronizationContext` deadlocks when the library omits ConfigureAwait. It also deadlocks with `ConfigureAwait(true)` and with "false on the first await only". It completes in 108 ms with `ConfigureAwait(false)` ($CA §5 V8-V11, $DS V2). The result is identical on net11 RC1 with `runtime-async=on` ($CA §11).
+  - A consumer that blocks on `.Result` under a single-threaded `SynchronizationContext` deadlocks when the library omits ConfigureAwait. It also deadlocks with `ConfigureAwait(true)` and with "false on the first await only". It completes in 108 ms with `ConfigureAwait(false)` ($CA §5 V8-V11, $DS V2). The result is identical on net11 RC1 with `runtime-async=on` (`<Features>runtime-async=on</Features>`, the documented opt-in; not re-measured on 11.0.100 GA) ($CA §11).
   - `.WithCancellation(ct)` returns a `ConfiguredCancelableAsyncEnumerable<T>` with `continueOnCapturedContext: true`. It satisfies CA2007, but the loop body still ran on the context thread ($CB §8, fixture 10).
 - Verify:
   - `.editorconfig`:
@@ -707,3 +707,4 @@ Ranked by how often each bites. Corpus counts are from $CA/$DS/$SF/$CB and exemp
   - New fixtures:
     - `$C/mz-gap` (V-C2, MA0004 vs CA2007, red/green with Meziantou off and on).
     - `$C/coalesce` (V-C3, Pattern B with `ForceYielding` vs no yield on net8 and net10).
+- 2026-11-27 delta refresh: CS-ASYNC-06 rationale names the runtime-async switch `<Features>runtime-async=on</Features>` as the documented opt-in and states the deadlock result was not re-measured on 11.0.100 GA; see `refresh-2026-11/csharp-quality.md`. No other rule ID in this file changed; the native `net11.0` re-run stays an open question.

@@ -14,7 +14,7 @@ grounding:
   - csharp-audit/exemplar-cli-wrappers-and-sdks.md
   - csharp-async.md, csharp-build.md and csharp-api.md (sibling consolidations, checked for agreement)
 date: 2026-10-11
-revised: 2026-10-11
+revised: 2026-11-27
 fixtures: /home/mherwig/.cache/research-lang/dotnet-tools/fixtures/consolidate-csharp-process/ (run-all.sh; transcript-linux.txt, transcript-windows-net10.txt; round 2: engine-r2/, engine-r2-mut/, driver-r2/, transcript-r2-linux.txt, transcript-r2-windows.txt, transcript-r2-rules.txt)
 ---
 
@@ -539,7 +539,7 @@ Ordered launch, then I/O, then termination, then exit status. Conventions:
   - They give CS0117 on net8/net10 [L V15].
   - RC1 `RunAsync` returns `Canceled=true` instead of throwing, and orphans grandchildren [C §10].
   - `ReadAllTextAsync` is unbounded and stalled 6 s on a held pipe [S §10].
-  - `KillOnParentExit` docs disagree on platforms, and macOS is excluded [C §10].
+  - `KillOnParentExit` docs disagree on platforms, and macOS is excluded [C §10]. At GA (2026-11-10) it covers Windows, Linux and Android only, never macOS, so the tree kill of CS-PROC-14 stays the only containment there (API reference, read 2026-11-27).
 - Check:
   - `dotnet build -c Release -f net8.0` and `-f net10.0` pass.
   - `rg -n -g '*.csproj' -g '*.props' 'net11' .` prints nothing.
@@ -1382,10 +1382,9 @@ Ranked by how often the shape appears in training data and in the surveyed libra
 - **csharp-process-self-update-pin.** Does `ocx self update` repoint `symlinks/.../current` atomically, so the unresolved `$OCX_HOME` pin survives an in-flight call? [R §2.12] could not run it: it needs `ocx.sh` or a local mirror registry that serves `ocx.sh/ocx/cli`. The owner must allow one of the two.
 - **.NET 11 GA re-measure (Nov 2026).** Check:
   - `RunAsync` cancel semantics.
-  - `KillOnParentExit` platforms.
   - Whether `ReadAll*` gained a size cap or a held-pipe bound.
 
-  If they did, CS-PROC-23 can relax for a net11.0 target.
+  The `KillOnParentExit` platform question is answered (Windows, Linux and Android only; see the Revision log). If they did, CS-PROC-23 can relax for a net11.0 target.
 
 ## Sub-artifacts
 
@@ -1434,3 +1433,4 @@ Ranked by how often the shape appears in training data and in the surveyed libra
 - CS-PROC-01, 04, 08, 11, 12, 13, 15, 18 and the other rows: `ocx:` build lines and real-ocx confirmations added; no rule text changed. Why: the brief requires the build per claim.
 - Reference engine: `ChildExit`, `OcxRetry`, `ExitTable` and the resolver replaced; `OcxExitDocument` and `PathAcl` added; `OcxProcess.cs` unchanged. Why: the rewritten rows above; built and run in [K2].
 - Verdict: items 1, 2, 3, 5 and 6 updated and item 9 (documented gaps) added. Open questions: owner decisions 8-9 added, a drift block added, the `csharp-process-real-ocx` and Windows writable-PATH rounds removed as answered, and `csharp-process-self-update-pin` added. Failure modes 18-25 and class I added. Key sources: runtime#42556 and the cancellation guide replaced by `Process.Win32.cs`, `GetAccessControl` and well-known SIDs.
+- 2026-11-27: CS-PROC-23 rationale extended: `KillOnParentExit` covers Windows, Linux and Android only, never macOS, at .NET 11 GA. Open questions: the `KillOnParentExit` platform item of the .NET 11 GA re-measure is answered. Decision file: refresh-2026-11/csharp-quality.md.
