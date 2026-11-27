@@ -1,0 +1,252 @@
+{
+ "topics": [
+  {
+   "slug": "marketing-claims-evidence",
+   "idFamily": "MKT-CLAIM",
+   "followups": 5,
+   "unanswered": 0,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/marketing-claims-evidence.md",
+   "rules": 30,
+   "must": 24,
+   "newMust": [
+    "MKT-CLAIM-28",
+    "MKT-CLAIM-30"
+   ],
+   "newIds": [
+    "MKT-CLAIM-27",
+    "MKT-CLAIM-28",
+    "MKT-CLAIM-29",
+    "MKT-CLAIM-30"
+   ],
+   "changedIds": [
+    "MKT-CLAIM-02",
+    "MKT-CLAIM-03",
+    "MKT-CLAIM-04",
+    "MKT-CLAIM-05",
+    "MKT-CLAIM-10",
+    "MKT-CLAIM-14",
+    "MKT-CLAIM-16",
+    "MKT-CLAIM-18",
+    "MKT-CLAIM-20",
+    "MKT-CLAIM-21",
+    "MKT-CLAIM-22",
+    "MKT-CLAIM-24",
+    "MKT-CLAIM-26"
+   ],
+   "retiredIds": [],
+   "newFailureClasses": [
+    "States reviews come from real or verified customers with no checking process behind it (EU Annex I 23b)",
+    "Uses a customer quote as the evidence for a performance, statistic or count claim",
+    "Writes a competitor limitation from memory into a comparison table (the nvm 'no Windows' cell)",
+    "Moves a caveat into a tooltip, details element or footer away from its claim",
+    "Anchors a 'was X, now Y' reduction on a list price instead of the 30-day lowest price",
+    "Presents a legal obligation as a product feature ('GDPR-compliant', 'encrypted as required by law')",
+    "Labels a product 'agentic' or 'intelligent', which the wave-1 gate did not see",
+    "Writes compact or suffix figures (100k+, 1.76s, 600 KB, 'Up to 10 sites') that the wave-1 unit and count arms missed"
+   ],
+   "stillOpen": [
+    "Will the owner give agents a separate GitHub identity? Without one, every MKT-CLAIM-16 sign-off class stays blocked, including the new comparison-party changes that recording the ocx drift table needs.",
+    "What precision and recall does the 15-line MKT-CLAIM-02 set reach on held-out home pages with a second rater? The 74.9% recall figure is in-sample, and recall on the wave-1 arms is at most 54.8%.",
+    "Where is the claims lint built (checks A to E plus the fixture scripts from followup-q2 and q4), and does it block from the first commit or start as a ratchet?",
+    "Should MKT-CLAIM-06 stay MUST when its 300-character link test flags 105 of 124 exemplar chart values, including values whose chart does link a reproduction page? Or does a per-chart record replace it?",
+    "Is any fleet surface aimed at UK or EU consumers, and what is the seller country? This decides how much MKT-CLAIM-27 and the UK duties bind."
+   ]
+  },
+  {
+   "slug": "marketing-positioning-record",
+   "idFamily": "MKT-POS",
+   "followups": 3,
+   "unanswered": 0,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/marketing-positioning-record.md",
+   "rules": 20,
+   "must": 14,
+   "newMust": [],
+   "newIds": [
+    "MKT-POS-20",
+    "MKT-POS-21"
+   ],
+   "changedIds": [
+    "MKT-POS-04",
+    "MKT-POS-12",
+    "MKT-POS-14"
+   ],
+   "retiredIds": [],
+   "newFailureClasses": [
+    "Commit signing mistaken for owner proof: agent signs with the owner's key, so Verified commits cannot gate the status flip",
+    "AGENTS.md hidden from a client: a non-importing CLAUDE.md (Claude Code), a first-match file such as .cursorrules (Zed), or a Gemini config without AGENTS.md in context.fileName"
+   ],
+   "stillOpen": [
+    "Does each product repository have a second approver account, and do agent sessions hold no admin token or bypass role? Until both are confirmed, MKT-POS-20 stays SHOULD and the MKT-POS-04 MUST is unenforced.",
+    "Does any non-Claude client actually follow the AGENTS.md pointer line in a live session? Only documented loading was verified, and no client was run.",
+    "How does the drift check read, and possibly write, the GitHub About field in CI without an agent-held admin token (open question 1)?"
+   ]
+  },
+  {
+   "slug": "marketing-first-screen-copy",
+   "idFamily": "MKT-PAGE",
+   "followups": 4,
+   "unanswered": 0,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/marketing-first-screen-copy.md",
+   "rules": 14,
+   "must": 5,
+   "newMust": [],
+   "newIds": [
+    "MKT-PAGE-12",
+    "MKT-PAGE-13",
+    "MKT-PAGE-14"
+   ],
+   "changedIds": [
+    "MKT-PAGE-01",
+    "MKT-PAGE-02",
+    "MKT-PAGE-06",
+    "MKT-PAGE-11"
+   ],
+   "retiredIds": [],
+   "newFailureClasses": [
+    "doc_surface declaration placed in an .astro frontmatter fence, which no check reads and the build drops",
+    "built doc-surface meta and source comment of one route drift apart",
+    "wrapped source line that starts with a stage word counted as a status label",
+    "gawk-only IGNORECASE silently case-sensitive under mawk",
+    "service offer hero with slogan and contact button but no buyer, price or engagement signal, or next step",
+    "agent invents a price figure for a service offer page",
+    "unquantified deliverer boast (world-class, deepest bench, decades) on an offer hero"
+   ],
+   "stillOpen": [
+    "Will the owner approve the doc_surface enum (pitch, home, offer) and CR-3 with a built-meta reader in checks/? Until then MKT-PAGE-01, -02, -11 and -14 verify only through a scratch reference reader that a published rule cannot point to.",
+    "Should MKT-PAGE-01's README scope follow GitHub's documented display order (.github/README.md before the root README)? followup-q2 answered only partly, so the change was not adopted.",
+    "Does a human rater confirm the LLM-rated 22-of-25 corpus count that MKT-PAGE-03's MUST rests on?",
+    "What does npmjs.com show above the fold, and does the crates.io result hold beyond one crate? This decides whether the candidate registry-README rule can be adopted."
+   ]
+  },
+  {
+   "slug": "marketing-discoverability",
+   "idFamily": "MKT-SEO",
+   "followups": 3,
+   "unanswered": 0,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/marketing-discoverability.md",
+   "rules": 25,
+   "must": 17,
+   "newMust": [],
+   "newIds": [
+    "MKT-SEO-26"
+   ],
+   "changedIds": [
+    "MKT-SEO-06",
+    "MKT-SEO-07",
+    "MKT-SEO-14"
+   ],
+   "retiredIds": [],
+   "newFailureClasses": [
+    "A CDN noindex header bound to a per-host trigger list is assumed to follow a new or renamed preview host (MKT-SEO-26)"
+   ],
+   "stillOpen": [
+    "The no-SVG og:image MUST (MKT-SEO-06) rests only on X's archived 2026-01-16 cards reference, with no live X or LinkedIn page behind it. Is an archive-only vendor statement enough to publish it as MUST, or does it need an owner's logged-in test post first?",
+    "Can ocx.sh's TLS failure on its public name be fixed so that MKT-SEO-17 and the 170 /catalog/ pages can be measured? Until then MKT-SEO-24's 0.5 template-share threshold has no second data point.",
+    "Does the Cloudflare edge 403 to PerplexityBot on the grimoire hosts also hit requests from Perplexity's published IP ranges? MKT-SEO-16's user-agent test cannot tell, and the owner's AI Crawl Control logs are needed.",
+    "Does MkDocs Material read a per-page description without a template override? MKT-SEO-04's MkDocs fix depends on the answer."
+   ]
+  },
+  {
+   "slug": "marketing-release-announcements",
+   "idFamily": "MKT-REL",
+   "followups": 3,
+   "unanswered": 0,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/marketing-release-announcements.md",
+   "rules": 18,
+   "must": 13,
+   "newMust": [],
+   "newIds": [
+    "MKT-REL-19"
+   ],
+   "changedIds": [
+    "MKT-REL-02",
+    "MKT-REL-07",
+    "MKT-REL-08",
+    "MKT-REL-09",
+    "MKT-REL-12",
+    "MKT-REL-14"
+   ],
+   "retiredIds": [],
+   "newFailureClasses": [
+    "F. Summary that never reaches the reader (slot above the version heading or in the header, relying on dist to read a tag message, a tag message with several paragraphs or a trailer)",
+    "C-9a: deprecation window opened in code but never named under ### Deprecated",
+    "C-9b: release prepared at a window's removal version with the window still open",
+    "C-9c: green compat gate taken as proof that no breaking change is unmarked"
+   ],
+   "stillOpen": [
+    "Does grimoire's real tagged release (dist host --steps=create in CI) carry the summary line into the published body the way the measured dist plan does, and can GitHub secret masking withhold that body?",
+    "Who creates grimoire's release tag, and can the workflow annotate it? Without that, MKT-REL-14 (d) cannot pass and each summary drops out of CHANGELOG.md at the next regeneration.",
+    "Does ocx keep AGENTS.md:21 ('no dual-form parsing, no warning schedule') or its 14 contract deprecation windows? MKT-REL-08 and MKT-REL-19 assume the windows stand.",
+    "Will the ocx 0.7.0 golden close all 14 windows that fall due (MKT-REL-19)? Only a control was run, because the tag does not exist yet."
+   ]
+  },
+  {
+   "slug": "marketing-measurement",
+   "idFamily": "MKT-MEAS",
+   "followups": 2,
+   "unanswered": 0,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/marketing-measurement.md",
+   "rules": 21,
+   "must": 17,
+   "newMust": [],
+   "newIds": [
+    "MKT-MEAS-21"
+   ],
+   "changedIds": [
+    "MKT-MEAS-12",
+    "MKT-MEAS-19"
+   ],
+   "retiredIds": [],
+   "newFailureClasses": [
+    "A single AI-citation churn rate quoted as fact, with no engine, quantity, source, date or vendor/preprint label, or with engines pooled (MKT-MEAS-21)",
+    "An AI-citation 'rose/fell' claim built on overlapping intervals or with no prompt and run counts (MKT-MEAS-19 MUST core)",
+    "An HDYHAU table that omits blanks or whose answered plus blank counts do not sum to shown (MKT-MEAS-12)"
+   ],
+   "stillOpen": [
+    "Does CDN or host server-side analytics (Cloudflare in front of grimoire.rs; GitHub Pages with no owner log access) count as log counting without personal data under DSK Rn. 88, and can it be read without a script? This decides whether the fleet has any site-traffic number at all.",
+    "How does the ICO read PECR Schedule A1 para 5(2) for IP and user-agent hashing? The ICO pages returned 403, and MKT-MEAS-04's UK branch rests on it.",
+    "Does a zero-result search beacon to the project's own function (DOC-NAV-10) fall under Article 5(3) and TDDDG section 25? The answer sets how far the V1 fix must reach into docs-instrument.",
+    "Is the MKT-MEAS-19 MUST rule 'overlapping intervals support no change claim', with the interval method left to the report, acceptable without a named interval method? No follow-up source prescribes one."
+   ]
+  },
+  {
+   "slug": "marketing-voice-ai-authorship",
+   "idFamily": "MKT-VOICE",
+   "followups": 4,
+   "unanswered": 0,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/marketing-voice-ai-authorship.md",
+   "rules": 20,
+   "must": 7,
+   "newMust": [],
+   "newIds": [
+    "MKT-VOICE-19",
+    "MKT-VOICE-20"
+   ],
+   "changedIds": [
+    "MKT-VOICE-03",
+    "MKT-VOICE-04",
+    "MKT-VOICE-09",
+    "MKT-VOICE-13",
+    "MKT-VOICE-14",
+    "MKT-VOICE-15",
+    "MKT-VOICE-16",
+    "MKT-VOICE-18"
+   ],
+   "retiredIds": [],
+   "newFailureClasses": [
+    "Invented reader step in an outage postmortem, or a vague 'take appropriate action' in an advisory with no version, command, link or credential (MKT-VOICE-19)",
+    "Corrective-framing and importance-flag phrases ('is more than a', 'why X matters') in agent copy after the em dash has gone (MKT-VOICE-20)",
+    "Generated human performer in an ad or pitch video with no owner yes, or its label placed in a footer or another figure (MKT-VOICE-16)",
+    "Labelling AI text to satisfy a US state law that exempts text (MKT-VOICE-14)",
+    "Register floor applied to a changelog or release note (MKT-VOICE-09)",
+    "Self-written Editorial responsibility line with no public contact page behind it (MKT-VOICE-15)"
+   ],
+   "stillOpen": [
+    "Is a software security advisory or incident post public-interest text under Art. 50(4)? No Commission or national-authority text rules on it, and MUST MKT-VOICE-15 rests on an analogy to the weather-warning example.",
+    "Is a software company's own landing-page video, pitch page or README an 'advertisement' under NY GBL 396-b, CA SB 1050 or PA Act 99? And when does SB 1050 take effect? Its chaptered text returned HTTP 403, and MUST MKT-VOICE-16's performer clause depends on both answers.",
+    "Does C/2026/6005 (Official Journal, 2026-11-12) replace C(2026) 7702, and did the text change between 2026-07-20 and 2026-11-05 in a way that moves the scope or exception paragraphs MKT-VOICE-15 and -16 cite?"
+   ]
+  }
+ ],
+ "failed": []
+}
