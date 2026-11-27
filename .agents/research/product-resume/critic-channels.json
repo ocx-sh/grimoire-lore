@@ -1,0 +1,26 @@
+{
+ "ok": false,
+ "missing": [
+  "distribution-posture.md smell 8 (tags without Releases: catalog 16, conventions 16, indexer 29; grim-gui/grim-mirror publish nothing): no dive brief or deferral. gh-release-announcement should add a tag-without-release check.",
+  "channel-video-production-software.md VP#26 (EU AI Act Art. 50 for synthetic video) and VP#27 (sponsored mention placement in video) are not in any map row, hand-off or deferral. Both belong with M-CO-4 or M-CO-2.",
+  "channel-linkedin-organic.md LO#40 (cost of low-quality video, reversibility) is cited by no map row.",
+  "exemplar-youtube-channels.md says the fleet has no YouTube presence, but distribution-posture.md says the channel exists. Frame correction 1 takes the posture audit's side without noting the conflict. The 'unlinked from 0 of 17 repos/sites' fix has no brief that owns inbound links."
+ ],
+ "weakBriefs": [
+  "li-limits-and-fold: renders public LinkedIn embed URLs in a headless browser. This is scraping that the User Agreement likely prohibits. The brief neither requires a ToS check first nor names a fallback if blocked, so it risks an unrepeatable or non-compliant measurement.",
+  "Briefs state scout-derived facts as givens, not as claims to verify (yt-upload-metadata-contract: '60 tags ignored', 'Shorts thumbnails API from 2026-11-03'; core-platform-labels: TikTok is_aigc effective 2026-09-24; yt-measurement: co-view 2026-11-16; vid-legibility: safe rectangle 288/672/120/192). Add a line: re-fetch every dated figure and flag any scout figure that fails to reproduce.",
+  "core-fact-decay: no named source for how skill catalogs version volatile facts ('two published skill catalogs' is unspecified). Wayback CDX covers snapshots, not edits, so the change counts may be undercounts. State that limit.",
+  "launch-shape-evidence: 'maintainer write-ups ... found by searching' names no primary source. 'Which first-users tactics have repeatable evidence' is unlikely to yield a checkable rule. Treat it as deferrable or limit it to the changelog gap measurement.",
+  "mb-platform-choice: the 'which platform is worth it' half is audience judgement and cannot yield a checkable rule. Only the link-placement default can.",
+  "vid-legibility-thresholds: 'Apple HIG and Material type-scale minimums' are not a source for terminal x-height. The decision rests entirely on the dive's own measurement, so label the floor as derived."
+ ],
+ "overlaps": [
+  "gh-signal-validity and launch-readiness-and-measurement: both fetch the GitHub traffic API and the 14-day window. Give the archive-job decision to one dive.",
+  "core-agent-action-boundary and com-hn-contract: both own the HN/Stack Overflow ban on generated text (CM#3, LP#17). Give the venue clause to the boundary dive and have com-hn-contract cite it.",
+  "li-limits-and-fold and vid-accessibility: both cover LinkedIn video captions (single SRT, Videos API caption fields) and alt text. Give one owner.",
+  "gh-release-announcement and com-own-community-home: both cover GH#18 Discussions announcements per release.",
+  "yt-format-portfolio and yt-measurement-and-testing: the 90-day Shorts success test sits in the first, and view definitions and thresholds sit in the second. They need one shared source.",
+  "li-format-and-reach-evidence and li-limits-and-fold: both start from LO#3, LO#21, LO#23, LO#31, LC#5, LC#27 and LC#28 (format limits versus format-by-goal). Split cleanly: limits in one, goal choice in the other.",
+  "Sibling territory: vid-legibility-thresholds in-frame contrast and type size (ux). launch-readiness UTM and install-path checks (marketing analytics, cli-first-run). vid-accessibility legal deadlines (marketing law, already named in one line). gh-registry-listings README-rendering rule (docs-quality). gh-release-announcement overlaps the commit-message rules, which it names itself."
+ ]
+}

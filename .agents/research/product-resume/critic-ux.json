@@ -1,0 +1,25 @@
+{
+ "ok": false,
+ "missing": [
+  "config-inventory.md smell 10 + ux-topic-map M038/M055: docs-quality.md:184 says page-level accessibility is governed nowhere, yet the map routes M055 to docs-quality and says it owns docs-page headings and landmarks. Nobody owns it. Name an owner (ux-quality rule globs on .astro/.html) or defer with a reason.",
+  "site-shape.md smells 4, 5, 10 and contradiction 4 (measured): theme version drift (6 consumers, 5 specifiers), three divergent CommandBar/SiteHeader/SiteFooter copies, 8 of 17 nav entries `planned: true`. The map neither selects, routes to css-theming, nor defers them. The 'consumer theme version matches the published version' check is the one checkable rule the audit proposes.",
+  "accessibility.md row 5 and practitioner.md line 30, both high: WCAG 2.2 criterion 3.2.6 Consistent Help (level A, rated H in AX criterion table) appears nowhere in the map. 2.5.7, 3.3.7 and 3.3.8 are deferred with reasons; 3.2.6 is not, and it applies to the docs sites.",
+  "recent-shifts.md RS17 (high): the six failure categories that make up 96 percent of WebAIM errors, as agent preempt-by-default list, is not cited in any row. It is the natural ranking input for UX-A11Y, so cite it in M017 or the focus/native-widgets dives. FC20 (high, WCAG version by jurisdiction) is likewise unreferenced, though M019 and M021 cover the substance."
+ ],
+ "weakBriefs": [
+  "ux-a11y/announcements-and-motion, ux-ai/conversation-mechanics, ux-cli/terminal-accessibility: 'test with a screen reader' cannot be run by an agent worker (the map's own M012 and accessibility.md AX34 say so), and the accessibility tree does not show what a live region announces. Name an executable tool (for example a virtual screen reader) or require results to be labelled unverified.",
+  "ux-agent/tool-names-and-descriptions: 'small eval of five tasks, report tool-selection accuracy' is n=5, which supports no checkable rule. Set a task count and a pass threshold, or make the deliverable a description checklist rather than an accuracy claim.",
+  "ux-act/agent-action-approval: 'record the approval flow in two agent clients' names no clients, no version and no method, so it is not reproducible. Name the clients and fetch their docs.",
+  "ux-verify/evidence-and-claims: 'unaided LLM review of two diffs, count true, false and unverifiable claims' has no ground truth beyond axe plus one manual pass, and n=2. Weak as a measurement. Primary source for the synthetic-users part says only 'dates as RM25 and RM26 state them', with no URL.",
+  "ux-verify/conformance-targets-law and ux-ai/ai-disclosure-and-labelling: the scouts already failed to fetch EUR-Lex. Without a hard fallback (PDF, Official Journal) the worker will fill the Article 50 and EAA dates from memory. The brief says 'mark unverified', but should say that an unverified legal date must not become a rule row."
+ ],
+ "overlaps": [
+  "ux-state/editor-extension-surfaces and ux-act/gui-destructive-actions: both read the 6 `modal: true` sites in the VS Code extension and both decide when a modal is allowed.",
+  "ux-state/editor-extension-surfaces and ux-state/loading-and-progress: both decide the progress rule for the extension (0 `withProgress` calls, webview async actions).",
+  "ux-act/agent-action-approval and ux-agent/tool-names-and-descriptions: both read the `grim mcp` module and list each tool and its annotations.",
+  "ux-act/cli-destructive-commands and ux-agent/correctable-errors-and-retries: both enumerate every mutating ocx and grim command and run each one; share one command inventory.",
+  "ux-a11y/announcements-and-motion, ux-ai/conversation-mechanics and ux-text/strings-that-survive: all three fetch WCAG 4.1.3 and test live-region behaviour (M045, M101, M169). The boundaries are stated but the measurements will repeat.",
+  "ux-verify/evidence-and-claims M015 (quoting UX statistics, Appcues benchmarks OC48) is a claims and statistics policy that probably overlaps the marketing sub-program's claim policy. Name it to marketing and keep only the UX-stat labelling rule.",
+  "ux-ai/ai-disclosure-and-labelling: disclosure in marketing posts and videos is already named as marketing's; also the Article 50(2) marking of generated release notes and docs (M158) touches marketing's release communication."
+ ]
+}
