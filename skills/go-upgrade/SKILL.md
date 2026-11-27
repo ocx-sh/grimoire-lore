@@ -41,7 +41,10 @@ Moving one or more Go modules to a new Go minor or point release, bumping the
 pinned golangci-lint or staticcheck, and answering a govulncheck finding or a
 dependency bump. Measured 2026-09-26 against Go 1.27.1, golangci-lint v2.14.0,
 staticcheck 2026.2.1, govulncheck v1.8.0 and gopls v0.23.0 unless a line says
-otherwise. The rules are cited by ID and live in the `go-quality` and
+otherwise. Re-checked 2026-11-27: the pins are Go 1.27.4, golangci-lint v2.15.0
+and staticcheck 2026.2.2, and no probe or measured line below was re-run on
+them. govulncheck v1.10.0 (2026-11-17) and gopls v0.24.0 (2026-10-14) are newer
+than their pins, which move only with a re-measure. The rules are cited by ID and live in the `go-quality` and
 `go-modules` rule sets (GO-LANG, GO-MOD, GO-GATE and the families they cite).
 Cutting and signing a release, `retract` and the binary-mode audit belong to the
 `go-release` skill.
@@ -51,13 +54,13 @@ Cutting and signing a release, `retract` and the binary-mode audit belong to the
 Each row is an agreed decision, marked **pinned**. It is a default an adopter
 overrides once, in their own repository, and never per module.
 
-| Decision | Default (2026-09-26) | Override looks like |
+| Decision | Default (re-checked 2026-11-27) | Override looks like |
 |---|---|---|
 | Library and SDK `go` line | The oldest supported release's `.0`, `go 1.26.0` today, or lower. No `toolchain` line | A lower floor the code proves with `stdversion` |
 | CLI `go` and `toolchain` lines | The current release's `.0` (`go 1.27.0`) plus `toolchain go1.27.N` naming the latest patch | `go-version: stable` in CI and no `toolchain` line, which gives up reproducible release builds |
 | CLI patch cadence | Bump `toolchain` within a week of each Go point release | A longer window, written down |
-| golangci-lint pin | Exactly `v2.14.0`, bumped only through step A6 | Another exact version, never `latest` |
-| gopls pin for the `yield` step | `v0.23.0` | Drop the step once step A5's re-check says vet or golangci carries the analyzer |
+| golangci-lint pin | Exactly `v2.15.0` (bundling staticcheck 2026.2.2), bumped only through step A6. P1 to P6 were measured on v2.14.0 and not re-run on v2.15.0 | Another exact version, never `latest` |
+| gopls pin for the `yield` step | `v0.23.0`. v0.24.0 (2026-10-14) is newer and moves only with a re-measure | Drop the step once step A5's re-check says vet or golangci carries the analyzer |
 
 ## Before step A1
 
@@ -119,7 +122,7 @@ Use the go command's own write, never a hand edit.
 
 ```sh
 go get go@1.27.0            # CLI: the current release's .0 (GO-MOD-01)
-go get toolchain@go1.27.1   # CLI: the latest patch, strictly above the go line (GO-MOD-02)
+go get toolchain@go1.27.4   # CLI: the latest patch, strictly above the go line (GO-MOD-02)
 ```
 
 - **CLI.** Both lines move. A point release moves only the `toolchain` line.
@@ -127,6 +130,9 @@ go get toolchain@go1.27.1   # CLI: the latest patch, strictly above the go line 
   to the new oldest supported `.0`, and never to adopt a language feature
   (GO-LANG-03). It never gains a `toolchain` line (GO-MOD-02). Its CI matrix,
   `[oldstable, stable]`, moves by itself (GO-MOD-16).
+  When Go 1.28 ships (planned for February 2027, unreleased on 2026-11-27),
+  1.26 leaves support: the library floor becomes `go 1.27.0`, the CLI line
+  `go 1.28.0`, and the `1.26.0` in the floor check below changes with them.
 
 Checks, each watched red and green on Go 1.27.1 (measured 2026-09-26):
 
@@ -220,7 +226,8 @@ of them carries it, drop the gopls step from the gate (GO-GATE-01 step 10).
    new version, before trusting its verdicts:
    - P1, the unattended `--fix` allowlist (GO-GATE-21).
    - P2, errcheck's receiver matching (GO-GATE-20).
-   - P3, gosec with `excludes` emptied, including G304 (GO-GATE-14).
+   - P3, gosec with `excludes` emptied, including G304, and G115, which stays
+     excluded until this run shows it clean (GO-GATE-14).
    - P4, staticcheck `QF1009` still blocking (GO-GATE-15).
    - P5, SA4023's `_test.go` blind spot (GO-ERR-05), also on every standalone
      staticcheck bump.
@@ -233,6 +240,14 @@ of them carries it, drop the gopls step from the gate (GO-GATE-01 step 10).
    carry `//nolint:<linter> // <reason>` (GO-GATE-12). Never widen an exclusion,
    add a preset, or disable `SA1019` repo-wide to reach green (GO-GATE-09,
    GO-LANG-05).
+
+**Dated re-check, every golangci-lint bump (GO-MOD-08).** Read the bundled
+depguard with `go version -m "$(command -v golangci-lint)" | grep -e 'OpenPeeDeeP/depguard'`.
+v2.15.0 bundles v2.2.1 (read from its go.mod, 2026-11-27). When a bump raises it
+to v2.3.0 or later, which matches by prefix with the longest match winning and
+errors on an empty entry, run `golangci-lint config verify` on all three files
+and plant one import of each `superseded` entry. Each must still report with its
+`desc`, and a missing report is the finding.
 
 ### A7. Audit `GOEXPERIMENT` pins
 
