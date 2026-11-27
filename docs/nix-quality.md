@@ -63,7 +63,7 @@ Some rules encode an agreed decision rather than a derivable fact, and they
 are marked pinned so a later reader does not re-litigate them. No FlakeHub,
 as input or as publish target. No public binary cache and no `nixConfig`, so
 every CI build really compiles. CppNix is the gate of record. Lix and the
-computed floor (`nix_2_31`, today 2.31.5) are advisory legs, and Determinate
+computed floor (`nix_2_34`, 2.34.9 on nixos-unstable, 2026-11-27) are advisory legs, and Determinate
 Nix is untested and never deliberately broken. A `package.nix` is by-name
 ready from the start and moves to nixpkgs after the CLI's first stable
 release. A generated flake lives in its own repository, updated by CI from

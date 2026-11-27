@@ -5,6 +5,7 @@ model: opus
 id_family: CMK-TEST, CMK-CI
 date: 2026-09-26
 verified: 2026-09-26
+revised: 2026-11-27
 consolidates:
   - cmake-testing-and-ci/ctest-contract.md
   - cmake-testing-and-ci/presets-and-ci-shape.md
@@ -357,13 +358,16 @@ schema ceiling of the oldest CMake any CI leg runs.**
 | 6 | 3.25 | 10 | 3.31 |
 | 7 | 3.27 | 11 | 4.3 |
 | 8 | 3.28 | 12 | 4.4 |
-| 9 | 3.30 | 13 | not released (4.5, `master` only) |
+| 9 | 3.30 | 13 | 4.5 |
 
 - Rationale: measured in [presets] §1. 3.31.12 rejects schema 12 with
   `Unrecognized "version" 12: must be >=1 and <=10`, rc 1. The
   `ubuntu-24.04` and `windows-2025` images default to 3.31.6 (CMK-VER-03), so
   a schema-11 file fails there while the author's newer local CMake accepts
-  it. The table comes from `cmake-presets.7.rst` @ v4.4.2. Renaming `dev` to
+  it. The table comes from `cmake-presets.7.rst` @ v4.4.2, and at v4.5.1 it is
+  confirmed by 4.4.5 accepting up to 12 and 4.5.1 up to 13 (measured
+  2026-11-27). Schema 13 adds `strict` and `nonTargetDirective` to `warnings`
+  and `errors`, and the `${configurePresetName}` macro. Renaming `dev` to
   `author` at schema 12 is `CMK-CORE-02`.
 - Verification: the command below prints each file's schema and the files
   it includes. Run the same `jq` on every included file (paths are relative
@@ -592,6 +596,7 @@ Ranked by how often the corpus shows each one.
 - 2026-09-26, verify wave 3: CI-01's command also lists included presets files; the published form printed 10 for a root whose schema-11 include 3.31.12 rejects.
 - 2026-09-26, verify wave 3: CI-04 no longer cites ClickHouse as satisfying the rule; it guards only a ccache launcher and chains onto any other (`cmake/ccache.cmake:15,97-98`). Moved to the violated column.
 - 2026-09-26, verify wave 3: "Verification variables" now runs each command once per CI directory; a quoted `"$CI_DIR"` holding two names fails with "No such file or directory".
+- 2026-11-27: CMK-CI-01 table row 13 now reads "4.5" (was unreleased), and its rationale records the v4.5.1 confirmation (4.4.5 up to 12, 4.5.1 up to 13) and what schema 13 adds. Decision file: refresh-2026-11/cmake-build.md. CMK-CI-05 is unchanged: no measurement on `ubuntu-26.04`, so the hosted-runner open question stays.
 
 ## Sub-artifacts
 

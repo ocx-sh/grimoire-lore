@@ -7,7 +7,7 @@ consolidates:
   - .agents/research/code-docs-surfaces/rendered-summary.md
   - .agents/research/code-docs-surfaces/interface-check.md
 date: 2026-09-27
-revised: 2026-09-27
+revised: 2026-11-27
 ---
 
 # Surfaces: text that renders from code
@@ -33,7 +33,7 @@ consolidation run (first pass or this revision) and use the census lexer
 5. **DOC-16 and DOC-01 stop at interface items.** Intra-doc links render raw in clap and schemars output (320 in ocx). Interface summaries follow the generator's convention, which is imperative for clap per DOC-11. ocx already writes them that way.
 6. **The jargon wordlist is dropped.** 144 of interface-leak's 145 schema "jargon" hits are product vocabulary: the ocx user docs use each flagged term 48 to 243 times. The mechanical tell for a leaked implementation detail is code syntax, and SRF-01 already bans it.
 7. **The summary cap is a ratcheted SHOULD, not rendered-summary's MUST** (SRF-04). The damage lands on listing pages that humans browse and agents rarely open. Hover shows the whole block anyway, and the fix preserves content.
-8. **Hover truncates nothing.** rust-analyzer, typescript-go and pyright render the whole doc block, and LSP 3.17 has no length field. No rule may argue from hover truncation.
+8. **Hover truncates nothing.** rust-analyzer, typescript-go and pyright render the whole doc block, and the LSP 3.18 hover result has no length field (read November 2026; the 3.19 draft adds none). No rule may argue from hover truncation.
 9. **Cut as duplicate or without fleet evidence:** summary-override tags, a pydantic/zod-specific rule, and a module-doc presence rule (DOC-10 already covers presence). A module states its "why" once (SRF-05).
 10. **The token set holds across every captured generator: 17 families, 1 false positive in 333 hits, now fixed.** interface-check read every hit in context on ocx and grimoire help, both repos' schemas, ocx-sdk-python's rendered reference and ocx-catalog's help. It reported 0 false. This revision found one: a Windows SID (`S-1-5-…`, `ocx:crates/ocx_schema/tests/golden/execution-record.json:213`) that a must-print-nothing gate would flag forever. The `S-` family now excludes a following `-digit`. `short2char` stays out: re-measured 4 false of 16 (25%: `V1`, `V3` schema versions, `C0` control codes).
 11. **Documented gap: no shipped gate enforces SRF-01 on any fleet surface.** ocx's clap test checks 3 of SRF-01's 17 families (`adr_`, the `C-S` label, ISO dates). It passes a bare `(C-999)` and missed the 2 code-syntax screens. ocx's help has 0 ID hits because of how its authors write, not because the gate stops them. `ocx:crates/ocx_schema/tests/schema_outputs.rs` has 15 tests and none reads description text. grimoire, ocx-sdk-python and ocx-catalog have no leak test at all, and ocx-catalog's leak shipped past a CLI test that asserts nothing about help text.
@@ -57,7 +57,7 @@ rendered output.
 
 - **Rule.** Keep every piece of interface text free of the following: plan or process IDs, record or plan filenames, source filenames, ISO dates, and, on raw-copy surfaces (every generator but a published package's API docs, whose renderer resolves cross-references into links), code paths (`Self::`, `crate::`, private function names) and rustdoc intra-doc link syntax. Interface text is any doc comment or description string that one of these generators copies to a reader outside the repo:
   - clap and schemars;
-  - an MCP tool list, including a `#[tool]` function's `///` when its `description` is unset;
+  - an MCP tool list, including a `#[tool]` or `#[prompt]` function's `///` when its `description` is unset;
   - argparse or commander;
   - a published package's API-doc build.
 
@@ -94,7 +94,7 @@ rendered output.
 - **Rule.** Each generated surface a repo ships has a test that walks the generator's own model and fails on SRF-01's tokens. One scanner holds the token list, and each generator gets its own walk:
   - clap, commander, argparse: every subcommand's help. That is the clap `Command` tree, `--help` run recursively, `program.commands`, or `format_help()`.
   - schemars: every emitted JSON Schema (goldens, or `grim schema --kind` output).
-  - MCP: the tool list in-process. It must cover `description =` strings, the function-doc fallback, and `JsonSchema` argument structs.
+  - MCP: the tool list in-process. It must cover `description =` strings, the function-doc fallback, and `JsonSchema` argument structs. Serialize the prompt list the same way when the server has `#[prompt]` functions.
   - Python published docs: load the package with griffe (mkdocstrings-python's own loader) under the docs build's `filters`, then scan every docstring, attribute docstrings included.
 
   A source-side scan of interface-tagged doc lines runs before the build.
@@ -103,7 +103,7 @@ rendered output.
   - `#[cfg_attr(feature = "jsonschema", derive(schemars::JsonSchema))]`: 25 in ocx-mirror, for example `ocx-mirror:crates/ocx_mirror_spec/src/dist.rs:62`, which `RUST_IFACE_RE` at `comment_census.py:106` does not match;
   - explicit MCP tool descriptions read by agents, in `grimoire:src/mcp/server.rs:60`;
   - Python and TS help strings: 58 argparse `add_argument` sites and 12 commander `.description(` calls, one of which is the live `ocx-catalog:src/cli/main.ts:37` `(C-007)` leak;
-  - rmcp's fallback. Dropping `description =` from a `#[tool]` silently publishes the function's `///`. It has 0 occurrences today.
+  - rmcp's fallback. Dropping `description =` from a `#[tool]` or `#[prompt]` silently publishes the function's `///`. Since rmcp 3.12.0 (2026-11-26) the fallback also holds when another attribute follows the doc comment, and `#[doc(hidden)]` no longer suppresses it. It has 0 occurrences today.
 
   The walk must match the renderer's model. `inspect.getdoc()` cannot see attribute docstrings, and 4 of them render on ocx-sdk-python's reference page. A grep over the built HTML double-counts: 14 of the 54 `C-` hits there sit in `show_source` listings.
 
@@ -214,6 +214,11 @@ Ranked by measured frequency.
 ## Open questions
 
 - **Human decision (one-way door).** Should ocx publish its JSON contract with stable public anchors? ocx-sdk-python cites "contract v0.1 C-003" (`src/ocx_sdk/_results.py:4`), and replacing those IDs under SRF-01 needs a public URL plus anchor to point at. Once published, the anchors must stay. The default is to drop the ID and keep the plain-language constraint until anchors exist.
+- **rmcp names.** The `ToolRouter::list_all()` name on rmcp 3.12.0 was not checked against docs.rs, and the prompt router's list method is unnamed. Confirm both in a spot check.
+- **Other MCP text.** `serverInfo`, the server `instructions` string, `resources/list` and tool `annotations` text may render to users and sit outside the SRF-03 walk. The 2026-07-28 field set is unconfirmed.
+- **Non-literal descriptions.** rmcp 3.4.1 accepts a const path or `concat!` as `description =`. The source scan reads only literals, so it could report a non-literal description as unresolved. The output gate already sees the final string.
+- **Coloured help.** Python 3.14 colours `format_help()` under `FORCE_COLOR` or `PYTHON_COLORS=1`, and the scanner strips no ANSI escapes. Measure whether a planted token in coloured help escapes the scan before choosing between stripping escapes and setting `NO_COLOR`.
+- **clap 5.0.** The unreleased `unstable-v5` uses the full doc comment for `ValueEnum` variant help. Re-read the clap sentence when 5.0 ships.
 - **Another round: vocabulary.** Is a term in interface text that the user docs never define (for example `singleflight`, 1 docs mention) a leak worth a CONSIDER check? This replaces the dropped wordlist.
 
 ## Sub-artifacts
@@ -230,7 +235,7 @@ Ranked by measured frequency.
 - [clippy too_long_first_doc_paragraph.rs](https://raw.githubusercontent.com/rust-lang/rust-clippy/master/clippy_lints/src/doc/too_long_first_doc_paragraph.rs): the 200-character gate.
 - [rustdoc book, how to write documentation](https://doc.rust-lang.org/rustdoc/how-to-write-documentation.html): the summary is everything before the first blank line, with no drop.
 - [rust-analyzer hover/render.rs](https://raw.githubusercontent.com/rust-lang/rust-analyzer/master/crates/ide/src/hover/render.rs) and [typescript-go internal/ls/hover.go](https://raw.githubusercontent.com/microsoft/typescript-go/main/internal/ls/hover.go): hover shows the whole block.
-- [LSP 3.17 hover.md](https://raw.githubusercontent.com/microsoft/language-server-protocol/gh-pages/_specifications/lsp/3.17/language/hover.md): no length field.
+- [LSP 3.17 hover.md, re-read against the 3.18 specification's `Hover` interface on 2026-11-27](https://raw.githubusercontent.com/microsoft/language-server-protocol/gh-pages/_specifications/lsp/3.17/language/hover.md): no length field.
 - `/home/mherwig/dev/ocx/crates/ocx_cli/src/app.rs:737` and `:779-800`: the existing output-side clap test, the template for SRF-03, and its 3-of-17 family coverage.
 - `/home/mherwig/dev/ocx/crates/ocx_schema/tests/golden_schemas.rs:4-20` and `/home/mherwig/dev/ocx/.agents/discussions/ocx-interface-contract.md:29`: the byte-pinned golden policy and the owner's structural contract scope.
 - `/home/mherwig/dev/ocx/crates/ocx_cli/src/api/data/shell_state.rs:289` rendering as `/home/mherwig/dev/ocx/crates/ocx_schema/tests/golden/reports.json:4573`: all three leak classes in one field.
@@ -262,3 +267,6 @@ Ranked by measured frequency.
 - Applied to the fleet: added ocx-catalog, grimoire-indexer and grimoire-vscode rows. Added grimoire help and MCP results. ocx-sdk-python's rendered count is corrected to 15 distinct `C-` IDs; 21 is the source count. Source: interface-check §5–§6, this revision's re-measure.
 - Failure modes 1, 2, 5 and 7: counts updated, and mode 7 now covers the rmcp fallback. Source: interface-check §2, §4–§6.
 - Decisions for the eval: added `grimoire:src/command/login.rs:64-69` as a `renders: yes` candidate site. Source: interface-check §2.
+- 2026-11-27, SRF-01 and SRF-03: MCP coverage extends to rmcp `#[prompt]`, with the same doc-comment fallback, and the rmcp 3.12.0 fix is named. Source: `refresh-2026-11/code-docs.md`, SRF-03 entry.
+- 2026-11-27, Verdict 8 and Key sources: the hover sentence moves from LSP 3.17 to 3.18, the current specification, with no length field in the 3.19 draft. Source: `refresh-2026-11/code-docs.md`, hover sentence entry.
+- 2026-11-27, Open questions: added the rmcp list-method names, other MCP text, non-literal descriptions, coloured help and clap 5.0. Source: `refresh-2026-11/code-docs.md`, Open questions.

@@ -21,8 +21,10 @@ Contents: [Dates and Defaults](#dates-and-defaults) · [The Gate](#the-gate) ·
 ## Dates and Defaults
 
 Measured 2026-09-27 with `checks/linkage_check.py` and `checks/interface_leak.py`
-as shipped in this skill, git 2.54 and lychee 0.24. `checks/` is this skill's
-own directory. Run every command from the repository root.
+as shipped in this skill, git 2.54 and lychee 0.24. On 2026-11-27 git 2.56.1
+and lychee 0.24.2 are current, and their release notes change none of the
+commands used here. `checks/` is this skill's own directory. Run every command
+from the repository root.
 
 | Default | Rule | Override |
 |---|---|---|

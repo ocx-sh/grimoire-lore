@@ -89,9 +89,10 @@ out.
   whole rule silently — no console error.
 - `exportparts` is required per hop; a part is exposed one hop only.
 - **`:host-context()` works in Chromium 151.** An agent will see it work locally
-  and ship a portability bug. The CSSWG removal has not reached the shipping
-  engine — treat it as "works where you will test it, absent where your users
-  are". Firefox/WebKit unverified this round.
+  and ship a portability bug. It is Chromium-only: web-features marks it
+  discouraged, Firefox closed its bug WONTFIX, and Safari does not ship it —
+  treat it as "works where you will test it, absent where your users are".
+  Firefox/WebKit unverified this round.
 
 ## Lit 3.3.3
 
@@ -127,6 +128,7 @@ The reference `::part()` implementation, and it diverges from the
 agent hunting for a `--component-*` name may miss one that exists.
 
 Churn here is dated evidence, not hypothetical: the library rebranded wholesale
-(`--sl-*` → `--wa-*`, repo archived 2026-08-28), removed
-`--wa-accordion-divider-color` in v3.9.0, and deprecated the `label` part in
-v3.12.0. Pinning any single hook name is a live risk.
+(`--sl-*` → `--wa-*`, Shoelace repo archived 2026-05-14), removed
+`--wa-accordion-divider-color` in v3.9.0, deprecated the `label` part in
+v3.11.0 (restated in the 3.12.0 notes), and deprecated a batch of `*__base`
+parts in v3.15.0 (2026-11-17). Pinning any single hook name is a live risk.

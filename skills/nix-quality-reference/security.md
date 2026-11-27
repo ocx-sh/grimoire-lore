@@ -28,7 +28,7 @@ Contents: [Dates and Floors](#dates-and-floors) · [nixConfig Keys](#nixconfig-k
 ## Dates and Floors
 
 - **Implementations.** Every row was measured on CppNix 2.35.2 (Linux, sandbox on). NIX-SEC-01's warnings, NIX-SEC-02's acceptance gate and NIX-SEC-05's IFD default were also measured on Lix 2.95.2, with the same result. NIX-SEC-06's check was run on CppNix 2.31.5 too. Determinate Nix is unmeasured throughout. The fixtures were re-planted and re-run on 2026-09-27 against a warm store.
-- **Defaults an agent must not assume.** `allow-import-from-derivation` defaults to `true` on CppNix 2.35.2 and Lix 2.95.2. `sandbox` defaults to `true` on Linux only, per the [Nix 2.35 conf-file manual](https://nix.dev/manual/nix/2.35/command-ref/conf-file) (the macOS default was not measured).
+- **Defaults an agent must not assume.** `allow-import-from-derivation` defaults to `true` on CppNix 2.35.2 and Lix 2.95.2. `sandbox` defaults to `true` on Linux only, per the [Nix 2.35 conf-file manual](https://nix.dev/manual/nix/2.35/command-ref/conf-file) (the macOS default was not measured, and GHSA-m4vq-qf6v-82pj, 2026-10-13, calls the macOS sandbox opt-in).
 - **Pinned default: no `nixConfig` at all**, because the project runs no public binary cache. An adopter who runs one overrides this once, and NIX-SEC-01 then allows exactly that cache's pair.
 - **Pinned default: NIX-SEC-06 gates CppNix only.** Lix runs as an advisory leg and Determinate Nix is untested but never deliberately broken. The consumer floor is NIX-GATE-16's computed floor, never a hardcoded version.
 - **Pinned default: an agent may run `nix develop` on a flake the project owns**, at a commit the agent or the owner authored or reviewed, never on a fork's pull request.
@@ -106,7 +106,7 @@ exits 1 on the pass and a negated `! grep` never fails a `bash -e` step.
 | NIX-SEC-02 | Never set, pass, script or recommend `accept-flake-config`: not as `--accept-flake-config`, not as `accept-flake-config = true` in any `nix.conf`, `NIX_CONFIG` or CI `extra_nix_config`, and not in `.envrc`, a Dockerfile, a README or an agent-instruction file (`AGENTS.md`, `CLAUDE.md`). Never answer Nix's "do you want to permanently mark this value as trusted" prompt with yes, and never pre-seed `~/.local/share/nix/trusted-settings.json`. | Acceptance lets the flake set daemon-scoped settings such as `post-build-hook`, which is root-equivalent when the caller is a trusted user. Maintainers confirm it is intended ([NixOS/nix#9649](https://github.com/NixOS/nix/issues/9649)), and a flake's `post-build-hook` executed once the flag was passed. A "permanent" answer is stored per (setting, value), not per flake, and every later flake declaring the same pair is applied silently. 8 of 36 corpus repositories pass the flag, including CI that accepts a third-party flake's config on a moving ref and one `AGENTS.md`. | The NIX-SEC-02 line above. Watched red: a README install line, exit 0. Watched green: the clean twin and a tree carrying an installed copy of these rules and a workflow that runs the gate block, exit 1. A warning against the flag belongs in this rule, never in the repository, so no hit is exempt. The trust file is a reading heuristic: absent, or holding only `false` entries. | MUST, shapes A-E | all implementations, and Lix 2.95.2 has the same gate |
 | NIX-SEC-03 | Supply a credential only as `access-tokens`, in a user `nix.conf` outside any repository, or in CI from a secret: `github_access_token: ${{ secrets.GITHUB_TOKEN }}` on `cachix/install-nix-action`, or `access-tokens = github.com=${{ secrets.… }}` (or the job token `${{ github.token }}`) in `extra_nix_config` or `NIX_CONFIG`. Never write a literal token into a tracked file. Never set `nix.settings.access-tokens` in a NixOS, nix-darwin or home-manager configuration. | A committed token is a permanent leak once the repository is public or forked. `nix.settings` is rendered into a generated `nix.conf` in the store, so even a secret-fed token there becomes a mode-444 file. | Greps (a), (b) and (c) above. Watched red: a literal `ghp_` token in `extra_nix_config` hit (a) and (b), and a secret-fed `nix.settings.access-tokens` hit (c), each exit 0. Watched green: the secret-fed workflow and a docs placeholder, exit 1 on all three. | MUST, shapes A-E | `access-tokens` syntax per the Nix 2.35 conf-file manual |
 | NIX-SEC-08 | Never tell a user or an agent to add themselves to `trusted-users` to make a flake's cache or `nixConfig` work, in a README, docs, CI or an agent file. Document the administrator-side lines instead: `extra-substituters` and `extra-trusted-public-keys` in `/etc/nix/nix.conf`, or `trusted-substituters` so untrusted users may opt in. | The Nix manual says a trusted user is essentially root, and it is the precondition that turns NIX-SEC-02's acceptance into root. [NixOS/nix#6752](https://github.com/NixOS/nix/issues/6752) is the confusion that sends users there. | The NIX-SEC-08 line above. A hit passes only inside a host-administration module the flake exports on purpose (NIX-MOD). Watched red: README `trusted-users = root $USER`, exit 0. Watched green: exit 1. | MUST, shapes A-E | Nix 2.35 manual |
-| NIX-SEC-09 | Enable no experimental feature beyond `nix-command flakes` in CI, docs or `nixConfig`. Never enable `ca-derivations` or `recursive-nix`. | Under `ca-derivations` any local user who can submit builds can poison realisations, because the daemon does not verify signatures on submitted realisations (GHSA-jm6c-h95p-6qhj, no backported fix as of 2026-09-27, re-check at each Nix security advisory). | The NIX-SEC-09 line above. Watched red: `extra_nix_config` enabling `ca-derivations`, exit 0. Watched green: exit 1. The attack itself was not reproduced, so the harm is a reading of the advisory. | SHOULD, shapes A-E | advisory status 2026-09-27 |
+| NIX-SEC-09 | Enable no experimental feature beyond `nix-command flakes` in CI, docs or `nixConfig`. Never enable `ca-derivations` or `recursive-nix`. | Under `ca-derivations` any local user who can submit builds can poison realisations, because the daemon does not verify signatures on submitted realisations (GHSA-jm6c-h95p-6qhj, no backported fix as of 2026-11-27, re-checked after the 2026-10-13 advisories, re-check at each Nix security advisory). | The NIX-SEC-09 line above. Watched red: `extra_nix_config` enabling `ca-derivations`, exit 0. Watched green: exit 1. The attack itself was not reproduced, so the harm is a reading of the advisory. | SHOULD, shapes A-E | advisory status 2026-11-27 |
 
 ## What Reaches the Store
 
@@ -153,19 +153,18 @@ inspected further without a human decision.
 Save this as `cve-floor.nix` beside the CI scripts:
 
 ```nix
-# CppNix fix per release line for CVE-2026-39860 (GHSA-g3g9-5vj6-r3gj, 2026-04-07).
-# Lines above 2.35 postdate the fix. Re-check at each Nix security advisory.
+# CppNix fix per release line: the later of CVE-2026-39860 (GHSA-g3g9-5vj6-r3gj, 2026-04-07)
+# and the five advisories of 2026-10-13 (GHSA-jwvx-xq5j-gc56 and four more).
+# 2.29, 2.32 and 2.33 got no 2026-10-13 fix and are left out, so they fail.
+# Lines above 2.35 postdate both fixes. Re-check at each Nix security advisory.
 { v }:
 let
   fixed = {
-    "2.28" = "2.28.6";
-    "2.29" = "2.29.3";
-    "2.30" = "2.30.4";
-    "2.31" = "2.31.4";
-    "2.32" = "2.32.7";
-    "2.33" = "2.33.4";
-    "2.34" = "2.34.5";
-    "2.35" = "2.35.2";
+    "2.28" = "2.28.8";
+    "2.30" = "2.30.6";
+    "2.31" = "2.31.6";
+    "2.34" = "2.34.9";
+    "2.35" = "2.35.3";
   };
   parts = builtins.splitVersion v;
   line = "${builtins.elemAt parts 0}.${builtins.elemAt parts 1}";
@@ -175,23 +174,23 @@ let
     else
       builtins.compareVersions v "2.36" >= 0;
 in
-if ok then true else throw "CppNix ${v} is below the CVE-2026-39860 fix for its release line"
+if ok then true else throw "CppNix ${v} is below the security fix for its release line"
 ```
 
 ```sh
 # the Nix running on this runner or builder
 nix eval --file ./cve-floor.nix --apply 'f: f { v = builtins.nixVersion; }' ''
 # the version the installer pin names (substitute it)
-nix eval --file ./cve-floor.nix --apply 'f: f { v = "2.35.2"; }' ''
+nix eval --file ./cve-floor.nix --apply 'f: f { v = "2.35.6"; }' ''
 ```
 
 `true` with exit 0 is the pass. Exit 1 with `CppNix … is below the
-CVE-2026-39860 fix` is the finding. Never run it on a Lix leg: Lix 2.95.2
+security fix` is the finding. Never run it on a Lix leg: Lix 2.95.2
 reports `builtins.nixVersion` as `2.18.3-lix`, which fails the table.
 
 | ID | Rule | Rationale | Verification | Severity | Floor / impl |
 |---|---|---|---|---|---|
-| NIX-SEC-06 | Run CI and every self-hosted builder on CppNix at or above the CVE-2026-39860 fix for its release line: 2.28.6, 2.29.3, 2.30.4, 2.31.4, 2.32.7, 2.33.4 or 2.34.5, and 2.35.2 or later on the 2.35 line. Pin it through NIX-GATE-13's `install_url`. Re-run the check whenever the pinned nixpkgs or the installer moves, and never write a remembered minimum version into docs or CI. | In [GHSA-g3g9-5vj6-r3gj](https://github.com/NixOS/nix/security/advisories/GHSA-g3g9-5vj6-r3gj) (critical, 2026-04-07), any user allowed to submit builds, which is everyone under the default `allowed-users = *`, escalates to root through a symlinked temp copy of a fixed-output derivation's output. The advisory names no 2.35 release, so 2.35.0 and 2.35.1 stay below the floor until a source read shows they carry the fix. | The two commands above. Watched red: `2.34.4`, `2.35.1` and `2.27.9` each threw, exit 1. Watched green: `2.31.5`, `2.34.8`, `2.35.2` and `2.36.0` printed `true`, exit 0, and so did `builtins.nixVersion` on CppNix 2.35.2 and 2.31.5. NIX-GATE-16's floor of 2.31.5 sits above the 2.31.4 fix. | MUST, the CI and builders of every shape | CppNix only (**pinned default**). Lix and Determinate Nix advisories unmeasured (re-check at each Lix and Determinate release) |
+| NIX-SEC-06 | Run CI and every self-hosted builder on CppNix at or above its release line's fix in the `cve-floor.nix` table: 2.28.8, 2.30.6, 2.31.6, 2.34.9 or 2.35.3, or 2.36.0 or later. The 2.29, 2.32 and 2.33 lines received no fix for the 2026-10-13 advisories and always fail. Pin it through NIX-GATE-13's `install_url`. Re-run the check whenever the pinned nixpkgs or the installer moves, and never write a remembered minimum version into docs or CI. | In [GHSA-g3g9-5vj6-r3gj](https://github.com/NixOS/nix/security/advisories/GHSA-g3g9-5vj6-r3gj) (critical, 2026-04-07), any user allowed to submit builds, which is everyone under the default `allowed-users = *`, escalates to root through a symlinked temp copy of a fixed-output derivation's output. In [GHSA-jwvx-xq5j-gc56](https://github.com/NixOS/nix/security/advisories/GHSA-jwvx-xq5j-gc56) (high, 2026-10-13), an untrusted daemon client overwrites store objects through repair mode, again a local root escalation. Four more advisories published that day (GHSA-m4vq-qf6v-82pj, GHSA-hf6w-2rg9-v84g, GHSA-92x5-h528-wrmw, GHSA-25vp-6h23-hj3g) share its patched versions. Each October fix is later than its line's CVE-2026-39860 fix, so the table holds one version per line. A host set up with the multi-user scripted installer below 2.35.3 keeps user-owned store contents (GHSA-hf6w-2rg9-v84g) until Nix is updated and the store is garbage-collected. | The two commands above. Watched 2026-09-27 on the CVE-2026-39860 table: `2.34.4`, `2.35.1` and `2.27.9` each threw, exit 1, and `2.31.5`, `2.34.8`, `2.35.2` and `2.36.0` printed `true`, exit 0, and so did `builtins.nixVersion` on CppNix 2.35.2 and 2.31.5. The 2026-11-27 table changes only the values under the same logic. Before relying on it, watch `2.35.2`, `2.31.5` and `2.33.4` throw and `2.35.3`, `2.34.9` and `2.36.0` print `true`. NIX-GATE-16's floor on nixos-unstable, 2.34.9, is exactly the 2.34 fix. | MUST, the CI and builders of every shape | CppNix only (**pinned default**). Lix fixed the daemon repair issue in 2.94.3, 2.95.4 and 2.96, and Determinate Nix 3.23.2's release notes name four of the five GHSA ids (all 2026-10-13). This table covers neither (re-check at each Lix and Determinate release) |
 
 ## The Lock-Bump Review
 

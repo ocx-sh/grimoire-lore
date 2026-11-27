@@ -43,7 +43,7 @@ you are on.** Four behaviours flip at 9.0.0 — `WORKSPACE` support is gone,
 defaults on — and every rule set here was measured on 8.7.0, 8.8.0 and 9.2.0
 (2026-09-06), except `java.md`, `go.md` and `swift.md`, whose own measurement
 disclosure governs. Where a rule names a version, that is the version it was
-watched on. Where it names none, it held on both majors. Bazel's own docs,
+watched on. Where it names none, it held on both majors. Releases after that date — 9.3.0 to 9.3.3, 8.8.1 to 8.9.0 and the 10.0.0 release candidates (10.0.0 itself is unreleased on 2026-11-27) — were checked against release notes and tagged source, not re-run on a binary; the one default they flip on a released major is `--rewind_lost_inputs`, on from 9.3.0. Bazel's own docs,
 ruleset READMEs and release notes were each measured wrong at least once
 during that work; the binary's two help surfaces are the only authority for
 whether a flag exists.

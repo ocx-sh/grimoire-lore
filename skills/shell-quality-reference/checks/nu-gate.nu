@@ -1,5 +1,5 @@
 #!/usr/bin/env nu
-# nu-range: 0.100.0..0.116.1
+# nu-range: 0.100.0..0.117.0
 # nu-gate.nu: parse gate for emitted or hand-written nushell. Exit 1 on ANY of:
 #   (1) an --ide-check diagnostic (parse/type errors; that flag always exits 0, so its JSON lines are the signal)
 #   (2) a parse-time Warning or Error from 'if false { source FILE }' (deprecations print only at parse of the
@@ -9,7 +9,7 @@
 #   (4) a call to a command the running nu itself files under category "removed" (renamed and removed names)
 # --allow takes a comma-separated STRING: a list<string> flag given on the command line parses as nuon on nu <= 0.110
 # and is a type mismatch on nu >= 0.114.
-# Written in the safe intersection: it runs on nu 0.100.0 .. 0.116.1.
+# Written in the safe intersection: it runs on nu 0.100.0 .. 0.117.0.
 # --strict: ANY bareword external is red unless listed in --allow (catches the removed size command, which a binutils binary answers).
 # usage: nu nu-gate.nu [--strict] [--allow ocx,git] file.nu ...
 def main [--allow: string = "", --strict, ...files: path] {

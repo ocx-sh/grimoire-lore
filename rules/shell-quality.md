@@ -196,5 +196,5 @@ Overriding one is a recorded decision, and re-arguing one in a pull request is n
 - **`shell-integration`, `installer-script`, `shell-port` and `shell-diagnose`**: procedures that cite these IDs by number and never restate them.
   The `shell-essentials` bundle ships all of them with this rule, `powershell-quality`, `code-docs` and `code-docs-cleanup`.
 
-**Dates.** Version claims in this rule set are dated 2026-10-11 and were measured on ShellCheck 0.11.0, shfmt 3.13.1, bash 3.2.57 to 5.3, dash 0.5.12, busybox 1.37, zsh 5.0.8 to 5.9, fish 3.6.0 to 4.9.3,
-nu 0.105.1 to 0.116.0 and elvish 0.21.0. macOS and BSD rows are unverified: read only. Dated end points: pwsh 7.4 ends support 2026-11-10, `ubuntu-latest` moves to 26.04 by 2026-11-19 (SH-CI-15), and the fish 3.6.0 floor holds until 2028-06-30.
+**Dates.** Version claims in this rule set are dated 2026-10-11, re-checked against upstream releases on 2026-11-27, and were measured on ShellCheck 0.11.0, shfmt 3.13.1, bash 3.2.57 to 5.3, dash 0.5.12, busybox 1.37, zsh 5.0.8 to 5.9, fish 3.6.0 to 4.9.3,
+nu 0.105.1 to 0.116.1 (the nu gate and hang check also on 0.117.0) and elvish 0.21.0. macOS and BSD rows are unverified: read only. Dated end points: pwsh 7.4 and 7.5 left support on 2026-11-10 (7.6 LTS is supported until 2028-11-14), `ubuntu-latest` has been 26.04 since 2026-11-24 (SH-CI-15), and the fish 3.6.0 floor holds until 2028-06-30.

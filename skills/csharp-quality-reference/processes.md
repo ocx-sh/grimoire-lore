@@ -30,7 +30,8 @@ Contents: [Conventions](#conventions) · [Launch](#launch) · [Streams](#streams
 [What Agents Get Wrong Here](#what-agents-get-wrong-here) · [Failure Classes](#failure-classes)
 
 CS-PROC-23 is retired, not reused: the .NET 11 process APIs (`Process.Run`, `RunAndCaptureText`, `KillOnParentExit`) are a
-`dotnet-upgrade` re-check, and no such code compiles until a `net11.0` leg exists (`CS-LANG-16`).
+`dotnet-upgrade` re-check, and no such code compiles until a `net11.0` leg exists (`CS-LANG-16`). At GA (2026-11-10) `KillOnParentExit`
+covers Windows, Linux and Android only, never macOS, so the tree kill of `CS-PROC-14` stays the only containment there (API reference, read 2026-11-27).
 CS-PROC-24 is retired, not reused: the real-child legs on Linux and Windows are owned by `CS-TEST-04` and `CS-CI-01`.
 
 ## Conventions

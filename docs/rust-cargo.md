@@ -51,7 +51,9 @@ Writing Rust CI is a subject you arrive at, not a path you land on: the
 ## What is in the CI section
 
 Top-level `permissions: {}` with per-job grants; every `uses:` pinned to a
-40-character SHA; `cargo deny` split so bans and licences block the PR
+40-character SHA; no checkout of pull-request head code under
+`pull_request_target` or `workflow_run`; a Cargo publish-age cooldown for
+dependency resolution; `cargo deny` split so bans and licences block the PR
 while advisories block only on a schedule (the advisory DB changes without
 your code, and a PR-blocking advisories gate punishes an unrelated commit
 and trains people to bypass it); native test runs on every release-target

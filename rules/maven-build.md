@@ -26,7 +26,7 @@ Contents: [The Gate](#the-gate) · [Non-Negotiables](#non-negotiables) ·
 [Siblings](#siblings)
 
 **Before trusting any rule below, confirm two things fire at all.**
-`maven-enforcer-plugin` ships 37 built-in rules and zero of them active, and a
+`maven-enforcer-plugin` ships dozens of built-in rules and zero of them active, and a
 `<rules>` block with no `<execution>` declaring the `enforce` goal enforces
 nothing while reviewing clean (`MVN-DEP-03`). Likewise, a green `mvn verify`
 distinguishes "annotation processors ran" from "processors were silently
@@ -38,7 +38,7 @@ enforcer is bound and the gate reaches `verify`.
 
 Run it after every change, narrowest scope first. Each stage costs more than the
 last, so the common case never reaches the slow ones. Maven 3.9.x, verified
-2026-09-12.
+2026-09-12. Maven 3.10.x, GA since 2026-09-27, is not re-measured here.
 
 ```bash
 ./mvnw -q validate                  # enforcer executions bind here by default
@@ -92,9 +92,9 @@ and verification.
 | 8 | `maven-surefire-plugin` is pinned from a version queried out of Central's metadata, never off the plugin doc-site banner, and the configured provider is confirmed from the run. | MVN-BUILD-05 |
 | 9 | Every committed `maven-wrapper.properties` sets both `wrapperSha256Sum` and `distributionSha256Sum`, and every `aether.` property in `.mvn/maven.config` is read against the Maven version that wrapper pins. Unrecognised resolver names are ignored, not rejected. | MVN-BUILD-14, MVN-BUILD-11 |
 | 10 | Never describe Maven checksum configuration as a supply-chain or trust control. When the subject is trust, the mechanism is `maven-gpg-plugin`. | MVN-BUILD-12 |
-| 11 | Maven 4 is release-candidate only (`4.0.0-rc-6` against `3.9.16` GA, 2026-09-12), so every Maven-4 row is migration readiness and every Maven mechanic written down says "(Maven 3)", "(Maven 4)" or "(both)". | MVN-BUILD-08, MVN-DEP-11, MVN-PUB-02 |
+| 11 | Maven 4 is release-candidate only (`4.0.0-rc-7` against the `3.9.16` and `3.10.2` GA lines, 2026-11-27), so every Maven-4 row is migration readiness and every Maven mechanic written down says "(Maven 3)", "(Maven 4)" or "(both)", narrowed to "(Maven 3.9)" or "(Maven 3.10)" where those two lines differ. | MVN-BUILD-08, MVN-DEP-11, MVN-PUB-02 |
 | 12 | `maven-toolchains-plugin` selects a JDK and never downloads one. Never claim it provisions a JDK, and never write `-Dtoolchain.skip` unless `org.mvnsearch:toolchains-maven-plugin` is actually bound. | MVN-BUILD-19 |
-| 13 | **pinned.** Publishing goes through `central-publishing-maven-plugin`; pin 0.7.0 or later before relying on a SNAPSHOT channel. `oss.sonatype.org`, `s01.oss.sonatype.org` and `nexus-staging-maven-plugin` are dead paths: OSSRH ended 2025-06-30. | MVN-PUB-03, MVN-PUB-01 |
+| 13 | **pinned.** Publishing goes through `central-publishing-maven-plugin`; pin 0.7.0 or later before relying on a SNAPSHOT channel, and 0.12.0 or later on Maven 3.10. `oss.sonatype.org`, `s01.oss.sonatype.org` and `nexus-staging-maven-plugin` are dead paths: OSSRH ended 2025-06-30. | MVN-PUB-03, MVN-PUB-01, MVN-PUB-11 |
 | 14 | No literal `<username>` or `<password>` in a POM. The Portal token lives in a `settings.xml` `<server>` entry named by `<publishingServerId>`. | MVN-PUB-06 |
 | 15 | Every deployed module carries `name`, `description`, `url`, `licenses`, `developers` and a full `scm` block, a matching `-sources.jar` and `-javadoc.jar`, an `.asc`, `.md5` and `.sha1` per file, and an explicit `project.build.outputTimestamp`. Central rejects the whole deployment on one missing element, after signing. | MVN-PUB-07, MVN-PUB-08, MVN-PUB-09, MVN-BUILD-10 |
 | 16 | Namespace verification and the tag-versus-`<version>` check are steps that run before any build. A release job whose exit code means "live on Central" sets `<autoPublish>true</autoPublish>` and `<waitUntil>published</waitUntil>`. | MVN-PUB-04, MVN-PUB-05, MVN-PUB-10 |

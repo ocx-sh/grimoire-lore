@@ -8,14 +8,14 @@ consolidates:
   - jvm-bazel-java/bazel-java-external-deps-and-kotlin.md
   - jvm-bazel-java/bazel-java-testing-and-coverage.md
 date: 2026-09-12
-revised: 2026-09-12
+revised: 2026-11-27
 ---
 
 # Bazel: the file the sibling set does not have
 
 Measured against Bazel 8.7.0 / 8.8.0 / 9.2.0, `rules_jvm_external` 7.1
 (2026-07-23), `rules_kotlin` v2.4.10 (2026-08-20), `contrib_rules_jvm` 0.31.0
-(pre-1.0, no tagged releases), and the six genuinely Bazel-carrying exemplars of
+(pre-1.0; tagged releases do exist, 0.31.1 of 2025-11-11 through 0.35.0 of 2026-11-12, and the repository is now `bazel-contrib/rules_jvm`), and the six genuinely Bazel-carrying exemplars of
 the 32-repo corpus ([pub](jvm-audit/exemplar-publishing-ci-bazel.md) Axis 4).
 No `bazel` binary was run; every flag name carries the doc or exemplar it was
 read from.
@@ -63,9 +63,10 @@ read from.
    `bazel build //...` never builds the artifact you ship. Binds CLIs and
    applications; never libraries.
 8. **The strict-deps rule splits in two, and its severities invert the dive's.**
-   Confirming the flag's contested name is demoted to SHOULD (its verification
+   Confirming the flag's name is demoted to SHOULD (its verification
    needs a `bazel` binary this program does not have and an adopting agent
-   often will not either); the MUST moves to the misreading that licenses a real
+   often will not either; the 2026-11 refresh settled the name from source, see
+   BZL-JAVA-05: both spellings parse, and the declared name is written); the MUST moves to the misreading that licenses a real
    edit — an absent flag already means `error`, so "strict deps isn't enforced
    here, let me set it" ends in `=off`.
 9. **Error Prone under Bazel is a compiler flag, never a dependency.**
@@ -136,7 +137,7 @@ Check: `grep -n -E 'strict_java_deps|explicit_java_test_deps|javacopt.*-Xep|java
 | ID | Rule | Rationale | Verification | Severity | Floor |
 |---|---|---|---|---|---|
 | BZL-JAVA-04 | Never conclude "strict deps is not enforced here" from an absent flag, and never add `=off` or `=warn` to make a build pass. `default` (the value when the flag is absent), `strict` and `error` are three names for the same behaviour. | Per bazel.build/docs/user-manual, all three "mean javac will generate errors instead of warnings… also the default behavior when the flag is unspecified." An agent pattern-matching "no flag = feature disabled" inverts a review finding and then fixes a real missing-`deps` bug by disabling the check that found it. | Grep for the flag. **Absence, or a value in `default|strict|error`, is the pass; `off` or `warn` is the finding to justify.** Five of six exemplars leave it unset and are all enforcing. | MUST | Bazel 8.x |
-| BZL-JAVA-05 | Write the flag as `--experimental_strict_java_deps` — the only spelling with exemplar evidence — and confirm it on the pinned binary (`bazel help build --long \| grep -i strict_java_deps`) before relying on it, whenever a `bazel` binary is available. | Bazel's own two docs pages disagree: `command-line-reference` lists `--experimental_strict_java_deps`, `user-manual` calls it `--strict_java_deps`. A model trained on one page and quizzed after the other produces the wrong name confidently. `rules_jvm_external@449754dcbb:.bazelrc:9` is the only corpus repo that sets it at all. | The `bazel help` grep on the pin: **empty on both help surfaces is the finding** (no such flag on this binary); a hit on exactly one confirms the live spelling. Where no binary is available, the exemplar-evidenced spelling is the default to write. | SHOULD | Bazel 8.x |
+| BZL-JAVA-05 | Write the flag as `--experimental_strict_java_deps`, its declared name, and confirm it against the pinned binary (`bazel help build --long \| grep -i strict_java_deps`) before relying on it, whenever a `bazel` binary is available. | Bazel's own two docs pages disagree: `command-line-reference` lists `--experimental_strict_java_deps`, `user-manual` calls it `--strict_java_deps`. Bazel's source settles it: `JavaOptions.java` declares `experimental_strict_java_deps` with `oldName = "strict_java_deps"` at 8.8.0, 9.2.0 and on `master`, so both spellings parse. Write the declared name, because it is the one the command-line reference and `bazel help` list; a model that calls either spelling nonexistent is wrong. `rules_jvm_external@449754dcbb:.bazelrc:9` is the only corpus repo that sets it at all. | The `bazel help` grep on the pin: **empty on both help surfaces is the finding** (no such flag on this binary); a hit on exactly one confirms the live spelling. Verified against documentation 2026-09-12 and tagged source 2026-11-27; `bazel build --nobuild --strict_java_deps=error //...` printing `Unrecognized option` would mean the alias is gone at that pin. Where no binary is available, the declared name is the default to write. | SHOULD | Bazel 8.x |
 | BZL-JAVA-06 | Wire Error Prone severity through `--javacopt="-Xep:<Check>:<SEVERITY>"` (build-wide) or `java_package_configuration` + `package_group` (scoped); never through a `bazel_dep`, `maven.install` coordinate on `com.google.errorprone:error_prone_core`, or a patched `java_toolchain`. | Error Prone is baked into JavaBuilder's compilation toolchain, not pulled in by `deps`. `google/error-prone` ships no `MODULE.bazel`, `WORKSPACE` or `BUILD` at its pinned SHA, so there is no Bazel integration surface to depend on — the javac flag surface is the only reachable knob. The check *list* is settled Gradle-side at `jvm-quality-gates.md` JAVA-LINT-02; this row owns only the plumbing. | `grep -rn 'error_prone_core\|error-prone-core' MODULE.bazel maven_install.json` — **any hit that is not a transitive `error_prone_annotations` is the finding.** Then confirm a `-Xep:` override actually appears in `--javacopt`, `--host_javacopt` or a `java_package_configuration`'s `javacopts`; none of the three is the finding. Exemplar: `dagger@4fbc045d2b:.bazelrc:17-18`. | MUST | Bazel 8.x |
 
 #### Group C — toolchain definition and registration
@@ -412,11 +413,10 @@ Ranked by how often it bites, with the mechanical check.
 
 **Cannot be closed by research — needs one run of a real binary**
 
-4. **The strict-deps flag's canonical name.** `command-line-reference` says
-   `--experimental_strict_java_deps`, `user-manual` says `--strict_java_deps`,
-   and no `bazel` binary exists in the fleet or in this program's sandbox. One
-   `bazel help build --long | grep -i strict_java_deps` on any pinned binary
-   closes it permanently. Until then BZL-JAVA-05 ships as a SHOULD.
+4. **Closed 2026-11-27 (number kept so citations hold): the strict-deps flag's
+   name.** Source read settles it: `experimental_strict_java_deps` is declared
+   with `oldName = "strict_java_deps"`, so both spellings parse (BZL-JAVA-05).
+   Only the live binary probe is left, and it is an optional check, not a gap.
 5. **bazel-and-java's two contradictory javac defaults.** The page states the
    default javac options are `-source 8 -target 8 -encoding UTF-8` two sections
    after stating `--java_language_version` defaults to `11`. Both cannot be
@@ -542,3 +542,16 @@ Ranked by how often it bites, with the mechanical check.
   rather than implied by the family's average.
 - **Counts:** 23 rules / 12 MUST → **27 rules / 15 MUST**. No existing ID
   renumbered, reordered or retired.
+
+**2026-11-27 — 2026-11 delta refresh** (decisions in
+[refresh-2026-11/bazel-quality.md](refresh-2026-11/bazel-quality.md)).
+
+- **BZL-JAVA-05 changed in place** (SHOULD, unchanged): the rule writes the
+  declared name `--experimental_strict_java_deps`, and the rationale now says
+  both spellings parse via `oldName`, so the old claim that a misspelling is
+  rejected is gone. Verification gains the `Unrecognized option` alias probe.
+- **Verdict item 8 and open question 4:** the flag-name question is settled from
+  source; question 4 is marked closed with its number kept.
+- **Header:** `contrib_rules_jvm` has tagged releases (0.31.1 to 0.35.0) and now
+  lives at `bazel-contrib/rules_jvm`.
+- No other ID changed; the rule count (27) and MUST count (15) are unchanged.

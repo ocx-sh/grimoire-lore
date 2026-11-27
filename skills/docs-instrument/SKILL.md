@@ -153,7 +153,8 @@ Two passes, and they answer different questions (DOC-OBS-01, DOC-OBS-02).
 measured sites already pass through `mkdocs build --strict` rather than through a
 separate checker (`wave2-calibration-a.md` section 3). Do not replace a working
 strict build with lychee. Where no strict mode exists, run
-`lychee --include-fragments <build-dir>` after the build, with `<build-dir>`
+`lychee --root-dir "$PWD/<build-dir>" --include-fragments <build-dir>` after
+the build, with `<build-dir>`
 taken from the generator row in
 [references/wiring-by-generator.md](references/wiring-by-generator.md).
 

@@ -14,12 +14,11 @@ it. The depth files and checks scripts ship in the `typescript-quality-reference
 
 ## It starts by assuming your lint is inert
 
-Roughly fifty rules — the whole `no-unsafe-*` family,
+More than sixty rules (64 at typescript-eslint 8.74.0) — the whole `no-unsafe-*` family,
 `no-floating-promises`, `no-misused-promises`,
 `switch-exhaustiveness-check` — need type information and are off by
-default. A config without `parserOptions.projectService`, or a Biome rule
-key written outside its group, never warns that those rules are dead. It
-just never fires them, and inert is indistinguishable from clean.
+default. A config without `parserOptions.projectService` never warns that
+those rules are dead. It just never fires them, and inert is indistinguishable from clean.
 
 So the first instruction in this set is not a rule about code. It is: prove
 the gate can go red, then trust the rest. Everything downstream is
@@ -64,8 +63,7 @@ reads exactly like a passing one forever. Every verification here was run
 against a deliberately broken copy before it shipped.
 
 The corollary is a second rule most rule sets lack: half these checks are
-*inverted* — a missing `projectService`, an absent `typecheck` script, four
-rules gone after a Biome migration are each the finding, not the pass. Every
+*inverted* — a missing `projectService`, an absent `typecheck` script, rules gone after a Biome migration are each the finding, not the pass. Every
 verification states which way empty output reads.
 
 ## Pinned decisions

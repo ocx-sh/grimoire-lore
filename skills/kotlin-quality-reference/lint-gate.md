@@ -41,21 +41,24 @@ tool is wired, because a wired tool whose config nobody wrote runs a rule set
 nobody chose.
 
 Both defaults are quiet, and that is this family's whole subject. detekt's
-shipped config activates 129 of its 231 rules, and every ktlint property you do
+main-branch config activates 129 of its 237 rules, and every ktlint property you do
 not set takes ktlint's value instead of yours. Neither tool reports what it is
 not running, so an unconfigured gate and a considered one produce the same green
 output.
 
 ## Group 1: What detekt Catches
 
-Gate: `./gradlew detekt`. Floors verified 2026-09-12: detekt's shipped
-`default-detekt-config.yml` defines 231 rules across 10 rule sets with 129
-active, and detekt 2.0 has been in alpha since 2025-09-04, reaching
-`2.0.0-alpha.6` on 2026-08-04 against Kotlin 2.4.10 and Gradle 9.6.1.
+Gate: `./gradlew detekt`. Floors verified 2026-11-27: detekt's
+`default-detekt-config.yml` on main (commit `72e93bc5967f`, 2026-11-26) defines
+237 rules across 10 rule sets with 129 active. The newest release tag,
+`v2.0.0-alpha.6`, ships an older file with 119 of 227 active and no
+`standard-library` set, so a count names the commit or tag it was read at.
+detekt 2.0 has been in alpha since 2025-09-04, and `2.0.0-alpha.6`
+(2026-08-04, Kotlin 2.4.10, Gradle 9.6.1) is still its newest release.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| KT-LINT-01 | Point detekt at a committed config file with `config.setFrom(...)`, and give every rule set you depend on an explicit `active: true` in it. `buildUponDefaultConfig = true` is a merge base, not an activation. | detekt's default config runs 129 of 231 rules: `comments` ships 0 of 10 active, `style` 38 of 78, `potential-bugs` 18 of 32. The `formatting`, `libraries` and `ruleauthors` rule sets are absent from that file entirely and do nothing until a `detektPlugins(...)` dependency adds them. So "detekt is applied" answers no question about which rules ran, and the build file does not show the answer either way. | see block KT-LINT-01 A `buildUponDefaultConfig` hit with no `config.setFrom` hit is the finding, and empty output beside an applied detekt plugin is the same finding: the project runs detekt's defaults. Then read the file the first hit names and confirm each rule set you rely on carries `active: true`. An absent key inherits detekt's own default, which for 102 of the 231 rules is off. | **MUST** |
+| KT-LINT-01 | Point detekt at a committed config file with `config.setFrom(...)`, and give every rule set you depend on an explicit `active: true` in it. `buildUponDefaultConfig = true` is a merge base, not an activation. | detekt's default config on main runs 129 of 237 rules: `comments` ships 0 of 10 active, `style` 38 of 80, `potential-bugs` 18 of 34. The `formatting`, `libraries` and `ruleauthors` rule sets are absent from that file entirely and do nothing until a `detektPlugins(...)` dependency adds them. So "detekt is applied" answers no question about which rules ran, and the build file does not show the answer either way. | see block KT-LINT-01 A `buildUponDefaultConfig` hit with no `config.setFrom` hit is the finding, and empty output beside an applied detekt plugin is the same finding: the project runs detekt's defaults. Then read the file the first hit names and confirm each rule set you rely on carries `active: true`. An absent key inherits detekt's own default, which for 108 of the 237 rules on main is off. | **MUST** |
 | KT-LINT-02 | Do not enable detekt's `formatting` rule set in a project that already runs ktlint, whether standalone or as a Spotless step. Choose one formatting engine. | detekt 2.0 renamed `:detekt-formatting` to `:detekt-rules-ktlint-wrapper`, package `dev.detekt.rules.ktlintwrapper`, which states what the old name obscured: the rule set wraps ktlint rather than implementing a second opinion. Two wrappers around one engine, pinned at two versions, disagree on autocorrection and report one class of finding twice. The split the tools themselves now describe is detekt for logic and ktlint for formatting. | see block KT-LINT-02 (1 of 2) then see block KT-LINT-02 (2 of 2) Hits from both commands in one project is the finding. Empty output from the first is the pass. | SHOULD |
 | KT-LINT-03 | Read the project's resolved detekt coordinate before writing a package name, a module coordinate or a config key. Write booleans in the config as YAML literals, never as quoted strings. | The artifact group moved from `io.gitlab.arturbosch.detekt` to `dev.detekt`, so a package emitted from memory targets 1.x and does not resolve on 2.x. detekt 2.0 also rejects `active: "true"` where 1.x accepted it, moves the complexity and statistics reports into separate `dev.detekt:detekt-report-*` plugins, and renames the formatting module. A config that looks correct against 1.x stops parsing on the bump. | see block KT-LINT-03 Any hit in a project whose detekt dependency resolves to `dev.detekt` is the finding, and empty output is the pass. Then bind the config path and check the boolean form: `CFG=config/detekt/detekt.yml; grep -n -e 'active: "' -e "active: '" "$CFG"` Any hit is the finding under 2.x, and empty output is the pass. | SHOULD |
 
@@ -95,14 +98,16 @@ dependencies {
 
 Gate: `./gradlew ktlintCheck`, the standalone `ktlint` CLI, or `./gradlew
 spotlessCheck` where the `ktlint()` step sits inside Spotless. Floors verified
-2026-09-12: ktlint documents 55 `standard` rules and at least 8 more
-`experimental` ones, configured through 62 distinct `ktlint_*` and
-`ij_kotlin_*` properties.
+2026-11-27: ktlint 1.8.0 (2025-11-14) is the newest stable release. Its
+snapshot documentation lists 99 `standard` rule ids under 55 sections and 8
+`experimental` ids (93 and 6 at the 1.8.0 tag), configured through 62 distinct
+`ktlint_*` and `ij_kotlin_*` properties (counted 2026-09-12).
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
 | KT-LINT-04 | **Pinned.** Set `ktlint_code_style` explicitly in a committed `.editorconfig` before wiring any ktlint gate. The default for this catalog is `ktlint_official`, and an adopter who wants IntelliJ's shape overrides it once in that one file. | `.editorconfig` is ktlint's entire configuration surface. There is no Kotlin or YAML config file, so every property left unset takes ktlint's own default rather than a project decision, and nothing in the build output says which. `ktlint_official` and `intellij_idea` are different rule sets, not strictness levels, so the unset case is a silent choice between two answers. Measured 2026-09-12: 3/32 of the corpus sets any `ktlint_*` key, so an unconfigured gate is the norm rather than the exception. | see block KT-LINT-04 Empty output in a project that runs a ktlint gate is the finding, including the case where no `.editorconfig` exists at all. One hit per code-style scope is the pass. | **MUST** |
 | KT-LINT-05 | Record every rule you turn off as its own `ktlint_standard_*` or `ktlint_experimental_*` key in that same committed `.editorconfig`, with the reason on the line above. Never relax `ktlint_code_style` to silence a single finding. | A per-rule key is one reviewable line, and the corpus's one heavily-tuned repository disables ten standard rules exactly that way. Relaxing the code style instead moves dozens of rules at once to quiet one, and leaves no record of which finding prompted it. This is the ktlint statement of the same discipline `JAVA-LINT-03` states for an Error Prone opt-out. | see block KT-LINT-05 then read the line above each hit. A disabled rule with no reason is the finding. Empty output means the project takes its code style unmodified, which is the pass. | SHOULD |
+| KT-LINT-09 | Pin ktlint's stable 1.x line, coordinate group `com.pinterest.ktlint`, in a gate of record. Never wire a `2.0.0-ALPHA` build, and never rewrite a `com.pinterest.ktlint` coordinate to a guessed new group. Verified 2026-11-27, when 1.8.0 was the newest stable release. | The project left Pinterest and now lives at `github.com/ktlint/ktlint`. Its 2.x line exists only as alphas: `2.0.0-ALPHA-4` (2026-08-21) published under `io.github.ktlint`, and `2.0.0-ALPHA-5` (2026-11-23) under `io.github.ktlint.core`, built against Kotlin 2.5.0-RC2 and marked not for production. The group changed twice in one cycle, so a coordinate written from memory is wrong either way, and detekt's ktlint wrapper still bundles ktlint 1.8.0. Re-check when ktlint 2.0.0 stable ships. | see block KT-LINT-09. Any hit is the finding, and empty output is the pass. Then read the version the ktlint plugin or Spotless step pins: a value containing `ALPHA` is the finding. | SHOULD |
 
 ```sh
 # KT-LINT-04
@@ -111,6 +116,10 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)**/.editorconfig
 # KT-LINT-05
 git ls-files -z --cached --others --exclude-standard -- ':(glob)**/.editorconfig' |
   xargs -0 -r grep -H -n -e 'ktlint_standard_' -e 'ktlint_experimental' --
+# KT-LINT-09
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.gradle.kts' \
+  ':(glob)**/*.gradle' ':(glob)**/*.toml' |
+  xargs -0 -r grep -H -n -i -e 'io.github.ktlint' -e 'ktlint.*alpha' --
 ```
 
 ```ini
@@ -124,13 +133,15 @@ ktlint_standard_no-wildcard-imports = disabled     # KT-LINT-05: one key, one re
 ## Group 3: What compileKotlin Catches
 
 Gate: `./gradlew compileKotlin`. Floors verified 2026-09-12: `-Wextra`, spelled
-`extraWarnings` in the Gradle DSL, arrived in Kotlin 2.1 and is still
-Experimental, as is `-Xsuppress-warning=NAME` from the same release.
+`extraWarnings` in the Gradle DSL, arrived in Kotlin 2.1 and was still
+Experimental through 2.4.0. The compiler reference read 2026-11-27 gives it no
+stability label, no longer documents `-Xsuppress-warning=NAME`, and documents
+`-Xwarning-level=NAME:(error|warning|disabled)` as the per-warning control.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
 | KT-LINT-06 | Where a build opts in to `extraWarnings`, declare it in exactly one convention plugin, on the same `compilerOptions` block that sets `jvmTarget`, and carry its Kotlin version. Whether to opt in at all is `KT-COMP-12`'s, which forbids stating it as a requirement, because it is Experimental as of Kotlin 2.1 and still Experimental at 2026-09-12. | The bundle surfaces `CAN_BE_VAL`, `UNREACHABLE_CODE`, `USELESS_CALL_ON_NOT_NULL`, `ASSIGNED_VALUE_IS_NEVER_READ`, `REDUNDANT_NULLABLE` and `PLATFORM_CLASS_MAPPED_TO_KOTLIN`. Those are dead-code and wrong-type-across-the-Java-boundary findings that plain compilation never prints and that no shipped detekt rule replaces. Declared per module it is a per-module opinion, and one convention plugin is the only place the decision is reviewable. | see block KT-LINT-06 More than one declaring file is the finding. Empty output means the bundle is off, which is never a finding (`KT-COMP-12`). | SHOULD |
-| KT-LINT-07 | Decide `allWarningsAsErrors` in that same convention plugin, and never behind a Gradle property that defaults to off. Before promoting, know that `-Xsuppress-warning=NAME` silences a warning globally and cannot silence an error. | Once a warning is promoted the per-name escape hatch is gone, and the remaining exits are fixing the code or un-promoting the whole set, so the promotion is a commitment rather than a setting. An unknown warning name passed to that flag is itself a compile error, so the hatch cannot be used speculatively either. Measured 2026-09-12: 7/32 of the corpus promotes warnings, and one of those gates the promotion behind an undefaulted Gradle property, so a bare `./gradlew build` there promotes nothing. That is the same shape as a coverage floor wrapped in a disabling conditional. | see block KT-LINT-07 then read each hit for an enclosing conditional or a `providers.gradleProperty(...)` lookup. A promotion that only applies when a property is passed is the finding, and must never be described as enforced. Empty output means warnings stay warnings, which is the pass for an adopter and the finding for a module you author. | SHOULD |
+| KT-LINT-07 | Decide `allWarningsAsErrors` in that same convention plugin, and never behind a Gradle property that defaults to off. The one per-name exemption from that promotion is `-Xwarning-level=NAME:disabled`, which suppresses that warning module-wide: declare it in the same plugin with its reason on the line above, because it is a weakening under `KT-CORE-01`. | Once warnings are promoted, the exits are fixing the code, a per-name `-Xwarning-level` exemption, or un-promoting the whole set, so the promotion is a commitment rather than a setting. `-Xsuppress-warning=NAME`, the older per-name flag, is absent from the compiler reference read 2026-11-27, so it is not the exemption to reach for. Measured 2026-09-12: 7/32 of the corpus promotes warnings, and one of those gates the promotion behind an undefaulted Gradle property, so a bare `./gradlew build` there promotes nothing. That is the same shape as a coverage floor wrapped in a disabling conditional. | see block KT-LINT-07 then read each hit for an enclosing conditional or a `providers.gradleProperty(...)` lookup. A promotion that only applies when a property is passed is the finding, and must never be described as enforced. Empty output means warnings stay warnings, which is the pass for an adopter and the finding for a module you author. Every `Xwarning-level` hit ending in `:disabled` with no reason on the line above is also the finding. | SHOULD |
 
 ```sh
 # KT-LINT-06
@@ -140,14 +151,14 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.gradle.kts'
 # KT-LINT-07
 git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.gradle.kts' \
   ':(glob)**/*.gradle' |
-  xargs -0 -r grep -H -n -e 'allWarningsAsErrors' --
+  xargs -0 -r grep -H -n -e 'allWarningsAsErrors' -e 'Xwarning-level' -e 'Xsuppress-warning' --
 ```
 
 ```kotlin
 kotlin {
     compilerOptions {
         extraWarnings.set(true)        // KT-LINT-06: Kotlin 2.1+, Experimental, one declaring file
-        allWarningsAsErrors.set(true)  // KT-LINT-07: after this, -Xsuppress-warning cannot reach them
+        allWarningsAsErrors.set(true)  // KT-LINT-07: after this, only a reasoned -Xwarning-level exemption reaches one
     }
 }
 ```
@@ -171,7 +182,7 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.gradle.kts'
 
 1. **Reporting "detekt is configured" as "these checks run."** The highest-value
    error in this family, because the build file that proves detekt is applied
-   says nothing about the 102 rules that are off, and `buildUponDefaultConfig =
+   says nothing about the 108 rules that are off, and `buildUponDefaultConfig =
    true` reads like the opposite of what it does. `KT-LINT-01` is the check, and
    `KT-CORO-01` is the same trap on the four coroutine rules specifically.
 2. **Emitting detekt packages and coordinates from memory.** Training data is
@@ -191,8 +202,9 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.gradle.kts'
    smallest tell is a code-style change in a commit whose subject is about a
    single file.
 6. **Promoting warnings to errors and then reaching for `-Xsuppress-warning`**
-   when one bites. The flag cannot silence an error, so the reflex fix does not
-   compile, and the next reflex is to un-promote the whole set.
+   when one bites. The compiler reference no longer documents that flag, the
+   documented per-name exemption is `-Xwarning-level=NAME:disabled`, and either
+   one is a weakening that needs its reason, not a reflex.
 7. **Gating a promotion or a gate behind a Gradle property that defaults to
    off**, then describing the project as enforcing it. Reading the flag's
    declaration is not enough, the enclosing conditional decides.

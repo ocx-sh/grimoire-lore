@@ -3,6 +3,7 @@ title: "TypeScript topic map — wave 1 deduplicated, adjudicated, wave 2 commis
 phase: 3
 model: opus
 date: 2026-08-29
+revised: 2026-11-27
 wave: "1 consolidated → 2 commissioned"
 sources_surveyed: 12
 candidates_deduplicated: 212
@@ -1296,3 +1297,8 @@ Unchanged from the frame: `bundles/typescript-essentials.toml` with members
 carrying no tag, `docs/typescript-{quality,packaging,essentials}.md` as
 per-package description companions, and `assets/lore-typescript.svg`, which
 already exists.
+
+## Corrections
+
+- 2026-11-27: the `node20-eol-floor` row says Node 20 went EOL in March 2026. Node 20 reached end of life on 2026-04-30; March 2026 (2026-03-24) is the date of its last release. The row's conclusion (a Node 20 floor is unsupported) holds. Decision: refresh-2026-11/typescript-packaging.md (TS-PKG-10).
+- 2026-11-27: the `ignore-scripts-gap` row asks only whether `ignore-scripts` is set. On npm 12, pnpm 11 and Bun, install scripts are default-deny behind per-tool allowlists (`allowScripts`, `allowBuilds`, `trustedDependencies`), and `ignore-scripts=true` applies to npm 11 and older. The row's question should be read against those keys. Decision: refresh-2026-11/typescript-quality.md (TS-SEC-13).

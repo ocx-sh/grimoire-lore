@@ -9,7 +9,7 @@ consolidates:
   - ts-extension-host/extension-host-bundling.md
   - ts-extension-host/typed-doubles-non-vitest.md
 date: 2026-08-29
-revised: 2026-08-29
+revised: 2026-11-27
 ---
 
 ## Verdict
@@ -400,7 +400,7 @@ compiling clean with zero `as` against a `WebviewPanel`/`Webview` pair modelled 
 `vscode.d.ts`, and catching a typo'd nested member (TS2561) automatically ([typed-doubles §6]).
 `sinon` is a direct devDependency of `microsoft/vscode` itself and was pushed 2026-08-05;
 `@golevelup/ts-sinon` is Proxy + `sinon.stub()` with zero runtime deps and no NestJS coupling
-despite its docs. The peer range is `sinon@^21.x`, so npm's `22.1.0` is out of range.
+despite its docs. The peer range is `sinon@^21.x` (checked 2026-11-27), so npm's `latest` sinon, which is 22.x, is out of range: pin `sinon@^21` explicitly.
 *Verify*: `npm ls sinon @golevelup/ts-sinon` reports no peer warning;
 `grep -rn 'as unknown as vscode\.\(WebviewPanel\|WebviewView\|OutputChannel\|GlobalEnvironmentVariableCollection\)' --include='*.ts' src/` → 0 outside the migration window.
 
@@ -633,6 +633,10 @@ Ranked by how often it bites in this codebase. Entries 14–19 were added by the
 
 ## Revision log
 
+- **2026-11-27 — TS-HOST-25 sinon peer pin re-checked.** The peer range `sinon@^21` is unchanged
+  (checked 2026-11-27), but npm `latest` sinon is now 22.x, outside it, so the rule says to pin
+  `sinon@^21` explicitly. Decision file:
+  `.agents/research/refresh-2026-11/typescript-quality.md`.
 - **2026-08-29 — folded in `extension-host-bundling.md` and `typed-doubles-non-vitest.md`**, the two
   rounds the first consolidation commissioned. Frontmatter `consolidates` extended; `revised:` added.
 - **New rules TS-HOST-18…23 (module and bundle semantics).** `Node16`/`Node16` on both extensions

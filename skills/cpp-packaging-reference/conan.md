@@ -23,7 +23,8 @@ in `cmake-build-reference/dependencies.md`. CPS import and export are `CMK-DEP` 
 also loads the Python quality rule, which owns its style.
 
 Written against Conan 2.32.0 (released 2026-08-31) and cmake-conan `develop2`
-as of 2026-06-05, verified 2026-09-26. CMake behaviour was measured on
+as of 2026-06-05, verified 2026-09-26, and source-checked against Conan
+2.34.0 (released 2026-10-28) on 2026-11-27. CMake behaviour was measured on
 3.31.12, 4.3.4 and 4.4.2. Every rule assumes the CMake floor 3.25.
 
 Contents: [Greps Over the Conanfile](#greps-over-the-conanfile) ·
@@ -90,7 +91,7 @@ as a dated edit. An adopter overrides it once, repository-wide.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| CMK-CONAN-04 | **Pinned.** In the explicit flow generate with `CMakeToolchain` plus `CMakeDeps`. Use `CMakeConfigDeps` only with the cmake-conan provider, or with a comment naming it experimental at Conan 2.32.0. A recipe's own `generate()` and its `test_package/conanfile.py` always use `CMakeDeps`. | `CMakeConfigDeps` moved from incubating to experimental in 2.25.0 and its reference page still carries the experimental banner at 2.32.0. The CCI template and every non-provider consumer checked use `CMakeDeps`. A recipe's `generate()` runs in `conan create`, never inside a provider's configure. Floor: Conan 2.25.0 for `CMakeConfigDeps`. | See block CMK-CONAN-04 (1). Empty output is the pass. Read each hit: the finding is a hit with neither the provider (see block CMK-CONAN-04 (2)) nor an "experimental" comment, and any hit in a published recipe or its `test_package`. | SHOULD |
+| CMK-CONAN-04 | **Pinned.** In the explicit flow generate with `CMakeToolchain` plus `CMakeDeps`. Use `CMakeConfigDeps` only with the cmake-conan provider, or with a comment naming it experimental at Conan 2.34.0. A recipe's own `generate()` and its `test_package/conanfile.py` always use `CMakeDeps`. | `CMakeConfigDeps` moved from incubating to experimental in 2.25.0 and its reference page still carries the experimental banner at 2.34.0, and its Python API changed between minors (`get_cmake_file_name` returns a dict from 2.33.0). The `CMakeDeps` page now suggests trying `CMakeConfigDeps` first, which is advice, not a stability claim. The CCI template and every non-provider consumer checked use `CMakeDeps`. A recipe's `generate()` runs in `conan create`, never inside a provider's configure. Floor: Conan 2.25.0 for `CMakeConfigDeps`. | See block CMK-CONAN-04 (1). Empty output is the pass. Read each hit: the finding is a hit with neither the provider (see block CMK-CONAN-04 (2)) nor an "experimental" comment, and any hit in a published recipe or its `test_package`. | SHOULD |
 | CMK-CONAN-05 | Never pair `CMakeConfigDeps` with `find_package(<Pkg> MODULE)` for a Conan-provided package, or with code that expects a Conan-generated `Find<Pkg>.cmake`. | `CMakeConfigDeps` writes no Find modules, and Conan's docs say support is not planned. Measured on Conan 2.32.0 with `cmake_find_mode` `both`: `CMakeDeps` writes `FindGamma.cmake`, `CMakeConfigDeps` only `GammaConfig*.cmake`. Floor: Conan 2.25.0. | Runs only when the `CMK-CONAN-04` grep hits. See block CMK-CONAN-05. Empty output is the pass. A hit naming a Conan-provided package is the finding. It sees single-line calls only, so read multi-line `find_package(` calls by hand. | MUST |
 | CMK-CONAN-06 | Under `CMakeDeps`, when CMake must `find_package` a `tool_requires` dependency (a code generator's targets, say), list it in `build_context_activated`. Add `build_context_suffix` when the same package is also a host `requires`. | By default `CMakeDeps` writes no config files for a build-context requirement, so the `find_package` fails or finds a host copy. Measured on Conan 2.32.0: 0 tool files by default, 5 when activated. `CMakeConfigDeps` does not need it. Floor: Conan 2.0. | Reading heuristic. Block CMK-CONAN-06 lists both sides. A `tool_requires` name that also appears in a `find_package(` call but not in `build_context_activated` is the finding. Empty output means not applicable. | MUST |
 
@@ -280,11 +281,11 @@ This row governs generated prose and profiles. Only a read catches it.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| CMK-CONAN-24 | Never describe `CPSDeps`, `conan.cps`, `[replace_requires]` or `[platform_requires]` as stable, GA or documented. Consume a system copy through a wrapper recipe plus `[replace_requires]`, not a bare `[platform_requires]`. | At Conan 2.32.0 `CPSDeps` exists in source only, with no docs page and no adopters sampled, and both profile sections carry the experimental banner. The CMake-side CPS rows are `CMK-DEP` (import) and `CMK-INST` (export). Floor: Conan 2.32.0. | Block CMK-CONAN-24 lists passages. Empty output means nothing to read. A passage calling one stable or GA is the finding. | SHOULD |
+| CMK-CONAN-24 | Never describe `CPSDeps`, `conan.cps`, `[replace_requires]`, `[platform_requires]` or Conan workspaces (`conanws.yml`, `conanws.py`, `conan workspace`) as stable or GA, and never cite a `CPSDeps` reference page. Consume a system copy through a wrapper recipe plus `[replace_requires]`, not a bare `[platform_requires]`. | At Conan 2.34.0 `CPSDeps` has no reference page. The docs gained an integrations page on CPS on 2026-11-20 that carries the experimental banner, warns of breaking changes and requires CMake 4.4 or later. Both profile sections still carry the experimental banner, and the docs call workspaces "generally available as experimental". No `CPSDeps` adopters were sampled (as of 2026-09-26). The CMake-side CPS rows are `CMK-DEP` (import) and `CMK-INST` (export). Floor: Conan 2.34.0. | Block CMK-CONAN-24 lists passages. Empty output means nothing to read. A passage calling one stable or GA, or citing a `CPSDeps` reference page, is the finding. | SHOULD |
 
 ```sh
 # CMK-CONAN-24
-git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.md' | xargs -0 -r grep -H -n -i -e CPSDeps -e platform_requires -e replace_requires --
+git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.md' | xargs -0 -r grep -H -n -i -e CPSDeps -e platform_requires -e replace_requires -e conanws -e 'conan workspace' --
 ```
 
 ## What Agents Get Wrong Here
@@ -325,6 +326,6 @@ Re-check:
 
 - D2: `CMK-CONAN-04` flips its default to `CMakeConfigDeps` on the first Conan
   changelog line that calls it stable, as a dated edit (verified experimental
-  at Conan 2.32.0, 2026-09-26).
+  at Conan 2.34.0, 2026-11-27).
 - D4: the Conan release tag. Re-run the version floors and the `CMK-CONAN-24`
-  status on each Conan minor after 2.32.0.
+  status on each Conan minor after 2.34.0.

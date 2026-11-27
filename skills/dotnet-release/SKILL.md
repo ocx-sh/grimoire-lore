@@ -218,7 +218,7 @@ src/Acme.Lib src/Acme.Lib.Extras; do ...; done`, the package ID in place of `Acm
 ```sh
 test "$(dotnet msbuild src/Acme.Lib -getProperty:EnablePackageValidation)" = true; echo "validation exit $?"
 rm -rf "$ART"
-SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) timeout 900 dotnet pack src/Acme.Lib -c Release -o "$ART" --tl:off --interactive false -nologo -v:q > "$LOGS/pack.log" 2>&1; echo "pack exit $?"
+T=$(git log -1 --format=%ct); SOURCE_DATE_EPOCH=$T timeout 900 dotnet pack src/Acme.Lib -c Release -o "$ART" -p:DeterministicTimestamp="$T" --tl:off --interactive false -nologo -v:q > "$LOGS/pack.log" 2>&1; echo "pack exit $?"
 ls "$ART"/*.snupkg
 ```
 

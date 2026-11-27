@@ -51,7 +51,7 @@ universal set outside `strict` (`noUncheckedIndexedAccess`,
 `isolatedModules`, `skipLibCheck`, and the two explicit `false`s), then adds
 per shape: `exactOptionalPropertyTypes` and `declaration` for a Node-loaded
 package, `noEmit` for a bundled app, `erasableSyntaxOnly` for a
-type-stripping runtime like Bun or `node --experimental-strip-types`, where
+type-stripping runtime like Bun or Node running `.ts` directly, where
 enums and parameter properties type-check clean and misbehave only when
 executed.
 
@@ -77,7 +77,8 @@ release-only gate finds the defect after it is already on the default
 branch. The set also covers `exports` key order as match priority, the
 shebang npm cannot insert for you, the one `attw` rule an ESM-only package
 should ignore and the ones it must not, and reading the published file list
-before it is unpublishable-back.
+before it is unpublishable-back. It also covers publish credentials: publishing
+from CI through npm trusted publishing (OIDC) instead of a long-lived token.
 
 ## What it does not cover
 

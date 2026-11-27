@@ -10,7 +10,7 @@ consolidates:
   - shell-pwsh/analyzer-profile.md
   - shell-pwsh/windows-7x-and-resolver.md
 date: 2026-10-11
-revised: 2026-10-11
+revised: 2026-11-27
 fixtures: /home/mherwig/.cache/research-lang/shell-tools/fixtures/pwsh-consolidation/ (this file's own runs R1-R8; the 2026-10-11 revision's runs R9-R16 sit in its rev2/ subdirectory); the four dives' fixtures sit beside it
 ---
 
@@ -22,7 +22,7 @@ Scope note. The map gives this group three families (PS-COMPAT, PS-ERR, PS-GATE)
 
 ## Verdict
 
-1. **Three targets, chosen by script kind.** Installers, bootstrap and anything fetched by `irm | iex` or run with `powershell -File` on a stock Windows target **Windows PowerShell 5.1** (`#Requires -Version 5.1`, ASCII only, no BOM, a version check in code because `iex` ignores `#Requires`). Repo, dev, CI and Pester scripts target **PowerShell 7.6 LTS** (`#Requires -Version 7.6`). Modules are dual-edition and imported on a real 5.1. 7.4 and 7.5 end support 2026-11-10 ([compat] §1, §11), so no `#Requires` floor names them.
+1. **Three targets, chosen by script kind.** Installers, bootstrap and anything fetched by `irm | iex` or run with `powershell -File` on a stock Windows target **Windows PowerShell 5.1** (`#Requires -Version 5.1`, ASCII only, no BOM, a version check in code because `iex` ignores `#Requires`). Repo, dev, CI and Pester scripts target **PowerShell 7.6 LTS** (`#Requires -Version 7.6`). Modules are dual-edition and imported on a real 5.1. 7.4 and 7.5 reached end of support on 2026-11-10 ([compat] §1, §11), so no `#Requires` floor names them and a 7.4.7 result in this file is a measurement record, not a target. pwsh 7.7.0 shipped on 2026-11-10 with no published end-of-support date, so the floor stays 7.6 (LTS to 2028-11-14).
 2. **5.1 compatibility is proven on a 5.1 host, not by PSScriptAnalyzer.** `Parser::ParseFile` on Windows PowerShell 5.1 is the syntax gate. `PSUseCompatibleSyntax` is off by default and blind to four constructs (leading-pipe continuation, trailing `&`, `clean {}`, `${a}?[0]`); pwsh 7 parses all of them, so the wrong host passes ([compat] §3, [gate] §4, R2). A Linux-only CI gets a labelled static fallback, never a silent green.
 3. **A native exit code is never an error under `$ErrorActionPreference = 'Stop'`, on any engine.** Every native whose failure matters is checked (`Invoke-Native` or inline `$LASTEXITCODE`). `$PSNativeCommandUseErrorActionPreference` is a 7.4+ convenience allowed only in 7.6-only code (decision: 7.4+, not the map's "7.3+"; 7.3 had it experimental). GHA `shell: pwsh` is "last native command wins" ([err] f1, f2, f6, R6).
 4. **Delivery by `irm | iex` constrains the whole file**: no `exit` (kills the caller's shell on 5.1, 7.4, 7.6), no BOM (a U+FEFF-prefixed string fails `iex` on 5.1, 7.4.7 and 7.6.6, Windows included, R14), no non-ASCII, no reliance on `#Requires` ([err] f8, [compat] §7, [win7x] f3, R8).
@@ -68,7 +68,7 @@ Each rule: imperative; **Why** (the failure it prevents); **Check** (exact comma
 ### PS-COMPAT - targets, syntax and runtime differences
 
 **PS-COMPAT-01 (MUST)** Declare the target with an exact `#Requires` line: `#Requires -Version 5.1` in installers, bootstrap and anything `irm | iex` or `powershell -File` runs on stock Windows; `#Requires -Version 7.6` in repo, dev, CI and Pester scripts; never `7.0`, `7.4` or `7.5` as a floor. A script that `iex` delivers also tests `$PSVersionTable.PSVersion` in code.
-- Why: on 5.1 `#Requires` wins over parse errors, so a mis-launched 7-only script says "requires PowerShell 7.6" instead of "Unexpected token '&&'"; `iex` ignores it ([compat] §1, §10); 7.4 and 7.5 end 2026-11-10 ([compat] §11).
+- Why: on 5.1 `#Requires` wins over parse errors, so a mis-launched 7-only script says "requires PowerShell 7.6" instead of "Unexpected token '&&'"; `iex` ignores it ([compat] §1, §10); 7.4 and 7.5 reached end of support on 2026-11-10 ([compat] §11).
 - Check: `grep -rL -x -e '#Requires -Version 5.1' --include='*.ps1' .` (installer dir); `grep -rL -x -e '#Requires -Version 7.6' --include='*.ps1' .` (repo-script dir); stale floors `grep -rn -e '#Requires -Version 7.0' -e '#Requires -Version 7.4' -e '#Requires -Version 7.5' --include='*.ps1' .`. The in-code guard is a named reading heuristic (www-setup `src/install.ps1:731`).
 - Watched: yes, [compat] V11, V15, V16 (V16 on the real fleet copies lists `grimoire-install.ps1` and `setup-grimoire-install.ps1`, passes `www-setup-install.ps1`); `#Requires` behaviour in fixture `req/`.
 - Scope: all PowerShell; the 5.1 form for the installer kind, 7.6 for script/test kinds; modules PS-COMPAT-08.
@@ -101,7 +101,7 @@ Each rule: imperative; **Why** (the failure it prevents); **Check** (exact comma
 - Why: since the 2025-12-09 update (CVE-2025-54100) a 5.1 call that parses the response prompts, then exits 1 under `-NonInteractive` and throws `NullReferenceException` with closed stdin; 7.x ignores the switch ([compat] §5, KB5074596). `Invoke-RestMethod` and `-OutFile` alone were unaffected on build 5.1.26100.9444; `-OutFile -PassThru` is affected.
 - Check: AST D7 (handles splatting and the `PSDefaultParameterValues` form); coarse `grep -rlZ -i -e 'Invoke-WebRequest' -e '\biwr\b' --include='*.ps1' . | xargs -r -0 grep -L -i -e 'UseBasicParsing'` (xargs exits 123 even on a hit; judge by output; a comment mentioning the switch evades it).
 - Watched: yes. [compat] V5 (`d7.ps1:1,2`), V9, V10; R5 (5.1 exit 1 on the plant, 0 on the twin; 7.4.7/7.6.6 0 on both).
-- Scope: 5.1-bound. Re-measure after later cumulative updates; `irm` is exempt only as of KB5129195 (2026-09-15).
+- Scope: 5.1-bound. Re-measure after later cumulative updates; `irm` is exempt only as of KB5129195 (2026-09-14, build 26100.9457; the measured build 26100.9444 predates it).
 
 **PS-COMPAT-07 (SHOULD)** Load the zip assembly before use: `Add-Type -AssemblyName System.IO.Compression.FileSystem` before `[System.IO.Compression.ZipFile]` in 5.1-bound code.
 - Why: "Unable to find type" on 5.1 ([compat] §6); loud, so SHOULD.
@@ -279,7 +279,7 @@ Each rule: imperative; **Why** (the failure it prevents); **Check** (exact comma
 - Scope: installer and module kinds.
 
 **PS-GATE-05 (SHOULD)** Pin PSSA: `Install-Module PSScriptAnalyzer -RequiredVersion 1.25.0`, or use the preinstalled runner copy and assert `(Get-Module PSScriptAnalyzer -ListAvailable).Version`.
-- Why: 1.24.0 changed `-EnableExit` semantics and raised the host minimum to 5.1; 1.25.0 (2026-03-20) is on the windows-2025 and ubuntu-24.04 images beside pwsh 7.6.6 ([gate] §1).
+- Why: 1.24.0 changed `-EnableExit` semantics and raised the host minimum to 5.1; 1.25.0 (2026-03-20) is on the windows-2025, ubuntu-24.04 and ubuntu-26.04 images beside pwsh 7.6.10 (image readmes of 2026-11-16; `ubuntu-latest` now maps to 26.04) ([gate] §1).
 - Check: `grep -rnP -e 'Install-Module[ ]+(-Name[ ]+)?PSScriptAnalyzer(?!.*-RequiredVersion)' --include='*.yml' --include='*.yaml' --include='*.ps1' .` ([gate] M1). Watched: yes; fleet hits `www-setup/taskfiles/pwsh.taskfile.yml:22`, `setup-grimoire/.github/workflows/test.yml:83`.
 - Scope: all PowerShell gates.
 
@@ -563,7 +563,7 @@ Tell set of record (the cheap, no-5.1-host layer): the greps named in PS-COMPAT-
 1. Ship the check assets under `rules/powershell-quality/checks/` (default: yes, mirroring `swift-quality/checks/`). Without them most MUST rows have no runnable check in the catalog.
 2. Exclude `PSUseBOMForUnicodeEncodedFile` for the script and test kinds (default: yes; R4).
 3. Keep PS-ENC and PS-NATIVE as their own depth files as the map says (default: yes); the family labels in this file are the file split.
-4. Keep a 7.4 column in the parse matrix until 2026-11-10, then delete it (default: yes).
+4. Settled 2026-11-27, no decision needed: 7.4 reached end of support on 2026-11-10; a 7.4.7 column is a measurement record and no longer a target.
 5. Settled 2026-10-11, no decision needed: PS-GATE-06 `Test-CommandResolves` stays SHOULD and becomes advisory (Verdict 10); a MUST needs an allow-list plus an out-of-sample corpus (below).
 6. M-U-02 (execution policy) is carried as PS-GATE-07; the PS-SEC consolidation should cite it, not restate it (default: carried here).
 7. Updated 2026-10-11: both `AppendAllText(... UTF8Encoding $false)` and `Out-File -Encoding utf8 -Append` are safe alone and mixed (PS-ENC-10, Verdict 9); the default stays `AppendAllText` (default: yes; the reader is emulated from runner source, not hosted).
@@ -573,7 +573,7 @@ Tell set of record (the cheap, no-5.1-host layer): the greps named in PS-COMPAT-
 
 - **Hosted-runner readers (GHA wrapper and env-file reader).** Question: does a throwaway workflow on `windows-latest` reproduce (a) the simulated "last native wins" results for `shell: pwsh` and `shell: powershell`, and (b) the 21-sequence env-file matrix of PS-ENC-10? [err] rebuilt the wrapper from runner source and the revision emulated the reader (`FileCommandManager.cs`@67f01c276e0a) over runner-shaped empty files; neither ran on a hosted job. A dispatch is covered by the standing CI grant.
 - **Interactive consoles and UTF-8 system-locale hosts.** Question: do the PS-ENC-05 and PS-ENC-09 rows (console code page 437 and the leak of `[Console]::OutputEncoding`) hold in an interactive Windows Terminal session, and with "Beta: Use Unicode UTF-8 for worldwide language support" on (ACP 65001, which would change 5.1's `Set-Content`, `Default` and BOM-less source reads)? Every Windows row was measured through WSL interop on one cp1252 host.
-- **`Invoke-RestMethod` and later cumulative updates.** Question: does 5.1 `irm` start prompting on builds after KB5129195 (2026-09-15)? PS-COMPAT-06 exempts it only as measured.
+- **`Invoke-RestMethod` and later cumulative updates.** Question: does 5.1 `irm` start prompting on builds after KB5129195 (2026-09-14, build 26100.9457)? No upstream evidence of a change as of 2026-11-27, and no build after 9444 was measured. PS-COMPAT-06 exempts it only as measured.
 - **Non-1252 ANSI hosts.** Question: does the curly-quote synthesis in PS-ENC-01 and PS-ENC-08 reproduce on cp932/936/949? Needs a host with another system locale.
 - **PSSA main.** Question: after the next release (`AvoidUsingArrayList`, `MissingTryBlock`, `AvoidDynamicallyCreatingVariableNames`, `InvalidMultiDotValue` are on main only; `Test-ScriptAnalyzerSettingsFile` is not exported by 1.25.0) does `TargetVersions` gain 7.x values, does `-EnableExit` change, and does the `severity == null` branch still report ParseError?
 - **Resolver out of sample.** Question: what is the false-finding rate of the tuned `Test-CommandResolves` on a corpus whose allow-list was not derived from it? Decides whether PS-GATE-06 can become MUST for a project that supplies its own allow-list.
@@ -608,6 +608,16 @@ Removed as answered 2026-10-11: pwsh 7.4.7/7.6.6 on Windows encoding and console
 - Open questions: three answered items removed; owner decisions 5 and 7 updated in place (numbering kept), 8 added (SH-CI-11 and topic-map counts hand-off); the two hosted-runner items merged; interactive console and UTF-8 locale hosts, and resolver out-of-sample precision, added.
 - No existing rule's verification failed to go red. Two went red on a compliant twin and were replaced: the first-pass wrapper's Severity check (PS-GATE-01) and unmodified D6 (PS-ENC-03).
 - Hand-offs, not applied here: SH-CI-11 wording in `shell-ci.md`; topic-map counts "37 IDs, 22 MUST" to 41 / 25.
+
+2026-11-27, folding in the delta refresh `refresh-2026-11/powershell-quality.md`. No ID added, removed or renumbered.
+
+- Frontmatter: `revised: 2026-11-27`.
+- Verdict 1: 7.4 and 7.5 end of support in the past tense (decision file, Changed rules and Non-ID stamps); 7.4.7 results are measurement records; 7.7.0 floor note.
+- PS-COMPAT-01: Why clause "end 2026-11-10" rewritten as "reached end of support on 2026-11-10" (refresh-2026-11/powershell-quality.md, Changed rules).
+- PS-GATE-05: Why image claim updated to pwsh 7.6.10 and ubuntu-26.04 (refresh-2026-11/powershell-quality.md, Changed rules).
+- PS-COMPAT-06 Scope and the `irm` open question: KB5129195 dated 2026-09-14 (build 26100.9457), not 2026-09-15; build 9444 predates it (spillover correction, refresh-2026-11/powershell-quality.md).
+- Open questions 4: settled by the past-tense rewrite; the `irm` prompting question stays open.
+- Upstream check 2026-11-27, no re-measure: the pwsh 7.6.7 to 7.6.10 notes change no measured behaviour, PSScriptAnalyzer 1.25.0 and Pester shipped nothing newer, newest 24H2 build is 26100.9974. The 7.6.6, 5.1.26100.9444 and 7.4.7 measurement stamps are history and stay.
 
 ## Sub-artifacts
 

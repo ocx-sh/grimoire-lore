@@ -44,6 +44,10 @@ digest check plus GO-MOD-13's binary scan, and none of the build steps apply.
 Tool versions, measured 2026-09-26 unless a line says otherwise: Go 1.27.1,
 goreleaser 2.17.1, cosign 3.1.3, syft 1.51.0, govulncheck v1.8.0, gh 2.93.0,
 `gorelease` from `golang.org/x/exp` at `v0.0.0-20260908205506-85c1c2202aba`.
+The goreleaser pin is v2.20.3, which fixes GHSA-qx28-5g8c-9fw6 (read
+2026-11-27). Re-run on 2.20.3 on 2026-11-27, the snapshot layout, the
+`goreleaser check` exit codes and the `subject-path` result matched 2.17.1.
+The other goreleaser measurements below were taken on 2.17.1 only.
 The goreleaser config and the release workflow these steps assume are in
 [references/release-config.md](references/release-config.md).
 
@@ -59,7 +63,7 @@ later reader does not re-litigate them.
 | Signing | Keyless, in CI only: a cosign bundle over `checksums.txt` **and** a GitHub build-provenance attestation over every asset. Both rest on one OIDC identity | Attestation only, which drops one step and one asset |
 | Stripping | No `-s -w`. The binary-mode vulnerability scan stays precise (1 finding unstripped, 4 stripped on one module) | Strip, and triage binary-scan findings against an unstripped twin (GO-REL-05) |
 | Channels | GitHub release assets only. No container image, Homebrew, Scoop or winget until asked | An image built with `ko build`, never goreleaser `dockers:` (GO-REL-10) |
-| Tool pins | goreleaser `v2.17.1`, cosign `v3.1.3`, `gorelease` at the pseudo-version above | Bumped through the upgrade procedure, never `latest` |
+| Tool pins | goreleaser `v2.20.3`, cosign `v3.1.3`, `gorelease` at the pseudo-version above | Bumped through the upgrade procedure, never `latest` |
 | SDK major version | An SDK wrapping a pre-1.0 CLI stays at v0, and its README recommends exact pinning | A `/v2` path once the wrapped CLI reaches 1.0 |
 
 ## The runbook
@@ -313,8 +317,10 @@ the release workflow in
 [references/release-config.md](references/release-config.md). That workflow
 signs `checksums.txt` with a keyless cosign bundle and attests every asset
 listed in it. Never sign on a laptop or in an agent sandbox, and never store a
-signing key (GO-REL-11). Point `actions/attest-build-provenance` at
-`subject-checksums: dist/checksums.txt`. With raw binaries, the glob
+signing key (GO-REL-11). Point `actions/attest` at
+`subject-checksums: dist/checksums.txt`. `actions/attest-build-provenance` v4
+only wraps it, so an existing workflow may keep the wrapper. With raw
+binaries, the glob
 `dist/mytool-*` matches only the SBOM files, so a `subject-path` glob attests
 the SBOMs and not one binary (measured on goreleaser 2.17.1, 2026-09-26).
 
@@ -396,6 +402,13 @@ is not reachable yet.
 - **A bad binary:** ship the fix as a new patch version and run this procedure
   from step 1. Never re-upload assets under the published tag: the signed
   checksums and the attestations still name the old digests.
+- **A binary built on an outdated Go patch:** `go version mytool-linux-amd64`
+  names the toolchain that built a published asset. A patch older than the
+  current one with security fixes is the finding: on 2026-11-27, go1.27.3 or
+  lower predates go1.27.4's fixes to cgo, the `go` command, the compiler, the
+  linker and `net/http`. Move the `toolchain` line to the current patch
+  (GO-MOD-16), ship a new patch version from step 1, and scan the new binary
+  in step 7. Never replace assets under the old tag.
 
 **Check** after the higher version is on the proxy:
 

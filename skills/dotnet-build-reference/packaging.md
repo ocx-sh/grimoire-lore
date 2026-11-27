@@ -6,7 +6,7 @@ summary: The CS-PKG rows for a library nupkg, owning the metadata block, SourceL
 # Packaging
 
 Binds to .NET SDK 10.0.401 with NuGet 7.9.0 on Linux x64 (measured 2026-10-11), MinVer 8.0.0 and `dotnet-validate`
-0.0.1-preview.582, every pack watched on `net8.0;net10.0`. SDK 8.0.425 and 11.0 RC1 appear only where a row names them.
+0.0.1-preview.582, every pack watched on `net8.0;net10.0`. SDK 8.0.425 and 11.0 RC1 appear only where a row names them; SDK 10.0.404 and 11.0.100 (NuGet 8.0.0), both released 2026-11-10, were not measured.
 Windows, macOS and arm64 behaviour is `unverified: read only`, and so is every nuget.org write path (the push, the
 Trusted Publishing exchange, prefix reservation): nothing was pushed.
 
@@ -68,7 +68,7 @@ Gate: block `cib-probe` for the property, block `repro` for the bytes.
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
 | CS-PKG-03 | Set `<ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>` and nothing else: never unconditionally, never keyed on `CI`, and never assume the SDK sets it. Passing `-p:ContinuousIntegrationBuild=true` on every CI `dotnet pack` and `build` is the equal alternative. | The SDK does not set it, even under `CI=true` or `GITHUB_ACTIONS=true` (measured 2026-10-11). Without it the PDB maps absolute paths, `dotnet-validate` exits 1 with `Non deterministic`, and the DLL differs per checkout directory. Unconditional breaks local source stepping, and a developer shell that exports `CI=true` would flip local builds. The provider variable wins over Polly's `CI`. | Block `cib-probe`: line 1 prints `true` or line 4 prints the CI commands that pass the property or line 5 names a delegated releaser, and lines 2 and 3 print an empty line. Watched red and green (measured 2026-10-11, net10.0): the unconditional tree printed `true` on line 2, the `CI`-keyed tree printed `true` on line 3, the conditional tree passed. Other CI providers set their own variable in the same condition; that is `unverified: read only`. A delegated releaser (`dotnet-releaser`, a reusable workflow: markdig) keeps CI outside the repository, so lines 1 and 4 print nothing: the fifth line names the releaser and its config is read for the property (`unverified: read only`). | MUST |
-| CS-PKG-05 | Pack releases as `SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) dotnet pack ...` on SDK 10.0.401 or newer, with `GITHUB_ACTIONS=true` (CS-PKG-03). | A fixed timestamp is the only setting that gives a byte-identical nupkg and snupkg across clones. SDK 8.0.425 ignores `SOURCE_DATE_EPOCH`, and 11.0 RC1 is still non-identical by default (measured 2026-10-11). | Block `repro` prints `EQUAL`. Watched red and green (measured 2026-10-11): two clones packed 2 s apart gave no `EQUAL` without the variable and `EQUAL` with it; a clone whose pack failed printed `FAILED pack in b` and an empty artifacts folder printed no `EQUAL`. | SHOULD |
+| CS-PKG-05 | Pack releases with the commit time passed both ways, `T=$(git log -1 --format=%ct); SOURCE_DATE_EPOCH=$T dotnet pack ... -p:DeterministicTimestamp=$T`, on SDK 10.0.401 or newer, with `GITHUB_ACTIONS=true` (CS-PKG-03). | A fixed timestamp is the only setting that gives a byte-identical nupkg and snupkg across clones. SDK 10.0.401 honoured `SOURCE_DATE_EPOCH` (measured 2026-10-11); NuGet 8.0.0 (SDK 11.0.100) and its 7.9.x backport for a later 10.0.4xx patch no longer read the variable and default `DeterministicTimestamp` to `false`, so only the property fixes the time there (NuGet.Client#7652 and #7661, NuGet 8.0 release notes, read 2026-11-27; the Learn deterministic-packages page that says otherwise predates the change). SDK 8.0.425 ignores `SOURCE_DATE_EPOCH`, and 11.0 RC1 is still non-identical by default (measured 2026-10-11). | Block `repro` prints `EQUAL`. Watched red and green (measured 2026-10-11, SDK 10.0.401, variable only): two clones packed 2 s apart gave no `EQUAL` without the variable and `EQUAL` with it; a clone whose pack failed printed `FAILED pack in b` and an empty artifacts folder printed no `EQUAL`. The property form on SDK 10.0.404 and 11.0.100 is `unverified: not run`. | SHOULD |
 
 ```sh
 # cib-probe (CS-PKG-03): line 1 prints true, or line 4 prints the CI commands that pass the property, or line 5 names a delegated releaser; lines 2 and 3 print an empty line
@@ -77,8 +77,8 @@ env -u GITHUB_ACTIONS -u CI dotnet msbuild "${PRJ:?MISSING PRJ}" -getProperty:Co
 env -u GITHUB_ACTIONS CI=true dotnet msbuild "${PRJ:?MISSING PRJ}" -getProperty:ContinuousIntegrationBuild -p:TargetFramework=net10.0
 grep -rnHE -e '(-p:|/p:)ContinuousIntegrationBuild=true' ${CIF:?MISSING CIF} | grep -v '^[^:]*:[0-9]*:[[:space:]]*#'
 grep -rlE 'dotnet-releaser' $CIF | sed 's/$/: delegated releaser, read its config for ContinuousIntegrationBuild/'
-# repro (CS-PKG-05): clone twice into different directories (a, b); a failed pack, an empty artifacts folder or a failed cd prints MISSING or FAILED and exits 1; EQUAL only when both packs pass and every hash matches
-for c in a b; do (cd "${c:?MISSING clone}" && rm -rf artifacts && SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) GITHUB_ACTIONS=true dotnet pack "${PACK:?MISSING PACK}" -c Release -o artifacts > pack.log 2>&1) || { echo "FAILED pack in $c"; false; }; done
+# repro (CS-PKG-05): clone twice into different directories (a, b), each pack taking the commit time as SOURCE_DATE_EPOCH and as DeterministicTimestamp; a failed pack, an empty artifacts folder or a failed cd prints MISSING or FAILED and exits 1; EQUAL only when both packs pass and every hash matches
+for c in a b; do (cd "${c:?MISSING clone}" && rm -rf artifacts && T=$(git log -1 --format=%ct) && SOURCE_DATE_EPOCH=$T GITHUB_ACTIONS=true dotnet pack "${PACK:?MISSING PACK}" -c Release -o artifacts -p:DeterministicTimestamp="$T" > pack.log 2>&1) || { echo "FAILED pack in $c"; false; }; done
 h() ( cd "$1" && set -o pipefail && ls artifacts/*nupkg > /dev/null && sha256sum artifacts/*nupkg | cut -d' ' -f1 )
 A=$(h a) && B=$(h b) && test -n "$A" && test "$A" = "$B" && echo EQUAL
 ```
@@ -151,7 +151,7 @@ grep -rnHE -e '--certificate-fingerprint +[0-9A-Fa-f]{40}( |$)' -e 'dotnet nuget
 | 2 | Adds `Microsoft.SourceLink.GitHub`, often pinned to 1.1.1 or without `PrivateAssets`. | Block `config-bans` | CS-PKG-02 |
 | 3 | Sets `IncludeSymbols` without `snupkg`, or copies the pdb-in-nupkg trick from a popular library (embed the PDB instead). | Block `symbols`, block `config-bans` | CS-PKG-04, CS-PKG-02 |
 | 4 | Sets `ContinuousIntegrationBuild` unconditionally, keys it on `CI`, or believes the SDK sets it. | Block `cib-probe` | CS-PKG-03 |
-| 5 | Presents `DeterministicTimestamp=true` as reproducible packaging. | Block `repro` | CS-PKG-05, CS-PKG-02 |
+| 5 | Presents `DeterministicTimestamp=true`, or `SOURCE_DATE_EPOCH` without the property, as reproducible packaging. | Block `repro` | CS-PKG-05, CS-PKG-02 |
 | 6 | Hand-sets `<Version>`, references MinVer with `Version=` under central package management (`NU1008`), or runs MinVer on a shallow clone. | Block `version-source`, block `tag-version` | CS-PKG-06, CS-PKG-07 |
 | 7 | Adds `SignAssembly` and a generated `.snk` "for NuGet". | Block `config-bans` | CS-PKG-08 |
 | 8 | Sets the baseline to the version being released (`NU1102`), or gates on `ls artifacts/*.nupkg`. | The pack exit code | CS-PKG-09 |

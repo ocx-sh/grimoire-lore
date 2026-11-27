@@ -49,17 +49,20 @@ which no ordinary consumer selector beats.
 That is ordinary cascade mechanics, not out-of-band compile-time ordering, and
 there IS a CSS entrypoint. The correct config key is `useCSSLayers` on the
 postcss-plugin (`src/plugin.js:35`), which maps internally onto the
-babel-plugin's `useLayers` (`bundler.js:69`).
+babel-plugin's `useLayers` (`bundler.js:69`). `@stylexjs/unplugin` documents the
+same `useCSSLayers` key, without a stated default; no unplugin build was run.
 
 ## The RSC boundary is per-library, not a category rule
 
-- **styled-components 6.5.3** has no `react-server` export condition and detects
-  the RSC environment internally: a plain Server Component with no directive
-  anywhere builds clean on Next 16.3.3/Turbopack and SSRs
+- **styled-components 6.5.3** has no `react-server` export condition (nor has
+  6.7.0) and detects the RSC environment internally: a plain Server Component
+  with no directive anywhere builds clean on Next 16.3.3/Turbopack (6.7.0 on
+  16.4.6 too) and SSRs
   `<style data-styled="">.bjovqr{color:red}</style>`.
-- **Emotion 11.14.x** throws `TypeError: n.createContext is not a function` at
-  module evaluation in the identical scenario, and works only once `"use client"`
-  is added.
+- **Emotion 11.14.x** throws `TypeError: <id>.createContext is not a function`
+  at module evaluation in the identical scenario, and works only once
+  `"use client"` is added. The minified `<id>` is `n` on Next 16.3.3 and `f` on
+  16.4.6, so match on `createContext is not a function`.
 
 Testing one library tells you nothing about the other.
 
@@ -118,3 +121,10 @@ utilities;` on line 1, every rule inside a layer. **Do not add a wrapper.**
 Its one trap: the stock `_dark` condition compiles to `.dark`, not
 `[data-theme="dark"]`, so an agent toggling `data-theme` ships a dark mode that
 never activates.
+
+**Panda 2.x** (npm `latest` since 2.0.0, 2026-09-29) no longer adds
+`@pandacss/preset-base` automatically. Without
+`presets: ['@pandacss/preset-base', '@pandacss/preset-panda']`, `_dark` raises
+only an `unknown_condition` warning and emits no CSS at all, so the dark rule
+silently vanishes. With the presets it compiles to `.dark …` as above (measured
+at 2.6.0).

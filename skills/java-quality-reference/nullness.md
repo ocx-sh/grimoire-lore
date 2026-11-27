@@ -91,7 +91,7 @@ names every flavour the module can resolve, and
 
 | Flavour | Import root | Severity for a Kotlin caller | Adoption, 32 repos, 2026-09-12 |
 |---|---|---|---|
-| JSpecify (1.0.0, 2024-07-17, verified 2026-09-12), annotation set frozen for life | `org.jspecify.annotations` | **error** by default from Kotlin 2.1.0, the only flavour whose Kotlin default is strict | declared 9/32, read natively by NullAway in 2/32 |
+| JSpecify (1.0.0, 2024-07-17; 1.0.1, 2026-07-29, changed packaging and documentation only; verified 2026-11-27), annotation set frozen for life | `org.jspecify.annotations` | **error** by default from Kotlin 2.1.0, the only flavour whose Kotlin default is strict | declared 9/32, read natively by NullAway in 2/32 |
 | JSR-305 | `javax.annotation` | warning by default | 13/32, still the most common |
 | Checker Framework | `org.checkerframework.checker.nullness.qual` | set by a compiler flag, not by the annotation. `KT-INTEROP` owns the flags | 8/32 |
 | JetBrains | `org.jetbrains.annotations` | set by a compiler flag, as above | not measured |
@@ -117,7 +117,7 @@ build files only.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| JAVA-NULL-06 | Enable `jspecifyMode` in a change that touches no production source, read the diagnostics, and only then promote it into the gate. Where generic-heavy or lambda-heavy call chains produce findings you believe are wrong, narrow the scope or report upstream. Do not clear the build by adding suppressions. | JSpecify mode is the strictest setting NullAway has and it has known gaps on lambda-heavy call patterns ([NullAway#1290](https://github.com/uber/NullAway/issues/1290)), so the first run on an existing module is not a list of real defects. A batch of `@SuppressWarnings("NullAway")` added to reach green leaves the module claiming a guarantee it is no longer checking, which is worse than leaving the flag off. `JAVA-LINT-05` is the separate precondition that the toolchain can run the mode at all. | see block JAVA-NULL-06. A suppression introduced by the same change that sets the flag is the finding. Empty output is the pass. A pre-existing suppression carrying a reason on the same line or the line above is not this row's business. | SHOULD |
+| JAVA-NULL-06 | Enable `jspecifyMode` in a change that touches no production source, read the diagnostics, and only then promote it into the gate. Where generic-heavy or lambda-heavy call chains produce findings you believe are wrong, narrow the scope or report upstream. Do not clear the build by adding suppressions. | JSpecify mode is the strictest setting NullAway has and it has known gaps: NullAway's JSpecify-support wiki page still lists full generic-method inference as outstanding and says the mode may report false positives (read 2026-11-27), and the lambda-inference case [NullAway#1290](https://github.com/uber/NullAway/issues/1290) closed only in 0.14.4, so the first run on an existing module is not a list of real defects. A batch of `@SuppressWarnings("NullAway")` added to reach green leaves the module claiming a guarantee it is no longer checking, which is worse than leaving the flag off. `JAVA-LINT-05` is the separate precondition that the toolchain can run the mode at all. | see block JAVA-NULL-06. A suppression introduced by the same change that sets the flag is the finding. Empty output is the pass. A pre-existing suppression carrying a reason on the same line or the line above is not this row's business. | SHOULD |
 
 ```sh
 # JAVA-NULL-06

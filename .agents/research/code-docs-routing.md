@@ -7,7 +7,7 @@ consolidates:
   - .agents/research/code-docs-routing/tests-as-guards.md
   - .agents/research/code-docs-routing/tests-as-guards-proof.md
 date: 2026-09-27
-revised: 2026-09-27
+revised: 2026-11-27
 ---
 
 # code-docs routing: where everything else goes
@@ -16,7 +16,9 @@ Question: which store holds each kind of information a comment carries today,
 and when does a test carry a guard well enough for the comment to shrink?
 Paths are relative to the worktree unless prefixed `repo:` (a fleet repo under
 `/home/mherwig/dev`) or absolute. Everything below was researched or
-re-checked on 2026-09-27.
+re-checked on 2026-09-27. Tool behaviour (Claude Code rule loading, cargo-mutants,
+Stryker, mutmut) was re-read 2026-11-27, against Claude Code 2.1.332,
+cargo-mutants 27.1.0, Stryker 10.1.1 and mutmut 3.8.1.
 
 ## Verdict
 
@@ -41,7 +43,7 @@ re-checked on 2026-09-27.
       - TS-01 and OCX-13: their tests never plant a symlinked parent directory.
     - **A breaking edit that hangs instead of failing.** Reordering OCX-01 hangs `a_fifo_is_not_a_trampoline_and_is_never_opened`: under `timeout 15` it exits 124 and never prints a result. Without a per-test timeout, CI hangs instead of naming the test.
     - **Platform-gated guards.** OCX-04's `#[cfg(windows)]` compile-time assert was never run. Its breaking edit has to be tested on Windows (the local cross-compile path), because on Linux the assert is not compiled at all.
-    - **Tool gaps.** cargo-mutants has no operator for a bare method call. mutmut 3.8.0 fails on `src/`-layout packages ([boxed/mutmut#585](https://github.com/boxed/mutmut/issues/585) is the related upstream defect).
+    - **Tool gaps.** cargo-mutants has no operator for a bare method call. mutmut 3.8.0 fails on `src/`-layout packages, and the 3.8.1 notes (2026-10-28) list no fix ([boxed/mutmut#585](https://github.com/boxed/mutmut/issues/585) is the related upstream defect).
 
 ## The ruleset
 
@@ -115,14 +117,14 @@ re-checked on 2026-09-27.
   - What mutation adds is gaps beside a guard: OCX-10's `<` to `<=` mutant survives.
 - Verification, by language:
   - **TypeScript** is cheap.
-    1. Install Stryker inside the project: `npm install --no-save @stryker-mutator/core @stryker-mutator/vitest-runner`. The `npx --yes` form fails with `ERR_MODULE_NOT_FOUND: typescript`.
+    1. Install Stryker inside the project: `npm install --no-save @stryker-mutator/core @stryker-mutator/vitest-runner`. The `npx --yes` form fails with `ERR_MODULE_NOT_FOUND: typescript`. On TypeScript 7, Stryker 10.1.1 crashes with `ts.parseConfigFileTextToJson is not a function` while a `tsconfig.json` exists: in the scratch copy, install `typescript@6` with `--no-save` or move the `tsconfig.json` aside.
     2. Set `mutate` to the one source file.
     3. Point `vitest.configFile` at a project-local config whose `include` names only the target test file. Stryker's dry run needs every configured test green.
-    4. Run `npx stryker run` and read the surviving mutants for the guard's line.
+    4. Run `./node_modules/.bin/stryker run` (a bare `npx stryker` can resolve an unrelated old package) and read the surviving mutants for the guard's line.
   - **Rust**:
     1. Run `cargo mutants -p ocx_sign -f crates/ocx_sign/src/verify/trust_cache.rs --in-place` in a clean worktree, then `git status --porcelain`.
     2. Read the unviable logs with `grep -rn -e 'unused variable' -e 'unused import' mutants.out/log`.
-  - **Python**: skip mutmut. Version 3.8.0 fails with an `ImportError` inside its own sandbox on `src/`-layout packages. Rely on the planted edit.
+  - **Python**: skip mutmut. Version 3.8.0 fails with an `ImportError` inside its own sandbox on `src/`-layout packages, and the 3.8.1 notes (2026-10-28) list no fix. Rely on the planted edit.
 - Severity: CONSIDER (was SHOULD). Portability: portable.
 
 **RTE-07 — Move an invariant that is true verbatim at every file a path-scoped rule's glob matches into that rule, and delete the copies in individual files.**
@@ -131,7 +133,7 @@ re-checked on 2026-09-27.
 - Severity: SHOULD. The eval must confirm cold recovery from rules before this rises. Portability: portable to any client with path-scoped instructions.
 
 **RTE-08 — Build the PostToolUse reminder that prints the rules covering a touched path from the rules' own `paths:` frontmatter, never from a hand-written table.**
-- Rationale: Claude Code loads path-scoped rules "when Claude reads files matching the pattern, not on every tool use", and drops them after compaction until a matching file is read again (<https://code.claude.com/docs/en/memory>). A Write-only edit can therefore skip the rule. Both fleet tables have drifted.
+- Rationale: Claude Code 2.1.288 and later (2026-11-27) loads path-scoped rules when the agent reads, writes or edits a matching file, or views it with a single-file Bash `cat`, `head`, `tail`, `sed -n` or `grep`, not on every tool use, and drops them after compaction until a matching file is touched again (<https://code.claude.com/docs/en/memory>). Before 2.1.288 only Read loaded them. A compaction therefore drops a path-scoped rule until a matching file is touched again, and Claude Code before 2.1.288 loaded none on a Write or Edit. From 2.1.288 the reminder only backs up the client's own loading, so a repo may drop it, never swap it for a table. Both fleet tables have drifted.
 - Verification: `grep -rln -e '^paths:' .claude/rules | wc -l` compared with `grep -rn -e 'subsystem-' .claude/hooks`. Every path-scoped rule the hook never names is a finding. ocx has 42 path-scoped rules, and its hook names 8 of its 14 subsystem rules.
 - Severity: SHOULD. Portability: fleet default the adopter may override (Claude Code hooks).
 
@@ -192,10 +194,10 @@ Ranked by how often each was measured to bite.
    - ocx's default copy mode fails with ENOSPC.
    - `-p ocx_package` needs five `__testing` features, and `-p ocx_project` needs `ocx_oci/__testing`.
    - `npx --yes` Stryker fails on ESM resolution.
-   - mutmut 3.8.0 does not run on a `src/` layout at all.
+   - mutmut 3.8.0 does not run on a `src/` layout at all, and 3.8.1 lists no fix.
 
    Check: use `--in-place` in a clean worktree, read the `E0433` crate names one at a time, and install Stryker into the project. When mutmut fails in its sandbox, stop and use the planted edit.
-8. **Editing without the governing rule loaded.** Rules load on read, and a Write-only edit or a compaction skips them. Frequency unmeasured. Check: the RTE-08 hook.
+8. **Editing without the governing rule loaded.** A compaction drops a path-scoped rule until a matching file is touched again, and a Write-only edit skips it on Claude Code before 2.1.288. Frequency unmeasured. Check: the RTE-08 hook.
 9. **Pointing at a commit** (1 in 9 repos). Check: RTE-02's grep.
 
 ## Decisions for the eval
@@ -244,7 +246,7 @@ Another research round:
 
 ## Key sources
 
-- <https://code.claude.com/docs/en/memory>: path-scoped rules trigger on read, not on every tool use, and are lost after compaction.
+- <https://code.claude.com/docs/en/memory>: path-scoped rules trigger on Read, Write or Edit of a matching file (Claude Code 2.1.288 and later), not on every tool use, and are lost after compaction.
 - <https://arxiv.org/abs/2608.20195>: 60.5% of agent documentation consultations hit instruction files.
 - <https://github.com/joelparkerhenderson/architecture-decision-record>: the ADR-worthiness filter.
 - <https://matklad.github.io/2021/02/06/ARCHITECTURE.md.html>: name symbols, don't link paths.
@@ -290,3 +292,12 @@ All revisions dated 2026-09-27. Every change below comes from [tests-as-guards-p
 - **Decisions for the eval, strata.** Tier-B sites are now split by planted-edit result instead of reading-based pairing. OCX-03, -05 and -09 are listed as not yet run.
 - **Open questions.** Removed the tests-as-guards round. Its noun-only rate is now measured at 4 of 23, and the precision of the static pairing check no longer gates anything.
 - **Frontmatter.** Adds tests-as-guards-proof to `consolidates` and adds `revised: 2026-09-27`.
+
+All revisions below dated 2026-11-27, from [refresh-2026-11/code-docs.md](refresh-2026-11/code-docs.md).
+
+- **Intro stamp.** Names the 2026-11-27 re-read of Claude Code, cargo-mutants, Stryker and mutmut versions; no measured result moved.
+- **RTE-06, TypeScript note.** Adds the local `./node_modules/.bin/stryker run` and the TypeScript 7 `tsconfig.json` crash workaround (Stryker 10.1.1).
+- **RTE-06, Python note, Verdict 10 tool gaps and failure mode 7.** mutmut 3.8.1 (2026-10-28) lists no fix for the `src/`-layout failure.
+- **RTE-08, rationale.** Replaces the "Write-only edit skips the rule" premise: Claude Code 2.1.288 loads path-scoped rules on Write and Edit, and 2.1.293 also on single-file Bash reads. The rule itself holds.
+- **Failure mode 8.** Narrows the Write-only case to Claude Code before 2.1.288.
+- **Key sources.** The memory-documentation line now describes Read, Write and Edit loading.

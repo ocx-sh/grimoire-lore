@@ -29,7 +29,7 @@ Commands in this file were translated 2026-10-11 to the portable dialect (git-fe
 ## Dates and Floors
 
 - Manifest-gated: ArgumentParser 1.8.0 needs tools 6.0 and Swift 6 mode. swift-log 1.16 and swift-subprocess 1.0.1 and
-  swift-configuration 1.2.2 need tools 6.2. swift-service-lifecycle 2.x needs tools 6.1.
+  swift-configuration 1.2.2 need tools 6.2. swift-service-lifecycle 2.12 needs tools 6.1, and 2.13.0 (2026-10-14) and later need tools 6.2.
 - Compiler-gated: `processExitsWith` (ST-0008) is Swift 6.2. `Mutex` needs `import Synchronization` (Swift 6.0, macOS 15 floor,
   read 2026-10-10).
 - Every exit 132 below was measured on the main thread with the default backtracer. A trap on another thread can exit 0 under it
@@ -94,7 +94,7 @@ Status table, the pinned default. `.success` and the EPIPE exemption are SW-CLI-
 | 77 | `.permissionDenied` | Insufficient permission |
 | 78 | `.config` | Bad configuration, including an unparsable value in a configuration layer (SW-CLI-17) |
 | 79 to 81 | `.notFound`, `.auth`, `.policyBlocked` | The shared core of the public `ocx` and `grim` CLIs |
-| 82 to 99 | per binary | Allocate from the first free slot, `ocx` uses 82 to 87 for its own conditions |
+| 82 to 99 | per binary | Allocate from the first free slot, `ocx` 0.6.5 used 82 to 87 for its own conditions, and 0.6.6 (2026-11-12) folded 83 to 87 into its next-action codes |
 | 128 to 255 | never a case | A signal killed or crashed the process (measured 130, 132, 137, 141, 143). Only a forwarded child status (`SW-IO`) lands here |
 
 ```swift

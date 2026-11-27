@@ -63,8 +63,8 @@ does not re-litigate them.
 | Binary cache | none, and no `nixConfig` (NIX-SEC-01, NIX-REL-15) | the project's own cache, as the one allowed `nixConfig` pair plus a README `nix.conf` block |
 | nixpkgs submission | `package.nix` by-name-ready now, submitted later (NIX-PKG-06, NIX-REL-14) | a submission, which swaps `version`, `src` and the dependency hash |
 | Implementations | CppNix gated. Lix and the computed floor are advisory legs. Determinate Nix untested and never deliberately broken (NIX-GATE-16, NIX-REL-12) | none: a Lix-only project still needs the CppNix check (NIX-FLK-19) |
-| Consumer floor | NIX-GATE-16's computed floor, today `nix_2_31` = 2.31.5, never a hardcoded number | none |
-| CI Nix | CppNix 2.35.2 through `install_url` (NIX-GATE-13, NIX-SEC-06) | a newer patch release, moved in its own pull request |
+| Consumer floor | NIX-GATE-16's computed floor, today `nix_2_34` = 2.34.9 (nixos-unstable, 2026-11-27), never a hardcoded number | none |
+| CI Nix | CppNix 2.35.6 through `install_url` (NIX-GATE-13, NIX-SEC-06) | a newer patch release, moved in its own pull request |
 | Lock refresh | weekly pull request under a GitHub App token, merged by a person (NIX-INP-11, NIX-SEC-07) | a fine-grained token with `contents` and `pull-requests` only |
 
 ## The procedure
@@ -87,7 +87,7 @@ input's node.
 
 | You read | It changes |
 |---|---|
-| `nix --version` names Lix | Lix 2.95.2 passes a `self: super:` overlay and a string `formatter` that CppNix fails. Count a flake check only when `nix shell --inputs-from . nixpkgs#nixVersions.nix_2_31 --command nix flake check --no-build --option allow-import-from-derivation false` also exits 0 (NIX-FLK-19). A lock older than the floor has no `nix_2_31`: drop `--inputs-from .`, and the flake still evaluates against its own lock |
+| `nix --version` names Lix | Lix 2.95.2 passes a `self: super:` overlay and a string `formatter` that CppNix fails. Count a flake check only when `nix shell --inputs-from . nixpkgs#nixVersions.nix_2_34 --command nix flake check --no-build --option allow-import-from-derivation false` also exits 0 (NIX-FLK-19). A lock older than the floor has no `nix_2_34`: drop `--inputs-from .`, and the flake still evaluates against its own lock |
 | a ref of `nixos-unstable`, `nixpkgs-unstable` or 26.11 and later | any `x86_64-darwin` attribute throws (NIX-FLK-09). `nixfmt-rfc-style` warns on every evaluation and `nixfmt-classic` throws (NIX-GATE-03) |
 | `nixos-26.05` | `x86_64-darwin` still evaluates, with a last-release warning. Drop it in the change that moves the pin |
 | no `flake.lock` yet | the era is the branch you are about to lock: the pinned `nixos-unstable` |

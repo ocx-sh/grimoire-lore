@@ -5,7 +5,7 @@ summary: The SW-PKG rows the index does not carry, owning the language-mode and 
 
 # Manifest
 
-Binds to Swift 6.4.0 and 6.3.3 on Linux x86_64 (measured 2026-10-10), with the `swift:6.2.0` floor leg a pinned default
+Binds to Swift 6.4.3 (current) and 6.3.3 on Linux x86_64 (measured 2026-10-10 on 6.4.0; the SwiftPM `migrate`, `init` template and lock-flag sources are unchanged through 6.4.3, read 2026-11-27), with the `swift:6.2.0` floor leg a pinned default
 that was not run here (`unverified: not run`). Apple, Xcode and Windows manifest behaviour is `unverified: read only`.
 Floors say which mechanism gates them: the manifest tools version, the compiler (`#if compiler`), or the toolchain.
 

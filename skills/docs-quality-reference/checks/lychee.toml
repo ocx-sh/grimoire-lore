@@ -1,5 +1,6 @@
 # Example lychee config for the built-output link pass (DOC-OBS-01).
-# Run with: lychee --config checks/lychee.toml 'site/**/*.html'
+# Run with: lychee --root-dir "$PWD/site" --config checks/lychee.toml 'site/**/*.html'
+# Keys checked against lychee 0.24.2, whose config rejects any unknown key.
 #
 # This file checks built HTML. The pre-build markdown pass is a separate job
 # with its own source root, and checks/links_raw.py runs that one (DOC-OBS-02).
@@ -9,11 +10,13 @@
 
 # Resolve root-relative hrefs against the built site root, not the filesystem
 # root. Without this a raw pass reports every /docs/... link as dead.
-base = "site"
+# The root_dir key takes an absolute path only, so the run command passes it
+# as --root-dir. The old base key aborts the run on lychee 0.24.
 
 # Fragments are the point of the pass. A link to a heading that moved is the
 # failure this catches.
-include_fragments = true
+# An enum since lychee 0.24.0: none, anchor-only, text-only or full.
+include_fragments = "anchor-only"
 
 # Network calls are opt-in. Keep the merge gate offline and run the external
 # pass on a schedule, so a third-party outage never blocks a merge.

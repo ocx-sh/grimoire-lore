@@ -30,7 +30,7 @@ rule, whose text and verification live with the ID.
 | R2 | `actions/setup-dotnet@<full SHA>` with `global-json-file: global.json`: the newest SDK, never the floor | The assertion of CS-BUILD-21 exits 0 | CS-BUILD-21 |
 | R3 | Restore into an empty packages folder with the audit asserted: `NUGET_PACKAGES=$RUNNER_TEMP/nuget dotnet restore --force`. Never `--locked-mode` | `restore` exits 0, and `CI=true dotnet restore --force -p:NuGetAudit=false` exits non-zero (the audited-count assertion fires) | CS-BUILD-25, CS-BUILD-26, CS-BUILD-27 |
 | R4 | `dotnet build -c Release --no-restore`, then `dotnet test -c Release --no-build --minimum-expected-tests N` | Both exit 0; exit 8 is zero tests and a failure | CS-TEST-06, DN-RULE-07 |
-| R5 | `SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) dotnet pack src/Acme.Lib -c Release -o artifacts` (`GITHUB_ACTIONS=true` is set by the runner) | Exit 0, which includes the CP#### package validation; `ls artifacts/*.snupkg` | CS-PKG-04, CS-PKG-05, CS-PKG-09 |
+| R5 | `T=$(git log -1 --format=%ct); SOURCE_DATE_EPOCH=$T dotnet pack src/Acme.Lib -c Release -o artifacts -p:DeterministicTimestamp=$T` (`GITHUB_ACTIONS=true` is set by the runner) | Exit 0, which includes the CP#### package validation; `ls artifacts/*.snupkg` | CS-PKG-04, CS-PKG-05, CS-PKG-09 |
 | R6 | Version and tag consistency | The packed file name is `Acme.Lib.` plus the tag minus `v`, and no `0.0.0` package exists | CS-PKG-07 |
 | R7 | Metadata, dependency budget and no native binary | The nuspec check of CS-PKG-01, the listing check of CS-PKG-15, the two `test` lines of CS-SEC-09, the leak check of CS-SEC-10 | CS-PKG-01, CS-PKG-15, CS-SEC-09, CS-SEC-10 |
 | R8 | Provenance: `dotnet tool restore`, then `dotnet-validate package local` on every nupkg | Exit 0 on each | CS-PKG-10 |
@@ -104,7 +104,7 @@ Each is a host or repository fact that makes the step 3 gate read wrong. Measure
 
 ## Reproduce in a second directory (step 7)
 
-A fixed `SOURCE_DATE_EPOCH` is the only setting that gives byte-identical nupkgs
+A fixed commit time passed as both `SOURCE_DATE_EPOCH` and `-p:DeterministicTimestamp` is the only setting that gives byte-identical nupkgs
 across clones (CS-PKG-05). Pack a fresh clone with the same command as step 4
 (its `-p:PackageVersion` too, when step 4 needed one), and give it the same `origin` URL, because
 the nuspec records it. CS-PKG-05 covers the snupkg too: both globs go in and the file holds four
@@ -114,7 +114,7 @@ The pass is `clone pack exit 0` and `reproducible`; a failed clone pack leaves t
 ```sh
 R=$(mktemp -d); git clone -q "$PWD" "$R/clone"
 git -C "$R/clone" remote set-url origin "$(git remote get-url origin)"
-( cd "$R/clone" && SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) timeout 900 dotnet pack src/Acme.Lib -c Release -o "$R/out" --tl:off --interactive false -nologo -v:q > "$R/pack.log" 2>&1; echo "clone pack exit $?" )
+( cd "$R/clone" && T=$(git log -1 --format=%ct) && SOURCE_DATE_EPOCH=$T timeout 900 dotnet pack src/Acme.Lib -c Release -o "$R/out" -p:DeterministicTimestamp="$T" --tl:off --interactive false -nologo -v:q > "$R/pack.log" 2>&1; echo "clone pack exit $?" )
 sha256sum "$ART"/Acme.Lib.[0-9]*nupkg "$R"/out/Acme.Lib.[0-9]*nupkg > "$R/sums.txt"
 test "$(wc -l < "$R/sums.txt")" -eq 4 && test "$(cut -d' ' -f1 "$R/sums.txt" | sort | uniq -c | awk '$1 != 2' | wc -l)" -eq 0 && echo reproducible
 rm -rf "$R" # after reading a failed clone's $R/pack.log
@@ -172,7 +172,7 @@ jobs:
           dotnet test -c Release --no-build --minimum-expected-tests 1
       - name: Pack
         working-directory: ${{ matrix.copy }}
-        run: SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) dotnet pack src/Acme.Lib -c Release -o artifacts --tl:off --interactive false -nologo -v:q
+        run: T=$(git log -1 --format=%ct); SOURCE_DATE_EPOCH=$T dotnet pack src/Acme.Lib -c Release -o artifacts -p:DeterministicTimestamp=$T --tl:off --interactive false -nologo -v:q
       - name: Check the version and the symbols
         working-directory: ${{ matrix.copy }}
         run: |
@@ -391,7 +391,7 @@ Ranked by how often it bites. Each is caught by the step or rule named.
     `*REMOVED*`, which makes the analyzer green and the binary break real
     (step 2, step 4, CS-API-11).
 12. **`DeterministicTimestamp=true` presented as reproducible packages**: it is the
-    wall clock. Only `SOURCE_DATE_EPOCH` gives equal digests (step 7, CS-PKG-05).
+    wall clock. Only the commit time in Unix seconds passed as `-p:DeterministicTimestamp`, with `SOURCE_DATE_EPOCH` for SDK 10.0.401, gives equal digests (step 7, CS-PKG-05).
 13. **Signs with a SHA-1 thumbprint** or calls `dotnet validate` an SDK verb
     (CS-PKG-13, CS-PKG-10).
 14. **Moves, deletes or re-creates a pushed tag**, or tries to reuse an unlisted

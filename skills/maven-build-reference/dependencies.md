@@ -40,8 +40,9 @@ mvn dependency:tree -Dverbose  # MVN-DEP-02: which declaration won on depth, wit
 
 ## Enforcer Runs Nothing Until It Is Bound
 
-`maven-enforcer-plugin` 3.6.3 (released 2026-05-15, verified 2026-09-12) ships
-37 built-in rules and **zero** of them active. Once an execution exists, the
+`maven-enforcer-plugin` 3.7.0 (on Central 2026-10-30, verified 2026-11-27) ships
+dozens of built-in rules, 3.7.0 adding `banPropertyPrefix`, and **zero** of them
+active. Once an execution exists, the
 `enforce` goal binds to `validate` by default, so the whole section costs one
 cheap phase:
 
@@ -125,13 +126,13 @@ curl -sSf -o published.pom "https://repo1.maven.org/maven2/$GROUP_PATH/$ART/$VER
 grep -nE -e 'version.(LATEST|RELEASE)' -e 'version.[][(]' -e 'SNAPSHOT' published.pom
 
 # MVN-DEP-11: is there a plain 4.0.0 on Central yet?
-curl -sS 'https://search.maven.org/solrsearch/select?q=g:org.apache.maven+AND+a:maven-core&core=gav&rows=5&wt=json'
+curl -sS 'https://repo.maven.apache.org/maven2/org/apache/maven/maven-core/maven-metadata.xml' | grep -n '<version>4\.0\.0</version>'
 ```
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
 | MVN-DEP-10 | Ensure every version in a POM you publish is a concrete resolved string, with no `+`, no range, no `LATEST` or `RELEASE`, and no unresolved property or catalog placeholder. | Maven mediation and enforcer both operate purely on the flattened POM text, so an unresolved dynamic version that leaks into a publication fails `banDynamicVersions` on the consumer's side, in the consumer's build, long after your release passed. This is the whole Maven-specific obligation a library built by another tool and consumed by Maven inherits. | The fetch-and-grep block above, run against the POM the repository actually serves after the release is visible. Empty output is the pass. Reading the local POM instead does not verify this, because the published file is generated. | MUST *(publishers)* |
-| MVN-DEP-11 | Do not adopt Maven 4's `bom` packaging or consumer-POM flattening (`maven.consumer.pom.flatten=true`) as a shipped mechanism. Treat both as migration preview. | Central lists `3.9.16` as the newest stable `org.apache.maven:maven-core` and tops the 4.0 line out at `4.0.0-rc-6`, with no plain `4.0.0` at all (queried 2026-09-12). Recommending a release-candidate-only feature strands every Maven 3.x consumer, and 0 of 32 corpus exemplars declare `bom` packaging. | The Central query above. A result set with no unsuffixed `"v":"4.0.0"` means Maven 4 is still RC and this row stands. Its presence is the trigger to revise this row, not a finding against a build. | MUST |
+| MVN-DEP-11 | Do not adopt Maven 4's `bom` packaging or consumer-POM flattening (`maven.consumer.pom.flatten=true`) as a shipped mechanism. Treat both as migration preview. | Central lists `3.10.2` as the newest stable `org.apache.maven:maven-core`, beside the maintained `3.9.16`, and tops the 4.0 line out at `4.0.0-rc-7`, with no plain `4.0.0` at all (queried 2026-11-27). Recommending a release-candidate-only feature strands every Maven 3.x consumer, and 0 of 32 corpus exemplars declare `bom` packaging. | The Central query above, which reads Central's own metadata because the search.maven.org Solr index lagged it on 2026-11-27 and listed no 3.10.x `maven-core`. Empty output, no plain `4.0.0` entry, means Maven 4 is still RC and this row stands. Its presence is the trigger to revise this row, not a finding against a build. | MUST |
 
 ## The Control Maven Does Not Have
 

@@ -25,8 +25,8 @@ Contents: [The Gate](#the-gate) · [Non-Negotiables](#non-negotiables) ·
 
 **Before trusting any rule below, confirm the analyzers actually activate.
 Read [kotlin-quality-reference/lint-gate.md](../skills/kotlin-quality-reference/lint-gate.md) first.** detekt's
-shipped `default-detekt-config.yml` activates 129 of its 231 rules, so
-`buildUponDefaultConfig = true` runs 102 of them not at all, and the four
+`default-detekt-config.yml` on its main branch (read 2026-11-27) activates 129 of its 237 rules, so
+`buildUponDefaultConfig = true` runs 108 of them not at all, and the four
 coroutine rules this rule set leans on are among the off ones. ktlint reads only
 `.editorconfig`, so every property left unset takes ktlint's default rather than
 a project decision, and 3 of 32 flagship JVM repositories measured 2026-09-12 set

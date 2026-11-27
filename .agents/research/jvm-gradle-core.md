@@ -8,6 +8,7 @@ consolidates:
   - jvm-gradle-core/build-logic-and-catalog-seam.md
   - jvm-gradle-core/task-inputs-and-cache-hits.md
 date: 2026-09-12
+revised: 2026-11-27
 ---
 
 # Gradle: the build that configures itself correctly
@@ -16,7 +17,8 @@ Consolidates three wave-2 dives into the authoritative source for
 `rules/gradle-build/caching-and-correctness.md` (`GRADLE-CACHE`) and
 `rules/gradle-build/structure-and-conventions.md` (`GRADLE-STRUCT`).
 Everything below is measured against Gradle 9.0.0-9.7.1 and the 32-repo
-exemplar corpus at the SHAs in [jvm-frame.md](jvm-frame.md).
+exemplar corpus at the SHAs in [jvm-frame.md](jvm-frame.md), and re-checked
+against the 9.8.0 to 9.9.2 release notes on 2026-11-27.
 
 ## Verdict
 
@@ -24,11 +26,14 @@ exemplar corpus at the SHAs in [jvm-frame.md](jvm-frame.md).
    anything this program authors.** Gradle 9.x is *preferred with automatic
    graceful fallback*, and the default-on target slipped from Gradle 10 to 11
    ([cc-dive §1](jvm-gradle-core/config-cache-contract.md),
-   [road-to-cc](https://blog.gradle.org/road-to-configuration-cache)). The frame
+   [road-to-cc](https://blog.gradle.org/road-to-configuration-cache), and the
+   [Gradle blog of 2026-08-19](https://blog.gradle.org/gradle-is-going-agentic),
+   re-read 2026-11-27; the 9.9.2 user manual still says Gradle 10, and the blog
+   is the newer source). The frame
    and [shape](jvm-audit/exemplar-build-shape.md)'s "Contradictions" section
    both said "on by default in Gradle 9" — both are wrong; the topic map's
-   conflict 18 is binding and the dive re-confirmed it from the 9.0.0 release
-   notes.
+   conflict 18 is binding and the dive re-confirmed it. The 9.0.0 release notes
+   establish preferred-with-fallback but never state the Gradle 11 target.
 2. **For a Gradle plugin (the OCX Gradle plugin), configuration-cache
    compatibility is a day-one release gate, not a roadmap item** — the plugin
    author does not control when consumers turn it on, and Gradle's trajectory
@@ -39,8 +44,8 @@ exemplar corpus at the SHAs in [jvm-frame.md](jvm-frame.md).
    task code. A rule that opens with `@Inject FileSystemOperations` teaches the
    smaller half of the problem.
 4. **Isolated Projects is diagnostics-only.** Incubating since 9.7.0
-   (2026-08-06), with two of four constraint categories unenforced by Gradle's
-   own admission. Never a failing CI gate in 2026; the live key is
+   (2026-08-06, re-verified on 9.9.2, 2026-11-27), with two of four constraint
+   categories unenforced by Gradle's own admission. Never a failing CI gate in 2026; the live key is
    `org.gradle.isolated-projects` (5/32 corpus; the `unsafe.` key is 0/32).
 5. **Gradle 9 flipped archive reproducibility on, which inverts the advice
    everyone repeats.** `reproducibleFileOrder` false→true,
@@ -74,6 +79,11 @@ exemplar corpus at the SHAs in [jvm-frame.md](jvm-frame.md).
     `validatePlugins { enableStricterValidation = true }`. *SDK* — same as
     library, plus the catalog-accessor discipline from day one because its
     build starts on `build-logic`.
+11. **#24040 is a settled finding, not an open gap.** The issue is closed
+    (2025-06-13, 9.0.0 RC1): graceful degradation to no configuration cache is the
+    intended behaviour for an explicit `credentials {}` block, not a bug awaiting a
+    fix (GRADLE-CACHE-08). Whether the fallback is scoped to the task or to the
+    whole cache entry stays open below.
 
 ## The ruleset
 
@@ -94,13 +104,13 @@ pre-filters for a diff review, not substitutes.
 | ID | Rule | Rationale | Verification | Sev | Floor |
 |---|---|---|---|---|---|
 | GRADLE-CACHE-01 | Never touch a `Project` from a task action — no `Task.getProject()`, no `project.copy {}`, no `project.exec {}`, no `project.logger`. Inject `FileSystemOperations`/`ExecOperations` and bind every value read from `Project` to a `Property<T>` at configuration time. | Hard configuration-cache violation and an independently-stated Gradle Best Practice; the "obvious" API still compiles. | The Group-1 command; pre-filter `grep -rn 'getProject()\|project\.' --include='*.gradle.kts' --include='*.kt' --include='*.java'` inside `doLast`/`doFirst`/`@TaskAction` bodies. | MUST | |
-| GRADLE-CACHE-02 | Never read a file, spawn a process, or resolve a `Configuration` at configuration time. Use `providers.fileContents(f).asText`, `providers.exec()`/`providers.javaexec()`, a `ValueSource` for anything else, and defer resolution into the task action behind a `FileCollection`/`Provider`. | An undeclared read or exec is an untracked cache input; resolution-at-configuration-time also defeats configuration avoidance. It is still *legal* — [#2298](https://github.com/gradle/gradle/issues/2298) is open — so no tool fails it for you. | The Group-1 command; pre-filter `grep -rn 'readText()\|Files.readString\|Files.readAllLines\|ProcessBuilder(\|Runtime.getRuntime().exec' --include='*.gradle.kts' --include='*.kt'` outside task actions. | MUST | |
+| GRADLE-CACHE-02 | Never read a file, spawn a process, or resolve a `Configuration` at configuration time. Use `providers.fileContents(f).asText`, `providers.exec()`/`providers.javaexec()`, a `ValueSource` for anything else, and defer resolution into the task action behind a `FileCollection`/`Provider`. | An undeclared read or exec is an untracked cache input; resolution-at-configuration-time also defeats configuration avoidance. It is still *legal* — [#2298](https://github.com/gradle/gradle/issues/2298) is open — so no tool fails it for you. Gradle 9.8.0 (2026-09-24) deprecates starting a process at configuration time, with the cache on or off, and Gradle 11 makes it an error, but until then it surfaces only in the deprecation summary. | The Group-1 command; pre-filter `grep -rn 'readText()\|Files.readString\|Files.readAllLines\|ProcessBuilder(\|Runtime.getRuntime().exec' --include='*.gradle.kts' --include='*.kt'` outside task actions. | MUST | |
 | GRADLE-CACHE-03 | Never enumerate `System.getenv()` or `System.getProperties()`. Read one named key, or `providers.environmentVariablesPrefixedBy("PREFIX")`. | "Every available property becomes one [cache input]" — a single `.forEach {}` turns the whole environment into cache-busting state. | The Group-1 command; pre-filter `grep -rn 'System\.getenv()\.\|System\.getProperties()\.' --include='*.gradle.kts' --include='*.kt'` — any hit with no argument to `getenv` is the finding. | MUST | |
-| GRADLE-CACHE-04 | Never register a `BuildListener` or `TaskExecutionListener` from a plugin or build script. Use a Build Service implementing `OperationCompletionListener`, registered through `BuildEventsListenerRegistry`. | Flatly disallowed with **no fallback flag** — and still an unsolved migration gap for build-start/finish hooks ([#18520](https://github.com/gradle/gradle/issues/18520), open). | `grep -rn 'addBuildListener\|gradle.addListener\|TaskExecutionListener\|BuildListener' --include='*.gradle.kts' --include='*.kt' --include='*.java'` — any hit is the finding. | MUST | |
+| GRADLE-CACHE-04 | Never register a `BuildListener` or `TaskExecutionListener` from a plugin or build script. Use a Build Service implementing `OperationCompletionListener`, registered through `BuildEventsListenerRegistry`. | Flatly disallowed with **no fallback flag** — and still an unsolved migration gap for build-start/finish hooks ([#18520](https://github.com/gradle/gradle/issues/18520), open as of 2026-11-27). | `grep -rn 'addBuildListener\|gradle.addListener\|TaskExecutionListener\|BuildListener' --include='*.gradle.kts' --include='*.kt' --include='*.java'` — any hit is the finding. | MUST | |
 | GRADLE-CACHE-05 | Never hold live-JVM state in a task field or capture it in a task action: `ClassLoader`, `Thread`, `Socket`, `OutputStream`, `Lock`, `ReadWriteLock`, `Semaphore`, `CountDownLatch`, `CyclicBarrier`, `Phaser` — nor `Gradle`, `Settings`, `SourceSet`, `Configuration`, `SourceDirectorySet` as inputs. A Build Service holds shared live state; `FileCollection`/`FileTree`/`Provider<ResolvedComponentResult>` replace the coarse types. | These "do not represent task inputs or outputs" and cannot be serialized into a cache entry. `System.in/out/err` are the one documented exception, for `Exec`/`JavaExec`. | The Group-1 command names the offending field and class. | MUST | |
 | GRADLE-CACHE-06 | Turn the cache on with `org.gradle.configuration-cache=true` in the root `gradle.properties`, not with a CI-only `--configuration-cache` flag, and leave `--configuration-cache-problems` at its default `fail`. `warn` is a migration aid with a tracked expiry, never a steady state. | CI overwhelmingly inherits the property (10/32) rather than re-asserting the flag (3/32), so "check `gradle.properties` first" is the reading heuristic. Gradle 9 also removed warn mode's old escape hatch: a task marked `notCompatibleWithConfigurationCache` now always discards the entry. | `grep -n 'configuration-cache' gradle.properties` — absent means opt-in has not happened; then `grep -rn 'configuration-cache-problems=warn' .github/` — any hit without a linked tracking issue is the finding. | SHOULD | 9.0.0 |
 | GRADLE-CACHE-07 | A published Gradle plugin MUST carry a TestKit test asserting `GradleRunner.withArguments(..., "--configuration-cache").build()` succeeds with zero reported problems, run in plugin CI. | Plugin authors do not control when consumers enable the cache, and an incompatible plugin is what actually blocks *their* migration (Square). | The TestKit test's own assertion; in CI, the job must exist and be required. | MUST (plugin) | 9.0.0 |
-| GRADLE-CACHE-08 | Never read "the build went green" as "the build was cached". Gradle 9 silently *disables* the cache for a task rather than failing in several documented cases — a `maven-publish` repository with explicit `credentials {}` is the named one ([#24040](https://github.com/gradle/gradle/issues/24040)). | "Automatic graceful fallback" means a permanently-uncached task produces no error at all. | Run the build twice; the second run must print `Reusing configuration cache.` — absence of that line on the second identical invocation is the finding. Pre-filter `grep -rn -A3 'credentials' build.gradle.kts` for literal credential blocks vs `PasswordCredentials`/env-backed providers. | SHOULD | 9.0.0 |
+| GRADLE-CACHE-08 | Never read "the build went green" as "the build was cached". Gradle 9 silently *disables* the configuration cache rather than failing, in several documented cases. The named one is a `maven-publish` repository with an explicit `credentials {}` block, which [#24040](https://github.com/gradle/gradle/issues/24040) turned from a failure into this silent fallback in 9.0.0 RC1 ([PR 33830](https://github.com/gradle/gradle/pull/33830)). The issue is closed, and the fallback is the fix, not a bug awaiting one. | "Automatic graceful fallback" means a permanently-uncached build produces no error at all. | Run the build twice; the second run must print `Reusing configuration cache.` — absence of that line on the second identical invocation is the finding. Pre-filter `grep -rn -A3 'credentials' build.gradle.kts` for literal credential blocks vs `PasswordCredentials`/env-backed providers. | SHOULD | 9.0.0 |
 | GRADLE-CACHE-09 | Write `org.gradle.isolated-projects`; never `org.gradle.unsafe.isolated-projects`. | The `unsafe.` key is the name that dominated blogs and training data for years; deprecated as of 9.7.0 and slated for removal. 0/32 corpus repos use it, 5/32 use the live key. | `grep -rn 'unsafe.isolated-projects' **/gradle.properties` — **any** hit is the finding; empty output is the pass. | MUST | 9.7.0 |
 | GRADLE-CACHE-10 | Do not gate CI on Isolated Projects. Run it manually in Diagnostics mode to collect violations; keep it out of the required checks. | Incubating only since 9.7.0 (2026-08-06); Gradle's own docs say cross-build and build-to-project constraints are "not fully enforced yet", and `group`/`version` are mutable despite looking like identity. | `grep -n 'isolated-projects' gradle.properties` plus the CI workflow: the property set *and* the job required is the finding. | SHOULD | 9.7.0 |
 
@@ -127,7 +137,7 @@ also installs only *warns*. Empty output from `validatePlugins` is the pass.
 
 | ID | Rule | Rationale | Verification | Sev | Floor |
 |---|---|---|---|---|---|
-| GRADLE-STRUCT-01 | Put new shared build logic in an included `build-logic` build wired by `includeBuild("build-logic")` in the root settings file. Do **not** call an existing `buildSrc` deprecated, legacy, or a defect, and do not propose migrating one as a required fix. | Any change under `buildSrc` invalidates the entire configuration phase; an included build invalidates only the consumers of the changed subproject. But 9/32 actively-maintained flagships still ship `buildSrc`, and Gradle has announced no deprecation — "preferred" is the strongest word the docs use. | `test -d buildSrc && ! grep -q 'includeBuild' settings.gradle*` flags a candidate for the *recommendation*; a review comment using "deprecated" or "legacy" about `buildSrc` is itself the finding. | SHOULD | |
+| GRADLE-STRUCT-01 | Put new shared build logic in an included `build-logic` build wired by `includeBuild("build-logic")` in the root settings file. Do **not** call an existing `buildSrc` deprecated, legacy, or a defect, and do not propose migrating one as a required fix. | Any change under `buildSrc` invalidates the entire configuration phase; an included build invalidates only the consumers of the changed subproject. But 9/32 actively-maintained flagships still ship `buildSrc`, and Gradle has announced no deprecation (through 9.9.2, verified 2026-11-27) — "preferred" is the strongest word the docs use. | `test -d buildSrc && ! grep -q 'includeBuild' settings.gradle*` flags a candidate for the *recommendation*; a review comment using "deprecated" or "legacy" about `buildSrc` is itself the finding. | SHOULD | |
 | GRADLE-STRUCT-02 | When a repo's build-logic holds **both** Settings plugins and ordinary convention plugins, split the Settings plugins into a separate minimal included build (`build-logic-settings`) included only from `pluginManagement { includeBuild(...) }`. | A build included from `pluginManagement` must be built before `settings.gradle.kts` is even evaluated, i.e. before any cache entry can exist; Gradle's own caveat is that this "reduces Build Caching capability". Dragging ordinary convention plugins through that path costs caching for no benefit. | `grep -n -A3 'pluginManagement' settings.gradle.kts` for `includeBuild`; then list that build's plugin sources — if it also contains non-`*.settings.gradle.kts` precompiled plugins, that is the finding. | SHOULD | |
 | GRADLE-STRUCT-03 | Never write a dot-notation version-catalog accessor (`libs.guava`, `libs.versions.jacoco`) inside a precompiled script plugin. Bind the catalog locally: `val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")`, then `libs.findLibrary("guava").get()` / `findVersion(...)` / `findPlugin(...)`. | Type-safe accessors are not generated for precompiled scripts — the plugin is compiled standalone, before Gradle knows which build (and catalog) will apply it. [#15383](https://github.com/gradle/gradle/issues/15383) has been open since 2020-12-01 and nothing in 9.x changed it. | `grep -rn 'libs\.[a-zA-Z]' build-logic/*/src/main/kotlin/*.gradle.kts buildSrc/src/main/kotlin/*.gradle.kts` — any hit in a file that does not itself bind `libs` from `VersionCatalogsExtension` is a compile error waiting to surface. | MUST | |
 | GRADLE-STRUCT-04 | Never import `org.gradle.accessors.dm.LibrariesForLibs` (or a per-catalog `LibrariesFor<Name>`) to restore dot-notation. | It is a Gradle-internal generated class: it breaks across Gradle upgrades, breaks when one precompiled plugin applies another, and has a known classloading failure under `buildSrc/test`. Multiple pre-docs-page blog answers present it as *the* fix, so models reach for it. | `grep -rn 'org.gradle.accessors.dm' build-logic/ buildSrc/` — any hit is the finding; empty output is the pass. | MUST | |
@@ -163,9 +173,10 @@ also installs only *warns*. Empty output from `validatePlugins` is the pass.
 
 **Not measurable in the corpus.** GRADLE-CACHE-01..05 and -15 are task/plugin-internals
 violations the wave-1 audits never source-grepped for. They rest on Gradle's own
-documented contract plus live tracker evidence ([#18520](https://github.com/gradle/gradle/issues/18520),
-[#19793](https://github.com/gradle/gradle/issues/19793),
-[#24040](https://github.com/gradle/gradle/issues/24040)), not on corpus
+documented contract plus tracker evidence ([#18520](https://github.com/gradle/gradle/issues/18520),
+open, [#19793](https://github.com/gradle/gradle/issues/19793), and
+[#24040](https://github.com/gradle/gradle/issues/24040), closed in 9.0.0 RC1 by
+graceful degradation), not on corpus
 counter-examples. Say so in the depth file rather than implying a measurement.
 
 **New commitments for the OCX SDK (JVM)**
@@ -292,7 +303,7 @@ each with the check that catches it mechanically.
     → any guidance recommending it as a required CI gate must name the incubating
     status and the two unenforced constraint categories, or it is ahead of reality.
 15. **Assumes #15383 was fixed** because the thread has had several false-hope
-    moments. → re-fetch the issue state; open as of 2026-09-12.
+    moments. → re-fetch the issue state; open as of 2026-11-27.
 
 ## Open questions
 
@@ -317,7 +328,7 @@ each with the check that catches it mechanically.
 
 | Subarea | Question |
 |---|---|
-| `maven-publish` × configuration cache | Is `maven-publish` fully cache-compatible on Gradle 9.7.x, partially (only the explicit-credentials path falls back), or still broadly incompatible? The cc dive fetched [#24040](https://github.com/gradle/gradle/issues/24040) and a March-2025 Gradle blog claim and could **not** resolve it. This blocks a precise GRADLE-CACHE-08 and touches `GRADLE-PUB` directly. |
+| `maven-publish` × configuration cache | Is the #24040 fallback scoped to the task or to the whole cache entry? The issue text says "the configuration cache", and GRADLE-CACHE-08 takes no position beyond that. Check it against the 9.9.2 configuration-cache docs or a TestKit run. |
 | GRADLE-STRUCT rows never dived | M-B-05 (two subprojects sharing a leaf name causing wrong conflict resolution, [#847](https://github.com/gradle/gradle/issues/847), 137 reactions, **no build failure**) and M-B-07 (a subproject `gradle.properties` overriding root settings the configuration cache assumes fixed) were both adjudicated P0/P1 and neither wave-2 dive covered them. Both are silent-failure shapes, which is exactly where a rule earns its keep. |
 | Remote build cache push-gating | 10 `buildCache {}` blocks across 6 repos, but **no** checked-out `settings.gradle*` showed `remote(HttpBuildCache) { isPush = ... }` — the push conditions live in build-logic the sparse checkout never materialised ([gates](jvm-audit/exemplar-quality-gates.md) §Gaps). "Who may push to the shared cache" is the one build-cache correctness question the corpus has not answered. |
 | Gradle 10 archive defaults | GRADLE-CACHE-17 is framed 9-vs-8. Nothing in the 9.0.0/9.7.0 notes says whether Gradle 10 changes archive reproducibility again; re-check when 10's notes exist. |
@@ -358,3 +369,11 @@ each with the check that catches it mechanically.
 | [gradle/gradle#15383](https://github.com/gradle/gradle/issues/15383) | The accessor gap: architectural cause, every workaround, still open 2026-06-22 |
 | [gradle/gradle#24040](https://github.com/gradle/gradle/issues/24040) | Gradle 9 silently disables the cache for credentialed publish tasks |
 | [Square: 5,400 hours a year](https://developer.squareup.com/blog/5-400-hours-a-year-saving-developers-time-and-sanity-with-gradles/) | The load-bearing precedent that plugins, not tasks, block migration |
+
+## Revision log
+
+- 2026-11-27: GRADLE-CACHE-02 gains the Gradle 9.8.0 deprecation of configuration-time process starts. Decision file: `refresh-2026-11/gradle-build.md`.
+- 2026-11-27: GRADLE-CACHE-04 restamps #18520 as open as of 2026-11-27. Decision file: `refresh-2026-11/gradle-build.md`.
+- 2026-11-27: GRADLE-CACHE-08 drops "for a task", records #24040 as closed with the fallback as intended 9.0.0 behaviour; Verdict gains item 11, and the Gradle 11 default-on target cites the Gradle blog of 2026-08-19. Decision file: `refresh-2026-11/gradle-build.md`.
+- 2026-11-27: GRADLE-STRUCT-01 and agent item 15 (#15383) restamped to 9.9.2 and 2026-11-27. Decision file: `refresh-2026-11/gradle-build.md`.
+- 2026-11-27: Verdict item 4 and the measured-against line restamped for the 9.9.2 re-read; the `maven-publish` open-question row narrowed to the task-or-cache-entry scope. Decision file: `refresh-2026-11/gradle-build.md`.

@@ -42,12 +42,12 @@ Contents: [Dates and Defaults](#dates-and-defaults) · [Canonical Setup](#canoni
   exclusion `cs`, keyed on test-project path segments so a shipped `Foo.Testing` package stays in scope. Every cell and
   gate below cites G0.
 - **Defaults, the adopter may override each:** the floor is `net8.0;net10.0` until .NET 8 end of support
-  (2026-11-10), then `net10.0` only, which deletes the package line of `CS-JSON-14`. LangVersion 14 on both TFMs.
+  (reached 2026-11-10; the move is pending), then `net10.0` only, which deletes the package line of `CS-JSON-14`. LangVersion 14 on both TFMs.
 - Every row of the policy table was run green on net8.0 and net10.0 (measured 2026-10-11). Each rule's gate was
   watched green on a clean tree and red on at least one planted defect (measured 2026-10-11, `CS-CORE-02`). A term that
   names a heuristic is a reading aid: read each hit.
 - The .NET 11 RC1 SDK (11.0.100-rc.1.26425.128) builds the shared union converter with 0 warnings and passes 198 of
-  198 cases (measured 2026-10-11). It is a probe; no `net11.0` leg exists.
+  198 cases (measured 2026-10-11; not re-run on SDK 11.0.100 GA). It is a probe; no `net11.0` leg exists.
 
 ## Canonical Setup
 
@@ -95,10 +95,10 @@ public abstract class SkippedReason : ITaggedUnion<SkippedReason>  // ITaggedUni
 | `UnmappedMemberHandling`, `SnakeCaseLower`, `required`, `GetTypeInfo(Type)`, `static abstract` interface members | yes | yes | yes |
 | `RespectNullableAnnotations`, `RespectRequiredConstructorParameters` | no | yes | yes |
 | `AllowDuplicateProperties`, `JsonSerializerOptions.Strict`, `GetTypeInfo<T>()` (banned by `CS-JSON-07`) | no | no | yes |
-| C# 15 `closed`, `InferClosedTypePolymorphism` | no | no | no (`closed` is CS8652 on SDK 10.0.401) |
+| C# 15 `closed`, `InferClosedTypePolymorphism` | no | no | no (`closed` is CS8652 on SDK 10.0.401 and CS0656 on SDK 11.0.100) |
 
 Every no on net8.0 in the first three rows is closed by the package line of `CS-JSON-14` (measured 2026-10-11). The
-last row is unavailable until .NET 11 GA (November 2026).
+last row works only on `net11.0`, from .NET 11 GA (2026-11-10, SDK 11.0.100), and stays unavailable on these three targets.
 
 ## Source Generation and Trim
 
@@ -326,4 +326,4 @@ Ranked by how often each bites. The first entries are what training data and tut
 | 22 | Holding a `JsonElement` from a disposed `JsonDocument` in the `Unknown` arm | the `CS-JSON-03` loop reading `Raw` after the call |
 | 23 | Treating exit 0 from `PublishAot` as proof, or suppressing IL2026 to silence it | `CS-JSON-04`, `CS-JSON-17` |
 | 24 | `GenerationMode = Serialization` "for performance" | `CS-JSON-03` round trip |
-| 25 | C# 15 `closed` or `InferClosedTypePolymorphism` as the modern union (CS8652 on SDK 10.0.401, throws on an unseen tag) | `CS-JSON-07` G7 |
+| 25 | C# 15 `closed` or `InferClosedTypePolymorphism` as the modern union (CS8652 on SDK 10.0.401; on `net11.0` an unseen tag throws `JsonException` and `IgnoreUnrecognizedTypeDiscriminators` has no concrete base to fall back to, measured 2026-11-27) | `CS-JSON-07` G7 |

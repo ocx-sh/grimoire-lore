@@ -187,7 +187,7 @@ Named holes, so a reader can tell a gap from a clearance.
 - **Vale was never exercised**, and the sentence-case heuristic, the tell-density
   threshold and the marketing wordlist have no measured false-positive rate.
 - **No validated freshness interval exists**, which is why no rule gates on a
-  page's age, and the Markdown twin has no measured implementation anywhere.
+  page's age, and no study measures a Markdown twin's effect on agents.
 - **Versioned docs, translations, and print or offline output** were not studied
   by any family. Neither was reStructuredText, whose carriers rest on primary
   documentation with no built fixture.

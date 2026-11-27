@@ -15,8 +15,8 @@ depth file is read only when the work calls for it.
 
 ## It starts by assuming your analyzers do not activate
 
-detekt's shipped default configuration activates 129 of its 231 rules, so a
-build that sets `buildUponDefaultConfig = true` runs 102 of them not at all.
+detekt's shipped default configuration on its main branch activates 129 of its 237 rules, so a
+build that sets `buildUponDefaultConfig = true` runs 108 of them not at all.
 The four coroutine rules this set leans on are among the off ones. ktlint reads
 only `.editorconfig`, so every property left unset takes ktlint's default
 rather than a project decision, and of 32 flagship JVM repositories measured,
@@ -41,7 +41,7 @@ this one.
 ## What is in it
 
 The index carries the gate, seventeen non-negotiables, and three cross-cutting
-rules it owns outright. 66 rules in total, 42 of them merge-blocking, spread
+rules it owns outright. 68 rules in total, 43 of them merge-blocking, spread
 over seven depth files: the lint gate, coroutines and cancellation, errors and
 resources, published API and ABI, the Java interop boundary, compiler flags and
 toolchain, and tests with Kover and virtual time.

@@ -38,6 +38,11 @@ and `noctx`) unless a row says otherwise.
 - Behaviour-gated (read 2026-09-26): `tarinsecurepath` and `zipinsecurepath`
   still default to permissive in toolchain 1.27.1. The Linux pidfd path
   (toolchain 1.23+) protects only the leader pid, with no group-scoped pidfd.
+- Toolchain-gated on Windows (CVE-2026-56857): `Root.Mkdir` and
+  `Root.MkdirAll` follow a junction out of the root before go1.27.2 and
+  go1.26.9, which includes the 1.27.1 these rows were measured on. A Windows
+  build that extracts through GO-IO-02 uses go1.27.2, go1.26.9 or later, and
+  `go version -m <binary>` names the toolchain that built it.
 - The Windows rows were not watched on a Windows runtime.
 
 ## Caught by golangci-lint

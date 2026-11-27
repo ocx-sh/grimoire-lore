@@ -7,7 +7,10 @@ summary: Why :deep() has no fixed specificity, the tokens you declare in a scope
 
 Reproduced from three fresh production builds: vue 3.5.42 + vite 8.2.2,
 vitepress 1.6.4, vitepress 2.0.0-alpha.19. `ocx-catalog`'s own layer-contract
-tests were read, not executed — never cite them as passing.
+tests were read, not executed — never cite them as passing. On 2026-11-27
+VitePress 2.0 is still alpha (alpha.21; npm `latest` is 1.6.4) and Vue 3.6 /
+Vapor is still a release candidate. Their changelogs touch nothing below except
+the token count; none was rebuilt.
 
 ## The scoped tuple
 
@@ -78,7 +81,9 @@ last" does not mean "my rule wins" once layers are involved asymmetrically.
 
 ## The token surface
 
-Both lines ship exactly 228 distinct `--vp-*` properties in two tiers: numbered
+The measured builds (1.6.4 and 2.0.0-alpha.19) both shipped exactly 228 distinct
+`--vp-*` properties; 2.0.0-alpha.21 (2026-10-25) declares 21 more in source, so
+recount at your version. They come in two tiers: numbered
 primitives (`--vp-c-indigo-1`) plus semantic aliases
 (`--vp-c-brand-1: var(--vp-c-indigo-1)`). Dark mode repoints the primitive, not
 the alias — override the primitive to rebrand, the alias to re-map a role.

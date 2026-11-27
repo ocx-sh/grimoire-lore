@@ -19,7 +19,7 @@ that runs the finished file, because linters do not see these defects.
 Every result here was measured on **2026-10-11** with dash 0.5.12, busybox ash
 1.35 and 1.37, mksh R59c, ksh93u+m, yash 2.52, posh 0.14.1, bash 3.2 and 5.2
 `--posix`, zsh 5.9 `--emulate sh`, Windows PowerShell 5.1.26100.9444 and
-PowerShell 7.4.7 and 7.6.6 (7.4 reaches end of support 2026-11-10). macOS, BSD
+PowerShell 7.4.7 and 7.6.6 (7.4 reached end of support on 2026-11-10). macOS, BSD
 and a .NET Framework older than 4.8.1 are `unverified: read only`. The rows that
 were provisional (SH-INST-22, SH-INST-23, PS-COMPAT-11, PS-SEC-14) were confirmed
 on 2026-10-11 against fresh third-party installers (the chezmoi install.sh and
@@ -142,7 +142,9 @@ steps say what to decide, the template shows one answer.
 
 Start from [references/install-template.ps1](references/install-template.ps1).
 The floor is Windows PowerShell 5.1, so write what 5.1 parses. Pwsh 7 is a
-second engine to test, not the target.
+second engine to test, not the target. Windows PowerShell 5.1 was deprecated on
+2026-11-17 (KB5137172), but it still ships in Windows and gets security
+updates, so it stays the floor.
 
 1. **Delivery and flags.** Document `irm URL | iex` or
    `iwr -UseBasicParsing URL | iex`, never `(iwr ...).Content | iex`, because
@@ -217,7 +219,8 @@ hash, digest, verify). A refusal for another reason, such as a side file the stu
 does not serve, is RED with that note, so serve the file through `extra`. It
 cannot build a good payload, so the control line reads `n/a`. A FAIL row is reported to the generator, or the
 release job wraps the rendered file. The PowerShell half (row 8) has an open
-upstream fix, so name the gap in the receipt and do not claim verification.
+upstream fix (cargo-dist PR 2497, still unmerged on 2026-11-27 and not in
+0.34.0), so name the gap in the receipt and do not claim verification.
 
 ## Run the kit
 

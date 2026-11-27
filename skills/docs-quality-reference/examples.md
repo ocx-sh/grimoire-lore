@@ -117,17 +117,17 @@ and belong to this family, because both govern an interactive element on a page.
 ## Mechanism by language
 
 Match the mechanism to what the example exercises, not to the project's main
-language. Status is as of September 2026.
+language. Status is as of November 2026.
 
 | Surface | Runner | Status | What it does not do |
 |---|---|---|---|
 | Shell, or anything needing a real registry, network or PTY | A page-bound acceptance-script tree, one script per binding key | No mainstream doctest tool models these side effects | Nothing generic. You write and own the harness. |
-| Python | Sybil 10.1.0, over `docs/**/*.md` plus docstring doctests | Current | Its `should_parse` calls `pathlib.Path.match`, so `**` matches one level. See DOC-EX-09. |
+| Python | Sybil 10.2.0, over `docs/**/*.md` plus docstring doctests | Current | Its `should_parse` calls `pathlib.Path.match`, so `**` matches one level. See DOC-EX-09. |
 | Rust, in doc comments | `cargo test --doc` | Current | Nothing outside the crate's own doc comments. |
 | Rust, inside an mdBook | `mdbook test` | Current | Rust only by design, so it cannot be a polyglot repo's only mechanism. |
-| TypeScript, a type-level claim | Twoslash 0.3.9, with `@shikijs/vitepress-twoslash` 4.4.3 for VitePress | Current, published 2026-06-22 and 2026-08-10 | Never executes the sample and never captures output. |
-| TypeScript, a sample that must execute | `deno test --doc`, or `deno check --doc-only` for types alone, Deno 2.9.6 | Current, released 2026-08-27 | Runs under Deno, so Node-specific code is a real gap. |
-| TypeScript, no doctest tool wanted | `node <file>.ts`, type-stripping only, stable since Node 23.6 | Current | Strips types, never checks them. |
+| TypeScript, a type-level claim | Twoslash 0.3.9, with `@shikijs/vitepress-twoslash` 4.6.0 for VitePress | Current, published 2026-06-22 and 2026-11-02 | Never executes the sample and never captures output. |
+| TypeScript, a sample that must execute | `deno test --doc`, or `deno check --doc-only` for types alone, Deno 2.9.8 | Current, released 2026-10-21 | Runs under Deno, so Node-specific code is a real gap. |
+| TypeScript, no doctest tool wanted | `node <file>.ts`, type-stripping only, on by default since Node 23.6 and stable since 24.12 and 25.2 | Current | Strips types, never checks them. |
 | Go | `go test` Example functions, transcluded into the page with `embedmd` | Current, `embedmd` pushed 2026-04-11 | No native Markdown-fence runner exists. An authored `go` fence is untested by construction. |
 | Anything else | Subprocess per example file, dispatched by suffix | Shipped as the harness mode of `checks/doc_examples.py` | Asserts an exit code only. No type-checking and no output diff without an added step. |
 
@@ -276,3 +276,8 @@ Named holes, not silence.
   family.
 - Sphinx and reStructuredText fence behaviour. The `..` and `%` carriers rest
   on primary documentation with no built fixture.
+- Zensical. Material for MkDocs takes critical fixes only, until 2027-05-05
+  (its 9.8.0 changelog). MkDocs 2.0 exists only as pre-releases and does not
+  read `mkdocs.yml`. Zensical reads `mkdocs.yml` on the same Python-Markdown
+  and SuperFences stack, so DOC-EX-20, DOC-EX-21 and DOC-EX-24 are expected to
+  hold there. None of them was measured on it, and it is at beta 0.1.x.

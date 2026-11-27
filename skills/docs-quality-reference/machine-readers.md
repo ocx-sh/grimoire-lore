@@ -16,7 +16,7 @@ Contents: [Rules](#rules) · [Agent-directed prose, shown](#agent-directed-prose
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| DOC-AGENT-01 | Publish a Markdown twin of every documentation page at a predictable URL by copying the Markdown source into the build output. | Without a twin an agent parses HTML chrome to reach content it could have read directly. | `diff <(find docs -name '*.md' -printf '%P\n') <(find "$OUT" -name '*.md' -printf '%P\n')` with `$OUT` set to the build output directory. Measured: twin present on 0 of 9 real sites, Markdown-source precondition on 9 of 9 (wave-2 calibration, 9 real docs sites). | SHOULD |
+| DOC-AGENT-01 | Publish a Markdown twin of every documentation page at a predictable URL by copying the Markdown source into the build output. | Without a twin an agent parses HTML chrome to reach content it could have read directly. | `diff <(find docs -name '*.md' ! -name SUMMARY.md -printf '%P\n') <(find "$OUT" -name '*.md' -printf '%P\n')` with `$OUT` set to the build output directory. `SUMMARY.md` is excluded because mdBook correctly emits no twin of it. Measured: twin present on 0 of 9 real sites, Markdown-source precondition on 9 of 9 (wave-2 calibration, 9 real docs sites). | SHOULD |
 | DOC-AGENT-03 | Ensure content collapsed behind a `<details>` block, a tab or an accordion appears unfolded in that page's twin. | A twin generated from the rendered page silently deletes content an agent has no other route to. | `grep -n -E -e '<details[^[:alnum:]_]' -e '<details$' -e '^=== "' -e '^::: tabs' -- "$PAGE"` with `$PAGE` set to the page's path lists the collapsed blocks. Then unverified: reading heuristic. Look for each block's inner text inside that page's twin. Runs on changed files first. | CONSIDER |
 | DOC-AGENT-04 | Publish `llms.txt` in the spec's shape as a recommended index, never as the required agent-readability mechanism. | 97 percent of published `llms.txt` files logged zero requests in May 2026 (mecanik.dev), so a site shipping only that file serves nobody. | `awk 'NR==1&&!/^# /{exit 1} /^## /{h=1} /^> /&&!h{g=1} END{exit !g}' llms.txt`, run only when the file exists. Measured: 0 of 9 sites publish it at repo root, the static passthrough directory or `docs/` (wave-2 calibration, 9 real docs sites). It is an existence test, so no false positive is possible. | SHOULD |
 | DOC-AGENT-05 | Name the specific consumer when justifying an agent-facing mechanism, never aggregate AI-traffic or search-visibility language. | Generic AI-crawler traffic is 1.1 percent of requests (mecanik.dev retrieval-bot share, May 2026), so a mechanism justified by it is wrong. | `grep -n -E -i -e 'AI traffic' -e 'AI crawler' -e 'search visibility' -- "$FILE"` with `$FILE` set to the file's path lists candidates. Then unverified: reading heuristic. Look for a named reader in the same sentence as each hit. Runs on changed files first. | SHOULD |
@@ -59,9 +59,21 @@ The twin hands it the page body instead of the site chrome.
 
 ## Build output by generator
 
-The twin has no measured implementation anywhere. Before adopting
-DOC-AGENT-01, build the site once. Then check whether a `.md` file placed beside
-a page reaches the output directory at that page's own path.
+Three third-party plugins emit a per-page twin. Each was built once on a
+two-page site on 2026-11-27.
+
+| Generator | Plugin and config | Result |
+|---|---|---|
+| MkDocs Material | `mkdocs-llms-source` 1.2.0, as `- llms-source` under `plugins:`, with `site_url` set | Copies each source file verbatim, so the DOC-AGENT-01 diff passes |
+| mdBook | `mdbook-llms` 0.4.1, as an empty `[output.llms]` table beside `site-url` under `[output.html]` | Writes from the preprocessed book. The second backend moves HTML output to `book/html/` |
+| VitePress | `vitepress-plugin-llms` 1.15.0, in `vite.plugins` | Regenerates each twin, skipped the root `index.md`, and dropped the text of a raw `<details>` block |
+
+Pin the plugin version, because each one has a single maintainer. Skip
+`mkdocs-llmstxt`, which rebuilds Markdown from HTML and is in maintenance mode.
+Skip `mdbook-llms-txt-tools`, which emits no per-page twin. Before adopting
+DOC-AGENT-01, build the site once and run its diff. Without a plugin, check
+whether a `.md` file placed beside a page reaches the output directory at that
+page's own path.
 
 | Generator | Build output | The trap |
 |---|---|---|
@@ -84,15 +96,19 @@ them from the docs and keep them out of the required-mechanism list.
 
 ## Not studied
 
-- **Twin generation mechanics.** Whether MkDocs Material, VitePress or mdBook can
-  emit a per-page twin with no custom plugin. Nobody has measured it, and this
-  gap is why DOC-AGENT-01 ships at SHOULD.
+- **Twin generation on VitePress.** The one plugin built regenerates the twin
+  instead of copying the source, and it lost collapsed text. This gap is why
+  DOC-AGENT-01 ships at SHOULD.
 - **Twin drift.** No check proves a generated twin still matches its page.
   DOC-AGENT-03 covers collapsed content only.
 - **Instruction durability.** The compliance result rests on 15 runs of one
   model, and the same author's second test scored 12 of 12 in every condition.
-- **Discovery files beyond `llms.txt`.** Vercel layers five files on top of
-  per-page twins. That set has not been read or costed.
+- **Discovery files beyond `llms.txt`.** Vercel's agent-resources page, updated
+  2026-11-14, lists five site-wide files on top of per-page twins. They have
+  been read, not costed. An IETF individual draft of 2026-10-05,
+  `draft-arsentev-llm-context-discovery-01`, proposes a `Link` header, a
+  `/.well-known/llm-context` URI and a `robots.txt` record. It is not IETF
+  consensus and cites no implementation.
 - **Non-Markdown sources.** No MDX or reStructuredText twin has been built or
   measured, so the last three rows of the generator table are reasoning, not
   results.
@@ -102,4 +118,6 @@ them from the docs and keep them out of the required-mechanism list.
 No row in this family pins a project decision. Every severity rests on a
 measured count or on a named published test, and both are on the row.
 DOC-AGENT-01 returns to MUST when one working twin configuration exists on
-MkDocs Material, VitePress and mdBook.
+MkDocs Material, VitePress and mdBook. On 2026-11-27 MkDocs Material and mdBook
+have one. VitePress does not, because its plugin fails the DOC-AGENT-01 diff and
+DOC-AGENT-03.

@@ -131,7 +131,7 @@ gate (`KT-LINT` owns that wiring, and `KT-CORE-02` owns "watch it go red").
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
 | KT-ERR-04 | Never write `SomeException(e.message)` where `SomeException(e)` is meant, and never re-wrap an exception in its own type. Keep detekt's `SwallowedException` and `ThrowingNewInstanceOfSameException` active. This row is "do not turn it off", not "turn it on". | `SomeException(e.message)` reads as if the failure survived and discards the cause, the stack and every suppressed exception under it. This is the one place Kotlin's default gate is **stronger** than Java's: detekt names `throw MyException(e.message)` as `SwallowedException`'s first noncompliant example and ships it `active: true`, where the Java analog sits disabled by default and the Java rule must spend a MUST on the promotion (detekt default config, verified 2026-09-12). | see block KT-ERR-04 (1 of 2). Empty output is the pass, because the shipped defaults keep both active. Any hit whose block sets `active: false` is the violation. Backstop where detekt does not fail CI: see block KT-ERR-04 (2 of 2). Here any hit is the finding. | MUST |
-| KT-ERR-05 | Library code (an SDK, a Gradle plugin, anything a caller embeds) never calls `System.exit()`, `Runtime.exit()`, `Runtime.halt()` or `exitProcess()`. Translate a child process's exit status into a typed exception instead. Promote detekt's `ExitOutsideMain` to `active: true`, because it ships off. | One detekt rule covers all four call shapes, including `Runtime.halt()`, which the nearest SpotBugs pattern does not name, but it ships `active: false` (detekt default config, verified 2026-09-12), the same "correct rule, off by default" shape this family meets throughout. In a Gradle plugin the consequence is concrete and immediate: the call kills the Gradle daemon mid-build, and the user sees a dead build, not your error. Applies to library code only. A CLI's own `main` is where a status code belongs. | see block KT-ERR-05 (1 of 2). Here empty output is **the finding**, because the rule ships off and silence means it is not promoted, and a hit setting `active: true` is the pass. Then see block KT-ERR-05 (2 of 2). Empty output is the pass, and any hit in a file with no `fun main(` is the violation. | MUST |
+| KT-ERR-05 | Library code (an SDK, a Gradle plugin, anything a caller embeds) never calls `System.exit()`, `Runtime.exit()`, `Runtime.halt()` or `exitProcess()`. Translate a child process's exit status into a typed exception instead. Promote detekt's `ExitOutsideMain` to `active: true`, because it ships off. | One detekt rule covers all four call shapes, including `Runtime.halt()`, which the nearest SpotBugs pattern does not name, but it ships `active: false` (detekt default config, verified 2026-09-12), the same "correct rule, off by default" shape this family meets throughout. In a Gradle plugin the consequence is concrete and immediate: the call kills the Gradle daemon mid-build, and the user sees a dead build, not your error. Applies to library code only. A CLI's own `main` is where a status code belongs. | see block KT-ERR-05 (1 of 2). Here empty output is **the finding**, because the rule ships off and silence means it is not promoted, and a hit setting `active: true` under `potential-bugs:`, the rule set that holds it, is the pass. Then see block KT-ERR-05 (2 of 2). Empty output is the pass, and any hit in a file with no `fun main(` is the violation. | MUST |
 
 ```sh
 # KT-ERR-04 (1 of 2)
@@ -151,9 +151,10 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.kt' |
 
 ```yaml
 # detekt.yml: one row is a promotion, the other two are a promise not to disable
-exceptions:
+potential-bugs:
   ExitOutsideMain:
     active: true          # ships false
+exceptions:
   SwallowedException:
     active: true          # ships true, never set this false
   ThrowingNewInstanceOfSameException:

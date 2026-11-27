@@ -27,7 +27,8 @@ hand-copied step list.
 ## Tier 2 — the browser driver, conditionally
 
 Required if and only if the project asserts a cascade-layer or cross-context
-relationship. **No DOM emulator, ever** — see below; that direction is absolute.
+relationship. **No DOM emulator, ever** — see below; that direction is absolute,
+even for an emulator that now passes a layer probe.
 But a project with no layer assertion to run needs no browser. Skip it for: a
 plain-CSS project with one unlayered stylesheet; a VS Code
 webview on `engines.vscode` ≤1.103, where the contract is deliberately NOT to
@@ -54,8 +55,8 @@ can text-assert its own wrapper; it cannot prove the downstream bundler kept it.
 | Next / Turbopack | `find .next -name '*.css'` | a hardcoded `.next/static/css/*.css` globs an empty directory on a default Turbopack build and silently inspects zero files |
 | everything else | `find <out> -name '*.css'` | |
 
-Pin Node while you are here: `@angular/cli` 22.1.6 requires
-`^22.22.3 || ^24.15.0 || >=26.0.0` and refuses Node 24.14.0 outright. "Just run
+Pin Node while you are here: `@angular/cli` 22.1.6 through 22.3.0 require
+`^22.22.3 || ^24.15.0 || >=26.0.0` and refuse Node 24.14.0 outright. "Just run
 `ng build`" is not a runnable instruction without a version note.
 
 ## outside-layers.mjs
@@ -156,17 +157,26 @@ default scope only; repeating a spacing step per scheme is the opposite defect.
 
 Not "with caution". Not "fine for simple cases". Reproduced at pinned versions:
 
-- **happy-dom 20.12.0** has zero `@layer` support anywhere in its CSS parser
-  source (a case-insensitive search for `layer` over `src/css/` returns nothing). An `@layer` block
+- **happy-dom 20.12.0 and 21.0.4** (the latest on 2026-11-27) have zero `@layer`
+  support anywhere in their CSS parser (a case-insensitive search for `layer`
+  over the CSS source returns nothing at either version). An `@layer` block
   parses to `cssRules.length === 0`. Worse, a bare `@layer a, b;` statement
-  corrupts the parse of every rule *after* it in the same sheet — so a false
-  pass can arrive from an entirely unrelated rule.
-- **jsdom 30.0.1** parses `@layer` into correct `CSSLayerStatementRule` and
-  `CSSLayerBlockRule` objects and its computed-style engine then ignores every
-  declaration inside any layer. One uncontested layered rule computes
-  identically to no CSS at all.
+  drops the unlayered rule that follows it in the same sheet (rules after an
+  intervening layer block survive) — so a false pass can arrive from an
+  unrelated rule.
+- **jsdom 30.0.1 through 30.1.3** parse `@layer` into correct
+  `CSSLayerStatementRule` and `CSSLayerBlockRule` objects, and the computed-style
+  engine then ignores every declaration inside any layer. One uncontested layered
+  rule computes identically to no CSS at all.
+- **jsdom 31.0.0 (2026-11-05) and later** replaced the style engine and apply
+  layer order correctly in a probe at 31.0.1. That still does not make jsdom the
+  engine: a pass says nothing about forced colors, shadow-DOM Context, or any
+  feature it was not measured on, and its release note warns that computed values
+  can differ from earlier releases. A probe in it needs the CSS-GATE-02 controls
+  like any other.
 
-Either way the assertion passes or fails for reasons unrelated to your CSS.
+On happy-dom and on jsdom 30 the assertion passes or fails for reasons unrelated
+to your CSS.
 
 ## Harness requirements (CSS-GATE-02)
 
@@ -193,11 +203,13 @@ controls caught them, and both read as clean passes:
 
 Round 1 told agents never to depend on a bare `@layer a, b;` statement because
 minifiers strip it. Measured, that is wrong in both halves. esbuild 0.28.2 and
-cssnano 9.0.1 never touch the statement. lightningcss 1.33.0 and Parcel 2.16.4
+cssnano 9.0.1 to 10.0.0 never touch the statement. lightningcss 1.33.0 and Parcel 2.16.4
 delete it unconditionally — including where it CONTRADICTS block order — and
 physically reorder the blocks to re-encode its priority, so source block order
 is not "the durable form" either.
 
 All five outputs plus the source rendered `rgb(255,0,0)` in Chromium: no
-minifier in the matrix broke the contract. `swc` has no CSS minifier at all — it
-exits clean and writes a 0-byte file.
+minifier in the matrix broke the contract. The swc CLI and `@swc/core` have no CSS
+minifier — given a `.css` file they exit clean and write 0 bytes. Only the
+standalone `@swc/css` package minifies (last release 2023-07-24), and it keeps
+the statement.

@@ -9,6 +9,7 @@ consolidates:
   - rust-cli-contract.md
   - rust-async.md
 date: 2026-08
+revised: 2026-11-27
 ---
 
 # Terminal UIs in Rust
@@ -131,7 +132,7 @@ reason), CONSIDER (judgement, but the default is stated).
 |---|---|---|---|---|
 | TUI-13 | Every registry-, manifest- or network-sourced string passes the sanitiser at the *display* boundary. State and caches store the raw value; sanitisation is never persisted. | The two-boundary invariant grim already documents (`tui/tree.rs:240-245`): sanitising on ingest corrupts the value used for matching and logging; sanitising on display is the only place it is unambiguously correct. | For each `Span`/`Line`/`Paragraph` constructed from a `Package`/`Manifest`/`Catalog` field, confirm a sanitiser call in between. A `Line::raw(<registry field>)` with no sanitiser is a finding. | MUST |
 | TUI-14 | The sanitiser strips, in one pass: all C0/C1 controls, ESC-introduced CSI/OSC sequences, bidi overrides and isolates (U+202A–U+202E, U+2066–U+2069), and zero-width code points (U+200B–U+200D, U+FEFF). Styling is re-emitted from trusted code only — attacker escape bytes are never forwarded. | CWE-150 plus real terminal RCEs; `strip-ansi-escapes` alone misses the bidi and zero-width classes, which are Unicode-content attacks, not escape-sequence attacks. `ansi-to-tui` is a renderer, not a sanitiser — a well-formed OSC 52 is not "malformed". | One unit test per stripped class asserting absence from the output; a test asserting the function is not O(n²). | MUST |
-| TUI-15 | Truncate for display by walking grapheme clusters (`unicode-segmentation`) and summing `unicode-width` per cluster, stopping before the column budget — never by byte slice or `chars().take(n)`, and only after sanitising. | `unicode-width` is scalar-value width, not cluster width; `chars().count()` measures a CJK name at half its rendered width and skews every fixed-width column, and can cut a combining sequence in half. Measuring before stripping desynchronises the budget from what the terminal will actually do. | `grep -rn '\.chars()\.take(\|\.chars()\.count()\|&[a-z_]*\[\.\.' src/` — each hit on non-literal text is a finding. | MUST |
+| TUI-15 | Truncate for display by walking grapheme clusters (`unicode-segmentation`) and summing `unicode-width` per cluster, stopping before the column budget — never by byte slice or `chars().take(n)`, and only after sanitising. | `UnicodeWidthChar::width` is per scalar value and `UnicodeWidthStr::width` applies the crate's sequence rules (`\r\n`, ZWJ and emoji sequences); neither is font-accurate, so the cluster walk stays. `chars().count()` measures a CJK name at half its rendered width and skews every fixed-width column, and can cut a combining sequence in half. Measuring before stripping desynchronises the budget from what the terminal will actually do. | `grep -rn '\.chars()\.take(\|\.chars()\.count()\|&[a-z_]*\[\.\.' src/` — each hit on non-literal text is a finding. | MUST |
 | TUI-16 | A hand-written `Widget`/`StatefulWidget` impl intersects its `area` with `buf.area` before indexing into the buffer. | Out-of-bounds buffer writes panic — inside raw mode, which means the panic message is eaten unless TUI-08 holds. ratatui's own FAQ names `area.intersection(buf.area)` as the fix. | For every `impl Widget`/`StatefulWidget`, confirm an `intersection`/`clamp` precedes any `buf.set_*`/index. | MUST |
 
 ### Interaction and presentation
@@ -356,3 +357,7 @@ Ranked by how often they bite a codebase of this shape.
 | [github.com/ratatui/templates](https://github.com/ratatui/templates) | The canonical spawned-`EventTask` + `tokio::select!` shape TUI-04 mandates |
 | [github.com/sxyazi/yazi](https://github.com/sxyazi/yazi) | The reference for splitting a large TUI shell by feature rather than by layer |
 | [github.com/atuinsh/atuin](https://github.com/atuinsh/atuin) | Blocking input poll on a spawned task alongside async queries — the cheaper migration path in Open question 1 |
+
+## Revision log
+
+- 2026-11-27: TUI-15 rationale corrected. `UnicodeWidthChar::width` is per scalar value and `UnicodeWidthStr::width` applies the crate's sequence rules, and neither is font-accurate, so the cluster walk stays. Decision file: refresh-2026-11/rust-quality.md.

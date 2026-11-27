@@ -12,6 +12,7 @@ audits_read:
   - swift-audit/config-inventory.md (CLI-03 and CLI-11 rows, ocx-sdk-python)
   - swift-audit/exemplar-concurrency.md (nonisolated(unsafe) counts)
 date: 2026-10-10
+revised: 2026-11-27
 ---
 
 # Untrusted input (SW-SEC)
@@ -27,7 +28,7 @@ Source keys. **[UI]** is `swift-security/untrusted-input.md` (section numbers an
 5. **Secrets by construction, proven by a canary.** A `Secret` type, URLs redacted where they enter text, no secret in `argv`, and a canary test over every failing path. Binds CLI, SDK and server; Apple apps follow the type rule, Keychain and `os.Logger` privacy stay read-only.
 6. **Terminal text is escaped, not stripped.** One `sanitizeForTerminal` at three boundaries (root error writer, log handler, human stdout). 0 of 40 exemplars do this; ArgumentParser and swift-log pass bytes raw. A library or SDK escapes wire- or child-derived text when it builds `message` (the function is idempotent, so the CLI's second pass is free); machine JSON stays faithful.
 7. **Randomness and crypto have one answer.** `SystemRandomNumberGenerator` and `import Crypto`; `Insecure.*` only with a reason; no hand-rolled primitives.
-8. **A scanner is one input.** There is no `swift package audit`. Roots that ship keep their resolved pins at or above hand-set advisory floors (checked by a runnable `jq` script); `osv-scanner` on `Package.resolved` is SHOULD.
+8. **A scanner is one input.** There is no `swift package audit`. Roots that ship keep their resolved pins at or above hand-set advisory floors (checked by a runnable `jq` script; the swift-crypto and hummingbird floors rose to 5.1.2 and 2.29.0 in the 2026-11 refresh, and `-Werror TemporaryPointers` still does not escalate on 6.4.3); `osv-scanner` on `Package.resolved` is SHOULD.
 9. **Set size.** The dive's 31 candidates become 24 rules (18 MUST, 6 SHOULD). Dropped or folded (dive IDs): -17 (the Sendable-handle policy is SW-CONC-09's; the use-flagging fact lives in SW-SEC-11), -28 (owned by SW-PKG-24), -31 (owned by SW-REL); -02, -16, -20 and -25 folded into neighbours.
 
 ## The ruleset
@@ -116,7 +117,7 @@ final class Node {
 #### C. Caught by the compiler, SwiftPM or a sanitizer
 
 **SW-SEC-09 (MUST, any Swift; `Span` from 6.2).** A pointer obtained from `withUnsafeBufferPointer`, `withUnsafeBytes`, `withUnsafe(Mutable)Pointer` or an `&x`-to-pointer conversion never leaves its closure or call: return a value computed inside, not the pointer. Prefer `Span` / `RawSpan` where the callee accepts one. Public API never returns a pointer into Swift-owned storage.
-- Why: `StrictMemorySafety` does not flag the escape, only a later dereference; a fully `unsafe`-acknowledged escape builds clean and is a use-after-free under ASan [UI §3, §4]. The `TemporaryPointers` warning (`initialization of 'UnsafePointer<Int>' results in a dangling pointer`) cannot be promoted to an error on 6.4.
+- Why: `StrictMemorySafety` does not flag the escape, only a later dereference; a fully `unsafe`-acknowledged escape builds clean and is a use-after-free under ASan [UI §3, §4]. The `TemporaryPointers` warning (`initialization of 'UnsafePointer<Int>' results in a dangling pointer`) cannot be promoted to an error on 6.4.0 or 6.4.3 (6.4.3 measured 2026-11-27).
 - Check, four layers: (a) compile: returning `a.span` from local storage fails with `a function cannot return a ~Escapable result` (no flag); (b) `grep -rn --include='*.swift' -e 'public .*Unsafe' -e 'open .*Unsafe' -e 'public .*OpaquePointer' -e 'open .*OpaquePointer' Sources`; (c) the ASan run of SW-SEC-06; (d) `swift build 2>&1 | grep -e 'TemporaryPointers'` must print nothing (`-warnings-as-errors`, `-Werror TemporaryPointers` and `-Xswiftc -Werror -Xswiftc TemporaryPointers` all exit 0 on 6.4; they exit 1 on 6.3.3).
 - Red: **yes**, [UI V8, V9, V10, V23 K5] and [CR1]: `SpanRed` exit 1 (`SpanRed.swift:2:23: error: a function cannot return a ~Escapable result`); K5 red 1 (`public func firstBytePointer(_ a: [UInt8]) -> UnsafePointer<UInt8>?`), `GreenLib` 0; `EscapeExe` ASan exit 1, `EscapeTwin` 0; `TmpPtr` prints `[#TemporaryPointers]` and exits 0 under `-Werror TemporaryPointers` on 6.4. `EscapeOnly` is **not** red under strict-memory-safety on 6.4 (CR1 rc 0; rc 1 on 6.3.3), so no check here relies on that flag.
 - Binds: library, SDK, CLI, server (any code with `Unsafe*Pointer`).
@@ -225,20 +226,21 @@ The 19-row corpus (each row asserts the forbidden scalars are absent, the escape
 
 #### F. Caught by the lockfile
 
-**SW-SEC-20 (MUST for roots that ship, SHOULD for libraries, any Swift).** The committed `Package.resolved` of a root that ships (SW-PKG-26 kinds) pins every dependency at or above its advisory floor; the check below exits 0 in CI and floors are re-derived from the dependencies' repository advisories whenever a dependency is bumped. A library or SDK keeps its wide range (SW-PKG-25) and raises the *lower bound* (`"4.5.1" ..< "6.0.0"`) only when it calls the affected API.
+**SW-SEC-20 (MUST for roots that ship, SHOULD for libraries, any Swift).** The committed `Package.resolved` of a root that ships (SW-PKG-26 kinds) pins every dependency at or above its advisory floor; the check below exits 0 in CI and floors are re-derived from the dependencies' repository advisories whenever a dependency is bumped. A library or SDK keeps its wide range (SW-PKG-25) and raises the *lower bound* (`"4.5.1" ..< "6.0.0"`) only when it calls the affected API; a root that cannot move to swift-crypto 5.x has no patched version today (no 4.x release carries the fix).
 - Why: a green scanner is not a safe tree. CVE-2026-43678, -97696, -97697, -102835, -43820 and -43823 return 0 from GitHub's global advisory API and OSV; swift-nio 2.100.0 is scanner-green and inside CVE-2026-43678's `<= 2.100.0` [UI §9, V27, CR5].
 - Floors, dated 2026-10-10 (repository advisories, [CR5]): swift-nio `2.101.0` (CVE-2026-43678, -43671, -28980, -28970); swift-nio-ssl `2.37.2` (CVE-2026-43820, critical, out-of-bounds read from a non-string SAN, `>= 2.18.0, <= 2.37.1`); swift-nio-extras `1.34.1` (CVE-2026-28975, decompression ratio bypass); swift-crypto `4.5.1` (CVE-2026-43823, critical); hummingbird `2.26.0` (CVE-2026-97696, -97697, -102835).
+- Floors raised 2026-11-27 (read, 2026-11-19 advisories): swift-crypto `5.1.2` (GHSA-rch3-xxjq-365j, critical, X25519 accepts a low-order public key and returns an all-zero shared secret, `<= 5.1.1`, and GHSA-c24m-vphm-p22w, Scrypt ignores `maxMemory`, `>= 4.0.0, <= 5.1.1`; both ranges cover 4.x and no 4.x release carries the fix; the floor also covers CVE-2026-43823, fixed 4.5.1, and CVE-2026-86983, fixed 5.0.3) and hummingbird `2.29.0` (GHSA-rgp4-jj2h-f9h9, high, request-body close handling exhausts resources, `>= 2.6.0, <= 2.28.1`; it also covers CVE-2026-97696, -97697 and -102835, fixed 2.26.0). The three swift-crypto and hummingbird advisories carry no CVE, and OSV returned not found for them and for GHSA-jwv7-rv4f-rff2 (read 2026-11-27). The swift-nio, swift-nio-ssl and swift-nio-extras floors above are unchanged.
 - Check, floors (output = pins below a floor, exit 1 if any; an absent dependency passes; branch and revision pins have no version and are SW-PKG-09's):
 
 ```sh
 f=Package.resolved; bad=0
 floor() { jq -e --arg i "$1" --argjson m "$2" '[.pins[] | select(.identity==$i) | .state.version | select(. != null) | sub("[-+].*$";"") | split(".") | map(tonumber)] | all(. >= $m)' "$f" >/dev/null || { echo "BELOW FLOOR: $1 (need >= $3)"; bad=1; }; }
 floor swift-nio '[2,101,0]' 2.101.0; floor swift-nio-ssl '[2,37,2]' 2.37.2; floor swift-nio-extras '[1,34,1]' 1.34.1
-floor swift-crypto '[4,5,1]' 4.5.1; floor hummingbird '[2,26,0]' 2.26.0; exit $bad
+floor swift-crypto '[5,1,2]' 5.1.2; floor hummingbird '[2,29,0]' 2.29.0; exit $bad
 ```
 
   Discovery (review list; the feed is repository-level, so it works for CVEs you have not heard of): `jq -r '.pins[] | select(.location | test("github.com")) | .location' Package.resolved | sed -E 's#.*github.com/([^/]+/[^/.]+)(\.git)?$#\1#' | while read -r r; do echo "== $r"; gh api "repos/$r/security-advisories" --jq '.[] | select(.state=="published") | "\(.cve_id // .ghsa_id) \(.severity) vulnerable=\(.vulnerabilities[0].vulnerable_version_range) fixed=\(.vulnerabilities[0].patched_versions)"'; done`
-- Red: **yes**, [CR4, CR5]: planted `floor/red` (swift-nio 2.100.0, swift-nio-ssl 2.37.1, swift-crypto 4.5.0, hummingbird 2.25.1, swift-nio-extras 1.34.0) prints 5 `BELOW FLOOR` lines, exit 1; `floor/green` (each at its floor) exit 0; the OSV-clean `scan/green` (swift-nio 2.100.0) prints `BELOW FLOOR: swift-nio` and exits 1; discovery on `scan/green` lists CVE-2026-43678 `vulnerable=<= 2.100.0 fixed=2.101.0`. The floor table is a dated snapshot, not a rule that ages well: re-run discovery before trusting it.
+- Red: **yes**, [CR4, CR5]: planted `floor/red` (swift-nio 2.100.0, swift-nio-ssl 2.37.1, swift-crypto 4.5.0, hummingbird 2.25.1, swift-nio-extras 1.34.0) prints 5 `BELOW FLOOR` lines, exit 1; `floor/green` (each at its floor) exit 0; the OSV-clean `scan/green` (swift-nio 2.100.0) prints `BELOW FLOOR: swift-nio` and exits 1; discovery on `scan/green` lists CVE-2026-43678 `vulnerable=<= 2.100.0 fixed=2.101.0`. The swift-crypto 5.1.2 and hummingbird 2.29.0 floors (2026-11-27) are not yet watched: a tree pinning swift-crypto 5.1.1 and hummingbird 2.28.1 must print 2 `BELOW FLOOR` lines and exit 1. The floor table is a dated snapshot, not a rule that ages well: re-run discovery before trusting it.
 - Binds: CLI, server, daemon, app, container image; the SDK and libraries per the lower-bound clause.
 
 **SW-SEC-21 (SHOULD, any Swift).** CI scans the lockfile with `osv-scanner scan source -L Package.resolved` (exit 1 on findings) and the repository enables Dependabot `package-ecosystem: swift` for alerts and update PRs; a release SBOM from SW-REL scans as `*.cdx.json`. A library that does not commit its lock (SW-PKG-27) scans the lock a fresh `swift package resolve` produces (reading, not run). Do not look for `swift package audit`: it does not exist.
@@ -363,7 +365,7 @@ Owner decisions (the program applies the default until told otherwise):
 3. **`StrictMemorySafety` severity for fleet C seams.** Default: SHOULD (map conflict 10). Say if fleet targets that wrap a C library should be MUST with `.treatWarning(..., as: .error)` in CI.
 4. **Marker comments** (`bounded:`, `truncate-ok:`, `wrap-ok:`, `redacted:`, `secret-ok:`, `insecure-ok:`, `SAFETY:`). 0 adoption, no tool reads them. Default: adopt, document in the index (same default as SW-ERR's `swallow-ok:`).
 5. **Escape vs strip.** Default: escape (SW-SEC-17) although the Rust fleet rule strips. Say if cross-language parity matters more than the Swift-side simplicity.
-6. **Advisory floor upkeep.** The SW-SEC-20 table is a 2026-10-10 snapshot. Default: floors are re-derived with the discovery command on every dependency bump, by whoever bumps; no scheduled job.
+6. **Advisory floor upkeep.** The SW-SEC-20 table is a 2026-10-10 snapshot (swift-crypto and hummingbird re-read 2026-11-27). Default: floors are re-derived with the discovery command on every dependency bump, by whoever bumps; no scheduled job.
 7. **JSON stdout and bidi.** Machine JSON containing U+202E is faithful but terminal-unsafe on `cat`. Default: leave it faithful and sanitise on a TTY or in the human format; unresolved in the dive.
 
 Another research round (subarea and question):
@@ -373,7 +375,8 @@ Another research round (subarea and question):
 3. **security/small-stack-recursion.** Re-measure recursion headroom on the real musl static Linux SDK and on Swift concurrency cooperative-pool and NIO event-loop threads, then confirm or move the 64 default and the 128 KiB test (CR6 simulates musl on glibc).
 4. **security/sdk-child-output-scrubbing.** A fixture for the SDK clause of SW-SEC-16: a fake child echoing the credential in plain, base64 (Basic auth), percent-encoded and URL-userinfo forms; which forms does an exact-value scrubber miss, and does the Python SDK's redaction cover them?
 5. **security/http-header-validation.** Map row M-I-11 (P3, never researched): what must a Swift server or client validate in header names and values (CR/LF injection, size caps, duplicate `Content-Length`), and which of swift-nio's `HTTPHeaders` and Hummingbird's `HTTPField` checks already do it? Nothing in this file covers it.
-6. **security/apple-privacy.** `os.Logger` privacy for dynamic strings, Keychain and Secure Enclave are `unverified: read only`; needs a macOS runner. Also: the `TemporaryPointers` non-escalation on 6.4 (exit 0 where 6.3.3 exits 1) looks like a regression and has no upstream issue checked.
+6. **security/apple-privacy.** `os.Logger` privacy for dynamic strings, Keychain and Secure Enclave are `unverified: read only`; needs a macOS runner. Also: the `TemporaryPointers` non-escalation on 6.4 (exit 0 where 6.3.3 exits 1) looks like a regression and has no upstream issue checked (the 2026-11-27 search was blocked by a rate limit).
+7. **security/swift-crypto-4x-fix.** Whether Apple will ship a 4.x fix for GHSA-rch3-xxjq-365j and GHSA-c24m-vphm-p22w is open. swift-nio-http2 1.45.0 (CVE-2026-64785) is a candidate floor, secondary-sourced from the hummingbird 2.28.0 notes, and its advisory page was not opened.
 
 ## Sub-artifacts
 
@@ -396,3 +399,10 @@ Another research round (subarea and question):
 13. https://github.com/google/osv-scalibr/blob/main/extractor/filesystem/language/swift/packageresolved/packageresolved.go (what OSV-Scanner reads from `Package.resolved`)
 14. https://docs.github.com/en/code-security/dependabot/ecosystems-supported-by-dependabot/supported-ecosystems-and-repositories (Dependabot `swift`, registry limits)
 15. https://wiki.musl-libc.org/functional-differences-from-glibc.html (musl default thread stack 128k, fetched 2026-10-10)
+
+## Revision log
+
+- 2026-11-27: SW-SEC-09 rationale records that `TemporaryPointers` cannot be promoted to an error on 6.4.0 or 6.4.3 (6.4.3 measured 2026-11-27); the build-log grep (d) stays the check. Decision: refresh-2026-11/swift-quality.md.
+- 2026-11-27: SW-SEC-20 raises the swift-crypto floor to 5.1.2 and the hummingbird floor to 2.29.0, with advisory IDs, ranges, the OSV not-found gap, the `floors` script and a not-yet-watched verification line; the other three floors stay. Decision: refresh-2026-11/swift-quality.md.
+- 2026-11-27: Verdict item 8 and Open questions (floor upkeep, TemporaryPointers upstream issue, new item 7 on a 4.x fix and swift-nio-http2) updated for the same delta. Decision: refresh-2026-11/swift-quality.md.
+- 2026-11-27: SW-SEC-11's re-check sentence lives only in the reference skill's security.md, not in this file, so it is unchanged here (the 6.4.3 exit 0 result is recorded under SW-SEC-09).

@@ -7,7 +7,7 @@ consolidates:
   - jvm-gradle-settings/settings-time-surface-and-tool-provisioning.md
   - jvm-gradle-settings/settings-plugin-testkit-verification.md
 date: 2026-09-12
-revised: 2026-09-12
+revised: 2026-11-27
 ---
 
 # Gradle: the settings-time surface
@@ -262,7 +262,7 @@ heuristic"** in those words rather than presenting a grep as if it were a test.
 
 | ID | Rule | Rationale | Verification | Sev | Floor |
 |---|---|---|---|---|---|
-| GRADLE-PLUG-27 | Run `./gradlew help -Dorg.gradle.isolated-projects.diagnostics=true` against the plugin's own functional-test build at least once per release, and never wire `org.gradle.isolated-projects=true` into a required CI job. | Diagnostics mode configures projects sequentially and reports every violation without failing, which is the only proof available; but IP is incubating since 9.7.0 (2026-08-06) and two of its four constraint categories are "not fully enforced yet," so a green run today is evidence, not proof. Consistent with GRADLE-CACHE-10. | **Runnable via TestKit for the diagnostics half; a static grep for the CI half — neither substitutes for the other.** Diagnostics: `GradleRunner.create().withArguments("help", "-Dorg.gradle.isolated-projects.diagnostics=true").build()`, then assert `BuildResult.output` carries no violation-summary text. This is a *legal* `BuildResult` assertion (GRADLE-PLUG-15) because diagnostics stores-then-discards through the configuration-cache problem pipeline — but the output is **never empty** (conflict F) and the exact phrase is a **dated re-check against the pinned Gradle version**, not a constant this file freezes. CI half: `grep -rn 'isolated-projects' .github/workflows/` must return nothing inside a job triggered by `pull_request:`/`push:` — TestKit cannot see the consumer's CI YAML at all. The deprecated `org.gradle.unsafe.isolated-projects` key must appear nowhere. | SHOULD | Gradle 9.7.0 |
+| GRADLE-PLUG-27 | Run `./gradlew help -Dorg.gradle.isolated-projects.diagnostics=true` against the plugin's own functional-test build at least once per release, and never wire `org.gradle.isolated-projects=true` into a required CI job. | Diagnostics mode configures projects sequentially and reports every violation without failing, which is the only proof available; but IP is incubating since 9.7.0 (2026-08-06) and two of its four constraint categories are "not fully enforced yet," so a green run today is evidence, not proof (re-read 2026-11-27 against 9.9.2). Consistent with GRADLE-CACHE-10. | **Runnable via TestKit for the diagnostics half; a static grep for the CI half — neither substitutes for the other.** Diagnostics: `GradleRunner.create().withArguments("help", "-Dorg.gradle.isolated-projects.diagnostics=true").build()`, then assert `BuildResult.output` carries no violation-summary text. This is a *legal* `BuildResult` assertion (GRADLE-PLUG-15) because diagnostics stores-then-discards through the configuration-cache problem pipeline — but the output is **never empty** (conflict F) and the exact phrase is a **dated re-check against the pinned Gradle version**, not a constant this file freezes. CI half: `grep -rn 'isolated-projects' .github/workflows/` must return nothing inside a job triggered by `pull_request:`/`push:` — TestKit cannot see the consumer's CI YAML at all. The deprecated `org.gradle.unsafe.isolated-projects` key must appear nowhere. | SHOULD | Gradle 9.7.0 |
 
 #### Caught by reading the functional test's own generated project
 
@@ -285,7 +285,7 @@ it.
 
 | ID | Rule | Rationale | Verification | Sev | Floor |
 |---|---|---|---|---|---|
-| GRADLE-STRUCT-10 | Never create two projects whose path's last segment is identical **in a build that also assigns a uniform explicit `group`** (a root `allprojects`/`subprojects { group = … }`, or a publishing plugin driving `group` from one property). Give the colliding projects distinct groups, or rename one. | Gradle identifies dependency-graph nodes by `group:name`, so both become `<group>:<leaf>:unspecified` and ordinary conflict resolution silently keeps one and drops the other — no failure, no warning, just a classpath missing classes ([#847](https://github.com/gradle/gradle/issues/847), open since 2016-11-12, reproduced on 8.12.1 on 2025-06-30, unfixed through 9.x). The group conjunct is load-bearing: Gradle's default group is "the path with dots as separators," which already disambiguates nested duplicates. | `./gradlew projects --console=plain -q \| grep -oE "Project ':[^']+'" \| sed -E "s/.*:([^:']+)'/\1/" \| sort \| uniq -d` — **non-empty output is a finding only if** `grep -rn 'group\s*=' build.gradle* gradle.properties` shows a uniform assignment. Both non-empty is the violation. | MUST | any |
+| GRADLE-STRUCT-10 | Never create two projects whose path's last segment is identical **in a build that also assigns a uniform explicit `group`** (a root `allprojects`/`subprojects { group = … }`, or a publishing plugin driving `group` from one property). Give the colliding projects distinct groups, or rename one. | Gradle identifies dependency-graph nodes by `group:name`, so both become `<group>:<leaf>:unspecified` and ordinary conflict resolution silently keeps one and drops the other — no failure, no warning, just a classpath missing classes ([#847](https://github.com/gradle/gradle/issues/847), open since 2016-11-12, reproduced on 8.12.1 on 2025-06-30, unfixed through 9.x, re-read 2026-11-27 against 9.9.2). The group conjunct is load-bearing: Gradle's default group is "the path with dots as separators," which already disambiguates nested duplicates. | `./gradlew projects --console=plain -q \| grep -oE "Project ':[^']+'" \| sed -E "s/.*:([^:']+)'/\1/" \| sort \| uniq -d` — **non-empty output is a finding only if** `grep -rn 'group\s*=' build.gradle* gradle.properties` shows a uniform assignment. Both non-empty is the violation. | MUST | any |
 
 #### Caught by a scan of every `gradle.properties` in the tree
 
@@ -297,7 +297,7 @@ it.
 
 | ID | Rule | Rationale | Verification | Sev | Floor |
 |---|---|---|---|---|---|
-| GRADLE-STRUCT-12 | Gate remote build-cache push on possession of a write credential, read through `providers.environmentVariable("<TOKEN>").isPresent` — never on CI-ness, a CI-vendor marker, or a branch name, and never through a raw `System.getenv`. | A fork PR's run is "CI" too, and GitHub Actions strips repository secrets from it by design; a credential the platform withholds from untrusted runs is the only predicate that distinguishes our CI from anyone's PR. A poisoned entry pushed once is then read by every trusted build. The `providers` half keeps the settings-time read a declared configuration-cache input, the same mechanic GRADLE-PLUG-07 enforces in plugin code. | `grep -rnE 'isPush|[^A-Za-z]push\s*=' --include='settings.gradle' --include='settings.gradle.kts' --include='*.settings.gradle.kts' .` — every hit's right-hand side must contain a credential-presence conjunct; a bare `isCiBuild`/`System.getenv("CI") != null` is the violation, and so is a correct predicate read with `System.getenv`. The `*.settings.gradle.kts` pattern is not optional (conflict D). | MUST | Gradle 7.0 for `providers.environmentVariable` |
+| GRADLE-STRUCT-12 | Gate remote build-cache push on possession of a write credential, read through `providers.environmentVariable("<TOKEN>").isPresent` — never on CI-ness, a CI-vendor marker, or a branch name, and never through a raw `System.getenv`. | A fork PR's run is "CI" too, and GitHub Actions strips repository secrets from it by design; a credential the platform withholds from untrusted runs is the only predicate that distinguishes our CI from anyone's PR. A poisoned entry pushed once is then read by every trusted build. The reading side is an attack surface too: Kotlin Gradle plugin releases before 2.4.20 deserialize build-cache metadata unsafely ([GHSA-r937-wjx7-w2jp](https://github.com/advisories/GHSA-r937-wjx7-w2jp), CVSS 6.7, verified 2026-11-27), and `KT-COMP-14` in `kotlin-quality` owns that 2.4.20 floor. The `providers` half keeps the settings-time read a declared configuration-cache input, the same mechanic GRADLE-PLUG-07 enforces in plugin code. | `grep -rnE 'isPush|[^A-Za-z]push\s*=' --include='settings.gradle' --include='settings.gradle.kts' --include='*.settings.gradle.kts' .` — every hit's right-hand side must contain a credential-presence conjunct; a bare `isCiBuild`/`System.getenv("CI") != null` is the violation, and so is a correct predicate read with `System.getenv`. The `*.settings.gradle.kts` pattern is not optional (conflict D). | MUST | Gradle 7.0 for `providers.environmentVariable` |
 
 **MUST count for GRADLE-STRUCT: 3 of 3. Total across both families: 10 MUST of 11 rules.**
 
@@ -340,8 +340,10 @@ GRADLE-PLUG half exists for, and all eight rows are corpus-unconfirmed:
   expected hash become `BuildServiceParameters`, and the download-and-verify runs
   the first time a task asks for the binary.
 - **GRADLE-PLUG-26/27** make the IP claim testable rather than assumed. The
-  plugin cannot *declare* IP compatibility — it is not a `plugin-publish`
-  Compatibility Plugin feature as of 2026-09-12 (GRADLE-PLUG-17) — so the
+  plugin cannot *declare* IP compatibility before a clean run — `isolatedProjects`
+  became a declarable `plugin-publish` Compatibility Plugin feature only from
+  plugin-publish 2.2.1 (2026-09-10), and GRADLE-PLUG-17 declares it only after the
+  GRADLE-PLUG-27 diagnostics run is clean (corrected 2026-11-27) — so the
   diagnostics run is the only artifact, and it is a TestKit leg asserting on
   `BuildResult.output`, not a human-read report.
 - **GRADLE-PLUG-29 is the precondition for the other seven.** The plugin's
@@ -502,6 +504,14 @@ new ID.
 | Verdict 11 added (TestKit reaches settings scope; mechanism and both routes) and verdict 12 added (three documented gaps: no instantiation-count surface, unpinned IP diagnostics wording, no exemplar anywhere) | — | Open question 1 answered; the parts that are gaps rather than answers moved into the Verdict per the revision contract. |
 | Open question 1 replaced: "how does `GradleRunner` apply a Settings plugin" (answered) → "which route should be the default absent the `compileOnly` trap" (genuinely unsettled) | — | The follow-up's own contested item; GRADLE-PLUG-29 ships a preference, not a measurement. |
 | MUST count 9/10 → **10/11**; GRADLE-PLUG 6/7 → **7/8** | — | One new MUST, no severity changed. |
+
+**2026-11-27 — delta refresh** (decisions in
+[refresh-2026-11/gradle-build.md](refresh-2026-11/gradle-build.md)). No rule ID
+renumbered, retired or re-meant.
+
+- GRADLE-STRUCT-12: the rationale gains the read-side sentence naming KGP before 2.4.20 (GHSA-r937-wjx7-w2jp) and deferring the floor to `KT-COMP-14` (spillover round).
+- GRADLE-PLUG-22, GRADLE-PLUG-27, GRADLE-STRUCT-10: restamped to the 9.9.2 re-read (2026-11-27); PLUG-27's rationale and STRUCT-10's `#847` status are unchanged by it.
+- GRADLE-PLUG-17 (owned by jvm-gradle-plugin-dev.md): the prose here that said IP is not declarable now says it is from plugin-publish 2.2.1, after a clean GRADLE-PLUG-27 run.
 
 ## Sub-artifacts
 

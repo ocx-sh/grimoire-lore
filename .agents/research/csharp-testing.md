@@ -10,6 +10,7 @@ consolidates:
   - csharp-audit/exemplar-build-and-gates.md (grounding: runner and coverage census :39, :49, :216-256)
   - cross-checked against csharp-crossplatform.md (CS-TEST-01..08, CS-CI-01..07), csharp-async.md (CS-ASYNC-06), csharp-build.md (CS-BUILD posture), csharp-api.md + csharp-api/csharp-api-evolution-gates.md, csharp-json.md (CS-JSON-11, class B), and the csharp-api-behavioral-compat fixture (its sub-artifact was not yet written; its evidence.txt was read)
 date: 2026-10-11
+revised: 2026-11-27
 target: "csharp-quality/testing.md, CS-TEST-09..31 (continues CS-TEST-01..08 and CS-CI-01..07)"
 fixtures: /home/mherwig/.cache/research-lang/dotnet-tools/fixtures/consolidate-csharp-testing/ (run-all.sh -> posture-tests/evidence.txt)
 ---
@@ -244,8 +245,9 @@ Each rule has a stable ID. **General** rules apply to any .NET library; **[ocx]*
   - Without a declaration the build fails with SC021.
   - An expired exemption fails CI with SC049 on the first day of its month.
   - `LicenseIgnored` survives TreatWarningsAsErrors, and CS-BUILD forbids the `-warnaserror` switch that would catch it.
+  - `Verify.XunitV3` 33.4.0 and later depends on xunit v3 4.0.3 (nuspec, read 2026-11-27), so it moves together with xunit, and a repository on 4.0.2 stays on 33.3.4 or earlier.
 - *Verify:*
-  - `dotnet build` exits 0.
+  - `dotnet build` exits 0 and the restore reports no package downgrade.
   - `! rg -n -g '*.props' -g '*.csproj' 'Verify_SponsorshipLicenseIgnored' .`
 - *Watched:* yes. 33.3.3 with no declaration gave `exit=1 SC021`; an expired exemption gave `exit=1 SC049`; 32.0.0 and a valid exemption gave `exit=0` [SP E7].
 
@@ -489,3 +491,7 @@ Fixture root: `/home/mherwig/.cache/research-lang/dotnet-tools/fixtures/consolid
 | C3 | Does `ConfigureAwait(false)` in a test still fail with the carve-out? | `./check.sh green tests/T2/T2.csproj`: `build-exit=1 [4 error xUnit1030]` | C2 tree (no ConfigureAwait): exit 0 |
 | C4 | csharp-build's `GenerateDocumentationFile=false` for tests | `./check.sh green tests/T3/T3.csproj`: `build-exit=1 [4 error EnableGenerateDocumentationFile]` | C2 (inherited `true` plus `CS1591 = none`): exit 0 |
 | C5 | Static greps for CS-TEST-12 and CS-TEST-27 | `greps/greps.sh greps/red`: 3 FAIL lines (`<NoWarn>` and `GenerateDocumentationFile>false`, xUnit1051 `none`, Shouldly/Verify/NSubstitute), exit 1 | `greps/greps.sh greps/green`: `OK`, exit 0 |
+
+## Revision log
+
+- 2026-11-27: CS-TEST-23 rationale and verification: `Verify.XunitV3` 33.4.0 and later needs xunit v3 4.0.3, so a repository on 4.0.2 stays on 33.3.4 or earlier, and the verification adds a restore with no package downgrade. Decision: `refresh-2026-11/csharp-quality.md` (changed rule CS-TEST-23). No other CS-TEST-09..31 rule is contradicted; the other testing changes in that file bind rules this file does not own (CS-TEST-05, CS-CI-02, CS-CI-06) or unnumbered reference-skill text.

@@ -4,6 +4,7 @@ topic: fixture scoping, isolation, parallelism, ordering, markers, assertion sty
 agent: scout-suite-architecture
 model: claude-sonnet-5
 date_researched: 2026-08-23
+revised: 2026-11-27
 sources_count: 22
 scope: >
   /home/mherwig/dev/ocx/test (harness, 2328 collected), /home/mherwig/dev/grimoire/test
@@ -318,3 +319,7 @@ Severity: MUST = Block, SHOULD = Warn, CONSIDER = Suggest. **Applies** column: H
 | `/home/mherwig/dev/ocx-sdk-python/pyproject.toml`, `tests/conftest.py`, `tests/contract/conftest.py`, `tests/acceptance/conftest.py` | Primary subject, read directly | current | `--strict-markers`/coverage config ground truth, three-tier conftest layering example (§1) |
 | `/home/mherwig/dev/index/bot/pyproject.toml`, `tests/core/test_serializer_golden.py`, `tests/golden/` | Primary subject, read directly | current | `[tool.mutmut]` config, golden-fixture provenance pattern (§6-7) |
 | Scratch demo at `/tmp/claude-1000/.../scratchpad/pytest-demo/` | This file's own planted-violation test | 2026-08-23, this session | `--strict-markers` red/green transcript quoted verbatim in §5; `time.sleep` annotation-finder red/green run in §2b |
+
+## Revision log
+
+- 2026-11-27: Normative candidate 1 (`--strict-markers`, the PY-TEST-13 candidate) and the matching statements in section 5 are contradicted in two ways. First, the spelling: `--strict-markers` in `addopts` is no longer the only pass. On pytest 9.0 or newer, `strict_markers = true` or `strict = true` with no `strict_markers = false` override also enables strict markers, so the candidate's verification grep for `--strict-markers` alone reports a false finding on the spelling pytest now prefers. Second, the version caveat: on pytest 9.0.x the `addopts` flag was silently ignored (fixed in 9.1.0), so a project on 9.0.x needs an ini spelling; and on pytest 9.2.0 (2026-10-27) strict markers also cover `-m` expressions, where `pytest --collect-only -q -m "not zz_probe"` exiting 4 with `Unknown marker(s) in '-m' expression` proves strictness whatever the spelling. The collection error text also carries backticks: `` 'requires_dokcer' not found in `markers` configuration option ``. The red/green transcript in section 5 stays valid for the `addopts` spelling. See `.agents/research/refresh-2026-11/python-quality.md` (PY-TEST-13).

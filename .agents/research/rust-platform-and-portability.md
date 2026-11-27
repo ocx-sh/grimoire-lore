@@ -12,7 +12,7 @@ consolidates:
   - .agents/research/ocx-codebase-audit/errors-async-security.md
   - .agents/research/ocx-codebase-audit/crate-architecture.md
 date: 2026-08
-revised: 2026-08
+revised: 2026-11-27
 ---
 
 # Platform and portability: paths, Windows/macOS divergence, clocks
@@ -52,7 +52,11 @@ ocx builds paths from wire data at 1,664 `std::fs`/`tokio::fs` call sites, grimo
    offset-only lossy serde — is inert once PLAT-31 mandates UTC `Z` for every persisted
    timestamp. Porting a shipped lockfile's date fields to buy a property we mandate anyway is
    pure cost. The rule that survives is the one that actually matters: **exactly one datetime
-   crate in the graph**, and today that is chrono.
+   crate in the graph**, and today that is chrono. As of 2026-11-27 chrono is flagged
+   unmaintained (RUSTSEC-2026-0543), which turns `cargo deny check` red under
+   `unmaintained = "workspace"`. The ignore for that advisory must be tracked with its removal
+   condition, the move to jiff 1.x (1.0 shipped 2026-11-15). That move is one reviewed change
+   that swaps the crate; it is not made in this refresh.
 6. **mtime is not a freshness predicate.** Not "with caveats" — FAT buckets writes into 2-second
    granularity, extraction resets mtime, NTFS delays access-time writeback by up to an hour. We
    already compute a SHA-256 digest for every blob; that is the freshness key. mtime survives
@@ -192,7 +196,7 @@ written exception. `CONSIDER` = raise in review.
 | PLAT-27 | `Instant` for every elapsed-time, TTL, timeout, backoff, and rate-limit decision. `SystemTime` only for values that get persisted or crossed a process boundary. | `SystemTime` is not monotonic — the stdlib docs state two sequential writes can read back out of order. `Instant` cannot produce a negative duration through normal use. | `grep -rn -A3 --include='*.rs' 'SystemTime::now()' src crates` — none of the surrounding code may compute an elapsed duration for a TTL/timeout decision. | MUST |
 | PLAT-28 | Never `.unwrap()`/`.expect()` a `SystemTime::duration_since` or `SystemTime::elapsed`. Match the `Err(SystemTimeError)` and treat it as "cannot prove freshness" → stale, logged, non-fatal. | A backwards clock step is routine: NTP correction, `timedatectl`, VM live migration, a container booting with a wrong clock that self-corrects seconds later. A `SystemTimeError` on the first cache check after process start is realistic. | `grep -rn --include='*.rs' 'duration_since(.*)\.\(unwrap\|expect\)\|elapsed()\.\(unwrap\|expect\)' src crates` — every non-test hit is a panic-on-clock-step bug. | MUST |
 | PLAT-29 | Filesystem mtime is never the sole gate for "is this artifact stale". Use the content digest we already compute, a monotonic generation counter in the cache index, or an explicit cache-entry metadata record written atomically alongside the artifact. mtime is permitted only as a cheap short-circuit paired with a stronger check, or as a throttle window where being wrong costs one redundant operation. | FAT buckets write-time into 2-second granularity and access-time into a day; NTFS delays access-time writeback up to an hour; extraction and copy routinely reset mtime to *now*, the exact inverse of "content unchanged since X". | `grep -rn -B3 -A3 --include='*.rs' '\.modified()' src crates` — every production hit is paired with a digest/counter check or is an explicit throttle. | MUST |
-| PLAT-30 | Exactly one datetime crate in the dependency graph. Today that is `chrono`, already deployed in both codebases. Adding `time` or `jiff` alongside it is a `cargo deny` bans finding, not a style nit. | Two crates modeling "instant in time" emit two different serde representations of the same logical lockfile field; a binary linking one and reading a file written by the other either fails to parse or silently misinterprets. This overrules the sub-artifact's `time`-0.3 recommendation: chrono's only disqualifying defect is offset-only lossy serde, which PLAT-31 renders inert, and porting a shipped on-disk format to buy a property we already mandate is pure cost. | `cargo tree -e normal \| grep -iE '(^\|[^-])(chrono\|jiff\|time) v'` — exactly one family. | MUST |
+| PLAT-30 | Exactly one datetime crate in the dependency graph. Today that is `chrono`, already deployed in both codebases. Adding `time` or `jiff` alongside it is a `cargo deny` bans finding, not a style nit. | Two crates modeling "instant in time" emit two different serde representations of the same logical lockfile field; a binary linking one and reading a file written by the other either fails to parse or silently misinterprets. This overrules the sub-artifact's `time`-0.3 recommendation: chrono's only disqualifying defect is offset-only lossy serde, which PLAT-31 renders inert, and porting a shipped on-disk format to buy a property we already mandate is pure cost. **Revised 2026-11-27:** chrono is now flagged unmaintained (RUSTSEC-2026-0543). With `unmaintained = "workspace"` (SEC-25) that fails the gate for a direct dependency, so the `[advisories].ignore` entry names that ID and the removal condition: the move to jiff 1.x (1.0 shipped 2026-11-15, `Zoned` renamed `ZonedDateTime`), made as one reviewed change that swaps the crate, never by adding jiff beside chrono. | `cargo tree -e normal \| grep -iE '(^\|[^-])(chrono\|jiff\|time) v'` — exactly one family. `cargo deny check advisories` also passes with RUSTSEC-2026-0543 ignored under a stated removal condition (the move to jiff 1.x), never with `unmaintained` lowered. | MUST |
 | PLAT-31 | Every persisted timestamp is RFC 3339 with an explicit `Z` UTC offset. Never a local offset, never a naive/unzoned string, never a bare epoch integer in a file a human will `cat` or a tool will diff. | Self-describing, diffable, unambiguous about both zone and precision — and it is precisely what makes chrono's offset-only serde a non-issue. An epoch integer is opaque to anyone debugging a stale-cache report and silently discards sub-second precision. | Grep the golden fixtures for the literal `Z` suffix on every timestamp field; a bare `+05:00` or an unsuffixed value is a bug. Confirm each field pins its format via `#[serde(with = …)]` rather than relying on the derive default. | MUST |
 | PLAT-32 | Registry-supplied time values are untrusted readings of a remote clock, never a synchronization source. Never diff `Date`/`Last-Modified` against a local `SystemTime::now()`. Measure `Cache-Control: max-age` and `Retry-After` against a locally-recorded `Instant` taken when the response arrived; prefer `ETag` + `If-None-Match` over `Last-Modified` whenever the registry sends both. | [RFC 9111 §4.2](https://www.rfc-editor.org/rfc/rfc9111.html) is normative that clock skew between client and server must not corrupt age or freshness math. `Retry-After`'s delay-seconds form is clock-independent and authoritative when present. | `grep -rn -A5 --include='*.rs' 'Last-Modified\|max-age\|Retry-After' src crates` — the value may feed only relative or validator logic. | MUST |
 | PLAT-33 | In backoff, rate-limit, and deadline code, use `Instant::checked_duration_since` rather than bare subtraction, or document why saturating to zero is acceptable there. | `Instant` arithmetic saturates to `Duration::ZERO` on a monotonicity violation rather than panicking — safe by default, but it silently turns a rate limiter or a backoff calculation into a no-op. | Reading heuristic on any backoff/rate-limit path; `grep -rn --include='*.rs' 'checked_duration_since' src crates` should be non-empty there. | CONSIDER |
@@ -407,9 +411,11 @@ Ranked by how often it bites, worst first.
 - **PLAT-10 ownership.** Path-context-on-`io::Error` sits between this group and the
   error-handling wave. It is stated here because the filesystem surface is where it bites;
   confirm it is not double-stated when the two rulesets are merged into shipped rules.
-- **`jiff` at 1.0.** PLAT-30 pins chrono on cost grounds, not merit. If jiff ships 1.0 and a
-  lockfile schema bump is happening for another reason, re-evaluate — but as one deliberate,
-  reviewed migration, never an incremental swap.
+- **When to make the jiff migration.** PLAT-30 pins chrono on cost grounds, not merit. The
+  trigger has fired: jiff 1.0 shipped 2026-11-15 and chrono is flagged unmaintained
+  (RUSTSEC-2026-0543). The migration is not made in the 2026-11 refresh. Still open is the
+  timing, as one deliberate, reviewed change that swaps the crate and ports the persisted
+  timestamp fields, never an incremental swap.
 
 ## Revision log
 
@@ -479,6 +485,16 @@ pre-existing IDs keep their numbers and meaning.
   reader, ReFS crash-consistency, the absence of any directory-fsync analogue, the
   non-certifiability of cap-std's Windows walk against every tag, undocumented reparse payload
   formats, and the unknowability of 8.3 short-name presence.
+
+2026-11-27 — delta refresh; decision file `refresh-2026-11/rust-quality.md`. No ID renumbered.
+
+- **Changed: PLAT-30** — states RUSTSEC-2026-0543 (chrono unmaintained), the required tracked
+  advisory ignore with its removal condition (the move to jiff 1.x), and the one-change
+  migration; verification adds `cargo deny check advisories` with the ignore present and
+  `unmaintained` not lowered. Decision file: `refresh-2026-11/rust-quality.md`.
+- **Verdict** — item 5 notes the advisory and the jiff 1.0 condition.
+- **Open questions** — the jiff 1.0 question is reframed: the trigger fired, only the migration
+  timing remains open.
 
 ## Sub-artifacts
 

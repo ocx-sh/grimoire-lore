@@ -3,6 +3,7 @@ title: Python research program — frame
 phase: 0
 model: opus
 date: 2026-08-22
+revised: 2026-11-27
 ---
 
 # Frame (phase 0)
@@ -55,3 +56,8 @@ already decided against owning non-domain code and deleted its equivalent.
 The `.agents/research/` tree already holds the Rust corpus. Python uses the
 `python-` prefix throughout: `python-topic-map.md`, `python-topic-map/<scout>.md`,
 `python-audit/<axis>.md`, `python-<topic>.md`, `python-<topic>/<worker>.md`.
+
+## Corrections
+
+- 2026-11-27: "Current release at research time: 3.14" is superseded. Python 3.15.0 shipped on 2026-10 and is now the current release. Source: `refresh-2026-11/python-packaging.md` (Revision log) and `refresh-2026-11/python-quality.md` (encoding scope by version).
+- 2026-11-27: The `>=3.10` floor row describes a floor that is no longer a supported CPython. CPython 3.10 reached end of life on 2026-10-01 (final release 3.10.22), and python-build-standalone stopped shipping 3.10 builds from tag 20261013. uv can still install 3.10.22, so the harnesses still run. Whether to keep or raise that floor is an open owner decision. The "binding constraint" wording describes the state at research time. Source: `refresh-2026-11/python-packaging.md`.

@@ -5,8 +5,9 @@ yet, or when reviewing one against the runbook. Both files are the pinned
 defaults: raw per-platform binaries, `checksums.txt`, a per-binary SBOM, a
 keyless cosign bundle and a build-provenance attestation. Rename `mytool` and
 the module path to yours. Every version and commit SHA below was resolved on
-2026-09-26, and the goreleaser file was run with goreleaser 2.17.1, Go 1.27.1
-and syft 1.51.0.
+2026-09-26, except the `actions/attest` SHA and the goreleaser `v2.20.3` pin,
+resolved on 2026-11-27. The goreleaser file was run with goreleaser 2.17.1,
+Go 1.27.1 and syft 1.51.0.
 
 Contents: [The goreleaser config](#the-goreleaser-config) ·
 [The release workflow](#the-release-workflow) ·
@@ -108,11 +109,11 @@ jobs:
       - uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
         with:
           distribution: goreleaser
-          version: v2.17.1
+          version: v2.20.3
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+      - uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
           subject-checksums: dist/checksums.txt
 ```
@@ -126,7 +127,7 @@ jobs:
 | `GOTOOLCHAIN: local` | the build uses the toolchain setup-go installed and never downloads another one | GO-MOD-16 |
 | `cosign-release: v3.1.3` | cosign-installer v4.1.2 defaults to v3.0.6 otherwise | GO-REL-11 |
 | `download-syft` | the `sboms` block fails the release with exit 1 when syft is missing | GO-REL-09 |
-| `version: v2.17.1` | the action's default `~> v2` floats across releases | GO-REL-07 |
+| `version: v2.20.3` | the action's default `~> v2` floats across releases | GO-REL-07 |
 | `GORELEASER_CURRENT_TAG` | picks the `vX.Y.Z` tag when a commit also carries a `<dir>/vX.Y.Z` tag | GO-REL-14 |
 | `subject-checksums` | attests every published name, see the traps below | GO-REL-11 |
 

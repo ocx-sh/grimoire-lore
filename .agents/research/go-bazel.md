@@ -17,7 +17,7 @@ fixtures:
   - /home/mherwig/.cache/research-lang/go-tools/fixtures/go-bazel-consolidation/
   - /home/mherwig/.cache/research-lang/go-tools/fixtures/go-bazel-revision/
 date: 2026-09-26
-revised: 2026-09-26
+revised: 2026-11-27
 ---
 
 # Bazel for Go: the BZL-GO depth file
@@ -142,7 +142,7 @@ unstripped twin) and GO-REL-14.
 | ID | Rule | Rationale | Verification | Watched red? | Sev | Floor |
 |---|---|---|---|---|---|---|
 | BZL-GO-12 | Fix one external module's BUILD generation with a per-module `go_deps.gazelle_override`, and upstream it to `default_gazelle_overrides.bzl`. Never use `go_deps.gazelle_default_attributes`. | `gazelle_default_attributes` "will overwrite #3 (which now must be applied manually by users)": it turns off the public registry overrides for **every** module (`bzlmod.md:319-340`). | `grep -rn --include=MODULE.bazel -e 'gazelle_default_attributes' .`: empty output passes. | no. This is a reading heuristic: the precedence order is a single-source primary read, and reproducing it needs a module that ships a registry override. | SHOULD | gazelle 0.54.0 |
-| BZL-GO-13 | When a Go module's version looks wrong under Bazel, look in three places in order. <br>1. `bazel_dep` in `MODULE.bazel`: a Go module that a Bazel module provides is always that version. <br>2. `go_deps.config(check_direct_dependencies = …)`: the default is a printed warning, and `"error"` fails the build. <br>3. The rule-set modules' own `go.mod` (BZL-GO-11). <br>`replace` in `go.mod` is effective only in the root Bazel module. | A plain-`go` mental model has no answer for any of the three. The dive named the attribute `checks`, but the real attribute is `check_direct_dependencies` (gazelle 0.54.0 `internal/bzlmod/go_deps.bzl:400,418-423,928-934`). | Reading order as stated. For the config: `grep -rn --include=MODULE.bazel -e 'check_direct_dependencies' .`. | no, doc-derived (dive §6). Case 3 was measured under BZL-GO-11. | CONSIDER | gazelle 0.54.0 |
+| BZL-GO-13 | When a Go module's version looks wrong under Bazel, look in three places in order. <br>1. `bazel_dep` in `MODULE.bazel`: a Go module that a Bazel module provides is always that version. <br>2. `go_deps.config(check_direct_dependencies = …)` (`checks = …` on the gazelle 2.x line): the default is a printed warning, and `"error"` fails the build. <br>3. The rule-set modules' own `go.mod` (BZL-GO-11). <br>`replace` in `go.mod` is effective only in the root Bazel module. | A plain-`go` mental model has no answer for any of the three. On gazelle 0.x (0.54.0) the attribute is `check_direct_dependencies`, not the `checks` the dive named (`internal/bzlmod/go_deps.bzl:400,418-423,928-934`); on the 2.0.0 beta line (2.0.0-beta.2, 2026-10-08) `checks` replaces it and the old name prints a deprecation message. On both, the default only prints a warning. | Reading order as stated. For the config: `grep -rn --include=MODULE.bazel -e 'check_direct_dependencies' -e 'checks *=' .`. | no, doc-derived (dive §6), gazelle 0.54.0 source read 2026-09-26 and the 2.0.0-beta source read 2026-11-27. Case 3 was measured under BZL-GO-11. | CONSIDER | gazelle 0.54.0 |
 
 **MUST count: 12** (BZL-GO-01..11 and 14. 02, 04, 05, 06, 09, 11 and 14 are code-kind- or
 nogo-conditional as marked. BZL-GO-15 is SHOULD because GO-REL-05, which it carries, is a
@@ -242,6 +242,7 @@ Ranked by how often an agent will hit each one: first-contact setup, then CI wir
 
 **Another research round needed:**
 - **bazel-go / `go_work` and #1797.** The gazelle dogfood uses `go_deps.from_file(go_work = …)`. The dependency-cycle divergence in bazelbuild/bazel-gazelle#1797 (open) was not fixture-run, and neither was the Windows runtime behavior of the `windows_amd64` artifact (compiled only).
+- **bazel-go / rules_go 0.64 and later.** BZL-GO-14 and BZL-GO-15 byte identity was measured on rules_go 0.63.0 and not re-measured on 0.64 or later. rules_go 0.64.0 dropped the fixed `-buildid=redacted` link flag and 0.65.0 derives Go build IDs from the linked binary ([PR 4728](https://github.com/bazel-contrib/rules_go/pull/4728)), so re-run the two-clone `sha256sum` check before claiming byte identity there. It is also unknown whether rules_go 0.65.0's `go.mod` still produces the BZL-GO-11 uplift example, and the citation of gazelle's `bzlmod.md` could not be located at `docs/bzlmod.md`.
 - **bazel-go / release across `--platforms`.** BZL-GO-14's byte-identity was measured for the host `linux_amd64` only. Cross-built `darwin`/`windows` artifacts under `--strip=never --stamp` have not been double-built.
 
 ## Conflicts resolved
@@ -258,7 +259,7 @@ Ranked by how often an agent will hit each one: first-contact setup, then CI wir
 5. **Dive against GO-MOD-01/16, on the library SDK.** The dive read the `.0`-floor SDK as matching wave-2 guidance. In fact it removes the `stable` test leg. Resolution: BZL-GO-02 adds an extra SDK plus `sdk_version`, both measured.
 6. **GO-REL-05 against rules_go, on stamping.** `-X` plus `ReadBuildInfo` becomes `x_defs` for both the semver and the commit, because `ReadBuildInfo` has 0 `vcs.*` settings under Bazel (measured).
 7. **The map against the audit against the dive, on version lag.** The map said gazelle's README lags its `MODULE.bazel`. The audit shows the opposite: the README's `WORKSPACE` snippet pins 0.62.0 while `MODULE.bazel` pins 0.59.0. The dive shows `bzlmod.md` lagging the BCR by 6 and 9 minors. None of them is current: only BCR `metadata.json` is (BZL-FLAG-28).
-8. **The dive's `go_deps.config(checks = …)` against gazelle's source.** The attribute is `check_direct_dependencies`, and its default is a print.
+8. **The dive's `go_deps.config(checks = …)` against gazelle's source.** On gazelle 0.x the attribute is `check_direct_dependencies`; on the 2.0.0 betas `checks` replaces it. The default is a print on both lines.
 9. **The dive's two doc-derived MVS divergences against a third, measured one (amended in revision).** `go_deps` MVS includes rules_go's own `go.mod`, so the binary links a different x/text than the source graph shows. That became BZL-GO-11, a MUST. The first consolidation also claimed the uplift "shipped a vulnerable x/text". That claim rested on a **stripped** binary. Unstripped, the same tree scans clean. The version divergence stands. The reachable-vulnerability claim is withdrawn, and a new unstripped plant now carries the red.
 10. **The audit ("both repos declare a `nogo`") against registration.** Declared isn't registered. Under Bzlmod neither repo registers nogo, which is the BZL-GO-05 violation.
 11. **The dive against the audit, on gazelle's SDK.** The dive said gazelle has "no `go_sdk` call". The audit said it has a dev `download`. Both are partial: `MODULE.bazel:18-23` uses `go_sdk` only for `use_repo`, and `:58-59` is `go_sdk_dev.download(version = "1.24.12")`.
@@ -307,3 +308,7 @@ under `go-bazel-release/` and `stamping-and-release/`.
 - **Verdict:** item 1 gains the stdversion bullet. Item 6 is extended with the strip trap and the withdrawn red. Items 7 (release recipe) and 9 (documented gap: nogo can't see the `go` line) are new. The old 7 and 8 are renumbered to 8 and 10. These are Verdict items, not rule IDs.
 - **Open questions:** removed nogo `stdversion`, release artifacts and `--workspace_status_command` path forms, which are all answered. Added release reproducibility across `--platforms`. `go_work`/#1797 stays open.
 - **Conflicts 9 amended; 12-15 added.** **Failure modes** 6, 8, 11, 12 and 19 added, 13 widened, and the list renumbered. **MUST count** 11 → 12.
+
+2026-11-27, delta refresh (decisions in `refresh-2026-11/bazel-quality.md`):
+- **BZL-GO-13, changed in place** (`refresh-2026-11/bazel-quality.md`, edits 37-40). `check_direct_dependencies` holds on gazelle 0.x; `checks` replaces it on the 2.0.0 betas, and the grep matches both spellings. Conflict 8 amended to match.
+- **Open questions** (`refresh-2026-11/bazel-quality.md`, edit 41): added the rules_go 0.64 and later re-measure note for BZL-GO-14 and BZL-GO-15 byte identity, with the unresolved BZL-GO-11 uplift and `bzlmod.md` citation items. No rule row changed.

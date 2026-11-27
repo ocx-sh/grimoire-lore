@@ -28,7 +28,7 @@ Contents: [The Gate](#the-gate) · [Non-Negotiables](#non-negotiables) ·
 
 **Before trusting any rule below, know what a green `./gradlew build` does not
 prove.** It does not prove the configuration cache is on, because Gradle 9
-disables it for a task and carries on rather than failing (`GRADLE-CACHE-08`).
+disables it and carries on rather than failing (`GRADLE-CACHE-08`).
 It does not run `validatePlugins`, so every task-annotation defect stays a
 `jar`-time warning nobody reads (`GRADLE-PLUG-01`). It does not pin a version,
 because a version catalog constrains requests and pins nothing
@@ -39,8 +39,8 @@ believed by everyone (`GRADLE-STRUCT-11`). All four look exactly like a pass.
 ## The Gate
 
 Run it after every change, narrowest scope first. Each stage costs more than the
-last, so the common case never reaches the slow ones. Gradle 9.x, verified
-2026-09-12.
+last, so the common case never reaches the slow ones. Gradle 9.x, current
+9.9.2, verified 2026-11-27.
 
 ```bash
 ./gradlew help --configuration-cache   # the configuration phase, cheapest of all
@@ -98,8 +98,8 @@ and verification.
 | 12 | Never `enforcedPlatform()` in a module that is published or consumed as a library, and never `strictly(...)` or the `!!` shorthand in a published library's own `api` or `implementation` declarations. | GRADLE-DEP-05, GRADLE-DEP-06 |
 | 13 | An `org.gradle.*` key lives only in a build root's `gradle.properties`, the configuration and build caches are switched on there rather than by a CI flag, and remote build-cache **push** is gated on possession of a write credential read through `providers.environmentVariable(...).isPresent`, never on CI-ness or a branch name. | GRADLE-STRUCT-11, GRADLE-CI-04, GRADLE-STRUCT-12 |
 | 14 | Inside a precompiled script plugin, never a dot-notation catalog accessor, never an `org.gradle.accessors.dm.LibrariesForLibs` import to restore one, and never `alias(libs.plugins.x)`. Bind the catalog through `VersionCatalogsExtension` and declare the plugin's marker artifact in the build-logic module's own `dependencies {}`. | GRADLE-STRUCT-03, GRADLE-STRUCT-04, GRADLE-STRUCT-05 |
-| 15 | Never publish a merged jar under a library's primary coordinates: vendoring requires namespace relocation, real POM dependencies for everything left unbundled, and a written reason. Every shaded jar excludes `META-INF/*.SF`, `*.DSA`, `*.RSA` and `*.EC`, all four in one list, or the JVM throws `SecurityException` at class load. The plugin id is `com.gradleup.shadow`, and `com.github.johnrengelman.shadow` is the dead pre-2023 coordinate (verified 2026-09-12). | GRADLE-DIST-02, GRADLE-DIST-05, GRADLE-DIST-13, GRADLE-DIST-12 |
-| 16 | Author a release against the Central Portal directly, never against `oss.sonatype.org`, `s01.oss.sonatype.org` or `io.codearte.nexus-staging`, because OSSRH ended 2025-06-30 (verified 2026-09-12). No `credentials { }` username or password is a string literal, and no committed `repositories { }` block declares `mavenLocal()`. | GRADLE-PUB-16, GRADLE-PUB-08, GRADLE-PUB-15 |
+| 15 | Never publish a merged jar under a library's primary coordinates: vendoring requires namespace relocation, real POM dependencies for everything left unbundled, and a written reason. Every shaded jar excludes `META-INF/*.SF`, `*.DSA`, `*.RSA` and `*.EC`, all four in one list, or the JVM throws `SecurityException` at class load. The plugin id is `com.gradleup.shadow`, and `com.github.johnrengelman.shadow` is the dead pre-2023 coordinate (verified 2026-11-27). | GRADLE-DIST-02, GRADLE-DIST-05, GRADLE-DIST-13, GRADLE-DIST-12 |
+| 16 | Author a release against the Central Portal directly, never against `oss.sonatype.org`, `s01.oss.sonatype.org` or `io.codearte.nexus-staging`, because OSSRH ended 2025-06-30 (verified 2026-11-27). No `credentials { }` username or password is a string literal, and no committed `repositories { }` block declares `mavenLocal()`. | GRADLE-PUB-16, GRADLE-PUB-08, GRADLE-PUB-15 |
 | 17 | Every workflow `uses:` is pinned to a 40-character commit SHA, a `./` local action excepted, and every workflow declares `permissions:` at its root starting from `contents: read`. | GRADLE-CI-09, GRADLE-CI-10 |
 | 18 | Never reach green by weakening the check, and never ship a verification nobody has watched go red. | GRADLE-CORE-01, GRADLE-CORE-02 |
 
@@ -182,5 +182,5 @@ defect never surfaces as a failure and is paid for as a stale artifact instead.
 - **`bazel-quality`**, for a repository that builds with Bazel and keeps a
   Gradle build only as a publishing handoff. Whether `rules_jvm_external`'s
   `java_export` can produce a Portal-acceptable bundle was unresolved as of
-  2026-09-12; the hand-off-to-Gradle path, which is dagger's own answer, is
+  2026-11-27 (rules_jvm_external 7.2); the hand-off-to-Gradle path, which is dagger's own answer, is
   governed here.

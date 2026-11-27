@@ -115,7 +115,7 @@ git ls-files --cached --others --exclude-standard -- ':(glob)**/mod.rs' ':(exclu
 |---|---|---|---|
 | ARCH-19 | Every new workspace member names, in the PR description, at least one of: an actual second consumer, a hard dependency/feature isolation need, a **measured** compile-time bottleneck, or an independent semver promise. "For organization" is not a reason. | A diff adding `crates/*/Cargo.toml` without a stated reason is rejected | MUST |
 | ARCH-20 | Adopt the pinned crate shape below. Never nest crate directories — Cargo's crate namespace is flat regardless of the directory tree, so a nested layout drifts. | see block ARCH-20, which returns nothing — a bare `find crates …` aborts on a single-crate repo; `cargo tree -e normal -p '<name>-types'` shows no tokio/reqwest/starlark | MUST |
-| ARCH-21 | Declare dependency versions, package metadata and lints once in `[workspace.dependencies]`/`[workspace.package]`/`[workspace.lints]`, and add `[lints] workspace = true` to **every** member manifest — workspace lints are not implicitly inherited, and a member without the opt-in silently gets none. | see block ARCH-21 — every member it lists is missing the opt-in; the workspace root manifest is not a member, so ignore it | MUST |
+| ARCH-21 | Declare dependency versions, package metadata and lints once in `[workspace.dependencies]`/`[workspace.package]`/`[workspace.lints]`, and add `[lints] workspace = true` to **every** member manifest — workspace lints are not implicitly inherited, and a member without the opt-in silently gets none. | see block ARCH-21 — every member it lists is missing the opt-in; the workspace root manifest is not a member, so ignore it. On Cargo 1.100+ `cargo check` also reports a missing opt-in through the warn-by-default `cargo::missing_lints_inheritance` lint | MUST |
 | ARCH-22 | Only if a crate is ever published to crates.io: declare internal deps as `{ path, version }`, gate merges on `cargo semver-checks`, enable `missing_docs`, seal public traits. Until publishing is decided, do none of it — each pays semver/docs overhead for a contract with no consumer. | see block ARCH-22 — a member lacking it activates this rule | CONSIDER |
 
 ```sh
@@ -181,9 +181,12 @@ workspace = true
     `impl Deref for Wrapper`. Compiles, looks clever, violates C-DEREF.
 11. **`unsafe { env::set_var }` in tests.** Silences the edition-2024 error and
     leaves the parallel-test data race intact.
-12. **Hallucinated tooling.** `clippy::pub_use` does not exist (it is
-    `wildcard_imports` plus a config key); `cargo publish --workspace
-    --dependency-order` has no such flag. Also: an in-memory FS double proves
+12. **Hallucinated tooling.** `cargo publish --workspace
+    --dependency-order` has no such flag: `--workspace` exists (Cargo 1.90)
+    and already publishes in dependency order. The inverse error is as
+    common: `clippy::pub_use` is real (restriction group, allow by default,
+    since 1.62), so check a lint name against the Clippy index before calling
+    it invented. Also: an in-memory FS double proves
     nothing about rename-across-filesystems, permission bits, or partial writes.
 
 ## Sources

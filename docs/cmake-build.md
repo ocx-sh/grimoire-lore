@@ -12,7 +12,7 @@ The depth files and checks scripts ship in the [`cmake-build-reference`](cmake-b
 
 Loads on `**/CMakeLists.txt`, `**/*.cmake`, `**/*.cmake.in`,
 `**/CMakeLists.txt.in`, `**/CMakePresets.json`, `**/CMakeUserPresets.json`,
-`**/*.pc.in`, `**/.gersemirc` and `**/.cmake-format*`. The index is 185 lines
+`**/*.pc.in`, `**/.gersemirc` and `**/.cmake-format*`. The index is 191 lines
 and always present. A depth file is read only when the work calls for it.
 
 ## It starts with what a green configure does not prove
@@ -36,8 +36,8 @@ test.
 
 ## What is in it
 
-The index carries the gate, eighteen non-negotiables, and five cross-cutting
-rules it owns outright. 164 rules in total, 96 of them merge-blocking, spread
+The index carries the gate, eighteen non-negotiables, and six cross-cutting
+rules it owns outright. 165 rules in total, 97 of them merge-blocking, spread
 over ten depth files: version floors and policies, the CMake language itself,
 module authoring, targets and linkage, install and export, dependency
 acquisition, toolchains and providers, testing, presets and CI, and the Bazel
@@ -71,11 +71,11 @@ The floor is written with three literal dots, `VERSION 3.25...4.4`, because
 two dots parse as one version number and set nothing. The configure gate is
 spelled per binary: `-Werror=author` on CMake 4.4 and newer, `-Werror=dev` on
 4.3 and older, and `-Werror=dev` on any command line that has to serve both,
-which CMake 4.4 still honours with a one-line deprecation notice. CPS import
+which CMake 4.4.2 through 4.5.1 still honour with a one-line deprecation notice. CPS import
 is stable from CMake 4.3, and a valid `.cps` beats an `XConfig.cmake` sitting
 in the same prefix there, with the fallback to Config silent whenever the
 `.cps` is rejected. gersemi is SHOULD, and cmake-lint and cmake-format are
-dead: both last released in 2020, and no maintained semantic linter has taken
+dead: both last released in 2020, and no semantic linter has taken
 their place.
 
 Each is a default an adopter overrides once, repository-wide, never per leg.

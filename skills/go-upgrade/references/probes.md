@@ -6,6 +6,9 @@ bump that changes the fact is caught before the old wording keeps shipping.
 
 Measured 2026-09-26 against Go 1.27.1, golangci-lint v2.14.0 (built with
 go1.27.1, bundled staticcheck 0.8.1) and standalone staticcheck 2026.2.1.
+The pin moved to golangci-lint v2.15.0 (bundled errcheck 1.30.0 and staticcheck
+0.8.2) on 2026-11-27, and no probe here was re-run on it: run every probe
+before trusting its verdicts.
 
 Contents: [How to run a probe](#how-to-run-a-probe) ·
 [P1. Unattended fix safety](#p1-unattended-fix-safety) ·

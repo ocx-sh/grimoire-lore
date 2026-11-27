@@ -4,6 +4,7 @@ topic: python-packaging
 agent: ground-tooling
 model: claude-sonnet-5
 date_researched: 2026-08-23
+revised: 2026-11-27
 sources_count: 17
 scope: >
   What a `pyproject.toml` must and must not claim for four shapes — shipped
@@ -45,7 +46,7 @@ scope: >
 - The specific failure src-layout prevents: without it, a bare `pytest` run from the repo root imports the *working-tree* copy (cwd goes first on `sys.path`), so tests can pass against source that a broken packaging config would never actually ship in the wheel ([packaging.python.org][src-layout]).
 - `uv.lock` is not yet a standard format; PEP 751 `pylock.toml` is Final (2025-03-31) and is explicitly designed as an *export target* other tools already have their own lock format for — `uv export --format pylock.toml` and `--format cyclonedx1.5` both work today (verified locally, uv 0.12.1) ([PEP 751][pep751]).
 - PyPI Trusted Publishing (OIDC, `id-token: write`, 15-minute tokens) is the recommended posture over long-lived API tokens — both `ocx-sdk-python` and `ocx-mirror-sdk` already use it correctly ([docs.pypi.org][trusted-publishers]).
-- PEP 740 index attestations are Final (2024-07-17) and PyPI has deployed them, but nothing in this fleet's release workflows requests one explicitly — it isn't automatic just from Trusted Publishing without confirming the action version supports it.
+- PEP 740 index attestations are Final (2024-07-17) and PyPI has deployed them; attestations are on by default under Trusted Publishing, so nothing in this fleet's release workflows needs to request one explicitly (confirmed in the 2026-11 refresh).
 - `uv init` now defaults new scaffolds to uv's own `uv_build` backend (not hatchling) as of mid-2026 — none of this fleet's three built packages use it; they all predate that default and use hatchling, which remains the more capable choice for anything beyond pure-Python.
 - Ruff config location is a hard requirement, not a style choice, the moment a project has no `pyproject.toml` at all: `grimoire-lore` (PEP 723 scripts, no `[project]` table) *must* use standalone `ruff.toml`; `.ruff.toml` beats `ruff.toml` beats `[tool.ruff]` in pyproject.toml when more than one is present in the same directory ([docs.astral.sh/ruff][ruff-config]).
 - `deptry` run correctly (self-package declared via `--known-first-party`, `[project.optional-dependencies]` dev groups declared via `--optional-dependencies-dev-groups`, `DEP004` suppressed because it only makes sense when tests are excluded from the scan — see Finding 8) found **zero real dependency defects** in `ocx-sdk-python` and `index/bot`; a first, naively-invoked pass produced 67 and 34 false positives respectively, entirely attributable to three flag mistakes (documented below so nobody repeats them).
@@ -334,11 +335,10 @@ only an unclaimed opportunity.
 **Attestations**: PEP 740 is Final (2024-07-17) and PyPI has deployed
 index-hosted attestation support ("PyPI allows the following attestation
 predicates: SLSA Provenance and PyPI Publish,"
-[docs.pypi.org/attestations][pypi-attestations]) — but attestation
-generation is not automatically implied merely by using Trusted Publishing;
-it depends on the publish action's own version supporting it. Not verified
-against `pypa/gh-action-pypi-publish@v1.14.2`'s specific behavior here — flagged
-as open in Contested/evolving rather than asserted either way.
+[docs.pypi.org/attestations][pypi-attestations]) — and attestations are
+on by default under Trusted Publishing (confirmed in the 2026-11 refresh, see
+`.agents/research/refresh-2026-11/python-packaging.md`), so no explicit opt-in
+is needed.
 
 ### 7. Tool configuration location
 
@@ -553,8 +553,11 @@ tool.
    pyproject.toml` is 0, and `grep -c '^license = "' pyproject.toml` is 1.
 4. **Rule**: A shipped library's `dependencies` carry lower bounds only,
    unless a specific version is known-incompatible — no upper caps "just in
-   case." **Rationale**: PyPA's own guidance; upper caps are what cause
-   downstream resolver deadlock. **Verification**: `grep -E '[a-z_-]+<[0-9]'
+   case." **Rationale**: PyPA's own guidance; an unexplained `<4.0` makes
+   every interpreter past the cap a resolver conflict for consumers on
+   pip-style resolvers and an install refusal for the project's own
+   contributors; uv ignores the cap on a dependency, which hides the bound
+   rather than removing it. **Verification**: `grep -E '[a-z_-]+<[0-9]'
    pyproject.toml` — any hit needs a comment naming the incompatibility it
    guards against, or it's a smell.
 5. **Rule**: Dev-only tooling (ruff, pyright, coverage, pytest plugins used
@@ -588,7 +591,11 @@ tool.
    notices. **Verification**: `grep -L 'id-token: write'
    .github/workflows/release.yml` on any repo that publishes — empty output
    (the file IS found, meaning it DOES have the permission) is the pass;
-   already true for both `ocx-sdk-python` and `ocx-mirror-sdk`.
+   already true for both `ocx-sdk-python` and `ocx-mirror-sdk`. A third,
+   separate grep, `grep -H -n -E -e 'UV_PUBLISH_(TOKEN|PASSWORD)'` over
+   `.github/workflows/**`, must also return nothing; it catches the
+   `uv publish` token paths that the other checks missed (a planted
+   `UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}` passed them).
 9. **Rule**: `deptry` runs in CI, but only with `--known-first-party
    <pkg>`, the correct `--optional-dependencies-dev-groups` for that
    project's dependency-declaration style, and `DEP004` either suppressed
@@ -661,7 +668,7 @@ tool.
 
 - **`uv_build` vs. hatchling as the default new-project backend.** `uv
   init` switched its own default to `uv_build` sometime before mid-2026
-  (version `uv_build>=0.12.5,<0.13` referenced in current uv docs,
+  (version `uv_build>=0.13.10,<0.14` referenced in current uv docs as of 2026-11,
   [docs.astral.sh/uv][uv-build-backend]); the official packaging tutorial
   still shows hatchling as of this research
   ([packaging.python.org][packaging-tutorial], no visible update date on
@@ -677,12 +684,12 @@ tool.
   natively. Whether the ecosystem converges on `pylock.toml` as the one
   lock format tools read (not just export to) is unresolved as of this
   research.
-- **PEP 740 attestations: deployed vs. automatic.** PyPI has deployed
+- **PEP 740 attestations: resolved.** PyPI has deployed
   index-hosted attestation support ([docs.pypi.org/attestations][pypi-attestations]),
-  but whether `pypa/gh-action-pypi-publish@v1.14.2` (the pinned version this
-  fleet uses) generates one automatically under Trusted Publishing, or needs
-  explicit opt-in, was not confirmed by the sources fetched here — flagged
-  open rather than guessed.
+  and attestations are on by default under Trusted Publishing (confirmed in
+  the 2026-11 refresh). The pinned `pypa/gh-action-pypi-publish` v1.14.2 has
+  since been superseded by v1.14.3 (commit
+  `7245906fb61fa33a13554f9d5fb856fe61758086`, 2026-10-20, a security fix).
 - **`dev` extras vs. dependency groups for the two shipped SDKs.** Finding 2
   makes the PEP-735-purist case that `dev` belongs in `[dependency-groups]`
   even for a published package; this fleet currently keeps it in
@@ -744,3 +751,11 @@ tool.
 [ruff-config]: https://docs.astral.sh/ruff/configuration/
 [deptry-usage]: https://deptry.com/usage/
 [deptry-rules]: https://deptry.com/rules-violations/
+
+## Revision log
+
+- 2026-11-27: Normative candidate 4 (upper caps), rationale narrowed to pip-style consumers and the project's own contributors; uv ignores a dependency's cap. Decision: `.agents/research/refresh-2026-11/python-packaging.md` (PY-PKG-03).
+- 2026-11-27: Normative candidate 8 (Trusted Publishing), verification gains a third grep for `UV_PUBLISH_(TOKEN|PASSWORD)`. Decision: `.agents/research/refresh-2026-11/python-packaging.md` (PY-PKG-10).
+- 2026-11-27: Summary, Finding 6 and Contested attestations entries, attestations are on by default under Trusted Publishing, so the open question is resolved. Decision: `.agents/research/refresh-2026-11/python-packaging.md`.
+- 2026-11-27: Contested `uv_build` entry, version range now `>=0.13.10,<0.14`; the pinned `pypa/gh-action-pypi-publish` v1.14.2 is superseded by v1.14.3 (the fleet's workflow example above still shows the pin recorded on 2026-08-23). Decision: `.agents/research/refresh-2026-11/python-packaging.md`.
+- 2026-11-27: Normative candidate 1 and Finding 8a, no edit: the `>=3.10` harness statements record past evidence; CPython 3.10 reached end of life on 2026-10-01 (PY-PKG-01 worked example moves to 3.11 in the rule file). Decision: `.agents/research/refresh-2026-11/python-packaging.md`.
