@@ -5,7 +5,8 @@
 """Checks for an MCP server's saved output (UX-AGENT-15 to 22, 26; UX-ACT-20).
 
 Subcommands:
-  tools FILE [--server-key KEY] [--max-tools N] [--gate-flag FLAG] [--writers a,b]
+  tools FILE [--server-key KEY] [--max-tools N] [--gate-flag FLAG] [--gated a,b]
+      [--writers a,b]
       FILE is a saved `tools/list` response: the full JSON-RPC reply, a
       `{"tools": [...]}` object or the bare array. Checks names (18), description
       length (19), input schemas (20), tool count (22), the gate named in a
@@ -14,14 +15,19 @@ Subcommands:
       --server-key  the key the client registers the server under, for the
                     128-character full-name check. A plugin-bundled server passes
                     plugin_<plugin-name>_<server-name>.
+      --gated       comma list of tool names that the launch flag gates off; the
+                    default list must not contain any of them (17).
       --writers     comma list of tool names the inventory says can write; none
                     may carry readOnlyHint: true.
-  result FILE [--error]
+  result FILE [--error | --expect-protocol-error]
       FILE is a saved `tools/call` response. With --error the call failed on
       purpose: it must be a result with isError true and no JSON-RPC `error`
       member (15), with the class and verdict prefix and under 10000 bytes (16).
       Without --error, text above 40000 bytes (26) and a structuredContent that
       differs from the JSON text (21) are findings.
+      --expect-protocol-error is for the call to a tool the server does not
+      register (a gated tool, UX-ACT-18): it must be a JSON-RPC error with code
+      -32602 and no result. That is the one place a protocol error is right.
   --self-test
 
 Exit codes: 0 clean, 1 findings, 2 usage or unreadable input.
@@ -69,12 +75,13 @@ def tools_of(doc) -> list[dict]:
     return doc
 
 
-def check_tools(
+def check_tools(  # noqa: PLR0913, PLR0917 - one flag per check, all optional
     tools: list[dict],
     server_key: str = "",
     max_tools: int = 20,
     gate_flag: str = "",
     writers: frozenset[str] = frozenset(),
+    gated: frozenset[str] = frozenset(),
 ) -> list[tuple[str, str, str]]:
     out: list[tuple[str, str, str]] = []
 
@@ -192,6 +199,8 @@ def check_tools(
         )
     if gate_flag and not any(gate_flag in str(t.get("description", "")) for t in tools):
         add("UX-AGENT-17", "SHOULD", f"no description names the gate {gate_flag}")
+    for n in sorted(gated & set(names)):
+        add("UX-AGENT-17", "SHOULD", f"{n}: gated tool is registered in the default list")
     return out
 
 
@@ -201,6 +210,19 @@ def text_of(result: dict) -> str:
         for c in result.get("content") or []
         if isinstance(c, dict) and c.get("type") == "text"
     )
+
+
+def check_unknown_tool(doc) -> list[tuple[str, str, str]]:
+    err = doc.get("error") if isinstance(doc, dict) else None
+    if not isinstance(err, dict):
+        return [
+            ("UX-ACT-18", "MUST", "the call to the absent tool did not return a JSON-RPC error")
+        ]
+    if err.get("code") != -32602:
+        return [("UX-ACT-18", "MUST", f"unknown tool answered code {err.get('code')}, not -32602")]
+    if "result" in doc:
+        return [("UX-ACT-18", "MUST", "the unknown-tool reply also carries a result")]
+    return []
 
 
 def check_result(doc, expect_error: bool) -> list[tuple[str, str, str]]:
@@ -270,10 +292,13 @@ def main(argv: list[str]) -> int:
     t.add_argument("--server-key", default="")
     t.add_argument("--max-tools", type=int, default=20)
     t.add_argument("--gate-flag", default="")
+    t.add_argument("--gated", default="")
     t.add_argument("--writers", default="")
     r = sub.add_parser("result")
     r.add_argument("file")
-    r.add_argument("--error", action="store_true")
+    mode = r.add_mutually_exclusive_group()
+    mode.add_argument("--error", action="store_true")
+    mode.add_argument("--expect-protocol-error", action="store_true")
     a = p.parse_args(argv)
     if a.cmd == "tools":
         return report(
@@ -283,8 +308,11 @@ def main(argv: list[str]) -> int:
                 a.max_tools,
                 a.gate_flag,
                 frozenset(w for w in a.writers.split(",") if w),
+                frozenset(g for g in a.gated.split(",") if g),
             )
         )
+    if a.expect_protocol_error:
+        return report(check_unknown_tool(load(a.file)))
     return report(check_result(load(a.file), a.error))
 
 
@@ -343,6 +371,41 @@ def self_test() -> int:
     expect(
         check_result(load(str(fx / "fail-structured-result.json")), False)[0][0] == "UX-AGENT-21",
         "drift missed",
+    )
+    expect(
+        not check_unknown_tool(load(str(fx / "pass-unknown-tool.json"))),
+        "clean unknown-tool error flagged",
+    )
+    expect(
+        check_unknown_tool(load(str(fx / "fail-unknown-tool.json")))[0][0] == "UX-ACT-18",
+        "unknown-tool stub result missed",
+    )
+    expect(
+        check_unknown_tool(load(str(fx / "fail-error-result.json")))[0][0] == "UX-ACT-18",
+        "wrong unknown-tool code missed",
+    )
+    leaked = check_tools(
+        tools_of(load(str(fx / "pass-tools.json"))),
+        "mytool",
+        20,
+        gated=frozenset({"mytool_search"}),
+    )
+    expect(
+        any(f[:2] == ("UX-AGENT-17", "SHOULD") and "mytool_search" in f[2] for f in leaked),
+        "registered gated tool missed",
+    )
+    expect(
+        not [
+            f
+            for f in check_tools(
+                tools_of(load(str(fx / "pass-tools.json"))),
+                "mytool",
+                20,
+                gated=frozenset({"mytool_render"}),
+            )
+            if f[0] != "note"
+        ],
+        "absent gated tool flagged",
     )
     big = {"result": {"content": [{"type": "text", "text": "x" * RESULT_MAX}]}}
     expect(check_result(big, False)[0][0] == "UX-AGENT-26", "oversize result missed")

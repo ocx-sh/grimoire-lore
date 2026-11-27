@@ -46,6 +46,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 import tomllib
 from pathlib import Path
 
@@ -65,7 +66,7 @@ ARMS = [
         r"\b(better|best|cheaper) than\b|\bunlike\b",
         r"\b[0-9]+([.,][0-9]+)? ?(µs|μs|ns|KB|kB|TB|req/s)\b|\b[0-9]+([.,][0-9]+)?s\b",
         r"\b[0-9][0-9,.]*[kKmMB]?\+",
-        r"\bup to [0-9]|(^|[^A-Za-z0-9-])free\b|\bstarts at \$",
+        r"\bup to [0-9][0-9,.]*|(^|[^A-Za-z0-9-])free\b|\bstarts at \$",
         r"\btrusted in production by\b|\bpowering (millions|thousands|businesses|the companies)",
         r"\bagentic\b|private alpha|zero[- ]trust|drop-in",
     ]
@@ -107,7 +108,7 @@ ABSOLUTE = re.compile(
     re.IGNORECASE,
 )
 COMPARE = re.compile(
-    r"\b(better|best|cheaper|faster|simpler) than\b|\bunlike\b|\bvs\b\.?(?!\s*code\b)|\bversus\b|\bcompared (to|with)\b|\balternative to\b",
+    r"\b(better|best|cheaper|faster|simpler) than\b|\bunlike\b|\bvs\b\.?(?!\s*code\b)|\bversus\b|\bcompared (to|with)\b|\b(alternative to|beats?|outperforms?|replaces)\b",
     re.IGNORECASE,
 )
 
@@ -283,10 +284,18 @@ def added_lines(root, base, rel):
             text=True,
             check=True,
         ).stdout
-    except (OSError, subprocess.CalledProcessError):
-        return None
+    except (OSError, subprocess.CalledProcessError) as e:
+        detail = (getattr(e, "stderr", "") or str(e)).strip()
+        print(f"claims_lint: git diff against --base {base} failed: {detail}", file=sys.stderr)
+        raise SystemExit(2) from e
     if not out:
-        return None
+        # Empty diff: an unchanged tracked file has no added lines; an untracked file is all new.
+        tracked = subprocess.run(  # noqa: S603
+            [git, "-C", str(root), "ls-files", "--error-unmatch", "--", rel],
+            capture_output=True,
+            check=False,
+        ).returncode
+        return set() if tracked == 0 else None
     added = set()
     for m in re.finditer(r"^@@ -\S+ \+(\d+)(?:,(\d+))? @@", out, re.MULTILINE):
         start, count = int(m.group(1)), int(m.group(2) or 1)
@@ -689,6 +698,30 @@ def self_test():
             expect(want[1:] not in got, f"false positive: {want[1:]}\n{got}")
         elif want.strip():
             expect(want in got, f"expected finding missing: {want}\n{got}")
+    # --base: an unchanged tracked file is not scanned, an untracked or edited one is, a bad ref is exit 2
+    git = shutil.which("git")
+    if git:
+        with tempfile.TemporaryDirectory() as td:
+            repo = Path(td)
+            g = [git, "-C", td, "-c", "user.email=t@example.com", "-c", "user.name=t"]
+            old = "A 1 MB binary.\n"
+            (repo / "claims.toml").write_text("")
+            (repo / "README.md").write_text(old)
+            for cmd in (["init", "-q"], ["add", "-A"], ["commit", "-qm", "x"]):
+                subprocess.run([*g, *cmd], check=True, capture_output=True)  # noqa: S603
+            base = ["--root", td, "--today", "2026-11-27", "--base", "HEAD"]
+            expect(run(base, io.StringIO()) == 0, "unchanged tracked file was scanned under --base")
+            (repo / "README.md").write_text(old + "Up to 10x quicker.\n")
+            buf = io.StringIO()
+            expect(run(base, buf) == 1 and "README.md:2" in buf.getvalue(), "added line not found")
+            expect("README.md:1" not in buf.getvalue(), "old line reported under --base")
+            expect("'up to 10'" in buf.getvalue().lower(), "up to token was cut short")
+            try:
+                run([*base[:-1], "nonexistent"], io.StringIO())
+                code = 0
+            except SystemExit as e:
+                code = e.code
+            expect(code == 2, "bad --base ref not exit 2")
     # a missing claims file is a usage error
     expect(
         run(["--root", str(here / "nowhere")], io.StringIO()) == 2,

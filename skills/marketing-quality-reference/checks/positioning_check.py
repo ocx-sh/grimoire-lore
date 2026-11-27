@@ -16,7 +16,8 @@ Record commands (read .agents/positioning.toml, override with --record):
   sentence      MKT-POS-07          one sentence, both nouns, no list, no banned trend word
   forbidden     MKT-POS-09          no forbidden variant on a governed surface
   drift         MKT-POS-08, 10, 11  all of the above plus surface match, lists, do_not_say
-  denigration   MKT-POS-14          HTML_FILE: no ban word in a sentence naming a tool
+  denigration   MKT-POS-14          HTML_FILE [--name NAME ...]: no ban word in a sentence naming a tool;
+                                    sees only kind = "tool" alternatives plus each --name, exit 2 when none
   globs         MKT-POS-12          RULE_FILE [EXTRA_GLOB ...]: each glob is its own paths: item
 First-screen extractors (MKT-PAGE, no record needed except hero-noun):
   readme-window README              first 15 non-blank, non-wrapper lines as path:line:text
@@ -35,9 +36,11 @@ from __future__ import annotations
 
 import argparse
 import atexit
+import contextlib
 import datetime
 import fnmatch
 import html
+import io
 import json
 import re
 import shutil
@@ -804,6 +807,13 @@ def self_test() -> int:
     )
 
     root = stage("pass")
+    page = root / "page.html"
+    page.write_text("<p>Unlike asdf, which is slow and bloated, demo is quick.</p>")
+    dn = ["--root", str(root), "denigration", str(page)]
+    with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+        no_tool, with_name = main(dn), main([*dn, "--name", "asdf"])
+    ok(no_tool == 2, "denigration without a tool alternative or --name is exit 2")
+    ok(with_name == 1, "denigration --name finds the competitor sentence")
     a = argparse.Namespace(
         dist="dist",
         about=None,
@@ -932,7 +942,9 @@ def main(argv: list[str]) -> int:
         action="store_true",
         help="run each [lists.*] extract command (owner-written shell)",
     )
-    sub.add_parser("denigration").add_argument("html")
+    dn = sub.add_parser("denigration")
+    dn.add_argument("html")
+    dn.add_argument("--name", action="append", default=[], help="extra competitor name, repeatable")
     g = sub.add_parser("globs")
     g.add_argument("rule")
     g.add_argument("extra", nargs="*")
@@ -1028,6 +1040,11 @@ def main(argv: list[str]) -> int:
         elif a.cmd == "denigration":
             d = load(root, a.record)
             names = [x["name"] for x in d.get("alternatives", []) if x.get("kind") == "tool"]
+            names += a.name
+            if not names:
+                raise Missing(
+                    'denigration: no kind = "tool" alternative in the record; pass --name NAME'
+                )
             out = denigration(Path(a.html).read_text(encoding="utf-8", errors="replace"), names)
         else:
             d = load(root, a.record)

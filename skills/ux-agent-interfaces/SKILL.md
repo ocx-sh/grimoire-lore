@@ -25,19 +25,21 @@ Stop when every surface in scope has findings, each as `path-or-command: ID: mes
 
 1. **Pick the surfaces.** Input: the diff, or the named server, binary or settings file. A CLI with a JSON mode goes to step 2. An MCP server goes to step 3 and then step 4. A permission, auto-approve or approval-logic file goes to step 4. A skill or script that calls tools goes to step 5. Done: a list of surfaces, each with its step.
 2. **CLI machine mode.** Input: the binary, one command that succeeds, one that fails not-found, one usage error. Run the first command below, add `--rust-cli04` for a binary under the Rust CLI-04 envelope, then read `references/machine-output.md` and run the blocks for the rows the script does not cover (UX-AGENT-05, 06, 07, 10, 11, 12, 13). Done: the script exits 0 and every block printed what its row says.
-3. **MCP server.** Input: the launch command and each write flag. Capture `tools/list` once per launch configuration, and one failing `tools/call` per failure class (recipe in `references/mcp-servers.md`). Run the second and third commands below. Read each `note:` line as a prompt to read a description or a schema, never as a finding. Done: both commands exit 0 for every capture.
-4. **Approval and permissions.** Input: the saved tool lists, the repository's agent settings, and its inventory (UX-ACT-01). Confirm every tool has a tier and a trifecta row, then run the blocks of UX-ACT-19, 20, 22, 25 and 28 in `references/tool-approval.md`, and check UX-ACT-18, 24 and 26 by their tests. Done: each block printed what its row says, and no T2 tool is covered by an allow rule.
+3. **MCP server.** Input: the launch command and each write flag. Capture `tools/list` once per launch configuration, and one failing `tools/call` per failure class (recipe in `references/mcp-servers.md`). Run the second and third commands below. Read each `note:` line as a prompt to read a description or a schema, never as a finding. Check the call to a gated tool that is absent (UX-ACT-18) with the fourth command, never with `--error`: `-32602` is the right answer there. Pass `--gated NAMES` to the second command so a gated tool in the default list is a finding. Done: every command exits 0 for every capture.
+4. **Approval and permissions.** Input: the saved tool lists, the repository's agent settings, and its inventory (UX-ACT-01). Confirm every tool has a tier and a trifecta row. If `docs/consequential-actions.md` or `docs/agent-trifecta.csv` is absent, report one finding `missing inventory` for it, ask the person whether to create it, and never invent tiers. Then run the blocks of UX-ACT-19, 20, 22, 25 and 28 in `references/tool-approval.md`, and check UX-ACT-18, 24 and 26 by their tests. Done: each block printed what its row says, and no T2 tool is covered by an allow rule.
 5. **Caller discipline.** When your own work calls a tool or a CLI: capture stdout and stderr apart, branch on class, exit code and `retryable`, retry at most 3 times, and read `truncated` before you conclude anything (UX-AGENT-25). Before you add an override flag to a T1+ command, run its `--dry-run`, show the output and wait for approval of the exact command (UX-ACT-21). Done: no flag was added without that approval.
 6. **Report.** One line per finding, grouped by surface, ordered by severity. End with a count per surface. Stop.
 
 ```sh
-CHECKS=.claude/skills/ux-agent-interfaces/checks
+SKILL_MD=path/to/this/SKILL.md   # wherever the client installed this skill
+CHECKS="$(dirname "$SKILL_MD")/checks"
 python3 -I "$CHECKS"/json_output_check.py --success 'about' --not-found 'describe nope/x' --usage 'about --bogus' -- mytool
-python3 -I "$CHECKS"/mcp_tools_check.py tools tools.json --server-key mytool
+python3 -I "$CHECKS"/mcp_tools_check.py tools tools.json --server-key mytool --gated mytool_render
 python3 -I "$CHECKS"/mcp_tools_check.py result call.json --error
+python3 -I "$CHECKS"/mcp_tools_check.py result call-absent.json --expect-protocol-error
 ```
 
-Both scripts exit 0 clean, 1 on a finding and 2 on a bad invocation. `--help` lists their options, and `--self-test` runs them over planted fixtures.
+The scripts exit 0 clean, 1 on a finding and 2 on a bad invocation. `--help` lists their options, and `--self-test` runs them over planted fixtures.
 
 ## Non-Negotiables
 
@@ -124,9 +126,10 @@ Pinned defaults, each overridable once by an adopter: the class vocabulary (`inv
 
 ## checks/
 
-Scripts the rows and procedure run. Set `CHECKS=.claude/skills/ux-agent-interfaces/checks` (`$CLAUDE_CONFIG_DIR/skills/ux-agent-interfaces/checks` when installed globally). Python 3.11 standard library only, run as `python3 -I`.
+Scripts the rows and procedure run. Set `CHECKS` to the `checks/` directory beside this file: `CHECKS="$(dirname "$SKILL_MD")/checks"`, where `SKILL_MD` is the path of this SKILL.md in whichever project or global directory the client installed it. Python 3.11 standard library only, run as `python3 -I`.
 
 | Script | Rows |
 |---|---|
 | `json_output_check.py` | UX-AGENT-01, 02, 03, 04, 09, 11, 14 over a success, a not-found and a usage case, each with the flag before and after the subcommand |
-| `mcp_tools_check.py` | UX-AGENT-15 to 22, 26 and UX-ACT-20 over a saved `tools/list` and `tools/call` result |
+| `mcp_tools_check.py` | UX-AGENT-15 to 22, 26 and UX-ACT-18, 20 over a saved `tools/list` and `tools/call` result |
+| `stub_server.py` | a throwaway local HTTP stub (429, 503, 404, hang) for the UX-AGENT-10 and 11 probes |

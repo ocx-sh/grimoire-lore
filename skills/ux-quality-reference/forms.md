@@ -43,6 +43,8 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.vue' ':(glo
 
 ## Labels and Submit State
 
+A pipeline that ends in `xargs` exits 123 when the script finds something, whatever its own status was. Read the output of these blocks, never the exit status.
+
 ```sh
 # UX-STATE-20: input-like elements with no evidence of an accessible name (aria-only means aria-label alone)
 git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.vue' ':(glob)**/*.svelte' ':(glob)**/*.tsx' ':(glob)**/*.jsx' ':(glob)**/*.astro' ':(glob)**/*.html' ':(exclude,glob)**/*test*' ':(exclude,glob)**/*spec*' ':(exclude,glob)**/*stories*' \

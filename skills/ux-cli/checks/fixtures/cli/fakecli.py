@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Fixture CLI for cli_matrix.py --self-test. FAKECLI_BAD lists the defects to switch on.
 
-Defects: repl, badversion, notip, installhint, globalafter, group2, escerr, anim,
+Defects: repl, badversion, notip, installhint, installinline, globalafter, group2, escerr, anim,
 badpalette, dryrunwrites, dryrunpasses, forcemisuse.
 """
 
@@ -75,7 +75,8 @@ def fail(msg, code=64, extra=""):
 
 
 def typo(word, names):
-    sys.stderr.write(f"error: unrecognized subcommand '{word}'\n")
+    hint = f"; install it with fakecli add pkg/{word}" if "installinline" in BAD else ""
+    sys.stderr.write(f"error: unknown subcommand '{word}'{hint}\n")
     near = difflib.get_close_matches(word, names, n=3, cutoff=0.6)
     if near and "notip" not in BAD:
         sys.stderr.write(f"\n  tip: a similar subcommand exists: '{near[0]}'\n")

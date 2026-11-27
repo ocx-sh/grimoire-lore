@@ -29,13 +29,13 @@ The open decisions D1 to D4 named in the rows are listed once in `SKILL.md`.
 
 ## Machine Mode
 
-Run the first group with `CHECKS=.claude/skills/ux-agent-interfaces/checks`. One command covers 01, 02, 03, 04 and the field half of 09 and 14:
+Run the first group with `CHECKS` set to the `checks/` directory next to `SKILL.md` (see `SKILL.md`). One command covers 01, 02, 03, 04 and the field half of 09 and 14:
 
 ```sh
 python3 -I "$CHECKS"/json_output_check.py --success 'about' --not-found 'describe nope/x' --usage 'about --bogus' -- mytool
 ```
 
-Exit 0 is the pass. Add `--rust-cli04` for a binary under Rust CLI-04, `--classes` with the documented vocabulary, and `--sentinel tok-SENTINEL` once the not-found command carries that fake token.
+Exit 0 is the pass. Add `--rust-cli04` for a binary under Rust CLI-04, `--classes` with the documented vocabulary, and `--sentinel tok-SENTINEL` once the failing call carries that fake token in a credential channel: an environment variable, a header or a `--password` value, as in `MYTOOL_TOKEN=tok-SENTINEL python3 -I "$CHECKS"/json_output_check.py --sentinel tok-SENTINEL --not-found 'describe nope/x' -- mytool`. Never put it in the argument the message must name (UX-AGENT-09 clause e): that echo is correct, and the check would report it.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
@@ -119,7 +119,7 @@ The first fails every clause: no version, no class slug, no exit, no `retryable`
 | UX-AGENT-10 | Set `retryable: true` (exit 75) only when an unchanged rerun can succeed: a transport failure that may clear (connection refused or reset, timeout), lock contention, 408, 429, and 5xx except 501. Set `false` (exit 69, or the class's own code) when input or config must change first: a TLS-to-plain-HTTP mismatch, a DNS name not found, a refused certificate, 501, and every other 4xx. Map the same cause to the same class and exit in every binary of the family. | A wrong "retryable" burns turns, and a wrong "not retryable" abandons a task that would have succeeded. The HTTP set is GO-NET-11's. Two measured CLIs were wrong in opposite directions: one sent 429 and 503 to exit 69, the other sent the TLS mismatch to exit 75. Held at SHOULD: the connection-refused clause contradicts the Rust and Go exit tables' "69 … non-retryable" wording while Swift treats a connect failure as 75 (D3). | See block UX-AGENT-10: each stub's exit and `.error.retryable` match the table below, in every binary. | SHOULD |
 | UX-AGENT-11 | Give every network operation a bounded, documented deadline. Report its expiry as class `timeout` with `retryable: true` and the elapsed deadline in seconds. Never report a rate limit as a timeout. | A silent hang leaves the agent waiting or killing the process. One measured CLI printed nothing for 100 s on a stalled peer, and one MCP path reported a 429 as `deadline has elapsed`. | See block UX-AGENT-11: the hang stub ends before the documented deadline with class `timeout`, and the 429 stub gives `rate_limited`. `json_output_check.py` reports UX-AGENT-11 when a case never exits. | MUST |
 
-The stub matrix: serve each cause from a throwaway local HTTP server (a small handler), and point the binary at it.
+The stub matrix: serve each cause from a throwaway local server, and point the binary at it. `checks/stub_server.py MODE` prints its base URL on the first line and serves modes `429`, `503`, `404` and `hang`. Start it in the background with its output redirected to a file, and read the URL from that file's first line (the first line of the block below does both). A refused port is any unused port. The TLS-against-plain-HTTP row is mode `404` addressed as `https://` instead of `http://`. In the blocks below `lookup` stands for the CLI's own command that fetches one record from the URL (`describe`, `inspect`, `pull`): use the one the CLI has.
 
 | Stub | Class | `retryable` | Exit |
 |---|---|---|---|
@@ -132,12 +132,19 @@ The stub matrix: serve each cause from a throwaway local HTTP server (a small ha
 
 ```sh
 CLI=mytool
+# Start each stub in turn: python3 -I "$CHECKS"/stub_server.py 429 >stub.txt & sleep 1; STUB_URL=$(head -n 1 stub.txt)
 # UX-AGENT-10: run once per stub URL. Compare both values with the table; every row must match, in every binary.
 "$CLI" --format json lookup "$STUB_URL/nope:1" >out.txt 2>/dev/null; echo "exit $?"
 jq -r '[.error.code // .error.kind, .error.retryable] | @tsv' out.txt
 # UX-AGENT-11: exit 124 means the CLI never gave up, and that is the finding.
 timeout 120 "$CLI" --format json lookup "$HANG_URL/nope:1" >out.txt 2>/dev/null; echo "exit $?"
 jq -e '(.error.code // .error.kind) == "timeout"' out.txt
+# UX-AGENT-12: an htpasswd registry answers 401 for a missing name. Start it, then look the name up.
+docker run --rm --entrypoint htpasswd httpd:2 -Bbn probe probe >htpasswd
+docker run -d --name probe-reg -p 5000:5000 -v "$PWD/htpasswd:/auth/htpasswd:ro" -e REGISTRY_AUTH=htpasswd -e REGISTRY_AUTH_HTPASSWD_REALM=probe -e REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd registry:2
+"$CLI" --format json lookup "localhost:5000/nope:1" >out.txt 2>err.txt; echo "exit $?"
+grep -c -F -e exist -- out.txt err.txt
+docker rm -f probe-reg
 ```
 
 ## Hints, Conflicts and Secrets
@@ -170,9 +177,9 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)src/**/*.rs' ':(
   | xargs -0 -r grep -H -n -E -e '#\[error\(' -- \
   | grep -E -e '--force' -e 'insecure = true' -e 'without --offline' \
   | grep -v -F -e "requires the owner's approval"
-# UX-AGENT-14: a failing call that carries the sentinel. Any hit is the finding.
+# UX-AGENT-14: a failing call that carries the sentinel in a credential channel (here an environment variable, or a header or --password value), never in the argument the message names. Any hit is the finding.
 SENTINEL=tok-SENTINEL
-"$CLI" --format json lookup "$SENTINEL" >out.txt 2>err.txt
+MYTOOL_TOKEN="$SENTINEL" "$CLI" --format json lookup nope/x >out.txt 2>err.txt
 cat out.txt err.txt | grep -n -F -e "$SENTINEL" --
 cat out.txt err.txt | grep -n -i -E -e 'authorization:' -e 'bearer ' -e 'Traceback' -e '\.rs:[0-9]+' --
 jq -r '.error.message' out.txt | grep -n -F -e '{"errors"' --

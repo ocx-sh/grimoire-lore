@@ -26,14 +26,14 @@ Contents: [Procedure](#procedure) · [Before you start](#before-you-start) ·
 Run the steps in order. Stop when every row you touched has a pass, a finding or a named `did not run`.
 
 1. **Classify the change.** Input: the diff or request. Output: the list of surfaces it touches (help text, version, typo path, installer output, colour or animation, TUI, error text, a mutating command). Done when each surface maps to one file in [Where the depth is](#where-the-depth-is). Read only those files.
-2. **Name the binary and the headline command.** Build the CLI (a debug build is enough). Find the declared headline command in the README Quick Start. If none is declared, propose the first Quick Start command and ask the owner (see Ask the owner). Done when `BIN` runs and the headline is named.
+2. **Name the binary and the headline command.** Build the CLI (a debug build is enough). Find the declared headline command in the README Quick Start: the first command that invokes the CLI itself, skipping the install line. If none is declared, propose that command and ask the owner (see Ask the owner). If the owner is unavailable, record the proposed headline and mark UX-CLI-04 and UX-CLI-14 as `headline unconfirmed`. Done when `BIN` runs and the headline is named.
 3. **Run the matrix.** Command below. Done when it exits 0, or you hold its findings and its `did not run:` line.
 4. **Run the blocks the matrix does not cover.** Each row's verification names its block in the routed file. Done when every MUST row you touched has a result.
 5. **Report.** One line per finding as `path: ID SEVERITY: message`, then `ran:` and `did not run:`. Mark a finding no script produced `unverified: reading heuristic`. Never report a Linux pass for macOS or Windows.
 
 ## Before you start
 
-- `BIN` is the binary (a path, or a quoted command with arguments), `USAGE` its pinned usage exit code (64 in a sysexits-aligned table), and `CHECKS` is `.claude/skills/ux-cli/checks` (`$CLAUDE_CONFIG_DIR/skills/ux-cli/checks` when installed globally).
+- `BIN` is the binary (a path, or a quoted command with arguments), `USAGE` its pinned usage exit code (64 in a sysexits-aligned table), and `CHECKS` is `.claude/skills/ux-cli/checks` (`$CLAUDE_CONFIG_DIR/skills/ux-cli/checks` when installed globally). Not installed: `CHECKS=<dir of this skill>/checks`.
 - Tools: `python3` 3.11 or newer for the matrix (standard library only). Optional: `strace` on Linux for the network gate, `script` for terminal captures.
 - Every check runs from an empty temporary directory with an empty `HOME`, stdin from `/dev/null`, `NO_COLOR=1` and `PAGER=cat`. The matrix does this itself.
 - Files the project keeps (**pinned** names, defaults an adopter overrides once): `flag-values.tsv` (UX-CLI-12), `decorative-colour.allow` (UX-CLI-22), `no-next-step.txt` (UX-CLI-17), and an action inventory TSV for the matrix (UX-ACT-12 to 17).
@@ -102,6 +102,8 @@ python3 -I "$CHECKS"/cli_matrix.py --self-test
 | `act` | UX-ACT-12 to 17 | `--inventory` (arguments, tab, tier, optional tab and refusal arguments) |
 
 Exit 0 is clean, 1 is findings, 2 is a usage error. A check that lacks its input prints under `did not run:` and is never a pass. `--must-only` exits 1 on MUST findings alone. The matrix runs a T1 or higher command only with `--dry-run`, plus the refusal command the inventory names (which must refuse), in a throwaway copy of the tree. List a refusal command only when its state is local.
+
+The matrix does not run UX-CLI-14 to 19 or UX-CLI-23 to 27. Run those from the shell blocks in the routed reference file.
 
 ## Where the depth is
 

@@ -17,3 +17,6 @@ mastodon.social platform
 # support.reddithelp.com, www.reddit.com, www.producthunt.com, api.producthunt.com,
 # help.producthunt.com, support-dev.discord.com, discord.com, github.com
 # (github.com admits every repository on GitHub).
+#
+# Registries also cite other hosts (docs.github.com, news.ycombinator.com and more).
+# facts_check.py --hosts prints each one until the owner lists it or drops the row.

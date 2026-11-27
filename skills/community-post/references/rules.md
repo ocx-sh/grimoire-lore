@@ -52,7 +52,7 @@ grep -c -E 'hn-draft\.md' "$WRITELOG"
 
 # CH-COM-02: the three counts are equal, one per venue section.
 grep -c -E '^rules_read: https://[^ ]+ 20[0-9][0-9]-[01][0-9]-[0-3][0-9]$' "$PLAN"
-grep -c -E '^rules_quote: ".{20,}"$' "$PLAN"
+grep -c -E '^rules_quote: "([^ ]+ +){7,}[^ ]+"$' "$PLAN"
 grep -c -E '^## ' "$PLAN"
 # CH-COM-02: ratios that no fetched page states. Any hit is the finding.
 grep -n -E '9:1|10 ?%|90/10' "$PLAN" reddit-facts.md
@@ -92,8 +92,10 @@ grep -n -F -e "$QUOTE" "$CHANGELOG"
 # CH-COM-05 (c): REPO is the repository URL. The count is the Show HN posts for it in the last 183 days. Expect 0.
 curl -s "https://hn.algolia.com/api/v1/search?query=$REPO&restrictSearchableAttributes=url&tags=show_hn" > algolia.json
 python3 -I -c 'import json,datetime as d; h=json.load(open("algolia.json"))["hits"]; c=d.datetime.now(d.timezone.utc)-d.timedelta(days=183); print(sum(1 for x in h if d.datetime.fromisoformat(x["created_at"].replace("Z","+00:00"))>=c))'
-# CH-COM-05 (d): TARGET is the submitted URL. Any hit is the finding.
-curl -sL "$TARGET" | grep -n -i -E 'pricing|waitlist|sign.?up|early access'
+# CH-COM-05 (d): TARGET is the submitted URL. Any hit is the finding. For a github.com repository
+# root, grep the README text instead (RAW_README is its raw.githubusercontent.com URL), because
+# GitHub's own page markup always matches `sign.?up`.
+curl -sL "${RAW_README:-$TARGET}" | grep -n -i -E 'pricing|waitlist|sign.?up|early access'
 printf '%s\n' "$TARGET" | grep -E '/(releases|blog|docs)(/|$)'
 
 # CH-COM-06: URL is the submitted URL, PRODUCT the product's own name. Exit 1 prints clause and span only.
@@ -105,7 +107,8 @@ grep -c -E '^text_placement: (text field|first comment)$' "$PLAN"
 grep -n -i -E 'first comment.*(boost|rank|algorithm)|comment within' "$PLAN"
 
 # CH-COM-08: the surfaces are announcement surfaces; add every path on the plan's solicitation_paths line.
-git ls-files -z -- 'README*' '*/README*' 'CHANGELOG*' '*/CHANGELOG*' '.github' 'cliff.toml' 'launch' 'announce' 'community-plan.md' '*-facts.md' | xargs -0 -r python3 -I "$CHECKS"/venue_check.py solicit
+# --others lists the untracked plan and fact-sheet files this skill writes, which --cached alone would skip.
+git ls-files -z --cached --others --exclude-standard -- 'README*' '*/README*' 'CHANGELOG*' '*/CHANGELOG*' '.github' 'cliff.toml' 'launch' 'announce' 'community-plan.md' '*-facts.md' | xargs -0 -r python3 -I "$CHECKS"/venue_check.py solicit
 
 # CH-COM-09: the first and third commands print nothing, the second prints at least 1 where an HN retry is planned.
 grep -n -i -E 'delete|resubmit|repost (tomorrow|next day)' "$PLAN"

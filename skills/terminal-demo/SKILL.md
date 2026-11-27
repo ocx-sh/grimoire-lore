@@ -48,8 +48,12 @@ This skill requires `channel-publishing`. Five of its rules bind a demo:
 - **CH-CORE-08.** Place a sponsor, material-connection or AI disclosure before the
   fold: spoken and on screen at or before the first mention in a long video,
   as burned-in text in the first seconds of a Short.
-- **CH-CORE-10.** A recorder never holds a publishing credential. The recording
-  environment (CH-VID-19) clears every one.
+- **CH-CORE-10.** In a repository that holds or may hold a publishing credential,
+  merge `channel-publishing`'s `checks/gitleaks-channels.toml` (the
+  `discord-webhook-url` and `google-oauth-refresh-token` rules) into the
+  repository's gitleaks configuration, and run the gitleaks commands of its block
+  CH-CORE-10. The Step 5 scans do not replace that. That a recorder holds no
+  credential is CH-VID-19 alone: the recording environment clears every one.
 - **CH-CORE-11.** Take a platform limit from a `facts.md` row and cite its id
   (`[VID-F01]`). Write no limit from memory or from a search snippet. A figure
   you measured carries its command. A number a demo shows or states carries a
@@ -75,8 +79,13 @@ limit. It cites the row.
 - Set these once and `export` them: `SCENARIOS` (the scenario or tape files),
   `RECORDER` (the recorder code), `CASTS` (the recordings directory), `SCRATCH`
   (an empty temporary directory) and `FLAT` (`$SCRATCH/flat`).
-- `ffprobe` is needed for video. `gitleaks` is needed for the secret scan, at the
-  version in the pipeline reference. Playwright is needed only to measure W.
+- Required tools: `asciinema` (the recorder), `gitleaks` (Step 5), `ffprobe` (video
+  and GIF checks), `vhs` (tapes and MP4), `agg` (README GIF) and Playwright (only
+  to measure W and to screenshot a player). Versions and install commands are in
+  the pipeline reference, "Install". Check each with `command -v`. A required tool
+  that is absent means the report line of every rule that needs it is `manual: TOOL
+  absent`, never `pass`, and the install is the owner's call when it needs
+  privileges. Do not substitute a different scanner.
 - Read [references/pipeline.md](references/pipeline.md) for the form per surface,
   the tape and render commands, the measured column caps and the tool pins.
 - Do not answer a platform question from memory. Read the row in `facts.md`.
@@ -111,15 +120,21 @@ prints nothing and that test passes.
 
 Input: the scenario and the form. Check: render per the pipeline reference. Pin
 VHS, vhs-action, agg and the player (CH-VID-06). Record new casts as v3
-(CH-VID-07). Done: the CH-VID-06 block shows no `latest`, and the cast header
-reads `"version": 3`.
+(CH-VID-07). For a README, also make the still (the pipeline reference, "Render
+Commands"). Done: the CH-VID-06 block shows no `latest`, the cast header reads
+`"version": 3`, and for a README the CH-VID-03 block prints no README with a demo and no linked still.
 
 ### Step 5. Flatten, scrub and scan
 
 Input: each cast. Check, in this order:
 
-1. `python3 -I "$CHECKS"/cast_check.py --must-only FILE` and read the CH-VID-21
-   and CH-VID-22 lines. It withholds the matched value.
+1. `python3 -I "$CHECKS"/cast_check.py --must-only --identity ORG_NAME --private-domain DOMAIN --allow-home runner FILE`
+   and read the CH-VID-21 and CH-VID-22 lines. It withholds the matched value.
+   `ORG_NAME` is the organisation's name as it would appear in a path or host
+   (the repository owner), `DOMAIN` its private domain suffix (repeat the flag for
+   each), and `--allow-home SEG` repeats once per `/home/SEG` that the repository
+   documents as allowed. Without them the scan is incomplete: ask the owner for
+   the values and never guess them.
 2. Flatten each cast and scan the flattened text and the raw file with
    `gitleaks dir`, then run the canary (block CH-VID-20).
 
@@ -138,10 +153,19 @@ Done: exit 0, or each remaining SHOULD finding has a recorded reason.
 
 ### Step 7. Contrast and dim text
 
-Input: each cast. Check: `python3 -I "$CHECKS"/cast_contrast.py FILE`. When the
-embed forces a theme, run it once per colour scheme with
-`--theme theme.json` (CH-VID-12, 27). Done: exit 0. Every `manual:` line is
-copied into the report. Dim text that fails passes only with a named exception.
+Input: each cast. Check: `python3 -I "$CHECKS"/cast_contrast.py --theme theme.json FILE`,
+once per colour scheme (CH-VID-12, 27). A cast from `asciinema rec` has no theme
+in its header, and without `--theme` the script exits 2 with `no theme in the cast
+header`. Exit 2 is not a pass: write the report line as `manual` or supply the
+theme. `theme.json` is `{"fg": "#rrggbb", "bg": "#rrggbb", "palette":
+"#rrggbb:...(16 entries)"}` holding the colours the viewer sees: the forced theme
+of the embed, or, when the page names a built-in player theme, that theme's
+`--term-color-foreground`, `--term-color-background` and `--term-color-0` to `15`
+values from the player's CSS. Read them from the vendored player, never from
+memory. Plain `cast_contrast.py FILE` is valid only for a cast whose header
+embeds its theme and whose embed does not force another. Done: exit 0. Every
+`manual:` line is copied into the report. Dim text that fails passes only with a
+named exception.
 
 ### Step 8. Make the embed accessible
 
@@ -205,7 +229,7 @@ CH-VID-08. Depth, tool pins and measured caps: the pipeline reference.
 |---|---|---|---|---|
 | CH-VID-01 | Generate every committed or uploaded demo from a committed scenario that runs the real product binary, asserts its output, names its output path and can regenerate the recording on demand. Commit the recording file only when no build step regenerates it (DOC-EX-13). Never commit a hand recording or scripted fake output. | A hand recording cannot be rebuilt when the CLI changes, and a faked frame misrepresents the product (DOC-EX-12). | See block CH-VID-01. Each scenario step has an `expect`, and each typed tape command is followed by `Wait`. | MUST |
 | CH-VID-02 | On a docs site, embed a terminal demo as an asciicast played by a self-hosted asciinema-player. Mount it when the embed scrolls into view, set autoplay off (`autoPlay: false`), and never set `loop: true`. Use an MP4 in `<video controls>` only for GUI content. | A cast is far smaller than a GIF or video, its text can be selected, and it can be paused (SC 2.2.2, VID-F25). Mounting on scroll is not autoplay when the reader starts playback. | See block CH-VID-02. It shows `autoPlay: false` and no `loop: true`, and finds no GIF of a terminal session. | MUST |
-| CH-VID-03 | In a README, place a still screenshot (PNG or SVG) that links to the docs page with the player. Add an animated GIF only when motion shows something the still cannot. Such a GIF plays for 5 s or less, plays once (`agg --no-loop`), and SHOULD be 1 MB or less. Never put a script or player in a README. | GitHub removes `script` tags (VID-F12). agg loops by default (VID-F13). A looping GIF has no pause control for viewers who kept autoplay on (VID-F11), and SC 2.2.2 sets 5 s (VID-F25). | See block CH-VID-03. `GIF` is the file. Duration is 5.0 or less, the loop value is `None`, and the size is 1,048,576 bytes or less. | MUST |
+| CH-VID-03 | In a README, place a still screenshot (PNG or SVG) that links to the docs page with the player. Add an animated GIF only when motion shows something the still cannot. Such a GIF plays for 5 s or less, plays once (`agg --no-loop`), and SHOULD be 1 MB or less. Never put a script or player in a README. | GitHub removes `script` tags (VID-F12). agg loops by default (VID-F13). A looping GIF has no pause control for viewers who kept autoplay on (VID-F11), and SC 2.2.2 sets 5 s (VID-F25). | See block CH-VID-03. It prints each README with no image link to a PNG or SVG still that points at a page. `GIF` is the file. Duration is 5.0 or less, the loop value is `None`, and the size is 1,048,576 bytes or less. | MUST |
 | CH-VID-04 | Render platform video from the scenario to the platform's dated spec: YouTube [VID-F01], [VID-F02]; LinkedIn, the stricter of the Videos API [VID-F06], [VID-F07] and the help page [VID-F10]; Shorts [VID-F03]. Read each limit from its row, never from memory. | An agent's remembered values for a Short or a LinkedIn floor are stale or invented. | See block CH-VID-04. Check each printed field against the rows. Re-fetch a page when its row is overdue, and update the row, not this file. | MUST |
 | CH-VID-05 | Do not add Remotion to a repository without the owner's written approval of its licence. | Its free licence is limited by company size, and a licence change is announced (VID-F24). | See block CH-VID-05. It is empty, or a decision record holds the approval. | MUST |
 | CH-VID-06 | Pin every render tool and record its provenance. VHS image by tag or digest, never `latest`. `version:` on every use of `charmbracelet/vhs-action`, whose default is `latest`. The agg version, plus the font passed with `--font-dir` and `--font-family`. The asciinema-player version and its sha256 in a comment beside the vendored file. One player version per site family. | One measured set of sites ran three player versions. agg exits 1 on a runner with no fonts. | See block CH-VID-06. No `latest`, every `vhs-action` use has a `version:` line, and the file digest equals the recorded one. | MUST |
@@ -218,8 +242,8 @@ CH-VID-08. Depth, tool pins and measured caps: the pipeline reference.
 | CH-VID-08 | Set the recording geometry by columns. Keep the column count at or below `floor(0.98 * W / 6)`, with W measured on the surface at its narrowest viewport. This holds the x-height at 6 px or more, a DERIVED floor. Measure W, never assume it. CONSIDER 8 px, which is `floor(0.98 * W / 8)` columns. | Font size cancels out of the on-screen size. The cell width is W divided by the columns whatever font the source sets. The constants come from one OCR engine, not from people. | `cast_check.py --width-px W FILE`, and the `.ap-line` probe in the pipeline reference. See block CH-VID-08 for tapes: `FontSize` without `Columns` fails, and `Columns` with `Width` fails. | MUST |
 | CH-VID-10 | Record the vertical master (Shorts, Reels, TikTok) as a dedicated 1080x1920 session of at most 41 columns and 20 rows. Keep all text inside x 120 to 888 and y 288 to 1248. Never crop or scale a landscape recording into a vertical frame. | The safe width is 0.711 of the frame, and 80 columns there gives a 3.1 px x-height. The rectangle is DERIVED from two third-party pages ([VID-F32], [VID-F33]). No platform publishes one. | `cast_check.py --vertical FILE`, and block CH-VID-10 for the frame size. OCR boxes of one frame per second inside the rectangle: unverified: reading heuristic. Label the rectangle "derived, third-party inputs" wherever it is cited. | MUST |
 | CH-VID-11 | Cap idle gaps at 2 s with the cast header `idle_time_limit`, the player's `idleTimeLimit`, or `agg --idle-time-limit 2`. | Long pauses read as a broken demo. agg defaults to 5 s (VID-F14), and the player has no limit unless set. | `cast_check.py FILE`, adding `--idle-limit 2` when the embed or agg sets the cap. Otherwise the largest gap between events is 2 s or less. | SHOULD |
-| CH-VID-12 | The theme foreground and every ANSI palette colour the session prints reach 4.5:1 against the background of the theme the viewer sees: the cast header theme, or, when the embed forces a theme, that theme in every colour scheme the site offers. | SC 1.4.3 sets 4.5:1 for text (VID-F30). The player draws HTML text, and uses the embedded theme by default (VID-F17). Applying it to GIF and MP4 frames is a reading, so this is SHOULD. 256-colour indices 16 to 255 and truecolour are manual. | `cast_contrast.py FILE`, or `cast_contrast.py --theme theme.json FILE` once per scheme. Exit 0. Each `manual:` line is read by hand. | SHOULD |
-| CH-VID-27 | Do not print dim (SGR 2) text in a colour whose 50/50 blend with the viewer's theme background is under 4.5:1. Two exceptions need a recorded reason: the same text is in the page's text alternative (CH-VID-14), or it labels an inactive control. Score the blend, not the palette entry. To set secondary text apart, print it in a palette colour that passes alone. | The player draws dim at opacity 0.5 (VID-F19), so no theme can repair it. SC 1.4.3 exempts inactive controls. | `cast_contrast.py FILE`, with `--theme` once per scheme under a forced theme. Exit 1 names each failing dim colour and ratio. Dim text on a set background is a `manual:` line. | SHOULD |
+| CH-VID-12 | The theme foreground and every ANSI palette colour the session prints reach 4.5:1 against the background of the theme the viewer sees: the cast header theme, or, when the embed forces a theme, that theme in every colour scheme the site offers. | SC 1.4.3 sets 4.5:1 for text (VID-F30). The player draws HTML text, and uses the embedded theme by default (VID-F17). Applying it to GIF and MP4 frames is a reading, so this is SHOULD. 256-colour indices 16 to 255 and truecolour are manual. | `cast_contrast.py --theme theme.json FILE` once per scheme (plain `cast_contrast.py FILE` only when the header embeds a theme and no other is forced). Exit 2 is not a pass. Exit 0. Each `manual:` line is read by hand. | SHOULD |
+| CH-VID-27 | Do not print dim (SGR 2) text in a colour whose 50/50 blend with the viewer's theme background is under 4.5:1. Two exceptions need a recorded reason: the same text is in the page's text alternative (CH-VID-14), or it labels an inactive control. Score the blend, not the palette entry. To set secondary text apart, print it in a palette colour that passes alone. | The player draws dim at opacity 0.5 (VID-F19), so no theme can repair it. SC 1.4.3 exempts inactive controls. | `cast_contrast.py --theme theme.json FILE` once per scheme (see Step 7; exit 2 is not a pass). Exit 1 names each failing dim colour and ratio. Dim text on a set background is a `manual:` line. | SHOULD |
 
 ### Accessibility
 
@@ -256,9 +280,9 @@ Run from the repository root. `git ls-files` feeds every list. Empty output is
 the pass unless a block says otherwise.
 
 ```sh
-# CH-VID-01: every printed name is a recording that no scenario, tape or script names
+# CH-VID-01: every printed name is a recording that no scenario, tape or script names (whole-name match: data.cast never sources a.cast)
 git ls-files -z -- ':(glob)**/*.cast' ':(glob)**/*.gif' ':(glob)**/*.mp4' ':(glob)**/*.webm' \
-  | xargs -0 -r -n1 sh -c 'b=${1##*/}; found=$(git ls-files -z -- ":(glob)**/*.yaml" ":(glob)**/*.yml" ":(glob)**/*.tape" ":(glob)**/*.py" ":(glob)**/*.toml" | xargs -0 -r grep -l -F -e "$b" --); [ -n "$found" ] || echo "unsourced: $1"' sh
+  | xargs -0 -r -n1 sh -c 'b=${1##*/}; found=$(git ls-files -z -- ":(glob)**/*.yaml" ":(glob)**/*.yml" ":(glob)**/*.tape" ":(glob)**/*.py" ":(glob)**/*.toml" | xargs -0 -r grep -l -E -e "(^|[^A-Za-z0-9_.-])$(printf %s "$b" | sed "s/[.]/[.]/g")([^A-Za-z0-9_-]|\$)" --); [ -n "$found" ] || echo "unsourced: $1"' sh
 ```
 
 ```sh
@@ -273,6 +297,9 @@ git ls-files -z -- ':(glob)**/*.md' ':(glob)**/*.mdx' ':(glob)**/*.astro' ':(glo
 ```sh
 # CH-VID-03: a script in a README is the finding
 git ls-files -z -- ':(glob)**/README.md' | xargs -0 -r grep -H -n -F -e '<script' --
+# the still: a README that shows a demo needs [![alt](still.png)](https://docs-page). A README with no demo is exempt.
+git ls-files -z -- ':(glob)**/README.md' \
+  | xargs -0 -r -n1 sh -c 'grep -q -E -e "\[!\[[^]]*\]\([^)]*[.](png|svg)\)\]\(https?://" -- "$1" || echo "no linked still: $1"' sh
 # GIF: set GIF to the file. Duration 5.0 or less, loop None, size 1048576 or less. The loop check needs Pillow.
 ffprobe -v error -show_entries format=duration -of csv=p=0 "$GIF"
 python3 -I -c "import sys;from PIL import Image;print(Image.open(sys.argv[1]).info.get('loop'))" "$GIF"
@@ -310,11 +337,11 @@ ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p
 
 ```sh
 # CH-VID-13: an autoplay video must be muted with controls. Hits are findings.
-git ls-files -z -- ':(glob)**/*.html' ':(glob)**/*.astro' ':(glob)**/*.md' ':(glob)**/*.mdx' ':(glob)**/*.js' ':(exclude,glob)**/node_modules/**' \
-  | xargs -0 -r grep -H -n -E -e '<video[^>]*autoplay' -- | grep -v -e 'muted.*controls' -e 'controls.*muted'
+git ls-files -z -- ':(glob)**/*.html' ':(glob)**/*.astro' ':(glob)**/*.md' ':(glob)**/*.mdx' ':(glob)**/*.js' ':(exclude,glob)**/*.min.js' ':(exclude,glob)**/node_modules/**' ':(exclude,glob)**/vendor/**' \
+  | xargs -0 -r grep -H -n -E -e '<video[^>]*autoplay' -- | grep -v -e 'muted.*controls' -e 'controls.*muted' | cut -c1-200
 # play() from a scroll or intersection handler: read each hit for a visible pause control
-git ls-files -z -- ':(glob)**/*.js' ':(glob)**/*.mjs' ':(glob)**/*.ts' ':(glob)**/*.astro' ':(exclude,glob)**/node_modules/**' \
-  | xargs -0 -r grep -H -n -E -e 'IntersectionObserver' -e '[.]play[(]' --
+git ls-files -z -- ':(glob)**/*.js' ':(glob)**/*.mjs' ':(glob)**/*.ts' ':(glob)**/*.astro' ':(exclude,glob)**/*.min.js' ':(exclude,glob)**/node_modules/**' ':(exclude,glob)**/vendor/**' \
+  | xargs -0 -r grep -H -n -E -e 'IntersectionObserver' -e '[.]play[(]' -- | cut -c1-200
 ```
 
 ```sh

@@ -16,7 +16,7 @@ This skill writes one file: the launch plan. It never posts, uploads, submits, p
 
 ## Stop condition
 
-Stop when the plan file exists, `plan_check.py` and `link_target_check.py` print no finding on it, and every `ask:` marker is in the reply as a question to the human. If a gate in step 2 fails, stop there and report the gate. Never plan around a failed gate.
+Stop when the plan file exists, `plan_check.py` and `link_target_check.py` print no finding on it, and every `ask:` marker is in the reply as a question to the human. A front-matter key that still holds `ask:` is reported by `plan_check.py` until the human answers; that finding is expected, so list it as a question and never fill it with an invented value. If a gate in step 2 fails, stop there and report the gate. Never plan around a failed gate.
 
 ## The boundary
 
@@ -65,19 +65,19 @@ Set `CHECKS=.claude/skills/launch-plan/checks` (`$CLAUDE_CONFIG_DIR/skills/launc
 ### 2. Run the readiness gate (CH-LAUNCH-01, 02, 03)
 
 - Input: the repository, the tag to launch, `link_target`.
-- Do: run the CH-LAUNCH-01 block from `references/rules.md`. It prints 1 or more when a non-prerelease release exists. Then run the link-target check, with the product's install host and package name:
+- Do: run the CH-LAUNCH-01 block from `references/rules.md`. It prints 1 or more when a non-prerelease release exists. The gate is for the planned tag (`launched_tag`): run the block's tag check on it. If that tag is not yet published, record the gate as pending, plan the release row as the first Schedule row, never mark the plan final, and re-run the gate after tagging. Then run the link-target check, with the product's install host and package name:
 
 ```sh
 python3 -I "$CHECKS"/link_target_check.py --install-host "$HOST" --package "$PKG" "$URL"
 ```
 
-- Done when: the release count is 1 or more and the script exits 0. On a failure, stop and report the line. A failure of CH-LAUNCH-03 is a SHOULD: report it and ask the human whether the install page leads with the product's own command by design.
+- Done when: the release count is 1 or more, the planned tag resolves as a non-prerelease release, and the script exits 0. On a failure, stop and report the line. A failure of CH-LAUNCH-03 is a SHOULD: report it and ask the human whether the install page leads with the product's own command by design.
 - Never use the local resolver for this check. The script uses a public one.
 
 ### 3. Set the launch reason and shape (CH-LAUNCH-07, 10)
 
 - Input: the release tag, the human's answer on "major".
-- Do: set `launch_reason` to `first-launch`, `major-version` or `owner-major:REF`. For `first-launch`, run the venue's own search for the product's domain and write the search and its zero-result output into `first_launch_evidence`. Never plan a Show HN or a Product Hunt launch for a routine release, and never hook a launch step to release automation. Set `launch_shape` to `single-day`. Choose `launch-week` only when the owner asks and `## Items` lists enough released items for CH-LAUNCH-10.
+- Do: set `launch_reason` to `first-launch`, `major-version` or `owner-major:REF`, where REF is a URL, a path, `#N`, a commit or a plan line that records the owner's written decision. A routine release (a patch or minor release that is neither the first launch nor a major version) is not a launch: stop, write no plan, report that `release-notes` covers it, and ask the owner whether they declare it major with a written `owner-major:REF`. While the owner has not answered, leave `launch_reason: ask: <the question>`. Never write a placeholder REF. For `first-launch`, run the venue's own search for the product's domain and write the search and its zero-result output into `first_launch_evidence`. Never plan a Show HN or a Product Hunt launch for a routine release, and never hook a launch step to release automation. Set `launch_shape` to `single-day`. Choose `launch-week` only when the owner asks and `## Items` lists enough released items for CH-LAUNCH-10.
 - Done when: `plan_check.py` prints no CH-LAUNCH-07 or CH-LAUNCH-10 line.
 
 ### 4. Admit venues from their own pages (CH-LAUNCH-04, 13, 17, 18)
@@ -96,7 +96,7 @@ python3 -I "$CHECKS"/link_target_check.py --install-host "$HOST" --package "$PKG
 
 - Input: the admitted venues, the human's days and staff.
 - Do:
-  1. Give every row of `## Schedule` a `venue_class`: `community`, `editorial` or `owned`. Mark the launch-day community venue `launch_day: true`. Put at most one such venue on any day.
+  1. Name each venue in the `venue` column by its slug: `show-hn` or `product-hunt` for those two (the checker also reads `Show HN` and `producthunt.com`), and a slug of your choice for any other venue. Any other community venue needs a `## Venue admission` row whose `url` is the fetched page that shows its reply surface (the place strangers reply). Give every row of `## Schedule` a `venue_class`: `community`, `editorial` or `owned`. Mark the launch-day community venue `launch_day: true`. Put at most one such venue on any day.
   2. Give every editorial row `publish_date: not-scheduled`. An editor sets that day, not the team.
   3. Order the rows: release, canonical record, launch-day venue, social posts, directory entries, recap (CH-LAUNCH-08). The release date is strictly earlier than the venue date.
   4. Fill `## Shifts` with one owner per block, in UTC, with no gap. Use `hn_duty_hours` for Show HN. For Product Hunt, cover the whole Pacific day [LP-F04, LP-F09] and keep the date inside the scheduling window [LP-F05].
@@ -173,4 +173,5 @@ Both exit 0 clean, 1 on a finding, 2 on bad usage. Both take `--help` and `--sel
 - `community-post` owns Show HN eligibility and titles, Lobsters gates, and the maker comment. It also owns CH-COM-08.
 - `github-presence` owns the counter list, the traffic archive and the report form that CH-LAUNCH-11 uses.
 - `release-notes` owns the release body that can serve as the canonical record.
-- `marketing-quality`, when installed, governs claims in a draft. Otherwise carry a `source:` line for every number.
+- `marketing-quality-reference` and `marketing-review`, when installed, govern claims in a draft. Otherwise carry a `source:` line for every number.
+- `community-post`, `github-presence` and `release-notes` are hand-off targets. They are optional: when one is not installed, report the hand-off to the human instead of writing the package.

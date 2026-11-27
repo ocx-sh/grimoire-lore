@@ -402,6 +402,11 @@ def emit(path: str, found: list[tuple[int, str, str]]) -> int:
     return 1 if found else 0
 
 
+# Same patterns as the CH-MB-10 and CH-MB-18 blocks in SKILL.md, kept in step by the self-test.
+RELME_RE = r"<(a|link)[^>]*rel=[\"']([^\"']* )?me( [^\"']*)?[\"'][^>]*>"
+OG_RE = r"<meta[^>]*(property|name)=[\"']og:(image|title|description)[\"'][^>]*>"
+
+
 def self_test() -> int:
     here = Path(__file__).resolve().parent / "fixtures" / "microblog"
     bad = 0
@@ -435,6 +440,16 @@ def self_test() -> int:
     for name, want in (("threads-ok.json", 0), ("threads-bad.json", 3)):
         got = len(threads_payload(json.loads((here / name).read_text())))
         expect(got == want, f"{name}: {got} findings, want {want}")
+    bad_html = (here / "relme-bad.html").read_text()
+    ok_html = (here / "relme-ok.html").read_text()
+    expect(
+        not re.search(RELME_RE, bad_html, re.IGNORECASE), "CH-MB-18 matched a tag with no rel=me"
+    )
+    expect(len(re.findall(RELME_RE, ok_html, re.IGNORECASE)) == 2, "CH-MB-18 missed a rel=me tag")
+    og = [
+        m.group(2) for m in re.finditer(OG_RE, (here / "og-mixed.html").read_text(), re.IGNORECASE)
+    ]
+    expect(og == ["image", "title"], f"CH-MB-10 og tags {og}")
     print("self-test " + ("FAILED" if bad else "ok"))
     return 1 if bad else 0
 

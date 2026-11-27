@@ -11,7 +11,7 @@ Rules covered:
   CH-CORE-17  every row has the required keys, enum values and an absolute
               last_checked
   CH-CORE-18  forward links (every active row's url is in each linked_from file),
-              reverse links (every channel URL in owned sources matches a row),
+              reverse links (every channel URL in owned sources matches an active row),
               staleness (90 days warn, 180 days fail) and zero links for
               retired and planned rows
   CH-CORE-19  an inferred handle is never active or linked; a failed probe is
@@ -247,7 +247,10 @@ def link_findings(path: Path, rows: list[dict], root: Path) -> list[str]:
                     f"{path}: {row.get('id')}: {rel} does not contain {row['url']} (forward link)"
                 )
     known = [norm(r["url"]) for r in rows if r.get("url")]
+    live = [norm(r["url"]) for r in rows if r.get("url") and r.get("status") == "active"]
     for name in owned_files(root):
+        if (root / name).resolve() == path.resolve():
+            continue  # the inventory holds every url on purpose
         try:
             data = (root / name).read_bytes()[:2_000_000]
         except OSError:
@@ -256,11 +259,16 @@ def link_findings(path: Path, rows: list[dict], root: Path) -> list[str]:
             continue
         for lineno, line in enumerate(data.decode("utf-8", "replace").splitlines(), 1):
             for hit in URL_RE.findall(line):
-                if CHANNEL_RE.search(hit) and not any(
-                    norm(hit) == k or norm(hit).startswith(k + "/") for k in known
-                ):
+                if not CHANNEL_RE.search(hit):
+                    continue
+                url = norm(hit)
+                if not any(url == k or url.startswith(k + "/") for k in known):
                     out.append(
                         f"{name}:{lineno}: {hit.rstrip('.,;')} matches no channels.yml row (reverse link)"
+                    )
+                elif not any(url == k or url.startswith(k + "/") for k in live):
+                    out.append(
+                        f"{name}:{lineno}: {hit.rstrip('.,;')} is linked but its row is not active (CH-CORE-18, CH-CORE-19)"
                     )
     return out
 
@@ -288,6 +296,7 @@ def self_test() -> int:
         "forward link",
         "reverse link",
         "not provable (<code>",
+        "its row is not active",
     ):
         if needle not in text:
             raise SystemExit(f"self-test: fail fixture did not report {needle!r}: {text}")

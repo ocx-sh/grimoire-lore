@@ -60,11 +60,21 @@ Run the Node scripts from a project that has the pins installed, so Node resolve
 ```sh
 npm i --save-exact axe-core@4.14.1 @axe-core/playwright@4.14.1 playwright-core@1.63.0
 CHECKS=.claude/skills/ux-quality-reference/checks   # $CLAUDE_CONFIG_DIR/skills/ux-quality-reference/checks when installed globally
-BASE=http://127.0.0.1:4321   # a served production build, never a dev server
+DIST=dist                    # the production build's output directory (astro, vite and next export default to dist or out)
+BASE=http://127.0.0.1:4321   # that build served over HTTP, never a dev server
 REPORT=report.md             # the run report this review writes
 ```
 
-Set `PW_CHROMIUM` to a Chromium or headless-shell binary when Playwright's own browser download is absent. Every script prints its own version line. An empty route list or an unreachable `BASE` is a failure, not a pass.
+Set `PW_CHROMIUM` to a Chromium or headless-shell binary when Playwright's own browser download is absent. A downloaded browser also needs system libraries: if it exits 127 (`error while loading shared libraries: libnspr4.so`), run `npx playwright install-deps chromium`, install the distro packages, or point `LD_LIBRARY_PATH` at a directory that holds them. When the browser cannot start, list steps 3 and 4 under `did not run:` with that reason. Every script prints its own version line. An empty route list or an unreachable `BASE` is a failure, not a pass.
+
+Create the three input files of the gate once, before the first run:
+
+```sh
+grep -o '<loc>[^<]*' "$DIST"/sitemap-0.xml | sed -e 's/<loc>//' -e 's|^https\{0,1\}://[^/]*||' > routes.txt   # one route per line
+node "$CHECKS"/axe-fixture.mjs "$BASE" --routes routes.txt --update-baseline a11y-baseline.json   # the needs-review baseline (UX-VERIFY-06): read it, then commit it
+```
+
+`states.json` is written by hand, one entry per open, error and loading state (UX-VERIFY-05), in the format `node "$CHECKS"/axe-fixture.mjs --help` prints. A step is `click`, `press` or `fill`. `press` takes one key name per step, never text: `{"press":".c"}` aborts the state. Type text with `{"fill":"input[name=email]","text":"a.c"}`. The fixture cannot hold a request open, so reach a loading state through a fixture route or a query flag in the app that renders the state without a response.
 
 ## What Runs and in What Order
 

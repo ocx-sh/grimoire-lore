@@ -7,6 +7,7 @@ metadata:
   keywords: ux,accessibility,a11y,wcag,review,audit,axe,playwright,keyboard,screen-reader,contrast,focus,reflow,zoom,loading,error-state,cli,help,first-run,ux-review,ux-quality
   grim.requires.skills.ux-quality-reference: "./ux-quality-reference:0"
   grim.requires.skills.ux-cli: "./ux-cli:0"
+  grim.requires.skills.ux-agent-interfaces: "./ux-agent-interfaces:0"
 ---
 
 # ux-review
@@ -42,13 +43,18 @@ step says so under `did not run:` with the reason. Never write "accessible", "co
 - Tools: `python3` 3.11 or newer (standard library only) for the scans. `node` and a Playwright
   browser for the `.mjs` checks. Each `.mjs` header names the exact Playwright and axe-core
   versions it was written for and the run prints them. If a package is missing, install those
-  exact versions into a scratch directory, never into the project, and say so under `ran:`.
+  exact versions into a scratch directory, never into the project, and say so under `ran:`. The `.mjs`
+  files import those packages by bare name, and Node resolves them from the script's own directory,
+  not the working directory: copy `$CHECKS` into the scratch directory, set `CHECKS` to the copy and run
+  every script from there.
 - A rendered check runs against a **served production build** in a real browser, never against
   jsdom and never against a dev server (a dev server changes timing and output). Serve the build
   directory: `python3 -m http.server 4402 --directory dist &`, then `BASE=http://127.0.0.1:4402`.
   Stop the server at the end.
-- No build, no browser or no Node means the rendered steps go under `did not run:`. Never report a
-  static pass as a rendered pass.
+- No build, no browser or no Node means the rendered steps go under `did not run:`. A browser that is
+  present but fails to launch (for example a missing shared library) counts as no browser: record the
+  launch error under `did not run:` and report no rendered result. Never report a static pass as a
+  rendered pass.
 - The pinned house defaults: the report field labels in [step 9](#9-report) and the
   `matrix-labels.csv` promotion rule (UX-VERIFY-13). An adopter overrides each once.
 
@@ -63,8 +69,10 @@ MCP server, JSON mode) and the base to compare against.
   `html-has-lang` violations (UX-VERIFY-04).
 
 ```sh
-cat dist/sitemap-*.xml | grep -oE '<loc>[^<]+' | sed 's/<loc>//; s#https\{0,1\}://[^/]*##' | sort -u
+cat dist/sitemap-[0-9]*.xml | grep -oE '<loc>[^<]+' | sed 's/<loc>//; s#https\{0,1\}://[^/]*##' | sort -u > routes.txt
 ```
+
+  `sitemap-[0-9]*.xml` skips `sitemap-index.xml`. Step 4c reads `routes.txt`.
 
 - Nothing named: the branch diff of interface source.
 
@@ -94,13 +102,19 @@ Run from the repository root. Each script takes explicit paths, exits 0 clean, 1
 on a bad call, and prints `--help`. A script whose input is absent goes under `did not run:`.
 
 ```sh
-python3 -I "$CHECKS"/focus_outline.py SRC_DIR...           # UX-A11Y-12, lead generator
+python3 -I "$CHECKS"/focus_outline.py SRC_DIR...           # UX-A11Y-12, lead generator; pass the theme, package and page source dirs
 python3 -I "$CHECKS"/wcag_contrast.py 4.5 < pairs.txt      # UX-A11Y-15, 16; 3 for large text and boundaries
-python3 -I "$CHECKS"/scan_wv.py                            # UX-A11Y-03, 04, 35; run from the webview template directory
-python3 -I "$CHECKS"/text_scan.py PATH...                  # UX-TEXT-16, 17, 25, 28
+python3 -I "$CHECKS"/scan_wv.py WEBVIEW_DIR...             # UX-A11Y-03, 04, 35; VS Code webview targets only
+for a in link-text emoji interjection img-alt plural-s bytes; do python3 -I "$CHECKS"/text_scan.py --arm $a PATH...; done   # UX-TEXT-16, 17, 20, 25, 28
 python3 -I "$CHECKS"/actions_scan.py PATH...               # UX-ACT-04 to 06, UX-AI-06
 for c in unnamed elem badtok pwtok; do python3 -I "$CHECKS"/form_fields.py $c FILE...; done   # UX-STATE-20, 27, 36
 ```
+
+`scan_wv.py` with no directory scans the whole working directory, which on a non-webview repository
+flags site tokens and tests: run it only when the target is a VS Code webview, and name the webview
+template directories. Otherwise list it under `did not run:` with the reason `not a webview`.
+The `plural-s` arm reads string literals only. For `(s)` in markup text, such as `<p>3 file(s)</p>`,
+also run `grep -nE '[A-Za-z]\((s|es)\)' FILE...`.
 
 How to file each result:
 
@@ -167,8 +181,11 @@ label never counts. Done: every row has pass, a Finding or a Needs human review 
 **4c. Page structure** (UX-A11Y-28 to 33, UX-VERIFY-04).
 
 ```sh
-python3 -I "$CHECKS"/page_structure.py dist
+python3 -I "$CHECKS"/page_structure.py --sitemap "$DIST"/sitemap-0.xml --page-list routes.txt "$DIST"
 ```
+
+`DIST` is the built directory and `routes.txt` is the route list from step 1. Never run it on the bare
+directory: fragments and partials give false `h1`, `lang` and title findings (UX-VERIFY-04).
 
 Each hit is a Finding, class measured. The checks cover `lang`, a non-empty title, one `main`, one
 `h1`, a skip link, and identical repeated header and navigation across pages.
@@ -327,7 +344,7 @@ sed -n '/^## Findings/,/^## /p' report.md | awk '/^- file:/{f++} /^ *evidence: *
 
 ```sh
 # UX-VERIFY-21: every sc: or also: ID is in the whitelist (prints nothing on a pass)
-grep -oE '^ *(sc|also): *[0-9. ,]+' report.md | grep -oE '[1-4]\.[0-9]{1,2}\.[0-9]{1,2}' | sort -u | awk 'NR==FNR{ok[$1]=1; next} !($1 in ok){print "not a WCAG 2.2 ID: " $1}' "$CHECKS"/wcag22-ids.txt -
+grep -oE '^ *(sc|also): *[0-9. ,]+' report.md | grep -oE '[0-9]+\.[0-9]{1,2}\.[0-9]{1,2}' | sort -u | awk 'NR==FNR{ok[$1]=1; next} !($1 in ok){print "not a WCAG 2.2 ID: " $1}' "$CHECKS"/wcag22-ids.txt -
 # every quote is a verbatim substring of its file: for each finding run
 grep -qF -- "QUOTE" FILE
 ```
@@ -451,5 +468,5 @@ of `ux-quality-reference`, each with its own date.
 - `ux-quality` (rule) and `ux-quality-reference` own the rules and every script this skill runs.
   `ux-cli` owns the CLI matrix. `ux-agent-interfaces` owns JSON output, MCP tools and approvals.
 - `marketing-review` grades marketing copy and claims. `docs-review` grades documentation pages.
-- `css-theming` owns the cascade that delivers a focus ring or a contrast pair. This skill grades
+- `css-theming` (rule) and `css-theming-reference` (skill) own the cascade that delivers a focus ring or a contrast pair. This skill grades
   the outcome.

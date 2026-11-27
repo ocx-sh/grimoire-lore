@@ -7,7 +7,8 @@ It carries CH-CORE-02 (the bot row) and CH-CORE-17 to CH-CORE-19.
 Contents: [Dates and versions](#dates-and-versions) · [Where it lives](#where-it-lives) ·
 [The row](#the-row) · [The bot row](#the-bot-row) · [Worked example](#worked-example) ·
 [The file format](#the-file-format) · [Link checks](#link-checks) ·
-[Recording a failed probe](#recording-a-failed-probe)
+[Recording a failed probe](#recording-a-failed-probe) ·
+[A link that already exists](#a-link-that-already-exists)
 
 ## Dates and versions
 
@@ -27,7 +28,9 @@ it there. Without the file, an agent invents handles or omits them, and cannot t
 "no channel" from "not listed".
 
 A platform the organisation decided against gets a `status: none` row, so an agent can
-tell a deliberate absence from a gap.
+tell a deliberate absence from a gap. Only a human decides it: `verified_by` names the
+decision, such as `owner decision, 2026-11-01`. An agent that merely believes the
+organisation has not joined a platform asks in `open_asks` and writes no `none` row.
 
 ## The row
 
@@ -38,7 +41,7 @@ tell a deliberate absence from a gap.
 | `handle`, `url` | The account. Empty for a `none` row |
 | `status` | `active`, `planned`, `retired`, `squatted` or `none` |
 | `ownership` | `proven` (a logged-in human checked) or `inferred` |
-| `verified_by` | Who checked, and when. Or `not provable (<code>, <date>)` |
+| `verified_by` | Who checked, and when. Or `not provable (<code>, <date>)` on a `planned` row. For `none`, the human decision, such as `owner decision, 2026-11-01` |
 | `owner_role` | A role, such as `community lead`. Never a person's name |
 | `automation` | `none`, `drafts` or `bot` |
 | `approved_by` | Who approved the automation |
@@ -131,6 +134,20 @@ channels:
     credential: ""
     last_checked: 2026-11-01
     linked_from: []
+  - id: bluesky
+    platform: bluesky
+    handle: ""
+    url: ""
+    status: none
+    ownership: proven
+    verified_by: owner decision, 2026-10-15
+    owner_role: maintainer
+    automation: none
+    approved_by: ""
+    labels_required: []
+    credential: ""
+    last_checked: 2026-10-15
+    linked_from: []
 ```
 
 ## The file format
@@ -150,7 +167,7 @@ release note that names a channel.
 |---|---|
 | Forward | An `active` row's `url` is missing from a file in its `linked_from` |
 | Reverse | A channel URL in an owned file matches no row |
-| Zero links | A `retired` or `planned` row has `linked_from` entries |
+| Zero links | A `retired` or `planned` row has `linked_from` entries, or an owned file links a url whose row is not `active` |
 | Staleness | `last_checked` is older than 180 days (a warning after 90) |
 
 The reverse check scans git-tracked and untracked, non-ignored files, and skips
@@ -169,9 +186,22 @@ git grep -n -I -i -E -e 'discord\.(gg|com/invite)/|youtube\.com/@|youtu\.be/|lin
 ## Recording a failed probe
 
 CH-CORE-19. A 403, a 999, a login wall or a missing API key means "not provable". Write
-`verified_by: not provable (403, 2026-11-01)` and leave the row `planned` or `none`.
+`verified_by: not provable (403, 2026-11-01)` and leave the row `planned`. A `none` row
+is a human decision, never a failed probe: `channels_check.py` fails a `none` row whose
+`verified_by` starts with `not provable`.
 LinkedIn refuses unauthenticated profile probes, and `videos.list` answers 403 without
 a key. Never write `retired` or `none` on an HTTP code alone. Never set `active` or a
 `linked_from` entry while `ownership` is `inferred`: a handle resolver returned the
 wrong channel for 9 of 29 handles in one measurement, and squatted handles exist. A
 logged-in human checks the account and records `verified_by`.
+
+## A link that already exists
+
+CH-CORE-18 and CH-CORE-19. A file may already link a url whose ownership you cannot prove,
+such as a LinkedIn profile on a team page. Personal profile links count as channels: the
+check matches `linkedin.com/in/`, so each needs a row. Add the row as `planned`,
+`ownership: inferred`, with `not provable (<code>, <date>)`. `channels_check.py` then fails
+with `linked but its row is not active`, which is correct, because the link is live and
+unproven. Put an `open_asks` line for the human: prove ownership while logged in, or remove
+the link. Only after the human records `verified_by` set `ownership: proven`, `status:
+active` and the real `linked_from`. Never leave a `planned` row with the url still linked.

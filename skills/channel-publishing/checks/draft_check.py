@@ -11,7 +11,8 @@ Subcommands (each prints one line per finding):
   rules-fetch PACKAGE [--page FILE]   CH-CORE-05: line 1 is 'rules_fetched: <date> <url>',
                                       and the verbatim rules_quote (8 words or more) is on that page
   labels PACKAGE                      CH-CORE-06: every label field of the platform is an explicit true or false
-  ai-use --facts FILE [--facts FILE]... PACKAGE     CH-CORE-07: 'ai_use: yes|no, case: <registry id>' agrees with the registry
+  ai-use --facts FILE [--facts FILE]... PACKAGE     CH-CORE-07: 'ai_use: yes|no, case: <registry id>' agrees with the registry;
+                                      bare 'ai_use: borderline' and 'ai_use: no-ai' pass; a platform with no AI label needs no line
   disclosure PACKAGE                  CH-CORE-08: with 'sponsored: true' the first body line is the disclosure
   refs --facts FILE [--facts FILE]... DRAFT         CH-CORE-11: a platform number carries a registry id or a (command: `...`)
   claims FILE...                      CH-CORE-20: known-wrong platform claims carry their registry id
@@ -150,7 +151,11 @@ def ai_use(path: Path, facts: list[Path]) -> list[str]:
         if not line.startswith("ai_use:"):
             continue
         seen = True
+        bare = re.fullmatch(r"ai_use: (borderline|no-ai)", line)  # the bare words CH-CORE-07 names
         match = re.fullmatch(r"ai_use: (yes|no), case: ([A-Za-z0-9-]+)", line)
+        if bare:
+            border = border or bare.group(1) == "borderline"
+            continue
         if not match:
             out.append(f"{path}:{number}: malformed ai_use")
             continue
@@ -166,7 +171,7 @@ def ai_use(path: Path, facts: list[Path]) -> list[str]:
             out.append(f"{path}:{number}: yes needs a trigger row")
         elif value == "no" and not kinds[case].startswith("exemption:"):
             out.append(f"{path}:{number}: no needs an exemption row")
-    if not seen:
+    if not seen and header.get("platform", "").lower() not in NO_AI_FIELD:
         out.append(f"{path}: no ai_use line")
     if border and "ai_use" not in header.get("open_asks", ""):
         out.append(f"{path}: borderline without an open_asks entry")
@@ -243,6 +248,15 @@ def self_test() -> int:
     out = text(labels_check(f / "linkedin.md"))
     need("no AI label field" in out and "Brand partnership" in out, f"labels linkedin: {out}")
     out = text(ai_use(f / "package.md", facts))
+    need(
+        not ai_use(p / "bare.md", facts) and not ai_use(p / "linkedin.md", facts),
+        f"ai-use: bare words or label-less platform rejected: {ai_use(p / 'bare.md', facts)}",
+    )
+    need(
+        "borderline without" in text(ai_use(f / "bare.md", facts))
+        and "no ai_use line" in text(ai_use(f / "youtube.md", facts)),
+        "ai-use: bare borderline without an ask, or a missing line on an AI-label platform, passed",
+    )
     for needle in (
         "yes needs a trigger row",
         "not in registry",

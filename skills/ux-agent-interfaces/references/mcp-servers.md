@@ -31,23 +31,27 @@ The open decisions D1 to D4 are listed once in `SKILL.md`.
 
 ## Capture the Server's Output
 
-Both scripts read saved JSON. `CHECKS=.claude/skills/ux-agent-interfaces/checks`.
+Both scripts read saved JSON. `CHECKS` is the `checks/` directory beside `SKILL.md`. The recipe runs under bash and zsh.
 
 ```sh
 # Capture tools/list. Run once with the default launch command and once with each write flag.
-SERVER="mytool mcp"
+SERVER=(mytool mcp)
 INIT='{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"probe","version":"0"}}}'
 NOTE='{"jsonrpc":"2.0","method":"notifications/initialized"}'
 ( printf '%s\n' "$INIT" "$NOTE" '{"jsonrpc":"2.0","id":2,"method":"tools/list"}'; sleep 2 ) \
-  | timeout 10 $SERVER 2>/dev/null | jq -c 'select(.id==2)' > tools.json
+  | timeout 10 "${SERVER[@]}" 2>server.err | jq -c 'select(.id==2)' > tools.json
 # Probe one call. TOOL and ARGS are the tool name and its JSON arguments object.
 ( printf '%s\n' "$INIT" "$NOTE" "{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"tools/call\",\"params\":{\"name\":\"$TOOL\",\"arguments\":$ARGS}}"; sleep 2 ) \
-  | timeout 10 $SERVER 2>/dev/null | jq -c 'select(.id==3)' > call.json
-python3 -I "$CHECKS"/mcp_tools_check.py tools tools.json --server-key mytool --gate-flag=--allow-writes
+  | timeout 10 "${SERVER[@]}" 2>server.err | jq -c 'select(.id==3)' > call.json
+python3 -I "$CHECKS"/mcp_tools_check.py tools tools.json --server-key mytool --gate-flag=--allow-writes --gated mytool_render
 python3 -I "$CHECKS"/mcp_tools_check.py result call.json --error
+# A call to a gated tool that is absent: capture it as call-absent.json the same way, then:
+python3 -I "$CHECKS"/mcp_tools_check.py result call-absent.json --expect-protocol-error
 ```
 
-`tools` exits 0 when no MUST or SHOULD line prints. Lines that start `note:` are pre-filters for the reading checks (UX-AGENT-19 items 2 and 3, UX-AGENT-21): read each one, none is a finding. `result --error` is for a call that failed on purpose, and `result` without it checks size and `structuredContent`.
+If `tools.json` is empty, read `server.err`: the launch command failed.
+
+`tools` exits 0 when no MUST or SHOULD line prints. Lines that start `note:` are pre-filters for the reading checks (UX-AGENT-19 items 2 and 3, UX-AGENT-21): read each one, none is a finding. `result --error` is for a call that failed on purpose, and `result` without it checks size and `structuredContent`. `result --expect-protocol-error` is for the call to a tool the server does not register: it passes only a JSON-RPC error with code `-32602` and no result, the one place a protocol error is right (UX-AGENT-15 excepts it). `--gated NAMES` lists the tools the launch flag gates off, and a name found in the default list is a UX-AGENT-17 finding.
 
 ## Failures and Gates
 
@@ -55,9 +59,9 @@ python3 -I "$CHECKS"/mcp_tools_check.py result call.json --error
 |---|---|---|---|---|
 | UX-AGENT-15 | Return every failure of the tool's work as a result with `isError: true`: upstream errors, not found, unauthorised, rate limit, business rule, and every argument failure (missing field, wrong type, bad value). Use JSON-RPC errors only for an unknown tool, a request that fails the `CallToolRequest` schema, and a genuine server fault. Never return `-32603` for an expected failure. | The spec lists input validation, API and business-logic failures as tool execution errors that clients SHOULD pass to the model, and `arguments` is an open object, so a bad argument is not a malformed request (Dates and Versions; the spec never says in words that an `inputSchema` violation is a tool execution error, so this is a reading of three texts). `CallToolResult.isError`: errors "SHOULD be reported inside the result object, with `isError` set to true, _not_ as an MCP protocol-level error response. Otherwise, the LLM would not be able to see that an error occurred and self-correct." `-32603` means "Internal error" ([JSON-RPC 2.0](https://www.jsonrpc.org/specification#error_object)). Codex, Copilot and Gemini pass both channels to the model, but Copilot rewrites a thrown error as `ERROR while calling tool: <message>` plus "Please check your input and try again.", wrong advice for a server fault. A measured server returned `-32603` for every operational failure. Cursor is not verified. | Script one `tools/call` each for not-found, unauthorised, refused, timeout, a malformed value and a missing field. `mcp_tools_check.py result FILE --error` exits 0 on every response: a `result` with `isError` true and no `error` member. | MUST |
 | UX-AGENT-16 | Start the text of every MCP error result with the class slug and the retry verdict, for example `not_found (not retryable): …`. Use the same class the CLI's JSON mode gives for the same condition. Keep the text under 10,000 characters. | **House convention.** An MCP result has no exit code, so the text is the only channel for the class. In Copilot in VS Code it is also the only channel for the failure itself, because `isError` goes to UI `details` only. No source or measurement shows that the prefix improves agent behaviour. The 10,000 bound sits just under the lowest error-text cut found, Claude Code's about 11,000 (Dates and Versions). | `mcp_tools_check.py result FILE --error` reports no UX-AGENT-16 line: the text starts with the class slug, then `(retryable)` or `(not retryable)`, then a colon, and is under 10,000 bytes. The class equals the CLI's `.error.code` or `.error.kind` for the same input. A test asserts the size of the largest realistic error. | SHOULD |
-| UX-AGENT-17 | Keep a tool that is gated off (write tools, admin tools) out of `tools/list`. Name the gate, and who decides it, in the server instructions or in an always-registered tool's description. | An agent that gets `tool not found` invents names. The spec says servers "MUST respond to `tools/list` requests with the set of tools currently available". | Start the server without the gate flag: `mcp_tools_check.py tools tools.json --gate-flag=--allow-writes` reports no UX-AGENT-17 line, and the gated tool is absent from the list. | SHOULD |
+| UX-AGENT-17 | Keep a tool that is gated off (write tools, admin tools) out of `tools/list`. Name the gate, and who decides it, in the server instructions or in an always-registered tool's description. | An agent that gets `tool not found` invents names. The spec says servers "MUST respond to `tools/list` requests with the set of tools currently available". | Start the server without the gate flag: `mcp_tools_check.py tools tools.json --gate-flag=--allow-writes --gated NAME` reports no UX-AGENT-17 line. `--gate-flag` covers the naming half and `--gated` the absence half, so name every gated tool. | SHOULD |
 
-Absence is the gate and a callable "disabled" stub is not: a stub adds a surface only to say no, and a call to the absent tool returns `-32602` (unknown tool), which is the one place a protocol error is right.
+Absence is the gate and a callable "disabled" stub is not: a stub adds a surface only to say no, and a call to the absent tool returns `-32602` (unknown tool), which is the one place a protocol error is right, checked with `mcp_tools_check.py result FILE --expect-protocol-error`.
 
 ## Names, Descriptions and Schemas
 

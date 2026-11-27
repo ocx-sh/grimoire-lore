@@ -1,0 +1,4 @@
+[project]
+name = "mytool-tests"
+version = "0.0.0"
+classifiers = ["Private :: Do Not Upload"]

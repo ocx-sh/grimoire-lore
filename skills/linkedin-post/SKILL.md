@@ -34,12 +34,12 @@ CH-LI-01 below is the LinkedIn case of CH-CORE-01.
 
 ## Procedure
 
-`LI=.claude/skills/linkedin-post`, `CHECKS=$LI/checks`, `CP=.claude/skills/channel-publishing/checks`. Use `$CLAUDE_CONFIG_DIR/skills/...` for a global install.
+`LI=.claude/skills/linkedin-post`, `CHECKS=$LI/checks`, `CP=.claude/skills/channel-publishing/checks`. Use `$CLAUDE_CONFIG_DIR/skills/...` for a global install. When the skills are not installed under `.claude/skills`, set `LI`, `CHECKS` and `CP` to the directories they were loaded from (`CP` is the `checks` directory of `channel-publishing`).
 
 1. **Read the facts.** Input: `$LI/references/facts.md`. Run `python3 -I "$CP"/facts_check.py "$LI"/references/facts.md`. Done: exit 0. A row that fails is a manual re-read (see below), not a step you skip.
 2. **Collect the brief.** Ask the human for: the author (a person), the goal, the metric that exists for that goal, the author's tie to the tool, a first-hand element with its command or file, a `source:` line for every number and quote, the `consented:` names for every mention, and whether value was exchanged. Done: each of these is a header key or an entry in `open_asks`. With no first-hand element, stop and ask. Do not invent one.
 3. **Pick the format from the goal.** Use the table under CH-LI-22. Done: `format` and `visual` are set, or `format_reason:` says why not.
-4. **Write the draft file** to `post-draft.md` or the path the human names, in the layout of [The draft file](#the-draft-file). Write a new opening sentence; never paste release-note lines. Done: header and body both exist.
+4. **Write the draft file** to `post-draft.md` or the path the human names, in the layout of [The draft file](#the-draft-file). Write a new opening sentence; never paste release-note lines. Keep lines 1 to 3 under the fold budget in [LI-F27] while they carry the CH-LI-04 disclosure, the subject and a first-hand number. Done: header and body both exist.
 5. **Place the link and the visuals.** One typed URL after line 3, no URL in lines 1 to 3. Write alt text yourself. Done: CH-LI-09 and CH-LI-11 hold.
 6. **Run the checker.** `python3 -I "$CHECKS"/li_draft_check.py post-draft.md --source NOTES --plan PLAN`. Add `--source` when the post comes from release notes or a README, and `--plan` for any plan or hand-off note you wrote. Fix each finding. A SHOULD finding may stay with a reason in `open_asks`. Done: exit 0.
 7. **Run the manual checks** CH-LI-10 (link card tags) and CH-LI-12 (accessible URL) from their blocks below when the draft needs them. Done: the output matches the rule's pass condition.
@@ -156,7 +156,8 @@ Format by goal (convention, not a LinkedIn requirement):
 # CH-LI-01 committed code: any hit is the finding
 git ls-files -z -- '.github/workflows' 'scripts' ':(exclude,glob)**/linkedin-post/**' \
   | xargs -0 -r grep -l -E -e 'linkedin\.com/(rest|v2|feed|in/|posts)' -e 'ugcPosts' -e 'play[w]right' -e 'pupp[e]teer' -e 'sele[n]ium' --
-# CH-LI-01 run time: $TOOL_LOG is the session's tool log; any line printed is the finding
+# CH-LI-01 run time: $TOOL_LOG is a file holding the session's tool log; any line printed is the finding.
+# With no such file (check: test -f "$TOOL_LOG"), skip this block and write 'unverified: no tool log' in open_asks.
 grep -o -E '//(www\.)?linkedin\.com/[A-Za-z0-9_-]+' "$TOOL_LOG" | grep -v -E 'com/(help|legal)$'
 # CH-LI-01, human, every 90 days: the bot clause is still in the User Agreement
 curl -sL --compressed -m 40 -A 'Mozilla/5.0 research' https://www.linkedin.com/legal/user-agreement \

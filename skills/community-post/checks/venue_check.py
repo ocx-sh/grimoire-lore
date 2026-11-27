@@ -75,7 +75,10 @@ def check_title(
         out.append(f'CH-COM-06 {clause}: "{span}"')
 
     if not title.startswith("Show HN: "):
-        hit("prefix", title[:9])
+        head = title.split(":", 1)[0]
+        if len(head) > 20:
+            head = head[:20].rsplit(" ", 1)[0] if " " in head[:21] else head[:20]
+        hit("prefix", head)
     for m in re.finditer(r"!", title):
         hit("exclamation", title[max(0, m.start() - 8) : m.end()])
     for m in SUPERLATIVE_RE.finditer(title):
@@ -207,6 +210,14 @@ def self_test() -> int:
     )
     prefix = (FIXTURES / "hn-fail-prefix.md").read_text(encoding="utf-8").splitlines()[0]
     expect(any("prefix" in s for s in check_title(prefix)), "hn-fail-prefix reports the prefix")
+    expect(
+        check_title("ocx, a package manager")[:1] == ['CH-COM-06 prefix: "ocx, a package"'],
+        "prefix span ends at a word boundary",
+    )
+    expect(
+        check_title(prefix)[:1] == ['CH-COM-06 prefix: "Mytool"'],
+        "prefix span stops at the first colon",
+    )
     expect(
         any("capitals" in s for s in check_title("Show HN: Mytool, an ASCII table renderer")),
         "capitals fail without an allow-list",

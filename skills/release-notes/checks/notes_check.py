@@ -24,7 +24,8 @@ Config (--config cliff.toml):
   MKT-REL-05  at least 4 Changelog: footer parsers
   MKT-REL-06  a scope skip parser exists; no Documentation group
   MKT-REL-14  the {% if message %} slot sits after the version heading
-  MKT-REL-10  with --workflows DIR, no generate_release_notes while a config exists
+  MKT-REL-10  with --workflows DIR, no generate_release_notes (or `gh release create
+              --generate-notes`) while a config exists
 
 Usage:
   notes_check.py [--notes FILE] [--config FILE] [--workflows DIR] [--skip ID]...
@@ -49,6 +50,7 @@ CC_BULLET = re.compile(r"^[-*] [a-z]+(\([^)]*\))?!?: ")
 REMOVAL = re.compile(
     r"remov[a-z]* (in|after|on) (v?[0-9]+\.[0-9]+|[0-9]{4}-[0-9]{2}-[0-9]{2})", re.IGNORECASE
 )
+GENERATED = re.compile(r"generate[-_]release[-_]notes|--generate-notes")
 FINDING = tuple[str, str]  # (rule id, message)
 
 
@@ -158,7 +160,7 @@ def check_workflows(directory: Path) -> list[FINDING]:
     files = [*directory.glob("*.yml"), *directory.glob("*.yaml")]
     for f in sorted(files):
         for n, line in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
-            if re.search(r"generate[-_]release[-_]notes", line):
+            if GENERATED.search(line):
                 out.append(("MKT-REL-10", f"{f}:{n}: GitHub-generated notes while a config exists"))
     return out
 
@@ -214,7 +216,9 @@ def self_test() -> int:
     expect(
         bad_cfg == {"MKT-REL-03", "MKT-REL-04", "MKT-REL-05", "MKT-REL-06", "MKT-REL-14"}, bad_cfg
     )
-    expect([f[0] for f in check_workflows(fx / "workflows")] == ["MKT-REL-10"])
+    # release.yml uses the action input, cli.yml the gh flag, ok.yml neither.
+    wf = [(f[0], f[1].split(":")[0].rsplit("/", 1)[-1]) for f in check_workflows(fx / "workflows")]
+    expect(wf == [("MKT-REL-10", "cli.yml"), ("MKT-REL-10", "release.yml")], wf)
     expect(run(fx / "bad.md", fx / "cliff.good.toml", None, set(bad)) == [])
     print("notes_check self-test ok")
     return 0

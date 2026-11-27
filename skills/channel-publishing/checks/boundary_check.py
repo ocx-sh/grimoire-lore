@@ -8,11 +8,13 @@ Subcommands:
   scan --repo ORG/REPO --channels channels.yml [--root DIR] [--exclude TEXT]... [PATH...]
       CH-CORE-01 and 02. Lists every workflow or skill file that names a posting
       endpoint or a publishing secret and is not the 'runs_from' of a channels.yml
-      row. With no PATH it lists git-tracked files under skills, .claude/skills
-      and .github/workflows. Files under a channel-publishing directory and files
+      row. With no PATH it lists git-tracked and untracked, non-ignored
+      files under skills, .claude/skills and .github/workflows. Files under a channel-publishing directory and files
       named facts.md are skipped, because they name endpoints on purpose.
   browser PATH...
-      CH-CORE-01. Fails on playwright, puppeteer or selenium in channel skills.
+      CH-CORE-01. Fails on playwright, puppeteer or selenium. Pass only files of
+      channel skills (those that require channel-publishing): a hit in any other
+      skill is not a channel finding, and the human decides it (an open_asks line).
   package FILE...
       CH-CORE-01 and 04. A publish package has the ten header keys, leaves
       approved_by and approved_at empty, and never targets Stack Overflow.
@@ -32,6 +34,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 import tomllib
 from pathlib import Path
 
@@ -69,7 +72,18 @@ def listed_files(root: Path) -> list[str]:
         print("boundary_check: git not found on PATH", file=sys.stderr)
         raise SystemExit(2)
     out = subprocess.run(  # noqa: S603  git is resolved with shutil.which, args are fixed
-        [git, "ls-files", "-z", "--", "skills", ".claude/skills", ".github/workflows"],
+        [
+            git,
+            "ls-files",
+            "-z",
+            "--cached",
+            "--others",
+            "--exclude-standard",
+            "--",
+            "skills",
+            ".claude/skills",
+            ".github/workflows",
+        ],
         cwd=root,
         capture_output=True,
         check=True,
@@ -149,6 +163,17 @@ def self_test() -> int:
         not scan(FIXTURES / "fail", ["workflows/post.yml"], repo, channels, ["post.yml"]),
         "--exclude ignored",
     )
+    with tempfile.TemporaryDirectory() as tmp:
+        git = shutil.which("git")
+        need(git is not None, "git missing")
+        wf = Path(tmp, ".github", "workflows")
+        wf.mkdir(parents=True)
+        subprocess.run([git, "init", "-q"], cwd=tmp, check=True)  # noqa: S603
+        (wf / "post.yml").write_text("curl -X POST https://api.linkedin.com/rest/posts\n")
+        need(
+            listed_files(Path(tmp)) == [".github/workflows/post.yml"],
+            "scan skips an untracked workflow",
+        )
     need(not browser([FIXTURES / "pass" / "skill.md"]), "browser pass fixture reported")
     need(len(browser([FIXTURES / "fail" / "skill.md"])) == 1, "browser fail fixture not reported")
     need(not package(FIXTURES / "pass" / "package.md"), "pass package reported")

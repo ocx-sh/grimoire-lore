@@ -307,7 +307,8 @@ def check_draft(path: Path, source: Path | None, plans: list[Path], facts: Path,
     consented = [
         c.strip().lstrip("@").lower() for c in ",".join(allv("consented")).split(",") if c.strip()
     ]
-    for m in re.findall(r"@[A-Z][A-Za-z.-]+(?: [A-Z][A-Za-z.-]+)?", body):
+    for raw in re.findall(r"(?<![\w.])@[A-Za-z][A-Za-z0-9._-]*(?: [A-Z][A-Za-z.-]+)?", body):
+        m = raw.rstrip(".,-")
         mm = m.lstrip("@").lower()
         if not any(mm.startswith(c) or c.startswith(mm) for c in consented):
             F.append(("CH-LI-08", f"mention {m} is not on the consented: list"))
@@ -608,6 +609,11 @@ def self_test() -> int:
     }
     got = ids("fail-body.md", source=notes, plans=["plan-fail.md"])
     expect(want <= got, sorted(want - got))
+    expect(
+        "CH-LI-08" in ids("fail-mention.md", source=notes),
+        "lowercase @handle must need consent",
+    )
+    expect("CH-LI-08" not in ids("pass-mention.md", source=notes), "consented handle passes")
     expect("CH-LI-12" in ids("fail-doc.md"), ids("fail-doc.md"))
     # a 2,901-count body breaks CH-LI-06; the same body in a clean draft shape does not
     big = FIX / "pass.md"

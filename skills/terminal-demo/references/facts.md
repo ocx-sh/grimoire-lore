@@ -19,8 +19,7 @@ never quote a platform limit, tool default or standard from memory.
   `verified` is the date an agent read the page. `refresh_days` is a number or
   `expires:<date>`. No cell holds a literal pipe, so `expect` uses no alternation.
 - Cadence: 180 days for hard limits, 90 for policy, API fields and tool behaviour,
-  30 for metered costs. The skill's floor is 180 days, and 90 for the player
-  version. `checks/` has no checker of its own for this file: the catalog's
+  30 for metered costs. `checks/` has no checker of its own for this file: the catalog's
   `facts_check.py` in the `channel-publishing` skill fails on the first overdue row.
   Re-fetch the page and move `verified` only after the `expect` pattern matches.
   Never extend a date without reading the page.

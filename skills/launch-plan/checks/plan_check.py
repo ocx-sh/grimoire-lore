@@ -32,17 +32,31 @@ ASK = re.compile(
 )
 ORDER = ["release", "record", "venue", "social", "directory", "recap"]
 COUNTERS = {f"C{n}" for n in range(1, 12)}
+# owner-major:REF points at a written decision: a URL, a path, #N, a commit or a plan line (L12).
+REF = re.compile(r"https?://\S+|\S*[/.]\S*|#\d+|[0-9a-f]{7,40}|L\d+")
+
+
+def slug(venue):
+    """Canonical slug of a venue name: `Product Hunt` and producthunt.com give product-hunt."""
+    name = venue.strip().lower()
+    key = re.sub(r"[^a-z0-9]", "", name)
+    if "producthunt" in key:
+        return "product-hunt"
+    if "showhn" in key or ("ycombinator" in key and "show" in key):
+        return "show-hn"
+    return name
 
 
 def parse(text):
-    """Return (front matter dict, {section: [(lineno, row dict)]}, lines)."""
+    """Return (front matter dict, {section: [(lineno, row dict)]}, lines, key line numbers)."""
     lines = text.splitlines()
-    fm, start = {}, 0
+    fm, at, start = {}, {}, 0
     if lines and lines[0] == "---":
         end = lines.index("---", 1) if "---" in lines[1:] else 0
-        for line in lines[1:end]:
+        for n, line in enumerate(lines[1:end], 2):
             key, _, value = line.partition(":")
             fm[key.strip()] = value.strip()
+            at[key.strip()] = n
         start = end + 1
     tables, section, header = {}, "", None
     for n, line in enumerate(lines[start:], start + 1):
@@ -56,7 +70,7 @@ def parse(text):
                 tables.setdefault(section, []).append((n, dict(zip(header, cells, strict=False))))
         else:
             header = None
-    return fm, tables, lines
+    return fm, tables, lines, at
 
 
 def val(fm, key):
@@ -107,8 +121,12 @@ def covered(blocks, need_start, need_end):
 
 
 def check(path, text, artifacts=()):
-    fm, tables, lines = parse(text)
+    fm, tables, lines, at = parse(text)
     out = []
+
+    def k(key):
+        """Line of a front-matter key, or 1 when the key is absent."""
+        return at.get(key, 1)
 
     def bad(n, rule, msg):
         out.append((n, rule, msg))
@@ -119,7 +137,7 @@ def check(path, text, artifacts=()):
 
     # CH-LAUNCH-04: the admission record
     if not plan_date:
-        bad(1, "CH-LAUNCH-04", "plan_date is missing or not YYYY-MM-DD")
+        bad(k("plan_date"), "CH-LAUNCH-04", "plan_date is missing or not YYYY-MM-DD")
     for n, r in tables.get("venue admission", []):
         verdict, quote = r.get("verdict", "").lower(), r.get("scope_quote", "")
         if verdict not in VERDICTS:
@@ -154,10 +172,10 @@ def check(path, text, artifacts=()):
     # CH-LAUNCH-06: classes, one community venue per day, staffing
     seen_days, community = {}, []
     admitted = {
-        r.get("venue", "").lower(): r.get("url", "") for _, r in tables.get("venue admission", [])
+        slug(r.get("venue", "")): r.get("url", "") for _, r in tables.get("venue admission", [])
     }
     for n, r in schedule:
-        cls, venue = r.get("venue_class", "").lower(), r.get("venue", "").lower()
+        cls, venue = r.get("venue_class", "").lower(), slug(r.get("venue", ""))
         if cls not in CLASSES:
             bad(n, "CH-LAUNCH-06", f"venue_class {cls!r} is not one of {sorted(CLASSES)}")
         launch_day = r.get("launch_day", "").lower() == "true"
@@ -174,7 +192,8 @@ def check(path, text, artifacts=()):
                 bad(
                     n,
                     "CH-LAUNCH-06",
-                    f"{venue}: cite the fetched page that shows its reply surface",
+                    f"{venue}: an unknown community venue; use show-hn or product-hunt, or "
+                    "give it a Venue admission row whose url is the fetched page that shows its reply surface",
                 )
         pub = r.get("publish_date", "")
         if cls == "editorial" and pub != "not-scheduled" and not pub.startswith("http"):
@@ -188,7 +207,7 @@ def check(path, text, artifacts=()):
         hours = val(fm, "hn_duty_hours")
         if venue == "show-hn" and not (hours.isdigit() and int(hours) >= 1):
             bad(n, "CH-LAUNCH-06", "hn_duty_hours must be a whole number of at least 1")
-        rows = [(m, s) for m, s in shifts if s.get("venue", "").lower() == venue]
+        rows = [(m, s) for m, s in shifts if slug(s.get("venue", "")) == venue]
         if not rows or any(not s.get("owner") for _, s in rows):
             bad(n, "CH-LAUNCH-06", f"{venue}: name an owner for every shift block")
             continue
@@ -225,17 +244,30 @@ def check(path, text, artifacts=()):
     # CH-LAUNCH-07: launch reason
     reason, tag = val(fm, "launch_reason"), val(fm, "launched_tag")
     if not re.fullmatch(r"first-launch|major-version|owner-major:\S+", reason):
-        bad(1, "CH-LAUNCH-07", "launch_reason is first-launch, major-version or owner-major:REF")
+        bad(
+            k("launch_reason"),
+            "CH-LAUNCH-07",
+            "launch_reason is first-launch, major-version or owner-major:REF; a routine "
+            "release is not a launch, so stop and ask the owner",
+        )
+    if reason.startswith("owner-major:") and not REF.fullmatch(reason.partition(":")[2]):
+        bad(
+            k("launch_reason"),
+            "CH-LAUNCH-07",
+            "owner-major:REF needs a URL, a path, #N, a commit or a plan line, not a placeholder",
+        )
     if reason == "major-version" and not MAJOR.match(tag):
-        bad(1, "CH-LAUNCH-07", f"major-version needs a tag like v2.0.0, not {tag!r}")
+        bad(
+            k("launched_tag"), "CH-LAUNCH-07", f"major-version needs a tag like v2.0.0, not {tag!r}"
+        )
     if reason == "first-launch" and not val(fm, "first_launch_evidence"):
         bad(
-            1,
+            k("first_launch_evidence"),
             "CH-LAUNCH-07",
             "first-launch needs first_launch_evidence: the venue search and its output",
         )
     for n, r in schedule:
-        if r.get("venue", "").lower() in ("show-hn", "product-hunt"):
+        if slug(r.get("venue", "")) in ("show-hn", "product-hunt"):
             for v in re.findall(r"\d+\.\d+\.\d+", r.get("title", "")):
                 if not MAJOR.match(v):
                     bad(
@@ -245,20 +277,28 @@ def check(path, text, artifacts=()):
                     )
     last = day(val(fm, "last_ph_launch"))
     if last and launch_date and (launch_date - last).days <= 60 and not val(fm, "relaunch_request"):
-        bad(1, "CH-LAUNCH-07", "a second Product Hunt launch inside 60 days needs relaunch_request")
+        bad(
+            k("last_ph_launch"),
+            "CH-LAUNCH-07",
+            "a second Product Hunt launch inside 60 days needs relaunch_request",
+        )
 
     # CH-LAUNCH-08: order. The first date of each step is compared with the step before it.
-    first = {}
-    for _n, r in schedule:
+    first, row_at = {}, {}
+    for n, r in schedule:
         step = r.get("step")
         if step in ORDER and (step != "venue" or r.get("launch_day", "").lower() == "true"):
-            first[ORDER.index(step)] = min(first.get(ORDER.index(step), "9999"), r.get("date", ""))
+            i, d = ORDER.index(step), r.get("date", "")
+            if d < first.get(i, "9999"):
+                first[i], row_at[i] = d, n
     ranks = sorted(first)
     for a, b in pairwise(ranks):
         if first[b] < first[a]:
-            bad(1, "CH-LAUNCH-08", f"{ORDER[b]} ({first[b]}) comes before {ORDER[a]} ({first[a]})")
+            msg = f"{ORDER[b]} ({first[b]}) comes before {ORDER[a]} ({first[a]})"
+            bad(row_at[b], "CH-LAUNCH-08", msg)
     if 0 in first and 2 in first and first[0] >= first[2]:
-        bad(1, "CH-LAUNCH-08", "the release date is not strictly earlier than the venue date")
+        msg = "the release date is not strictly earlier than the venue date"
+        bad(row_at[2], "CH-LAUNCH-08", msg)
 
     # CH-LAUNCH-10: launch week
     if val(fm, "launch_shape") == "launch-week":
@@ -266,7 +306,7 @@ def check(path, text, artifacts=()):
         done = sum(1 for _, r in tables.get("items", []) if r.get("released", "").lower() == "yes")
         if done < need:
             bad(
-                1,
+                k("launch_shape"),
                 "CH-LAUNCH-10",
                 f"a launch week needs {need} released items; the plan lists {done}",
             )
@@ -274,32 +314,36 @@ def check(path, text, artifacts=()):
     # CH-LAUNCH-11: one numeric goal
     for key in ("goal", "counter", "read_command", "baseline_window", "target", "read_on"):
         if not val(fm, key):
-            bad(1, "CH-LAUNCH-11", f"front matter lacks {key}")
+            bad(k(key), "CH-LAUNCH-11", f"front matter lacks {key}")
     counter, approved = val(fm, "counter"), val(fm, "owner_approved_counter") == "true"
     if counter and counter not in COUNTERS:
-        bad(1, "CH-LAUNCH-11", f"counter {counter!r} is not one of C1 to C11")
+        bad(k("counter"), "CH-LAUNCH-11", f"counter {counter!r} is not one of C1 to C11")
     if counter in ("C1", "C11") and not approved:
         bad(
-            1,
+            k("counter"),
             "CH-LAUNCH-11",
             f"{counter} is a venue or star count; use C5, C6, C3 or C4, or set owner_approved_counter: true",
         )
     if counter in ("C3", "C4") and not val(fm, "traffic_archive"):
-        bad(1, "CH-LAUNCH-11", "a C3 or C4 counter needs traffic_archive (CH-GH-25)")
+        bad(k("counter"), "CH-LAUNCH-11", "a C3 or C4 counter needs traffic_archive (CH-GH-25)")
     if re.search(
         r"\b(stars?|points?|rank(ing)?|trending|upvotes?)\b", val(fm, "goal"), re.IGNORECASE
     ):
-        bad(1, "CH-LAUNCH-11", "the goal names stars, points or a rank (CH-GH-24)")
+        bad(k("goal"), "CH-LAUNCH-11", "the goal names stars, points or a rank (CH-GH-24)")
     window = re.fullmatch(r"28 days ending (\d{4}-\d{2}-\d{2})", val(fm, "baseline_window"))
     if val(fm, "baseline_window") and not (
         window and launch_date and day(window.group(1)) == launch_date - timedelta(days=1)
     ):
-        bad(1, "CH-LAUNCH-11", "baseline_window is `28 days ending` the day before launch_date")
+        bad(
+            k("baseline_window"),
+            "CH-LAUNCH-11",
+            "baseline_window is `28 days ending` the day before launch_date",
+        )
     reads = [day(s.strip()) for s in val(fm, "read_on").split(",") if s.strip()]
     if val(fm, "read_on") and (
         launch_date is None or reads != [launch_date + timedelta(days=k) for k in (1, 2, 7)]
     ):
-        bad(1, "CH-LAUNCH-11", "read_on is launch_date plus 1, 2 and 7 days")
+        bad(k("read_on"), "CH-LAUNCH-11", "read_on is launch_date plus 1, 2 and 7 days")
 
     # CH-LAUNCH-13: venue figures carry their URL
     in_facts = False
@@ -316,12 +360,14 @@ def check(path, text, artifacts=()):
             )
 
     # CH-LAUNCH-14: Product Hunt account
-    if any(r.get("venue", "").lower() == "product-hunt" for _, r in schedule):
+    ph_rows = [n for n, r in schedule if slug(r.get("venue", "")) == "product-hunt"]
+    if ph_rows:
         acct = val(fm, "ph_account").lower()
         if not acct:
-            bad(1, "CH-LAUNCH-14", "name the maker's personal Product Hunt account in ph_account")
+            msg = "name the maker's personal Product Hunt account in ph_account"
+            bad(at.get("ph_account", ph_rows[0]), "CH-LAUNCH-14", msg)
         elif acct in (val(fm, "org").lower(), val(fm, "product").lower()):
-            bad(1, "CH-LAUNCH-14", f"ph_account {acct!r} is the org or product name")
+            bad(k("ph_account"), "CH-LAUNCH-14", f"ph_account {acct!r} is the org or product name")
     return [(path, *f) for f in sorted(out)]
 
 
@@ -354,6 +400,29 @@ def self_test():
         not covered([(t0, t0 + 3 * h), (t0 + 4 * h, t0 + 8 * h)], t0, t0 + 8 * h),
         "self-test expectation failed",
     )
+    # Venue names are normalised: `Show HN` and `producthunt.com` count as the slugs.
+    alias = (here / "alias-plan.md").read_text(encoding="utf-8")
+    found = check("alias-plan.md", alias)
+    by_rule = {f[2]: f[1] for f in found}
+    expect({"CH-LAUNCH-06", "CH-LAUNCH-07", "CH-LAUNCH-14"} <= set(by_rule), found)
+    expect(by_rule["CH-LAUNCH-14"] > 1 and by_rule["CH-LAUNCH-07"] > 1, found)
+    spelled = (
+        (here / "good-plan.md").read_text(encoding="utf-8").replace("| show-hn |", "| Show HN |")
+    )
+    expect(not check("spelled-plan.md", spelled), "a spelled venue name must pass like its slug")
+    unknown = spelled.replace("| venue | Show HN |", "| venue | HN launch |")
+    expect(
+        any("unknown community venue" in f[3] for f in check("unknown-plan.md", unknown)),
+        "an unknown community venue must be flagged",
+    )
+    ref = (
+        (here / "good-plan.md")
+        .read_text(encoding="utf-8")
+        .replace(
+            "launch_reason: major-version", "launch_reason: owner-major:docs/decisions/launch.md"
+        )
+    )
+    expect(not check("ref-plan.md", ref), "a path REF must pass")
     print("plan_check self-test: ok")
     return 0
 

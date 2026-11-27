@@ -12,7 +12,7 @@ skill's `SKILL.md`. Dated platform limits are in `facts.md`, cited by id.
 Contents: [Dates and Versions](#dates-and-versions) ·
 [Form per Surface](#form-per-surface) · [The Scenario](#the-scenario) ·
 [Render Commands](#render-commands) · [Column Caps](#column-caps) ·
-[Pins](#pins) · [What Agents Get Wrong Here](#what-agents-get-wrong-here)
+[Pins](#pins) · [Install](#install) · [What Agents Get Wrong Here](#what-agents-get-wrong-here)
 
 ## Dates and Versions
 
@@ -97,6 +97,7 @@ CH-VID-23 can diff between runs.
 | Play a cast on a docs page | player options `autoPlay: false` (spelled `autoplay` on the options page, so match both), `idleTimeLimit: 2`, `fit: 'width'`, `controls: true`. Mount the player when the embed scrolls into view. Never `loop: true` |
 | README GIF from a cast | `agg --no-loop --idle-time-limit 2 --font-dir DIR --font-family NAME demo.cast demo.gif` |
 | MP4 for YouTube or LinkedIn | tape `Output demo.mp4`, then check with `ffprobe` against `facts.md` |
+| README still (PNG) | in the tape, `Screenshot readme.png` after the last `Wait`, so the frame shows the finished output. Where the scenario is a cast with no tape, open the docs page, wait for the player to mount and seek to the final frame, then capture the `.ap-player` element with Playwright (`locator.screenshot`). Commit the PNG next to the scenario and wrap it in a Markdown link to the docs page (an image inside a link, the link target being the page URL). No tool here converts a cast to SVG, so an SVG still is a hand-picked tool the owner approves |
 | Cast of the scenario | record the scenario with `asciinema rec` inside the isolated environment, never in your own shell, and never with input capture |
 | Vertical master | a dedicated tape of at most 41 columns and 20 rows in a 1080x1920 frame. The rule fixes the target, not a recipe: adjust the tape until `ffprobe` prints `1080,1920` and every text box sits inside x 120 to 888 and y 288 to 1248 |
 
@@ -157,12 +158,27 @@ CH-VID-06 in practice:
   fields of the two. DOC-EX-14 asks you to state the cast version and check that
   the pinned player parses it.
 
+## Install
+
+None of these ships with the skill. Install at the pinned version of "Dates and
+Versions", then check with `command -v`. A tool that cannot be installed (no
+network, no privilege) is reported `manual: TOOL absent`, never `pass`.
+
+| Tool | Install at the pin |
+|---|---|
+| asciinema | the 3.2.1 release binary from the project's releases page, or `cargo install --locked asciinema --version 3.2.1` |
+| agg | `cargo install --locked --git https://github.com/asciinema/agg --tag v1.9.0`, or the 1.9.0 release binary |
+| VHS | the container image `ghcr.io/charmbracelet/vhs:v0.12.1`, which carries `ttyd` and `ffmpeg`, or `go install github.com/charmbracelet/vhs@v0.12.1` with `ttyd` and `ffmpeg` on the PATH |
+| gitleaks | the v8.30.1 release binary from the project's releases page, checked against the release checksums |
+| ffprobe | the `ffmpeg` package of the system's package manager |
+| Playwright | `python3 -m pip install playwright` or `npm install playwright`, then `playwright install chromium`. Pin the version your lockfile records |
+
 ## What Agents Get Wrong Here
 
 - Writing `Set FontSize 28` or "zoom in" and believing the text is now large.
 - Measuring the embed container, or the viewport, instead of the drawn text line.
 - Cropping a 16:9 recording into 9:16 for Shorts.
 - Proposing Remotion or a paid recorder for a terminal demo.
-- Putting a looping GIF or a `<script>` in a README.
+- Putting a looping GIF or a `<script>` in a README, or leaving a README with no still at all.
 - Running `vhs` from `latest`, or `vhs-action` without `version:`.
 - Treating a hand recording as a demo. It cannot be rebuilt when the CLI changes.

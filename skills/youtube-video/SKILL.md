@@ -27,7 +27,10 @@ Contents: [Boundary](#boundary) · [Facts](#facts-and-cadence) ·
 
 Stop when these files exist under `youtube/<slug>/`: a manifest that lints with
 exit 0, `desc.txt`, the thumbnail, `insert-body.json` that lints, and a list of
-open asks. Upload, schedule and publish nothing. A video is never public because an
+open asks. An agent with no image tool writes `thumb-spec.md` (size, ratio, text,
+subject) and hands over a placeholder or human-made image as `thumb.png`; the
+linter checks only that image file for type, size and ratio, never the spec, so
+list the real image under `open_asks`. Upload, schedule and publish nothing. A video is never public because an
 agent said so.
 
 ## Boundary
@@ -54,7 +57,7 @@ These five rules from it bind every step here:
   cite it as `[YT-F11]`. No row, no number. This file never repeats a limit.
 
 A title, description or on-screen text that states a number or a claim follows
-`marketing-quality` (MKT-CLAIM) when it is installed. Otherwise each number carries a
+`marketing-quality-reference` (MKT-CLAIM) when it is installed. Otherwise each number carries a
 `source:` line in the draft package.
 
 ## Facts and cadence
@@ -64,6 +67,9 @@ date. Every row carries `refresh_days`: 180 for hard limits, 90 for policy, labe
 triggers and feature screens, and 30 for API behaviour, view definitions and
 prices. The YouTube Data API changes often, so its rows run on 30 days. The check fails on the first overdue row. Re-fetch it,
 and never extend the date.
+
+The `YT` line must point at the real skill directory, which exists only after
+`grim add`. Run `ls "$YT/checks"` after setting it.
 
 ```sh
 YT=.claude/skills/youtube-video   # "$CLAUDE_CONFIG_DIR/skills/youtube-video" when installed globally
@@ -79,7 +85,9 @@ Run the steps in order. Each names its input, its check and what done means.
 2. **Find the channel record.** Input: `youtube/channel-record.yml`. Check:
    `python3 -I "$YT/checks/yt_manifest_check.py" --channel-record youtube/channel-record.yml`.
    Done: exit 0 (CH-YT-12). With no record, ask the human the questions in
-   [Ask a human](#what-an-agent-must-ask-a-human) and stop. Never fill one in.
+   [Ask a human](#what-an-agent-must-ask-a-human) and stop. Never fill one in. After asking, the agent may still draft title,
+   description and chapters as unlinted text in the hand-over, marked "not linted,
+   no channel record".
 3. **Choose the format.** Input: the topic and the pilot record. Default: a
    long-form task tutorial (CH-YT-15, CH-YT-18). A Short needs an approved pilot
    record that passes `--pilot` (CH-YT-21). An announcement word in a title needs a
@@ -118,13 +126,23 @@ Run the steps in order. Each names its input, its check and what done means.
    manifest. `--strict` fails on any warning.
 7. **Write the insert body.** Input: the manifest. Write `insert-body.json` with
    `privacyStatus` set to `private` and all five explicit fields (shape in
-   `references/manifest.md`). Check: the linter with `--insert-body`. Done: exit 0.
+   `references/manifest.md`). Check: this command. Done: exit 0.
+
+   ```sh
+   python3 -I "$YT/checks/yt_manifest_check.py" "$UP/manifest.toml" \
+     --channel-record youtube/channel-record.yml --insert-body "$UP/insert-body.json"
+   ```
 8. **Hand over.** Output: the file paths and `open_asks`. Tell the human to: upload
    as private, set the thumbnail only after processing finishes, read the values back,
    check Studio Claims within 24 hours, watch the private upload, then make it
    public and log their name (CH-YT-09, 10, 23).
-9. **Check the read-back.** Input: the human's `readback.json`. Check: the linter
-   with `--readback`. Done: exit 0. A difference goes back to the human as a finding.
+9. **Check the read-back.** Input: the human's `readback.json`. Check: this command. Done: exit 0. A difference goes back to the human as
+   a finding.
+
+   ```sh
+   python3 -I "$YT/checks/yt_manifest_check.py" "$UP/manifest.toml" \
+     --channel-record youtube/channel-record.yml --readback "$UP/readback.json"
+   ```
 
 ## Pinned defaults
 
@@ -158,7 +176,7 @@ reason.
 | CH-YT-07 | Add chapters to every long-form video of 600 seconds or more that has distinct sections. Add none to a Short | Search can use description timestamps for key moments. The case is findability only, with a measured lift of 1.00 for company videos (n=63) | The linter | SHOULD |
 | CH-YT-08 | Upload the thumbnail as JPG or PNG within [YT-F20] and [YT-F30]. Long-form: 16:9, at least 1280 by 720, target per [YT-F19]. Short: 9:16, at least 720 by 1280. Poll `processingStatus` for `succeeded` before `thumbnails.set` on a Short [YT-F29] | A 16:9 image on a vertical video is replaced by an automatic one [YT-F21]. One variant under 1280 by 720 downgrades every Test and Compare variant [YT-F39]. The floor costs nothing | The linter checks type, size and ratio. `grep -n -e processingStatus -- "$UPLOAD"` finds the poll in the upload script | MUST |
 
-Block CH-YT-03, any line printed is a missing link:
+Block CH-YT-03, the count printed must be at least 1; 0 is a missing link:
 
 ```sh
 grep -v -e '^[[:space:]]*$' desc.txt | head -3 | grep -c -e 'https\?://'

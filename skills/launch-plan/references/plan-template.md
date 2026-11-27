@@ -67,11 +67,12 @@ owner_approved_counter: false
 
 ## Field notes
 
-- `launch_reason` is `first-launch`, `major-version` or `owner-major:REF` (CH-LAUNCH-07). `major-version` needs `launched_tag` to match `^v?[1-9][0-9]*\.0\.0$`. Leave `last_ph_launch` and `relaunch_request` out unless the product launched on Product Hunt before.
+- `launch_reason` is `first-launch`, `major-version` or `owner-major:REF` (CH-LAUNCH-07). REF is a URL, a path, `#N`, a commit or a plan line that records the owner's written decision; a placeholder fails. A routine release has no value: it gets no plan. While the owner has not said whether a release is major, write `launch_reason: ask: is this release major`. `major-version` needs `launched_tag` to match `^v?[1-9][0-9]*\.0\.0$`. Leave `last_ph_launch` and `relaunch_request` out unless the product launched on Product Hunt before.
 - `read_on` holds three dates: `launch_date` plus 1 day, plus 2 days and plus 7 days (CH-LAUNCH-11). `baseline_window` ends the day before `launch_date`.
 - `counter` is C5, C6, C3 or C4. A C3 or C4 counter needs a `traffic_archive` key that names the archive workflow. C1 or C11 needs `owner_approved_counter: true` (CH-GH-32).
 - `launch_shape` is `single-day` or `launch-week`. A launch week adds `week_min_items` when the owner sets N, and lists every item in `## Items` (CH-LAUNCH-10).
 - Admission `verdict` is `fit`, `mismatch`, `excluded-by-default`, `unverified`, `deferred` or `owner-override`. An `unverified` row has the scope quote `page states no scope; human decides`. A Console.dev row holds `lane` Tools or Betas.
+- Schedule and Shifts `venue` is `show-hn` for Show HN and `product-hunt` for Product Hunt; the checker also reads `Show HN` and `producthunt.com`. Any other community venue needs a Venue admission row whose `url` shows its reply surface, or the checker flags it as unknown (CH-LAUNCH-06).
 - Schedule `step` is `release`, `record`, `venue`, `social`, `directory` or `recap` (CH-LAUNCH-08). `venue` marks the launch-day community venue. An editorial listing and an awesome-list entry are `directory` rows with `venue_class` `editorial` and `publish_date: not-scheduled`. `venue_class` is `community`, `editorial` or `owned` (CH-LAUNCH-06). `launch_day` is `true` or `false`.
 - Schedule `actor` is `agent` or `human`. A directory or list row says `human submits` or `human pays` in `action` (CH-LAUNCH-12). `title` holds the maker's own Show HN or Product Hunt title when the maker has written one. The agent never writes it (CH-CORE-03).
 - `## Shifts` holds one row per coverage block, with UTC times such as `2026-12-03T14:00Z`, one owner per row, and no gap between blocks.

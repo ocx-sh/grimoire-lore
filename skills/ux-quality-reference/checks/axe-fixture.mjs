@@ -13,6 +13,7 @@
 //   axe-fixture.mjs --print-tags | --help
 // FILE of --routes: one route per line, taken from the sitemap or the router, never from a walk of dist/.
 // FILE of --states: JSON [{"route":"/","name":"palette","steps":[{"press":"Control+k"},{"click":"button.open"}],"visible":"role=dialog"}].
+//   Step verbs: click SELECTOR; press KEY (one key name per step, never text); fill SELECTOR with text, as {"fill":"input[name=email]","text":"a@b"}.
 // Exit 0 clean, 1 violations or needs-review above the baseline, 2 usage or version drift.
 import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -74,6 +75,7 @@ async function runState(page, base, st) {
   await page.goto(new URL(st.route, base).href, { waitUntil: 'load' });
   for (const step of st.steps ?? []) {
     if (step.click) await page.locator(step.click).first().click();
+    else if (step.fill) await page.locator(step.fill).first().fill(step.text ?? '');
     else if (step.press) await page.keyboard.press(step.press);
   }
   // The state must be on screen before analyze(); a closed dialog is not in the accessibility tree (UX-VERIFY-05).

@@ -48,8 +48,9 @@ Fetched or read 2026-11-27. Each law or platform fact below carries the default 
 # MKT-CLAIM-12: a licence is named somewhere. Any output means LICENSE* must exist.
 git ls-files -z --cached --others --exclude-standard -- 'README.md' 'Cargo.toml' 'package.json' 'pyproject.toml' ':(glob)**/*.md' \
   | xargs -0 -r grep -l -E -e '^license:' -e '"license"' -e '^license *=' --
-# MKT-CLAIM-12: the LICENSE file exists. Empty output is the finding.
-git ls-files --cached --others --exclude-standard -- 'LICENSE*' 'COPYING*'
+# MKT-CLAIM-12: the LICENSE file exists on disk. Empty output is the finding. A tracked file deleted from the tree is not listed, and LICENSE-THIRD-PARTY* never counts.
+git ls-files -z --cached --others --exclude-standard -- 'LICENSE*' 'COPYING*' \
+  | xargs -0 -r ls -d -- 2>/dev/null | grep -v -i -E -e 'third[-_]?party'
 ```
 
 ```sh

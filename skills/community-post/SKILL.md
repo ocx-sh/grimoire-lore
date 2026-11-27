@@ -70,13 +70,13 @@ Each row is a decision of this skill, marked **pinned**. An adopter overrides it
 
 Every venue clause, account gate and chat threshold sits in [references/facts.md](references/facts.md), with its source URL, source date and refresh cadence. This file repeats none of them. Cite a row by its id in square brackets. A clause that is not in a row is not known: read the venue's page in the same session, and when the page is blocked, say so and ask the human to paste it.
 
-Every row carries `refresh_days`: 180 for hard limits, 90 for policy, API fields and label triggers, 30 for prices. `facts_check.py` fails on the first overdue row; re-fetch it, never extend the date. The cadence floor of this skill is 90 days, and venue rules are re-read on the day of a plan (CH-COM-02). Run the check with `python3 -I "$BOUNDARY"/facts_check.py references/facts.md`.
+Every row of this registry carries `refresh_days` of 90, or an `expires:` date for an event. `facts_check.py` fails on the first overdue row; re-fetch it, never extend the date. The cadence floor of this skill is 90 days, and venue rules are re-read on the day of a plan (CH-COM-02). Run the check with `python3 -I "$BOUNDARY"/facts_check.py "$CHECKS"/../references/facts.md`.
 
 The rules, with their severity and verification, are in [references/rules.md](references/rules.md). The steps below name the rule each one applies.
 
 ## Procedure
 
-Set two variables once. `CHECKS=.claude/skills/community-post/checks` and `BOUNDARY=.claude/skills/channel-publishing/checks` (`$CLAUDE_CONFIG_DIR/skills/...` when installed globally). Use the commands under each rule's block in `references/rules.md`.
+Run from the repository root. Set two variables once. `CHECKS=.claude/skills/community-post/checks` and `BOUNDARY=.claude/skills/channel-publishing/checks` (`$CLAUDE_CONFIG_DIR/skills/...` when installed globally). Use the commands under each rule's block in `references/rules.md`.
 
 ### 1. Name the venues and the maker
 
@@ -115,7 +115,7 @@ solicitation_paths: <paths of chat, newsletter and social templates, or none>
 ### 3. Read each venue's contract today
 
 - Input: the plan, and the `url` column of `references/facts.md` for each venue.
-- Do: fetch each page in this session. Record `rules_read:` with the date and `rules_quote:` with one verbatim self-promotion or AI clause (CH-COM-02). Compare the page with the registry row: when a row's `expect` text is absent, report the row id as stale and stop that venue. For a subreddit, a Discord server or a forum, the rules are that community's own page (CH-CORE-05).
+- Do: fetch each page in this session. Record `rules_read:` with the date and `rules_quote:` with one verbatim self-promotion or AI clause of at least 8 words (CH-COM-02). This pair is the plan's record, and a draft still starts with its own CH-CORE-05 `rules_fetched:` and `rules_quote:` lines. Compare the page with the registry row: when a row's `expect` text is absent, report the row id as stale and stop that venue. For a subreddit, a Discord server or a forum, the rules are that community's own page (CH-CORE-05).
 - Blocked page: make one request per URL, record the status, stop, and ask the human to paste the rules. Never try another user agent, a mirror, a proxy or a login that is not the owner's. Never fill a rule in from memory.
 - Done: every section has both lines, or the section says `asked: paste the rules`.
 
@@ -129,7 +129,7 @@ solicitation_paths: <paths of chat, newsletter and social templates, or none>
 ### 5. Check Show HN eligibility
 
 - Input: the HN section and the repository URL.
-- Do: run the CH-COM-05 block. (a) Run the documented install in a clean container with no login. (b) For a repeat Show HN, the maker attests a major overhaul and gives a changelog line. (c) Query for a Show HN in the window the rule sets. (d) The URL is the runnable thing. No version-number test applies. Check CH-COM-11 and CH-COM-10 on the plan text.
+- Do: run the CH-COM-05 block. (a) Run the documented install in a clean container with no login: `docker run --rm debian:12-slim sh -c 'apt-get update -qq && apt-get install -y -qq curl ca-certificates && <the documented install line>'`. `--rm` removes the container afterwards. (b) For a repeat Show HN, the maker attests a major overhaul and gives a changelog line. (c) Query for a Show HN in the window the rule sets. (d) The URL is the runnable thing. No version-number test applies. Check CH-COM-11 and CH-COM-10 on the plan text.
 - Done: `eligible: yes` with the four answers, or `eligible: no` with the failing letter.
 
 ### 6. Write the fact sheet
@@ -137,7 +137,7 @@ solicitation_paths: <paths of chat, newsletter and social templates, or none>
 - Input: the repository, its README and its latest release.
 - Do: write `<venue>-facts.md` in the `channel-publishing` format: one heading, then bullets with the keys `version`, `install`, `repository`, `measured`, `limit`, `motive`. Put the licence, the pricing and prior threads in as `limit:` bullets. Give each number a `(command: ...)` or the `source:` line your claims policy needs. Leave `motive:` blank. Never write a title, a first comment or any prose.
 - Check: `python3 -I "$BOUNDARY"/factsheet_check.py hn-facts.md`, then the CH-COM-01 (b) and (c) commands.
-- Done: both print nothing. Ask the human whether the pricing and licence statements are accurate.
+- Done: `factsheet_check.py` prints nothing and both `grep -c` commands print `0`. Ask the human whether the pricing and licence statements are accurate.
 
 ### 7. Hand over, then check the maker's draft
 

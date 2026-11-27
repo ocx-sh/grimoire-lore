@@ -6,6 +6,7 @@ labels:
   made_with_ai: false
   paid_partnership: false
   is_made_with_ai: false
+ai_use: no, case: no-ai
 ai_role: drafted
 sponsored: false
 spend: none

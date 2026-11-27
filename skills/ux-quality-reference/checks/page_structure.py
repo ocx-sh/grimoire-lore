@@ -231,11 +231,12 @@ def check(
             if page and page.has_html:
                 pages[route] = page
         if page_list:
-            listed = {
-                ln.strip()
-                for ln in page_list.read_text(encoding="utf-8").splitlines()
-                if ln.strip()
-            }
+            try:
+                page_text = page_list.read_text(encoding="utf-8")
+            except OSError as err:
+                print(f"page_structure: cannot read {page_list}: {err}", file=sys.stderr)
+                raise SystemExit(2) from err
+            listed = {ln.strip() for ln in page_text.splitlines() if ln.strip()}
             for r in sorted(set(routes) - listed):
                 findings.append(("UX-VERIFY-04", r, "in the sitemap, missing from the page list"))
             for r in sorted(listed - set(routes)):
@@ -407,6 +408,11 @@ def self_test() -> int:
         (Path(tmp) / "frag.html").write_text("<div>fragment</div>", encoding="utf-8")
         f, n = check(Path(tmp), None, None)
         expect(n == 0 and not f, "a fragment must be skipped")
+    try:  # an unreadable page list is a usage error (exit 2), never a traceback
+        check(good, good / "sitemap.xml", good / "no-such-list.txt")
+        expect(False, "a missing page list must exit 2")
+    except SystemExit as err:
+        expect(err.code == 2, f"a missing page list must exit 2, got {err.code}")
     print("page_structure: self-test ok")
     return 0
 

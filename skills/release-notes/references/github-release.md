@@ -34,7 +34,7 @@ GitHub Docs pages carry no date. The date given is the fetch date, 2026-11-27.
 ## Variables
 
 `REPO` is `owner/repo`, `TAG` the tag, `PKG` the registry package name, `UA` a
-descriptive client name, `CHECKS` is `.claude/skills/release-notes/checks`, and
+descriptive client name, `CHECKS` is the `checks/` directory next to the skill's `SKILL.md` (the install path varies by client), and
 `DRAFT` is a plan or post file. The two input files of `release_gap.py` come from
 the commands in block MKT-REL-11.
 
@@ -62,7 +62,7 @@ MKT-REL-17 is retired and CH-GH-29 is retired. Neither number is reused.
 # MKT-REL-11: collect, then compare. Alias tags such as v0 never match the three-component pattern
 gh api "repos/$REPO/tags" --paginate -q '.[].name' > tags.txt
 gh release list -R "$REPO" -L 1000 --json tagName,isLatest,isPrerelease,isDraft > releases.json
-python3 -I "$CHECKS"/release_gap.py --tags tags.txt --releases releases.json --baseline .github/release-gap-baseline.txt
+python3 -I "$CHECKS"/release_gap.py --tags tags.txt --releases releases.json --baseline .github/release-gap-baseline.txt   # a missing baseline file counts as empty
 # consumer check, across checkouts: who pins this repository
 git grep -n -I -E -e "$REPO"
 ```

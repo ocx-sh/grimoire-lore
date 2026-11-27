@@ -13,7 +13,7 @@ the CI gate on the rendered body, the summary sentence, scopes and links.
 Deprecation windows, runtime warnings and the removal blocker are
 `deprecation.md`. The GitHub Release object, tag coverage and the commit-message
 route when a repository forbids editing the changelog are `github-release.md`.
-The `CHANGELOG.md` page format is `docs-quality` (DOC-TYPE-37 to 41). The notice
+The `CHANGELOG.md` page format is `docs-quality-reference` (DOC-TYPE-37 to 41). The notice
 for a licence or pricing change is MKT-REL-13 in `SKILL.md`.
 
 Contents: [Dates and versions](#dates-and-versions) · [Variables](#variables) ·
@@ -37,7 +37,7 @@ Measured 2026-11-27. "Tested" below means run against a synthetic repository.
 
 Verification commands use quoted variables the reader sets: `BASE` is the last
 release tag, `TAG` the tag being released, `CHECKS` is
-`.claude/skills/release-notes/checks`, and `S` is the alternation of internal
+the `checks/` directory next to `SKILL.md` (the install path varies by client), and `S` is the alternation of internal
 scopes read from the skip parser (for example `test|ci|deps|release`).
 `DOCS` is an extended regular expression for the docs host and anchors
 (for example `https://example\.com/docs|\.md#`). `notes.md` is the rendered body.
@@ -55,8 +55,8 @@ Severity comes from the consolidated ruleset on 2026-11-27. A cell that says
 | MKT-REL-04 | Set `protect_breaking_commits = true`. Put a parser ahead of every skip parser that routes `chore\|ci\|style\|test\|build\|release` commits with `!` to `Changed`. | Without protection a breaking `ci!:` commit is skipped silently. Tested: protection alone sends a protected commit that hits a skip parser under a raw type heading (`### chore`), which breaks DOC-TYPE-37. | The script prints no MKT-REL-04 line. By hand: `grep -c -F -e 'protect_breaking_commits = true' cliff.toml` prints 1, and see block MKT-REL-04 | MUST |
 | MKT-REL-05 | Route deprecations, removals and security fixes with a commit trailer: `Changelog: deprecated`, `Changelog: removed`, `Changelog: security`, or `Changelog: skip` to omit a commit. Match them with `footer` parsers placed before the type parsers. Never add commit types that the repository's commit-msg check rejects. | No measured template had a Deprecated, Removed or Security group, and the hook allows 11 types only. Tested: `{ footer = "^Changelog: ?removed", group = "Removed" }` routes a `feat(publish)!:` commit to `### Removed`. | `grep -c -E -e 'footer = "\^Changelog' cliff.toml` prints 4 or more. The commit-msg regex is unchanged in the diff. A fixture commit for each trailer renders under its heading in a template test | MUST |
 | MKT-REL-06 | Skip commits by internal scope before any group parser, with the internal scopes listed in one place: the skip parser itself, `{ field = "scope", pattern = "^(S)$", skip = true }`. Drop the `Documentation` group and skip `docs` commits unless a `Changelog:` trailer routes them. | Parsers skip by type, not scope: in 10 bodies each, 26, 30 and 15 bullets of three measured repositories carried an internal scope. `Documentation` is not a Keep a Changelog category. Tested: `fix(test)` is dropped by the `field = "scope"` matcher. | The script prints no MKT-REL-06 line. By hand: `grep -c -F -e '"Documentation"' cliff.toml` prints 0, and `grep -c -E -e "^- .*\*?\(($S)\)" notes.md` prints 0 | MUST |
-| MKT-REL-10 | Render the notes in CI before the Release is created, and fail the job when the body is empty, has no line other than `**Full Changelog**`, contains a hash-shaped word as visible text, has a BREAKING item with no Migration line, has an internal-scope bullet, or has a `###` heading outside the six. When nothing user-facing is in range, write "No user-facing changes." and the reason. Never let GitHub generate the body when the repository has a `cliff.toml`. | In one measured repository 7 of 10 bodies were one compare link. Another carried 104 hash-shaped words over 10 bodies. Tested: a chore-only range renders a 0-byte body. | `python3 -I "$CHECKS"/notes_check.py --notes notes.md --config cliff.toml --workflows .github/workflows` exits 0. `git grep -n -E -e 'generate[-_]release[-_]notes' -- .github/workflows` prints nothing when `cliff.toml` exists. Equivalent shell lint: see block MKT-REL-10 | MUST |
-| MKT-REL-14 | Open a release that adds, removes, deprecates or breaks something with one summary sentence of at most 30 words that says what a user can now do or must now do. Put the template's `{% if message %}` slot inside the version section, after the `## [x.y.z]` heading line. Never put it above that heading or in `[changelog] header`. Annotate the tag with that sentence as a single paragraph with no trailer (`git tag -a "$TAG" -m "$SUMMARY"`), so every regeneration renders it. When the notes are rendered before the tag exists, pass the same sentence with `git-cliff --with-tag-message`. In a cargo-dist repository, that flagged render must be the one that writes the committed `CHANGELOG.md`. Add no summary to a fix-only patch. | 0 of 90 measured bodies open with orientation. uv's minor releases do (0.13.0, 2026-10-09, `gh release view`). dist 0.33.0 copies the `CHANGELOG.md` section by version and never reads a tag message, so a slot above the heading or in the header is dropped from the body (tested, Dates and versions). A multi-paragraph tag message renders verbatim, trailers included. | (a) the script prints no MKT-REL-14 line for the config. (b) the script prints none for the notes. (c) and (d) see block MKT-REL-14 | SHOULD |
+| MKT-REL-10 | Render the notes in CI before the Release is created, and fail the job when the body is empty, has no line other than `**Full Changelog**`, contains a hash-shaped word as visible text, has a BREAKING item with no Migration line, has an internal-scope bullet, or has a `###` heading outside the six. When nothing user-facing is in range, write "No user-facing changes." and the reason. Never let GitHub generate the body when the repository has a `cliff.toml`. | In one measured repository 7 of 10 bodies were one compare link. Another carried 104 hash-shaped words over 10 bodies. Tested: a chore-only range renders a 0-byte body. | `python3 -I "$CHECKS"/notes_check.py --notes notes.md --config cliff.toml --workflows .github/workflows` exits 0. `git grep -n -E -e 'generate[-_]release[-_]notes\|--generate-notes' -- .github/workflows` prints nothing when `cliff.toml` exists. Equivalent shell lint: see block MKT-REL-10 | MUST |
+| MKT-REL-14 | Open a release that adds, removes, deprecates or breaks something with one summary sentence of at most 30 words that says what a user can now do or must now do. Put the template's `{% if message %}` slot inside the version section, after the `## [x.y.z]` heading line. Never put it above that heading or in `[changelog] header`. Annotate the tag with that sentence as a single paragraph with no trailer (`git tag -a "$TAG" -m "$SUMMARY"`), so every regeneration renders it. When the notes are rendered before the tag exists, pass the same sentence with `git-cliff --with-tag-message`. In a cargo-dist repository, that flagged render must be the one that writes the committed `CHANGELOG.md`. Add no summary to a fix-only patch. | 0 of 90 measured bodies open with orientation. uv's minor releases do (0.13.0, 2026-10-09, `gh release view`). dist 0.33.0 copies the `CHANGELOG.md` section by version and never reads a tag message, so a slot above the heading or in the header is dropped from the body (tested, Dates and versions). A multi-paragraph tag message renders verbatim, trailers included. | (a) the script prints no MKT-REL-14 line for the config. In a template with a `## [{{ version` heading line, the awk in block MKT-REL-14 (a) also exits 0. (b) the script prints none for the notes. (c) and (d) see block MKT-REL-14 | SHOULD |
 | MKT-REL-15 | Give a user-visible `feat` or `fix` commit a scope that names a user-facing area (a command, a package kind), never one of the internal scopes MKT-REL-06 skips. | The subject is the entry and MKT-REL-06 drops internal scopes. A user-visible fix scoped `release` ("shipped binaries shrink from 73 MB to 27 MB") would be skipped. 20 of 400 measured commits had a `feat` or `fix` with an internal scope. | see block MKT-REL-15. Reading heuristic, not pass or fail: each commit listed is internal-only or is re-scoped | SHOULD |
 | MKT-REL-16 | Link the docs or upgrade-guide anchor from a Migration line, and from an Added entry for a documented command or setting, and check the links. | 0 docs links in 10 bodies of one measured repository, 1 in another. A Migration line that links an upgrade-guide anchor is the model. | `grep -c -E -e "$DOCS" notes.md` prints 1 or more when a BREAKING or Deprecated item exists. `lychee notes.md` passes | SHOULD |
 
@@ -127,7 +127,7 @@ hash in link text fails. Count bullets, never non-empty lines, because the
 version heading is a non-empty line.
 
 ```sh
-# MKT-REL-14 (a): exits 0 when the slot follows the heading. Assumes a heading line that starts "## [{{ version"
+# MKT-REL-14 (a): exits 0 when the slot follows the heading. Only for a template with a heading line that starts "## [{{ version"; a heading-less template (the worked template) exits 1 here, and the script alone decides it
 awk '/^## \[\{\{ version/{h=NR} /\{%-? ?if message %\}/{m=NR} END{exit !(h && m>h)}' cliff.toml
 # MKT-REL-14 (c): cargo-dist only. Prints the summary sentence
 dist plan --tag="$TAG" --output-format=json | jq -r .announcement_github_body | sed -n '/^## Release Notes/,/^### /p' | sed -n 3p
@@ -151,6 +151,17 @@ Tested with git-cliff 2.14.1. It carries every row above except the version
 heading, because this shape renders notes for the Release body alone. In a
 repository whose `CHANGELOG.md` comes from the same template, put the version
 heading first and the `{% if message %}` block directly after it (MKT-REL-14).
+The heading-first variant adds one heading line at the top of `body`, and the
+MKT-REL-14 (a) awk exits 0 on it:
+
+```toml
+body = """
+## [{{ version | trim_start_matches(pat="v") }}] - {{ timestamp | date(format="%Y-%m-%d") }}
+{% if message %}{{ message | trim }}
+{% endif %}\
+```
+
+Keep the rest of the worked body unchanged.
 
 ```toml
 [changelog]

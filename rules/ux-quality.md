@@ -36,7 +36,9 @@ Contents: [The Gate](#the-gate) · [Non-Negotiables](#non-negotiables) ·
 
 Run it after every change to markup, CSS or script of a rendered page, against a
 served production build in a real browser. Never jsdom, never a dev server. The
-scripts are in the `ux-quality-reference` skill (`CHECKS=.claude/skills/ux-quality-reference/checks`).
+scripts are in the `ux-quality-reference` skill (`CHECKS=.claude/skills/ux-quality-reference/checks`). `DIST` is the build output directory,
+`BASE` the URL it is served at. `routes.txt`, `a11y-baseline.json` and `states.json` do not
+exist on a first run: `verification.md` Setup says how to create each, so do that before step 3.
 
 ```sh
 npx eslint .                                                                        # 1 static lint: TS-WEB-06 for JSX, astro/jsx-a11y for .astro (UX-VERIFY-12)
@@ -59,11 +61,13 @@ obscured-focus checks are advisory and go to Needs human review, because no huma
 labelled their firings (UX-VERIFY-13). Steps 3 and 4 block every pull request that
 touches interface code (UX-VERIFY-07). List every step under `ran:` or `did not run:`
 with the reason (UX-VERIFY-01), and fix and re-run until the first run's findings are gone.
+On an Astro repository, `npx eslint --print-config <an .astro file> | grep -c astro/jsx-a11y`
+printing 0 means step 1 checks no accessibility rule: list it under `did not run:`.
 
 An interface change is done when the report names each command, its exit status, the
 tool versions, the routes and schemes it covered, and what no automated step decides.
-A green gate covers at most 21 of 55 A and AA criteria, none completely. Narration is
-not evidence.
+A green gate covers at most 21 of 55 A and AA criteria, none completely (the count and
+its date are the first row of `verification.md` Dates and Versions). Narration is not evidence.
 
 ## Non-Negotiables
 

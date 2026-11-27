@@ -1,6 +1,6 @@
 ---
 name: release-notes
-description: "Release-notes and GitHub Release standards for every release: the git-cliff, release-please or .github/release.yml template, breaking-change marking and the BREAKING line, deprecation trailers and runtime warnings, skip parsers for internal scopes, rendering the notes in CI before the release exists, one GitHub Release per stable tag, the Latest flag, prerelease flags, asset names behind /releases/latest/download links, draft-first immutable releases, and one version string across tag, title, changelog and registry. Use when cutting or preparing a release, writing or fixing release notes or a release body, editing cliff.toml or release.yml, marking a commit breaking, deprecating a flag or setting, or finding tags with no release. Not for building, signing or uploading binaries, which the language release skills own, not for the CHANGELOG.md page format, which is docs-quality, and not for announcing a release on social channels, which is launch-plan or a platform skill."
+description: "Release-notes and GitHub Release standards for every release: the git-cliff, release-please or .github/release.yml template, breaking-change marking and the BREAKING line, deprecation trailers and runtime warnings, skip parsers for internal scopes, rendering the notes in CI before the release exists, one GitHub Release per stable tag, the Latest flag, prerelease flags, asset names behind /releases/latest/download links, draft-first immutable releases, and one version string across tag, title, changelog and registry. Use when cutting or preparing a release, writing or fixing release notes or a release body, editing cliff.toml or release.yml, marking a commit breaking, deprecating a flag or setting, or finding tags with no release. Not for building, signing or uploading binaries, which the language release skills own, not for the CHANGELOG.md page format, which is docs-quality-reference, and not for announcing a release on social channels, which is launch-plan or a platform skill."
 license: Apache-2.0
 metadata:
   summary: Release-notes and GitHub Release procedure, from commit footer and cliff.toml template through the CI-rendered body to one Release per tag, Latest, and deprecation windows
@@ -28,7 +28,7 @@ Contents: [Scope](#scope) · [Stop condition](#stop-condition) ·
 | Deprecation trailers, windows, warnings on use, removal blockers | this skill, `references/deprecation.md` |
 | One Release per tag, Latest, prerelease, download names, draft-first, version agreement | this skill, `references/github-release.md` |
 | Building, signing and uploading binaries | the language release skills (`go-release`, `jvm-release`, `dotnet-release`, `swift-release`, `nix-flake-release`) |
-| The `CHANGELOG.md` page format | `docs-quality` (DOC-TYPE-37 to 41) |
+| The `CHANGELOG.md` page format | `docs-quality-reference` (DOC-TYPE-37 to 41) |
 | Posting the release on X, Bluesky, LinkedIn, YouTube or a community venue | `microblog-post`, `linkedin-post`, `youtube-video`, `community-post`, `launch-plan` |
 | Wording of a price, limit or licence claim on a copy surface | `marketing-quality-reference` (MKT-CLAIM-03 and MKT-CLAIM-12) |
 
@@ -66,22 +66,28 @@ each one once, for the whole repository.
 
 ## The runbook
 
+Prerequisites: `git-cliff` 2.14 or later, `python3` 3.11 or later, `gh` and `jq`.
+`lychee` and `dist` are optional: run them when installed. When `gh` is not
+logged in, skip every `gh` command, mark steps 7 and 8 open and hand the owner
+the commands.
+
 Set the variables first. `BASE` is the last release tag, `TAG` the tag being
-released, `REPO` is `owner/repo`, and `CHECKS` is
-`.claude/skills/release-notes/checks`.
+released, `REPO` is `owner/repo`, and `CHECKS` is the `checks/` directory next to
+this `SKILL.md` (the install path varies by client, so resolve it, never assume
+one).
 
 ### 1. Find the file that owns the template (MKT-REL-01)
 
 ```sh
 ls cliff.toml .github/release.yml
 head -1 cliff.toml
-git grep -n -E -e 'generate[-_]release[-_]notes' -- .github/workflows
+git grep -n -E -e 'generate[-_]release[-_]notes|--generate-notes' -- .github/workflows
 ```
 
 A first line that names an owner means the template is generated: edit the
-upstream template and propagate it, never the copy. Any
-`generate_release_notes` hit while `cliff.toml` exists is the MKT-REL-10
-violation to remove.
+upstream template and propagate it, never the copy. Any `generate_release_notes`
+or `--generate-notes` hit while `cliff.toml` exists is the MKT-REL-10 violation
+to remove.
 
 **Done:** you can name the one file you will edit.
 
@@ -93,16 +99,21 @@ git log --format='%h %s' "$BASE"..HEAD
 
 Run the per-commit loop of MKT-REL-02 (a) from `references/notes-template.md`.
 Each hash it prints is a breaking subject with no `BREAKING CHANGE:` footer. For
-every breaking commit, write the migration in the footer: what to change, the
-replacement and the version from which the old form stops working. Re-read each
+every breaking commit not yet pushed, write the migration in the footer: what to
+change, the replacement and the version from which the old form stops working.
+A commit already pushed or merged keeps its message, because history is never
+rewritten. For each of those, draft the Migration line and put the commit in the
+report as an owner question: the owner either approves a hand-written Migration
+line under that item in `notes.md` or decides to amend the message. Re-read each
 `!` against the definition in MKT-REL-02. A form that worked and now fails or
 means something else is breaking. An internal refactor is not. List user-visible
 `feat` and `fix` commits that carry an internal scope (MKT-REL-15) and re-scope
-them. If a repository rule says the commit body is never read, follow
+them when unpushed. Report a pushed one as an owner question, because the scope
+skip drops it from the notes. If a repository rule says the commit body is never read, follow
 MKT-REL-12 in `references/github-release.md`.
 
 **Done:** the loop prints nothing, and no user-visible commit carries an internal
-scope.
+scope. Or each pushed commit that still prints is an owner question in the report.
 
 ### 3. Check the template (MKT-REL-03 to 06, 14)
 
@@ -111,9 +122,14 @@ python3 -I "$CHECKS"/notes_check.py --config cliff.toml
 ```
 
 Each line names the rule it breaks. Fix them in the file step 1 named, using
-the worked template in `references/notes-template.md`.
+the worked template in `references/notes-template.md`. When step 1 showed a
+template-owned file, the owner lives in another repository and this checkout
+may not hold it. Then report every finding as an owner action against that
+upstream template, and lint a local copy of the worked template only to render
+a draft of `notes.md`. Never edit the downstream copy.
 
-**Done:** the command prints nothing and exits 0.
+**Done:** the command prints nothing and exits 0, or each finding on a
+template-owned file is an owner action in the report.
 
 ### 4. Announce every deprecation and close every due window (MKT-REL-07, 08, 09, 19)
 
@@ -143,7 +159,7 @@ length and the position. A fix-only patch gets none.
 git tag -a "$TAG" -m "$SUMMARY"
 ```
 
-Annotate locally and leave the push to the owner. Before the tag exists, pass
+Annotate locally and leave the push to the owner. Never push the tag. Before the tag exists, pass
 the same sentence to `git-cliff --with-tag-message` (step 6). In a cargo-dist
 repository, that flagged render writes the committed `CHANGELOG.md`.
 
@@ -162,7 +178,12 @@ range, write "No user-facing changes." and the reason into `notes.md`. Link a
 Migration line to the upgrade guide anchor and run `lychee notes.md` when the
 tool is installed (MKT-REL-16).
 
-**Done:** the lint exits 0, and the CI job runs the same two commands.
+A `BREAKING item without a Migration line` finding on a pushed commit (step 2)
+is not fixed by editing history. Add the owner-approved Migration line to
+`notes.md` by hand, or leave the finding in the report as open.
+
+**Done:** the lint exits 0, and the CI job runs the same two commands. Or each
+remaining finding is open in the report with its owner question.
 
 ### 7. Create the draft Release, attach assets, publish (CH-GH-07, 09, 10)
 
@@ -173,14 +194,20 @@ assets.
 gh release create "$TAG" --draft --verify-tag --notes-file notes.md   # then upload every asset, then publish
 ```
 
+`--verify-tag` needs `TAG` on the remote, and pushing it is the owner's act.
+When `git ls-remote --tags origin "refs/tags/$TAG"` prints nothing, do not push.
+Hand the owner `git push origin "$TAG"` and the command above, and mark the
+draft open in the report.
+
 Derive Latest from a version comparison: `--latest` only when `TAG` is the
 highest stable tag, `--latest=false` for a backport, never a constant. Pass
 `--prerelease` exactly when the version has a SemVer pre-release identifier.
 Never upload or replace an asset after publishing. Never delete and re-push a
 published tag.
 
-**Done:** a draft exists with the notes and every asset. Publishing is the
-owner's act unless the task says otherwise.
+**Done:** a draft exists with the notes and every asset, or the owner has the
+exact commands to make one. Publishing is the owner's act unless the task says
+otherwise.
 
 ### 8. Verify what was published (MKT-REL-11, CH-GH-07, 08, 10, 11, 12)
 
@@ -212,7 +239,7 @@ copy surfaces is MKT-CLAIM-03 in `marketing-quality-reference`.
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
-| MKT-REL-13 | Draft a licence, terms, pricing or limit change notice, but never publish, merge or tag it. The draft states: from-licence and to-licence with SPDX ids; first affected version and effective date; who is affected and who is not; a definition of every operative term in the same document; the status of already-released versions and their security-patch line; naming, trademark and contribution (CLA) effects; a contact address. For pricing, state what any headline word such as "unlimited" or "free" excludes, in the same sentence. | HashiCorp left "competitive offering" undefined ([2023-08-10](https://www.hashicorp.com/en/blog/hashicorp-adopts-business-source-license)). The OpenTF fork was announced on 2023-08-25 ([The Register, 2023-08-28](https://www.theregister.com/2023/08/28/opentf_forks_terraform_code/)); the 15-day gap is derived from the two dates, not stated by either source. Cursor's "unlimited" needed an apology ([2025-07-04](https://cursor.com/blog/june-2025-pricing)). | Stop half: see block MKT-REL-13 (CODEOWNERS); a printed line per path is the pass. Draft half: see block MKT-REL-13 (draft). Reading heuristic: each quoted term has a definition within one section of its first use | MUST |
+| MKT-REL-13 | Draft a licence, terms, pricing or limit change notice, but never publish, merge or tag it. The draft states: from-licence and to-licence with SPDX ids; first affected version and effective date; who is affected and who is not; a definition of every operative term in the same document; the status of already-released versions and their security-patch line; naming, trademark and contribution (CLA) effects; a contact address. Use one heading per field, with these names: `Licence change`, `Effective`, `Who is affected`, `Who is not affected`, `Definitions`, `Released versions`, `Naming and contributions`, `Contact`. Add one line `SPDX: OLD -> NEW` (for example `SPDX: MIT -> BUSL-1.1`). For pricing, state what any headline word such as "unlimited" or "free" excludes, in the same sentence. | HashiCorp left "competitive offering" undefined ([2023-08-10](https://www.hashicorp.com/en/blog/hashicorp-adopts-business-source-license)). The OpenTF fork was announced on 2023-08-25 ([The Register, 2023-08-28](https://www.theregister.com/2023/08/28/opentf_forks_terraform_code/)); the 15-day gap is derived from the two dates, not stated by either source. Cursor's "unlimited" needed an apology ([2025-07-04](https://cursor.com/blog/june-2025-pricing)). | Stop half: see block MKT-REL-13 (CODEOWNERS); a printed line per path is the pass. Draft half: see block MKT-REL-13 (draft). Reading heuristic: each quoted term has a definition within one section of its first use | MUST |
 
 ```sh
 # MKT-REL-13 stop half: CODEOWNERS must name the licence file and both manifests.
@@ -269,6 +296,10 @@ Ask, and never decide:
 - The deprecation window numbers and the compatibility-policy text. Whether a
   repository that promises frozen released surfaces keeps the promise or the
   practice.
+- A breaking commit already pushed with no `BREAKING CHANGE:` footer, or a
+  user-visible commit already pushed with an internal scope: whether to approve
+  a hand-written Migration line in `notes.md`, amend the message, or accept the
+  gap. Never rewrite pushed history.
 - Moving a repository from a subject-only model to the footer model, when its
   agent instructions say the body is never read.
 - Annotated tags and a summary input to the release task, and who creates the

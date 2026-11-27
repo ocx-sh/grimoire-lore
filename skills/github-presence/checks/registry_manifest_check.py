@@ -16,7 +16,7 @@ Rules covered:
 
 Reads Cargo.toml, package.json and pyproject.toml under --root, with the README
 each one names. A package that never reaches a registry (cargo publish = false,
-npm private) is skipped. Fenced code in a README is not scanned.
+npm private, a PyPI project with the classifier `Private :: Do Not Upload`) is skipped. Fenced code in a README is not scanned.
 
 Findings print as `path:line: CH-GH-nn SEVERITY: message`; `note:` lines are
 reports. Exit codes: 0 clean, 1 findings, 2 usage or missing input.
@@ -266,7 +266,7 @@ def check_extension(fs: Findings, path: Path, pkg: dict, kws: list, files: list[
 
 def check_pyproject(fs: Findings, path: Path, files: list[Path]) -> None:
     proj = tomllib.loads(path.read_text(encoding="utf-8")).get("project")
-    if not proj:
+    if not proj or "Private :: Do Not Upload" in (proj.get("classifiers") or []):
         return
     description_checks(fs, path, proj.get("description"))
     readme = proj.get("readme")

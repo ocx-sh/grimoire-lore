@@ -34,8 +34,8 @@ This skill requires `channel-publishing`. These five rules from it bind every st
 
 ## Before you start
 
-- **Tools.** `gh` authenticated with read access, `python3` 3.11 or newer, `jq`, `curl`. The scripts use the standard library only.
-- **Variables.** `R` is `OWNER/REPO`, `O` is the organisation login, and `CHECKS` is `.claude/skills/github-presence/checks` (`$CLAUDE_CONFIG_DIR/skills/github-presence/checks` when installed globally). Every script has `--help` and `--self-test`, exits 0 clean, 1 on findings, 2 on a usage error.
+- **Tools.** `gh` authenticated with read access (optional: steps 2 and 4 name the fallback when it is unavailable or not authorised), `python3` 3.11 or newer, `jq`, `curl`. The scripts use the standard library only.
+- **Variables.** `R` is `OWNER/REPO`, `O` is the organisation login, `ORGREPO` is a checkout of the organisation `.github` repository, and `CHECKS` is the directory that holds `repo_card_check.py`: `.claude/skills/github-presence/checks` in an installed project copy, `$CLAUDE_CONFIG_DIR/skills/github-presence/checks` when installed globally, `skills/github-presence/checks` in the catalog tree. Every script has `--help` and `--self-test`, exits 0 clean, 1 on findings, 2 on a usage error.
 - **Two lists the owner supplies.** The flagship repositories (CH-GH-05 is a MUST for them) and the internal repositories (exempt from CH-GH-01, CH-GH-03 and CH-GH-05). Ask for both before step 1. If the owner has not answered, treat no repository as internal and name none a flagship, and say so in the report.
 - **Pinned defaults.** The description budget, the minimum topic count, the social-preview margin, the launch baseline length, Discussions as the support home and one organisation `.github` repository are catalog norms. They are defaults an adopter overrides once, not GitHub facts.
 
@@ -63,13 +63,13 @@ Done when every target has a surface list and a classification.
 
 ### 2. Read each repository card
 
-Input: `R`. Run:
+Input: `R`. Run `export CHECKS=<the directory that holds repo_card_check.py>` before any block in this procedure, then:
 
 ```sh
 python3 -I "$CHECKS"/repo_card_check.py --repo "$R" --flagship
 ```
 
-Drop `--flagship` for other repositories and add `--internal` for an exempt one. The script reads `gh repo view --json` and downloads the social image to measure it. A `homepage: ask` line is a question for the owner, not a failure.
+Drop `--flagship` for other repositories and add `--internal` for an exempt one. The script reads `gh repo view --json` and downloads the social image to measure it. A `homepage: ask` line is a question for the owner, not a failure. When `gh` is unavailable or the owner has not authorised it, feed the output of `gh repo view --json` (or the unauthenticated REST fields in the same shape) through `--json FILE`, and the downloaded social image through `--image FILE`, in place of `--repo`.
 
 Done when you hold the findings for CH-GH-01 to 05 and 30 for every repository, or the note that explains why none ran.
 
@@ -89,7 +89,7 @@ python3 -I "$CHECKS"/community_check.py --repo "$R" --has-discussions true
 python3 -I "$CHECKS"/community_check.py --root ORGREPO --org-repo --check-links --has-discussions true
 ```
 
-Use `false` when the first command printed `false`. Run the CH-COM-16 commands in `references/community-health.md` for the categories and the README link.
+Use `false` when the first command printed `false`. Without `gh`, the first command becomes a question for the owner, and the answer goes in `--has-discussions`. If the organisation `.github` repository does not exist, record CH-COM-18 and CH-GH-06 as failed and skip the third command. Exit 2 means a usage error, not a pass. Run the CH-COM-16 commands in `references/community-health.md` for the categories and the README link.
 
 Done when CH-COM-16 to 20 each have a pass, a finding or a named owner question.
 
@@ -101,7 +101,7 @@ Input: a checkout of each package repository. Run:
 python3 -I "$CHECKS"/registry_manifest_check.py --root . --live-categories
 ```
 
-Then run the per-row commands of `references/registry-listings.md` that the script does not cover (CH-GH-20 to 22). A README edit reaches no registry until the next release (CH-GH-22): say which registry still shows the old text.
+A PyPI project marked `Private :: Do Not Upload` is skipped as unpublished. For a tree with other unpublished PyPI projects, ask the owner which projects are published and run the script with each of their directories as `--root`. Then run the per-row commands of `references/registry-listings.md` that the script does not cover (CH-GH-20 to 22). A README edit reaches no registry until the next release (CH-GH-22): say which registry still shows the old text.
 
 Done when CH-GH-13 to 22 each have a pass, a finding or "not applicable" with the reason (no formula, no extension, no image).
 

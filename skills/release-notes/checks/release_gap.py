@@ -15,7 +15,8 @@
 Inputs are files, so the script never calls the network:
   --tags      one tag per line: gh api "repos/$REPO/tags" --paginate -q '.[].name'
   --releases  JSON: gh release list -R "$REPO" -L 1000 --json tagName,isLatest,isPrerelease,isDraft
-  --baseline  tags exempt from MKT-REL-11, one per line; blank and # lines ignored
+  --baseline  tags exempt from MKT-REL-11, one per line; blank and # lines ignored.
+              A file that does not exist counts as empty (no legacy tags)
   --assets    JSON: gh release view "$LATEST_TAG" --json assets
   --docs      files that document /releases/latest/download/<asset> URLs
 
@@ -99,6 +100,12 @@ def _lines(path: Path) -> list[str]:
     return [x.strip() for x in path.read_text(encoding="utf-8").splitlines() if x.strip()]
 
 
+def _baseline(path: Path | None) -> set[str]:
+    if path is None or not path.exists():
+        return set()
+    return {x for x in _lines(path) if not x.startswith("#")}
+
+
 def expect(condition: object, message: object = "condition false") -> None:
     """Self-test check that survives python -O, which strips a bare assert."""
     if not condition:
@@ -109,7 +116,8 @@ def self_test() -> int:
     fx = Path(__file__).resolve().parent / "fixtures" / "gap"
     tags = _lines(fx / "tags.txt")
     releases = json.loads((fx / "releases.json").read_text(encoding="utf-8"))
-    baseline = {x for x in _lines(fx / "baseline.txt") if not x.startswith("#")}
+    baseline = _baseline(fx / "baseline.txt")
+    expect(baseline and _baseline(fx / "absent.txt") == set() and _baseline(None) == set())
     assets = {
         a["name"] for a in json.loads((fx / "assets.json").read_text(encoding="utf-8"))["assets"]
     }
@@ -155,9 +163,7 @@ def main(argv: list[str]) -> int:
     try:
         tags = _lines(args.tags)
         releases = json.loads(args.releases.read_text(encoding="utf-8"))
-        baseline = (
-            {x for x in _lines(args.baseline) if not x.startswith("#")} if args.baseline else set()
-        )
+        baseline = _baseline(args.baseline)
         names = None
         documented = None
         if args.assets:

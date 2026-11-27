@@ -48,8 +48,16 @@ Severity is the rule's own. Verification commands read `$CHECKS`, the `checks/` 
 ## Verification blocks
 
 ```sh
-# MKT-MEAS-01: every analytics host, SDK or placeholder in changed files names a tool in the record
+# MKT-MEAS-01: every analytics host, SDK or placeholder in changed files names a tool in the record.
+# pipefail: an unresolvable merge base (no origin/HEAD) fails the block instead of passing as an empty diff.
+set -o pipefail
 git diff --name-only -z --diff-filter=d --merge-base origin/HEAD -- \
+  ':(glob)**/*.html' ':(glob)**/*.astro' ':(glob)**/*.js' ':(glob)**/*.mjs' ':(glob)**/*.cjs' \
+  ':(glob)**/*.ts' ':(glob)**/*.jsx' ':(glob)**/*.tsx' ':(glob)**/*.vue' ':(glob)**/*.svelte' \
+  ':(glob)**/*.json' ':(glob)**/*.toml' ':(glob)**/*.yml' ':(glob)**/*.yaml' \
+  | xargs -0 -r python3 -I "$CHECKS"/inventory_check.py scan --decision .agents/decisions/measurement.md --
+# MKT-MEAS-01: auditing existing code, scan every tracked source file, not only the diff
+git ls-files -z -- \
   ':(glob)**/*.html' ':(glob)**/*.astro' ':(glob)**/*.js' ':(glob)**/*.mjs' ':(glob)**/*.cjs' \
   ':(glob)**/*.ts' ':(glob)**/*.jsx' ':(glob)**/*.tsx' ':(glob)**/*.vue' ':(glob)**/*.svelte' \
   ':(glob)**/*.json' ':(glob)**/*.toml' ':(glob)**/*.yml' ':(glob)**/*.yaml' \

@@ -32,7 +32,9 @@ These rules come from `channel-publishing`, which this skill requires. Read its 
 | `MB` | `.claude/skills/microblog-post/checks`, or `$CLAUDE_CONFIG_DIR/skills/microblog-post/checks` when installed globally |
 | `MB_DEPS` | a directory whose `node_modules` holds `twitter-text` 3.1.0 and `@atproto/api` 0.32.7 |
 | `DRAFT` | the draft file, by default `posts/<tag>-microblog.md` (pinned default, an adopter overrides it once) |
-| `INSTANCE` | the Mastodon host the post goes to |
+| `INSTANCE` | the Mastodon host the post goes to. When the owner named none, use `mastodon.social` and add an `open_asks` line naming the instance |
+| `CP` | `channel-publishing`'s checks directory: `"$MB"/../../channel-publishing/checks` |
+| `TMP` | a scratch directory, for example one made with `mktemp -d` |
 
 Install the counters once:
 
@@ -53,6 +55,7 @@ labels:
   made_with_ai: false
   paid_partnership: false
   is_made_with_ai: false
+ai_use: no, case: no-ai
 ai_role: drafted
 sponsored: false
 spend: none
@@ -80,6 +83,7 @@ card: https://example.com/changelog#v0-14-0
 link_attachment: https://example.com/changelog#v0-14-0
 ```
 
+- `ai_use` is required because X and Threads have an AI label (CH-CORE-07). Write `no, case: no-ai` when no AI touched the media. Write `borderline` with an `open_asks` entry naming `ai_use` when unsure. The registry has no `trigger:` or `exemption:` rows, so those are the only two usable values.
 - `summary` is the release's summary sentence (MKT-REL-14 in `release-notes`). A fix-only patch has none, so write one from a rewritten fix line. Never copy a raw commit subject.
 - `items` is the number of distinct user-facing changes.
 - Two X accounts get two sections, `## x:@one` and `## x:@two`, with different text (CH-MB-16).
@@ -91,11 +95,11 @@ link_attachment: https://example.com/changelog#v0-14-0
 Each step names its input, its command or check, and what done looks like.
 
 1. **Collect inputs.** Input: the repository and the release. Run `git describe --tags --abbrev=0` for the tag as the tag writes it. Read the summary sentence and count the user-facing items from the release notes. Done: tag, product name, summary and item count are known, or each missing one is in `open_asks`.
-2. **Pick the link target.** Input: the owned per-version page and the GitHub Release page. Run the CH-MB-10 block on the owned page. Done: the owned page passes the card gate, or the draft links the GitHub Release page and `open_asks` reports the owned page as a site defect. Never ship a card with no image.
-3. **Check the accounts.** Input: `channels.yml` or the owner's answer. Done: each platform you draft for has an account the owner named. For Mastodon, run the CH-MB-17 and CH-MB-18 blocks against the home page. For Bluesky, run the CH-MB-19 block.
+2. **Pick the link target.** Input: the owned per-version page and the GitHub Release page. Run the CH-MB-10 block on the owned page. Done: the owned page passes the card gate, or the draft links the GitHub Release page and `open_asks` reports the owned page as a site defect. A page that cannot be fetched at all (TLS or network error) fails the gate: report the fetch error in `open_asks`. Never ship a card with no image.
+3. **Check the accounts.** Input: `channels.yml` or the owner's answer. Done: each platform you draft for has an account the owner named. With no `channels.yml` and no owner answer, list the platform in `open_asks`, draft with a placeholder account, and skip the Mastodon and Bluesky account checks below. For Mastodon, run the CH-MB-17 and CH-MB-18 blocks against the home page. For Bluesky, run the CH-MB-19 block.
 4. **Write the draft.** Input: steps 1 to 3. Write one self-contained post per platform (CH-MB-08, CH-MB-09). Put one full `https://` URL in post 1 (CH-MB-07, CH-MB-22). Reuse one alt text on every variant (CH-MB-13, CH-MB-23). Done: the file matches the draft format.
 5. **Count.** Run the CH-MB-01 block. Add `--instance "$INSTANCE"` so Mastodon reads its live limit. Done: every row says `pass`. A `FAIL` row means shorten that variant only.
-6. **Check the draft.** Run `python3 -I "$MB"/mb_check.py "$DRAFT"`. Done: it prints nothing and exits 0. Each line names a rule ID and a line.
+6. **Check the draft.** Run `python3 -I "$MB"/mb_check.py "$DRAFT"`. Then run the `channel-publishing` checks: `python3 -I "$CP"/boundary_check.py package "$DRAFT"`, then `python3 -I "$CP"/draft_check.py` with each of `labels`, `disclosure` and `claims`, and with each of `ai-use` and `refs` plus `--facts "$MB"/../references/facts.md`, all on `"$DRAFT"`. Done: every command prints nothing and exits 0. Each line names a rule ID and a line.
 7. **Cite the facts.** Every platform number or clause in the draft's notes carries its registry id from `references/facts.md`. Run `python3 -I "$MB"/../../channel-publishing/checks/facts_check.py "$MB"/../references/facts.md`. Done: exit 0. An overdue row means re-fetch it, never extend the date.
 8. **Hand over.** Output: the draft file, the count output, and the `open_asks` list. Stop. A named human posts. Done: no post call was made.
 
@@ -151,13 +155,13 @@ python3 -I "$MB"/mb_check.py --parse "$DRAFT" | node "$MB"/mb_count.mjs --facets
 
 ```sh
 # CH-MB-10: URL is the page, IMG is its og:image URL. All three tags print, and the image URL starts with https://
-curl -sL "$URL" | grep -oE '<meta property="og:(image|title|description)"[^>]*>'
+curl -sL "$URL" | grep -oiE '<meta[^>]*(property|name)=["'\'']og:(image|title|description)["'\''][^>]*>'
 curl -sL "$IMG" -o "$TMP"/og.img
 stat -c %s "$TMP"/og.img
-file "$TMP"/og.img
+head -c 8 "$TMP"/og.img | od -An -tx1
 ```
 
-The size is within the thumb limit [BS-F08], and `file` reports PNG or JPEG.
+The size is within the thumb limit [BS-F08]. The first bytes are `89 50 4e 47 0d 0a 1a 0a` (PNG) or start with `ff d8 ff` (JPEG). The GitHub Release fallback is exempt from the `og:description` requirement, because that page carries only `<meta name="description">`.
 
 ```sh
 # CH-MB-11: after publishing, AT_URI is the post's at:// URI
@@ -183,7 +187,7 @@ curl -s "https://$INSTANCE/api/v1/statuses/$STATUS_ID" | jq '.card.missing_attri
 
 ```sh
 # CH-MB-18: prints the profile URL in the raw HTML
-curl -sL "$HOME_PAGE_URL" | grep -oiE '<(a|link)[^>]*rel=.[^>]*me[^>]*>'
+curl -sL "$HOME_PAGE_URL" | grep -oiE "<(a|link)[^>]*rel=[\"']([^\"']* )?me( [^\"']*)?[\"'][^>]*>"
 # verified_at is non-null on the website row
 curl -s "https://$INSTANCE/api/v1/accounts/lookup?acct=$ACCT" | jq '.fields[] | {name,verified_at}'
 ```
@@ -196,7 +200,7 @@ grep -niE 'blue ?check' "$DRAFT"
 ```
 
 ```sh
-# CH-MB-21: bridged video is within the bridge limit [BR-F02]. Prints the duration in seconds
+# CH-MB-21: bridged video is within the bridge limit [BR-F02]. Prints the duration in seconds. Needs ffprobe (optional: skip when absent and report the video unchecked)
 ffprobe -v error -show_entries format=duration -of csv=p=0 "$VIDEO"
 ```
 

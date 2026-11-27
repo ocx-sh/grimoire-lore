@@ -104,3 +104,17 @@ channels:
     credential: SOME_SECRET
     last_checked: 2026-07-01
     linked_from: []
+  - id: li-person
+    platform: linkedin
+    handle: example
+    url: https://www.linkedin.com/in/example
+    status: planned
+    ownership: inferred
+    verified_by: not provable (999, 2026-11-01)
+    owner_role: maintainer
+    automation: none
+    approved_by: ""
+    labels_required: []
+    credential: ""
+    last_checked: 2026-11-01
+    linked_from: []

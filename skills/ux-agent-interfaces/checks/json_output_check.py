@@ -20,8 +20,13 @@ Usage:
   --classes    comma list; when given, the error class must be one of them.
   --rust-cli04 the binary follows the Rust CLI-04 envelope: a missing
                schema_version or retryable in an error document is SHOULD, not MUST.
-  --sentinel   text the caller put in a failing call (a fake token); it must not
-               appear in stdout or stderr.
+  --sentinel   a fake token the caller puts in a credential channel of a failing
+               call (an environment variable, a header, a --password value); it
+               must not appear in stdout or stderr. Never put it in the argument
+               the error message must name (UX-AGENT-09 e): that echo is correct
+               and would be reported. The CLI inherits this process's
+               environment, so run `MYTOOL_TOKEN=tok-SENTINEL json_output_check.py
+               --sentinel tok-SENTINEL ...`.
   --must-only  report SHOULD findings but do not fail on them.
 
 Exit codes: 0 clean, 1 findings, 2 usage or a case that did not behave as named.
@@ -263,6 +268,22 @@ def self_test() -> int:
         "UX-AGENT-14",
     ):
         expect(want in ids, f"planted violation {want} not found in {sorted(ids)}")
+    leaky = check(
+        [py, str(HERE / "fixtures/json/pass_cli.py")],
+        {"not_found": "describe tok-X"},
+        Options(fmt, "", 20, sentinel="tok-X"),
+    )
+    expect(
+        any(f[0] == "UX-AGENT-14" for f in leaky),
+        "sentinel in the named input must be reported",
+    )
+    os.environ["MYTOOL_TOKEN"] = "tok-X"  # noqa: S105 - fake sentinel
+    credential = check(
+        [py, str(HERE / "fixtures/json/pass_cli.py")],
+        {"not_found": "describe nope/x"},
+        Options(fmt, "", 20, sentinel="tok-X"),
+    )
+    expect(not credential, f"sentinel in env only was reported: {credential}")
     soft = check(
         [py, str(HERE / "fixtures/json/fail_cli.py")],
         {"not_found": "describe nope/x"},

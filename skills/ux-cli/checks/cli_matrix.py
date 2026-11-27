@@ -433,14 +433,9 @@ def c_typo(c, a):
                     f"'{label(path)} {t}' exits {r.code} and {'does' if re.search('similar|did you mean', text, re.IGNORECASE) else 'does not'} suggest a name; want exit {c.usage} and a suggestion",
                 )
             for ln in text.splitlines():
-                if (
-                    t in ln
-                    and re.search(r"\b(add|install|get|pull)\b", ln)
-                    and not re.search(
-                        r"unrecogni|unknown|no such|not found|invalid|similar|did you mean",
-                        ln,
-                        re.IGNORECASE,
-                    )
+                # Only a suggestion line is exempt: an error line may carry the hint.
+                if re.search(rf"\b(add|install|get|pull)\b.*{re.escape(t)}", ln) and not re.search(
+                    r"similar|did you mean", ln, re.IGNORECASE
                 ):
                     c.fail(
                         "UX-CLI-10",
@@ -764,6 +759,7 @@ def self_test() -> int:
         ("group2", "groups", "UX-CLI-03"),
         ("notip", "typo", "UX-CLI-09"),
         ("installhint", "typo", "UX-CLI-10"),
+        ("installinline", "typo", "UX-CLI-10"),
         ("globalafter", "global", "UX-CLI-12"),
         ("escerr", "color", "UX-CLI-20"),
         ("anim", "anim", "UX-CLI-21"),

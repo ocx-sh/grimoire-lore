@@ -54,15 +54,29 @@ record).
 Read the installed `marketing-quality` rule, then only the depth files it routes to
 for the target types. They sit in the `marketing-quality-reference` skill:
 `positioning.md`, `first-screen.md`, `claims.md`, `trust-claims.md`, `voice.md`,
-`discoverability.md`. Find the checks directory with
-`find . -path '*marketing-quality-reference/checks' -type d -not -path '*/node_modules/*'`.
-Set `CHECKS` to the hit. No hit means the rule is not installed: say
+`discoverability.md`. Find the checks directory in the project install, then the
+agents install, then the global one:
+
+```sh
+for d in .claude/skills .agents/skills "${CLAUDE_CONFIG_DIR:-$HOME/.claude}"/skills; do ls -d "$d"/marketing-quality-reference/checks 2>/dev/null; done
+```
+
+Set `CHECKS` to the first line. All three miss means the rule is not installed: say
 `grim add ghcr.io/ocx-sh/lore/marketing-quality` and stop.
 
 ## 3. Run the checks in order
 
 Run from the repository root. Skip a check whose input is absent and list it under
-"did not run". Build the site first when a built-page check needs `dist/`.
+"did not run". Steps 2, 3, 4 and 6 read a built `dist/`. When it is missing, build the
+site with the repository's own command (the `build` entry of its task runner or
+package scripts, or the build line in its README or CI). When no build is possible,
+list those steps under "did not run" and read the source instead: the MKT-PAGE-02
+declaration grep on the page source, and the MKT-PAGE-03 hero by hand, marked
+`unverified: reading heuristic`.
+
+The checks that scan the whole repository (the `git ls-files` blocks of
+`trust-claims.md` and `claims.md`) hit agent config, specs and docs bodies. Narrow
+each block's file list to the typed targets of step 1 before reading its output.
 
 | Step | Command | Rules |
 |---|---|---|
@@ -71,19 +85,24 @@ Run from the repository root. Skip a check whose input is absent and list it und
 | 3 Pitch scope | `python3 -I "$CHECKS"/positioning_check.py surface dist --need index.html` | MKT-PAGE-01, 02 |
 | 4 Hero noun | `python3 -I "$CHECKS"/positioning_check.py hero-noun dist/index.html` | MKT-PAGE-03 |
 | 5 Claims | `python3 -I "$CHECKS"/claims_lint.py --base origin/main --reading` (add each target path to scan named files) | MKT-CLAIM-01 to 05, 28 |
-| 6 Head | `python3 -I "$CHECKS"/head_check.py dist --host "$HOST"` | MKT-SEO-01 to 10, 21, 23, 25 |
-| 7 Live site | `python3 -I "$CHECKS"/live_site_check.py robots "$HOST"`, only when the user asks for the deployed site | MKT-SEO-11 to 17 |
+| 6 Head | `python3 -I "$CHECKS"/head_check.py dist --host "$HOST"` | MKT-SEO-01 to 10, 21 to 25 |
+| 7 Live site | `python3 -I "$CHECKS"/live_site_check.py robots "$HOST"`, only when the user asks for the deployed site | MKT-SEO-11 to 17, 26 |
 
 Step 1 exit 2 means no positioning record. Report that as the first finding, name
 `positioning-brief` as the fix, and run the checks that need no record: steps 3, 5,
 6. Steps 2 and 4 stay under "did not run". Never pick a noun yourself.
+
+Step 5 exit 2 with `cannot read claims file` means no `claims.toml`. Report "no
+claims record" as a finding, name `claims.md` for the record format, then run step 5
+again with `--claims /dev/null` (or any empty file). Every pattern hit it prints is a hit
+without a record. Never create `claims.toml` in the repository.
 
 Then run these verifications by hand. Each is the verification cell or check block of the rule, in the depth file named.
 
 | Surface | Block | Rules |
 |---|---|---|
 | README first screen | `positioning_check.py readme-window README.md`, then the checks of those rules in `first-screen.md` | MKT-PAGE-06, 09, 10 |
-| Added copy lines | The checks of those rules in `voice.md` (em dash, first-person experience, authorship) | MKT-VOICE-03, 06, 14 |
+| Added copy lines | The checks of those rules in `voice.md` (em dash, first-person experience, authorship). For named existing files nothing is added, so grep each file instead of the diff. A hit there is a report, never a rewrite, because MKT-VOICE-03 binds added lines only | MKT-VOICE-03, 06, 14 |
 | Generated media on a page | `positioning_check.py performer PAGE`, then the caption grep in `voice.md` | MKT-VOICE-16 |
 | Recordings on a pitch or README | The check of that rule in `voice.md` | MKT-VOICE-17 |
 | Licence wording | The checks of those rules in `trust-claims.md` | MKT-CLAIM-11, 12, 13 |
@@ -92,6 +111,10 @@ Then run these verifications by hand. Each is the verification cell or check blo
 
 A claims hit without a live record is a finding even when the sentence reads as
 true. The record decides, not the reviewer.
+
+MKT-PAGE-10 needs `gh api "repos/$SLUG" --jq .archived`. Without a logged-in `gh`, try
+`curl -s "https://api.github.com/repos/$SLUG"` and read `"archived"`. When both fail,
+ask the owner and list the check under "did not run".
 
 ## 4. The landing checklist
 
@@ -115,7 +138,8 @@ this order. Stop at the first MUST finding of a row and report it, then continue
    an objective claim (MKT-CLAIM-28).
 4. **Calls to action.** Length, placement and the adoption link of a
    `doc_type: landing` page are `docs-quality`'s (DOC-TYPE-10 to 15): run
-   `docs-review` for them and cite its findings. A `doc_surface: offer` page needs
+   `docs-review` for them and cite its findings. Without `docs-review` installed,
+   list DOC-TYPE-10 to 15 under "did not run". A `doc_surface: offer` page needs
    one next step that says what happens after the click (MKT-PAGE-12).
 
 ## 5. The AI-marker pass
@@ -123,7 +147,8 @@ this order. Stop at the first MUST finding of a row and report it, then continue
 Report AI-writing markers as `WARN`, never as findings, and never as a reason to
 rewrite. No detector score, humanizer step or style-marker count may fail a
 review (MKT-VOICE-01, 02). Report em dash density on existing copy with its rate
-and baseline (MKT-VOICE-04), and a corrective-framing phrase on an added line
+and baseline (MKT-VOICE-04; without `docs-quality-reference` there is no
+`strip_prose.py`, so list that density check under "did not run"), and a corrective-framing phrase on an added line
 (MKT-VOICE-20). A first-person account of the author's past with no `Owner words`
 source (MKT-VOICE-06) and an authorship badge or "human-written" claim
 (MKT-VOICE-14) are findings. Name the phrase and the line. Never write that a page
@@ -174,9 +199,9 @@ step 3.
 
 The claims pattern set is a mechanical filter. It was measured on 2026-11-27 on 19
 held-out developer-product home pages, fetched that day, by one reader with no
-second rater: 58.2 percent precision on frozen strict labels (66.6 percent with
-borderline calls) and recall of at most 50.5 percent. Expect about 4 false hits in
-10 on a new page. Pages that are not developer products were not measured.
+second rater: 59.5 percent precision for the 15-line set and recall of at most 55.9
+percent (`claims.md` holds the table; the earlier set scored 58.2 percent on frozen
+strict labels). Expect about 4 false hits in 10 on a new page. Pages that are not developer products were not measured.
 A false hit costs a marker or an allow entry. Built-page checks read
 the built page, because source misses text a component renders. Which country's law
 applies is the owner's and counsel's question: never state it.

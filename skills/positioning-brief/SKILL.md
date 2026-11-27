@@ -27,17 +27,21 @@ The schema and rule rows (MKT-POS-01 to 21) are in `positioning.md` of the
 `marketing-quality-reference` skill. Set
 `CHECKS=.claude/skills/marketing-quality-reference/checks`
 (`$CLAUDE_CONFIG_DIR/skills/marketing-quality-reference/checks` when installed
-globally). Run every command from the repository root.
+globally). If that directory is missing, install `marketing-quality-reference` first
+(`grim install`) or set `CHECKS` to wherever the skill is unpacked. Run every command
+from the repository root.
 
 ## Stop condition
 
-Stop when all of these hold. Then edit no README, manifest or site copy.
+Stop when all of these hold. Then change no product sentence, category noun or object noun on any surface; other copy edits stay allowed (MKT-POS-04).
 
 - `.agents/positioning.toml` exists, has at most 80 lines and `status = "unreviewed"`.
 - Every required field holds a value copied from repository text, with a
   `[sources]` line `field = "path:line"`, or the literal `ASK-OWNER`.
 - `positioning_check.py fields`, `sourced`, `audience` and `alternatives` exit 0.
   `sentence` exits 0 once `sentence`, `category` and `object` are all filled.
+- The claim-word check of step 7 prints nothing. `positioning_check.py` does not
+  test claim words, so a green script run alone never proves the sentence is claim-free.
 - Your report lists every `ASK-OWNER` field as a question for the owner.
 
 ## Never
@@ -46,7 +50,8 @@ Stop when all of these hold. Then edit no README, manifest or site copy.
   An empty field is better than a plausible one (MKT-POS-03).
 - Never write `status = "reviewed"`, and never move `review_by` (MKT-POS-04).
 - Never put a claim word in the sentence ("fast", "simple", "secure"). Claim
-  words are MKT-CLAIM-02.
+  words are MKT-CLAIM-02. `positioning_check.py` does not catch them: run the
+  claim-word check of step 7.
 - Never write the GitHub About field. The write publishes at once. Propose the
   text in your report.
 
@@ -103,7 +108,7 @@ candidates in a trailing comment. The comment is the owner's input.
 | `audience` | README, docs home, issues | One segment: a role or behaviour plus its context (MKT-POS-05). "Developers and teams" fails. |
 | `non_target` | README limits, docs limitations, issues closed as out of scope | A condition a reader can check, such as "needs Windows 7 support". |
 | `alternatives` | Issues, docs, README | The first entry is what the audience does today without the product: a behaviour, a tool or nothing (MKT-POS-06). Never "other tools". |
-| `maturity` | Manifest version, release list, status line | One plain sentence: stage word first, then what may change. Version 0.x is pre-1.0. |
+| `maturity` | Manifest version, release list, status line | One plain sentence: write only the stage word the version supports (`Pre-1.0` for 0.x), then `ASK-OWNER` for what may change. |
 | `lists` | A fact that a surface enumerates (kinds, clients, platforms) | A `[lists.<name>]` table with `source` (code file) and `extract` (a command that prints the members). Empty when nothing is enumerated. |
 | `do_not_say` | A spec or note that bans a word | Entries have `pattern`, `reason`, `instead`, `lift_when` (MKT-POS-13). Write none when the repository holds no ban. |
 
@@ -119,7 +124,7 @@ object = "widgets"
 forbidden = ["ASK-OWNER"]
 audience = "ASK-OWNER"
 non_target = ["ASK-OWNER"]
-maturity = "Pre-1.0: commands may change between minor releases."
+maturity = "Pre-1.0: ASK-OWNER"  # example: only the stage word the version supports, then what may change
 do_not_say = []                 # a key, so it sits above every table
 [[alternatives]]
 name = "ASK-OWNER"
@@ -182,11 +187,23 @@ existing copy, and one `[surface.<name>]` row each for `pitch`, `readme` and
 for c in fields sourced audience alternatives sentence; do python3 -I "$CHECKS"/positioning_check.py "$c"; done
 ```
 
-Exit 0 is clean. Exit 1 prints findings: fix each by editing the draft, never by
+For `positioning_check.py`, exit 0 is clean. Exit 1 prints findings: fix each by editing the draft, never by
 weakening the check. Exit 2 means there is no record file. `sentence` fails by
 design while `category` or `object` is `ASK-OWNER`: report it as the owner's
-question. Do not run `drift`: an unreviewed draft is not a standard to compare
-surfaces against. Done: the stop condition holds.
+question. `sourced` checks only that each cited line exists, not that it holds the value, so
+compare each citation by eye. Do not run `drift`: an unreviewed draft is not a standard to compare
+surfaces against.
+
+`positioning_check.py` does not test claim words. Check the sentence against the MKT-CLAIM-02
+pattern set, which needs no `claims.toml`. Any line it prints is a hit: rewrite the
+sentence and rerun. No output is clean.
+
+```sh
+sed -n 's/^sentence[[:space:]]*=//p' .agents/positioning.toml > "${TMPDIR:-/tmp}"/sentence.txt
+awk '/^```pattern-set/{f=1;next} /^```/{f=0} f&&!/^#/' "$CHECKS"/../claims.md | grep -n -i -E -f - "${TMPDIR:-/tmp}"/sentence.txt
+```
+
+Done: the stop condition holds.
 
 ## 8. Report
 

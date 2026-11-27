@@ -76,8 +76,14 @@ ADOPTION = re.compile(
 HDYHAU = re.compile(r"hdyhau|how did you hear|heard about us", re.IGNORECASE)
 SHIELD = re.compile(r"img\.shields\.io/(github/stars|npm/d|pypi/d|crates/d|github/downloads)")
 
+_PCT = r"\b[0-9]{1,3}\s?%"
+_CITE = r"\b(?:citations?|cited)\b"
+_CHANGE = r"\b(?:gone|drop(?:ped)?|fell|fall(?:s|en)?|declin\w*|churn|change[sd]?|disappear\w*|stable|retain\w*|still (?:shared|cited)|lost|shared|overlap\w*)\b"
+# the percentage may come before or after the noun, and the change word on either side
 CHURN_TRIGGER = re.compile(
-    r"\b[0-9]{1,3}\s?%[^.\n]*\b(citations?|cited)\b[^.\n]*\b(gone|drop(ped)?|churn|change[sd]?|disappear\w*|stable|retain\w*|still (shared|cited)|lost|shared|overlap\w*)\b",
+    rf"{_PCT}[^.\n]*{_CITE}[^.\n]*{_CHANGE}"
+    rf"|{_CITE}[^.\n]*{_PCT}[^.\n]*{_CHANGE}"
+    rf"|{_CITE}[^.\n]*{_CHANGE}[^.\n]*{_PCT}",
     re.IGNORECASE,
 )
 ENGINES = re.compile(r"ChatGPT|Gemini|Perplexity|AI Overviews|SearchGPT|Copilot|AI Mode")
@@ -339,8 +345,8 @@ def self_test() -> int:
         expect(f"aicite {needle}", cmd_aicite(bad / "aicite.csv"), False, needle)
     expect("churn pass", cmd_churn(ok / "churn.md"), True)
     got = cmd_churn(bad / "churn.md")
-    if len(got) != 2:
-        raise SystemExit(f"self-test churn: want 2 findings, got {got}")
+    if len(got) != 3:
+        raise SystemExit(f"self-test churn: want 3 findings, got {got}")
     expect("badges pass", cmd_badges(ok / "badges.md"), True)
     expect("badges fail", cmd_badges(bad / "badges.md"), False, "MKT-MEAS-20")
     print("report_check self-test: ok")

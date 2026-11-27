@@ -52,15 +52,17 @@ Run in this order after every change to a governed surface. Each step's exit sta
 ```sh
 CHECKS=.claude/skills/marketing-quality-reference/checks   # $CLAUDE_CONFIG_DIR/skills/... when installed globally
 BASE=origin/main                                            # the branch this change merges into, rename it
+HOST=example.com                                            # the production hostname, no scheme
+DIST=dist                                                   # the built site directory (replace dist with the real build output)
 python3 -I "$CHECKS"/claims_lint.py --base "$BASE"          # 1 MKT-CLAIM-01 to 05, 28: pattern hits against claims.toml
 python3 -I "$CHECKS"/positioning_check.py drift             # 2 MKT-POS-08 to 11: record, surfaces, lists, banned terms
 # 3 after the site build, on the built output:
-python3 -I "$CHECKS"/head_check.py dist --host "$HOST"      # MKT-SEO-01 to 10, 21 to 25
+python3 -I "$CHECKS"/head_check.py "$DIST" --host "$HOST"    # MKT-SEO-01 to 10, 21 to 25
 # 4 after every deploy, against the public name:
 python3 -I "$CHECKS"/live_site_check.py robots "$HOST"      # MKT-SEO-11 to 17, 26; also policy, parity, preview
 ```
 
-Exit 0 is clean, 1 is findings, 2 is a bad invocation or a missing input (no record, no file). A step that exits 2 did not run. `claims_lint.py` needs a `claims.toml` at the repository root, and the positioning check needs `.agents/positioning.toml`. When either is missing, the first rows below say what to do, and neither step is skipped silently. Steps 1 and 2 read only the repository. Steps 3 and 4 read a build and a live host and are the owner's pipeline's to run. If you cannot run them, say so.
+Exit 0 is clean, 1 is findings, 2 is a bad invocation or a missing input (no record, no file). A step that exits 2 did not run. `claims_lint.py` needs a `claims.toml` at the repository root, and the positioning check needs `.agents/positioning.toml`. When the record is missing, row 1 says what to do. When `claims.toml` is missing, create it empty (no `[[claim]]` rows, a valid file) so step 1 runs, and report each hit as an owner question: never invent a record. While the record is unreviewed, step 2's `drift` exits 1 on the sentence and tagline mismatch (MKT-POS-07, MKT-POS-08) by construction: list it under `ran:` as "owner decision pending" with its exit code, and take the verdict from `fields`, `sourced`, `audience` and `alternatives`. Neither step is skipped silently. A repository with no built site has no step 3 to run: say so. Steps 1 and 2 read only the repository. Steps 3 and 4 read a build and a live host and are the owner's pipeline's to run. If you cannot run them, say so. `denigration` sees only the record's `kind = "tool"` alternatives plus each `--name`.
 
 ## Non-Negotiables
 
@@ -80,9 +82,9 @@ Every line below blocks a merge within the scope it names. IDs resolve through [
 | 10 | Never write "SOC 2 certified" or "compliant with" a law. A security attestation or commitment, a maturity grade or a commercial comparison needs a named human sign-off from a second identity. | MKT-CLAIM-14, MKT-CLAIM-16 |
 | 11 | Write "AI-powered", "AI-driven", "agentic" or "intelligent" only when the shipped artefact calls a model at runtime for that function. An AI accuracy figure needs an `ai-capability` record. | MKT-CLAIM-18, MKT-CLAIM-19 |
 | 12 | Never invent a quote, a name with a role, a rating, a logo or an adopter. Quote exact words with a capture date, and state any connection in the same element. Never use a quote as the source of a measured claim. | MKT-CLAIM-20, MKT-CLAIM-21, MKT-CLAIM-22, MKT-CLAIM-28 |
-| 13 | Never set a third party against the product except through a `comparison` record with a source and a date. Never state a competitor's limitation from memory. Add or remove no compared party yourself. | MKT-CLAIM-30, MKT-CLAIM-16 |
+| 13 | Never set a third party against the product except through a `comparison` record with a source and a date. Never state a competitor's limitation from memory: no script detects that clause, so read for it. Add or remove no compared party yourself. | MKT-CLAIM-30, MKT-CLAIM-16 |
 | 14 | A popularity count is a dated number with a link, never a customer list. Tie no review incentive to a rating or sentiment. | MKT-CLAIM-24, MKT-CLAIM-26 |
-| 15 | First-screen rules apply only to a page that declares `doc_surface: pitch` and to a releasing repository's README. Write no "stable" or "production-ready" claim at major 0. An archived repository's README says so first. | MKT-PAGE-01, MKT-PAGE-09, MKT-PAGE-10 |
+| 15 | First-screen rules apply only to a page that declares `doc_surface: pitch` or `offer` and to a releasing repository's README. Write no "stable" or "production-ready" claim at major 0. An archived repository's README says so first. | MKT-PAGE-01, MKT-PAGE-09, MKT-PAGE-10 |
 | 16 | Never gate on an AI-detector score, never run a humanizer, never state who or what wrote a page, and never invent the author's past: write `ASK-OWNER`. | MKT-VOICE-01, MKT-VOICE-02, MKT-VOICE-14, MKT-VOICE-06 |
 | 17 | Publish a recording or screenshot only from a real run of the shipped binary. Label generated media that could pass as a real person, product or event. | MKT-VOICE-17, MKT-VOICE-16 |
 | 18 | The production origin is an absolute https URL. Every indexable page has one canonical, a unique title, its own description and the Open Graph set on the built page. Never enforce a title or description length that Google never set. | MKT-SEO-01, MKT-SEO-02, MKT-SEO-03, MKT-SEO-04, MKT-SEO-05, MKT-SEO-06 |
