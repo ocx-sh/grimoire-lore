@@ -5,6 +5,10 @@ The exit codes, streams, and interface behaviour every OCX-family binary
 that can end a process, choose a status, or write to stdout — the file
 that does it is not reliably named `main.rs` or `exit_code.rs`, which is
 why this is routed to by subject rather than matched by path.
+Help layout, `--version`, typo suggestions, first-run messages, colour
+palette and animation choices, error wording and destructive-command
+confirmations belong to the `ux-cli` skill. Machine output for scripts and
+agents belongs to `ux-agent-interfaces`.
 
 Contents: [The Exit-Code Table](#the-exit-code-table-pinned) ·
 [Exit-Code Rules](#exit-code-rules) · [Streams and Output](#streams-and-output) ·

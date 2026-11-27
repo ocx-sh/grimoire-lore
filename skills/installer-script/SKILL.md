@@ -55,7 +55,8 @@ Out of scope: an installer that must be root by design (a package-manager
 dispatcher). It is labelled in its header and checked for the narrowest
 escalation under SH-INST-23. Shell-init and completion
 emitters are `shell-integration`. The rc edit an installer performs follows
-that skill's rules (SH-EMIT-16, 18, 19).
+that skill's rules (SH-EMIT-16, 18, 19). What its last success line says is
+UX-CLI-14 in the `ux-cli` skill.
 
 Run the kit only on a file you may execute. It never touches the network or the
 real HOME, and it starts the installer under `env -i` with a throwaway HOME,

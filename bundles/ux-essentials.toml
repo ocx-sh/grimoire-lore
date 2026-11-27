@@ -1,0 +1,36 @@
+summary = "The interface quality set: a rule for pages, apps and editor webviews, and skills for CLIs, machine-facing interfaces and on-demand UX review"
+keywords = "ux,accessibility,a11y,wcag,aria,focus,contrast,forms,loading-states,error-messages,microcopy,confirmation,ai-disclosure,axe,playwright,cli,help-text,first-run,no-color,dry-run,mcp,json-output,error-envelope,tool-approval,review"
+description = "Everything a repository with an interface needs to write, gate and review it: the ux-quality rule (a gate, twenty non-negotiables and eleven depth files on accessibility, states, forms, text, consequential actions, AI features and verification claims), the ux-cli skill that checks a command-line tool by running it, the ux-agent-interfaces skill for JSON output, MCP servers and agent tool approval, and the ux-review skill that grades a page, a CLI or a branch by hand and reports what no tool decides."
+license = "Apache-2.0"
+repository = "https://github.com/ocx-sh/grimoire-lore"
+
+# Members are same-directory relative: this catalog publishes flat under
+# ghcr.io/ocx-sh/lore/<name>, so `./ux-quality` resolves against wherever the
+# bundle itself was pulled from. A mirror keeps working.
+#
+# MEMBERS CARRY NO TAG. Not a digest, not an exact version, not a floating
+# major, not `latest`. `latest` is a tag like any other, and naming it is still
+# a pin. A bundle is a *set*, not a snapshot: its job is to say "these belong
+# together", and the consumer's own `grimoire.lock` is what freezes them.
+#
+# Do not pass --pin when releasing this bundle.
+#
+# One rule and three skills, split by what triggers them. `ux-quality` loads
+# when an agent edits markup or a stylesheet. No rule glob can reach a CLI's
+# source or an MCP server's, so `ux-cli` and `ux-agent-interfaces` are skills
+# that load on the task. `ux-review` is the on-demand trigger, because a rule
+# only loads on an edit. `ux-quality-reference` carries the depth files and the
+# checks scripts. The rule and the skills require it, so it is not a member.
+#
+# This is a separate bundle from `product-essentials`, and there is no umbrella
+# bundle over the two. Nested bundles are invalid, and a union bundle would be
+# a second name for two sets. A repository with an interface and a public pitch
+# adds both.
+
+[rules]
+ux-quality = "./ux-quality"
+
+[skills]
+ux-cli = "./ux-cli"
+ux-agent-interfaces = "./ux-agent-interfaces"
+ux-review = "./ux-review"

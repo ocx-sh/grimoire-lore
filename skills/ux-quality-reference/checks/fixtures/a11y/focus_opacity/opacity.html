@@ -1,0 +1,13 @@
+<!doctype html><html lang="en"><title>fixture</title>
+<style>.fade{opacity:0}.fixed{opacity:0}.fixed:focus-within{opacity:1}.vh{visibility:hidden}.dim{opacity:.8}.rd{opacity:0;position:absolute}.z{width:0;height:0;opacity:0;position:absolute}</style>
+<button>O1 visible</button>
+<div class="fade"><button>O2 in opacity-0 container</button></div>
+<div class="fixed"><button>O3 container fixed with focus-within</button></div>
+<div class="fade" inert><button>O4 inert, not a stop</button></div>
+<button>O5 visible</button>
+<a href="#"></a>
+<label><input type="radio" name="g" class="rd">O7 tab label (proxy visible)</label>
+<div class="dim"><button>O8 dimmed to 0.8</button></div>
+<label><input type="checkbox" class="z">O9 zero-size checkbox with visible label</label>
+<div class="fade"><label><input type="radio" name="h" class="rd">O10 radio inside opacity-0 container</label></div>
+</html>

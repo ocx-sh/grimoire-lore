@@ -1,0 +1,12 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>focus diff fixture</title>
+<style>
+body{background:#fff;color:#111;font:16px sans-serif;margin:24px}
+button{margin:16px;padding:8px 12px}
+.ring:focus-visible{outline:2px solid #0b4f9c;outline-offset:2px}   /* D1: ring 3:1 or better against white: passes */
+.bare{outline:none}                                                 /* D2: outline removed, nothing drawn: 0 pixels */
+.faint:focus-visible{outline:2px solid #ddd;outline-offset:2px}     /* D3: ring under 3:1 against white: low ratio */
+</style>
+<button class="ring">D1 ring drawn</button>
+<button class="bare">D2 no ring</button>
+<button class="faint">D3 faint ring</button>
+</html>

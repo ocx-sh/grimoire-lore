@@ -1,0 +1,48 @@
+summary = "The product surface set: a marketing rule with a positioning record and claims evidence, procedures for release notes, measurement and review, and the public-channel skills"
+keywords = "marketing,positioning,claims,evidence,readme,landing-page,seo,open-graph,release-notes,github-release,analytics,consent,utm,github,registry-listing,linkedin,youtube,x,bluesky,mastodon,terminal-demo,hacker-news,launch-plan"
+description = "Everything a repository with a public pitch needs to keep its words true: the marketing-quality rule (a gate, twenty-one non-negotiables and six depth files on positioning, claims, trust claims, the first screen, voice and discoverability), the positioning-brief, release-notes, marketing-review and marketing-measurement skills, and eight channel skills (channel-publishing, github-presence, linkedin-post, youtube-video, microblog-post, terminal-demo, community-post and launch-plan) that end every task at a draft for a named human to post."
+license = "Apache-2.0"
+repository = "https://github.com/ocx-sh/grimoire-lore"
+
+# Members are same-directory relative: this catalog publishes flat under
+# ghcr.io/ocx-sh/lore/<name>, so `./marketing-quality` resolves against
+# wherever the bundle itself was pulled from. A mirror keeps working.
+#
+# MEMBERS CARRY NO TAG. Not a digest, not an exact version, not a floating
+# major, not `latest`. `latest` is a tag like any other, and naming it is still
+# a pin. A bundle is a *set*, not a snapshot: its job is to say "these belong
+# together", and the consumer's own `grimoire.lock` is what freezes them.
+#
+# Do not pass --pin when releasing this bundle.
+#
+# One rule and twelve skills. `marketing-quality` loads on the files a pitch
+# lives in (README, manifests, site config, release templates). Everything else
+# is a procedure that runs once per release, per launch or per post, and would
+# be dead weight in the context budget on every edit. The channel skills cite
+# the marketing claims policy (MKT-CLAIM), so they never ship without the rule.
+# `channel-publishing` holds the agent-drafts, human-posts boundary that the
+# seven platform skills require. `marketing-quality-reference` carries the depth
+# files and checks the rule routes to. The rule and the skills require it, so
+# it is not a member.
+#
+# This is a separate bundle from `ux-essentials`, and there is no umbrella
+# bundle over the two. Nested bundles are invalid, and a union bundle would be
+# a second name for two sets. A repository with an interface and a public pitch
+# adds both.
+
+[rules]
+marketing-quality = "./marketing-quality"
+
+[skills]
+positioning-brief = "./positioning-brief"
+release-notes = "./release-notes"
+marketing-review = "./marketing-review"
+marketing-measurement = "./marketing-measurement"
+channel-publishing = "./channel-publishing"
+github-presence = "./github-presence"
+linkedin-post = "./linkedin-post"
+youtube-video = "./youtube-video"
+microblog-post = "./microblog-post"
+terminal-demo = "./terminal-demo"
+community-post = "./community-post"
+launch-plan = "./launch-plan"

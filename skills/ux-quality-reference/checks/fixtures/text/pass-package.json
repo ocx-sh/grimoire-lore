@@ -1,0 +1,19 @@
+{
+  "name": "demo",
+  "contributes": {
+    "commands": [
+      { "command": "demo.search", "title": "Search" },
+      { "command": "demo.check", "title": "Check for Updates" }
+    ],
+    "configuration": {
+      "title": "Demo",
+      "properties": {
+        "demo.long": {
+          "type": "string",
+          "markdownDescription": "Controls the first thing. It also controls a second. It then controls a third. See [the guide](https://example.com/guide)."
+        },
+        "demo.short": { "type": "string", "description": "Controls one thing." }
+      }
+    }
+  }
+}

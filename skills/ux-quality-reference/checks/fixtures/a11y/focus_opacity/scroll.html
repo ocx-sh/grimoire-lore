@@ -1,0 +1,17 @@
+<!doctype html><html lang="en"><title>fixture scroll and transition</title>
+<style>body{margin:0;height:4000px}.sp{height:300px}
+#fin{opacity:0}#fix{opacity:0}#fix:focus-within{opacity:1}
+.tr{opacity:.2;transition:opacity 1s linear 0s}.tr:focus-within{opacity:1}
+.tr0{opacity:0;transition:opacity .15s}.tr0:focus-within{opacity:1}</style>
+<button>S1 visible</button>
+<div class="sp"></div>
+<!-- S2: container opacity written from scrollY, 0 until scrollY>2000; the Tab scroll stays far below 2000 -->
+<div id="fin"><button>S2 scroll-linked opacity, 0 at this scroll</button></div>
+<script>addEventListener('scroll',()=>{document.getElementById('fin').style.opacity=Math.min(1,Math.max(0,(scrollY-2000)/200))})</script>
+<div class="sp"></div>
+<div id="fix"><button>S3 same container fixed with focus-within</button></div>
+<div class="sp"></div>
+<div class="tr"><button>S4 fades from 0.2 to 1 over 1 s on focus (settles to pass)</button></div>
+<div class="sp"></div>
+<div class="tr0"><button>S5 fades from 0 to 1 over 0.15 s on focus (settles to pass)</button></div>
+</html>

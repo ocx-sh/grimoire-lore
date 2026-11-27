@@ -129,6 +129,7 @@ Depth files and checks scripts ship in the `typescript-quality-reference` skill 
 | Adding a log line, a catch that does not rethrow, a `.sort()`, or a formatted date | [typescript-quality-reference/observability.md](../skills/typescript-quality-reference/observability.md) |
 | Rendering HTML, binding a URL, editing a CSP or a generated client, growing the bundle | [typescript-quality-reference/browser.md](../skills/typescript-quality-reference/browser.md) |
 | Writing code that runs inside an editor or Electron extension host — `activate()`, a webview, the host bundle, a host-API double | [typescript-quality-reference/extension-host.md](../skills/typescript-quality-reference/extension-host.md) |
+| Writing what an extension's user sees: a notification, a progress indicator, an input box, a modal or webview markup | `ux-quality` (sibling set: its `editor-extensions.md`) |
 | Editing `package.json`, any `tsconfig*.json`, or a lint config file itself | `typescript-packaging` (sibling set — see below) |
 
 ## Severity

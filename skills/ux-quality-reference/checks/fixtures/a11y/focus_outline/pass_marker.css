@@ -1,0 +1,2 @@
+/* focus-ok: the highlighted row draws the ring through aria-activedescendant */
+.list:focus-visible { outline: none; }

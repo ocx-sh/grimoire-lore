@@ -68,10 +68,12 @@ every query reads as a missing page.
 
 ## Analytics vendors
 
-Only needed when the repo wants page traffic. Confirm current pricing at the
-vendor's own page before citing a number. The Umami tier and the Plausible and
-Fathom event cells were confirmed at the vendor's own pages on 2026-11-27. The
-other prices were not re-checked there.
+Only needed when the repo wants page traffic. Satisfy MKT-MEAS-01 to 04 in
+the `marketing-measurement` skill first: an owner-approved decision record, and
+no client script before consent where the audience requires it. Confirm
+current pricing at the vendor's own page before citing a number. The Umami tier
+and the Plausible and Fathom event cells were confirmed at the vendor's own
+pages on 2026-11-27. The other prices were not re-checked there.
 
 | Vendor | Self-host | Hosted entry cost | Named custom events |
 |---|---|---|---|

@@ -1,0 +1,20 @@
+{
+  "name": "demo",
+  "contributes": {
+    "commands": [
+      { "command": "demo.search", "title": "Search" },
+      { "command": "demo.check", "title": "check for updates" },
+      { "command": "demo.collapse", "title": "Collapse All" }
+    ],
+    "configuration": {
+      "title": "Demo",
+      "properties": {
+        "demo.long": {
+          "type": "string",
+          "description": "Controls the first thing. It also controls a second thing. It then controls a third thing."
+        },
+        "demo.short": { "type": "string", "description": "Controls one thing." }
+      }
+    }
+  }
+}

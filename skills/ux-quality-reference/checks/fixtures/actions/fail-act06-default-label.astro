@@ -1,0 +1,5 @@
+---
+// Planted violation: UX-ACT-06. The component supplies a default confirm label.
+const { title, confirmLabel = 'Confirm' } = Astro.props;
+---
+<dialog><h2>{title}</h2><button>Cancel</button><button>{confirmLabel}</button></dialog>

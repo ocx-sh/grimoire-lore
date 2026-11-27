@@ -267,6 +267,35 @@ tasks:
         for s in skills/code-docs-reference/checks/*.py; do
           {{.PY}} "$s" --self-test || exit 1
         done
+      #
+      # The UX, marketing and channel sets are checked WITHOUT a root, for the
+      # CSS and docs reason. ux-quality globs one extension per markup or
+      # stylesheet language, and marketing-quality globs names a build tool
+      # requires and records the set itself defines. Measured 2026-11-27: the
+      # fleet has no .jsx, .vue, .svelte or .scss file and no positioning,
+      # claims or crawler-policy record yet, so liveness against any one root
+      # reports dead globs the rules correctly cover. `--forbid` keeps
+      # workstation paths, the research corpus and the fleet's own hosts and
+      # package names out of artifacts written for any team. A rule .md path
+      # covers its sibling `skills/<stem>-reference` skill.
+      - "{{.PY}} .claude/skills/research-lang/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' --forbid 'research-lang/exemplars' --forbid 'ocx.sh' --forbid 'grimoire.rs' --forbid 'grimoire-rs/' --forbid 'ocx-sh/ocx' --forbid 'ocx-sh/website' --forbid '@ocx-sh/' --forbid 'grim-gui' rules/ux-quality.md rules/marketing-quality.md skills/ux-cli skills/ux-agent-interfaces skills/ux-review skills/positioning-brief skills/release-notes skills/marketing-review skills/marketing-measurement skills/channel-publishing skills/github-presence skills/linkedin-post skills/youtube-video skills/microblog-post skills/terminal-demo skills/community-post skills/launch-plan"
+      #
+      # Every Python check in these sets carries fixtures and --self-test. The
+      # globs name `checks/*.py` one level down, never `checks/fixtures/`, which
+      # holds planted files (Cargo.toml, package.json, workflow YAML) that are
+      # fixtures and not project files. The .mjs checks need a browser or a
+      # platform's counter library and are not run here.
+      - |
+        for s in skills/ux-quality-reference/checks/*.py skills/ux-cli/checks/*.py skills/ux-agent-interfaces/checks/*.py skills/marketing-quality-reference/checks/*.py skills/marketing-measurement/checks/*.py skills/release-notes/checks/*.py skills/channel-publishing/checks/*.py skills/github-presence/checks/*.py skills/linkedin-post/checks/*.py skills/youtube-video/checks/*.py skills/microblog-post/checks/*.py skills/terminal-demo/checks/*.py skills/community-post/checks/*.py skills/launch-plan/checks/*.py; do
+          {{.PY}} "$s" --self-test || exit 1
+        done
+      #
+      # The structural half of the platform-facts check (row grammar, https
+      # URLs, date forms, intervals, compiling expect patterns). `--today` is
+      # pinned to a date before any row was written, so no row is ever overdue
+      # and a calendar date never turns this task red. The staleness half is the
+      # separate `facts:stale` task, outside `ci`.
+      - "{{.PY}} skills/channel-publishing/checks/facts_check.py --today 2000-01-01 skills/*/references/facts.md"
     vars:
       CONSUMER: '{{.CONSUMER | default "../ocx"}}'
       # The fleet root, not a single repo — see the comment above.
@@ -282,6 +311,16 @@ tasks:
       CSHARP_CONSUMER: '{{.CSHARP_CONSUMER | default ""}}'
       # A tree with shell and PowerShell files; absent paths fall back to no root.
       SHELL_CONSUMER: '{{.SHELL_CONSUMER | default "../www-setup"}}'
+
+  # Platform facts go stale on a date (CH-CORE-13). This fails when any row is
+  # past verified + refresh_days, which is the refresh cadence each platform
+  # skill states. Re-fetch the row; never move the date. It is in neither `ci`
+  # nor `verify`: a date passing must never turn the catalog's CI red for an
+  # unrelated change. Run it on a schedule or before a release.
+  facts:stale:
+    desc: Fail when a platform-facts row is past its refresh date (not part of ci)
+    cmds:
+      - "{{.PY}} skills/channel-publishing/checks/facts_check.py skills/*/references/facts.md"
 
   build:
     desc: Build every publishable artifact without pushing anything

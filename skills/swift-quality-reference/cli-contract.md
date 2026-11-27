@@ -17,7 +17,7 @@ terminal text is `SW-SEC-17`. The libc import chain is `SW-LANG-02`. Mapping net
 Delivering these greps as SwiftLint `custom_rules` is `SW-GATE`. The rules bind every `@main` executable. A server's executable
 target takes `SW-CLI-01` to `-03`, `-08`, `-15`, `-16` and `-20` to `-22`. A library or SDK never calls `exit`, `signal`,
 `fatalError` or `LoggingSystem.bootstrap`. Every table value, flag name, file name and the example binary `mytool` below is a
-**pinned default, the adopter may override it** once, in `Status.swift`, `GlobalOptions.swift` or the XDG helper.
+**pinned default, the adopter may override it** once, in `Status.swift`, `GlobalOptions.swift` or the XDG helper. Help layout, `--version`, typo suggestions, first-run messages, colour palette and animation choices, error wording and destructive-command confirmations belong to the `ux-cli` skill. Machine output for scripts and agents belongs to `ux-agent-interfaces`.
 
 Contents: [Dates and Floors](#dates-and-floors) · [Exit Status and Streams](#exit-status-and-streams) ·
 [Services, Logging and Configuration](#services-logging-and-configuration) · [The Compiler](#the-compiler) ·

@@ -1,0 +1,5 @@
+// pairs for UX-A11Y-15: foreground background label
+#767676 #ffffff gray-on-white
+#000 #fff black-on-white
+#0b4f9c #ffffff link-blue
+#00000099 #ffffff alpha-black-60

@@ -219,7 +219,7 @@ In ascending cost:
 | Hand-measured, dated time to first working result | one person, one run | DOC-OBS-07 |
 | Trigger matrix mapping source globs to the docs they invalidate | one file | DOC-OBS-03 |
 | Zero-result search beacon and its sink | free tier to about 20 a month | DOC-NAV-10 |
-| Privacy-preserving page analytics with custom events | free tier to about 45 a month | DOC-OBS-16 |
+| Privacy-preserving page analytics with custom events, only after MKT-MEAS-01 to 04 hold (`marketing-measurement`) | free tier to about 45 a month | DOC-OBS-16 |
 | Feedback widget | deferred until a real traffic denominator exists | DOC-OBS-16, DOC-OBS-17 |
 
 Sinks, vendor comparison, the cost bands and the deferral form are in

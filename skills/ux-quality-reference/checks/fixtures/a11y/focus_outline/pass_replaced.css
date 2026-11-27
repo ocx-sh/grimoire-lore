@@ -1,0 +1,13 @@
+/* the reset has a replacement in every accepted shape */
+.mouse:focus:not(:focus-visible) { outline: 0; }
+.ring:focus-visible { outline: none; }
+.ring:focus-visible::after { outline: 2px solid blue; }
+.ok { all: unset; }
+.ok:focus-visible { outline: 2px solid blue; }
+.field:has(.field__input:focus-visible) { outline: 2px solid blue; }
+.field__input:focus-visible { outline: none; }
+.group:focus-within { border-color: blue; }
+.group__control:focus-visible { outline: none; }
+.in::-webkit-datetime-edit-day-field:focus { outline: none; }
+a:focus { outline: 0; }
+a:focus-visible { outline: 2px solid blue; outline-offset: 2px; }

@@ -621,3 +621,106 @@ description = { readme = "docs/shell-diagnose.md", logo = "assets/lore-shell.svg
 [bundles.shell-essentials]
 version = "0.1.0"
 description = { readme = "docs/shell-essentials.md", logo = "assets/lore-shell.svg" }
+
+# The UX set: one index rule plus three skills. `ux-quality` loads on markup and
+# stylesheet extensions and routes to eleven depth files by task. `ux-cli` and
+# `ux-agent-interfaces` are skills because no rule glob reaches CLI or MCP
+# source, and `ux-review` is the on-demand trigger. `ux-quality-reference`
+# arrives through the rule's requirement and the three skills' requirement, so
+# the bundle does not list it.
+[rules.ux-quality]
+version = "0.1.0"
+description = { readme = "docs/ux-quality.md", logo = "assets/lore-ux.svg" }
+
+[skills.ux-quality-reference]
+version = "0.1.0"
+description = { readme = "docs/ux-quality-reference.md", logo = "assets/lore-ux.svg" }
+
+[skills.ux-cli]
+version = "0.1.0"
+description = { readme = "docs/ux-cli.md", logo = "assets/lore-ux.svg" }
+
+[skills.ux-agent-interfaces]
+version = "0.1.0"
+description = { readme = "docs/ux-agent-interfaces.md", logo = "assets/lore-ux.svg" }
+
+[skills.ux-review]
+version = "0.1.0"
+description = { readme = "docs/ux-review.md", logo = "assets/lore-ux.svg" }
+
+[bundles.ux-essentials]
+version = "0.1.0"
+description = { readme = "docs/ux-essentials.md", logo = "assets/lore-ux.svg" }
+
+# The marketing set: one index rule plus five skills. `marketing-quality` loads
+# on the files a pitch lives in (README, manifests, site config, release
+# templates) and routes to six depth files by task. `positioning-brief` writes
+# the one record every copy surface must match. `release-notes` owns the notes
+# template and the GitHub Release. `marketing-review` is the on-demand trigger.
+# `marketing-measurement` decides whether an analytics script may exist at all.
+[rules.marketing-quality]
+version = "0.1.0"
+description = { readme = "docs/marketing-quality.md", logo = "assets/lore-product.svg" }
+
+[skills.marketing-quality-reference]
+version = "0.1.0"
+description = { readme = "docs/marketing-quality-reference.md", logo = "assets/lore-product.svg" }
+
+[skills.positioning-brief]
+version = "0.1.0"
+description = { readme = "docs/positioning-brief.md", logo = "assets/lore-product.svg" }
+
+[skills.release-notes]
+version = "0.1.0"
+description = { readme = "docs/release-notes.md", logo = "assets/lore-product.svg" }
+
+[skills.marketing-review]
+version = "0.1.0"
+description = { readme = "docs/marketing-review.md", logo = "assets/lore-product.svg" }
+
+[skills.marketing-measurement]
+version = "0.1.0"
+description = { readme = "docs/marketing-measurement.md", logo = "assets/lore-product.svg" }
+
+# The channel set: eight skills and no rule, because no file glob reaches a
+# social post, a video upload or a launch day. `channel-publishing` holds the
+# boundary every platform skill shares (an agent drafts, a named human posts)
+# and the dated platform-facts registry format. The seven others each require
+# it, so none ships without the boundary. `product-essentials` bundles the
+# marketing rule, its five skills and these eight, because the channel skills
+# cite the marketing claims policy.
+[skills.channel-publishing]
+version = "0.1.0"
+description = { readme = "docs/channel-publishing.md", logo = "assets/lore-product.svg" }
+
+[skills.github-presence]
+version = "0.1.0"
+description = { readme = "docs/github-presence.md", logo = "assets/lore-product.svg" }
+
+[skills.linkedin-post]
+version = "0.1.0"
+description = { readme = "docs/linkedin-post.md", logo = "assets/lore-product.svg" }
+
+[skills.youtube-video]
+version = "0.1.0"
+description = { readme = "docs/youtube-video.md", logo = "assets/lore-product.svg" }
+
+[skills.microblog-post]
+version = "0.1.0"
+description = { readme = "docs/microblog-post.md", logo = "assets/lore-product.svg" }
+
+[skills.terminal-demo]
+version = "0.1.0"
+description = { readme = "docs/terminal-demo.md", logo = "assets/lore-product.svg" }
+
+[skills.community-post]
+version = "0.1.0"
+description = { readme = "docs/community-post.md", logo = "assets/lore-product.svg" }
+
+[skills.launch-plan]
+version = "0.1.0"
+description = { readme = "docs/launch-plan.md", logo = "assets/lore-product.svg" }
+
+[bundles.product-essentials]
+version = "0.1.0"
+description = { readme = "docs/product-essentials.md", logo = "assets/lore-product.svg" }
