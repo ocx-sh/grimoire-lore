@@ -1,0 +1,36 @@
+{
+  "created": "2026-11-27T17:08:13+01:00",
+  "description": "GitHub and package-registry presence for a software project, covering the repository About line, homepage, topics and social preview, the organisation profile README, community files (Discussions, issue-chooser routes, SUPPORT.md, code-of-conduct contacts), registry listings on crates.io, npm, PyPI, the VS Code Marketplace, Homebrew taps and GHCR image labels, the README images and links registries reuse, and how to report stars, downloads, clones and traffic without inflating them. Use when setting a repository description or topics, adding a social preview image, editing package keywords, description or repository fields, setting up Discussions or SUPPORT.md, submitting to homebrew-core, or quoting a GitHub or download number. Not for release notes or the GitHub Release object, which is release-notes, and not for posts on social or community venues, which are the channel skills.",
+  "keywords": [
+    "github",
+    "repository",
+    "about",
+    "topics",
+    "social-preview",
+    "organisation-profile",
+    "discussions",
+    "support",
+    "code-of-conduct",
+    "crates.io",
+    "npm",
+    "pypi",
+    "vscode-marketplace",
+    "homebrew",
+    "ghcr",
+    "readme",
+    "stars",
+    "downloads",
+    "traffic",
+    "metrics"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "github-presence",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/github-presence",
+  "schema": 1,
+  "summary": "Checked procedure for the GitHub repository card, organisation profile, community health files, registry listings and reportable numbers, with every platform limit in one dated facts file"
+}

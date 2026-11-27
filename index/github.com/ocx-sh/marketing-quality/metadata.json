@@ -1,0 +1,38 @@
+{
+  "created": "2026-11-27T17:08:13+01:00",
+  "description": "Marketing Quality",
+  "keywords": [
+    "marketing",
+    "positioning",
+    "messaging",
+    "tagline",
+    "value-proposition",
+    "claims",
+    "evidence",
+    "testimonials",
+    "open-source",
+    "licence",
+    "landing-page",
+    "hero",
+    "readme",
+    "seo",
+    "open-graph",
+    "canonical",
+    "robots-txt",
+    "ai-crawlers",
+    "structured-data",
+    "release-notes",
+    "analytics"
+  ],
+  "kind": "rule",
+  "license": "Apache-2.0",
+  "name": "marketing-quality",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/marketing-quality",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "The marketing-surface index, holding the positioning record every pitch surface must match, the claims that need an evidence record, the first screen, voice and AI authorship, head metadata and crawler policy, and where the depth lives"
+}

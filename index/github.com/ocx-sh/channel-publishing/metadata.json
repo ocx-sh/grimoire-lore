@@ -1,0 +1,37 @@
+{
+  "created": "2026-11-27T17:08:13+01:00",
+  "description": "The boundary every public channel shares: an agent drafts and a named human posts, which venues get only a fact sheet, why Stack Overflow gets nothing, owner-commissioned automation on X, Bluesky, Threads, Mastodon and Discord, platform label fields for AI use and sponsorship, disclosure before the fold, publishing-credential scans, the dated platform-facts registry, and the channels.yml inventory of the accounts a project may link. Use when drafting or reviewing any public post, upload, listing or announcement for a social, video or community platform, adding a social link or badge to a README or site, wiring a webhook or bot that posts, or editing channels.yml. Not for GitHub releases, About fields or package-registry listings, which are release-notes and github-presence. The platform skills require this skill.",
+  "keywords": [
+    "social",
+    "publishing",
+    "boundary",
+    "linkedin",
+    "youtube",
+    "x",
+    "bluesky",
+    "mastodon",
+    "threads",
+    "discord",
+    "reddit",
+    "hacker-news",
+    "product-hunt",
+    "labels",
+    "disclosure",
+    "c2pa",
+    "gitleaks",
+    "channels",
+    "inventory",
+    "facts-registry",
+    "fact-sheet"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "channel-publishing",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/channel-publishing",
+  "schema": 1,
+  "summary": "The agent-versus-human boundary, label fields, dated platform facts and channel inventory that every public-channel skill shares"
+}

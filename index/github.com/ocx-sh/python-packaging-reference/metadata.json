@@ -1,0 +1,21 @@
+{
+  "created": "2026-11-19T14:59:46+01:00",
+  "description": "Checks scripts behind the python-packaging rule, loaded on demand. Use when the python-packaging rule routes you to a checks script.",
+  "keywords": [
+    "python",
+    "pyproject",
+    "packaging",
+    "uv",
+    "reference"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "python-packaging-reference",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/python-packaging-reference",
+  "schema": 1,
+  "summary": "Checks scripts behind the python-packaging rule"
+}

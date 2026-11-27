@@ -1,0 +1,30 @@
+{
+  "created": "2026-11-27T17:08:13+01:00",
+  "description": "The single positioning record of a software product or service, written as one machine-readable file: audience and non-target, the category and object nouns, the one product sentence, the alternatives a buyer uses today, forbidden noun variants, do-not-say entries and the owner's review state. Use when someone asks for positioning, a value proposition, a tagline, a one-liner, an elevator pitch, messaging, a target audience or ideal customer, or a category or competitor framing, or when the marketing-quality rule finds no positioning record before an edit to a README, manifest description or site head. Not for writing page copy from an existing record, which the marketing-quality rule governs, and not for sequencing a launch, which is launch-plan.",
+  "keywords": [
+    "positioning",
+    "positioning-brief",
+    "value-proposition",
+    "tagline",
+    "one-liner",
+    "messaging",
+    "audience",
+    "category",
+    "alternatives",
+    "competitors",
+    "non-target",
+    "do-not-say",
+    "brief",
+    "marketing"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "positioning-brief",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/positioning-brief",
+  "schema": 1,
+  "summary": "Drafts the one positioning record of a product from the repository's own text, marks every unsourced field for the owner, and checks the draft with the positioning script"
+}

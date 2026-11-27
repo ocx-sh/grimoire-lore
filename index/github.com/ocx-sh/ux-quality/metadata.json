@@ -1,0 +1,39 @@
+{
+  "created": "2026-11-27T17:08:13+01:00",
+  "description": "UX Quality",
+  "keywords": [
+    "ux",
+    "accessibility",
+    "a11y",
+    "wcag",
+    "aria",
+    "focus",
+    "contrast",
+    "keyboard",
+    "screen-reader",
+    "forms",
+    "loading",
+    "empty-state",
+    "error-state",
+    "microcopy",
+    "alt-text",
+    "confirmation",
+    "dialog",
+    "reduced-motion",
+    "axe",
+    "playwright",
+    "ai-disclosure",
+    "vscode-webview"
+  ],
+  "kind": "rule",
+  "license": "Apache-2.0",
+  "name": "ux-quality",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/ux-quality",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "The interface quality index for web pages, docs sites, apps and editor webviews — the gate, the non-negotiables, and where the accessibility, state, text, action and AI-feature depth lives"
+}

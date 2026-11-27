@@ -1,0 +1,42 @@
+{
+  "created": "2026-11-27T17:08:13+01:00",
+  "description": "Everything a repository with an interface needs to write, gate and review it: the ux-quality rule (a gate, twenty non-negotiables and eleven depth files on accessibility, states, forms, text, consequential actions, AI features and verification claims), the ux-cli skill that checks a command-line tool by running it, the ux-agent-interfaces skill for JSON output, MCP servers and agent tool approval, and the ux-review skill that grades a page, a CLI or a branch by hand and reports what no tool decides.",
+  "keywords": [
+    "ux",
+    "accessibility",
+    "a11y",
+    "wcag",
+    "aria",
+    "focus",
+    "contrast",
+    "forms",
+    "loading-states",
+    "error-messages",
+    "microcopy",
+    "confirmation",
+    "ai-disclosure",
+    "axe",
+    "playwright",
+    "cli",
+    "help-text",
+    "first-run",
+    "no-color",
+    "dry-run",
+    "mcp",
+    "json-output",
+    "error-envelope",
+    "tool-approval",
+    "review"
+  ],
+  "kind": "bundle",
+  "license": "Apache-2.0",
+  "name": "ux-essentials",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/ux-essentials",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "The interface quality set: a rule for pages, apps and editor webviews, and skills for CLIs, machine-facing interfaces and on-demand UX review"
+}

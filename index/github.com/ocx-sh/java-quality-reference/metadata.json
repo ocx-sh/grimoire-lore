@@ -1,0 +1,24 @@
+{
+  "created": "2026-11-27T17:08:13+01:00",
+  "description": "Depth files behind the java-quality rule, loaded on demand. Use when the java-quality rule routes you to a depth file, or when a task cites a rule ID the index only summarises.",
+  "keywords": [
+    "java",
+    "jvm",
+    "quality",
+    "standards",
+    "nullness",
+    "error-prone",
+    "concurrency",
+    "reference"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "java-quality-reference",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/java-quality-reference",
+  "schema": 1,
+  "summary": "Depth files behind the java-quality rule"
+}

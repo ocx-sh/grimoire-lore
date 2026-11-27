@@ -1,0 +1,29 @@
+{
+  "created": "2026-11-27T17:08:13+01:00",
+  "description": "Hacker News, Lobsters, Reddit, Stack Overflow, dev.to, Hashnode and Discord or Matrix chat for a software project, as fact sheets and checklists for the human who posts, never paste-ready text where a venue bans generated content: venue contracts read on the day, account gates, Show HN eligibility and title checks, one submission per URL, no vote requests, Stack Overflow as support only, cross-posting, and chat as a secondary channel. Use when someone wants to post a Show HN, submit to Lobsters, share on a subreddit, answer on Stack Overflow, cross-post to dev.to or Hashnode, or announce in a Discord or Matrix server. Not for planning a multi-venue launch, which is launch-plan, and not for GitHub Discussions or SUPPORT.md, which is github-presence.",
+  "keywords": [
+    "hacker-news",
+    "show-hn",
+    "lobsters",
+    "reddit",
+    "stack-overflow",
+    "dev-to",
+    "hashnode",
+    "discord",
+    "matrix",
+    "community",
+    "self-promotion",
+    "fact-sheet",
+    "cross-post"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "community-post",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/community-post",
+  "schema": 1,
+  "summary": "Fact sheets and checks for developer-community posts, with venue contracts, account gates and chat rules kept in a dated registry"
+}

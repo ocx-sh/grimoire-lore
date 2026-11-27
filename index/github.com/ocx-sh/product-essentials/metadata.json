@@ -1,0 +1,40 @@
+{
+  "created": "2026-11-27T17:08:13+01:00",
+  "description": "Everything a repository with a public pitch needs to keep its words true: the marketing-quality rule (a gate, twenty-one non-negotiables and six depth files on positioning, claims, trust claims, the first screen, voice and discoverability), the positioning-brief, release-notes, marketing-review and marketing-measurement skills, and eight channel skills (channel-publishing, github-presence, linkedin-post, youtube-video, microblog-post, terminal-demo, community-post and launch-plan) that end every task at a draft for a named human to post.",
+  "keywords": [
+    "marketing",
+    "positioning",
+    "claims",
+    "evidence",
+    "readme",
+    "landing-page",
+    "seo",
+    "open-graph",
+    "release-notes",
+    "github-release",
+    "analytics",
+    "consent",
+    "utm",
+    "github",
+    "registry-listing",
+    "linkedin",
+    "youtube",
+    "x",
+    "bluesky",
+    "mastodon",
+    "terminal-demo",
+    "hacker-news",
+    "launch-plan"
+  ],
+  "kind": "bundle",
+  "license": "Apache-2.0",
+  "name": "product-essentials",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/product-essentials",
+  "repository": "https://github.com/ocx-sh/grimoire-lore",
+  "schema": 1,
+  "summary": "The product surface set: a marketing rule with a positioning record and claims evidence, procedures for release notes, measurement and review, and the public-channel skills"
+}

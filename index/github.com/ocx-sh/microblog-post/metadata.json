@@ -1,0 +1,33 @@
+{
+  "created": "2026-11-27T17:08:13+01:00",
+  "description": "Release and announcement posts for X, Bluesky, Mastodon and Threads - each platform's own length counter, URLs written in full, link cards and facets, alt text, one post versus a thread, duplicate text across accounts, Mastodon verification links and the fediverse creator tag, and dated platform facts. Use when someone asks for a tweet or X post, a Bluesky post, a toot or Mastodon post, a Threads post, a thread announcing a release, or a check of a post's length. Not for LinkedIn, which is linkedin-post, and not for bot or scheduled posting, which needs an owner-commissioned automation row in channel-publishing.",
+  "keywords": [
+    "x",
+    "twitter",
+    "tweet",
+    "bluesky",
+    "mastodon",
+    "toot",
+    "threads",
+    "microblog",
+    "release",
+    "announcement",
+    "thread",
+    "alt-text",
+    "link-card",
+    "facets",
+    "fediverse",
+    "rel-me",
+    "bridgy-fed"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "microblog-post",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/microblog-post",
+  "schema": 1,
+  "summary": "Drafts and checks release posts for X, Bluesky, Mastodon and Threads with per-platform counters, link cards, alt text and dated platform facts"
+}

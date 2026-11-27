@@ -1,0 +1,34 @@
+{
+  "created": "2026-11-27T17:08:13+01:00",
+  "description": "YouTube upload standards for a software product's channel, covering the upload manifest and its linter, title and description limits, the one destination link, hashtags, chapter timestamps, thumbnail format, private-first uploads, made-for-kids, language, altered-or-synthetic and paid-placement fields, automatic dubbing, the channel record, Shorts pilots, series numbering, audio licensing, end screens, and reporting views by their definitions. Use when preparing a YouTube upload or Short, writing a video title, description or chapters, setting up or auditing a channel, uploading through the YouTube Data API, or reporting YouTube numbers. Not for recording terminal footage, which is terminal-demo, and not for thumbnail or hook craft, which no check here can measure.",
+  "keywords": [
+    "youtube",
+    "video",
+    "upload",
+    "shorts",
+    "thumbnail",
+    "chapters",
+    "description",
+    "hashtags",
+    "made-for-kids",
+    "synthetic-media",
+    "paid-placement",
+    "dubbing",
+    "end-screen",
+    "audio-library",
+    "manifest",
+    "youtube-data-api",
+    "views",
+    "ctr"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "youtube-video",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/youtube-video",
+  "schema": 1,
+  "summary": "YouTube upload manifest and linter, metadata limits, private-first uploads, labels, Shorts pilot gate and view reporting, with a dated platform-facts registry"
+}

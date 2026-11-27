@@ -1,0 +1,38 @@
+{
+  "created": "2026-11-27T17:08:13+01:00",
+  "description": "Terminal demos and screencasts that are reproducible, legible and safe to publish: asciinema casts, VHS tapes, GIFs, SVG or PNG stills and platform video rendered from a committed scenario that runs the real product, column geometry for phones and docs columns, idle gaps, palette contrast, pause controls, captions and transcripts, flashing limits, secret and identity scrubbing, and text-normalised drift checks. Use when recording, re-recording, embedding or reviewing a terminal demo, a .cast or .tape file, a README GIF or CLI screenshot, or a video built from terminal footage. Not for the docs-page player and tooltip rules, which docs-quality owns, and not for uploading or posting a recording, which only a named human does.",
+  "keywords": [
+    "terminal",
+    "demo",
+    "screencast",
+    "asciinema",
+    "cast",
+    "vhs",
+    "tape",
+    "gif",
+    "agg",
+    "video",
+    "recording",
+    "screenshot",
+    "readme",
+    "accessibility",
+    "captions",
+    "transcript",
+    "wcag",
+    "gitleaks",
+    "scrub",
+    "contrast",
+    "legibility",
+    "reproducible"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "terminal-demo",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/terminal-demo",
+  "schema": 1,
+  "summary": "Procedure and gate for terminal demos, from a committed scenario to a scrubbed, legible, accessible recording and a gate report, with dated platform facts and two checks scripts"
+}

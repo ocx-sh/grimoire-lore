@@ -1,0 +1,24 @@
+{
+  "created": "2026-11-27T17:08:13+01:00",
+  "description": "Depth files behind the maven-build rule, loaded on demand. Use when the maven-build rule routes you to a depth file, or when a task cites a rule ID the index only summarises.",
+  "keywords": [
+    "maven",
+    "pom",
+    "mvn",
+    "mvnw",
+    "enforcer",
+    "surefire",
+    "central",
+    "reference"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "maven-build-reference",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/maven-build-reference",
+  "schema": 1,
+  "summary": "Depth files behind the maven-build rule"
+}

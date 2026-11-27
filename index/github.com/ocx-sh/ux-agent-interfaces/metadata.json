@@ -1,0 +1,32 @@
+{
+  "created": "2026-11-27T17:08:13+01:00",
+  "description": "Standards for interfaces whose caller is a program or an AI agent, covering --format json and --json machine output, schema_version, bounded list output, JSON Lines events, error envelopes with a class slug and a retry verdict, MCP server tool names, descriptions, input and output schemas, isError results and tool counts, and approval of agent tool calls by consequence tier, including annotation hints, write gating, approval prompts, injection-safe approval and the lethal-trifecta check. Use when building or reviewing an MCP server or tool, a CLI's JSON output mode, an SDK or editor extension that parses a CLI's JSON, an agent's permission or auto-approve configuration, or an agent call to a CLI that must capture its streams. Not for human-readable help and error text, which is ux-cli, and not for chat interfaces shown to people, which the ux-quality rule set covers.",
+  "keywords": [
+    "agent",
+    "mcp",
+    "json",
+    "machine-output",
+    "schema-version",
+    "error-envelope",
+    "retryable",
+    "tool-description",
+    "tool-annotations",
+    "readonlyhint",
+    "approval",
+    "permissions",
+    "auto-approve",
+    "lethal-trifecta",
+    "elicitation",
+    "jsonl"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "ux-agent-interfaces",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/ux-agent-interfaces",
+  "schema": 1,
+  "summary": "Machine-output, MCP server and agent tool-approval standards with two runnable checks, a JSON output probe and an MCP tools check, and every dated client limit in the depth files"
+}

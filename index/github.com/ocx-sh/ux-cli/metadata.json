@@ -1,0 +1,34 @@
+{
+  "created": "2026-11-27T17:08:13+01:00",
+  "description": "Interaction standards for command-line tools and terminal UIs - bare invocation and help layout, --version output, unknown-command suggestions, global flag position, shell completion offers, the installer's last line, first-run messages for a missing config, colour and animation per stream, TUI parity and linear mode, terminal error wording, and --dry-run, --force and typed confirmation on destructive commands. Use when writing or reviewing a CLI's help text, usage or error message, version flag, typo suggestion, progress spinner, NO_COLOR or CLICOLOR handling, install script output, or a command that deletes, overwrites or publishes. Not for exit-code tables, stdout and stderr routing or signal handling, which the language rule sets own, and not for JSON output read by scripts or agents, which is ux-agent-interfaces.",
+  "keywords": [
+    "cli",
+    "help",
+    "usage",
+    "version",
+    "typo",
+    "did-you-mean",
+    "completion",
+    "installer",
+    "first-run",
+    "no-color",
+    "spinner",
+    "tui",
+    "accessibility",
+    "error-message",
+    "dry-run",
+    "force",
+    "confirmation",
+    "idempotent"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "ux-cli",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/ux-cli",
+  "schema": 1,
+  "summary": "What a CLI owes a first-time human and an agent above the stream and exit-code contracts - help, version, typos, first run, colour and animation, error shape and destructive commands - with a binary check that runs the CLI itself"
+}

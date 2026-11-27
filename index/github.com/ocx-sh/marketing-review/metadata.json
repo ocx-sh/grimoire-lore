@@ -1,0 +1,34 @@
+{
+  "created": "2026-11-27T17:08:13+01:00",
+  "description": "On-demand review of marketing surfaces against the marketing-quality rule set: a README first screen, a pitch or home page, manifest and repository descriptions, claims and their evidence records, endorsements and popularity counts, open-source and licence wording, positioning drift, maturity lines, head metadata and AI-authorship markers. Use when someone asks to review, check or audit a landing page, a home page or hero, a README pitch, a tagline, product copy, a claim such as fast, secure or free, a testimonial, or a pull request that touches marketing copy. Not for accessibility or interface review, which is ux-review, and not for documentation pages, which is docs-review.",
+  "keywords": [
+    "marketing",
+    "review",
+    "audit",
+    "landing-page",
+    "hero",
+    "readme",
+    "tagline",
+    "claims",
+    "evidence",
+    "testimonial",
+    "positioning",
+    "drift",
+    "maturity",
+    "seo",
+    "open-graph",
+    "licence",
+    "copy",
+    "marketing-quality"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "marketing-review",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/marketing-review",
+  "schema": 1,
+  "summary": "Grades named marketing surfaces or a branch diff against the marketing-quality rules, runs the positioning, claims, head and voice checks in order, and reports findings with rule IDs and a separate owner list"
+}

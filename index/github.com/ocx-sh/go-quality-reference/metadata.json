@@ -1,0 +1,28 @@
+{
+  "created": "2026-11-27T17:08:13+01:00",
+  "description": "Depth files and checks scripts behind the go-quality rule, loaded on demand. Use when the go-quality rule routes you to a depth file or a checks script, or when a task cites a rule ID the index only summarises.",
+  "keywords": [
+    "go",
+    "golang",
+    "quality",
+    "errors",
+    "concurrency",
+    "testing",
+    "cli",
+    "iterators",
+    "generics",
+    "slog",
+    "net/http",
+    "reference"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "go-quality-reference",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/go-quality-reference",
+  "schema": 1,
+  "summary": "Depth files and checks scripts behind the go-quality rule"
+}

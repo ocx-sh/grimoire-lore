@@ -1,0 +1,21 @@
+{
+  "created": "2026-11-27T17:08:13+01:00",
+  "description": "Depth files behind the css-theming rule, loaded on demand. Use when the css-theming rule routes you to a depth file, or when a task cites a rule ID the index only summarises.",
+  "keywords": [
+    "css",
+    "theming",
+    "design-tokens",
+    "custom-properties",
+    "reference"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "css-theming-reference",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/css-theming-reference",
+  "schema": 1,
+  "summary": "Depth files behind the css-theming rule"
+}

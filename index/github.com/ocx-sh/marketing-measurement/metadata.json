@@ -1,0 +1,34 @@
+{
+  "created": "2026-11-27T17:08:13+01:00",
+  "description": "Rules for measuring a site, docs, README or campaign without breaking consent law or misreporting a number: whether an analytics script, pixel or beacon may be added at all, cookieless and consent-exemption claims, privacy-statement drift, UTM and campaign tagging, metric definitions, AI answer citations, and A/B test pre-registration. Use when someone proposes adding analytics (Plausible, Umami, GoatCounter, Fathom, PostHog, Google Analytics, Cloudflare Web Analytics), a tracking pixel, UTM parameters, a metrics dashboard or report, a growth number on a page, or an A/B test. Not for GitHub stars, clones or download counts, which is github-presence, and not for head tags or robots.txt, which the marketing-quality rule set covers.",
+  "keywords": [
+    "analytics",
+    "measurement",
+    "consent",
+    "cookieless",
+    "gdpr",
+    "eprivacy",
+    "cnil",
+    "plausible",
+    "matomo",
+    "posthog",
+    "utm",
+    "attribution",
+    "campaign",
+    "privacy-statement",
+    "metrics",
+    "a-b-test",
+    "ai-citations",
+    "hdyhau"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "marketing-measurement",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/marketing-measurement",
+  "schema": 1,
+  "summary": "Decision record before any analytics script, a closed UTM format, five fields beside every number, and a pre-registered gate for A/B tests and AI-citation reports"
+}

@@ -1,0 +1,37 @@
+{
+  "created": "2026-11-27T17:08:13+01:00",
+  "description": "On-demand UX and accessibility review of a web page, docs site, app view, editor webview or CLI against the ux-quality, ux-cli and ux-agent-interfaces rule sets, with every finding tagged by evidence class and a separate needs-human-review list. Use when someone asks to review, audit, test or check accessibility, a11y, WCAG, keyboard or screen-reader behaviour, contrast, focus, zoom and reflow, loading and error states, or a CLI's help and first run, or asks whether a page or a change is accessible. Not for fixing findings unless asked, and not for marketing copy or claims, which is marketing-review.",
+  "keywords": [
+    "ux",
+    "accessibility",
+    "a11y",
+    "wcag",
+    "review",
+    "audit",
+    "axe",
+    "playwright",
+    "keyboard",
+    "screen-reader",
+    "contrast",
+    "focus",
+    "reflow",
+    "zoom",
+    "loading",
+    "error-state",
+    "cli",
+    "help",
+    "first-run",
+    "ux-review",
+    "ux-quality"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "ux-review",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/ux-review",
+  "schema": 1,
+  "summary": "Runs the UX gate by hand over named pages, built routes, a CLI or a branch diff, tags each finding with an evidence class, and never writes a conformance verdict"
+}

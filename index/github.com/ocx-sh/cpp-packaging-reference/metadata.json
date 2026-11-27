@@ -1,0 +1,24 @@
+{
+  "created": "2026-11-27T17:08:13+01:00",
+  "description": "Depth files and checks scripts behind the cpp-packaging rule, loaded on demand. Use when the cpp-packaging rule routes you to a depth file or a checks script, or when a task cites a rule ID the index only summarises.",
+  "keywords": [
+    "cpp",
+    "c++",
+    "cmake",
+    "conan",
+    "vcpkg",
+    "conan.lock",
+    "lockfile",
+    "reference"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "cpp-packaging-reference",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/cpp-packaging-reference",
+  "schema": 1,
+  "summary": "Depth files and checks scripts behind the cpp-packaging rule"
+}

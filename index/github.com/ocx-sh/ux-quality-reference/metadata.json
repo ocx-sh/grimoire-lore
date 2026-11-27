@@ -1,0 +1,33 @@
+{
+  "created": "2026-11-27T17:08:13+01:00",
+  "description": "Depth files and checks scripts behind the ux-quality rule, loaded on demand. Use when the ux-quality rule routes you to a depth file or a checks script, or when a task cites a UX-A11Y, UX-STATE, UX-TEXT, UX-ACT, UX-AI or UX-VERIFY rule ID the index only summarises. Not for CLI help or terminal output, which is the ux-cli skill, and not for JSON output or MCP tools, which is the ux-agent-interfaces skill.",
+  "keywords": [
+    "ux",
+    "accessibility",
+    "a11y",
+    "wcag",
+    "aria",
+    "focus",
+    "contrast",
+    "forms",
+    "loading",
+    "empty-state",
+    "error-state",
+    "microcopy",
+    "confirmation",
+    "ai-disclosure",
+    "axe",
+    "playwright",
+    "reference"
+  ],
+  "kind": "skill",
+  "license": "Apache-2.0",
+  "name": "ux-quality-reference",
+  "owner": {
+    "github": "ocx-sh",
+    "id": 263156444
+  },
+  "ref": "ghcr.io/ocx-sh/lore/ux-quality-reference",
+  "schema": 1,
+  "summary": "Depth files and checks scripts behind the ux-quality rule"
+}
