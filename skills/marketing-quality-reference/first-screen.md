@@ -17,9 +17,12 @@ Set `CHECKS=.claude/skills/marketing-quality-reference/checks`
 globally). Run from the repository root. `PAGE` is a built page (`dist/index.html`).
 
 Contents: [Dates and Versions](#dates-and-versions) · [Scope and the doc_surface Declaration](#scope-and-the-doc_surface-declaration) ·
-[First Screen Defined](#first-screen-defined) · [Rules](#rules) · [Check Blocks](#check-blocks) ·
+[First Screen Defined](#first-screen-defined) · [Scope and Declaration Rules](#scope-and-declaration-rules) ·
+[Hero Content Rules](#hero-content-rules) · [Maturity and Status Rules](#maturity-and-status-rules) ·
+[Docs Home Rule](#docs-home-rule) · [Offer Page Rules](#offer-page-rules) · [Check Blocks](#check-blocks) ·
 [Maturity Vocabulary](#maturity-vocabulary) · [Precedence Over docs-quality](#precedence-over-docs-quality) ·
-[Where the README Sits](#where-the-readme-sits) · [Ask the Owner](#ask-the-owner) · [Not Studied](#not-studied)
+[Where the README Sits](#where-the-readme-sits) · [Ask the Owner](#ask-the-owner) · [Not Studied](#not-studied) ·
+[What Agents Get Wrong Here](#what-agents-get-wrong-here)
 
 ## Dates and Versions
 
@@ -64,6 +67,12 @@ matter; MDX `{/* doc_surface: pitch */}` in the same place; any built page
 `head:` field with a `meta` tag named `doc-surface`; `.astro` built meta only (a
 `//` comment in the frontmatter fence is dropped by the build).
 
+**Why a declaration, and why built HTML.**
+
+- A README counts as a pitch whether or not a site exists. A stranger reaches the repository page from search, from a registry and from links without passing the site, and GitHub shows the README under the repository name with no other page in front of it. One strong exemplar redirects its pitch URL to the repository.
+- The declaration is the scope. The implicit test (the built `/` route renders a hero `<h1>`) is only the audit that finds an undeclared pitch, never the scope itself, because `DOC-TYPE-02` forbids reading a page's role from its path.
+- First-screen checks read the built HTML, not the source. A pitch keeps its words in a component: a source scan returned 0 findings on the one real pitch and 6 false findings on 5 hubs and docs homes. The declaration follows the same logic: a `//` comment in an `.astro` frontmatter fence never reaches the build, so a component-rendered pitch declares itself with the built meta.
+
 docs-quality does not read `doc_surface` yet: this file defines the key and the
 source value is checked by reading.
 
@@ -76,24 +85,51 @@ Every rule reads the same two extractions, both in `positioning_check.py`, from 
 | `pitch` or `offer` page | The hero segment of the **built** HTML: it starts at the first `<section>` whose class contains `hero`, or at `<main>`, and runs from the first `<h1>` after that point to the next `<h2>`. "Subhead" is the first `<p>` of 4 or more words after that `<h1>`. A Starlight page puts a site-title `<h1>` inside `<main>`, hence the hero section first. `python3 -I "$CHECKS"/positioning_check.py hero "$PAGE"` prints the H1, the subhead and the hero text, one per line. A page with no `<h1>` exits 1: a failed first screen |
 | Repository-root README | The first 15 non-blank source lines after removing HTML wrapper lines (`<div>`, `<p align>`, `<img>`, `<picture>`, `<source>`, `<br>`) and badge lines (`[![`), stopping at the first `## ` heading. A proxy, not a rendered measurement. `python3 -I "$CHECKS"/positioning_check.py readme-window README.md` prints `path:line:text` |
 
-## Rules
+## Scope and Declaration Rules
 
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
 | MKT-PAGE-01 | Apply marketing first-screen rules only to a page declared `doc_surface: pitch`, to a page declared `doc_surface: offer`, and to the first screen of the repository-root README of a repository that publishes a release or a package. Never scope such a rule to `doc_type: landing`. On an `offer` page MKT-PAGE-03 and MKT-PAGE-06 to 10 do not apply: MKT-PAGE-12 and 13 take their place. | 1 of 12 measured `landing`-tagged pages is a pitch, because the tag fires on hubs. | `git grep -n -F -e 'doc_type: landing' -- "$RULE"` prints nothing for a marketing rule file `RULE`. A rule for offer pages names the value: `git grep -c -E -e 'doc_surface: *offer' -- "$RULE"` prints at least 1. README scope: block MKT-PAGE-01. Skip count: `python3 -I "$CHECKS"/positioning_check.py surface dist` prints `pitch=N home=M offer=K skipped_no_doc_surface=S`. | MUST |
 | MKT-PAGE-02 | Declare the page that renders a product site's `/` route with a hero as a pitch, with `<meta name="doc-surface" content="pitch">` in its built `<head>`, whatever its source. When its source is Markdown or MDX, also put `doc_surface: pitch` as a source comment in the first 12 lines after any front matter. Never put the declaration in an `.astro` frontmatter fence. Declare `home` on the docs entry page of every product the same way. Give a section hub no declaration. | Agents and checks cannot tell a pitch from a hub without a declaration. Astro drops JavaScript comments from the build; a meta added through `head` rendered in a real build. | After the build, `python3 -I "$CHECKS"/positioning_check.py surface dist --need index.html` exits 0. It fails a `/` page that has an `<h1>` and no meta, a doubled meta, and a value outside `pitch`, `home`, `offer`. It does not decide which value is right: MKT-PAGE-11 and the owner do. Grep arm: block MKT-PAGE-02. Source-side value validation is `unverified: reading heuristic` until docs-quality reads the key. | MUST |
+| MKT-PAGE-14 | Make the built `<meta name="doc-surface">` and the source comment of the same route name the same value. Never edit one without the other. | Two declarations of one fact drift: a measured page's source said `pitch` and its built meta said `home`. Markdown and MDX only: an `.astro` page has no source declaration. | `python3 -I "$CHECKS"/positioning_check.py surface-pair "$BUILT" "$SOURCE"` exits 0 when the values are equal or the source has none, and 1 on a mismatch. | SHOULD |
+
+## Hero Content Rules
+
+- **The noun is a literal match.** A synonym fails, because a generic category lexicon passes a slogan hero on the word "tools". With no record the check stops with exit 2 rather than guess. MKT-POS-08 lets the `<title>` carry the noun when the h1 is a slogan. MKT-PAGE-03 is stricter on the hero and accepts only the H1 or the subhead, so a hero that passes MKT-PAGE-03 also passes MKT-POS-08. A test that asks for the noun on "at least 3 of 4 surfaces" was rejected, because it lets the hero be the surface that drops the noun.
+
+| ID | Rule | Rationale | Verification | Severity |
+|---|---|---|---|---|
 | MKT-PAGE-03 | Put the product's recorded category noun (`category` in `.agents/positioning.toml`, MKT-POS-02) in the hero H1 or in the subhead. A slogan H1 is allowed only when the subhead carries the noun. A synonym does not count: change the hero, or ask the owner to change the record. When no record exists, stop and ask (MKT-POS-03): do not pick a noun. | A reader who cannot name the kind of thing cannot decide to try it. 22 of 25 exemplar heroes name a category (LLM-rated). The literal match is deliberate: MKT-POS-09's `forbidden` list stops variant nouns. On a `home` page the requirement is SHOULD: 4 of 6 exemplar docs homes repeat the noun. | `python3 -I "$CHECKS"/positioning_check.py hero-noun "$PAGE"` exits 0. Exit 2 means no record: a stop, never a pass. No lexicon fallback: a generic lexicon passes a slogan hero on the word "tools". Pass "The web framework for content-driven websites". Fail "Same tools. Every machine." with a subhead that holds no category noun. | MUST |
 | MKT-PAGE-04 | Build the hero H1 and subhead, and the README description paragraph, as category or job plus one differentiator: a clause that the reader's current alternative could not print unchanged. Do not write an outcome that no software delivers alone ("drive revenue"), one that draws "but what does that mean?" ("automate systems"), or a list of three or more audiences or outcomes. | Only the Fletch constructions are sourced. Only 6 of 18 measured READMEs state a differentiator. Tests 1 and 2 are judgement: advice, not a gate. | `unverified: reading heuristic`, three tests. (1) Name removal: delete the product name and version, and the remainder still names a category or a job. (2) Competitor swap: could a team using the first `alternatives` entry (MKT-POS-06) print the sentence unchanged? With the alternative "a curl-and-chmod script per tool": fail "Same tools. Every machine."; pass "Pins each tool to a digest in a lockfile". (3) Count: at most two items in any list of audiences or outcomes. | CONSIDER |
 | MKT-PAGE-05 | Put no "AI", "AI-powered", "AI-driven", "AI-native" or "agentic" in the hero H1, the subhead or the README tagline, unless the word sits inside the recorded `category` or `object`, or the record has `status = "reviewed"` and `trend_words.hero` is not `"banned"`. Treat "agent" or "agents" the same way only when the copy presents the product itself as the agent. An agent the product serves or installs into is not AI framing. | Agents add AI framing by default. It backfires when the AI is weak, not tied to a job or not backed by reputation. | Block MKT-PAGE-05. Each mechanical hit must be a substring of `category` or `object`, or the `trend_words` exception must hold. With no record, report the hit to the owner (MKT-POS-03). The "agent" arm is `unverified: reading heuristic`. Pass an object noun like "AI-agent config". Fail "The agentic package manager". | SHOULD |
+
+## Maturity and Status Rules
+
+- **SHOULD, not MUST.** Upstream practice is silence: 0 of 25 landing pages and 1 of 39 READMEs with a release tag state a status. SemVer section 4 describes the API, not the page, and repostatus.org only suggests a badge. The line is still recommended, because the readers of this copy include coding agents that run README commands with no human present. That reason is argued, not measured, and no conversion data exists for it or against it. A SHOULD warns, and the warning needs a recorded reason to pass.
+
+| ID | Rule | Rationale | Verification | Severity |
+|---|---|---|---|---|
 | MKT-PAGE-06 | When the manifest version or the latest release tag has major 0, or the product is labelled concept, skeleton, alpha, beta, preview, experimental, unmaintained or moved, state that stage in one plain-text sentence inside the first screen. The sentence makes the product its subject ("mytool is in early development") or opens its line with a stage label followed by `:` or `.` ("Status: skeleton.", "Pre-1.0:"). A stage word that qualifies a feature ("hooks are experimental") does not count. In a README put the line before any install block. In a hero put it in the hero segment. A footer note, a `## Status` section further down or an image-only badge does not count. | SemVer section 4: anything MAY change below 1.0. An agent that reads only text cannot see a badge image. SHOULD: no primary source requires a status line, and upstream practice is silence (0 of 25 landing pages, 1 of 39 READMEs with a release tag). Coding agents run README commands with no human present. | Block MKT-PAGE-06: read the version, then the README window and line 3 of the hero must each print at least 1. A label-arm hit counts only when the physical line before it is blank, a heading or the file start. | SHOULD |
 | MKT-PAGE-07 | Write the maturity sentence with the stage word first and then what may change, with no adjectives: "Pre-1.0: the CLI works, and commands or the config format may change between minor releases." Take the stage word from the vocabulary table. When the record has a `maturity` field (MKT-POS-02), use its word. | A reader needs the stage and the consequence. "We are just getting started" gives neither. | `unverified: reading heuristic`. The sentence contains one vocabulary word and names one thing that may change (command, flag, format, API, config). Fail "Exciting early days!". | SHOULD |
 | MKT-PAGE-08 | Back every maturity line with a `[[claim]]` row of class `maturity` in the repository-root `claims.toml`, using the MKT-CLAIM-04 schema (`definition`, `subject_version`, `caveat`, `approved_by`). Set `subject_version` to the current manifest version and `refresh_by` to the next release. | A status line written once turns false when the product ships 1.0 or stops. SHOULD until the MKT-CLAIM-01 lint is in force, MUST once it is. | `git grep -n -E -e 'class *= *"maturity"' -- claims.toml` prints a row, and the version comparison in block MKT-PAGE-08 exits 0. When the MKT-CLAIM-01 lint is in force, its check D replaces the comparison. | SHOULD (MUST once the MKT-CLAIM-01 lint ships) |
 | MKT-PAGE-09 | Never write "stable", "production-ready", "battle-tested", "enterprise-grade" or "mature" as a claim on a first screen while the version major is 0, or while the `maturity` value is concept, skeleton, alpha, beta or pre-1.0. This holds even when a claims record exists. A negated form ("not stable yet", "isn't production-ready") is a maturity statement and is allowed. A word that names a release channel ("the stable channel", "latest-stable") is not a grade claim. | SemVer section 4 says the public API "SHOULD NOT be considered stable" below 1.0. The ban is this ruleset's policy built on that clause. At 1.0 and above the words need a record and a named human sign-off (MKT-CLAIM-02, MKT-CLAIM-16). | Block MKT-PAGE-09. A grade-pattern line fails when the version starts with `0.`, unless it matches the negation pattern (exempt) or the channel pattern (a reader decides). Self-test: "not yet stable" is exempt, "A stable package manager" fails. | MUST |
 | MKT-PAGE-10 | (MUST) When the repository is archived, make the first content line of the README say so. (SHOULD) Do the same when the record's `maturity` is unmaintained or moved, or when the owner says work has stopped, and also make the same statement the first line of the hero segment. | One upstream README (1 of 39) opens on "no longer actively maintained". Only the `archived` flag is machine-readable, so "the maintainer has stopped" is SHOULD. | Block MKT-PAGE-10. MUST half: when `archived` prints `true`, the first README window line matches the pattern. SHOULD half: a reading check of line 3 of the hero against the same pattern. | MUST (archived README line); SHOULD (rest) |
+
+## Docs Home Rule
+
+| ID | Rule | Rationale | Verification | Severity |
+|---|---|---|---|---|
 | MKT-PAGE-11 | Write no hero on a `doc_surface: home` page or on a hub: no tagline stack, no differentiator band, no proof section. In a product with no pitch page, the README is the pitch and the docs home stays `home`. Promote a docs home to a pitch only on the owner's decision. | Agents read "home page" as "marketing page". 8 of 10 measured docs sites have no pitch page, and their docs homes open on a plain description and a command, which works. | Block MKT-PAGE-11: no hero markup in the home source, and no `class="...hero..."` in any built page that declares `home`. The tagline stack is DOC-TYPE-10's second-lead-in test, read by hand. | SHOULD |
+
+## Offer Page Rules
+
+- **The market norm is the failure.** Of 21 measured software-service pages, 14 to 16 heroes name the service type, 1 names the buyer, 2 give an engagement signal, 0 print a price and 0 say what happens after the click. An agent that copies the norm leaves three of the four questions open, so the rule is normative, not descriptive.
+- **Why SHOULD.** Business customers rank price as their top information need (2013 usability report), and analyst opinion says complex offers may keep prices private, which is why an engagement model with a time box and "price on request" are accepted. No conversion data exists for service pages, and prices behind JavaScript are invisible to the server-HTML count. A productized fixed-price exemplar set is the trigger to reconsider MUST.
+
+| ID | Rule | Rationale | Verification | Severity |
+|---|---|---|---|---|
 | MKT-PAGE-12 | On the first screen of a `doc_surface: offer` page, state in text, in this order: (1) the service delivered, as a noun phrase naming what the client receives; (2) the buyer, as a noun for who hires the service; (3) a price or engagement signal: a price range, the price of typical engagements, a package list, or an engagement model with a time box; (4) one next step, as a verb phrase that says what happens after the click (a response time, a call length, a free first step or the first deliverable). When the owner has not approved a price figure, state the engagement model and time box and write "price on request". Never choose a price figure: that is an ask-first item. | 0 of 21 measured service heroes print a price, 1 names the buyer and 0 say what the next step is. SHOULD: the basis is a 2013 usability report, a 2020 vendor survey and opinion, and no conversion data on service pages exists. | Block MKT-PAGE-12: four filters over line 3 of the hero, each must print at least 1, and a reviewer reads every match. Element 3 pass: "Small expert teams shipping production software in weeks". Fail: a hero that ends on "Let's talk" with no time box, price or response time. | SHOULD |
 | MKT-PAGE-13 | On an `offer` page, put a proof point about the deliverer in the hero only when a `[[claim]]` row in `claims.toml` backs it (MKT-CLAIM-04: the number, its date and its source). Never write "decades of experience", "world-class", "best-in-class", "deepest bench", "leading" or "trusted by the best" without a number backed that way. | 5 of 21 measured service heroes carry an unquantified boast. No evidence shows that proof moves a buyer's decision: CONSIDER. Grade words on product pages stay with MKT-CLAIM-02 and 16. | Block MKT-PAGE-13 prints nothing unless a matching `[[claim]]` row exists. Pass "Trusted by 400+ companies worldwide ... since 2010" with a claims row. Fail "the deepest bench of expertise". | CONSIDER |
-| MKT-PAGE-14 | Make the built `<meta name="doc-surface">` and the source comment of the same route name the same value. Never edit one without the other. | Two declarations of one fact drift: a measured page's source said `pitch` and its built meta said `home`. Markdown and MDX only: an `.astro` page has no source declaration. | `python3 -I "$CHECKS"/positioning_check.py surface-pair "$BUILT" "$SOURCE"` exits 0 when the values are equal or the source has none, and 1 on a mismatch. | SHOULD |
 
 ## Check Blocks
 
@@ -108,6 +144,7 @@ gh release list -R "$SLUG" --limit 1; npm view "$PKG" version; cargo search "$CR
 # MKT-PAGE-02: a built / with an h1 and no declaration fails (first count 1 or more and second 0)
 grep -c -e '<h1' dist/index.html
 grep -c -E -e '<meta[^>]*name="doc-surface"[^>]*content="(pitch|home)"' dist/index.html
+# MKT-PAGE-05: pass an object noun like "AI-agent config", fail "The agentic package manager".
 # MKT-PAGE-05: AI framing in the hero (lines 1, 2) and the README tagline; each hit must sit inside category or object
 AI='(^|[^[:alnum:]_])AI([^[:alnum:]_]|$)'
 python3 -I "$CHECKS"/positioning_check.py hero "$PAGE" | head -2 | grep -n -i -E -e "$AI" -e 'AI-(powered|driven|native)' -e 'agentic'
@@ -125,6 +162,7 @@ python3 -I "$CHECKS"/positioning_check.py readme-window README.md > window.txt
 python3 -I "$CHECKS"/positioning_check.py hero "$PAGE" | sed -n 3p | grep -i -c -E -e "$SENT"
 # MKT-PAGE-08: a maturity record for the current version exists (exit 0 is the pass)
 python3 -I -c "import tomllib,sys;r=[c for c in tomllib.load(open('claims.toml','rb')).get('claim',[]) if c.get('class')=='maturity'];sys.exit(0 if any(c.get('subject_version')==sys.argv[1] for c in r) else 1)" "$V"
+# MKT-PAGE-09 self-test: "not yet stable" is exempt, "A stable package manager" fails, "the newest of stable and prerelease" goes to the reading line.
 # MKT-PAGE-09: grade words while the version starts with 0. First pipeline: failures. Second: lines for a reader to judge.
 G='(^|[^-[:alnum:]_])(stable|production-ready|battle-tested|enterprise-grade|mature)([^-[:alnum:]_]|$)'
 N='(^|[^[:alnum:]_])(not|isn.t|aren.t|never|no longer)[^[:alnum:]_]+(yet[^[:alnum:]_]+)?([[:alnum:]_]+[^[:alnum:]_]+){0,2}(stable|production-ready|battle-tested|enterprise-grade|mature)([^[:alnum:]_]|$)'
@@ -144,7 +182,7 @@ grep -i -c -E -e '(^|[^[:alnum:]_])(consult[[:alnum:]_]*|implementation|migratio
 grep -i -c -E -e '(^|[^[:alnum:]_])(enterprises?|founders?|startups?|scale-ups?|platform teams?|CTOs?|engineering leaders?)([^[:alnum:]_]|$)' offer-hero.txt
 grep -i -c -E -e '[$€£][0-9]+([.,][0-9]+)?[kK]?( |$|/)' -e '(^|[^[:alnum:]_])from [$€£]' -e '(^|[^[:alnum:]_])packages?([^[:alnum:]_]|$)' -e 'fixed[- ](price|fee|scope)' -e 'per (hour|day|week|month)' -e 'in ([0-9]+ )?(days|weeks|months)' -e 'price on request' offer-hero.txt
 grep -i -c -E -e 'within [0-9]+' -e '[0-9]+[- ]minute' -e '(^|[^[:alnum:]_])free([^[:alnum:]_]|$)' -e 'we (reply|respond)' -e 'first (call|workshop|assessment|deliverable)' offer-hero.txt
-# MKT-PAGE-13: prints nothing unless a matching [[claim]] row exists
+# MKT-PAGE-13: prints nothing unless a matching [[claim]] row exists.
 grep -i -o -E -e '(^|[^[:alnum:]_])(world-class|best-in-class|deepest|leading|trusted by the best|decades)([^[:alnum:]_]|$)' offer-hero.txt
 ```
 
@@ -168,23 +206,26 @@ For MKT-PAGE-07. Every word maps to a source or is named as a house word.
 
 ## Precedence Over docs-quality
 
-docs-quality keeps gating every `doc_type: landing` page with `DOC-TYPE-10` to
-`DOC-TYPE-15`. No MKT-PAGE rule suspends a DOC-TYPE finding: MKT-PAGE-01 only bars
-**marketing** rules from those pages, and MKT-PAGE adds requirements only on the
-pitch surfaces. docs-quality does not read `doc_surface` yet, and its landing
-check reads source, so it misses a component-rendered pitch: MKT-PAGE-02's
-source-side validation and MKT-PAGE-11's tagline-stack test stay reading checks.
+- **docs-quality keeps gating every `doc_type: landing` page** with `DOC-TYPE-10` to `DOC-TYPE-15`. No MKT-PAGE rule suspends a DOC-TYPE finding. MKT-PAGE-01 only bars **marketing** rules from those pages.
+- **Where both sets apply to one page, docs-quality governs the page.** MKT-PAGE adds requirements only on the pitch surfaces and on `offer` pages.
+- **Two families never share the first sentence.** docs-quality keeps length, calls to action, placeholders and adoption links. `MKT-POS` keeps sentence identity. MKT-PAGE keeps what the hero and the README opening must contain: the noun, the differentiator, the maturity status and the grade-word contradiction.
+- **docs-quality does not read `doc_surface` yet, and its landing check reads source.** It misses a component-rendered pitch, so MKT-PAGE-02's source-side validation and MKT-PAGE-11's tagline-stack test (`DOC-TYPE-10`'s second lead-in) stay reading checks.
+
+Who owns what on a README, first to last. The built `<h1>` count belongs to `ux-quality`, and About text, social card and registry listing pages to the channel skills.
+
+| README element | Owner |
+|---|---|
+| Section structure | `DOC-TYPE-32` to `DOC-TYPE-36` |
+| Tagline equal to the recorded sentence, audience in the first 10 lines, the alternative named bare | `MKT-POS-08`, `MKT-POS-17` |
+| Category noun, differentiator and AI framing in the opening | MKT-PAGE-03 to 05 |
+| Status line, grade-word ban, archived notice | MKT-PAGE-06 to 10 |
+| A grade word at 1.0 or above, or any claim | `MKT-CLAIM-02` and `16`, with a named human sign-off |
 
 ## Where the README Sits
 
-Headless Chromium, one run per case, 2026-11-27, indicative: on GitHub 0 README
-lines sit above the fold on 4 of 4 repositories (it starts 993 to 2182 px down at
-1440x900), and the About description is what shows, which MKT-POS-08 governs. No
-platform documents a fold, so the 15-line window stays a source-line proxy.
-"Repository-root README" is the file GitHub shows only when no `.github/README.md`
-exists (display order `.github`, root, `docs`; 500 KiB truncation, GitHub Docs,
-undated). crates.io (one crate) shows the README opening above the fold; npmjs.com
-was unmeasured (HTTP 403).
+Headless Chromium, one unauthenticated run per case, 2026-11-27, indicative (no fonts installed). On GitHub 0 README lines sit above the fold on 4 of 4 repositories at 1440x900 and at 390x844. The README starts 993 to 2182 px down on desktop and 1266 to 1348 px on mobile, below the repository name, About text, topics and file list, so the sign of the result is robust. At 1920x1080 one repository showed 2 README lines and another 0. What shows above the fold is the About description, which MKT-POS-08 governs. No platform documents a fold, so the 15-line window stays a source-line proxy.
+
+"Repository-root README" is the file GitHub shows only when no `.github/README.md` exists (display order `.github`, root, `docs`; 500 KiB truncation; [GitHub Docs](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes), no page date, source last committed 2026-09-03). On crates.io (one crate measured) the manifest `description` sits in the header card and the README opening is above the fold: about 16 lines at 1440x900 and 13 at 390x844. npmjs.com answered HTTP 403 with a challenge page, so its fold is unmeasured. npm and crates.io update the rendered README only on publish ([npm Docs](https://docs.npmjs.com/about-package-readme-files), last edited 2025-11-04; [Cargo manifest reference](https://doc.rust-lang.org/cargo/reference/manifest.html), no page date). A rule that a published registry README must carry the same noun and maturity line was not adopted, because it rests on one crate and no npm page.
 
 ## Ask the Owner
 
@@ -199,4 +240,21 @@ was unmeasured (HTTP 403).
 
 - Whether a human rater agrees with the two model raters (the basis of MKT-PAGE-03). No differentiator check is mechanical, so MKT-PAGE-04 is CONSIDER.
 - No conversion data exists for service pages, prices behind JavaScript are invisible to the server-HTML count, and the status label arm's false-fire rate is untested (English-only convenience sample).
+- Whether a registry README (crates.io, npm) shows the opening above the fold beyond the one crate measured, and what npmjs.com shows (a browser session that passes its challenge page is needed, which an unattended agent must not create).
 - Dropped for want of a source: an H1 word band, a banned vague-verb list, an audience-in-hero rule (DOC-TYPE-36 holds it at CONSIDER) and a superlatives grep on hubs (DOC-PLAIN-12).
+
+## What Agents Get Wrong Here
+
+Measured failures first, then expected ones.
+
+| What the agent does | Caught by | Basis |
+|---|---|---|
+| Treats `doc_type: landing`, or the words "home page", as "write marketing copy here" | MKT-PAGE-01, 11 | Measured: 11 of 12 `landing`-tagged pages are not pitches |
+| Hands over a component-rendered pitch with no declaration, or puts it in a `//` comment of an `.astro` frontmatter fence, so no check reads it | MKT-PAGE-02 (built-meta check) | Measured |
+| Moves the status to a footer, a `## Status` section or an image-only badge, or leaves it out because 0 of 25 exemplar heroes state it | MKT-PAGE-06 | Measured: 7 of 10 in-scope pre-1.0 READMEs |
+| Reads a feature-level "experimental" as the product status | MKT-PAGE-06 (product-attached pattern) | Measured: an earlier pattern counted it as a pass |
+| Writes a new tagline per surface so the hero drops the noun, a slogan H1 with a subhead that names no category, or a synonym of the recorded noun | MKT-PAGE-03 here, `MKT-POS` for the other surfaces | Measured: 11 distinct one-liners for one product |
+| Checks the `.mdx` or `.astro` source and misses words a component renders | MKT-PAGE-03 and 06 (built-HTML clauses) | Measured |
+| Writes "stable" or "production-ready" for a 0.x tool because the code works, or prepends "AI-powered" or "agentic" to the H1 | MKT-PAGE-09, 05 | Expected |
+| Reads the wrong text as the hero or the label: the site-title `<h1>` of a Starlight page, or a wrapped line that starts with "unstable." | The hero-section-first rule and the wrap guard in MKT-PAGE-06 | Measured |
+| Writes a service hero with a slogan and a "Let's talk" button, invents a price figure, or boasts "world-class" with no number | MKT-PAGE-12 (price is ask-first, "price on request" is accepted), MKT-PAGE-13 | Expected |
