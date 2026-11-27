@@ -12,9 +12,10 @@ grim add ghcr.io/ocx-sh/lore/go-modules
 Loads on the 13 globs in the frontmatter: `go.mod`, `go.sum`, `go.work`,
 `go.work.sum`, every golangci-lint config name, every goreleaser config name,
 `.ko.yaml` and `staticcheck.conf`. A `*.go` file, a Makefile or an ordinary
-workflow never loads it, and `go-quality` routes those. Binds to Go 1.27.1,
-golangci-lint v2.14.0, staticcheck 2026.2.1, govulncheck v1.8.0 and goreleaser
-2.17.1, measured on 2026-09-26 against a 35-repository upstream exemplar
+workflow never loads it, and `go-quality` routes those. Binds to Go 1.27.4,
+golangci-lint v2.15.0, staticcheck 2026.2.2, govulncheck v1.8.0 and goreleaser
+2.20.3, re-checked on 2026-11-27 (behaviour measured on 2026-09-26 on Go 1.27.1,
+golangci-lint v2.14.0 and goreleaser 2.17.1) against a 35-repository upstream exemplar
 corpus, because the fleet that adopts this set has no Go code of its own yet.
 
 The depth files and the three golangci-lint files ship in the `go-modules-reference` skill, which the rule requires and grim installs with it (grim 0.16.0 or later).
@@ -28,7 +29,7 @@ looks identical to a deliberate floor. A stripped release binary keeps its
 `BuildInfo` but drops the symbol table `govulncheck -mode=binary` needs, so a
 clean scan on a `-s -w` artifact proves nothing about the artifact itself. And
 a nested module with no `go.mod` at the git root stamps `(devel)` at a tag
-with exit 0, on every Go 1.25 through 1.27.1 build, tag included.
+with exit 0, on every Go 1.25 and later build (measured through 1.27.1), tag included.
 
 The gate is six commands for that reason, run from every `go.mod` root:
 `go mod tidy -diff`, `go build ./...`, `go vet ./...`,
@@ -60,7 +61,7 @@ actions.
 
 A library or the SDK declares `go 1.26.0` or lower, a CLI declares
 `go 1.27.0`, and only a CLI carries a `toolchain` line. golangci-lint stays at
-v2.14.0 and moves only through the `go-upgrade` skill. The SDK is a
+v2.15.0 and moves only through the `go-upgrade` skill. The SDK is a
 stdlib-only library wrapping the project's CLI, with go-cmp and goleak
 allowed for tests only. Release binaries ship as raw per-platform binaries
 plus a checksums file, never `-s -w`, signed keyless in CI with a GitHub

@@ -15,7 +15,7 @@ Measured 2026-09-26 unless a row says otherwise, against Go 1.27.1, golangci-lin
 
 - **`errors.AsType`** needs go 1.26 (go-line gated). Below it, use `errors.As`. **`errors.Join`** and **`context.WithCancelCause`** need go 1.20 (go-line gated). **`os.UserConfigDir`** needs go 1.13.
 - **`signal.NotifyContext`'s cancel cause** arrived in Go 1.26 as an unexported string type with no signal accessor (toolchain-gated, read 2026-09-26 in go1.27.1 `os/signal`). That is why GO-CLI-08 builds its own typed cause.
-- **Every cobra row** was read against cobra v1.10.1 source and watched on fixtures. Re-run the in-process tests on every cobra bump. [spf13/cobra#1708](https://github.com/spf13/cobra/issues/1708) (`SetOut` also redirects deprecation notices) was open on 2026-09-26.
+- **Every cobra row** was read against cobra v1.10.1 source and watched on fixtures. Re-run the in-process tests on every cobra or pflag bump, since pflag v1.1.0 (2026-11-06) changed deprecation, unknown-flag and usage text. [spf13/cobra#1708](https://github.com/spf13/cobra/issues/1708) (`SetOut` also redirects deprecation notices) was open on 2026-09-26.
 - **colorprofile is pre-1.0.** Re-check its `NO_COLOR` parsing on every bump (GO-CLI-13).
 - **Windows is first-class, and its legs are compile-verified only.** The Windows branches of GO-CLI-07, 08 and 13 pass `GOOS=windows go vet ./...` and were not watched on a Windows host.
 - **Pinned defaults, each overridable once by an adopter:** a CLI declares `go 1.27.0` plus a `toolchain` line. cobra is the framework. GO-CLI-08 is a SHOULD. On Windows, Ctrl-C exits 130 for script parity with Unix, not the native `0xC000013A`.
@@ -213,7 +213,7 @@ Four stream rules carry over unchanged from the Rust CLI contract (`rust-quality
 - **A root, or a group, that takes both subcommands and its own positional arguments** has no validator that tells a typo from a real argument. The GO-CLI-17 and GO-CLI-21 validators reject every leftover token, so neither may take positionals. A CLI that needs both names the ambiguity in its help.
 - **`app help lsit` exits 0.** cobra's built-in `help` prints `Unknown help topic` and returns nothing. Fixing it means replacing the command with `SetHelpCommand`, which is not ruled because the invocation asked for help.
 - **A group with a no-op `Run` behind a count-only `Args`** is `Runnable()`, so GO-CLI-21's tree-walk test passes it. `noop-group-locator` finds the candidates, and the no-op itself is a reading call.
-- **The `TraverseChildren` typo gap has no upstream tracker**, and cobra's docs are silent, so GO-CLI-17 treats it as the CLI's problem regardless of intent.
+- **The `TraverseChildren` typo gap has no upstream tracker**, and cobra's docs are silent, so GO-CLI-17 treats it as the CLI's problem regardless of intent. The nearest tracked defect, [spf13/cobra#2528](https://github.com/spf13/cobra/issues/2528) (open since 2026-10-15), is a second reason to leave it unset: `TraverseChildren` can run a subcommand named after `--` and discard the positional arguments.
 - **The stderr order of a joined error is scheduler order.** A golden-stderr test on a concurrent batch compares lines as a set. Only the exit code is deterministic under GO-CLI-18.
 - **If colorprofile's `envNoColor` becomes a non-empty check**, GO-CLI-13's colorprofile ban relaxes to a version floor.
 

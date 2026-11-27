@@ -94,9 +94,9 @@ linters:
             - pkg: github.com/golang/mock
               desc: "archived 2024-01-08; use go.uber.org/mock"
             - pkg: gopkg.in/yaml.v2
-              desc: "go-yaml archived 2025-04-01; use go.yaml.in/yaml/v3"
+              desc: "go-yaml archived 2025-04-01; new code uses go.yaml.in/yaml/v4, a drop-in swap uses go.yaml.in/yaml/v3 (frozen)"
             - pkg: gopkg.in/yaml.v3
-              desc: "go-yaml archived 2025-04-01; use go.yaml.in/yaml/v3"
+              desc: "go-yaml archived 2025-04-01; new code uses go.yaml.in/yaml/v4, a drop-in swap uses go.yaml.in/yaml/v3 (frozen)"
             - pkg: github.com/ghodss/yaml
               desc: "unmaintained; use sigs.k8s.io/yaml"
             - pkg: github.com/satori/go.uuid
@@ -122,7 +122,7 @@ linters:
     gosec:
       excludes:
         - G104 # duplicates errcheck
-        - G115 # ignores prior bounds checks (securego/gosec#1187); re-review this list on every golangci-lint bump
+        - G115 # bounds-check false positives (securego/gosec#1187, closed by #1189 in 2024); kept until the emptied-excludes probe shows G115 clean; re-review this list on every golangci-lint bump
         - G304 # file inclusion via variable; untrusted names go through os.Root (GO-IO-02, GO-SEC-01)
       config:
         G301: "0755"

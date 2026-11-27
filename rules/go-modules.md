@@ -34,9 +34,10 @@ Contents: [The Gate](#the-gate) · [Non-Negotiables](#non-negotiables) ·
 Installed with the 13 globs in the frontmatter: module files, golangci-lint,
 goreleaser, ko and staticcheck configs, plus any workflow named `*golangci*.yml`
 on purpose. A `*.go` file, a Makefile or another workflow never loads it, and
-the `go-quality` index routes those. Binds to Go 1.27.1,
-golangci-lint v2.14.0, staticcheck 2026.2.1, govulncheck v1.8.0 and goreleaser
-2.17.1 (measured 2026-09-26). "The SDK" is a stdlib-only library that wraps the
+the `go-quality` index routes those. Binds to Go 1.27.4,
+golangci-lint v2.15.0, staticcheck 2026.2.2, govulncheck v1.8.0 and goreleaser
+2.20.3 (re-checked 2026-11-27; behaviour measured 2026-09-26 on Go 1.27.1,
+golangci-lint v2.14.0 and goreleaser 2.17.1). "The SDK" is a stdlib-only library that wraps the
 project's CLI, a pinned default the adopter renames or drops.
 
 **Read the `go` line before any rule below** (`go list -m -f '{{.GoVersion}}'`).
@@ -139,8 +140,8 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob).github/**' \
 |---|---|---|---|---|
 | GO-MOD-14 | When a module's first v2+ tag ships, move its `module` line and every self-import to `/vN` in the same change. Never commit `+incompatible`. Tag a nested module `dir/vX.Y.Z`, laid out as GO-REL-14 says so that it stamps. | Without the suffix a v2 tag is unreachable by its path or resolves as `+incompatible`. | Reading heuristic, because tag history is not in the checkout: `grep -n '^module ' go.mod` against the highest release tag's major. | MUST |
 | GO-MOD-15 | Fix a bad published tag with `retract vX.Y.Z // reason` (or `retract [lo, hi]`) inside a new, higher tag. Never delete, force-push or re-tag a version. | A retraction acts only once a higher version carries it. A deleted tag stays in the proxy and the checksum database. | After the new tag: `go list -m -retracted -f '{{.Version}} {{.Retracted}}' example.com/mod@v1.0.1` (rename). An empty `[]` is the finding. | MUST |
-| GO-MOD-16 | Library and SDK test jobs use `go-version: [oldstable, stable]`, and the `oldstable` leg's `go build ./...` is GO-LANG-04's durable floor check. CLI jobs use `go-version-file: go.mod` over GO-MOD-02's `toolchain` line. Never point `go-version-file` at a bare `go 1.N.0` for a release build, never write `go-version: '1.N'` without `check-latest: true`, and set `GOTOOLCHAIN=local` on build jobs. | `go-version-file` on a bare `go 1.27.0` installs exactly 1.27.0, and stdlib CVEs are fixed only in point releases. `check-latest` cannot move an exact patch (setup-go v6, read 2026-09-26). | Reading heuristic, since setup-go resolution cannot run locally: see block GO-MOD-16, then read each hit for the three forbidden shapes. | MUST |
-| GO-MOD-17 | Every Go repository has a grouped `package-ecosystem: "gomod"` Dependabot block (or a Renovate `gomod` manager), and a human reviews each bump. Passing CI is not review. | Configs that cover only `github-actions` leave every module bump unreviewed and unopened. | `grep -n -e 'gomod' .github/dependabot.yml`: empty output or exit 2 is the finding. | SHOULD |
+| GO-MOD-16 | Library and SDK test jobs use `go-version: [oldstable, stable]`, and the `oldstable` leg's `go build ./...` is GO-LANG-04's durable floor check. CLI jobs use `go-version-file: go.mod` over GO-MOD-02's `toolchain` line. Never point `go-version-file` at a bare `go 1.N.0` for a release build, never write `go-version: '1.N'` without `check-latest: true`, and set `GOTOOLCHAIN=local` on build jobs. | `go-version-file` on a bare `go 1.27.0` installs exactly 1.27.0, and stdlib and go-command CVEs are fixed only in point releases (go1.27.4 fixed cgo build-time code execution; go1.27.3 added the eMudhra intermediate denylist, GO-2026-6809, which reaches a shipped binary only on rebuild, so judge a binary by `go version -m`, never by the host `go version`). `check-latest` cannot move an exact patch (setup-go v7.1.0 docs, read 2026-11-27). | Reading heuristic, since setup-go resolution cannot run locally: see block GO-MOD-16, then read each hit for the three forbidden shapes. | MUST |
+| GO-MOD-17 | Every Go repository has a grouped `package-ecosystem: "gomod"` Dependabot block (or a Renovate `gomod` manager), and a human reviews each bump. Passing CI is not review. | Configs that cover only `github-actions` leave every module bump unreviewed and unopened. Dependabot's gomod docs say nothing about the `toolchain` line, so GO-MOD-02's bump stays a manual step. | `grep -n -e 'gomod' .github/dependabot.yml`: empty output or exit 2 is the finding. | SHOULD |
 | GO-MOD-18 | A job that fetches private modules sets `GOPRIVATE` (which implies `GONOPROXY` and `GONOSUMDB`) and never sets `GOAUTH=off`. | Without `GOPRIVATE`, private paths go to the public proxy and checksum database. | see block GO-MOD-18, read against each private fetch. | CONSIDER |
 
 ```sh
@@ -176,7 +177,7 @@ commit body. CONSIDER = Suggest: never blocks, never re-raised after a decline.
 Rules marked **pinned**, and these defaults, encode an agreed decision rather than
 a derivable fact: libraries and the SDK at `go 1.26.0` and CLIs at `go 1.27.0`
 plus a `toolchain` line bumped within a week of each point release, golangci-lint
-v2.14.0 moved only through `go-upgrade`, the three shipped golangci-lint files,
+v2.15.0 moved only through `go-upgrade`, the three shipped golangci-lint files,
 the SDK stdlib-only at runtime with go-cmp and goleak for tests, raw release
 binaries signed keyless in CI, Windows as a first-class CI leg, no vendoring,
 and no private modules (GO-MOD-18 turns MUST the day one exists). Each is a

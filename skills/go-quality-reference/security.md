@@ -5,7 +5,7 @@ summary: The GO-SEC family. The gosec preset that must stay off, crypto/rand for
 
 # Randomness, TLS, Secrets, Templates, Unsafe and Input Bounds
 
-Binds to Go 1.27.1 and golangci-lint v2.14.0 with its bundled gosec (measured 2026-09-26).
+Binds to Go 1.27.4 and golangci-lint v2.15.0 with its bundled gosec (re-checked 2026-11-27; behaviour measured 2026-09-26 on Go 1.27.1 and golangci-lint v2.14.0).
 
 Owns the Go-specific, checkable security rows: where random bytes come from, how a
 TLS client decides whom to trust, how a credential is held, logged, marshalled and

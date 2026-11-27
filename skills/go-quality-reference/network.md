@@ -5,7 +5,7 @@ summary: The GO-NET family owns HTTP clients, transports and servers, stall boun
 
 # HTTP and Registry Clients
 
-Binds to Go 1.27.1, golangci-lint v2.14.0 and go-containerregistry v0.22.1, measured 2026-09-26.
+Binds to Go 1.27.4, golangci-lint v2.15.0 and go-containerregistry v0.22.1 (re-checked 2026-11-27; behaviour measured 2026-09-26 on Go 1.27.1 and golangci-lint v2.14.0).
 
 Owns every outbound HTTP request and every `http.Server`: client and transport
 construction, stall bounds, redirect credentials, body bounds, closing and
@@ -28,7 +28,7 @@ Contents: [Dates and Floors](#dates-and-floors) · [Servers: gosec](#servers-gos
 Every row was measured or read 2026-09-26 on Go 1.27.1 (linux/amd64), golangci-lint v2.14.0 and go-containerregistry v0.22.1 unless it says otherwise.
 
 - **`context.WithCancelCause` and `context.Cause`** (go 1.20, go-line gated) carry GO-NET-06's typed stall cause. **`testing/synctest`** (go 1.25, go-line gated) backs GO-NET-11's test. vet `hostport` (go 1.25, toolchain gated) is not GO-NET-04's check.
-- **Stdlib facts** (read from the go1.27.1 source): `DefaultMaxIdleConnsPerHost = 2`, `Close` lets a connection be reused when at most 256 KiB is unread, `defaultCheckRedirect` stops at 10 hops, and no per-`Read` body deadline exists (`IdleConnTimeout` covers idle pooled connections, `ResponseHeaderTimeout` only the headers).
+- **Stdlib facts** (read from the go1.27.1 source): `DefaultMaxIdleConnsPerHost = 2`, `Close` lets a connection be reused when at most 256 KiB is unread and it drains within 50 ms (an internal bound the Go blog of 2026-10-14 says may change), `defaultCheckRedirect` stops at 10 hops, and no per-`Read` body deadline exists (`IdleConnTimeout` covers idle pooled connections, `ResponseHeaderTimeout` only the headers).
 - The pinned `go` lines (SDK and libraries `go 1.26.0`, CLIs `go 1.27.0`) clear every floor above.
 
 ## Servers: gosec

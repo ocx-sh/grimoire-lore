@@ -7,7 +7,7 @@ non-negotiables, and ten depth files routed to by task.
 grim add ghcr.io/ocx-sh/lore/go-quality
 ```
 
-Loads on `**/*.go`. The index is 193 lines and always present; a depth file
+Loads on `**/*.go`. The index is 195 lines and always present; a depth file
 is read only when the work calls for it. The depth files and checks scripts ship in the `go-quality-reference` skill, which the rule requires and grim installs with it (grim 0.16.0 or later).
 
 ## It starts by assuming your gate is quieter than it looks
@@ -62,8 +62,8 @@ empty output as the pass.
 ## Pinned decisions
 
 Some rules encode an agreed decision rather than a derivable fact, and they
-are marked pinned so a later reader does not re-litigate them. Go 1.27.1,
-golangci-lint v2.14.0 and govulncheck v1.8.0 are the measured toolchain,
+are marked pinned so a later reader does not re-litigate them. Go 1.27.4,
+golangci-lint v2.15.0 and govulncheck v1.8.0 are the pinned toolchain,
 pinned exactly, never `latest`, moved only through the `go-upgrade` skill.
 Libraries and the SDK declare `go 1.26.0`. CLIs declare `go 1.27.0` with a
 `toolchain` line. The SDK shape is a stdlib-only library wrapping the
