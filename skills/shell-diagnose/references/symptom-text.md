@@ -33,7 +33,7 @@ A script whose first line is `#!/bin/sh` followed by a carriage return. The kern
 | 127 | ``yash: cannot execute command `crA.sh': No such file or directory`` | yash 2.52 |
 | 1 | `crA.sh: No such file or directory` | posh 0.14.1 |
 
-The bash 5.2 row is the outlier. Bash 5.3 returned to the specific `bad interpreter` message (bash CHANGES, 5.3-alpha). `ubuntu-latest` moves to 26.04 by 2026-11-19 (SH-CI-15), so the text a CI log shows changes in that window.
+The bash 5.2 row is the outlier. Bash 5.3 returned to the specific `bad interpreter` message (bash CHANGES, 5.3-alpha). `ubuntu-latest` has pointed at 26.04 since 2026-11-24 (runner-images PR 15381; SH-CI-15), so the text a CI log shows for `sh` steps changed with that move.
 
 ## CR in the body
 

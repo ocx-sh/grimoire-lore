@@ -221,8 +221,9 @@ Then put `* text=auto eol=lf` in `.gitattributes` (SH-GATE-14), and rerun the
 | 0 | no message, the `[[` branch runs | busybox ash 1.37 (alpine:3.22) | Ash accepts `[[`, so the step passes here and fails on another image | SH-CI-04 | MUST |
 
 The answer flips with the dash package, so do not call dash "pipefail-less"
-as a fact. `ubuntu-latest` moves to 26.04 by 2026-11-19 (SH-CI-15, SHOULD), and a
-`shell: sh` step changes behaviour in that window. ShellCheck 0.11.0 finds it
+as a fact. `ubuntu-latest` has pointed at 26.04 since 2026-11-24 (runner-images
+PR 15381; SH-CI-15, SHOULD), so a `shell: sh` step that passed on 24.04 can
+change behaviour. ShellCheck 0.11.0 finds it
 statically with `shellcheck -s sh FILE` (SC3040 for the option, SC3010 for
 `[[`). SH-DIAL-02 makes the body match the declared dialect.
 
