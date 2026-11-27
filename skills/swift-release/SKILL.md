@@ -51,7 +51,7 @@ repository ships one, the receipt says `unverified: read only`. The
 (measured 2026-10-10) and is never executed on arm64 hardware: label it `not
 run on arm64 hardware`.
 
-Tool versions, measured 2026-10-10: Swift 6.4.0 current and 6.3.3 previous,
+Tool versions, measured 2026-10-10: Swift 6.4.0 (6.4.3 is current on 2026-11-27, not re-run) and 6.3.3 previous,
 Static Linux SDK 0.1.0 (version label 0.1.0 on both rows, but one bundle per toolchain: take URL and checksum from the pin's own row), GNU `grep`,
 `jq` and `sha256sum`. `--sbom-spec` exists on 6.4 only (6.3.3 exits 64 with
 `Unknown option '--sbom-spec'`), so the release job runs 6.4. A step that
