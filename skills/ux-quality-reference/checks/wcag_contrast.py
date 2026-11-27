@@ -51,18 +51,30 @@ def luminance(rgb: list[float]) -> float:
 
 def ratio(fg: str, bg: str) -> float:
     (f, a), (b, _) = rgba(fg), rgba(bg)
-    blended = [a * x + (1 - a) * y for x, y in zip(f, b)]
+    blended = [a * x + (1 - a) * y for x, y in zip(f, b, strict=True)]
     hi, lo = sorted((luminance(blended), luminance(b)), reverse=True)
     return (hi + 0.05) / (lo + 0.05)
 
 
+def expect(condition: bool, message: str) -> None:
+    """Self-test check. A bare assert is stripped by python -O and would pass silently."""
+    if not condition:
+        raise SystemExit(f"self-test: {message}")
+
+
 def self_test() -> int:
-    assert abs(ratio("#767676", "#ffffff") - 4.542) < 0.001
-    assert ratio("#767676", "#ffffff") >= 4.5
-    assert abs(ratio("#aaa", "#fff") - 2.323) < 0.001
-    assert abs(ratio("#000", "#fff") - 21) < 1e-9
-    assert ratio("#00000099", "#ffffff") > ratio("#00000040", "#ffffff")
-    assert ratio("#fff", "#fff") == 1.0
+    expect(
+        abs(ratio("#767676", "#ffffff") - 4.542) < 0.001,
+        'abs(ratio("#767676", "#ffffff") - 4.542) < 0.001',
+    )
+    expect(ratio("#767676", "#ffffff") >= 4.5, 'ratio("#767676", "#ffffff") >= 4.5')
+    expect(abs(ratio("#aaa", "#fff") - 2.323) < 0.001, 'abs(ratio("#aaa", "#fff") - 2.323) < 0.001')
+    expect(abs(ratio("#000", "#fff") - 21) < 1e-9, 'abs(ratio("#000", "#fff") - 21) < 1e-9')
+    expect(
+        ratio("#00000099", "#ffffff") > ratio("#00000040", "#ffffff"),
+        'ratio("#00000099", "#ffffff") > ratio("#00000040", "#ffffff")',
+    )
+    expect(ratio("#fff", "#fff") == 1.0, 'ratio("#fff", "#fff") == 1.0')
     try:
         ratio("red", "#fff")
     except ValueError:
@@ -70,8 +82,14 @@ def self_test() -> int:
     else:
         raise AssertionError("a named colour must be rejected")
     here = Path(__file__).resolve().parent / "fixtures" / "a11y" / "contrast"
-    assert run(4.5, (here / "pairs_pass.txt").read_text().splitlines(), quiet=True) == 0
-    assert run(4.5, (here / "pairs_fail.txt").read_text().splitlines(), quiet=True) == 1
+    expect(
+        run(4.5, (here / "pairs_pass.txt").read_text().splitlines(), quiet=True) == 0,
+        'run(4.5, (here / "pairs_pass.txt").read_text().splitlines(), quiet=True) == 0',
+    )
+    expect(
+        run(4.5, (here / "pairs_fail.txt").read_text().splitlines(), quiet=True) == 1,
+        'run(4.5, (here / "pairs_fail.txt").read_text().splitlines(), quiet=True) == 1',
+    )
     print("self-test ok")
     return 0
 
@@ -95,9 +113,18 @@ def run(need: float, lines: list[str], quiet: bool = False) -> int:
 
 
 def main(argv: list[str]) -> int:
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("threshold", nargs="?", type=float, help="4.5 for normal text, 3 for large text or a boundary")
-    ap.add_argument("--self-test", action="store_true", help="run the built-in checks over the fixtures")
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    ap.add_argument(
+        "threshold",
+        nargs="?",
+        type=float,
+        help="4.5 for normal text, 3 for large text or a boundary",
+    )
+    ap.add_argument(
+        "--self-test", action="store_true", help="run the built-in checks over the fixtures"
+    )
     args = ap.parse_args(argv)
     if args.self_test:
         return self_test()

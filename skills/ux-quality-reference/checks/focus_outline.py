@@ -79,7 +79,7 @@ def _split_list(sel: str) -> list[str]:
             cur = ""
         else:
             cur += ch
-    return [p for p in parts + [cur.strip()] if p]
+    return [p for p in [*parts, cur.strip()] if p]
 
 
 def _resolve(prelude: str, parent: list[str]) -> list[str]:
@@ -101,11 +101,11 @@ def parse(css: str) -> list[tuple[str, str, bool, int]]:
         keep = "\n" * m.group(0).count("\n")
         return (f" {MARK} " if "focus-ok:" in m.group(1) else " ") + keep
 
-    css = re.sub(r"/\*(.*?)\*/", mark, css, flags=re.S)
+    css = re.sub(r"/\*(.*?)\*/", mark, css, flags=re.DOTALL)
     css = re.sub(r"(?m)^\s*//.*$", "", css) if "//" in css else css
     out: list[tuple[str, str, bool, int]] = []
     frames: list[dict] = []
-    buf, line, buf_line = "", 1, 1
+    buf, line = "", 1
     for ch in css:
         if ch == "\n":
             line += 1
@@ -171,9 +171,15 @@ def _replacement(rules: list, sel: str) -> str | None:
             return f"{s2} (line {ln2})"
         if ":has(" in s2 and last and re.search(rf"(?<![\w.#-]){re.escape(last)}(?![\w-])", s2):
             return f"{s2} (line {ln2})"
-        if ":focus-within" in s2 and b2base and (
-            base.startswith(b2base + " ")
-            or (_last_class(b2base) and _last_class(base).startswith(_last_class(b2base) + "__"))
+        if (
+            ":focus-within" in s2
+            and b2base
+            and (
+                base.startswith(b2base + " ")
+                or (
+                    _last_class(b2base) and _last_class(base).startswith(_last_class(b2base) + "__")
+                )
+            )
         ):
             return f"{s2} (line {ln2})"
     return None
@@ -221,52 +227,114 @@ def files(root: Path):
             yield p, p.read_text(errors="replace")
         elif p.suffix in (".astro", ".html", ".svelte", ".vue"):
             blocks = re.findall(
-                r"<style[^>]*>(.*?)</style>", p.read_text(errors="replace"), flags=re.S
+                r"<style[^>]*>(.*?)</style>", p.read_text(errors="replace"), flags=re.DOTALL
             )
             if blocks:
                 yield p, "\n".join(blocks)
+
+
+def expect(condition: bool, message: str) -> None:
+    """Self-test check. A bare assert is stripped by python -O and would pass silently."""
+    if not condition:
+        raise SystemExit(f"self-test: {message}")
 
 
 def self_test() -> int:
     def v(css: str) -> list[str]:
         return [r[0] for r in check(css)]
 
-    assert v("button:focus{outline:none}") == ["FAIL"]
-    assert v("a:focus-visible{outline:none;box-shadow:0 0 0 2px red}") == ["FAIL"]
-    assert v("a:focus{outline:0}a:focus-visible{outline:2px solid blue}")[0] == "PASS"
-    assert v(".f:has(.t:focus-visible){outline:2px solid red}a:focus{outline:none}") == ["FAIL"]
-    assert v(".f:has(.t:focus-visible){outline:var(--ring)} .t:focus-visible{outline:none}") == ["PASS"]
-    assert v(".x:focus-visible{outline:none;border-color:var(--c)}") == ["PASS"]
-    assert v(".g:focus-within{border-color:blue} .g__in:focus-visible{outline:none}") == ["PASS"]
-    assert v("/* focus-ok: active option draws it */ .l:focus-visible{outline:none}") == ["EXEMPT"]
-    assert v(".mouse:focus:not(:focus-visible){outline:0}") == []
-    assert v(".in::-webkit-datetime-edit-day-field:focus{outline:none}") == []
-    assert v(".nest{padding:0;&:focus{outline:none}}") == ["FAIL"]
-    assert v(".nest{padding:0;&:focus{outline:none}&:focus-visible{outline:2px solid red}}")[0] == "PASS"
-    assert v(".bs{all:unset}.bs:focus-visible{box-shadow:0 0 0 2px red}") == ["FAIL"]
-    assert v(".ok{all:unset}.ok:focus-visible{outline:2px solid blue}") == ["PASS"]
-    assert v(".ring:focus-visible{outline:none}.ring:focus-visible::after{outline:2px solid blue}") == ["PASS"]
-    assert v("@media (min-width:1px){.m:focus{outline:none}}") == ["FAIL"]
+    expect(
+        v("button:focus{outline:none}") == ["FAIL"], 'v("button:focus{outline:none}") == ["FAIL"]'
+    )
+    expect(
+        v("a:focus-visible{outline:none;box-shadow:0 0 0 2px red}") == ["FAIL"],
+        'v("a:focus-visible{outline:none;box-shadow:0 0 0 2px red}") == ["FAIL"]',
+    )
+    expect(
+        v("a:focus{outline:0}a:focus-visible{outline:2px solid blue}")[0] == "PASS",
+        'v("a:focus{outline:0}a:focus-visible{outline:2px solid blue}")[0] == "PASS"',
+    )
+    expect(
+        v(".f:has(.t:focus-visible){outline:2px solid red}a:focus{outline:none}") == ["FAIL"],
+        'v(".f:has(.t:focus-visible){outline:2px solid red}a:focus{outline:none}") == ["FAIL"]',
+    )
+    expect(
+        v(".f:has(.t:focus-visible){outline:var(--ring)} .t:focus-visible{outline:none}")
+        == ["PASS"],
+        'v(".f:has(.t:focus-visible){outline:var(--ring)} .t:focus-visible{outline:none}") == [ "PASS" ]',
+    )
+    expect(
+        v(".x:focus-visible{outline:none;border-color:var(--c)}") == ["PASS"],
+        'v(".x:focus-visible{outline:none;border-color:var(--c)}") == ["PASS"]',
+    )
+    expect(
+        v(".g:focus-within{border-color:blue} .g__in:focus-visible{outline:none}") == ["PASS"],
+        'v(".g:focus-within{border-color:blue} .g__in:focus-visible{outline:none}") == ["PASS"]',
+    )
+    expect(
+        v("/* focus-ok: active option draws it */ .l:focus-visible{outline:none}") == ["EXEMPT"],
+        'v("/* focus-ok: active option draws it */ .l:focus-visible{outline:none}") == ["EXEMPT"]',
+    )
+    expect(
+        v(".mouse:focus:not(:focus-visible){outline:0}") == [],
+        'v(".mouse:focus:not(:focus-visible){outline:0}") == []',
+    )
+    expect(
+        v(".in::-webkit-datetime-edit-day-field:focus{outline:none}") == [],
+        'v(".in::-webkit-datetime-edit-day-field:focus{outline:none}") == []',
+    )
+    expect(
+        v(".nest{padding:0;&:focus{outline:none}}") == ["FAIL"],
+        'v(".nest{padding:0;&:focus{outline:none}}") == ["FAIL"]',
+    )
+    expect(
+        v(".nest{padding:0;&:focus{outline:none}&:focus-visible{outline:2px solid red}}")[0]
+        == "PASS",
+        'v(".nest{padding:0;&:focus{outline:none}&:focus-visible{outline:2px solid red}}")[0] == "PASS"',
+    )
+    expect(
+        v(".bs{all:unset}.bs:focus-visible{box-shadow:0 0 0 2px red}") == ["FAIL"],
+        'v(".bs{all:unset}.bs:focus-visible{box-shadow:0 0 0 2px red}") == ["FAIL"]',
+    )
+    expect(
+        v(".ok{all:unset}.ok:focus-visible{outline:2px solid blue}") == ["PASS"],
+        'v(".ok{all:unset}.ok:focus-visible{outline:2px solid blue}") == ["PASS"]',
+    )
+    expect(
+        v(".ring:focus-visible{outline:none}.ring:focus-visible::after{outline:2px solid blue}")
+        == ["PASS"],
+        'v( ".ring:focus-visible{outline:none}.ring:focus-visible::after{outline:2px solid blue}" ) == ["PASS"]',
+    )
+    expect(
+        v("@media (min-width:1px){.m:focus{outline:none}}") == ["FAIL"],
+        'v("@media (min-width:1px){.m:focus{outline:none}}") == ["FAIL"]',
+    )
     here = Path(__file__).resolve().parent / "fixtures" / "a11y" / "focus_outline"
-    assert here.is_dir(), f"fixtures missing: {here}"
+    expect(here.is_dir(), f"fixtures missing: {here}")
     for fx in sorted(here.iterdir()):
         css = fx.read_text()
         if fx.suffix == ".html":
-            css = "\n".join(re.findall(r"<style[^>]*>(.*?)</style>", css, flags=re.S))
+            css = "\n".join(re.findall(r"<style[^>]*>(.*?)</style>", css, flags=re.DOTALL))
         rows = [r[0] for r in check(css, fx.name)]
         if fx.name.startswith("fail_"):
-            assert "FAIL" in rows, f"{fx.name}: expected a FAIL row, got {rows}"
+            expect("FAIL" in rows, f"{fx.name}: expected a FAIL row, got {rows}")
         else:
-            assert rows and "FAIL" not in rows, f"{fx.name}: expected PASS or EXEMPT only, got {rows}"
+            expect(
+                rows and "FAIL" not in rows, f"{fx.name}: expected PASS or EXEMPT only, got {rows}"
+            )
     print("self-test ok")
     return 0
 
 
 def main(argv: list[str]) -> int:
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     ap.add_argument("dirs", nargs="*", type=Path, help="source directories to scan")
     ap.add_argument("--format", choices=("text", "json"), default="text")
-    ap.add_argument("--self-test", action="store_true", help="run the built-in checks over the fixtures")
+    ap.add_argument(
+        "--self-test", action="store_true", help="run the built-in checks over the fixtures"
+    )
     args = ap.parse_args(argv)
     if args.self_test:
         return self_test()
@@ -280,7 +348,15 @@ def main(argv: list[str]) -> int:
         for p, css in files(root):
             rows.extend(check(css, str(p)))
     if args.format == "json":
-        print(json.dumps([dict(zip(("verdict", "where", "selector", "evidence"), r)) for r in rows], indent=1))
+        print(
+            json.dumps(
+                [
+                    dict(zip(("verdict", "where", "selector", "evidence"), r, strict=False))
+                    for r in rows
+                ],
+                indent=1,
+            )
+        )
     else:
         for r in rows:
             print(*r, sep="\t")

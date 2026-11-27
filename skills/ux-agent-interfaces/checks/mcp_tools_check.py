@@ -41,8 +41,11 @@ HERE = Path(__file__).resolve().parent
 NAME_RE = re.compile(r"[a-z0-9_]{1,128}")
 GENERIC = {"search", "fetch", "get", "list", "run", "query", "read"}
 DESC_MAX = 2048  # old-client margin, UX-AGENT-19
-CUE = re.compile(r"\b(use when|use this|use it|when you|call this|call it|instead of|before|after|if you)\b", re.I)
-CLOSED = re.compile(r"\b(one of|either|must be (?:one of )?['\"`])", re.I)
+CUE = re.compile(
+    r"\b(use when|use this|use it|when you|call this|call it|instead of|before|after|if you)\b",
+    re.IGNORECASE,
+)
+CLOSED = re.compile(r"\b(one of|either|must be (?:one of )?['\"`])", re.IGNORECASE)
 PREFIX = re.compile(r"^[a-z_]+ \((retryable|not retryable)\): ")
 ERR_MAX = 10_000
 RESULT_MAX = 40_000
@@ -66,8 +69,13 @@ def tools_of(doc) -> list[dict]:
     return doc
 
 
-def check_tools(tools: list[dict], server_key: str = "", max_tools: int = 20, gate_flag: str = "",
-                writers: frozenset[str] = frozenset()) -> list[tuple[str, str, str]]:
+def check_tools(
+    tools: list[dict],
+    server_key: str = "",
+    max_tools: int = 20,
+    gate_flag: str = "",
+    writers: frozenset[str] = frozenset(),
+) -> list[tuple[str, str, str]]:
     out: list[tuple[str, str, str]] = []
 
     def add(rid: str, sev: str, msg: str) -> None:
@@ -81,17 +89,31 @@ def check_tools(tools: list[dict], server_key: str = "", max_tools: int = 20, ga
         if not NAME_RE.fullmatch(n):
             add("UX-AGENT-18", "MUST", f"{n!r}: name is not 1 to 128 characters of [a-z0-9_]")
         if n in GENERIC:
-            add("UX-AGENT-18", "SHOULD", f"{n}: bare generic verb; prefix it with the server or object")
+            add(
+                "UX-AGENT-18",
+                "SHOULD",
+                f"{n}: bare generic verb; prefix it with the server or object",
+            )
         if server_key and len(f"mcp__{server_key}__{n}") > 128:
-            add("UX-AGENT-18", "SHOULD", f"{n}: full name mcp__{server_key}__{n} is over 128 characters")
+            add(
+                "UX-AGENT-18",
+                "SHOULD",
+                f"{n}: full name mcp__{server_key}__{n} is over 128 characters",
+            )
         desc = t.get("description")
         if not isinstance(desc, str) or not desc.strip():
             add("UX-AGENT-19", "SHOULD", f"{n}: description is missing")
         else:
             if len(desc) > DESC_MAX:
-                add("UX-AGENT-19", "SHOULD", f"{n}: description is {len(desc)} characters, over {DESC_MAX}")
+                add(
+                    "UX-AGENT-19",
+                    "SHOULD",
+                    f"{n}: description is {len(desc)} characters, over {DESC_MAX}",
+                )
             if not CUE.search(desc):
-                out.append(("note", "", f"{n}: no sentence names a trigger (UX-AGENT-19 item 2): read it"))
+                out.append(
+                    ("note", "", f"{n}: no sentence names a trigger (UX-AGENT-19 item 2): read it")
+                )
         schema = t.get("inputSchema")
         if not isinstance(schema, dict):
             add("UX-AGENT-20", "MUST", f"{n}: inputSchema is missing")
@@ -104,12 +126,20 @@ def check_tools(tools: list[dict], server_key: str = "", max_tools: int = 20, ga
             if not isinstance(p, dict) or not str(p.get("description", "")).strip():
                 add("UX-AGENT-20", "MUST", f"{n}.{pname}: property has no description")
             elif CLOSED.search(p["description"]) and "enum" not in p:
-                out.append(("note", "", f"{n}.{pname}: description lists a closed set but there is no enum"))
+                out.append(
+                    (
+                        "note",
+                        "",
+                        f"{n}.{pname}: description lists a closed set but there is no enum",
+                    )
+                )
         for r in schema.get("required") or []:
             if r not in props:
                 add("UX-AGENT-20", "MUST", f"{n}: required {r!r} is not a property")
         if not props and schema.get("additionalProperties") is not False:
-            add("UX-AGENT-20", "SHOULD", f"{n}: a no-parameter tool uses additionalProperties false")
+            add(
+                "UX-AGENT-20", "SHOULD", f"{n}: a no-parameter tool uses additionalProperties false"
+            )
         ann = t.get("annotations")
         if not isinstance(ann, dict):
             add("UX-ACT-20", "SHOULD", f"{n}: no annotations; set the four hints explicitly")
@@ -120,37 +150,71 @@ def check_tools(tools: list[dict], server_key: str = "", max_tools: int = 20, ga
                 add("UX-ACT-20", "MUST", f"{n}: can write but carries readOnlyHint true")
             if "openWorldHint" not in ann:
                 add("UX-ACT-20", "SHOULD", f"{n}: openWorldHint is not set")
-    required_of = {str(t.get("name")): set((t.get("inputSchema") or {}).get("required") or []) for t in tools}
+    required_of = {
+        str(t.get("name")): set((t.get("inputSchema") or {}).get("required") or []) for t in tools
+    }
     seen = sorted(required_of)
     for i, a in enumerate(seen):
-        for b in seen[i + 1:]:
+        for b in seen[i + 1 :]:
             shared = required_of[a] & required_of[b]
             da = next(str(t.get("description", "")) for t in tools if str(t.get("name")) == a)
             db = next(str(t.get("description", "")) for t in tools if str(t.get("name")) == b)
-            if shared and not ((b in da or "instead" in da.lower()) and (a in db or "instead" in db.lower())):
-                out.append(("note", "", f"{a} and {b} share required input {sorted(shared)[0]!r} but do not "
-                            f"name each other (UX-AGENT-19 item 3): read them"))
+            if shared and not (
+                (b in da or "instead" in da.lower()) and (a in db or "instead" in db.lower())
+            ):
+                out.append(
+                    (
+                        "note",
+                        "",
+                        (
+                            f"{a} and {b} share required input {min(shared)!r} but do not "
+                            f"name each other (UX-AGENT-19 item 3): read them"
+                        ),
+                    )
+                )
     bare = [str(t.get("name")) for t in tools if "outputSchema" not in t]
     if bare:
-        out.append(("note", "", f"{len(bare)} of {len(tools)} tools have no outputSchema; UX-AGENT-21 binds "
-                    f"only those that return structured data"))
+        out.append(
+            (
+                "note",
+                "",
+                (
+                    f"{len(bare)} of {len(tools)} tools have no outputSchema; UX-AGENT-21 binds "
+                    f"only those that return structured data"
+                ),
+            )
+        )
     if len(tools) > max_tools:
-        add("UX-AGENT-22", "SHOULD", f"{len(tools)} tools are registered; the default set is at most {max_tools}")
+        add(
+            "UX-AGENT-22",
+            "SHOULD",
+            f"{len(tools)} tools are registered; the default set is at most {max_tools}",
+        )
     if gate_flag and not any(gate_flag in str(t.get("description", "")) for t in tools):
         add("UX-AGENT-17", "SHOULD", f"no description names the gate {gate_flag}")
     return out
 
 
 def text_of(result: dict) -> str:
-    return "".join(c.get("text", "") for c in result.get("content") or []
-                   if isinstance(c, dict) and c.get("type") == "text")
+    return "".join(
+        c.get("text", "")
+        for c in result.get("content") or []
+        if isinstance(c, dict) and c.get("type") == "text"
+    )
 
 
 def check_result(doc, expect_error: bool) -> list[tuple[str, str, str]]:
     out: list[tuple[str, str, str]] = []
     if isinstance(doc, dict) and "error" in doc:
-        out.append(("UX-AGENT-15", "MUST", f"failure came back as a JSON-RPC error ({doc['error'].get('code')})"
-                    if expect_error else "the call returned a JSON-RPC error member"))
+        out.append(
+            (
+                "UX-AGENT-15",
+                "MUST",
+                f"failure came back as a JSON-RPC error ({doc['error'].get('code')})"
+                if expect_error
+                else "the call returned a JSON-RPC error member",
+            )
+        )
         return out
     result = doc.get("result", doc) if isinstance(doc, dict) else None
     if not isinstance(result, dict):
@@ -162,19 +226,31 @@ def check_result(doc, expect_error: bool) -> list[tuple[str, str, str]]:
         if result.get("isError") is not True:
             out.append(("UX-AGENT-15", "MUST", "the failure result does not set isError true"))
         if not PREFIX.match(text):
-            out.append(("UX-AGENT-16", "SHOULD", "text does not start `<class> (retryable|not retryable): `"))
+            out.append(
+                (
+                    "UX-AGENT-16",
+                    "SHOULD",
+                    "text does not start `<class> (retryable|not retryable): `",
+                )
+            )
         if size >= ERR_MAX:
-            out.append(("UX-AGENT-16", "SHOULD", f"error text is {size} bytes, over the {ERR_MAX} bound"))
+            out.append(
+                ("UX-AGENT-16", "SHOULD", f"error text is {size} bytes, over the {ERR_MAX} bound")
+            )
     else:
         if size >= RESULT_MAX:
-            out.append(("UX-AGENT-26", "SHOULD", f"text is {size} bytes, over the {RESULT_MAX} bound"))
+            out.append(
+                ("UX-AGENT-26", "SHOULD", f"text is {size} bytes, over the {RESULT_MAX} bound")
+            )
         if "structuredContent" in result:
             try:
                 same = json.loads(text) == result["structuredContent"]
             except ValueError:
                 same = False
             if not same:
-                out.append(("UX-AGENT-21", "SHOULD", "text block is not the JSON of structuredContent"))
+                out.append(
+                    ("UX-AGENT-21", "SHOULD", "text block is not the JSON of structuredContent")
+                )
     return out
 
 
@@ -200,8 +276,15 @@ def main(argv: list[str]) -> int:
     r.add_argument("--error", action="store_true")
     a = p.parse_args(argv)
     if a.cmd == "tools":
-        return report(check_tools(tools_of(load(a.file)), a.server_key, a.max_tools, a.gate_flag,
-                                  frozenset(w for w in a.writers.split(",") if w)))
+        return report(
+            check_tools(
+                tools_of(load(a.file)),
+                a.server_key,
+                a.max_tools,
+                a.gate_flag,
+                frozenset(w for w in a.writers.split(",") if w),
+            )
+        )
     return report(check_result(load(a.file), a.error))
 
 
@@ -211,27 +294,73 @@ def self_test() -> int:
             raise SystemExit(f"self-test: {what}")
 
     fx = HERE / "fixtures" / "mcp"
-    ok = [f for f in check_tools(tools_of(load(str(fx / "pass-tools.json"))), "mytool", 20) if f[0] != "note"]
+    ok = [
+        f
+        for f in check_tools(tools_of(load(str(fx / "pass-tools.json"))), "mytool", 20)
+        if f[0] != "note"
+    ]
     expect(not ok, f"clean tools reported {ok}")
-    bad = check_tools(tools_of(load(str(fx / "fail-tools.json"))), "mytool", 5, "--allow-writes",
-                      frozenset({"mytool_render"}))
+    bad = check_tools(
+        tools_of(load(str(fx / "fail-tools.json"))),
+        "mytool",
+        5,
+        "--allow-writes",
+        frozenset({"mytool_render"}),
+    )
     got = {(f[0], f[1]) for f in bad}
-    for want in (("UX-AGENT-18", "MUST"), ("UX-AGENT-18", "SHOULD"), ("UX-AGENT-19", "SHOULD"),
-                 ("UX-AGENT-20", "MUST"), ("UX-AGENT-20", "SHOULD"), ("UX-AGENT-22", "SHOULD"),
-                 ("UX-AGENT-17", "SHOULD"), ("UX-ACT-20", "MUST"), ("UX-ACT-20", "SHOULD")):
+    for want in (
+        ("UX-AGENT-18", "MUST"),
+        ("UX-AGENT-18", "SHOULD"),
+        ("UX-AGENT-19", "SHOULD"),
+        ("UX-AGENT-20", "MUST"),
+        ("UX-AGENT-20", "SHOULD"),
+        ("UX-AGENT-22", "SHOULD"),
+        ("UX-AGENT-17", "SHOULD"),
+        ("UX-ACT-20", "MUST"),
+        ("UX-ACT-20", "SHOULD"),
+    ):
         expect(want in got, f"planted violation {want} not found")
-    expect(any(f[0] == "note" and "mytool_describe" in f[2] for f in bad), "overlap pre-filter did not fire")
-    expect(not check_result(load(str(fx / "pass-error-result.json")), True), "clean error result flagged")
-    expect(check_result(load(str(fx / "fail-error-result.json")), True)[0][0] == "UX-AGENT-15", "rpc error missed")
-    expect(check_result(load(str(fx / "fail-error-text.json")), True)[0][0] == "UX-AGENT-16", "prefix missed")
-    expect(not check_result(load(str(fx / "pass-structured-result.json")), False), "clean structured flagged")
-    expect(check_result(load(str(fx / "fail-structured-result.json")), False)[0][0] == "UX-AGENT-21", "drift missed")
+    expect(
+        any(f[0] == "note" and "mytool_describe" in f[2] for f in bad),
+        "overlap pre-filter did not fire",
+    )
+    expect(
+        not check_result(load(str(fx / "pass-error-result.json")), True),
+        "clean error result flagged",
+    )
+    expect(
+        check_result(load(str(fx / "fail-error-result.json")), True)[0][0] == "UX-AGENT-15",
+        "rpc error missed",
+    )
+    expect(
+        check_result(load(str(fx / "fail-error-text.json")), True)[0][0] == "UX-AGENT-16",
+        "prefix missed",
+    )
+    expect(
+        not check_result(load(str(fx / "pass-structured-result.json")), False),
+        "clean structured flagged",
+    )
+    expect(
+        check_result(load(str(fx / "fail-structured-result.json")), False)[0][0] == "UX-AGENT-21",
+        "drift missed",
+    )
     big = {"result": {"content": [{"type": "text", "text": "x" * RESULT_MAX}]}}
     expect(check_result(big, False)[0][0] == "UX-AGENT-26", "oversize result missed")
     with tempfile.TemporaryDirectory() as tmp:
         f = Path(tmp) / "t.json"
-        f.write_text(json.dumps({"tools": [{"name": "ok_tool", "description": "Use when asked.",
-                                            "inputSchema": {"type": "object", "additionalProperties": False}}]}))
+        f.write_text(
+            json.dumps(
+                {
+                    "tools": [
+                        {
+                            "name": "ok_tool",
+                            "description": "Use when asked.",
+                            "inputSchema": {"type": "object", "additionalProperties": False},
+                        }
+                    ]
+                }
+            )
+        )
         expect(tools_of(load(str(f)))[0]["name"] == "ok_tool", "bare tools object not read")
     print("mcp_tools_check self-test: ok")
     return 0

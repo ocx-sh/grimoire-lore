@@ -41,7 +41,9 @@ HERE = Path(__file__).resolve().parent
 FIXTURES = HERE / "fixtures" / "contrast"
 MIN_RATIO = 4.5  # WCAG SC 1.4.3 for text
 
-TOKEN = re.compile(r"\x1b\[([0-9;]*)m|\x1b\[[0-9;?]*[ -/]*[@-~]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)|([^\x1b])")
+TOKEN = re.compile(
+    r"\x1b\[([0-9;]*)m|\x1b\[[0-9;?]*[ -/]*[@-~]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)|([^\x1b])"
+)
 
 
 def rgb(colour: str) -> list[float]:
@@ -63,7 +65,8 @@ def ratio(a: list[float], b: list[float]) -> float:
 
 
 def hexs(c: list[float]) -> str:
-    return "#%02x%02x%02x" % tuple(round(v) for v in c)
+    r, g, b = (round(v) for v in c)
+    return f"#{r:02x}{g:02x}{b:02x}"
 
 
 class ScanError(Exception):
@@ -84,7 +87,11 @@ def read_theme(header: dict, theme_path: str | None) -> dict:
     palette = str(theme.get("palette", "")).split(":")
     if len(palette) < 16 or not theme.get("fg") or not theme.get("bg"):
         raise ScanError("theme needs fg, bg and a 16-entry palette")
-    return {"fg": rgb(theme["fg"]), "bg": rgb(theme["bg"]), "palette": [rgb(p) for p in palette[:16]]}
+    return {
+        "fg": rgb(theme["fg"]),
+        "bg": rgb(theme["bg"]),
+        "palette": [rgb(p) for p in palette[:16]],
+    }
 
 
 def scan(text: str) -> dict:
@@ -155,7 +162,9 @@ def score(path: Path, theme_path: str | None) -> tuple[list[str], bool]:
         lines = path.read_text(encoding="utf-8").splitlines()
         header = json.loads(lines[0])
         version = int(header.get("version", 0))
-        out_text = "".join(json.loads(ln)[2] for ln in lines[1:] if ln.strip() and json.loads(ln)[1] == "o")
+        out_text = "".join(
+            json.loads(ln)[2] for ln in lines[1:] if ln.strip() and json.loads(ln)[1] == "o"
+        )
     except (OSError, ValueError, IndexError, TypeError) as exc:
         raise ScanError(f"{path}: not readable as an asciicast: {exc}") from exc
     if version not in (2, 3):
@@ -166,12 +175,14 @@ def score(path: Path, theme_path: str | None) -> tuple[list[str], bool]:
 
     def row(label: str, colour: list[float], blend: bool, rule: str) -> None:
         nonlocal failed
-        shown = [(c + b) / 2 for c, b in zip(colour, bg)] if blend else colour
+        shown = [(c + b) / 2 for c, b in zip(colour, bg, strict=False)] if blend else colour
         r = ratio(shown, bg)
         bad = r < MIN_RATIO
         failed |= bad
         tail = f" effective {hexs(shown)}" if blend else ""
-        report.append(f"{path}: {rule} {label} {hexs(colour)}{tail} {r:.2f} {'FAIL' if bad else 'ok'}")
+        report.append(
+            f"{path}: {rule} {label} {hexs(colour)}{tail} {r:.2f} {'FAIL' if bad else 'ok'}"
+        )
 
     row("fg", theme["fg"], False, "CH-VID-12")
     for idx in sorted(i for i in found["used"] if i is not None):
@@ -186,7 +197,10 @@ def score(path: Path, theme_path: str | None) -> tuple[list[str], bool]:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    ap = argparse.ArgumentParser(description="Contrast of the colours a cast prints (CH-VID-12, CH-VID-27).", epilog="Exit 0 clean, 1 a colour fails, 2 usage.")
+    ap = argparse.ArgumentParser(
+        description="Contrast of the colours a cast prints (CH-VID-12, CH-VID-27).",
+        epilog="Exit 0 clean, 1 a colour fails, 2 usage.",
+    )
     ap.add_argument("files", nargs="*", help="cast files")
     ap.add_argument("--theme", help="JSON theme the embed forces; run once per colour scheme")
     ap.add_argument("--self-test", action="store_true", help="run against the bundled fixtures")

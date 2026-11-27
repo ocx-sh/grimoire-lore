@@ -390,10 +390,13 @@ END { if (!sh) print FILENAME ": no Set Shell" }'
 ```python
 # CH-VID-26: needs PyYAML, so run it as: uv run --with pyyaml python -I needs.py .github/workflows/*.yml
 import re, sys, yaml
+
 bad = 0
 for f in sys.argv[1:]:
     for n, j in ((yaml.safe_load(open(f)) or {}).get("jobs") or {}).items():
-        text = " ".join(str(s.get("run", "")) + " " + str(s.get("uses", "")) for s in j.get("steps", []))
+        text = " ".join(
+            str(s.get("run", "")) + " " + str(s.get("uses", "")) for s in j.get("steps", [])
+        )
         if re.search(r"asciinema upload|vhs publish|youtube|linkedin", text, re.I):
             needs = j.get("needs", [])
             needs = [needs] if isinstance(needs, str) else needs

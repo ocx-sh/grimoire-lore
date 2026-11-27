@@ -43,6 +43,7 @@ import sys
 import tempfile
 import threading
 import urllib.error
+import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 from collections import defaultdict
@@ -136,7 +137,11 @@ def sitemap_urls(build: Path) -> tuple[dict[str, dict[str, str]], list[str]]:
     for f in sorted(build.rglob("sitemap*.xml")):
         rel = f.relative_to(build).as_posix()
         try:
-            root = ET.parse(f).getroot()
+            raw = f.read_bytes()
+            # A sitemap never needs a DTD; refusing one closes the entity-expansion hole.
+            if b"<!DOCTYPE" in raw or b"<!ENTITY" in raw:
+                raise ET.ParseError("DTD in sitemap")
+            root = ET.ElementTree().parse(f)
         except ET.ParseError:
             broken.append(rel)
             continue
@@ -167,9 +172,12 @@ def ld_objects(h: Head) -> list[dict]:
 
 
 def fetch_image(url: str) -> tuple[int, str, int]:
-    req = urllib.request.Request(url, headers={"User-Agent": "catalog-seo-check/1"})
+    if urllib.parse.urlsplit(url).scheme not in ("http", "https"):
+        return 0, f"unsupported URL scheme: {url}", 0
+    opener = urllib.request.build_opener()
+    opener.addheaders = [("User-Agent", "catalog-seo-check/1")]
     try:
-        with urllib.request.urlopen(req, timeout=30) as r:
+        with opener.open(url, timeout=30) as r:
             return r.status, r.headers.get("Content-Type", ""), len(r.read(MAX_IMAGE_BYTES + 1))
     except urllib.error.HTTPError as e:
         return e.code, e.headers.get("Content-Type", ""), 0
@@ -182,11 +190,15 @@ def image_findings(url: str, where: str) -> list[Finding]:
     kind = ctype.split(";")[0].strip().lower()
     out: list[Finding] = []
     if status != 200 or not kind.startswith("image/") or "svg" in kind:
-        out.append(Finding("06", "MUST", where, f"og:image {url} answers {status} {ctype or 'no type'}"))
+        out.append(
+            Finding("06", "MUST", where, f"og:image {url} answers {status} {ctype or 'no type'}")
+        )
     elif kind not in ("image/png", "image/jpeg"):
         out.append(Finding("06", "SHOULD", where, f"og:image {url} is {kind}, prefer PNG or JPEG"))
     if size > MAX_IMAGE_BYTES:
-        out.append(Finding("06", "SHOULD", where, f"og:image {url} is over {MAX_IMAGE_BYTES} bytes"))
+        out.append(
+            Finding("06", "SHOULD", where, f"og:image {url} is over {MAX_IMAGE_BYTES} bytes")
+        )
     return out
 
 
@@ -207,14 +219,24 @@ def run(a: argparse.Namespace) -> list[Finding]:
     for rel, h in pages.items():
         for v in h.canon + h.meta.get("og:url", []):
             if not origin.match(v):
-                add("01", "MUST", rel, f"canonical or og:url {v!r} is not an absolute https URL on {host}")
+                add(
+                    "01",
+                    "MUST",
+                    rel,
+                    f"canonical or og:url {v!r} is not an absolute https URL on {host}",
+                )
         if len(h.canon) != 1:
             add("02", "MUST", rel, f"{len(h.canon)} canonical links, expected exactly 1")
         for c in h.canon:
             if "#" in c:
                 add("02", "MUST", rel, f"canonical {c!r} carries a fragment")
         if len(h.canon) == 1 and h.one("og:url") and h.one("og:url") != h.canon[0]:
-            add("02", "MUST", rel, f"og:url {h.one('og:url')!r} differs from canonical {h.canon[0]!r}")
+            add(
+                "02",
+                "MUST",
+                rel,
+                f"og:url {h.one('og:url')!r} differs from canonical {h.canon[0]!r}",
+            )
         title = h.title or ""
         if not title:
             add("03", "MUST", rel, "title is missing or empty")
@@ -223,7 +245,12 @@ def run(a: argparse.Namespace) -> list[Finding]:
             if title.lower() == name:
                 add("03", "MUST", rel, "title is the site name alone")
             elif title.lower().count(name) > 1:
-                add("03", "MUST", rel, f"site name {a.site_name!r} appears more than once in the title")
+                add(
+                    "03",
+                    "MUST",
+                    rel,
+                    f"site name {a.site_name!r} appears more than once in the title",
+                )
         if not h.one("description"):
             add("04", "MUST", rel, "meta description is missing or empty")
         for p in ("title", "type", "image", "url"):
@@ -238,7 +265,12 @@ def run(a: argparse.Namespace) -> list[Finding]:
             if not h.one("og:image:alt"):
                 add("06", "SHOULD", rel, "og:image:alt is missing")
         if h.one("twitter:card") == "summary_large_image" and not (img or h.one("twitter:image")):
-            add("07", "SHOULD", rel, "summary_large_image declared with no og:image or twitter:image")
+            add(
+                "07",
+                "SHOULD",
+                rel,
+                "summary_large_image declared with no og:image or twitter:image",
+            )
         otype = h.one("og:type")
         if rel == "index.html" and otype and otype != "website":
             add("08", "SHOULD", rel, f"home page og:type is {otype!r}, expected website")
@@ -252,7 +284,12 @@ def run(a: argparse.Namespace) -> list[Finding]:
     for value, rels in by_value.items():
         if len(rels) > 1:
             for rel in (r for r in rels if r not in exempt):
-                add("04", "MUST", rel, f"description shared with {len(rels) - 1} other page(s): {value[:50]!r}")
+                add(
+                    "04",
+                    "MUST",
+                    rel,
+                    f"description shared with {len(rels) - 1} other page(s): {value[:50]!r}",
+                )
     dups: dict[str, list[str]] = defaultdict(list)
     for rel, h in pages.items():
         if h.title:
@@ -279,7 +316,12 @@ def run(a: argparse.Namespace) -> list[Finding]:
         for rel, locs in sitemaps.items():
             for u, m in locs.items():
                 if rel in old and u in old[rel] and old[rel][u] != m:
-                    add("10", "MUST", rel, f"lastmod of {u} changed between two builds: {old[rel][u]} to {m}")
+                    add(
+                        "10",
+                        "MUST",
+                        rel,
+                        f"lastmod of {u} changed between two builds: {old[rel][u]} to {m}",
+                    )
     if sitemaps:
         canon = {c for h in pages.values() for c in h.canon}
         for u in sorted(canon - page_locs):
@@ -287,11 +329,19 @@ def run(a: argparse.Namespace) -> list[Finding]:
         for u in sorted(page_locs - canon):
             add("02", "MUST", "sitemap", f"sitemap loc {u} is the canonical of no indexable page")
     else:
-        print("note: no sitemap*.xml under the build; the sitemap arms of 01, 02, 09, 10 did not run", file=sys.stderr)
+        print(
+            "note: no sitemap*.xml under the build; the sitemap arms of 01, 02, 09, 10 did not run",
+            file=sys.stderr,
+        )
 
     for rel, text in raw.items():
         if REVIEW_RE.search(text) and rel not in reviews_ok:
-            add("21", "MUST", rel, "review or rating markup, and the page is not in the reviews allow-list")
+            add(
+                "21",
+                "MUST",
+                rel,
+                "review or rating markup, and the page is not in the reviews allow-list",
+            )
         if DEAD_RE.search(text):
             add("25", "SHOULD", rel, "FAQPage or HowTo markup produces no rich result")
         if SOFTAPP_RE.search(text) and not RATED_RE.search(text):
@@ -306,13 +356,23 @@ def run(a: argparse.Namespace) -> list[Finding]:
         sites = [o for o in ld_objects(home) if o.get("@type") == "WebSite"]
         ok = [o for o in sites if o.get("name") and home.canon and o.get("url") == home.canon[0]]
         if len(sites) != 1 or not ok:
-            add("22", "SHOULD", "index.html", "expected one WebSite JSON-LD object with name and url equal to the canonical")
+            add(
+                "22",
+                "SHOULD",
+                "index.html",
+                "expected one WebSite JSON-LD object with name and url equal to the canonical",
+            )
     if a.fetch_images:
-        urls = {h.one("og:image") for h in pages.values() if h.one("og:image").startswith("https://")}
+        urls = {
+            h.one("og:image") for h in pages.values() if h.one("og:image").startswith("https://")
+        }
         for u in sorted(urls):
             f.extend(image_findings(u, u))
     else:
-        print("note: image bytes not fetched; pass --fetch-images for the 200, type and size arms of 06", file=sys.stderr)
+        print(
+            "note: image bytes not fetched; pass --fetch-images for the 200, type and size arms of 06",
+            file=sys.stderr,
+        )
     if a.only:
         keep = {x.strip() for x in a.only.split(",")}
         f = [x for x in f if x.rid in keep]
@@ -336,6 +396,12 @@ def serve(routes: dict[str, tuple[int, str, bytes]]) -> ThreadingHTTPServer:
     return srv
 
 
+def expect(condition: object, message: str) -> None:
+    """Self-test check that survives `python -O`, unlike a bare assert."""
+    if not condition:
+        raise SystemExit(message)
+
+
 def self_test() -> int:
     here = Path(__file__).resolve().parent / "fixtures" / "seo"
 
@@ -343,55 +409,87 @@ def self_test() -> int:
         ns = parse(["--host", "example.com", "--site-name", "Example", str(here / site), *extra])
         return run(ns)
 
-    assert not [str(x) for x in go("site-good")], "good site must be clean"
+    expect(not [str(x) for x in go("site-good")], "good site must be clean")
     bad = go("site-bad")
     ids = {x.rid for x in bad}
     want = {"01", "02", "03", "04", "06", "07", "08", "09", "10", "21", "22", "23", "25"}
-    assert want <= ids, f"bad site missed rules: {sorted(want - ids)}"
-    assert not any("frag/" in x.where for x in bad), "a noindex page must be skipped"
+    expect(want <= ids, f"bad site missed rules: {sorted(want - ids)}")
+    expect(not any("frag/" in x.where for x in bad), "a noindex page must be skipped")
     allowed = go("site-bad", "--reviews-allow", "/dev/null", "--only", "21")
-    assert [x.rid for x in allowed] == ["21"], "--only must filter"
+    expect([x.rid for x in allowed] == ["21"], "--only must filter")
     with tempfile.TemporaryDirectory() as t:
         allow = Path(t, "allow.txt")
         allow.write_text("index.html\napp.js\ndocs/d/index.html\n")
-        left = {x.rid for x in go("site-bad", "--reviews-allow", str(allow), "--back-allow", str(allow), "--only", "21,23")}
-        assert not left, f"allow-lists must clear 21 and 23, left {left}"
+        left = {
+            x.rid
+            for x in go(
+                "site-bad",
+                "--reviews-allow",
+                str(allow),
+                "--back-allow",
+                str(allow),
+                "--only",
+                "21,23",
+            )
+        }
+        expect(not left, f"allow-lists must clear 21 and 23, left {left}")
         prev = Path(t, "prev")
         prev.mkdir()
         (prev / "sitemap-0.xml").write_text(
-            '<urlset><url><loc>https://example.com/docs/a/</loc><lastmod>2026-01-01</lastmod></url></urlset>'
+            "<urlset><url><loc>https://example.com/docs/a/</loc><lastmod>2026-01-01</lastmod></url></urlset>"
         )
         drift = go("site-good", "--previous-build", str(prev), "--only", "10")
-        assert [x.rid for x in drift] == ["10"], "lastmod drift between builds must fail"
+        expect([x.rid for x in drift] == ["10"], "lastmod drift between builds must fail")
     png = b"\x89PNG" + b"0" * 10
-    srv = serve({"/ok.png": (200, "image/png", png), "/logo.svg": (200, "image/svg+xml", b"<svg/>"),
-                 "/big.webp": (200, "image/webp", b"0" * (MAX_IMAGE_BYTES + 5))})
+    srv = serve(
+        {
+            "/ok.png": (200, "image/png", png),
+            "/logo.svg": (200, "image/svg+xml", b"<svg/>"),
+            "/big.webp": (200, "image/webp", b"0" * (MAX_IMAGE_BYTES + 5)),
+        }
+    )
     base = f"http://127.0.0.1:{srv.server_address[1]}"
-    assert not image_findings(f"{base}/ok.png", "p"), "a PNG with 200 passes"
+    expect(not image_findings(f"{base}/ok.png", "p"), "a PNG with 200 passes")
     svg = image_findings(f"{base}/logo.svg", "p")
-    assert [x.sev for x in svg] == ["MUST"], "SVG is a MUST finding"
-    assert {x.sev for x in image_findings(f"{base}/big.webp", "p")} == {"SHOULD"}, "WebP and size are SHOULD"
-    assert image_findings(f"{base}/gone.png", "p")[0].sev == "MUST", "a 404 image is a MUST finding"
+    expect([x.sev for x in svg] == ["MUST"], "SVG is a MUST finding")
+    expect(
+        {x.sev for x in image_findings(f"{base}/big.webp", "p")} == {"SHOULD"},
+        "WebP and size are SHOULD",
+    )
+    expect(
+        image_findings(f"{base}/gone.png", "p")[0].sev == "MUST", "a 404 image is a MUST finding"
+    )
     srv.shutdown()
     h = Head()
-    h.feed('<title>A</title><meta name="Description" content="d"><link rel="Canonical nofollow" href="/x">')
-    assert (h.title, h.one("description"), h.canon) == ("A", "d", ["/x"])
+    h.feed(
+        '<title>A</title><meta name="Description" content="d"><link rel="Canonical nofollow" href="/x">'
+    )
+    expect(
+        (h.title, h.one("description"), h.canon) == ("A", "d", ["/x"]),
+        "assertion failed: (h.title, h.one('description'), h.canon) == ('A', 'd', ['/x'])",
+    )
     print("head_check self-test: ok")
     return 0
 
 
 def parse(argv: list[str]) -> argparse.Namespace:
-    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    p = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     p.add_argument("build", nargs="?", help="built site directory")
     p.add_argument("--host", help="public host name, no scheme (example.com)")
     p.add_argument("--site-name", help="site name, enables the title arms of rule 03")
     p.add_argument("--only", help="comma list of rule numbers to keep, such as 01,03")
     p.add_argument("--must-only", action="store_true", help="report and fail on MUST findings only")
     p.add_argument("--fetch-images", action="store_true", help="fetch each og:image (network)")
-    p.add_argument("--exempt-description", help="file of built page paths that may share a description")
+    p.add_argument(
+        "--exempt-description", help="file of built page paths that may share a description"
+    )
     p.add_argument("--reviews-allow", default="structured-data-reviews.txt")
     p.add_argument("--back-allow", default="back-button-allow.txt")
-    p.add_argument("--previous-build", help="an earlier build of the same content, for the lastmod diff")
+    p.add_argument(
+        "--previous-build", help="an earlier build of the same content, for the lastmod diff"
+    )
     p.add_argument("--self-test", action="store_true")
     ns = p.parse_args(argv)
     if not ns.self_test and not (ns.build and ns.host):

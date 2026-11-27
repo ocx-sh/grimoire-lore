@@ -47,7 +47,7 @@ MIGRATION = re.compile(r"\*\*Migration:")
 HASH_WORD = re.compile(r"\b[0-9a-f]{7,40}\b")
 CC_BULLET = re.compile(r"^[-*] [a-z]+(\([^)]*\))?!?: ")
 REMOVAL = re.compile(
-    r"remov[a-z]* (in|after|on) (v?[0-9]+\.[0-9]+|[0-9]{4}-[0-9]{2}-[0-9]{2})", re.I
+    r"remov[a-z]* (in|after|on) (v?[0-9]+\.[0-9]+|[0-9]{4}-[0-9]{2}-[0-9]{2})", re.IGNORECASE
 )
 FINDING = tuple[str, str]  # (rule id, message)
 
@@ -82,9 +82,7 @@ def check_notes(text: str, scopes: str | None = None) -> list[FINDING]:
         m = re.match(r"^### (.+?)\s*$", line)
         if m and m.group(1) not in SIX:
             out.append(("MKT-REL-04", f"line {n}: heading outside the six: {m.group(1)}"))
-        if "**BREAKING" in line and not (
-            n < len(lines) and MIGRATION.search(lines[n])
-        ):
+        if "**BREAKING" in line and not (n < len(lines) and MIGRATION.search(lines[n])):
             out.append(("MKT-REL-03", f"line {n}: BREAKING item without a Migration line below"))
         if scopes and re.search(rf"^- .*\*?\(({scopes})\)", line):
             out.append(("MKT-REL-06", f"line {n}: bullet carries an internal scope"))
@@ -106,7 +104,9 @@ def _deprecated(lines: list[str]) -> list[FINDING]:
     items = [x for x in section if BULLET.match(x) and not MIGRATION.search(x)]
     migrations = [x for x in section if MIGRATION.search(x)]
     if len(items) != len(migrations):
-        out.append(("MKT-REL-07", f"{len(items)} Deprecated items but {len(migrations)} Migration lines"))
+        out.append(
+            ("MKT-REL-07", f"{len(items)} Deprecated items but {len(migrations)} Migration lines")
+        )
     for m in migrations:
         if not REMOVAL.search(m):
             out.append(("MKT-REL-07", "Migration line names no removal version or date"))
@@ -114,7 +114,7 @@ def _deprecated(lines: list[str]) -> list[FINDING]:
 
 
 def _summary(lines: list[str], text: str) -> list[FINDING]:
-    if not re.search(r"^### (Added|Removed|Deprecated)\s*$|\*\*BREAKING", text, re.M):
+    if not re.search(r"^### (Added|Removed|Deprecated)\s*$|\*\*BREAKING", text, re.MULTILINE):
         return []
     for line in lines:
         if not line.strip() or line.startswith("#"):
@@ -131,7 +131,7 @@ def check_config(config: str) -> list[FINDING]:
     out: list[FINDING] = []
     if "breaking_description" not in config:
         out.append(("MKT-REL-03", "template never renders breaking_description"))
-    if not re.search(r"^\s*protect_breaking_commits\s*=\s*true", config, re.M):
+    if not re.search(r"^\s*protect_breaking_commits\s*=\s*true", config, re.MULTILINE):
         out.append(("MKT-REL-04", "protect_breaking_commits = true is missing"))
     parsers = [x for x in config.splitlines() if re.search(r"\b(message|footer|field)\s*=", x)]
     first_skip = next((i for i, x in enumerate(parsers) if re.search(r"skip\s*=\s*true", x)), None)
@@ -141,10 +141,10 @@ def check_config(config: str) -> list[FINDING]:
     if len(re.findall(r'footer\s*=\s*"\^Changelog', config)) < 4:
         out.append(("MKT-REL-05", "fewer than 4 'footer = \"^Changelog' parsers"))
     if scopes_from_config(config) is None:
-        out.append(("MKT-REL-06", "no scope skip parser (field = \"scope\", skip = true)"))
+        out.append(("MKT-REL-06", 'no scope skip parser (field = "scope", skip = true)'))
     if '"Documentation"' in config:
         out.append(("MKT-REL-06", "a Documentation group is defined"))
-    heading = re.search(r"^##\s+\[\{\{\s*-?\s*version", config, re.M)
+    heading = re.search(r"^##\s+\[\{\{\s*-?\s*version", config, re.MULTILINE)
     slot = re.search(r"\{%-?\s*if message\s*-?%\}", config)
     if slot is None:
         out.append(("MKT-REL-14", "no {% if message %} summary slot"))
@@ -176,33 +176,54 @@ def run(notes: Path | None, config: Path | None, workflows: Path | None, skip: s
     return [(src, f) for src, f in found if f[0] not in skip]
 
 
+def expect(condition: object, message: object = "condition false") -> None:
+    """Self-test check that survives python -O, which strips a bare assert."""
+    if not condition:
+        raise SystemExit(f"self-test failed: {message}")
+
+
 def self_test() -> int:
     fx = Path(__file__).resolve().parent / "fixtures" / "notes"
     good_cfg = (fx / "cliff.good.toml").read_text(encoding="utf-8")
     scopes = scopes_from_config(good_cfg)
-    assert scopes and "release" in scopes, scopes
-    assert check_notes((fx / "good.md").read_text(encoding="utf-8"), scopes) == []
-    assert check_config(good_cfg) == []
+    expect(scopes and "release" in scopes, scopes)
+    expect(check_notes((fx / "good.md").read_text(encoding="utf-8"), scopes) == [])
+    expect(check_config(good_cfg) == [])
     bad = {f[0] for f in check_notes((fx / "bad.md").read_text(encoding="utf-8"), scopes)}
-    assert bad == {"MKT-REL-03", "MKT-REL-04", "MKT-REL-06", "MKT-REL-07", "MKT-REL-10", "MKT-REL-14"}, bad
+    expect(
+        bad
+        == {
+            "MKT-REL-03",
+            "MKT-REL-04",
+            "MKT-REL-06",
+            "MKT-REL-07",
+            "MKT-REL-10",
+            "MKT-REL-14",
+        },
+        bad,
+    )
     empty = check_notes((fx / "empty.md").read_text(encoding="utf-8"))
-    assert [f[0] for f in empty] == ["MKT-REL-10"], empty
-    assert check_notes("") == [("MKT-REL-10", "body is empty")]
-    assert check_notes("No user-facing changes. Only CI changed.\n") == []
+    expect([f[0] for f in empty] == ["MKT-REL-10"], empty)
+    expect(check_notes("") == [("MKT-REL-10", "body is empty")])
+    expect(check_notes("No user-facing changes. Only CI changed.\n") == [])
     # A commit URL in a link target passes; the same hash in link text fails.
     ok = "- Fix a crash ([#1](https://example.com/commit/abc1234def))\n"
-    assert check_notes(ok) == []
-    assert any("hash" in m for _, m in check_notes("- Fix a crash [abc1234def]\n"))
+    expect(check_notes(ok) == [])
+    expect(any("hash" in m for _, m in check_notes("- Fix a crash [abc1234def]\n")))
     bad_cfg = {f[0] for f in check_config((fx / "cliff.bad.toml").read_text(encoding="utf-8"))}
-    assert bad_cfg == {"MKT-REL-03", "MKT-REL-04", "MKT-REL-05", "MKT-REL-06", "MKT-REL-14"}, bad_cfg
-    assert [f[0] for f in check_workflows(fx / "workflows")] == ["MKT-REL-10"]
-    assert run(fx / "bad.md", fx / "cliff.good.toml", None, set(bad)) == []
+    expect(
+        bad_cfg == {"MKT-REL-03", "MKT-REL-04", "MKT-REL-05", "MKT-REL-06", "MKT-REL-14"}, bad_cfg
+    )
+    expect([f[0] for f in check_workflows(fx / "workflows")] == ["MKT-REL-10"])
+    expect(run(fx / "bad.md", fx / "cliff.good.toml", None, set(bad)) == [])
     print("notes_check self-test ok")
     return 0
 
 
 def main(argv: list[str]) -> int:
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     ap.add_argument("--notes", type=Path, help="rendered release-notes body")
     ap.add_argument("--config", type=Path, help="cliff.toml")
     ap.add_argument("--workflows", type=Path, help="directory of workflow files (needs --config)")

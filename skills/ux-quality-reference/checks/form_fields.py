@@ -39,34 +39,118 @@ from pathlib import Path
 # The HTML Standard autofill field names (form-control-infrastructure, last
 # updated 27 November 2026) plus on and off. section-* is matched by prefix.
 TOKENS = frozenset(
-    """additional-name address-level1 address-level2 address-level3 address-level4
-    address-line1 address-line2 address-line3 bday bday-day bday-month bday-year
-    billing cc-additional-name cc-csc cc-exp cc-exp-month cc-exp-year
-    cc-family-name cc-given-name cc-name cc-number cc-type country country-name
-    current-password email family-name fax given-name home honorific-prefix
-    honorific-suffix impp language mobile name new-password nickname off on
-    one-time-code organization organization-title pager photo postal-code sex
-    shipping street-address tel tel-area-code tel-country-code tel-extension
-    tel-local tel-local-prefix tel-local-suffix tel-national transaction-amount
-    transaction-currency url username webauthn work""".split()
+    [
+        "additional-name",
+        "address-level1",
+        "address-level2",
+        "address-level3",
+        "address-level4",
+        "address-line1",
+        "address-line2",
+        "address-line3",
+        "bday",
+        "bday-day",
+        "bday-month",
+        "bday-year",
+        "billing",
+        "cc-additional-name",
+        "cc-csc",
+        "cc-exp",
+        "cc-exp-month",
+        "cc-exp-year",
+        "cc-family-name",
+        "cc-given-name",
+        "cc-name",
+        "cc-number",
+        "cc-type",
+        "country",
+        "country-name",
+        "current-password",
+        "email",
+        "family-name",
+        "fax",
+        "given-name",
+        "home",
+        "honorific-prefix",
+        "honorific-suffix",
+        "impp",
+        "language",
+        "mobile",
+        "name",
+        "new-password",
+        "nickname",
+        "off",
+        "on",
+        "one-time-code",
+        "organization",
+        "organization-title",
+        "pager",
+        "photo",
+        "postal-code",
+        "sex",
+        "shipping",
+        "street-address",
+        "tel",
+        "tel-area-code",
+        "tel-country-code",
+        "tel-extension",
+        "tel-local",
+        "tel-local-prefix",
+        "tel-local-suffix",
+        "tel-national",
+        "transaction-amount",
+        "transaction-currency",
+        "url",
+        "username",
+        "webauthn",
+        "work",
+    ]
 )
 
 # One attribute run: plain text, quoted strings, and brace groups two deep.
 # Possessive so a stray quote or brace cannot make the scan quadratic.
 ATTR = r"""(?:[^>"'{}]|"[^"]*"|'[^']*'|\{(?:[^{}]|\{[^{}]*\})*\})*+"""
 
-ELEM_TAGS = (
-    "input Input PasswordInput VInput FormInput FormField Password "
-    "InterfaceSystemInputPassword TextField Field"
-).split()
-UNNAMED_TAGS = (
-    "input textarea select Input Textarea Select PasswordInput SensitiveInput VInput "
-    "FormInput Password InterfaceSystemInputPassword OTPInput TextField FormField"
-).split()
-PW_TAGS = (
-    "input Input PasswordInput SensitiveInput VInput FormInput FormField Password "
-    "InterfaceSystemInputPassword"
-).split()
+ELEM_TAGS = [
+    "input",
+    "Input",
+    "PasswordInput",
+    "VInput",
+    "FormInput",
+    "FormField",
+    "Password",
+    "InterfaceSystemInputPassword",
+    "TextField",
+    "Field",
+]
+UNNAMED_TAGS = [
+    "input",
+    "textarea",
+    "select",
+    "Input",
+    "Textarea",
+    "Select",
+    "PasswordInput",
+    "SensitiveInput",
+    "VInput",
+    "FormInput",
+    "Password",
+    "InterfaceSystemInputPassword",
+    "OTPInput",
+    "TextField",
+    "FormField",
+]
+PW_TAGS = [
+    "input",
+    "Input",
+    "PasswordInput",
+    "SensitiveInput",
+    "VInput",
+    "FormInput",
+    "FormField",
+    "Password",
+    "InterfaceSystemInputPassword",
+]
 
 CUE = re.compile(
     r"""type=["'{]+(?:email|password|tel)"""
@@ -90,7 +174,7 @@ def load(path: str) -> str | None:
         print(f"form_fields: cannot read {path}: {exc.strerror}", file=sys.stderr)
         return None
     # Whole-line // comments go, so an apostrophe in a comment cannot open a string.
-    return re.sub(r"^[ \t]*//[^\n]*$", "", text, flags=re.M)
+    return re.sub(r"^[ \t]*//[^\n]*$", "", text, flags=re.MULTILINE)
 
 
 def elements(text: str, tags: list[str]):
@@ -104,7 +188,7 @@ def line_of(text: str, pos: int) -> int:
 
 
 def window(text: str, pos: int, chars: int, lines: int) -> str:
-    before = text[max(0, pos - chars):pos]
+    before = text[max(0, pos - chars) : pos]
     parts = before.split("\n")
     while parts and parts[-1] == "":  # a trailing newline is not a line
         parts.pop()
@@ -116,7 +200,7 @@ def check_elem(text: str, tags: list[str]) -> list[tuple[int, str]]:
     for name, body, pos in elements(text, tags):
         has_cue = CUE.search(f"<{name}{body}") is not None
         spread = FIELD_WINDOW.search(window(text, pos, 400, 8)) and "{...field}" in body
-        if not (has_cue or spread) or re.search("autocomplete", body, re.I):
+        if not (has_cue or spread) or re.search("autocomplete", body, re.IGNORECASE):
             continue
         out.append((line_of(text, pos), f"<{name}>"))
     return out
@@ -125,7 +209,9 @@ def check_elem(text: str, tags: list[str]) -> list[tuple[int, str]]:
 def check_unnamed(text: str, tags: list[str]) -> list[tuple[int, str]]:
     out = []
     for name, body, pos in elements(text, tags):
-        if name == "FormField" and (not re.search(r"\btype=", body) or re.search(r"\brender=", body)):
+        if name == "FormField" and (
+            not re.search(r"\btype=", body) or re.search(r"\brender=", body)
+        ):
             continue
         if re.search(r"""type=["'](?:hidden|submit|button|checkbox|radio|file)["']""", body):
             continue
@@ -145,11 +231,13 @@ def check_unnamed(text: str, tags: list[str]) -> list[tuple[int, str]]:
 
 def check_badtok(text: str, tokens: frozenset[str]) -> list[tuple[int, str]]:
     out = []
-    pat = re.compile(r"""(?<![-\w])autocomplete\s*=\s*(?:"([^"{}]*)"|'([^'{}]*)')""", re.I)
+    pat = re.compile(r"""(?<![-\w])autocomplete\s*=\s*(?:"([^"{}]*)"|'([^'{}]*)')""", re.IGNORECASE)
     for n, line in enumerate(text.split("\n"), 1):
         for m in pat.finditer(line):
             value = m.group(1) if m.group(1) is not None else m.group(2)
-            bad = [w for w in value.lower().split() if w not in tokens and not w.startswith("section-")]
+            bad = [
+                w for w in value.lower().split() if w not in tokens and not w.startswith("section-")
+            ]
             if bad:
                 out.append((n, f'autocomplete="{value}"'))
     return out
@@ -157,7 +245,7 @@ def check_badtok(text: str, tokens: frozenset[str]) -> list[tuple[int, str]]:
 
 PW_ELEM = re.compile(
     r"""type=["'{][^>]*password|<(?:PasswordInput|Password|SensitiveInput|InterfaceSystemInputPassword)\b""",
-    re.I,
+    re.IGNORECASE,
 )
 
 
@@ -166,11 +254,11 @@ def check_pwtok(text: str, tags: list[str]) -> list[tuple[int, str]]:
     for name, body, pos in elements(text, tags):
         if not PW_ELEM.search(f"<{name}{body}"):
             continue
-        if m := re.search(r'autocomplete\s*=\s*"([^"]*)"', body, re.I):
+        if m := re.search(r'autocomplete\s*=\s*"([^"]*)"', body, re.IGNORECASE):
             tok = m.group(1)
-        elif m := re.search(r"autocomplete\s*=\s*\{([^}]*)\}", body, re.I):
+        elif m := re.search(r"autocomplete\s*=\s*\{([^}]*)\}", body, re.IGNORECASE):
             tok = "{" + m.group(1) + "}"
-        elif re.search("autocomplete", body, re.I):
+        elif re.search("autocomplete", body, re.IGNORECASE):
             tok = "(dynamic)"
         else:
             tok = "(none: read wrapper default)"
@@ -218,19 +306,32 @@ def self_test() -> int:
             expect(any(is_finding(check, r) for r in rows), f"{f.name} must be listed")
         for f in passes:
             rows = run(check, str(f), [], TOKENS) or []
-            expect(not any(is_finding(check, r) for r in rows), f"{f.name} must be clean, got {rows}")
+            expect(
+                not any(is_finding(check, r) for r in rows), f"{f.name} must be clean, got {rows}"
+            )
 
     def rows(check: str, name: str) -> list[str]:
         return [r.split(":", 1)[1] for r in run(check, str(here / name), [], TOKENS) or []]
 
-    expect(rows("unnamed", "unnamed-fail-placeholder.vue") == ["6:<VInput>", "9:<input>", "13:<SensitiveInput>"],
-           f"unnamed placeholder rows {rows('unnamed', 'unnamed-fail-placeholder.vue')}")
-    expect(rows("unnamed", "unnamed-fail-aria-only.tsx") == ["3:<input> aria-only"], "aria-only row")
-    expect(rows("elem", "elem-fail-components.vue") == ["3:<VInput>", "5:<PasswordInput>", "6:<input>", "10:<VInput>"],
-           f"elem rows {rows('elem', 'elem-fail-components.vue')}")
+    expect(
+        rows("unnamed", "unnamed-fail-placeholder.vue")
+        == ["6:<VInput>", "9:<input>", "13:<SensitiveInput>"],
+        f"unnamed placeholder rows {rows('unnamed', 'unnamed-fail-placeholder.vue')}",
+    )
+    expect(
+        rows("unnamed", "unnamed-fail-aria-only.tsx") == ["3:<input> aria-only"], "aria-only row"
+    )
+    expect(
+        rows("elem", "elem-fail-components.vue")
+        == ["3:<VInput>", "5:<PasswordInput>", "6:<input>", "10:<VInput>"],
+        f"elem rows {rows('elem', 'elem-fail-components.vue')}",
+    )
     expect(rows("elem", "elem-fail-spread.tsx") == ["4:<Input>"], "elem spread row")
-    expect(rows("badtok", "badtok-fail-password.vue") == ['2:autocomplete="password"', '3:autocomplete="new-pass"'],
-           "badtok rows")
+    expect(
+        rows("badtok", "badtok-fail-password.vue")
+        == ['2:autocomplete="password"', '3:autocomplete="new-pass"'],
+        "badtok rows",
+    )
     expect(rows("pwtok", "pwtok-fail-username.vue")[0].endswith("token=username"), "pwtok username")
     expect(len(TOKENS) == 64 and "section-x" not in TOKENS, "token list size")
     with tempfile.TemporaryDirectory() as tmp:  # a formatter-split tag with a brace group inside
@@ -242,11 +343,17 @@ def self_test() -> int:
 
 
 def main(argv: list[str]) -> int:
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     ap.add_argument("check", nargs="?", choices=["unnamed", "elem", "badtok", "pwtok"])
     ap.add_argument("files", nargs="*")
-    ap.add_argument("--tag", action="append", default=[], help="extra component tag name (repeatable)")
-    ap.add_argument("--tokens", help="file with one autofill token per line, replacing the built-in list")
+    ap.add_argument(
+        "--tag", action="append", default=[], help="extra component tag name (repeatable)"
+    )
+    ap.add_argument(
+        "--tokens", help="file with one autofill token per line, replacing the built-in list"
+    )
     ap.add_argument("--self-test", action="store_true")
     args = ap.parse_args(argv)
     if args.self_test:

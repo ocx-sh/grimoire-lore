@@ -35,7 +35,7 @@ SOURCE = {".ts", ".js", ".html"}
 SKIP_DIRS = {"node_modules", ".git", "dist", "build", "out", "fixtures"}
 HEX = re.compile(r"#[0-9a-fA-F]{3,8}\b")
 VSCODE_FALLBACK = re.compile(r"var\(\s*--vscode-[\w-]+\s*,[^;{}]*\)")
-COLOUR_LINE = re.compile(r"(color|background|border|outline|fill|stroke|shadow)", re.I)
+COLOUR_LINE = re.compile(r"(color|background|border|outline|fill|stroke|shadow)", re.IGNORECASE)
 
 
 def open_tag(s: str, i: int) -> tuple[str, int]:
@@ -58,7 +58,7 @@ def classify(s: str, m: re.Match) -> tuple[str, int, str]:
     tag = m.group(1)
     t, end = open_tag(s, m.start())
     close = s.find(f"</{tag}>", end)
-    body = s[end:close] if 0 < close and close - end < 600 else ""
+    body = s[end:close] if close > 0 and close - end < 600 else ""
     text = re.sub(r"<[^>]*>", "", re.sub(r"\$\{[^}]*\}", "X", body)).strip()
     line = s.count("\n", 0, m.start()) + 1
     if tag == "input" and re.search(r"""type=["']hidden["']""", t):
@@ -73,7 +73,9 @@ def classify(s: str, m: re.Match) -> tuple[str, int, str]:
         before = s[: m.start()]
         wrapped = before.rfind("<label") > before.rfind("</label>")
         ident = re.search(r"""\bid=["']([^"'$]+)["']""", t)
-        if wrapped or (ident and re.search(r"""\bfor=["']""" + re.escape(ident.group(1)) + r"""["']""", s)):
+        if wrapped or (
+            ident and re.search(r"""\bfor=["']""" + re.escape(ident.group(1)) + r"""["']""", s)
+        ):
             return tag, line, "text"
     if re.search(r"\stitle=", t):
         return tag, line, "title-only"
@@ -82,9 +84,11 @@ def classify(s: str, m: re.Match) -> tuple[str, int, str]:
 
 def scan_file(path: Path) -> tuple[list[tuple[int, str, str]], list[tuple[int, str]]]:
     s = path.read_text(encoding="utf-8", errors="replace")
-    controls = [] if path.suffix == ".css" else [
-        (line, tag, kind) for tag, line, kind in (classify(s, m) for m in OPEN.finditer(s))
-    ]
+    controls = (
+        []
+        if path.suffix == ".css"
+        else [(line, tag, kind) for tag, line, kind in (classify(s, m) for m in OPEN.finditer(s))]
+    )
     hexes = []
     for n, raw in enumerate(s.split("\n"), 1):
         if re.match(r"\s*(/\*|\*|//)", raw):
@@ -107,9 +111,13 @@ def files_under(roots: list[Path]):
             yield root
             continue
         for p in sorted(root.rglob("*")):
-            if p.is_file() and p.suffix in SOURCE | {".css"} and not (SKIP_DIRS & set(p.parts)):
-                if not p.name.endswith(".d.ts"):
-                    yield p
+            if (
+                p.is_file()
+                and p.suffix in SOURCE | {".css"}
+                and not (SKIP_DIRS & set(p.parts))
+                and not p.name.endswith(".d.ts")
+            ):
+                yield p
 
 
 def scan(roots: list[Path], listing: list[str]) -> tuple[Counter, list[str]]:
@@ -143,8 +151,14 @@ def self_test() -> int:
 
     counts, found = scan([here / "scanwv-fail-controls.ts"], [])
     expect(counts[("button", "title-only")] == 2, f"title-only buttons: {counts}")
-    expect(counts[("button", "UNNAMED")] == 1 and counts[("input", "UNNAMED")] == 1, f"UNNAMED: {counts}")
-    expect(counts[("button", "aria-label")] == 1 and counts[("button", "text")] == 1, f"named: {counts}")
+    expect(
+        counts[("button", "UNNAMED")] == 1 and counts[("input", "UNNAMED")] == 1,
+        f"UNNAMED: {counts}",
+    )
+    expect(
+        counts[("button", "aria-label")] == 1 and counts[("button", "text")] == 1,
+        f"named: {counts}",
+    )
     expect(len(found) == 4, f"fail fixture findings: {found}")
     counts, found = scan([here / "scanwv-pass-controls.ts"], [])
     expect(found == [], f"pass fixture must be clean: {found}")
@@ -158,9 +172,17 @@ def self_test() -> int:
 
 
 def main(argv: list[str]) -> int:
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     ap.add_argument("dirs", nargs="*", default=["."])
-    ap.add_argument("--list", nargs="+", default=[], metavar="TAG", help="also print every control of these tags")
+    ap.add_argument(
+        "--list",
+        nargs="+",
+        default=[],
+        metavar="TAG",
+        help="also print every control of these tags",
+    )
     ap.add_argument("--self-test", action="store_true")
     args = ap.parse_args(argv)
     if args.self_test:

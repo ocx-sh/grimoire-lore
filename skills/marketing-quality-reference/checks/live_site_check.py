@@ -23,11 +23,10 @@ from __future__ import annotations
 
 import argparse
 import re
-import socket
 import ssl
 import sys
-import threading
 import tempfile
+import threading
 import tomllib
 import urllib.error
 import urllib.request
@@ -40,8 +39,17 @@ from urllib.parse import urljoin, urlparse
 BROWSER_UA = "Mozilla/5.0"
 MAX_REDIRECTS = 5  # the largest count every compliant crawler must follow (RFC 9309)
 MAX_ROBOTS_BYTES = 512_000  # Google reads 500 KiB
-REQUIRED_TOKENS = ("OAI-SearchBot", "Claude-SearchBot", "PerplexityBot", "ChatGPT-User",
-                   "Claude-User", "Perplexity-User", "GPTBot", "ClaudeBot", "Google-Extended")
+REQUIRED_TOKENS = (
+    "OAI-SearchBot",
+    "Claude-SearchBot",
+    "PerplexityBot",
+    "ChatGPT-User",
+    "Claude-User",
+    "Perplexity-User",
+    "GPTBot",
+    "ClaudeBot",
+    "Google-Extended",
+)
 STALE_DAYS = 180
 SEV = {"26": "SHOULD"}
 
@@ -55,18 +63,23 @@ class _NoRedirect(urllib.request.HTTPRedirectHandler):
         return None
 
 
-_OPENER = urllib.request.build_opener(_NoRedirect)
-
-
 def http(url: str, ua: str = BROWSER_UA, cap: int = 2_000_000, follow: bool = True) -> dict:
     """GET with manual redirects. Raises Unreachable on TLS, DNS, refusal and timeout."""
     hops = 0
     while True:
-        req = urllib.request.Request(url, headers={"User-Agent": ua})
+        if urlparse(url).scheme not in ("http", "https"):
+            raise Unreachable(f"unsupported URL scheme: {url}")
+        opener = urllib.request.build_opener(_NoRedirect)
+        opener.addheaders = [("User-Agent", ua)]
         try:
-            with _OPENER.open(req, timeout=20) as r:
-                return {"status": r.status, "headers": r.headers, "body": r.read(cap + 1),
-                        "redirects": hops, "url": url}
+            with opener.open(url, timeout=20) as r:
+                return {
+                    "status": r.status,
+                    "headers": r.headers,
+                    "body": r.read(cap + 1),
+                    "redirects": hops,
+                    "url": url,
+                }
         except urllib.error.HTTPError as e:
             if follow and e.code in (301, 302, 303, 307, 308) and e.headers.get("Location"):
                 hops += 1
@@ -74,12 +87,17 @@ def http(url: str, ua: str = BROWSER_UA, cap: int = 2_000_000, follow: bool = Tr
                 if hops > 20:
                     raise Unreachable("redirect loop") from None
                 continue
-            return {"status": e.code, "headers": e.headers, "body": e.read(cap + 1),
-                    "redirects": hops, "url": url}
+            return {
+                "status": e.code,
+                "headers": e.headers,
+                "body": e.read(cap + 1),
+                "redirects": hops,
+                "url": url,
+            }
         except urllib.error.URLError as e:
             kind = "TLS error" if isinstance(e.reason, ssl.SSLError) else "unreachable"
             raise Unreachable(f"{kind} for {url}: {e.reason}") from None
-        except (socket.timeout, OSError) as e:
+        except (TimeoutError, OSError) as e:
             raise Unreachable(f"unreachable {url}: {e}") from None
 
 
@@ -89,8 +107,8 @@ def parse_robots(text: str) -> tuple[list[tuple[list[str], list[tuple[str, str]]
     groups: list[tuple[list[str], list[tuple[str, str]]]] = []
     sitemaps: list[str] = []
     prev_ua = False
-    for line in text.splitlines():
-        line = line.split("#", 1)[0].strip()
+    for raw_line in text.splitlines():
+        line = raw_line.split("#", 1)[0].strip()
         if ":" not in line:
             continue
         field, _, value = line.partition(":")
@@ -117,7 +135,12 @@ def robots_text_findings(text: str, indexes: list[str]) -> list[tuple[str, str]]
         if "*" in agents or "googlebot" in agents:
             for field, value in rules:
                 if field in ("crawl-delay", "noindex"):
-                    out.append(("11", f"{field}: {value} in a group for {'/'.join(agents)}; Google ignores it"))
+                    out.append(
+                        (
+                            "11",
+                            f"{field}: {value} in a group for {'/'.join(agents)}; Google ignores it",
+                        )
+                    )
     star = {v for a, r in groups if "*" in a for f, v in r if f == "disallow" and v}
     for agents, rules in groups:
         if "*" in agents:
@@ -165,7 +188,7 @@ def policy_file_findings(path: Path, today: date) -> tuple[list[tuple[str, str]]
     tokens = p.get("token", {})
     for t in REQUIRED_TOKENS:
         if t not in tokens:
-            out.append(("15", f"token {t} has no [token.\"{t}\"] table"))
+            out.append(("15", f'token {t} has no [token."{t}"] table'))
     for t in ("anthropic-ai", "Claude-Web"):
         if t in tokens and "ClaudeBot" not in tokens:
             out.append(("15", f"{t} is recorded without ClaudeBot"))
@@ -179,7 +202,12 @@ def policy_file_findings(path: Path, today: date) -> tuple[list[tuple[str, str]]
             if v.get("owner") == "unreviewed":
                 open_items.append(name)
             elif not (v.get("owner") and v.get("decided")):
-                out.append(("15", f"{name}: a block needs owner and decided, or owner = \"unreviewed\" alone"))
+                out.append(
+                    (
+                        "15",
+                        f'{name}: a block needs owner and decided, or owner = "unreviewed" alone',
+                    )
+                )
     try:
         age = (today - date.fromisoformat(str(p["reviewed"]))).days
         if age > STALE_DAYS:
@@ -193,20 +221,27 @@ def policy_file_findings(path: Path, today: date) -> tuple[list[tuple[str, str]]
     return out, open_items
 
 
-def policy_live_findings(host: str, scheme: str, policy: dict, build_robots: Path | None) -> list[tuple[str, str]]:
+def policy_live_findings(
+    host: str, scheme: str, policy: dict, build_robots: Path | None
+) -> list[tuple[str, str]]:
     base = f"{scheme}://{host}"
     resp = http(f"{base}/robots.txt")
     live = resp["body"].decode("utf-8", "replace")
     groups, _ = parse_robots(live)
     live_tokens = {a for agents, _r in groups for a in agents if a != "*"}
     policy_tokens = {t.lower(): t for t in policy.get("token", {})}
-    out = [("16", f"live robots.txt names {t}, which the policy file does not record")
-           for t in sorted(live_tokens - set(policy_tokens))]
+    out = [
+        ("16", f"live robots.txt names {t}, which the policy file does not record")
+        for t in sorted(live_tokens - set(policy_tokens))
+    ]
     if not policy.get("cdn"):
         if build_robots is None:
             out.append(("16", "no cdn list and no --build-robots: bytes cannot be compared"))
         else:
-            clean = lambda s: [x for x in s.splitlines() if x.strip() and not x.startswith("#")]
+
+            def clean(s):
+                return [x for x in s.splitlines() if x.strip() and not x.startswith("#")]
+
             if clean(live) != clean(build_robots.read_text(encoding="utf-8")):
                 out.append(("16", "live robots.txt differs from the build's robots.txt"))
     ref = http(f"{base}/", BROWSER_UA)["status"]
@@ -249,15 +284,20 @@ def head_fields(html: str) -> dict[str, str]:
 
 def live_locs(url: str) -> list[str]:
     out: list[str] = []
-    for loc in re.findall(r"<loc>\s*([^<\s]+)\s*</loc>", http(url)["body"].decode("utf-8", "replace")):
+    for loc in re.findall(
+        r"<loc>\s*([^<\s]+)\s*</loc>", http(url)["body"].decode("utf-8", "replace")
+    ):
         out += live_locs(loc) if loc.endswith(".xml") else [loc]
     return out
 
 
 def built_file(build: Path, url: str) -> Path | None:
     path = urlparse(url).path
-    cands = [build / path.lstrip("/") / "index.html"] if path.endswith("/") or "." not in Path(path).name \
+    cands = (
+        [build / path.lstrip("/") / "index.html"]
+        if path.endswith("/") or "." not in Path(path).name
         else [build / path.lstrip("/")]
+    )
     if not path.endswith("/") and "." not in Path(path).name:
         cands.append(build / (path.lstrip("/") + ".html"))
     return next((c for c in cands if c.is_file()), None)
@@ -271,7 +311,11 @@ def parity_findings(host: str, scheme: str, build: Path) -> list[tuple[str, str]
     live = sorted({u for s in smaps for u in live_locs(s)})
     built: set[str] = set()
     for f in build.rglob("sitemap*.xml"):
-        built |= {x for x in re.findall(r"<loc>\s*([^<\s]+)\s*</loc>", f.read_text(encoding="utf-8")) if not x.endswith(".xml")}
+        built |= {
+            x
+            for x in re.findall(r"<loc>\s*([^<\s]+)\s*</loc>", f.read_text(encoding="utf-8"))
+            if not x.endswith(".xml")
+        }
     out = [("17", f"sitemap difference: live only {u}") for u in sorted(set(live) - built)]
     out += [("17", f"sitemap difference: build only {u}") for u in sorted(built - set(live))]
     for u in sorted({f"{base}/", *live[:5], *live[-5:]}):
@@ -284,11 +328,21 @@ def parity_findings(host: str, scheme: str, build: Path) -> list[tuple[str, str]
         build_fields = head_fields(f.read_text(encoding="utf-8", errors="replace"))
         for k in sorted(set(live_fields) | set(build_fields)):
             if live_fields.get(k) != build_fields.get(k):
-                out.append(("17", f"{u}: {k} is {live_fields.get(k)!r} live and {build_fields.get(k)!r} in the build"))
+                out.append(
+                    (
+                        "17",
+                        f"{u}: {k} is {live_fields.get(k)!r} live and {build_fields.get(k)!r} in the build",
+                    )
+                )
         link = resp["headers"].get("Link", "")
         m = re.search(r'<([^>]+)>\s*;\s*rel="?canonical"?', link)
         if m and m.group(1) != build_fields.get("canonical"):
-            out.append(("02", f"{u}: Link header names canonical {m.group(1)}, HTML says {build_fields.get('canonical')}"))
+            out.append(
+                (
+                    "02",
+                    f"{u}: Link header names canonical {m.group(1)}, HTML says {build_fields.get('canonical')}",
+                )
+            )
     return out
 
 
@@ -328,25 +382,60 @@ def serve(fn) -> ThreadingHTTPServer:
     return srv
 
 
+def expect(condition: object, message: object) -> None:
+    """Self-test check that survives `python -O`, unlike a bare assert."""
+    if not condition:
+        raise SystemExit(message)
+
+
 def self_test() -> int:
     here = Path(__file__).resolve().parent / "fixtures" / "seo"
-    robots = lambda n: (here / "robots" / n).read_text(encoding="utf-8")
-    ids = lambda found: sorted({r for r, _ in found})
-    assert robots_text_findings(robots("good.txt"), ["https://example.com/sitemap-index.xml"]) == []
-    assert ids(robots_text_findings(robots("crawl-delay.txt"), [])) == ["11"]
-    assert ids(robots_text_findings(robots("drops-disallow.txt"), [])) == ["13"]
-    assert ids(robots_text_findings(robots("good.txt"), ["https://example.com/other.xml"])) == ["12"]
-    assert ids(robots_text_findings("User-agent: *\nDisallow:\nSitemap: /sitemap.xml\n", [])) == ["12"]
+
+    def robots(n):
+        return (here / "robots" / n).read_text(encoding="utf-8")
+
+    def ids(found):
+        return sorted({r for r, _ in found})
+
+    expect(
+        robots_text_findings(robots("good.txt"), ["https://example.com/sitemap-index.xml"]) == [],
+        "assertion failed: robots_text_findings(robots('good.txt'), ['https://example.com/sitemap",
+    )
+    expect(
+        ids(robots_text_findings(robots("crawl-delay.txt"), [])) == ["11"],
+        "assertion failed: ids(robots_text_findings(robots('crawl-delay.txt'), [])) == ['11']",
+    )
+    expect(
+        ids(robots_text_findings(robots("drops-disallow.txt"), [])) == ["13"],
+        "assertion failed: ids(robots_text_findings(robots('drops-disallow.txt'), [])) == ['13']",
+    )
+    expect(
+        ids(robots_text_findings(robots("good.txt"), ["https://example.com/other.xml"])) == ["12"],
+        "assertion failed: ids(robots_text_findings(robots('good.txt'), ['https://example.com/oth",
+    )
+    expect(
+        ids(robots_text_findings("User-agent: *\nDisallow:\nSitemap: /sitemap.xml\n", []))
+        == ["12"],
+        "assertion failed: ids(robots_text_findings('User-agent: *\\nDisallow:\\nSitemap: /sitemap.",
+    )
     today = date(2026, 11, 27)
     found, open_items = policy_file_findings(here / "policy" / "crawler-policy-good.toml", today)
-    assert found == [] and open_items == ["GPTBot"], (found, open_items)
+    expect(found == [] and open_items == ["GPTBot"], (found, open_items))
     bad, _ = policy_file_findings(here / "policy" / "crawler-policy-bad.toml", today)
-    assert len(bad) == 3 and ids(bad) == ["15"], bad
-    assert policy_file_findings(here / "policy" / "missing.toml", today)[0]
+    expect(len(bad) == 3 and ids(bad) == ["15"], bad)
+    expect(
+        policy_file_findings(here / "policy" / "missing.toml", today)[0],
+        "assertion failed: policy_file_findings(here / 'policy' / 'missing.toml', today)[0]",
+    )
 
     good = here / "site-good"
     state: dict = {"mode": "ok"}
-    srv = serve(lambda path, ua: route(path, ua))
+    handler: dict = {}
+
+    def dispatch(path: str, ua: str):
+        return handler["route"](path, ua)
+
+    srv = serve(dispatch)
     host = f"127.0.0.1:{srv.server_address[1]}"
     with tempfile.TemporaryDirectory() as t:
         build = Path(t)
@@ -354,20 +443,33 @@ def self_test() -> int:
             if f.is_file():
                 dest = build / f.relative_to(good)
                 dest.parent.mkdir(parents=True, exist_ok=True)
-                dest.write_text(f.read_text(encoding="utf-8").replace("https://example.com", f"http://{host}"), encoding="utf-8")
-        (build / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: http://{host}/sitemap-0.xml\n")
+                dest.write_text(
+                    f.read_text(encoding="utf-8").replace("https://example.com", f"http://{host}"),
+                    encoding="utf-8",
+                )
+        (build / "robots.txt").write_text(
+            f"User-agent: *\nAllow: /\nSitemap: http://{host}/sitemap-0.xml\n"
+        )
 
         def route(path: str, ua: str):
             mode = state["mode"]
             if path.startswith("/r") and path != "/robots.txt":
                 n = int(path[2:])
-                return (302, {"Location": f"/r{n + 1}"}, b"") if n < 6 else (200, {"Content-Type": "text/plain"}, b"User-agent: *\n")
+                return (
+                    (302, {"Location": f"/r{n + 1}"}, b"")
+                    if n < 6
+                    else (200, {"Content-Type": "text/plain"}, b"User-agent: *\n")
+                )
             if path == "/robots.txt":
                 if mode == "redirect":
                     return 302, {"Location": "/r1"}, b""
                 if mode == "html":
                     return 200, {"Content-Type": "text/html"}, b"User-agent: *\n"
-                return 200, {"Content-Type": "text/plain; charset=utf-8"}, (build / "robots.txt").read_bytes()
+                return (
+                    200,
+                    {"Content-Type": "text/plain; charset=utf-8"},
+                    (build / "robots.txt").read_bytes(),
+                )
             if mode == "pv-ok":
                 return 200, {"X-Robots-Tag": "noindex, nofollow"}, b""
             if mode == "pv-bad":
@@ -384,29 +486,66 @@ def self_test() -> int:
                 body = body.replace(b"Install the tool", b"Something else")
             return 200, {}, body
 
-        assert parity_findings(host, "http", build) == [], "good parity"
+        handler["route"] = route
+        expect(parity_findings(host, "http", build) == [], "good parity")
         state["mode"] = "retitle"
-        assert any("title" in m for _, m in parity_findings(host, "http", build)), "head drift"
+        expect(any("title" in m for _, m in parity_findings(host, "http", build)), "head drift")
         state["mode"] = "short"
-        assert any("sitemap difference" in m for _, m in parity_findings(host, "http", build)), "sitemap drift"
+        expect(
+            any("sitemap difference" in m for _, m in parity_findings(host, "http", build)),
+            "sitemap drift",
+        )
         state["mode"] = "ok"
-        assert robots_response_findings(http(f"http://{host}/robots.txt")) == []
+        expect(
+            robots_response_findings(http(f"http://{host}/robots.txt")) == [],
+            "assertion failed: robots_response_findings(http(f'http://{host}/robots.txt')) == []",
+        )
         state["mode"] = "html"
-        assert ids(robots_response_findings(http(f"http://{host}/robots.txt"))) == ["11"]
+        expect(
+            ids(robots_response_findings(http(f"http://{host}/robots.txt"))) == ["11"],
+            "assertion failed: ids(robots_response_findings(http(f'http://{host}/robots.txt'))) == ['",
+        )
         state["mode"] = "redirect"
-        assert robots_response_findings(http(f"http://{host}/robots.txt"))[0][1].startswith("6 redirects")
+        expect(
+            robots_response_findings(http(f"http://{host}/robots.txt"))[0][1].startswith(
+                "6 redirects"
+            ),
+            "assertion failed: robots_response_findings(http(f'http://{host}/robots.txt'))[0][1].star",
+        )
         state["mode"] = "ok"
         pol = {"token": {"GPTBot": {"class": "training"}, "PerplexityBot": {"class": "search"}}}
-        assert policy_live_findings(host, "http", pol, build / "robots.txt") == []
-        (build / "robots.txt").write_text("User-agent: *\nAllow: /\nUser-agent: NewBot\nDisallow: /\n")
-        assert ids(policy_live_findings(host, "http", pol, build / "robots.txt")) == ["16"], "unrecorded token"
-        (build / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: http://{host}/sitemap-0.xml\n")
+        expect(
+            policy_live_findings(host, "http", pol, build / "robots.txt") == [],
+            "assertion failed: policy_live_findings(host, 'http', pol, build / 'robots.txt') == []",
+        )
+        (build / "robots.txt").write_text(
+            "User-agent: *\nAllow: /\nUser-agent: NewBot\nDisallow: /\n"
+        )
+        expect(
+            ids(policy_live_findings(host, "http", pol, build / "robots.txt")) == ["16"],
+            "unrecorded token",
+        )
+        (build / "robots.txt").write_text(
+            f"User-agent: *\nAllow: /\nSitemap: http://{host}/sitemap-0.xml\n"
+        )
         state["mode"] = "blocked"
-        assert any("PerplexityBot gets 403" in m for _, m in policy_live_findings(host, "http", pol, build / "robots.txt"))
+        expect(
+            any(
+                "PerplexityBot gets 403" in m
+                for _, m in policy_live_findings(host, "http", pol, build / "robots.txt")
+            ),
+            "assertion failed: any(('PerplexityBot gets 403' in m for _, m in policy_live_findings(ho",
+        )
         state["mode"] = "pv-ok"
-        assert preview_findings([host], "http") == []
+        expect(
+            preview_findings([host], "http") == [],
+            "assertion failed: preview_findings([host], 'http') == []",
+        )
         state["mode"] = "pv-bad"
-        assert ids(preview_findings([host], "http")) == ["26"]
+        expect(
+            ids(preview_findings([host], "http")) == ["26"],
+            "assertion failed: ids(preview_findings([host], 'http')) == ['26']",
+        )
     srv.shutdown()
     try:
         http("http://127.0.0.1:1/")
@@ -418,14 +557,28 @@ def self_test() -> int:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     ap.add_argument("--self-test", action="store_true")
-    ap.add_argument("--scheme", choices=("https", "http"), default="https", help="http is for the self-test server")
+    ap.add_argument(
+        "--scheme",
+        choices=("https", "http"),
+        default="https",
+        help="http is for the self-test server",
+    )
     sub = ap.add_subparsers(dest="cmd")
     r = sub.add_parser("robots", help="rules 11, 12, 13")
     r.add_argument("host", nargs="?")
-    r.add_argument("--file", help="check this robots.txt text instead of fetching (skips the response arm)")
-    r.add_argument("--index", action="append", default=[], help="a sitemap index URL the deploy publishes; repeatable")
+    r.add_argument(
+        "--file", help="check this robots.txt text instead of fetching (skips the response arm)"
+    )
+    r.add_argument(
+        "--index",
+        action="append",
+        default=[],
+        help="a sitemap index URL the deploy publishes; repeatable",
+    )
     pf = sub.add_parser("policy-file", help="rule 15")
     pf.add_argument("file")
     pf.add_argument("--today", help="YYYY-MM-DD, for tests")
@@ -449,15 +602,28 @@ def main() -> int:
                 text, found = Path(a.file).read_text(encoding="utf-8"), []
             elif a.host:
                 resp = http(f"{a.scheme}://{a.host}/robots.txt")
-                text, found = resp["body"].decode("utf-8", "replace"), robots_response_findings(resp)
+                text, found = (
+                    resp["body"].decode("utf-8", "replace"),
+                    robots_response_findings(resp),
+                )
             else:
                 ap.error("robots needs HOST or --file")
-            notes = [] if a.index else ["note: no --index given; every sitemap index the deploy publishes must be named"]
+            notes = (
+                []
+                if a.index
+                else [
+                    "note: no --index given; every sitemap index the deploy publishes must be named"
+                ]
+            )
             return emit(a.host or a.file, found + robots_text_findings(text, a.index), notes)
         if a.cmd == "policy-file":
             today = date.fromisoformat(a.today) if a.today else date.today()
             found, items = policy_file_findings(Path(a.file), today)
-            return emit(a.file, found, [f"open item for the owner: {t} is blocked and unreviewed" for t in items])
+            return emit(
+                a.file,
+                found,
+                [f"open item for the owner: {t} is blocked and unreviewed" for t in items],
+            )
         if a.cmd == "policy":
             pol = tomllib.loads(Path(a.policy).read_text(encoding="utf-8"))
             br = Path(a.build_robots) if a.build_robots else None

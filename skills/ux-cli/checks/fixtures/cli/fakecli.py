@@ -9,6 +9,7 @@ import difflib
 import os
 import sys
 import time
+from pathlib import Path
 
 BAD = set(filter(None, os.environ.get("FAKECLI_BAD", "").split(",")))
 NAMES = ["run", "clean", "publish", "config", "completion"]
@@ -35,16 +36,36 @@ Examples:
   fakecli run job.toml
   fakecli clean --dry-run
 """
-FORCE = "Delete files and skip the trust prompt" if "forcemisuse" in BAD else "Delete files other projects use"
+FORCE = (
+    "Delete files and skip the trust prompt"
+    if "forcemisuse" in BAD
+    else "Delete files other projects use"
+)
 HELP = {
     (): ROOT,
-    ("run",): "Run a job\n\nUsage: fakecli run [OPTIONS] <FILE> [-- <ARGS>...]\n\nOptions:\n  -h, --help  Print help\n",
-    ("clean",): f"Remove cached files\n\nUsage: fakecli clean [OPTIONS]\n\nOptions:\n      --force    {FORCE}\n      --dry-run  Print the plan and write nothing\n  -h, --help     Print help\n",
-    ("publish",): "Publish a version\n\nUsage: fakecli publish [OPTIONS] <VERSION>\n\nOptions:\n      --force    Move an existing tag\n      --dry-run  Print the plan and write nothing\n  -h, --help     Print help\n\nConsequence: moves the tag for everyone who pulls this version.\n",
-    ("completion",): "Print a shell completion script\n\nUsage: fakecli completion <SHELL>\n\nOptions:\n  -h, --help  Print help\n",
-    ("config",): "Read and write settings\n\nUsage: fakecli config <COMMAND>\n\nCommands:\n  get  Print a key\n  set  Set a key\n\nOptions:\n  -h, --help  Print help\n",
-    ("config", "get"): "Print a key\n\nUsage: fakecli config get <KEY>\n\nOptions:\n  -h, --help  Print help\n",
-    ("config", "set"): "Set a key\n\nUsage: fakecli config set <KEY> <VALUE>\n\nOptions:\n  -h, --help  Print help\n",
+    (
+        "run",
+    ): "Run a job\n\nUsage: fakecli run [OPTIONS] <FILE> [-- <ARGS>...]\n\nOptions:\n  -h, --help  Print help\n",
+    (
+        "clean",
+    ): f"Remove cached files\n\nUsage: fakecli clean [OPTIONS]\n\nOptions:\n      --force    {FORCE}\n      --dry-run  Print the plan and write nothing\n  -h, --help     Print help\n",
+    (
+        "publish",
+    ): "Publish a version\n\nUsage: fakecli publish [OPTIONS] <VERSION>\n\nOptions:\n      --force    Move an existing tag\n      --dry-run  Print the plan and write nothing\n  -h, --help     Print help\n\nConsequence: moves the tag for everyone who pulls this version.\n",
+    (
+        "completion",
+    ): "Print a shell completion script\n\nUsage: fakecli completion <SHELL>\n\nOptions:\n  -h, --help  Print help\n",
+    (
+        "config",
+    ): "Read and write settings\n\nUsage: fakecli config <COMMAND>\n\nCommands:\n  get  Print a key\n  set  Set a key\n\nOptions:\n  -h, --help  Print help\n",
+    (
+        "config",
+        "get",
+    ): "Print a key\n\nUsage: fakecli config get <KEY>\n\nOptions:\n  -h, --help  Print help\n",
+    (
+        "config",
+        "set",
+    ): "Set a key\n\nUsage: fakecli config set <KEY> <VALUE>\n\nOptions:\n  -h, --help  Print help\n",
 }
 
 
@@ -80,7 +101,9 @@ def run_job(flags, file):
     on = colour(sys.stderr, flags)
     red = "\x1b[38;5;203m" if "badpalette" in BAD else "\x1b[31m"
     lead = "\x1b[1m" if "escerr" in BAD else ""
-    sys.stderr.write(f"{lead}{red if on else ''}warning{chr(27) + '[0m' if on or lead else ''}: slow disk\n")
+    sys.stderr.write(
+        f"{lead}{red if on else ''}warning{chr(27) + '[0m' if on or lead else ''}: slow disk\n"
+    )
     quiet = "--quiet" in flags
     moving = sys.stderr.isatty() and not quiet and not os.environ.get("FAKECLI_NO_ANIM")
     if moving and (os.environ.get("TERM") != "dumb" or "anim" in BAD):
@@ -147,14 +170,21 @@ def main(argv):
     elif path == ("clean",):
         if "--dry-run" in flags:
             if "dryrunwrites" in BAD:
-                open("cache.bak", "w").write("x")
+                Path("cache.bak").write_text("x")
             print("would remove cache/a.txt")
             return
         if "--force" not in flags:
-            fail("cache holds 2 files", 73, "Try: fakecli clean --dry-run\nOverride: --force deletes the files\n")
+            fail(
+                "cache holds 2 files",
+                73,
+                "Try: fakecli clean --dry-run\nOverride: --force deletes the files\n",
+            )
         print("removed cache/a.txt")
     elif path == ("publish",):
-        refusal = (65, "Try: fakecli publish v2\nOverride: --force moves the tag for everyone who pulls v1\n")
+        refusal = (
+            65,
+            "Try: fakecli publish v2\nOverride: --force moves the tag for everyone who pulls v1\n",
+        )
         if "--dry-run" in flags and "dryrunpasses" in BAD:
             print("would publish v1")
             return

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Fixture CLI that breaks UX-AGENT-01, 02, 03, 04, 09 and 14 on purpose."""
+
 import json
 import sys
 
@@ -16,8 +17,17 @@ if args[:1] == ["about"]:
     print("loading...")
     print(json.dumps({"name": "mytool"}))
 elif args[:1] == ["describe"]:
-    print(json.dumps({"error": {"code": "not_found", "exit": 1,
-                                "message": "Traceback (most recent call last): {\"errors\":[]}"}}))
+    print(
+        json.dumps(
+            {
+                "error": {
+                    "code": "not_found",
+                    "exit": 1,
+                    "message": 'Traceback (most recent call last): {"errors":[]}',
+                }
+            }
+        )
+    )
     sys.exit(79)
 else:
     sys.exit(64)

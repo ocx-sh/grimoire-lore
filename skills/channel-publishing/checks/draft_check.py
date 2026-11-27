@@ -77,23 +77,38 @@ def registry_kinds(files: list[Path]) -> dict[str, str]:
 
 def rules_fetch(path: Path, page: Path | None) -> list[str]:
     lines = path.read_text(encoding="utf-8").splitlines()
-    match = re.fullmatch(r"rules_fetched: 20[0-9][0-9]-[01][0-9]-[0-3][0-9] (https:\S*)", lines[0] if lines else "")
+    match = re.fullmatch(
+        r"rules_fetched: 20[0-9][0-9]-[01][0-9]-[0-3][0-9] (https:\S*)", lines[0] if lines else ""
+    )
     if not match:
         return [f"FAIL {path}: line 1 is not rules_fetched: <date> <url>"]
-    quote = next((m.group(1) for m in (re.fullmatch(r'rules_quote: "(.*)"', ln) for ln in lines) if m), "")
+    quote = next(
+        (m.group(1) for m in (re.fullmatch(r'rules_quote: "(.*)"', ln) for ln in lines) if m), ""
+    )
     if len(quote.split()) < 8:
         return [f"FAIL {path}: rules_quote missing or under 8 words"]
     try:
         if page:
             raw = page.read_text(encoding="utf-8")
         else:
-            req = urllib.request.Request(match.group(1), headers={"User-Agent": "Mozilla/5.0 (compatible; draft-check)"})
-            with urllib.request.urlopen(req, timeout=40) as reply:
+            if not match.group(1).startswith("https://"):
+                return [f"FAIL {path}: rules url is not https"]
+            opener = urllib.request.build_opener()
+            opener.addheaders = [("User-Agent", "Mozilla/5.0 (compatible; draft-check)")]
+            with opener.open(match.group(1), timeout=40) as reply:
                 raw = reply.read(2_000_000).decode("utf-8", "replace")
     except (urllib.error.URLError, TimeoutError, OSError):
-        return [f"FAIL {path}: could not fetch {match.group(1)} (re-read by hand if the host blocks scripts)"]
+        return [
+            f"FAIL {path}: could not fetch {match.group(1)} (re-read by hand if the host blocks scripts)"
+        ]
     text = " ".join(re.sub(r"<[^>]*>", " ", raw).split())
-    return [] if quote in text else [f"FAIL {path}: quote not found on {match.group(1)} (re-read by hand if the host blocks scripts)"]
+    return (
+        []
+        if quote in text
+        else [
+            f"FAIL {path}: quote not found on {match.group(1)} (re-read by hand if the host blocks scripts)"
+        ]
+    )
 
 
 def labels_check(path: Path) -> list[str]:
@@ -105,12 +120,25 @@ def labels_check(path: Path) -> list[str]:
         found = [o for o in options if o in leaf]
         if not found:
             out.append(f"{path}: {platform} label {' or '.join(options)} is missing (CH-CORE-06)")
-        out += [f"{path}: {o} must be true or false, not {leaf[o]!r}" for o in found if leaf[o] not in ("true", "false")]
+        out += [
+            f"{path}: {o} must be true or false, not {leaf[o]!r}"
+            for o in found
+            if leaf[o] not in ("true", "false")
+        ]
     if platform in NO_AI_FIELD:
-        out += [f"{path}: {platform} has no AI label field, found {k} (CH-CORE-06)"
-                for k in leaf if re.search(r"(^|_)(ai|aigc|synthetic)", k, re.IGNORECASE)]
-    if platform == "linkedin" and not re.search(r"brand[_ ]partnership[_ ]toggle", " ".join(header.values()) + " ".join(labels), re.IGNORECASE):
-        out.append(f"{path}: LinkedIn package does not list the Brand partnership toggle as a manual step")
+        out += [
+            f"{path}: {platform} has no AI label field, found {k} (CH-CORE-06)"
+            for k in leaf
+            if re.search(r"(^|_)(ai|aigc|synthetic)", k, re.IGNORECASE)
+        ]
+    if platform == "linkedin" and not re.search(
+        r"brand[_ ]partnership[_ ]toggle",
+        " ".join(header.values()) + " ".join(labels),
+        re.IGNORECASE,
+    ):
+        out.append(
+            f"{path}: LinkedIn package does not list the Brand partnership toggle as a manual step"
+        )
     return out
 
 
@@ -152,7 +180,9 @@ def disclosure(path: Path) -> list[str]:
     first = next((ln.strip() for ln in body.splitlines() if ln.strip()), "")
     if DISCLOSURE_RE.match(first):
         return []
-    return [f"{path}: sponsored: true but the first line is not a disclosure such as 'Ad:' or 'Paid partnership:' (CH-CORE-08)"]
+    return [
+        f"{path}: sponsored: true but the first line is not a disclosure such as 'Ad:' or 'Paid partnership:' (CH-CORE-08)"
+    ]
 
 
 def refs(path: Path, facts: list[Path]) -> list[str]:
@@ -175,10 +205,15 @@ def claims(path: Path) -> list[str]:
         low = line
         if re.search(r"self-bot|user-bot", low, re.IGNORECASE) and "[DC-F07]" not in line:
             out.append(f"{where} (self-bot claim needs [DC-F07])")
-        if re.search(r"product hunt.{0,80}\b(AI|LLMs?)\b", low, re.IGNORECASE) and not re.search(r"\[PH-F[0-9]+\]", line):
+        if re.search(r"product hunt.{0,80}\b(AI|LLMs?)\b", low, re.IGNORECASE) and not re.search(
+            r"\[PH-F[0-9]+\]", line
+        ):
             out.append(f"{where} (Product Hunt AI claim needs a PH row id)")
-        if (re.search(r"bluesky.{0,80}(filter|hide|requir)", low, re.IGNORECASE) and re.search(r"bot|automat", low, re.IGNORECASE)
-                and not re.search(r"\[BS-F0[1-4]\]", line)):
+        if (
+            re.search(r"bluesky.{0,80}(filter|hide|requir)", low, re.IGNORECASE)
+            and re.search(r"bot|automat", low, re.IGNORECASE)
+            and not re.search(r"\[BS-F0[1-4]\]", line)
+        ):
             out.append(f"{where} (Bluesky bot claim needs BS-F01 to BS-F04)")
     return out
 
@@ -191,18 +226,30 @@ def self_test() -> int:
     p, f = FIXTURES / "pass", FIXTURES / "fail"
     facts = [p / "facts.md"]
     for name, found in (
-        ("labels", labels_check(p / "package.md")), ("ai-use", ai_use(p / "package.md", facts)),
-        ("disclosure", disclosure(p / "package.md")), ("refs", refs(p / "package.md", facts)),
-        ("claims", claims(p / "package.md")), ("rules-fetch", rules_fetch(p / "rules.md", p / "page.html")),
+        ("labels", labels_check(p / "package.md")),
+        ("ai-use", ai_use(p / "package.md", facts)),
+        ("disclosure", disclosure(p / "package.md")),
+        ("refs", refs(p / "package.md", facts)),
+        ("claims", claims(p / "package.md")),
+        ("rules-fetch", rules_fetch(p / "rules.md", p / "page.html")),
     ):
         need(not found, f"pass fixture reported by {name}: {found}")
-    text = lambda found: " ".join(found)  # noqa: E731
+    text = " ".join
     out = text(labels_check(f / "package.md"))
-    need("hasPaidProductPlacement is missing" in out and "must be true or false" in out, f"labels: {out}")
+    need(
+        "hasPaidProductPlacement is missing" in out and "must be true or false" in out,
+        f"labels: {out}",
+    )
     out = text(labels_check(f / "linkedin.md"))
     need("no AI label field" in out and "Brand partnership" in out, f"labels linkedin: {out}")
     out = text(ai_use(f / "package.md", facts))
-    for needle in ("yes needs a trigger row", "not in registry", "no-ai needs no", "borderline without", "no needs an exemption"):
+    for needle in (
+        "yes needs a trigger row",
+        "not in registry",
+        "no-ai needs no",
+        "borderline without",
+        "no needs an exemption",
+    ):
         need(needle in out, f"ai-use lacks {needle!r}: {out}")
     need(len(disclosure(f / "package.md")) == 1, "disclosure fail fixture not reported")
     out = text(refs(f / "package.md", facts))
@@ -218,7 +265,9 @@ def main(argv: list[str] | None = None) -> int:
     argv = sys.argv[1:] if argv is None else argv
     if argv == ["--self-test"]:
         return self_test()
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     sub = parser.add_subparsers(dest="cmd")
     r = sub.add_parser("rules-fetch")
     r.add_argument("file", type=Path)
@@ -227,7 +276,13 @@ def main(argv: list[str] | None = None) -> int:
         sub.add_parser(name).add_argument("file", type=Path)
     for name in ("ai-use", "refs"):
         s = sub.add_parser(name)
-        s.add_argument("--facts", action="append", required=True, type=Path, help="registry file; repeat for more")
+        s.add_argument(
+            "--facts",
+            action="append",
+            required=True,
+            type=Path,
+            help="registry file; repeat for more",
+        )
         s.add_argument("file", type=Path)
     sub.add_parser("claims").add_argument("files", nargs="+", type=Path)
     args = parser.parse_args(argv)

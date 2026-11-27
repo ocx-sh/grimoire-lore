@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import argparse
 import re
+import shutil
 import subprocess
 import sys
 import tomllib
@@ -45,17 +46,33 @@ SECRETS = re.compile(
     r"|PRODUCTHUNT|TIKTOK)[A-Z0-9_]*"
 )
 BROWSER = re.compile(r"playwright|puppeteer|selenium", re.IGNORECASE)
-HEADER_KEYS = ("platform", "account", "action", "labels", "ai_role", "sponsored", "spend", "open_asks",
-               "approved_by", "approved_at")
+HEADER_KEYS = (
+    "platform",
+    "account",
+    "action",
+    "labels",
+    "ai_role",
+    "sponsored",
+    "spend",
+    "open_asks",
+    "approved_by",
+    "approved_at",
+)
 RULES = ("discord-webhook-url", "google-oauth-refresh-token")
 HERE = Path(__file__).resolve().parent
 FIXTURES = HERE / "fixtures" / "boundary"
 
 
 def listed_files(root: Path) -> list[str]:
-    out = subprocess.run(
-        ["git", "ls-files", "-z", "--", "skills", ".claude/skills", ".github/workflows"],
-        cwd=root, capture_output=True, check=True,
+    git = shutil.which("git")
+    if git is None:
+        print("boundary_check: git not found on PATH", file=sys.stderr)
+        raise SystemExit(2)
+    out = subprocess.run(  # noqa: S603  git is resolved with shutil.which, args are fixed
+        [git, "ls-files", "-z", "--", "skills", ".claude/skills", ".github/workflows"],
+        cwd=root,
+        capture_output=True,
+        check=True,
     ).stdout
     return [n.decode() for n in out.split(b"\0") if n]
 
@@ -64,10 +81,16 @@ def scan(root: Path, paths: list[str], repo: str, channels: str, exclude: list[s
     out = []
     for rel in paths:
         parts = Path(rel).parts
-        if "channel-publishing" in parts or parts[-1] == "facts.md" or any(x in rel for x in exclude):
+        if (
+            "channel-publishing" in parts
+            or parts[-1] == "facts.md"
+            or any(x in rel for x in exclude)
+        ):
             continue
         text = (root / rel).read_text(encoding="utf-8", errors="ignore")
-        if (ENDPOINTS.search(text) or SECRETS.search(text)) and f"runs_from: {repo}/{rel}" not in channels:
+        if (
+            ENDPOINTS.search(text) or SECRETS.search(text)
+        ) and f"runs_from: {repo}/{rel}" not in channels:
             out.append(f"UNLISTED {repo}/{rel}")
     return out
 
@@ -75,7 +98,9 @@ def scan(root: Path, paths: list[str], repo: str, channels: str, exclude: list[s
 def browser(paths: list[Path]) -> list[str]:
     out = []
     for path in paths:
-        for number, line in enumerate(path.read_text(encoding="utf-8", errors="ignore").splitlines(), 1):
+        for number, line in enumerate(
+            path.read_text(encoding="utf-8", errors="ignore").splitlines(), 1
+        ):
             if BROWSER.search(line):
                 out.append(f"{path}:{number}: browser automation in a channel skill (CH-CORE-01)")
     return out
@@ -112,10 +137,18 @@ def self_test() -> int:
     repo = "example/mytool"
     ok = scan(FIXTURES / "pass", ["workflows/ci.yml", "workflows/notify.yml"], repo, channels, [])
     need(not ok, f"pass fixture reported {ok}")
-    bad = scan(FIXTURES / "fail", ["workflows/post.yml", "workflows/notify.yml"], repo, channels, [])
+    bad = scan(
+        FIXTURES / "fail", ["workflows/post.yml", "workflows/notify.yml"], repo, channels, []
+    )
     need(bad == ["UNLISTED example/mytool/workflows/post.yml"], f"fail fixture listed {bad}")
-    need(len(scan(FIXTURES / "fail", ["workflows/notify.yml"], repo, "", [])) == 1, "secret-name pattern missed")
-    need(not scan(FIXTURES / "fail", ["workflows/post.yml"], repo, channels, ["post.yml"]), "--exclude ignored")
+    need(
+        len(scan(FIXTURES / "fail", ["workflows/notify.yml"], repo, "", [])) == 1,
+        "secret-name pattern missed",
+    )
+    need(
+        not scan(FIXTURES / "fail", ["workflows/post.yml"], repo, channels, ["post.yml"]),
+        "--exclude ignored",
+    )
     need(not browser([FIXTURES / "pass" / "skill.md"]), "browser pass fixture reported")
     need(len(browser([FIXTURES / "fail" / "skill.md"])) == 1, "browser fail fixture not reported")
     need(not package(FIXTURES / "pass" / "package.md"), "pass package reported")
@@ -123,14 +156,23 @@ def self_test() -> int:
     for needle in ("lacks spend", "approved_by must stay empty", "Stack Overflow"):
         need(needle in found, f"package fail fixture lacks {needle!r}")
     need(not gitleaks(HERE / "gitleaks-channels.toml"), "shipped gitleaks rules incomplete")
-    need(len(gitleaks(FIXTURES / "fail" / "gitleaks.toml")) == 2, "gitleaks fail fixture not reported")
+    need(
+        len(gitleaks(FIXTURES / "fail" / "gitleaks.toml")) == 2,
+        "gitleaks fail fixture not reported",
+    )
     config = tomllib.loads((HERE / "gitleaks-channels.toml").read_text(encoding="utf-8"))
     hook = "https://discord.com/api/webhooks/123456789012345678/" + "a" * 68
     token = "1//" + "b" * 45
     rules = {r["id"]: re.compile(r["regex"]) for r in config["rules"]}
     need(rules["discord-webhook-url"].search(hook) is not None, "webhook rule misses a planted URL")
-    need(rules["google-oauth-refresh-token"].search(token) is not None, "refresh-token rule misses a planted token")
-    need(rules["discord-webhook-url"].search("https://discord.com/api/v10/users/@me") is None, "webhook rule too broad")
+    need(
+        rules["google-oauth-refresh-token"].search(token) is not None,
+        "refresh-token rule misses a planted token",
+    )
+    need(
+        rules["discord-webhook-url"].search("https://discord.com/api/v10/users/@me") is None,
+        "webhook rule too broad",
+    )
     print("boundary_check self-test: ok")
     return 0
 
@@ -139,12 +181,14 @@ def main(argv: list[str] | None = None) -> int:
     argv = sys.argv[1:] if argv is None else argv
     if argv == ["--self-test"]:
         return self_test()
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     sub = parser.add_subparsers(dest="cmd")
     s = sub.add_parser("scan")
     s.add_argument("--repo", required=True)
     s.add_argument("--channels", required=True, type=Path)
-    s.add_argument("--root", type=Path, default=Path("."))
+    s.add_argument("--root", type=Path, default=Path())
     s.add_argument("--exclude", action="append", default=[])
     s.add_argument("paths", nargs="*")
     for name in ("browser", "package"):
@@ -157,7 +201,9 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.cmd == "scan":
             paths = args.paths or listed_files(args.root)
-            found = scan(args.root, paths, args.repo, args.channels.read_text(encoding="utf-8"), args.exclude)
+            found = scan(
+                args.root, paths, args.repo, args.channels.read_text(encoding="utf-8"), args.exclude
+            )
         elif args.cmd == "browser":
             found = browser(args.files)
         elif args.cmd == "package":

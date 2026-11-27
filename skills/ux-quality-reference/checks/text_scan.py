@@ -51,35 +51,45 @@ import re
 import sys
 from pathlib import Path
 
-I = re.I
+IGNORE_CASE = re.IGNORECASE
 # name: (pattern, flags, drop pattern for a line that clears the hit)
 LINE_ARMS: dict[str, tuple[str, int, str | None]] = {
     "emoji": (r"[\U0001F300-\U0001FAFF☀-➿]", 0, None),
-    "interjection": (r"\b(?:oops|whoops|uh-oh|yikes)\b", I, None),
-    "polite": (r"\b(?:please|sorry|apologi[sz]e)\b", I, None),
+    "interjection": (r"\b(?:oops|whoops|uh-oh|yikes)\b", IGNORE_CASE, None),
+    "polite": (r"\b(?:please|sorry|apologi[sz]e)\b", IGNORE_CASE, None),
     "bang": (r"""\w!['"`]""", 0, None),
-    "generic": (r"something went wrong|an error occurred|unknown error", I, None),
-    "did-you-mean": (r"did you mean", I, None),
+    "generic": (r"something went wrong|an error occurred|unknown error", IGNORE_CASE, None),
+    "did-you-mean": (r"did you mean", IGNORE_CASE, None),
     "decision": (
-        r"""show(?:Warning|Error|Information)Message\([^)]*['"](?:OK|Ok|Yes|No|Submit|Done)['"]"""
-        r"""|>(?:OK|Ok|Yes|No|Submit|Done)<""",
+        (
+            r"""show(?:Warning|Error|Information)Message\([^)]*['"](?:OK|Ok|Yes|No|Submit|Done)['"]"""
+            r"""|>(?:OK|Ok|Yes|No|Submit|Done)<"""
+        ),
         0,
         None,
     ),
     "link-text": (
-        r">(?:here|click here|learn more|read more|more)</(?:a|button)>"
-        r"|\[(?:here|click here|learn more|read more)\]\(",
-        I,
+        (
+            r">(?:here|click here|learn more|read more|more)</(?:a|button)>"
+            r"|\[(?:here|click here|learn more|read more)\]\("
+        ),
+        IGNORE_CASE,
         None,
     ),
-    "invalid": (r""""[^"]*\binvalid\b[^"]*\"""", 0, r"expected|must|allowed|one of|valid values|\{|: "),
-    "click": (r"\bclick(?:s|ing)?\b", I, None),
-    "latin": (r"(?<![\w.])(?:e\.g\.|i\.e\.|etc\.)", I, None),
-    "ampersand": (r"[a-z] & [a-z]", I, None),
+    "invalid": (
+        r""""[^"]*\binvalid\b[^"]*\"""",
+        0,
+        r"expected|must|allowed|one of|valid values|\{|: ",
+    ),
+    "click": (r"\bclick(?:s|ing)?\b", IGNORE_CASE, None),
+    "latin": (r"(?<![\w.])(?:e\.g\.|i\.e\.|etc\.)", IGNORE_CASE, None),
+    "ampersand": (r"[a-z] & [a-z]", IGNORE_CASE, None),
     "plural-s": (r"""["'`][^"'`]*(?<!http)(?<=[A-Za-z])\((?:s|es|ies)\)""", 0, None),
     "ternary-plural": (
-        r"""===?\s*1\s*\?\s*['"`][A-Za-z ]*['"`]\s*:\s*['"`][A-Za-z ]*['"`]"""
-        r"""|(?:==|!=) 1 \{ "[A-Za-z ]*" \} else \{ "[A-Za-z ]*" \}""",
+        (
+            r"""===?\s*1\s*\?\s*['"`][A-Za-z ]*['"`]\s*:\s*['"`][A-Za-z ]*['"`]"""
+            r"""|(?:==|!=) 1 \{ "[A-Za-z ]*" \} else \{ "[A-Za-z ]*" \}"""
+        ),
         0,
         None,
     ),
@@ -91,14 +101,16 @@ LINE_ARMS: dict[str, tuple[str, int, str | None]] = {
     "bytes": (r"/ ?1024.*\b(?:KB|MB|GB)\b", 0, None),
     "locale": (r"""['"]en-US['"]""", 0, None),
     "status": (
-        r"""(?:showInformationMessage|showWarningMessage|setStatus|set_status|println!)"""
-        r"""\(\s*['"`]?(?:Done|Saved|Success|Error|OK|Failed|Copied)\.?['"`]?\s*[,)]""",
+        (
+            r"""(?:showInformationMessage|showWarningMessage|setStatus|set_status|println!)"""
+            r"""\(\s*['"`]?(?:Done|Saved|Success|Error|OK|Failed|Copied)\.?['"`]?\s*[,)]"""
+        ),
         0,
         None,
     ),
 }
 FILE_ARMS = {"img-alt", "command-title", "setting-length"}
-IMG_NO_ALT = re.compile(r"<img\b(?![^>]*\balt=)[^>]*>", re.S)
+IMG_NO_ALT = re.compile(r"<img\b(?![^>]*\balt=)[^>]*>", re.DOTALL)
 MD_EMPTY_ALT = re.compile(r"!\[\]\(")
 ARMS = sorted(set(LINE_ARMS) | FILE_ARMS)
 
@@ -129,8 +141,14 @@ def manifest_hits(text: str, arm: str) -> list[tuple[int, str, str]]:
         for block in conf if isinstance(conf, list) else [conf]:
             props = block.get("properties") if isinstance(block, dict) else None
             for key, spec in (props or {}).items():
-                desc = (spec.get("markdownDescription") or spec.get("description") or "") if isinstance(spec, dict) else ""
-                if len(re.findall(r"[.!?](\s|$)", desc)) > 2 and not re.search(r"\]\(|https?://", desc):
+                desc = (
+                    (spec.get("markdownDescription") or spec.get("description") or "")
+                    if isinstance(spec, dict)
+                    else ""
+                )
+                if len(re.findall(r"[.!?](\s|$)", desc)) > 2 and not re.search(
+                    r"\]\(|https?://", desc
+                ):
                     out.append((at(key), arm, f"{key}: over two sentences, no docs link"))
     return out
 
@@ -188,7 +206,9 @@ def self_test() -> int:
 
 
 def main(argv: list[str]) -> int:
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     ap.add_argument("files", nargs="*")
     ap.add_argument("--arm", action="append", default=[], help="arm name, or all (repeatable)")
     ap.add_argument("--self-test", action="store_true")
@@ -198,7 +218,10 @@ def main(argv: list[str]) -> int:
     arms = ARMS if "all" in args.arm else args.arm
     bad = [a for a in arms if a not in ARMS]
     if not arms or bad or not args.files:
-        print(f"text_scan: need --arm (one of {', '.join(ARMS)}) and at least one file", file=sys.stderr)
+        print(
+            f"text_scan: need --arm (one of {', '.join(ARMS)}) and at least one file",
+            file=sys.stderr,
+        )
         return 2
     found = False
     for path in args.files:

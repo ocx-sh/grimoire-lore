@@ -65,8 +65,14 @@ def self_test() -> int:
     if lint(FIXTURES / "pass" / "sheet.md"):
         raise SystemExit("self-test: pass fixture reported findings")
     found = " ".join(lint(FIXTURES / "fail" / "sheet.md"))
-    for needle in ("heading not allowed", "not a fact-sheet key", "motive must stay blank",
-                   "first or second person", "value over 20 words", "text before"):
+    for needle in (
+        "heading not allowed",
+        "not a fact-sheet key",
+        "motive must stay blank",
+        "first or second person",
+        "value over 20 words",
+        "text before",
+    ):
         if needle not in found:
             raise SystemExit(f"self-test: fail fixture did not report {needle!r}")
     print("factsheet_check self-test: ok")
@@ -74,7 +80,9 @@ def self_test() -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument("files", nargs="*", type=Path)
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args(argv)

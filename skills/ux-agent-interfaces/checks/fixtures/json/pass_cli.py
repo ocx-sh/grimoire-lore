@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Fixture CLI that meets UX-AGENT-01 to 04 and 09: the format flag works in any position."""
+
 import json
 import sys
 
@@ -20,14 +21,22 @@ while i < len(args):
 
 
 def fail(code, slug, message, retryable=False):
-    doc = {"schema_version": 1, "error": {"code": slug, "exit": code, "retryable": retryable,
-                                          "message": message, "hint": "Run mytool --help."}}
+    doc = {
+        "schema_version": 1,
+        "error": {
+            "code": slug,
+            "exit": code,
+            "retryable": retryable,
+            "message": message,
+            "hint": "Run mytool --help.",
+        },
+    }
     print(json.dumps(doc))
     sys.exit(code)
 
 
 if any(a.startswith("--") for a in rest):
-    fail(64, "invalid_input", "unexpected argument " + [a for a in rest if a.startswith("--")][0])
+    fail(64, "invalid_input", "unexpected argument " + next(a for a in rest if a.startswith("--")))
 if rest[:1] == ["about"]:
     print(json.dumps({"schema_version": 1, "name": "mytool"}))
 elif rest[:1] == ["describe"]:

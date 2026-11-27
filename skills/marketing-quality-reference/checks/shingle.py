@@ -75,7 +75,7 @@ class Text(HTMLParser):
 def words(html: str) -> list[str]:
     t = Text()
     t.feed(html)
-    return re.findall(r"[\w'’-]+", " ".join(t.main or t.all).lower())
+    return re.findall(r"[\w'\u2019-]+", " ".join(t.main or t.all).lower())
 
 
 def shingles(w: list[str], k: int = 5) -> set[str]:
@@ -91,8 +91,11 @@ def make_getter(root: str | None):
             if p.is_dir() or url.endswith("/") or not p.suffix:
                 p = p / "index.html"
             return p.read_text(encoding="utf-8", errors="replace")
-        req = urllib.request.Request(url, headers={"User-Agent": "catalog-seo-check/1"})
-        return urllib.request.urlopen(req, timeout=30).read().decode("utf-8", "replace")
+        if urlparse(url).scheme not in ("http", "https"):
+            raise OSError(f"unsupported URL scheme: {url}")
+        opener = urllib.request.build_opener()
+        opener.addheaders = [("User-Agent", "catalog-seo-check/1")]
+        return opener.open(url, timeout=30).read().decode("utf-8", "replace")
 
     return get
 
@@ -122,16 +125,25 @@ def report(pages: dict[str, list[str]]) -> int:
         return 2
     ws = [r[1] for r in rows]
     over = [r for r in rows if r[3] >= THRESHOLD]
-    print(f"pages {n} words min/median/max {min(ws)}/{statistics.median(ws)}/{max(ws)} "
-          f"distinct median {statistics.median(r[2] for r in rows)}")
-    print(f"template share median {statistics.median(r[3] for r in rows):.2f} "
-          f"mean {statistics.mean(r[3] for r in rows):.2f}  pages>={THRESHOLD}: {len(over)}")
+    print(
+        f"pages {n} words min/median/max {min(ws)}/{statistics.median(ws)}/{max(ws)} "
+        f"distinct median {statistics.median(r[2] for r in rows)}"
+    )
+    print(
+        f"template share median {statistics.median(r[3] for r in rows):.2f} "
+        f"mean {statistics.mean(r[3] for r in rows):.2f}  pages>={THRESHOLD}: {len(over)}"
+    )
     if n <= 300:
         sh = {u: shingles(w) for u, w in pages.items()}
-        js = [len(sh[a] & sh[b]) / max(1, len(sh[a] | sh[b])) for a, b in itertools.combinations(sh, 2)]
+        js = [
+            len(sh[a] & sh[b]) / max(1, len(sh[a] | sh[b]))
+            for a, b in itertools.combinations(sh, 2)
+        ]
         if js:
-            print(f"pairwise Jaccard median {statistics.median(js):.3f} max {max(js):.3f}; "
-                  f"pairs>=0.5: {sum(j >= 0.5 for j in js)} of {len(js)}")
+            print(
+                f"pairwise Jaccard median {statistics.median(js):.3f} max {max(js):.3f}; "
+                f"pairs>=0.5: {sum(j >= 0.5 for j in js)} of {len(js)}"
+            )
     for r in sorted(over, key=lambda r: -r[3]):
         print(f"  FLOOR {r[0]} {r[3]:.2f}")
     if n < MIN_SET:
@@ -140,19 +152,45 @@ def report(pages: dict[str, list[str]]) -> int:
     return 1 if over else 0
 
 
+def expect(condition: object, message: str) -> None:
+    """Self-test check that survives `python -O`, unlike a bare assert."""
+    if not condition:
+        raise SystemExit(message)
+
+
 def self_test() -> int:
-    assert shingles(["a", "b", "c", "d", "e", "f"]) == {"a b c d e", "b c d e f"}
-    assert words("<nav>menu words here</nav><main>Body text</main><footer>x</footer>") == ["body", "text"]
-    template = " ".join(f"shared template sentence number {i} appears on every page" for i in range(12))
+    expect(
+        shingles(["a", "b", "c", "d", "e", "f"]) == {"a b c d e", "b c d e f"},
+        "assertion failed: shingles(['a', 'b', 'c', 'd', 'e', 'f']) == {'a b c d e', 'b c d e f'}",
+    )
+    expect(
+        words("<nav>menu words here</nav><main>Body text</main><footer>x</footer>")
+        == [
+            "body",
+            "text",
+        ],
+        "assertion failed: words('<nav>menu words here</nav><main>Body text</main><footer>x</foot",
+    )
+    template = " ".join(
+        f"shared template sentence number {i} appears on every page" for i in range(12)
+    )
 
     def tree(root: Path, unique: bool, count: int) -> None:
         loc = ""
         for i in range(count):
-            body = " ".join(f"page {i} sentence {j} says something {i * 7 + j} entirely its own" for j in range(30)) \
-                if unique else f"{template} unique{i} tail{i} extra{i} words{i} here{i}"
+            body = (
+                " ".join(
+                    f"page {i} sentence {j} says something {i * 7 + j} entirely its own"
+                    for j in range(30)
+                )
+                if unique
+                else f"{template} unique{i} tail{i} extra{i} words{i} here{i}"
+            )
             d = root / f"p{i}"
             d.mkdir()
-            (d / "index.html").write_text(f"<html><body><nav>menu</nav><main>{body}</main></body></html>")
+            (d / "index.html").write_text(
+                f"<html><body><nav>menu</nav><main>{body}</main></body></html>"
+            )
             loc += f"<url><loc>https://example.com/p{i}/</loc></url>"
         (root / "sitemap.xml").write_text(f"<urlset>{loc}</urlset>")
 
@@ -164,15 +202,17 @@ def self_test() -> int:
             with contextlib.redirect_stdout(io.StringIO()):
                 return report({u: words(get(u)) for u in urls})
 
-    assert run(unique=True, count=12) == 0, "distinct pages pass"
-    assert run(unique=False, count=12) == 1, "templated pages fail"
-    assert run(unique=False, count=4) == 0, "below 10 pages the result is not used"
+    expect(run(unique=True, count=12) == 0, "distinct pages pass")
+    expect(run(unique=False, count=12) == 1, "templated pages fail")
+    expect(run(unique=False, count=4) == 0, "below 10 pages the result is not used")
     print("shingle self-test: ok")
     return 0
 
 
 def main() -> int:
-    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    p = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     p.add_argument("sitemap", nargs="?", help="sitemap URL, or a file path with --root")
     p.add_argument("filter", nargs="?", help="regex; only matching page URLs are measured")
     p.add_argument("--root", help="read pages from this build directory instead of the network")

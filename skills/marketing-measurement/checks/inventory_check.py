@@ -54,23 +54,30 @@ TOOLS = [
     (r"@amplitude/|cdn\.amplitude\.com", "amplitude"),
     (r"cloudflareinsights\.com", "cloudflare"),
 ]
-PLACEHOLDER = re.compile(r"<!--[^>]*\banalytics\b[^>]*-->", re.I)
-UNPINNED = re.compile(r"""<script[^>]+src=["'][^"']*(?:@latest|/latest/)""", re.I)
+PLACEHOLDER = re.compile(r"<!--[^>]*\banalytics\b[^>]*-->", re.IGNORECASE)
+UNPINNED = re.compile(r"""<script[^>]+src=["'][^"']*(?:@latest|/latest/)""", re.IGNORECASE)
 POSTHOG_ALWAYS = re.compile(r"""cookieless_mode\s*:\s*['"]always['"]""")
 POSTHOG_OPTOUT = re.compile(r"opt_out_capturing|identify\(|alias\(")
-BEACON = re.compile(r"navigator\.sendBeacon|/api/event|/matomo\.php|/collect\?|/j/collect|_paq\.push|gtag\(")
-PIXEL = re.compile(r"""<img[^>]+\b(?:width|height)=["']?1["']?(?=[\s/>"'])""", re.I)
-HOST_TAG = re.compile(
-    r"""<(script|link|img|iframe)\b([^>]*?)\b(?:src|href)=["']https?://([^"'/?#]+)""", re.I | re.S
+BEACON = re.compile(
+    r"navigator\.sendBeacon|/api/event|/matomo\.php|/collect\?|/j/collect|_paq\.push|gtag\("
 )
-REL_SKIP = re.compile(r"""rel=["'](?:canonical|alternate|me|author|license|sitemap)["']""", re.I)
-LOCAL_SCRIPT = re.compile(r"""<script[^>]+src=["'](/[^"']*)""", re.I)
-STORAGE_KEY = re.compile(r"""(?:localStorage|sessionStorage)\.(?:get|set|remove)Item\(\s*["']([^"']+)["']""")
+PIXEL = re.compile(r"""<img[^>]+\b(?:width|height)=["']?1["']?(?=[\s/>"'])""", re.IGNORECASE)
+HOST_TAG = re.compile(
+    r"""<(script|link|img|iframe)\b([^>]*?)\b(?:src|href)=["']https?://([^"'/?#]+)""",
+    re.IGNORECASE | re.DOTALL,
+)
+REL_SKIP = re.compile(
+    r"""rel=["'](?:canonical|alternate|me|author|license|sitemap)["']""", re.IGNORECASE
+)
+LOCAL_SCRIPT = re.compile(r"""<script[^>]+src=["'](/[^"']*)""", re.IGNORECASE)
+STORAGE_KEY = re.compile(
+    r"""(?:localStorage|sessionStorage)\.(?:get|set|remove)Item\(\s*["']([^"']+)["']"""
+)
 STORAGE_API = re.compile(r"document\.cookie|indexedDB")
-UTM_IN_BEACON = re.compile(r"utm_[a-z]+", re.I)
+UTM_IN_BEACON = re.compile(r"utm_[a-z]+", re.IGNORECASE)
 REF_PARAM = re.compile(
     r"""(?:[?&]|["'])(?:r|ref|referrer|urlref)(?:=|["']\s*:\s*["'])(https?(?::|%3A)(?://|%2F%2F)[^/&"'%]+(?:/|%2F)[^&"'\s]+)""",
-    re.I,
+    re.IGNORECASE,
 )
 
 
@@ -95,7 +102,9 @@ def parse_record(path: Path | None) -> dict[str, str]:
     for line in read(path).splitlines():
         m = re.match(r"^\s*[-*]?\s*([A-Za-z_][A-Za-z0-9_ -]*?)\s*:\s*(.*)$", line)
         if m:
-            record[m.group(1).strip().lower().replace(" ", "_").replace("-", "_")] = m.group(2).strip()
+            record[m.group(1).strip().lower().replace(" ", "_").replace("-", "_")] = m.group(
+                2
+            ).strip()
     return record
 
 
@@ -117,14 +126,20 @@ def cmd_scan(decision: Path | None, files: list[Path]) -> list[str]:
             for m in re.finditer(pattern, text):
                 hit = True
                 if tool not in record_text:
-                    out.append(f"{path}:{lineno(text, m.start())}: MKT-MEAS-01: {tool} is not named in the decision record")
+                    out.append(
+                        f"{path}:{lineno(text, m.start())}: MKT-MEAS-01: {tool} is not named in the decision record"
+                    )
                     break
         for m in PLACEHOLDER.finditer(text):
-            out.append(f"{path}:{lineno(text, m.start())}: MKT-MEAS-01: analytics placeholder block; fill none")
+            out.append(
+                f"{path}:{lineno(text, m.start())}: MKT-MEAS-01: analytics placeholder block; fill none"
+            )
         for m in UNPINNED.finditer(text):
             out.append(f"{path}:{lineno(text, m.start())}: MKT-MEAS-05: unpinned script version")
         if POSTHOG_ALWAYS.search(text) and POSTHOG_OPTOUT.search(text):
-            out.append(f"{path}: MKT-MEAS-07: cookieless_mode 'always' with identify, alias or an opt-out call")
+            out.append(
+                f"{path}: MKT-MEAS-07: cookieless_mode 'always' with identify, alias or an opt-out call"
+            )
     if hit and decision and decision.is_file():
         missing = [k for k in REQUIRED if not rec.get(k)]
         if missing:
@@ -144,27 +159,39 @@ def third_party(text: str, own: set[str]) -> list[tuple[int, str, str]]:
     return found
 
 
-def cmd_hosts(dist: Path, own: set[str], decision: Path | None, statement: Path | None) -> list[str]:
+def cmd_hosts(
+    dist: Path, own: set[str], decision: Path | None, statement: Path | None
+) -> list[str]:
     out: list[str] = []
-    allowed = {h.lower() for h in re.split(r"[\s,]+", parse_record(decision).get("allowed_hosts", "")) if h}
+    allowed = {
+        h.lower() for h in re.split(r"[\s,]+", parse_record(decision).get("allowed_hosts", "")) if h
+    }
     stated = read(statement).lower() if statement else None
     for path in files_under(dist, (".html",)):
         text = read(path)
         for line, tag, host in third_party(text, own):
             if tag == "script" and host not in allowed:
-                out.append(f"{path}:{line}: MKT-MEAS-03: external script host {host} is not in allowed_hosts")
+                out.append(
+                    f"{path}:{line}: MKT-MEAS-03: external script host {host} is not in allowed_hosts"
+                )
             if stated is not None and host not in stated:
-                out.append(f"{path}:{line}: MKT-MEAS-06: {tag} host {host} is not named in the privacy statement")
+                out.append(
+                    f"{path}:{line}: MKT-MEAS-06: {tag} host {host} is not named in the privacy statement"
+                )
     if stated is not None:
         for path in files_under(dist):
             text = read(path)
             for m in STORAGE_KEY.finditer(text):
                 if m.group(1).lower() not in stated:
-                    out.append(f"{path}:{lineno(text, m.start())}: MKT-MEAS-06: storage key {m.group(1)} is not named in the privacy statement")
+                    out.append(
+                        f"{path}:{lineno(text, m.start())}: MKT-MEAS-06: storage key {m.group(1)} is not named in the privacy statement"
+                    )
             for m in STORAGE_API.finditer(text):
                 word = "indexeddb" if m.group(0) == "indexedDB" else "cookie"
                 if word not in stated:
-                    out.append(f"{path}:{lineno(text, m.start())}: MKT-MEAS-06: {m.group(0)} is used and the statement does not mention it")
+                    out.append(
+                        f"{path}:{lineno(text, m.start())}: MKT-MEAS-06: {m.group(0)} is used and the statement does not mention it"
+                    )
     return out
 
 
@@ -204,10 +231,14 @@ def cmd_har(path: Path, cookieless: bool) -> list[str]:
         url = req.get("url", "")
         body = (req.get("postData") or {}).get("text", "")
         if number > 0 and (UTM_IN_BEACON.search(url) or UTM_IN_BEACON.search(body)):
-            out.append(f"{path}: MKT-MEAS-04: request {number} carries a utm_ parameter: {url[:80]}")
+            out.append(
+                f"{path}: MKT-MEAS-04: request {number} carries a utm_ parameter: {url[:80]}"
+            )
         for blob in (url, body):
             if number > 0 and REF_PARAM.search(blob):
-                out.append(f"{path}: MKT-MEAS-04: request {number} sends a referrer with a path: {url[:80]}")
+                out.append(
+                    f"{path}: MKT-MEAS-04: request {number} sends a referrer with a path: {url[:80]}"
+                )
                 break
         if cookieless and (req.get("cookies") or entry.get("response", {}).get("cookies")):
             out.append(f"{path}: MKT-MEAS-05: request {number} sets or sends a cookie: {url[:80]}")
@@ -233,13 +264,32 @@ def self_test() -> int:
     expect("scan fail", cmd_scan(None, [bad / "dist" / "index.html"]), False, "plausible")
     expect("scan placeholder", cmd_scan(None, [bad / "dist" / "index.html"]), False, "placeholder")
     expect("scan named", cmd_scan(ok / "decision.md", [ok / "plausible.html"]), True)
-    expect("scan incomplete record", cmd_scan(bad / "decision.md", [ok / "plausible.html"]), False, "lacks")
+    expect(
+        "scan incomplete record",
+        cmd_scan(bad / "decision.md", [ok / "plausible.html"]),
+        False,
+        "lacks",
+    )
     expect("posthog", cmd_scan(ok / "decision.md", [bad / "posthog.js"]), False, "MKT-MEAS-07")
     expect("decision pass", cmd_decision(ok / "decision.md"), True)
     expect("decision fail", cmd_decision(bad / "decision.md"), False, "lacks")
-    expect("hosts pass", cmd_hosts(ok / "dist", {"example.com"}, ok / "decision.md", ok / "privacy.md"), True)
-    expect("hosts fail", cmd_hosts(bad / "dist", {"example.com"}, bad / "decision.md", ok / "privacy.md"), False, "MKT-MEAS-03")
-    expect("statement fail", cmd_hosts(bad / "dist", {"example.com"}, None, ok / "privacy.md"), False, "MKT-MEAS-06")
+    expect(
+        "hosts pass",
+        cmd_hosts(ok / "dist", {"example.com"}, ok / "decision.md", ok / "privacy.md"),
+        True,
+    )
+    expect(
+        "hosts fail",
+        cmd_hosts(bad / "dist", {"example.com"}, bad / "decision.md", ok / "privacy.md"),
+        False,
+        "MKT-MEAS-03",
+    )
+    expect(
+        "statement fail",
+        cmd_hosts(bad / "dist", {"example.com"}, None, ok / "privacy.md"),
+        False,
+        "MKT-MEAS-06",
+    )
     expect("beacons pass", cmd_beacons(ok / "dist"), True)
     expect("beacons fail", cmd_beacons(bad / "dist"), False, "1-pixel")
     expect("live pass", cmd_live_diff(ok / "dist", ok / "live", None), True)
@@ -254,7 +304,9 @@ def self_test() -> int:
 
 
 def main(argv: list[str]) -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument("--self-test", action="store_true")
     sub = parser.add_subparsers(dest="cmd")
     p = sub.add_parser("scan")
@@ -288,7 +340,9 @@ def main(argv: list[str]) -> int:
         if args.cmd == "decision":
             return report(cmd_decision(args.file))
         if args.cmd == "hosts":
-            return report(cmd_hosts(args.dist, {h.lower() for h in args.own}, args.decision, args.statement))
+            return report(
+                cmd_hosts(args.dist, {h.lower() for h in args.own}, args.decision, args.statement)
+            )
         if args.cmd == "beacons":
             return report(cmd_beacons(args.dist))
         if args.cmd == "live-diff":

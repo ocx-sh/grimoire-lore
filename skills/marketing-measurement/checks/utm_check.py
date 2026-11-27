@@ -47,7 +47,11 @@ def check_url(url: str) -> list[str]:
     """MKT-MEAS-10 findings for one URL that carries a utm_ parameter."""
     query = parse_qs(urlsplit(url).query, keep_blank_values=True)
     flat = {k: v[0] for k, v in query.items()}
-    out = [f"required {k} is missing or empty" for k in ("utm_source", "utm_medium", "utm_campaign") if not flat.get(k)]
+    out = [
+        f"required {k} is missing or empty"
+        for k in ("utm_source", "utm_medium", "utm_campaign")
+        if not flat.get(k)
+    ]
     for key in ("utm_source", "utm_medium", "utm_campaign"):
         if flat.get(key) and not VALUE.fullmatch(flat[key]):
             out.append(f"{key}={flat[key]} is not lower case a-z, 0-9, hyphen and underscore")
@@ -64,15 +68,19 @@ def check_url(url: str) -> list[str]:
 def cmd_tags(decision: Path | None, files: list[Path]) -> list[str]:
     out: list[str] = []
     record = read(decision) if decision and decision.is_file() else ""
-    collected = re.search(r"^\s*[-*]?\s*acquisition[_ -]data\s*:\s*yes\b", record, re.I | re.M)
+    collected = re.search(
+        r"^\s*[-*]?\s*acquisition[_ -]data\s*:\s*yes\b", record, re.IGNORECASE | re.MULTILINE
+    )
     for path in files:
         for number, line in enumerate(read(path).splitlines(), 1):
-            for url in URL.findall(line):
-                url = url.rstrip(".,;")
+            for found in URL.findall(line):
+                url = found.rstrip(".,;")
                 if "utm_" not in url:
                     continue
                 if not collected:
-                    out.append(f"{path}:{number}: MKT-MEAS-08: tagged URL and the decision record does not say acquisition_data: yes")
+                    out.append(
+                        f"{path}:{number}: MKT-MEAS-08: tagged URL and the decision record does not say acquisition_data: yes"
+                    )
                 out += [f"{path}:{number}: MKT-MEAS-10: {msg}" for msg in check_url(url)]
     return out
 
@@ -81,7 +89,9 @@ def cmd_owned(hosts: set[str], files: list[Path]) -> list[str]:
     out: list[str] = []
     for path in files:
         for number, line in enumerate(read(path).splitlines(), 1):
-            candidates = [a or b for a, b in LINK.findall(line)] + [u.rstrip(".,;") for u in URL.findall(line)]
+            candidates = [a or b for a, b in LINK.findall(line)] + [
+                u.rstrip(".,;") for u in URL.findall(line)
+            ]
             for target in dict.fromkeys(candidates):
                 parts = urlsplit(target)
                 if parts.scheme in ("mailto", "tel", "javascript"):
@@ -89,9 +99,15 @@ def cmd_owned(hosts: set[str], files: list[Path]) -> list[str]:
                 host = parts.netloc.lower().removeprefix("www.")
                 if parts.netloc and host not in hosts:
                     continue
-                bad = sorted(k for k in parse_qs(parts.query, keep_blank_values=True) if k.startswith("utm_") or k in ("ref", "source"))
+                bad = sorted(
+                    k
+                    for k in parse_qs(parts.query, keep_blank_values=True)
+                    if k.startswith("utm_") or k in ("ref", "source")
+                )
                 if bad:
-                    out.append(f"{path}:{number}: MKT-MEAS-09: owned link {target[:80]} carries {', '.join(bad)}")
+                    out.append(
+                        f"{path}:{number}: MKT-MEAS-09: owned link {target[:80]} carries {', '.join(bad)}"
+                    )
     return out
 
 
@@ -109,8 +125,14 @@ def cmd_campaigns(path: Path) -> list[str]:
     for number, row in enumerate(rows, 2):
         spellings[re.sub(r"[-_]", "", row["campaign"].lower())].add(row["campaign"])
         out += [f"{path}:{number}: MKT-MEAS-10: {msg}" for msg in check_url(row["url"])]
-    out += [f"{path}: MKT-MEAS-11: variant spellings {sorted(s)}" for s in spellings.values() if len(s) > 1]
-    out += [f"{path}: MKT-MEAS-11: tuple {t} is used by {n} rows" for t, n in tuples.items() if n > 1]
+    out += [
+        f"{path}: MKT-MEAS-11: variant spellings {sorted(s)}"
+        for s in spellings.values()
+        if len(s) > 1
+    ]
+    out += [
+        f"{path}: MKT-MEAS-11: tuple {t} is used by {n} rows" for t, n in tuples.items() if n > 1
+    ]
     return out
 
 
@@ -130,14 +152,25 @@ def self_test() -> int:
             raise SystemExit(f"self-test {label}: expected {needle!r}, got {got}")
 
     expect("tags pass", cmd_tags(ok / "decision.md", [ok / "posts.md"]), True)
-    expect("tags no collector", cmd_tags(bad / "decision.md", [ok / "posts.md"]), False, "MKT-MEAS-08")
-    for needle in ("not in the closed set", "lower case", "TLD", "missing", "not allowed", "longer than"):
+    expect(
+        "tags no collector", cmd_tags(bad / "decision.md", [ok / "posts.md"]), False, "MKT-MEAS-08"
+    )
+    for needle in (
+        "not in the closed set",
+        "lower case",
+        "TLD",
+        "missing",
+        "not allowed",
+        "longer than",
+    ):
         expect(f"tags {needle}", cmd_tags(ok / "decision.md", [bad / "posts.md"]), False, needle)
     expect("owned pass", cmd_owned({"example.com"}, [ok / "page.md"]), True)
     expect("owned fail", cmd_owned({"example.com"}, [bad / "page.md"]), False, "MKT-MEAS-09")
     got = cmd_owned({"example.com"}, [bad / "page.md"])
     if len(got) != 3:
-        raise SystemExit(f"self-test owned count: want 3 findings (relative, owned host, www), got {got}")
+        raise SystemExit(
+            f"self-test owned count: want 3 findings (relative, owned host, www), got {got}"
+        )
     expect("campaigns pass", cmd_campaigns(ok / "campaigns.csv"), True)
     expect("campaigns variant", cmd_campaigns(bad / "campaigns.csv"), False, "variant spellings")
     expect("campaigns tuple", cmd_campaigns(bad / "campaigns.csv"), False, "used by 2 rows")
@@ -147,7 +180,9 @@ def self_test() -> int:
 
 
 def main(argv: list[str]) -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument("--self-test", action="store_true")
     sub = parser.add_subparsers(dest="cmd")
     p = sub.add_parser("tags")

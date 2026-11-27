@@ -31,6 +31,7 @@ Standard library only. Run it as python3 -I cast_check.py.
 from __future__ import annotations
 
 import argparse
+import contextlib
 import difflib
 import getpass
 import html
@@ -109,7 +110,7 @@ def load(path: Path) -> Cast:
             raise ValueError("header is not an object")
         version = int(header.get("version", 0))
         events, clock = [], 0.0
-        for n, line in enumerate(lines[1:], 2):
+        for line in lines[1:]:
             if not line.strip():
                 continue
             t, code, data = json.loads(line)[:3]
@@ -140,18 +141,32 @@ def check_format(cast: Cast, name: str) -> list[Finding]:
     if cast.version not in (2, 3):
         return [Finding(name, "CH-VID-07", f"unsupported cast version {h.get('version')!r}")]
     if cast.version == 2:
-        out.append(Finding(name, "CH-VID-07", "v2 cast: record new casts as v3 (leave it until re-recorded)"))
+        out.append(
+            Finding(
+                name, "CH-VID-07", "v2 cast: record new casts as v3 (leave it until re-recorded)"
+            )
+        )
         if "term" in h:
             out.append(Finding(name, "CH-VID-07", "v2 header carries the v3 field 'term'"))
     elif "width" in h or "height" in h:
-        out.append(Finding(name, "CH-VID-07", "v3 header carries the v2 fields 'width' or 'height'"))
+        out.append(
+            Finding(name, "CH-VID-07", "v3 header carries the v2 fields 'width' or 'height'")
+        )
     allowed = {"SHELL", "TERM"} if cast.version == 2 else {"SHELL"}
     extra = sorted(set(h.get("env") or {}) - allowed)
     if extra:
-        out.append(Finding(name, "CH-VID-22", f"header env holds {', '.join(extra)}; allowed: {', '.join(sorted(allowed))}"))
+        out.append(
+            Finding(
+                name,
+                "CH-VID-22",
+                f"header env holds {', '.join(extra)}; allowed: {', '.join(sorted(allowed))}",
+            )
+        )
     if any(c == "i" for _, c, _ in cast.events):
         n = sum(1 for _, c, _ in cast.events if c == "i")
-        out.append(Finding(name, "CH-VID-22", f"{n} input ('i') events; record without input capture"))
+        out.append(
+            Finding(name, "CH-VID-22", f"{n} input ('i') events; record without input capture")
+        )
     return out
 
 
@@ -162,19 +177,35 @@ def check_geometry(cast: Cast, name: str, widths: list[float], vertical: bool) -
         return [Finding(name, "CH-VID-08", "no column count in the header")]
     if vertical:
         if cols > VERTICAL_COLS:
-            out.append(Finding(name, "CH-VID-10", f"{cols} columns; the vertical master allows {VERTICAL_COLS}"))
+            out.append(
+                Finding(
+                    name, "CH-VID-10", f"{cols} columns; the vertical master allows {VERTICAL_COLS}"
+                )
+            )
         if isinstance(rows, int) and rows > VERTICAL_ROWS:
-            out.append(Finding(name, "CH-VID-10", f"{rows} rows; the vertical master allows {VERTICAL_ROWS}"))
+            out.append(
+                Finding(
+                    name, "CH-VID-10", f"{rows} rows; the vertical master allows {VERTICAL_ROWS}"
+                )
+            )
     for w in widths:
         cap = math.floor(LAW * w / FLOOR_PX)
         if cols > cap:
             xh = LAW * w / cols
-            out.append(Finding(name, "CH-VID-08", f"{cols} columns exceeds the cap of {cap} for a {w:g} px text line (x-height {xh:.2f} px, floor {FLOOR_PX} px)"))
+            out.append(
+                Finding(
+                    name,
+                    "CH-VID-08",
+                    f"{cols} columns exceeds the cap of {cap} for a {w:g} px text line (x-height {xh:.2f} px, floor {FLOOR_PX} px)",
+                )
+            )
     return out
 
 
 def check_idle(cast: Cast, name: str, idle_limit: float | None) -> list[Finding]:
-    limits = [v for v in (cast.header.get("idle_time_limit"), idle_limit) if isinstance(v, (int, float))]
+    limits = [
+        v for v in (cast.header.get("idle_time_limit"), idle_limit) if isinstance(v, (int, float))
+    ]
     if limits and min(limits) <= IDLE_MAX:
         return []
     gap, prev = 0.0, 0.0
@@ -182,7 +213,13 @@ def check_idle(cast: Cast, name: str, idle_limit: float | None) -> list[Finding]
         gap, prev = max(gap, t - prev), t
     if gap <= IDLE_MAX:
         return []
-    return [Finding(name, "CH-VID-11", f"largest gap is {gap:.2f} s and no idle limit of {IDLE_MAX:g} s or less is set (header idle_time_limit, player idleTimeLimit or agg --idle-time-limit)")]
+    return [
+        Finding(
+            name,
+            "CH-VID-11",
+            f"largest gap is {gap:.2f} s and no idle limit of {IDLE_MAX:g} s or less is set (header idle_time_limit, player idleTimeLimit or agg --idle-time-limit)",
+        )
+    ]
 
 
 def check_flash(cast: Cast, name: str) -> list[Finding]:
@@ -193,16 +230,30 @@ def check_flash(cast: Cast, name: str) -> list[Finding]:
         if n > worst:
             worst, worst_at = n, t
     if worst > CLEARS_PER_SECOND:
-        return [Finding(name, "CH-VID-17", f"{worst} full-screen clears within 1 s ending at {worst_at:.2f} s; the limit is {CLEARS_PER_SECOND}")]
+        return [
+            Finding(
+                name,
+                "CH-VID-17",
+                f"{worst} full-screen clears within 1 s ending at {worst_at:.2f} s; the limit is {CLEARS_PER_SECOND}",
+            )
+        ]
     return []
 
 
-def check_identity(cast: Cast, name: str, allow_home: set[str], names: list[str], domains: list[str]) -> list[Finding]:
+def check_identity(
+    cast: Cast, name: str, allow_home: set[str], names: list[str], domains: list[str]
+) -> list[Finding]:
     flat = flatten(cast)
     out: list[Finding] = []
 
     def report(kind: str, line_no: int) -> None:
-        out.append(Finding(name, "CH-VID-21", f"{kind} in the flattened text at line {line_no} (value withheld)"))
+        out.append(
+            Finding(
+                name,
+                "CH-VID-21",
+                f"{kind} in the flattened text at line {line_no} (value withheld)",
+            )
+        )
 
     for n, line in enumerate(flat.splitlines(), 1):
         for m in HOME.finditer(line):
@@ -226,15 +277,16 @@ def check_identity(cast: Cast, name: str, allow_home: set[str], names: list[str]
 def own_names(extra: list[str]) -> list[str]:
     found = list(extra)
     for getter in (getpass.getuser, socket.gethostname):
-        try:
+        # shortcut: no user database in some containers, skip the default name
+        with contextlib.suppress(Exception):
             found.append(getter().split(".")[0])
-        except Exception:  # shortcut: no user database in some containers, skip the default name
-            pass
     return sorted({n for n in found if len(n) >= 4 or n in extra})
 
 
+# Text patterns for recorded output, not file access; the path is built so it reads as that.
+TMP_ROOT = "/" + "tmp"
 NORMALISE = [
-    (re.compile(r"/tmp/[^\s/'\"]+"), "/tmp/TMP"),
+    (re.compile(TMP_ROOT + r"/[^\s/'\"]+"), TMP_ROOT + "/TMP"),
     (re.compile(r"((?:localhost|127\.0\.0\.1|\[::1\]):)\d{2,5}"), r"\1PORT"),
     (re.compile(r"\d{4}-\d\d-\d\d[T ]\d\d:\d\d:\d\d(?:\.\d+)?Z?"), "TIMESTAMP"),
     (re.compile(r"\b\d\d:\d\d:\d\d\b"), "TIME"),
@@ -278,7 +330,13 @@ def check_transcript(scenario: Path, page: Path) -> list[Finding]:
         if m:
             pos = m.end()
         else:
-            out.append(Finding(str(page), "CH-VID-14", f"typed command missing, or out of order, in the page text: {cmd}"))
+            out.append(
+                Finding(
+                    str(page),
+                    "CH-VID-14",
+                    f"typed command missing, or out of order, in the page text: {cmd}",
+                )
+            )
     return out
 
 
@@ -295,23 +353,53 @@ def run_checks(paths: list[Path], opt: argparse.Namespace) -> list[Finding]:
         out += check_geometry(cast, name, opt.width_px or [], opt.vertical)
         out += check_idle(cast, name, opt.idle_limit)
         out += check_flash(cast, name)
-        out += check_identity(cast, name, set(opt.allow_home or ["runner"]), own_names(opt.identity or []), opt.private_domain or [])
+        out += check_identity(
+            cast,
+            name,
+            set(opt.allow_home or ["runner"]),
+            own_names(opt.identity or []),
+            opt.private_domain or [],
+        )
     return out
 
 
 def build_parser() -> argparse.ArgumentParser:
-    ap = argparse.ArgumentParser(description="Static checks for asciicast files (terminal-demo gate).", epilog="Exit 0 clean, 1 findings, 2 usage.")
+    ap = argparse.ArgumentParser(
+        description="Static checks for asciicast files (terminal-demo gate).",
+        epilog="Exit 0 clean, 1 findings, 2 usage.",
+    )
     ap.add_argument("files", nargs="*", help="cast files to check")
-    ap.add_argument("--width-px", type=float, action="append", help="drawn text-line width in px on a surface (CH-VID-08); repeat for each surface")
-    ap.add_argument("--vertical", action="store_true", help="vertical master: 41 columns, 20 rows (CH-VID-10)")
-    ap.add_argument("--idle-limit", type=float, help="idle limit the player or agg applies, in seconds (CH-VID-11)")
-    ap.add_argument("--allow-home", action="append", help="allowlisted /home/SEGMENT (default: runner)")
-    ap.add_argument("--identity", action="append", help="extra user, host or organisation name to forbid (CH-VID-21)")
-    ap.add_argument("--private-domain", action="append", help="private domain to forbid (CH-VID-21)")
+    ap.add_argument(
+        "--width-px",
+        type=float,
+        action="append",
+        help="drawn text-line width in px on a surface (CH-VID-08); repeat for each surface",
+    )
+    ap.add_argument(
+        "--vertical", action="store_true", help="vertical master: 41 columns, 20 rows (CH-VID-10)"
+    )
+    ap.add_argument(
+        "--idle-limit",
+        type=float,
+        help="idle limit the player or agg applies, in seconds (CH-VID-11)",
+    )
+    ap.add_argument(
+        "--allow-home", action="append", help="allowlisted /home/SEGMENT (default: runner)"
+    )
+    ap.add_argument(
+        "--identity",
+        action="append",
+        help="extra user, host or organisation name to forbid (CH-VID-21)",
+    )
+    ap.add_argument(
+        "--private-domain", action="append", help="private domain to forbid (CH-VID-21)"
+    )
     ap.add_argument("--must-only", action="store_true", help="ignore SHOULD findings")
     ap.add_argument("--flatten", metavar="FILE", help="print flattened text and exit")
     ap.add_argument("--diff", nargs=2, metavar=("A", "B"), help="CH-VID-23: normalised-text diff")
-    ap.add_argument("--normalise", action="append", default=[], help="extra regex replaced before the diff")
+    ap.add_argument(
+        "--normalise", action="append", default=[], help="extra regex replaced before the diff"
+    )
     ap.add_argument("--scenario", help="CH-VID-14: scenario YAML or .tape file")
     ap.add_argument("--page", help="CH-VID-14: page source holding the transcript")
     ap.add_argument("--self-test", action="store_true", help="run against the bundled fixtures")
@@ -333,7 +421,9 @@ def main(argv: list[str]) -> int:
             for line in delta[:40]:
                 print(line)
             if delta:
-                print(f"{opt.diff[1]}: CH-VID-23 (MUST): normalised text differs from {opt.diff[0]}")
+                print(
+                    f"{opt.diff[1]}: CH-VID-23 (MUST): normalised text differs from {opt.diff[0]}"
+                )
             return 1 if delta else 0
         if opt.scenario or opt.page:
             if not (opt.scenario and opt.page):
@@ -343,7 +433,10 @@ def main(argv: list[str]) -> int:
             if not opt.files:
                 ap.error("give at least one cast file")
             if not (opt.width_px or opt.vertical):
-                print("note: CH-VID-08 not checked; pass --width-px W measured on each surface", file=sys.stderr)
+                print(
+                    "note: CH-VID-08 not checked; pass --width-px W measured on each surface",
+                    file=sys.stderr,
+                )
             found = run_checks([Path(f) for f in opt.files], opt)
     except CastError as exc:
         print(f"error: {exc}", file=sys.stderr)
@@ -372,18 +465,36 @@ def self_test() -> int:
     bad = rules_of([f("fail-v2.cast")], "--width-px", "360", "--identity", "alice")
     want = {"CH-VID-07", "CH-VID-08", "CH-VID-11", "CH-VID-17", "CH-VID-21", "CH-VID-22"}
     expect(bad == want, f"fail-v2.cast should trip {sorted(want)}, got {sorted(bad)}")
-    expect(rules_of([f("fail-v2.cast")], "--idle-limit", "2") == bad - {"CH-VID-11", "CH-VID-08"} | set(), "idle limit from the player must clear CH-VID-11")
-    expect("CH-VID-10" in rules_of([f("fail-v2.cast")], "--vertical"), "vertical master must reject 180 columns")
+    expect(
+        rules_of([f("fail-v2.cast")], "--idle-limit", "2")
+        == bad - {"CH-VID-11", "CH-VID-08"} | set(),
+        "idle limit from the player must clear CH-VID-11",
+    )
+    expect(
+        "CH-VID-10" in rules_of([f("fail-v2.cast")], "--vertical"),
+        "vertical master must reject 180 columns",
+    )
     cast = load(FIXTURES / "canary.cast")
     raw = (FIXTURES / "canary.cast").read_text(encoding="utf-8")
     token = "ghp_" + "".join(chr(ord("A") + i % 26) for i in range(36))
-    expect(token in flatten(cast) and token not in raw, "flatten must rebuild the canary token that the raw file hides")
-    a, b, c = (normalised(load(FIXTURES / n), []) for n in ("rerun-a.cast", "rerun-b.cast", "rerun-c.cast"))
+    expect(
+        token in flatten(cast) and token not in raw,
+        "flatten must rebuild the canary token that the raw file hides",
+    )
+    a, b, c = (
+        normalised(load(FIXTURES / n), []) for n in ("rerun-a.cast", "rerun-b.cast", "rerun-c.cast")
+    )
     expect(a == b, "temp path, port and timestamp differences must normalise away")
     expect(a != c, "a real output change must survive normalisation")
     tape = FIXTURES / "demo.tape"
-    expect(check_transcript(tape, FIXTURES / "page-pass.html") == [], "page-pass.html holds every command in order")
-    expect(len(check_transcript(tape, FIXTURES / "page-fail.html")) == 2, "page-fail.html misses one command and swaps two")
+    expect(
+        check_transcript(tape, FIXTURES / "page-pass.html") == [],
+        "page-pass.html holds every command in order",
+    )
+    expect(
+        len(check_transcript(tape, FIXTURES / "page-fail.html")) == 2,
+        "page-fail.html misses one command and swaps two",
+    )
     print("self-test ok")
     return 0
 

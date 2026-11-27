@@ -63,7 +63,10 @@ def site_name(url: str) -> str:
 
 
 def check_title(
-    title: str, url: str = "", products: tuple[str, ...] = (), acronyms: frozenset[str] = frozenset()
+    title: str,
+    url: str = "",
+    products: tuple[str, ...] = (),
+    acronyms: frozenset[str] = frozenset(),
 ) -> list[str]:
     """CH-COM-06. Each finding is `CH-COM-06 <clause>: "<span from the title>"`."""
     out: list[str] = []
@@ -196,7 +199,10 @@ def self_test() -> int:
         "hn-fail-site reports the site name",
     )
     expect(
-        not any("site name" in s for s in check_title(site, "https://github.com/example/mytool", ("github",))),
+        not any(
+            "site name" in s
+            for s in check_title(site, "https://github.com/example/mytool", ("github",))
+        ),
         "the product's own name is not a site-name finding",
     )
     prefix = (FIXTURES / "hn-fail-prefix.md").read_text(encoding="utf-8").splitlines()[0]
@@ -210,12 +216,20 @@ def self_test() -> int:
         "capitals pass with the allow-list",
     )
     expect(check_title("Show HN: A first-class table renderer") == [], "first-class passes")
-    expect(any("superlative" in s for s in check_title("Show HN: The first table renderer")), "the first fails")
+    expect(
+        any("superlative" in s for s in check_title("Show HN: The first table renderer")),
+        "the first fails",
+    )
 
     clean = walk([str(FIXTURES / "solicit-pass")])
     dirty = walk([str(FIXTURES / "solicit-fail")])
-    expect(scan_lines(clean, SOLICIT_RE, "CH-COM-08", "solicitation") == [], "solicit-pass is clean")
-    expect(len(scan_lines(dirty, SOLICIT_RE, "CH-COM-08", "solicitation")) >= 2, "solicit-fail has hits")
+    expect(
+        scan_lines(clean, SOLICIT_RE, "CH-COM-08", "solicitation") == [], "solicit-pass is clean"
+    )
+    expect(
+        len(scan_lines(dirty, SOLICIT_RE, "CH-COM-08", "solicitation")) >= 2,
+        "solicit-fail has hits",
+    )
 
     claim_pass = [FIXTURES / "claims-pass.md"]
     claim_fail = [FIXTURES / "claims-fail.md"]
@@ -224,9 +238,14 @@ def self_test() -> int:
     expect(check_claims(claim_fail, True) == [], "a DISCOVERABLE server clears the claim")
 
     findings, info = check_invite(load_invite(FIXTURES / "invite-small.json"))
-    expect(len(findings) == 3 and info == ["CH-COM-24 DISCOVERABLE: no"], "invite-small fails three gates")
+    expect(
+        len(findings) == 3 and info == ["CH-COM-24 DISCOVERABLE: no"],
+        "invite-small fails three gates",
+    )
     findings, info = check_invite(load_invite(FIXTURES / "invite-discoverable.json"))
-    expect(findings == [] and info == ["CH-COM-24 DISCOVERABLE: yes"], "invite-discoverable is clean")
+    expect(
+        findings == [] and info == ["CH-COM-24 DISCOVERABLE: yes"], "invite-discoverable is clean"
+    )
 
     before = hashlib.sha256((FIXTURES / "hn-fail.md").read_bytes()).hexdigest()
     check_title(fail_title)
@@ -240,8 +259,12 @@ def self_test() -> int:
 
 
 def main(argv: list[str]) -> int:
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--self-test", action="store_true", help="run the checks over the bundled fixtures")
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    ap.add_argument(
+        "--self-test", action="store_true", help="run the checks over the bundled fixtures"
+    )
     sub = ap.add_subparsers(dest="cmd")
     t = sub.add_parser("title", help="CH-COM-06 and CH-COM-25 over the first line of a draft")
     t.add_argument("draft")

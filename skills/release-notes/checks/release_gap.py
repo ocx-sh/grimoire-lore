@@ -45,7 +45,8 @@ DOWNLOAD = re.compile(r"releases/latest/download/([A-Za-z0-9._-]+)")
 
 def version_key(tag: str) -> tuple[int, int, int]:
     m = STABLE.match(tag)
-    assert m
+    if not m:
+        raise ValueError(tag)
     return int(m.group(1)), int(m.group(2)), int(m.group(3))
 
 
@@ -68,7 +69,12 @@ def check(
     else:
         pool = stable or [t for t in published if STABLE.match(t)]
         if pool and latest[0] != max(pool, key=version_key):
-            out.append(("CH-GH-07", f"Latest is {latest[0]}, highest stable tag is {max(pool, key=version_key)}"))
+            out.append(
+                (
+                    "CH-GH-07",
+                    f"Latest is {latest[0]}, highest stable tag is {max(pool, key=version_key)}",
+                )
+            )
     for r in releases:
         tag = r["tagName"]
         if bool(PRE.match(tag)) != bool(r.get("isPrerelease")):
@@ -93,33 +99,46 @@ def _lines(path: Path) -> list[str]:
     return [x.strip() for x in path.read_text(encoding="utf-8").splitlines() if x.strip()]
 
 
+def expect(condition: object, message: object = "condition false") -> None:
+    """Self-test check that survives python -O, which strips a bare assert."""
+    if not condition:
+        raise SystemExit(f"self-test failed: {message}")
+
+
 def self_test() -> int:
     fx = Path(__file__).resolve().parent / "fixtures" / "gap"
     tags = _lines(fx / "tags.txt")
     releases = json.loads((fx / "releases.json").read_text(encoding="utf-8"))
     baseline = {x for x in _lines(fx / "baseline.txt") if not x.startswith("#")}
-    assets = {a["name"] for a in json.loads((fx / "assets.json").read_text(encoding="utf-8"))["assets"]}
+    assets = {
+        a["name"] for a in json.loads((fx / "assets.json").read_text(encoding="utf-8"))["assets"]
+    }
     docs = documented_names([fx / "README.md"])
-    assert docs == ["mytool-installer.sh", "ASSET"], docs
+    expect(docs == ["mytool-installer.sh", "ASSET"], docs)
     # v1.4.0 is in the baseline, v2 and v1 are aliases, v2.1.0-rc.1 is a prerelease.
-    assert check(tags, releases, baseline, assets, docs) == []
-    assert check(tags, releases, set(), assets, docs) == [("MKT-REL-11", "stable tag v1.4.0 has no published Release")]
+    expect(check(tags, releases, baseline, assets, docs) == [])
+    expect(
+        check(tags, releases, set(), assets, docs)
+        == [("MKT-REL-11", "stable tag v1.4.0 has no published Release")]
+    )
     draft = [dict(r, isDraft=r["tagName"] == "v1.4.1") for r in releases]
-    assert [f[0] for f in check(tags, draft, baseline)] == ["MKT-REL-11"]
+    expect([f[0] for f in check(tags, draft, baseline)] == ["MKT-REL-11"])
     moved = [dict(r, isLatest=r["tagName"] == "v1.4.1") for r in releases]
-    assert [f[0] for f in check(tags, moved, baseline)] == ["CH-GH-07"]
+    expect([f[0] for f in check(tags, moved, baseline)] == ["CH-GH-07"])
     none = [dict(r, isLatest=False) for r in releases]
-    assert [f[0] for f in check(tags, none, baseline)] == ["CH-GH-07"]
+    expect([f[0] for f in check(tags, none, baseline)] == ["CH-GH-07"])
     flag = [dict(r, isPrerelease=False) for r in releases]
-    assert [f[0] for f in check(tags, flag, baseline)] == ["CH-GH-09"]
+    expect([f[0] for f in check(tags, flag, baseline)] == ["CH-GH-09"])
     renamed = {"mytool-linux-amd64"}
-    assert [f[0] for f in check(tags, releases, baseline, renamed, docs)] == ["CH-GH-08"]
+    expect([f[0] for f in check(tags, releases, baseline, renamed, docs)] == ["CH-GH-08"])
     print("release_gap self-test ok")
     return 0
 
 
 def main(argv: list[str]) -> int:
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     ap.add_argument("--tags", type=Path)
     ap.add_argument("--releases", type=Path)
     ap.add_argument("--baseline", type=Path)
@@ -136,11 +155,15 @@ def main(argv: list[str]) -> int:
     try:
         tags = _lines(args.tags)
         releases = json.loads(args.releases.read_text(encoding="utf-8"))
-        baseline = {x for x in _lines(args.baseline) if not x.startswith("#")} if args.baseline else set()
+        baseline = (
+            {x for x in _lines(args.baseline) if not x.startswith("#")} if args.baseline else set()
+        )
         names = None
         documented = None
         if args.assets:
-            names = {a["name"] for a in json.loads(args.assets.read_text(encoding="utf-8"))["assets"]}
+            names = {
+                a["name"] for a in json.loads(args.assets.read_text(encoding="utf-8"))["assets"]
+            }
             documented = documented_names(args.docs)
     except (OSError, ValueError, KeyError) as err:
         print(f"release_gap: {err}", file=sys.stderr)

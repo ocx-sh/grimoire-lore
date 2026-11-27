@@ -34,9 +34,9 @@ import re
 import sys
 import urllib.error
 import urllib.request
+from collections.abc import Callable
 from datetime import date, timedelta
 from pathlib import Path
-from typing import Callable
 
 ROW_RE = re.compile(r"^\| ([A-Z]+-F[0-9]+) ")
 DATE_RE = r"20[0-9][0-9]-[01][0-9]-[0-3][0-9]"
@@ -66,8 +66,8 @@ def read_rows(path: Path) -> list[tuple[int, list[str]]]:
 
 def load_hosts(path: Path) -> set[str]:
     hosts = set()
-    for line in path.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
         if line and not line.startswith("#"):
             hosts.add(" ".join(line.split()))
     return hosts
@@ -80,11 +80,13 @@ def check_files(files: list[Path], today: date, hosts: set[str] | None) -> list[
         for number, cells in read_rows(path):
             where = f"{path}:{number}"
             if len(cells) != 12:
-                out.append(f"{where}: {len(cells) - 2} columns, want 10 (a cell holds a literal pipe?)")
+                out.append(
+                    f"{where}: {len(cells) - 2} columns, want 10 (a cell holds a literal pipe?)"
+                )
                 continue
             rid, _plat, _fact, _val, url, src, verified, refresh, prov, expect = cells[1:11]
 
-            def bad(what: str) -> None:
+            def bad(what: str, where: str = where, rid: str = rid) -> None:
                 out.append(f"{where}: {rid}: {what}")
 
             if rid in seen:
@@ -93,7 +95,9 @@ def check_files(files: list[Path], today: date, hosts: set[str] | None) -> list[
             if not re.fullmatch(r"https://\S+", url):
                 bad("url is not an https URL")
             elif "web.archive.org" in url:
-                bad("url is an archive capture; cite the canonical page and keep the capture in a history note")
+                bad(
+                    "url is an archive capture; cite the canonical page and keep the capture in a history note"
+                )
             if not re.fullmatch(rf"{DATE_RE}|relative:.+@{DATE_RE}|none", src) or (
                 re.fullmatch(DATE_RE, src) and not to_date(src)
             ):
@@ -115,7 +119,9 @@ def check_files(files: list[Path], today: date, hosts: set[str] | None) -> list[
             if checked and refresh in ("30", "90", "180"):
                 due = checked + timedelta(days=int(refresh))
                 if due < today:
-                    bad(f"overdue by {(today - due).days} days (verified {verified}, refresh_days {refresh}); re-fetch it")
+                    bad(
+                        f"overdue by {(today - due).days} days (verified {verified}, refresh_days {refresh}); re-fetch it"
+                    )
             if refresh.startswith("expires:"):
                 end = to_date(refresh[8:])
                 if end and end < today:
@@ -137,7 +143,11 @@ def refetch(files: list[Path], fetch: Callable[[str], tuple[int, str]]) -> list[
             host = url.split("/")[2] if url.count("/") >= 2 else ""
             if MANUAL_RE.search(host):
                 base = to_date(verified)
-                due = (base + timedelta(days=int(refresh))).isoformat() if base and refresh.isdigit() else refresh
+                due = (
+                    (base + timedelta(days=int(refresh))).isoformat()
+                    if base and refresh.isdigit()
+                    else refresh
+                )
                 out.append(f"MANUAL {rid} {url} due {due}")
                 continue
             code, body = fetch(url)
@@ -155,9 +165,12 @@ def refetch(files: list[Path], fetch: Callable[[str], tuple[int, str]]) -> list[
 
 
 def http_fetch(url: str) -> tuple[int, str]:
-    request = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (compatible; facts-check)"})
+    if not url.startswith("https://"):
+        return 0, ""
+    opener = urllib.request.build_opener()
+    opener.addheaders = [("User-Agent", "Mozilla/5.0 (compatible; facts-check)")]
     try:
-        with urllib.request.urlopen(request, timeout=40) as reply:
+        with opener.open(url, timeout=40) as reply:
             return reply.status, reply.read(2_000_000).decode("utf-8", "replace")
     except urllib.error.HTTPError as err:
         return err.code, ""
@@ -175,9 +188,20 @@ def self_test() -> int:
     if good:
         raise SystemExit(f"self-test: pass fixture reported {good}")
     bad = " ".join(run(FIXTURES / "fail" / "facts.md"))
-    for needle in ("5 columns", "source_date", "verified is not", "refresh_days", "provenance",
-                   "expect is empty", "does not compile", "overdue by", "expired on", "archive capture",
-                   "also defined", "not an https"):
+    for needle in (
+        "5 columns",
+        "source_date",
+        "verified is not",
+        "refresh_days",
+        "provenance",
+        "expect is empty",
+        "does not compile",
+        "overdue by",
+        "expired on",
+        "archive capture",
+        "also defined",
+        "not an https",
+    ):
         if needle not in bad:
             raise SystemExit(f"self-test: fail fixture did not report {needle!r}: {bad}")
     hosts = load_hosts(FIXTURES / "hosts.txt")
@@ -200,11 +224,17 @@ def self_test() -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument("files", nargs="*", type=Path)
     parser.add_argument("--today", help="override today's date (YYYY-MM-DD)")
-    parser.add_argument("--hosts", type=Path, help="allowlist of '<host> <provenance>' lines (CH-CORE-15)")
-    parser.add_argument("--refetch", action="store_true", help="weekly re-fetch job (CH-CORE-14); always exits 0")
+    parser.add_argument(
+        "--hosts", type=Path, help="allowlist of '<host> <provenance>' lines (CH-CORE-15)"
+    )
+    parser.add_argument(
+        "--refetch", action="store_true", help="weekly re-fetch job (CH-CORE-14); always exits 0"
+    )
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args(argv)
     if args.self_test:

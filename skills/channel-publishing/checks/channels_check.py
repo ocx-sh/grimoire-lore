@@ -33,13 +33,28 @@ from __future__ import annotations
 
 import argparse
 import re
+import shutil
 import subprocess
 import sys
 from datetime import date
 from pathlib import Path
 
-REQUIRED = ("id", "platform", "handle", "url", "status", "ownership", "verified_by", "owner_role",
-            "automation", "approved_by", "labels_required", "credential", "last_checked", "linked_from")
+REQUIRED = (
+    "id",
+    "platform",
+    "handle",
+    "url",
+    "status",
+    "ownership",
+    "verified_by",
+    "owner_role",
+    "automation",
+    "approved_by",
+    "labels_required",
+    "credential",
+    "last_checked",
+    "linked_from",
+)
 BOT_REQUIRED = ("runs_from", "gates_attested", "attested_by", "attested_at")
 ENUMS = {
     "status": ("active", "planned", "retired", "squatted", "none"),
@@ -115,7 +130,23 @@ def norm(url: str) -> str:
 
 def owned_files(root: Path) -> list[Path]:
     try:
-        listed = subprocess.run(["git", "-C", str(root), "ls-files", "-z", "--cached", "--others", "--exclude-standard"], capture_output=True, check=True).stdout
+        git = shutil.which("git")
+        if git is None:
+            raise FileNotFoundError("git")
+        listed = subprocess.run(  # noqa: S603  git is resolved with shutil.which, args are fixed
+            [
+                git,
+                "-C",
+                str(root),
+                "ls-files",
+                "-z",
+                "--cached",
+                "--others",
+                "--exclude-standard",
+            ],
+            capture_output=True,
+            check=True,
+        ).stdout
         names = [Path(n.decode()) for n in listed.split(b"\0") if n]
     except (OSError, subprocess.CalledProcessError):
         names = [p.relative_to(root) for p in root.rglob("*") if p.is_file()]
@@ -154,22 +185,34 @@ def check(path: Path, today: date, root: Path | None) -> tuple[list[str], list[s
                 warns.append(f"{path}: {rid}: last_checked is {age} days old (fails after 180)")
         except ValueError:
             bad("last_checked is not an absolute date")
-        status, owner, links = row.get("status"), row.get("ownership"), as_list(row.get("linked_from"))
+        status, owner, links = (
+            row.get("status"),
+            row.get("ownership"),
+            as_list(row.get("linked_from")),
+        )
         verified = str(row.get("verified_by", ""))
         if owner == "inferred" and (status == "active" or links):
-            bad("ownership is inferred, so the row is not active and has no linked_from (CH-CORE-19)")
+            bad(
+                "ownership is inferred, so the row is not active and has no linked_from (CH-CORE-19)"
+            )
         if owner == "proven" and not verified:
             bad("ownership is proven but verified_by is empty")
-        if verified.startswith("not provable") and not re.fullmatch(r"not provable \([^,)]+, \d{4}-\d\d-\d\d\)", verified):
+        if verified.startswith("not provable") and not re.fullmatch(
+            r"not provable \([^,)]+, \d{4}-\d\d-\d\d\)", verified
+        ):
             bad("verified_by must read: not provable (<code>, <date>)")
-        if status in ("retired", "none") and (verified.startswith("not provable") or re.fullmatch(r"(HTTP )?[0-9]{3}", verified)):
+        if status in ("retired", "none") and (
+            verified.startswith("not provable") or re.fullmatch(r"(HTTP )?[0-9]{3}", verified)
+        ):
             bad(f"status {status} rests on a failed probe; a 403 is not absence (CH-CORE-19)")
         if status in ("retired", "planned") and links:
             bad(f"a {status} row has linked_from entries (CH-CORE-18)")
         if row.get("automation") == "bot":
             platform = str(row.get("platform", "")).lower()
             if platform not in GATES:
-                bad(f"automation: bot on {platform!r}; bots exist on {', '.join(GATES)} only (CH-CORE-02)")
+                bad(
+                    f"automation: bot on {platform!r}; bots exist on {', '.join(GATES)} only (CH-CORE-02)"
+                )
                 continue
             for k in ("approved_by", "credential", "labels_required", *BOT_REQUIRED):
                 if not row.get(k):
@@ -197,8 +240,12 @@ def link_findings(path: Path, rows: list[dict], root: Path) -> list[str]:
             continue
         for rel in as_list(row.get("linked_from")):
             target = root / rel
-            if not target.is_file() or row["url"].rstrip("/") not in target.read_text(encoding="utf-8", errors="ignore"):
-                out.append(f"{path}: {row.get('id')}: {rel} does not contain {row['url']} (forward link)")
+            if not target.is_file() or row["url"].rstrip("/") not in target.read_text(
+                encoding="utf-8", errors="ignore"
+            ):
+                out.append(
+                    f"{path}: {row.get('id')}: {rel} does not contain {row['url']} (forward link)"
+                )
     known = [norm(r["url"]) for r in rows if r.get("url")]
     for name in owned_files(root):
         try:
@@ -209,8 +256,12 @@ def link_findings(path: Path, rows: list[dict], root: Path) -> list[str]:
             continue
         for lineno, line in enumerate(data.decode("utf-8", "replace").splitlines(), 1):
             for hit in URL_RE.findall(line):
-                if CHANNEL_RE.search(hit) and not any(norm(hit) == k or norm(hit).startswith(k + "/") for k in known):
-                    out.append(f"{name}:{lineno}: {hit.rstrip('.,;')} matches no channels.yml row (reverse link)")
+                if CHANNEL_RE.search(hit) and not any(
+                    norm(hit) == k or norm(hit).startswith(k + "/") for k in known
+                ):
+                    out.append(
+                        f"{name}:{lineno}: {hit.rstrip('.,;')} matches no channels.yml row (reverse link)"
+                    )
     return out
 
 
@@ -223,9 +274,21 @@ def self_test() -> int:
     root = FIXTURES / "fail"
     fails, warns = check(root / "channels.yml", today, root)
     text = " ".join(fails)
-    for needle in ("missing keys", "want one of", "CH-CORE-19", "a 403 is not absence", "retired row has linked_from",
-                   "bots exist on", "lacks x-bio", "attested_at is", "no spend_cap", "days old (fails after 180)",
-                   "forward link", "reverse link", "not provable (<code>"):
+    for needle in (
+        "missing keys",
+        "want one of",
+        "CH-CORE-19",
+        "a 403 is not absence",
+        "retired row has linked_from",
+        "bots exist on",
+        "lacks x-bio",
+        "attested_at is",
+        "no spend_cap",
+        "days old (fails after 180)",
+        "forward link",
+        "reverse link",
+        "not provable (<code>",
+    ):
         if needle not in text:
             raise SystemExit(f"self-test: fail fixture did not report {needle!r}: {text}")
     if not any("fails after 180" in w for w in warns):
@@ -235,9 +298,13 @@ def self_test() -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument("channels", nargs="?", type=Path)
-    parser.add_argument("--root", type=Path, default=Path("."), help="repository root for the link checks")
+    parser.add_argument(
+        "--root", type=Path, default=Path(), help="repository root for the link checks"
+    )
     parser.add_argument("--today", help="override today's date (YYYY-MM-DD)")
     parser.add_argument("--no-links", action="store_true", help="skip the CH-CORE-18 link checks")
     parser.add_argument("--self-test", action="store_true")

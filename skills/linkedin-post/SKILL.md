@@ -1,6 +1,6 @@
 ---
 name: linkedin-post
-description: LinkedIn posts for a software product, written for a named person rather than a company Page: the goal and metric header, the first three lines, the length limit, link placement and link cards with their Open Graph tags, document posts, image alt text, polls, engagement-bait patterns, sponsorship and AI-use disclosure, and dated LinkedIn facts. Use when someone asks for a LinkedIn post, a LinkedIn announcement of a release or launch, a carousel or document post, a company Page update, or a review of a LinkedIn draft. Not for posting, scheduling or automation, which LinkedIn bans and channel-publishing forbids, and not for X, Bluesky or Mastodon posts, which is microblog-post.
+description: "LinkedIn posts for a software product, written for a named person rather than a company Page: the goal and metric header, the first three lines, the length limit, link placement and link cards with their Open Graph tags, document posts, image alt text, polls, engagement-bait patterns, sponsorship and AI-use disclosure, and dated LinkedIn facts. Use when someone asks for a LinkedIn post, a LinkedIn announcement of a release or launch, a carousel or document post, a company Page update, or a review of a LinkedIn draft. Not for posting, scheduling or automation, which LinkedIn bans and channel-publishing forbids, and not for X, Bluesky or Mastodon posts, which is microblog-post."
 license: Apache-2.0
 metadata:
   summary: Drafts and reviews a person-led LinkedIn post about a software tool, ending in a draft file for a human to post

@@ -51,11 +51,9 @@ DIALOG_CONTEXT = re.compile(
     re.IGNORECASE,
 )
 CONTEXT_LINES = 4
-LABEL_PROP = re.compile(
-    r"""\b(?:confirm|ok)(?:Button)?(?:Label|Text)\b(\s*\?\s*:|\s*=\s*['"`])"""
-)
+LABEL_PROP = re.compile(r"""\b(?:confirm|ok)(?:Button)?(?:Label|Text)\b(\s*\?\s*:|\s*=\s*['"`])""")
 DECLARATION = re.compile(r"\b(?:const|let|var)\s+$")
-ZERO_WIDTH = {"​": "U+200B", "‌": "U+200C", "‍": "U+200D", "⁠": "U+2060", "﻿": "U+FEFF"}
+ZERO_WIDTH = {"\u200b": "U+200B", "‌": "U+200C", "‍": "U+200D", "⁠": "U+2060", "﻿": "U+FEFF"}
 
 
 def scan_text(text: str, name: str, arms: tuple[str, ...]) -> tuple[list[dict], list[dict]]:
@@ -76,7 +74,13 @@ def scan_text(text: str, name: str, arms: tuple[str, ...]) -> tuple[list[dict], 
             for m in BANNED_LABEL.finditer(line):
                 label = m.group(2) or m.group(3)
                 rest = line[: m.start()] + " " + line[m.end() :]
-                window = " ".join(lines[max(0, i - 1 - CONTEXT_LINES) : i - 1] + [rest] + lines[i : i + CONTEXT_LINES])
+                window = " ".join(
+                    [
+                        *lines[max(0, i - 1 - CONTEXT_LINES) : i - 1],
+                        rest,
+                        *lines[i : i + CONTEXT_LINES],
+                    ]
+                )
                 if DIALOG_CONTEXT.search(window):
                     add("act05", i, f"confirm label {label!r}; use a verb that names the action")
         if "act06" in arms:
@@ -91,9 +95,19 @@ def scan_text(text: str, name: str, arms: tuple[str, ...]) -> tuple[list[dict], 
                 if col < 0:
                     continue
                 if ch == "﻿" and i == 1 and col == 0 and line.count(ch) == 1:
-                    notes.append({"file": name, "line": i, "message": "byte-order mark at the first byte, an encoding artefact; record it"})
+                    notes.append(
+                        {
+                            "file": name,
+                            "line": i,
+                            "message": "byte-order mark at the first byte, an encoding artefact; record it",
+                        }
+                    )
                     continue
-                add("ai06", i, f"zero-width mark {label} at column {col + 1}; an owner decision record must cite it")
+                add(
+                    "ai06",
+                    i,
+                    f"zero-width mark {label} at column {col + 1}; an owner decision record must cite it",
+                )
     return findings, notes
 
 
@@ -158,7 +172,9 @@ def check_cases(path: Path) -> list[str]:
             if not case.get(key):
                 problems.append(f"{cid}: missing {key}")
         if not violations(case, case.get("naive_output", "")):
-            problems.append(f"{cid}: naive_output does not break any assertion, so the case cannot go red")
+            problems.append(
+                f"{cid}: naive_output does not break any assertion, so the case cannot go red"
+            )
         if violations(case, case.get("safe_output", "")):
             problems.append(f"{cid}: safe_output breaks {violations(case, case['safe_output'])}")
     return problems
@@ -187,7 +203,9 @@ def self_test() -> int:
     for problem in check_cases(here / "model-output-cases.json"):
         print(f"self-test: model-output-cases.json: {problem}")
         bad += 1
-    print(f"self-test: {'FAILED' if bad else 'ok'}, {bad} mismatches over {len(names)} fixtures and the cases file")
+    print(
+        f"self-test: {'FAILED' if bad else 'ok'}, {bad} mismatches over {len(names)} fixtures and the cases file"
+    )
     return 1 if bad else 0
 
 

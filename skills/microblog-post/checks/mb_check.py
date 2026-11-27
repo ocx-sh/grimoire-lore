@@ -42,20 +42,40 @@ import re
 import sys
 from pathlib import Path
 
-HEADER_KEYS = ("platform", "account", "action", "labels", "ai_role", "sponsored",
-               "spend", "open_asks", "approved_by", "approved_at")
+HEADER_KEYS = (
+    "platform",
+    "account",
+    "action",
+    "labels",
+    "ai_role",
+    "sponsored",
+    "spend",
+    "open_asks",
+    "approved_by",
+    "approved_at",
+)
 DRAFT_KEYS = ("product", "release_tag", "summary", "items")
 POST_KEYS = ("image", "video", "alt", "recorded", "card", "link_attachment", "cw")
 PLATFORMS = ("x", "bluesky", "mastodon", "threads")
 STOP = {"with", "from", "this", "that", "release", "version", "update"}
-TLDS = ("com|org|net|io|dev|sh|rs|app|ai|co|me|xyz|tech|cloud|info|us|de|uk|eu|fr|nl|ch|"
-        "se|no|fi|dk|jp|cn|in|ca|au|br|ru")
-URL_RE = re.compile(r"https?://[^\s<>\"')\]]+", re.I)
-BARE_RE = re.compile(r"(?<![\w@/.:#-])(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+(?:%s)\b(?:/\S*)?" % TLDS, re.I)
-ALT_BAD = (re.compile(r"^(IMG_|screenshot|image)\b", re.I), re.compile(r"\.(png|jpe?g|gif)$", re.I))
-SIMILAR = 0.8   # project default, not a reading of the X policy (CH-MB-16)
-POS = re.compile(r"penali[sz]|down-?rank|depriori|suppress|throttl|de-?boost|demot|boost|hurts?\b|reach|engagement", re.I)
-SUBJ = re.compile(r"\blinks?\b|\bthreads?\b|\brepl(?:y|ies)\b", re.I)
+TLDS = (
+    "com|org|net|io|dev|sh|rs|app|ai|co|me|xyz|tech|cloud|info|us|de|uk|eu|fr|nl|ch|"
+    "se|no|fi|dk|jp|cn|in|ca|au|br|ru"
+)
+URL_RE = re.compile(r"https?://[^\s<>\"')\]]+", re.IGNORECASE)
+BARE_RE = re.compile(
+    rf"(?<![\w@/.:#-])(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+(?:{TLDS})\b(?:/\S*)?", re.IGNORECASE
+)
+ALT_BAD = (
+    re.compile(r"^(IMG_|screenshot|image)\b", re.IGNORECASE),
+    re.compile(r"\.(png|jpe?g|gif)$", re.IGNORECASE),
+)
+SIMILAR = 0.8  # project default, not a reading of the X policy (CH-MB-16)
+POS = re.compile(
+    r"penali[sz]|down-?rank|depriori|suppress|throttl|de-?boost|demot|boost|hurts?\b|reach|engagement",
+    re.IGNORECASE,
+)
+SUBJ = re.compile(r"\blinks?\b|\bthreads?\b|\brepl(?:y|ies)\b", re.IGNORECASE)
 SEV = {"CH-MB-07": "SHOULD", "CH-MB-08": "SHOULD", "CH-MB-09": "SHOULD", "CH-MB-23": "SHOULD"}
 
 
@@ -101,12 +121,19 @@ def parse(path: Path) -> dict:
             post = None
             continue
         if re.match(r"###\s+post\s+\d+", ln) and var is not None:
-            post = {"line": n + 1, "text": "", "media": [], "card": "", "link_attachment": "", "cw": ""}
+            post = {
+                "line": n + 1,
+                "text": "",
+                "media": [],
+                "card": "",
+                "link_attachment": "",
+                "cw": "",
+            }
             var["posts"].append(post)
             continue
         if post is None:
             continue
-        k = re.match(r"(%s):\s*(.*)$" % "|".join(POST_KEYS), ln)
+        k = re.match(rf"({'|'.join(POST_KEYS)}):\s*(.*)$", ln)
         if k:
             key, val = k.group(1), k.group(2).strip()
             if key in ("image", "video"):
@@ -166,76 +193,173 @@ def check(d: dict) -> list[tuple[int, str, str]]:
             f.append((ln, "CH-MB-01", f"unknown platform {plat}"))
             continue
         labels = h.get("labels", "")
-        need = {"x": ("made_with_ai", "paid_partnership"), "threads": ("is_made_with_ai",)}.get(plat, ())
+        need = {"x": ("made_with_ai", "paid_partnership"), "threads": ("is_made_with_ai",)}.get(
+            plat, ()
+        )
         for key in need:
-            if not re.search(r"\b%s:\s*(true|false)\b" % key, labels):
-                f.append((ln, "CH-CORE-06", f"labels lacks an explicit {key}: true or false ({tagv})"))
+            if not re.search(rf"\b{key}:\s*(true|false)\b", labels):
+                f.append(
+                    (ln, "CH-CORE-06", f"labels lacks an explicit {key}: true or false ({tagv})")
+                )
         posts = v["posts"]
         if not posts:
             f.append((ln, "CH-MB-09", f"{tagv} has no post"))
             continue
         n = len(posts)
         if n > 3 or (n > 1 and items < 2):
-            f.append((ln, "CH-MB-09", f"{tagv}: {n} posts for {items} item(s); allowed: 1 post, or 2 to 3 for 2 or more items"))
+            f.append(
+                (
+                    ln,
+                    "CH-MB-09",
+                    f"{tagv}: {n} posts for {items} item(s); allowed: 1 post, or 2 to 3 for 2 or more items",
+                )
+            )
         first = posts[0]
         u1 = set(urls(first["text"]))
         card = {first["card"]} if first["card"] else set()
         if len(u1) > 1:
-            f.append((first["line"], "CH-MB-07", f"{tagv}: post 1 has {len(u1)} URLs, want exactly one"))
+            f.append(
+                (first["line"], "CH-MB-07", f"{tagv}: post 1 has {len(u1)} URLs, want exactly one")
+            )
         if not u1 and not (plat == "bluesky" and card):
-            f.append((first["line"], "CH-MB-07", f"{tagv}: post 1 has no release URL and no Bluesky card"))
+            f.append(
+                (
+                    first["line"],
+                    "CH-MB-07",
+                    f"{tagv}: post 1 has no release URL and no Bluesky card",
+                )
+            )
         for k, p in enumerate(posts[1:], 2):
             extra = urls(p["text"])
             if extra:
-                f.append((p["line"], "CH-MB-07", f"{tagv}: post {k} holds a URL; the URL lives in post 1 only"))
-        if h.get("sponsored", "").lower() == "true":
-            if not re.match(r"(?i)(ad|sponsored|paid partnership|in partnership with)\b", first["text"]):
-                f.append((first["line"], "CH-CORE-08", f"{tagv}: sponsored post 1 must open with Ad: or Paid partnership:"))
+                f.append(
+                    (
+                        p["line"],
+                        "CH-MB-07",
+                        f"{tagv}: post {k} holds a URL; the URL lives in post 1 only",
+                    )
+                )
+        if h.get("sponsored", "").lower() == "true" and not re.match(
+            r"(?i)(ad|sponsored|paid partnership|in partnership with)\b", first["text"]
+        ):
+            f.append(
+                (
+                    first["line"],
+                    "CH-CORE-08",
+                    f"{tagv}: sponsored post 1 must open with Ad: or Paid partnership:",
+                )
+            )
         pre = URL_RE.split(first["text"])[0]
         if tag and prod:
             low = pre.lower()
             if prod not in low:
-                f.append((first["line"], "CH-MB-08", f"{tagv}: text before the URL lacks the product name"))
+                f.append(
+                    (
+                        first["line"],
+                        "CH-MB-08",
+                        f"{tagv}: text before the URL lacks the product name",
+                    )
+                )
             if tag not in pre:
-                f.append((first["line"], "CH-MB-08", f"{tagv}: text before the URL lacks the tag {tag}"))
+                f.append(
+                    (first["line"], "CH-MB-08", f"{tagv}: text before the URL lacks the tag {tag}")
+                )
             words = {w.lower() for w in re.findall(r"[A-Za-z]{4,}", pre)} - STOP
             if summary_words and not (words & summary_words):
-                f.append((first["line"], "CH-MB-08", f"{tagv}: no concrete change shared with the summary line"))
+                f.append(
+                    (
+                        first["line"],
+                        "CH-MB-08",
+                        f"{tagv}: no concrete change shared with the summary line",
+                    )
+                )
         vals = []
         for k, p in enumerate(posts, 1):
             blank = URL_RE.sub(" ", p["text"])
             for m in BARE_RE.finditer(blank):
-                f.append((p["line"], "CH-MB-22", f"{tagv} post {k}: bare domain {m.group(0)!r}, write https://"))
+                f.append(
+                    (
+                        p["line"],
+                        "CH-MB-22",
+                        f"{tagv} post {k}: bare domain {m.group(0)!r}, write https://",
+                    )
+                )
             for u in urls(p["text"]):
                 if u.lower().startswith("http://"):
-                    f.append((p["line"], "CH-MB-22", f"{tagv} post {k}: {u} must start with https://"))
+                    f.append(
+                        (p["line"], "CH-MB-22", f"{tagv} post {k}: {u} must start with https://")
+                    )
             for mdx in p["media"]:
                 alt = mdx["alt"].strip()
                 vals.append(alt)
                 if not alt:
-                    f.append((mdx["line"], "CH-MB-13", f"{tagv} post {k}: media {mdx['path']} has no alt text"))
+                    f.append(
+                        (
+                            mdx["line"],
+                            "CH-MB-13",
+                            f"{tagv} post {k}: media {mdx['path']} has no alt text",
+                        )
+                    )
                 elif len(alt) > ALT_MAX or any(r.search(alt) for r in ALT_BAD):
-                    f.append((mdx["line"], "CH-MB-13", f"{tagv} post {k}: alt text is a file name, a stub or over {ALT_MAX} characters"))
+                    f.append(
+                        (
+                            mdx["line"],
+                            "CH-MB-13",
+                            f"{tagv} post {k}: alt text is a file name, a stub or over {ALT_MAX} characters",
+                        )
+                    )
                 rec = mdx["recorded"]
                 if rec and alt:
                     try:
-                        run = [s.strip() for s in (Path(d["path"]).parent / rec).read_text(encoding="utf-8").splitlines() if s.strip()]
+                        run = [
+                            s.strip()
+                            for s in (Path(d["path"]).parent / rec)
+                            .read_text(encoding="utf-8")
+                            .splitlines()
+                            if s.strip()
+                        ]
                     except OSError:
-                        f.append((mdx["line"], "CH-MB-23", f"{tagv} post {k}: recorded run {rec} unreadable"))
+                        f.append(
+                            (
+                                mdx["line"],
+                                "CH-MB-23",
+                                f"{tagv} post {k}: recorded run {rec} unreadable",
+                            )
+                        )
                         continue
                     if not run or run[0] not in alt or not any(o in alt for o in run[1:]):
-                        f.append((mdx["line"], "CH-MB-23", f"{tagv} post {k}: alt text must quote the recorded command and one output line"))
+                        f.append(
+                            (
+                                mdx["line"],
+                                "CH-MB-23",
+                                f"{tagv} post {k}: alt text must quote the recorded command and one output line",
+                            )
+                        )
             if prose_hit(p["text"]):
-                f.append((p["line"], "CH-MB-15", f"{tagv} post {k}: platform-treatment claim without URL, ISO date and n="))
+                f.append(
+                    (
+                        p["line"],
+                        "CH-MB-15",
+                        f"{tagv} post {k}: platform-treatment claim without URL, ISO date and n=",
+                    )
+                )
         if vals:
             alts.append((tagv, vals))
     if len({tuple(a[1]) for a in alts}) > 1:
-        f.append((1, "CH-MB-13", "alt text differs between variants: " + ", ".join(a[0] for a in alts)))
+        f.append(
+            (1, "CH-MB-13", "alt text differs between variants: " + ", ".join(a[0] for a in alts))
+        )
     xs = [v for v in d["variants"] if v["platform"] == "x"]
     for i, a in enumerate(xs):
-        for b in xs[i + 1:]:
+        for b in xs[i + 1 :]:
             if a["account"] != b["account"] and similar(a, b):
-                f.append((b["line"], "CH-MB-16", f"x:{a['account']} and x:{b['account']} are over {SIMILAR} similar"))
+                f.append(
+                    (
+                        b["line"],
+                        "CH-MB-16",
+                        f"x:{a['account']} and x:{b['account']} are over {SIMILAR} similar",
+                    )
+                )
     return f
 
 
@@ -248,9 +372,13 @@ def similar(a: dict, b: dict) -> bool:
 
 
 def compare(d: dict, other: dict) -> list[tuple[int, str, str]]:
-    return [(a["line"], "CH-MB-16", f"x variant matches {other['path']} x:{b['account']}")
-            for a in d["variants"] if a["platform"] == "x"
-            for b in other["variants"] if b["platform"] == "x" and similar(a, b)]
+    return [
+        (a["line"], "CH-MB-16", f"x variant matches {other['path']} x:{b['account']}")
+        for a in d["variants"]
+        if a["platform"] == "x"
+        for b in other["variants"]
+        if b["platform"] == "x" and similar(a, b)
+    ]
 
 
 def threads_payload(p: dict) -> list[str]:
@@ -290,10 +418,16 @@ def self_test() -> int:
     for fx in sorted(here.glob("fail-*.md")):
         rid = fx.stem.removeprefix("fail-").upper()
         found = check(parse(fx))
-        expect(any(r == rid for _, r, _ in found), f"{fx.name} should report {rid}, got {[r for _, r, _ in found]}")
+        expect(
+            any(r == rid for _, r, _ in found),
+            f"{fx.name} should report {rid}, got {[r for _, r, _ in found]}",
+        )
     expect(prose_hit("X does not hurt reach for links."), "CH-MB-15 plant 1")
     expect(prose_hit("Threads boost engagement."), "CH-MB-15 plant 2")
-    expect(not prose_hit("Source https://example.com/a 2025-10-14 n=18800000: links lose reach."), "CH-MB-15 sourced twin")
+    expect(
+        not prose_hit("Source https://example.com/a 2025-10-14 n=18800000: links lose reach."),
+        "CH-MB-15 sourced twin",
+    )
     expect(not prose_hit("Lock v4 pins resolve offline."), "CH-MB-15 decoy")
     a, b = parse(here / "pass-release.md"), parse(here / "pass-thread.md")
     expect(bool(compare(a, a)), "compare flags identical x text")
@@ -306,13 +440,24 @@ def self_test() -> int:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0],
-                                 epilog="Exit 0 clean, 1 findings, 2 usage.")
+    ap = argparse.ArgumentParser(
+        description=__doc__.split("\n\n")[0], epilog="Exit 0 clean, 1 findings, 2 usage."
+    )
     ap.add_argument("drafts", nargs="*", help="draft files")
     ap.add_argument("--parse", action="store_true", help="print the parsed draft as JSON")
-    ap.add_argument("--compare", metavar="OTHER", help="also compare x text against another draft (CH-MB-16)")
-    ap.add_argument("--prose", nargs="+", default=[], metavar="FILE", help="run the CH-MB-15 paragraph check on plain files")
-    ap.add_argument("--threads-payload", metavar="JSON", help="check a Threads container payload (CH-MB-12)")
+    ap.add_argument(
+        "--compare", metavar="OTHER", help="also compare x text against another draft (CH-MB-16)"
+    )
+    ap.add_argument(
+        "--prose",
+        nargs="+",
+        default=[],
+        metavar="FILE",
+        help="run the CH-MB-15 paragraph check on plain files",
+    )
+    ap.add_argument(
+        "--threads-payload", metavar="JSON", help="check a Threads container payload (CH-MB-12)"
+    )
     ap.add_argument("--self-test", action="store_true")
     a = ap.parse_args()
     if a.self_test:
@@ -325,7 +470,9 @@ def main() -> int:
                 rc = 1
         for p in a.prose:
             if prose_hit(Path(p).read_text(encoding="utf-8")):
-                print(f"{p}: CH-MB-15 [MUST]: platform-treatment claim without URL, ISO date and n=")
+                print(
+                    f"{p}: CH-MB-15 [MUST]: platform-treatment claim without URL, ISO date and n="
+                )
                 rc = 1
         if not (a.drafts or a.prose or a.threads_payload):
             ap.error("give a draft, --prose FILE or --threads-payload JSON")

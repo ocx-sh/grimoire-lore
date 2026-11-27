@@ -41,16 +41,37 @@ import tempfile
 import time
 from pathlib import Path
 
+try:
+    import pty
+except ImportError:  # Windows has no pty module; the one caller checks os.name first
+    pty = None
+
 TIMEOUT = 20
-SEV = {"UX-CLI-01": "MUST", "UX-CLI-02": "MUST", "UX-CLI-08": "MUST", "UX-CLI-09": "MUST", "UX-CLI-10": "MUST",
-       "UX-CLI-11": "MUST", "UX-CLI-12": "MUST", "UX-CLI-13": "MUST", "UX-CLI-20": "MUST", "UX-CLI-21": "MUST",
-       "UX-CLI-22": "MUST", "UX-ACT-12": "MUST", "UX-ACT-13": "MUST", "UX-ACT-15": "MUST", "UX-ACT-17": "MUST"}
+SEV = {
+    "UX-CLI-01": "MUST",
+    "UX-CLI-02": "MUST",
+    "UX-CLI-08": "MUST",
+    "UX-CLI-09": "MUST",
+    "UX-CLI-10": "MUST",
+    "UX-CLI-11": "MUST",
+    "UX-CLI-12": "MUST",
+    "UX-CLI-13": "MUST",
+    "UX-CLI-20": "MUST",
+    "UX-CLI-21": "MUST",
+    "UX-CLI-22": "MUST",
+    "UX-ACT-12": "MUST",
+    "UX-ACT-13": "MUST",
+    "UX-ACT-15": "MUST",
+    "UX-ACT-17": "MUST",
+}
 HEAD_RE = re.compile(r"^(?:(?:[A-Z][A-Za-z-]* )*Commands:|[A-Z][A-Z -]*COMMANDS)$")
 ROW_RE = re.compile(r"^ {2,}([a-z][a-z0-9-]*)(?:, [a-z0-9-]+)*(?:: +| {2,}|:?$)")
 SYNONYMS = [{"update", "upgrade"}, {"remove", "delete", "rm"}, {"create", "new"}, {"list", "ls"}]
 CHANGE_WORDS = re.compile(rb"\b(added|updated|pushed|installed|removed|created)\b")
 CURSOR_RE = re.compile(rb"\x1b\[[0-9;?]*[ABCDEFGHJKSTfhl]")
-CONNECT = "import socket\ntry: socket.create_connection(('192.0.2.1', 9), 0.2)\nexcept OSError: pass"
+CONNECT = (
+    "import socket\ntry: socket.create_connection(('192.0.2.1', 9), 0.2)\nexcept OSError: pass"
+)
 
 
 def subs(text: str) -> list[str]:
@@ -95,18 +116,38 @@ class Ctx:
         self.skipped.append(f"{what} ({why})")
 
     def env(self, **extra):
-        e = {k: v for k, v in os.environ.items() if k not in ("FORCE_COLOR", "CLICOLOR_FORCE", "CLICOLOR", "CI")}
-        e.update(HOME=self.home, USERPROFILE=self.home, NO_COLOR="1", PAGER="cat", TERM="xterm",
-                 XDG_CONFIG_HOME=self.home + "/.config", XDG_CACHE_HOME=self.home + "/.cache",
-                 XDG_DATA_HOME=self.home + "/.local")
+        e = {
+            k: v
+            for k, v in os.environ.items()
+            if k not in ("FORCE_COLOR", "CLICOLOR_FORCE", "CLICOLOR", "CI")
+        }
+        e.update(
+            HOME=self.home,
+            USERPROFILE=self.home,
+            NO_COLOR="1",
+            PAGER="cat",
+            TERM="xterm",
+            XDG_CONFIG_HOME=self.home + "/.config",
+            XDG_CACHE_HOME=self.home + "/.cache",
+            XDG_DATA_HOME=self.home + "/.local",
+        )
         for k, v in extra.items():
             e.pop(k, None) if v is None else e.__setitem__(k, v)
         return e
 
     def run(self, args, timeout=TIMEOUT, **env) -> R:
         try:
-            p = subprocess.run(self.cmd + list(args), stdin=subprocess.DEVNULL, capture_output=True,
-                               env=self.env(**env), cwd=self.cwd, timeout=timeout, start_new_session=True)
+            # S603: the argv is the CLI under test, named by the caller with --bin.
+            p = subprocess.run(  # noqa: S603
+                self.cmd + list(args),
+                stdin=subprocess.DEVNULL,
+                capture_output=True,
+                env=self.env(**env),
+                cwd=self.cwd,
+                timeout=timeout,
+                start_new_session=True,
+                check=False,
+            )
             return R(p.returncode, p.stdout, p.stderr)
         except subprocess.TimeoutExpired as e:
             return R(None, e.stdout, e.stderr, True)
@@ -116,10 +157,18 @@ class Ctx:
 
     def pty(self, args, timeout, **env) -> R:
         """Run with stdin and both output streams on a pseudo-terminal (POSIX only)."""
-        import pty
         m, s = pty.openpty()
-        p = subprocess.Popen(self.cmd + list(args), stdin=s, stdout=s, stderr=s, env=self.env(**env),
-                             cwd=self.cwd, close_fds=True, start_new_session=True)
+        # S603: the argv is the CLI under test, named by the caller with --bin.
+        p = subprocess.Popen(  # noqa: S603
+            self.cmd + list(args),
+            stdin=s,
+            stdout=s,
+            stderr=s,
+            env=self.env(**env),
+            cwd=self.cwd,
+            close_fds=True,
+            start_new_session=True,
+        )
         os.close(s)
         buf, end, hung = b"", time.monotonic() + timeout, False
         while True:
@@ -161,7 +210,9 @@ class Ctx:
         """Every command path mapped to its child names. A child whose help equals its parent's is no command."""
         if self.tree is None:
             self.tree = {}
-            sig = lambda r: hashlib.md5(r.out + r.err).hexdigest()
+
+            def sig(r):
+                return hashlib.sha256(r.out + r.err).hexdigest()
 
             def rec(path):
                 if len(path) >= 8:  # alarm, not a cap: no real path is this deep
@@ -169,10 +220,14 @@ class Ctx:
                     self.tree[path] = []
                     return
                 h = self.help(path)
-                kids = [c for c in subs(h.out.decode("utf-8", "replace")) if sig(self.help(path + (c,))) != sig(h)]
+                kids = [
+                    c
+                    for c in subs(h.out.decode("utf-8", "replace"))
+                    if sig(self.help((*path, c))) != sig(h)
+                ]
                 self.tree[path] = kids
                 for c in kids:
-                    rec(path + (c,))
+                    rec((*path, c))
 
             rec(())
         return self.tree
@@ -187,7 +242,7 @@ def label(path) -> str:
 
 
 def usage_ok(r: R) -> bool:
-    return r.code == 0 and re.search(rb"^usage", r.out, re.I | re.M) is not None
+    return r.code == 0 and re.search(rb"^usage", r.out, re.IGNORECASE | re.MULTILINE) is not None
 
 
 def tsv(path):
@@ -207,11 +262,16 @@ def c_bare(c, a):
         c.fail("UX-CLI-01", "bare invocation prints no usage text")
     if os.name == "posix":
         if c.pty([], 5).hung:
-            c.fail("UX-CLI-01", "bare invocation on a terminal did not end in 5 s (prompt, REPL or stdin read)")
+            c.fail(
+                "UX-CLI-01",
+                "bare invocation on a terminal did not end in 5 s (prompt, REPL or stdin read)",
+            )
     else:
         c.skip("UX-CLI-01 terminal run", "needs a POSIX pty")
     if r.code != 0 or lines(r.out) != lines(c.help(()).out):
-        c.fail("UX-CLI-28", f"bare invocation (exit {r.code}) is not the -h text on stdout with exit 0")
+        c.fail(
+            "UX-CLI-28", f"bare invocation (exit {r.code}) is not the -h text on stdout with exit 0"
+        )
 
 
 def c_help(c, a):
@@ -220,14 +280,26 @@ def c_help(c, a):
         for extra in (["-h"], ["--help"]):
             r = c.help(path) if extra == ["-h"] else c.run([*path, *extra])
             if not usage_ok(r):
-                c.fail("UX-CLI-02", f"'{label(path)} {extra[0]}' exits {r.code} or shows no Usage line on stdout")
-        flags = re.findall(r"^ +(?:-[A-Za-z], )?(--[a-z][a-z0-9-]*)  ", c.run([*path, "--help"]).out.decode("utf-8", "replace"), re.M)
+                c.fail(
+                    "UX-CLI-02",
+                    f"'{label(path)} {extra[0]}' exits {r.code} or shows no Usage line on stdout",
+                )
+        flags = re.findall(
+            r"^ +(?:-[A-Za-z], )?(--[a-z][a-z0-9-]*)  ",
+            c.run([*path, "--help"]).out.decode("utf-8", "replace"),
+            re.MULTILINE,
+        )
         flag = next((f for f in flags if f not in ("--help", "--version")), None)
         if flag and not usage_ok(c.run([*path, flag, "-h"])):
             c.fail("UX-CLI-02", f"'{label(path)} {flag} -h' does not show help")
     for name in filter(None, (a.forwarding or "").split(",")):
-        if not re.search(r"^Usage:.*(--|\.\.\.)", c.help((name,)).out.decode("utf-8", "replace"), re.M):
-            c.fail("UX-CLI-02", f"'{name}' forwards arguments but its usage line shows neither -- nor ...")
+        if not re.search(
+            r"^Usage:.*(--|\.\.\.)", c.help((name,)).out.decode("utf-8", "replace"), re.MULTILINE
+        ):
+            c.fail(
+                "UX-CLI-02",
+                f"'{name}' forwards arguments but its usage line shows neither -- nor ...",
+            )
 
 
 def c_groups(c, a):
@@ -236,7 +308,10 @@ def c_groups(c, a):
         if path and kids:
             r = c.run(list(path))
             if r.code != c.usage or b"usage" not in r.err.lower():
-                c.fail("UX-CLI-03", f"group '{label(path)}' exits {r.code} with usage on stderr {b'usage' in r.err.lower()}; want {c.usage} and usage on stderr")
+                c.fail(
+                    "UX-CLI-03",
+                    f"group '{label(path)}' exits {r.code} with usage on stderr {b'usage' in r.err.lower()}; want {c.usage} and usage on stderr",
+                )
 
 
 def c_shape(c, a):
@@ -244,9 +319,9 @@ def c_shape(c, a):
     text = c.help(()).out.decode("utf-8", "replace")
     if len(text.splitlines()) > 60:
         c.fail("UX-CLI-06", f"root -h is {len(text.splitlines())} lines (house limit 60)")
-    m = re.search(r"^(?:EXAMPLES|Examples):?\s*$", text, re.M)
+    m = re.search(r"^(?:EXAMPLES|Examples):?\s*$", text, re.MULTILINE)
     n = 0
-    for ln in text[m.end():].splitlines() if m else []:
+    for ln in text[m.end() :].splitlines() if m else []:
         if ln and not ln[0].isspace():
             break
         n += bool(ln.strip())
@@ -255,19 +330,30 @@ def c_shape(c, a):
     for path, kids in c.paths().items():
         for syn in SYNONYMS:
             if len(syn & set(kids)) > 1:
-                c.fail("UX-CLI-07", f"'{label(path)}' lists {sorted(syn & set(kids))} as separate commands")
+                c.fail(
+                    "UX-CLI-07",
+                    f"'{label(path)}' lists {sorted(syn & set(kids))} as separate commands",
+                )
     top = c.paths()[()]
     for path, kids in c.paths().items():
         for k in kids if len(path) == 1 else []:
             if k in top:
-                c.notes.append(f"REVIEW UX-CLI-07: '{k}' and '{label(path)} {k}' share a name; read both descriptions")
+                c.notes.append(
+                    f"REVIEW UX-CLI-07: '{k}' and '{label(path)} {k}' share a name; read both descriptions"
+                )
     if a.headline:
         c.did("UX-CLI-04")
         if a.headline not in top:
             c.fail("UX-CLI-04", f"headline command '{a.headline}' is not in the root command list")
         elif top.index(a.headline) >= 5 and not re.search(
-                rf"^(?:Common|Main|Basic|Core)[^\n]*\n(?:[^\n]+\n)*?\s+{re.escape(a.headline)}\b", text, re.I | re.M):
-            c.fail("UX-CLI-04", f"'{a.headline}' is row {top.index(a.headline) + 1}, outside the first 5 and under no Common heading")
+            rf"^(?:Common|Main|Basic|Core)[^\n]*\n(?:[^\n]+\n)*?\s+{re.escape(a.headline)}\b",
+            text,
+            re.IGNORECASE | re.MULTILINE,
+        ):
+            c.fail(
+                "UX-CLI-04",
+                f"'{a.headline}' is row {top.index(a.headline) + 1}, outside the first 5 and under no Common heading",
+            )
     else:
         c.skip("UX-CLI-04", "no --headline")
 
@@ -277,31 +363,56 @@ def c_version(c, a):
     for flag, sev in (("--version", "MUST"), ("-V", "SHOULD")):
         r = c.run([flag])
         out = lines(r.out)
-        bad = r.code != 0 or len(out) != 1 or not re.match(r"^[A-Za-z][A-Za-z0-9._ -]* v?\d+\.\d+\.\d+", out[0] if out else "") or r.err
+        bad = (
+            r.code != 0
+            or len(out) != 1
+            or not re.match(r"^[A-Za-z][A-Za-z0-9._ -]* v?\d+\.\d+\.\d+", out[0] if out else "")
+            or r.err
+        )
         if bad:
-            c.fail("UX-CLI-08", f"'{flag}' must print one '<name> <semver>' line on stdout, exit 0, nothing on stderr (got exit {r.code}, {len(out)} lines, {len(r.err)} stderr bytes)", sev)
+            c.fail(
+                "UX-CLI-08",
+                f"'{flag}' must print one '<name> <semver>' line on stdout, exit 0, nothing on stderr (got exit {r.code}, {len(out)} lines, {len(r.err)} stderr bytes)",
+                sev,
+            )
 
 
 def c_net(c, a):
-    if not shutil.which("strace"):
-        return c.skip("net (UX-CLI-08)", "strace not found; Linux only. macOS and Windows: record the result or 'not run'")
+    strace = shutil.which("strace")
+    if not strace:
+        c.skip(
+            "net (UX-CLI-08)",
+            "strace not found; Linux only. macOS and Windows: record the result or 'not run'",
+        )
+        return
 
     def connects(argv):
         fd, tmp = tempfile.mkstemp()
         os.close(fd)
         try:
-            subprocess.run(["strace", "-f", "-qq", "-e", "trace=connect", "-o", tmp, *argv], stdin=subprocess.DEVNULL,
-                           capture_output=True, env=c.env(), cwd=c.cwd, timeout=TIMEOUT)
+            # S603: argv is the resolved strace plus the CLI under test.
+            subprocess.run(  # noqa: S603
+                [strace, "-f", "-qq", "-e", "trace=connect", "-o", tmp, *argv],
+                stdin=subprocess.DEVNULL,
+                capture_output=True,
+                env=c.env(),
+                cwd=c.cwd,
+                timeout=TIMEOUT,
+                check=False,
+            )
             return len(re.findall(r"AF_INET6?", Path(tmp).read_text(errors="replace")))
         finally:
-            os.unlink(tmp)
+            Path(tmp).unlink()
 
     if connects([sys.executable, "-I", "-c", CONNECT]) < 1:
-        return c.skip("net (UX-CLI-08)", "the control run saw no connect call, so a 0 would prove nothing")
+        c.skip("net (UX-CLI-08)", "the control run saw no connect call, so a 0 would prove nothing")
+        return
     c.did("UX-CLI-08 network")
     for args in ([], ["--version"], ["-V"]):
         if connects(c.cmd + args):
-            c.fail("UX-CLI-08", f"'{' '.join(args) or 'bare invocation'}' makes a network connect call")
+            c.fail(
+                "UX-CLI-08", f"'{' '.join(args) or 'bare invocation'}' makes a network connect call"
+            )
 
 
 def typo_for(name, siblings):
@@ -316,17 +427,38 @@ def c_typo(c, a):
             t, before = typo_for(k, kids), c.snap()
             r = c.run([*path, t])
             text = r.text()
-            if r.code != c.usage or not re.search(r"similar|did you mean", text, re.I):
-                c.fail("UX-CLI-09", f"'{label(path)} {t}' exits {r.code} and {'does' if re.search('similar|did you mean', text, re.I) else 'does not'} suggest a name; want exit {c.usage} and a suggestion")
+            if r.code != c.usage or not re.search(r"similar|did you mean", text, re.IGNORECASE):
+                c.fail(
+                    "UX-CLI-09",
+                    f"'{label(path)} {t}' exits {r.code} and {'does' if re.search('similar|did you mean', text, re.IGNORECASE) else 'does not'} suggest a name; want exit {c.usage} and a suggestion",
+                )
             for ln in text.splitlines():
-                if t in ln and re.search(r"\b(add|install|get|pull)\b", ln) and not re.search(r"unrecogni|unknown|no such|not found|invalid|similar|did you mean", ln, re.I):
-                    c.fail("UX-CLI-10", f"'{label(path)} {t}' prints an install hint built from the typo: {ln.strip()}")
+                if (
+                    t in ln
+                    and re.search(r"\b(add|install|get|pull)\b", ln)
+                    and not re.search(
+                        r"unrecogni|unknown|no such|not found|invalid|similar|did you mean",
+                        ln,
+                        re.IGNORECASE,
+                    )
+                ):
+                    c.fail(
+                        "UX-CLI-10",
+                        f"'{label(path)} {t}' prints an install hint built from the typo: {ln.strip()}",
+                    )
             if c.snap() != before:
-                c.fail("UX-CLI-11", f"'{label(path)} {t}' changed files in HOME or the working directory")
+                c.fail(
+                    "UX-CLI-11",
+                    f"'{label(path)} {t}' changed files in HOME or the working directory",
+                )
 
 
 def pairs(c, path):
-    return re.findall(r"^ +-([A-Za-z]), --([a-z][a-z0-9-]*)", c.run([*path, "--help"]).out.decode("utf-8", "replace"), re.M)
+    return re.findall(
+        r"^ +-([A-Za-z]), --([a-z][a-z0-9-]*)",
+        c.run([*path, "--help"]).out.decode("utf-8", "replace"),
+        re.MULTILINE,
+    )
 
 
 def c_global(c, a):
@@ -335,40 +467,59 @@ def c_global(c, a):
     for path in c.paths():
         for s, long in pairs(c, path) if path else []:
             if s in root and root[s] != long:
-                c.fail("UX-CLI-12", f"-{s} is --{root[s]} at the root and --{long} in '{label(path)}'")
+                c.fail(
+                    "UX-CLI-12", f"-{s} is --{root[s]} at the root and --{long} in '{label(path)}'"
+                )
     if not a.flag_values:
-        return c.skip("UX-CLI-12 position", "no --flag-values file")
+        c.skip("UX-CLI-12 position", "no --flag-values file")
+        return
     for flag, *val in tsv(a.flag_values):
-        val = [v for v in val if v]
+        vals = [v for v in val if v]
         for s in c.paths()[()]:
-            for where, argv in (("before", [flag, *val, s, "--help"]), ("after", [s, flag, *val, "--help"])):
+            for where, argv in (
+                ("before", [flag, *vals, s, "--help"]),
+                ("after", [s, flag, *vals, "--help"]),
+            ):
                 r = c.run(argv)
                 if r.code != 0:
-                    c.fail("UX-CLI-12", f"flag {flag} {where} '{s}' exits {r.code}: {' '.join(argv)}")
+                    c.fail(
+                        "UX-CLI-12", f"flag {flag} {where} '{s}' exits {r.code}: {' '.join(argv)}"
+                    )
 
 
 def c_completion(c, a):
     c.did("UX-CLI-13")
     top = c.paths()[()]
-    words = shlex.split(a.completion_cmd) if a.completion_cmd else [n for n in top if "complet" in n][:1]
+    words = (
+        shlex.split(a.completion_cmd)
+        if a.completion_cmd
+        else [n for n in top if "complet" in n][:1]
+    )
     if not words:
-        return c.fail("UX-CLI-13", "no command whose name contains 'complet' is listed in the root help")
+        c.fail("UX-CLI-13", "no command whose name contains 'complet' is listed in the root help")
+        return
     r = c.run([*words, "bash"])
     if r.code != 0 or not r.out.strip() or r.err:
-        c.fail("UX-CLI-13", f"'{' '.join(words)} bash' must print the script on stdout, exit 0, nothing on stderr (exit {r.code}, {len(r.err)} stderr bytes)")
+        c.fail(
+            "UX-CLI-13",
+            f"'{' '.join(words)} bash' must print the script on stdout, exit 0, nothing on stderr (exit {r.code}, {len(r.err)} stderr bytes)",
+        )
     if c.run([*words, "nosuchshell"]).code != c.usage:
         c.fail("UX-CLI-13", f"an unknown shell must exit {c.usage}")
 
 
 def c_color(c, a):
     if not a.log_cmd:
-        return c.skip("color (UX-CLI-20)", "no --log-cmd naming a command that logs a warning")
+        c.skip("color (UX-CLI-20)", "no --log-cmd naming a command that logs a warning")
+        return
     c.did("UX-CLI-20")
     base = shlex.split(a.log_cmd)
-    for name, argv, env in (("--color=never", ["--color=never", *base], {"NO_COLOR": None}),
-                            ("CLICOLOR=0", base, {"NO_COLOR": None, "CLICOLOR": "0"}),
-                            ("TERM=dumb", base, {"NO_COLOR": None, "TERM": "dumb"}),
-                            ("NO_COLOR=1", base, {})):
+    for name, argv, env in (
+        ("--color=never", ["--color=never", *base], {"NO_COLOR": None}),
+        ("CLICOLOR=0", base, {"NO_COLOR": None, "CLICOLOR": "0"}),
+        ("TERM=dumb", base, {"NO_COLOR": None, "TERM": "dumb"}),
+        ("NO_COLOR=1", base, {}),
+    ):
         r = c.run(argv, **env)
         if (r.out + r.err).count(b"\x1b"):
             c.fail("UX-CLI-20", f"escape bytes in the output of '{a.log_cmd}' under {name}")
@@ -376,9 +527,11 @@ def c_color(c, a):
 
 def c_anim(c, a):
     if not a.anim_cmd:
-        return c.skip("anim (UX-CLI-21)", "no --anim-cmd naming a command that shows progress")
+        c.skip("anim (UX-CLI-21)", "no --anim-cmd naming a command that shows progress")
+        return
     if os.name != "posix":
-        return c.skip("anim (UX-CLI-21)", "needs a POSIX pty")
+        c.skip("anim (UX-CLI-21)", "needs a POSIX pty")
+        return
     c.did("UX-CLI-21")
     base = shlex.split(a.anim_cmd)
     cases = [("TERM=dumb", base, {"TERM": "dumb"}), ("--quiet", [*base, "--quiet"], {})]
@@ -388,13 +541,18 @@ def c_anim(c, a):
         out = c.pty(argv, 10, **env).out
         n = len(re.findall(rb"\r(?!\n)", out)) + len(CURSOR_RE.findall(out))
         if n:
-            c.fail("UX-CLI-21", f"{n} bare carriage returns or cursor sequences from '{a.anim_cmd}' under {name}")
+            c.fail(
+                "UX-CLI-21",
+                f"{n} bare carriage returns or cursor sequences from '{a.anim_cmd}' under {name}",
+            )
 
 
 def c_palette(c, a):
     c.did("UX-CLI-22")
     allow = {(r[0], int(r[1])) for r in tsv(a.decorative_allow)} if a.decorative_allow else set()
-    runs = [(label(p), [*p, "--help"], {"CLICOLOR_FORCE": "1", "NO_COLOR": None}) for p in c.paths()]
+    runs = [
+        (label(p), [*p, "--help"], {"CLICOLOR_FORCE": "1", "NO_COLOR": None}) for p in c.paths()
+    ]
     for argv in tsv(a.probe) if a.probe else []:
         words = shlex.split(argv[0])
         runs.append((" ".join(words), [*words, "--color=always"], {"NO_COLOR": None}))
@@ -405,15 +563,19 @@ def c_palette(c, a):
             c.fail("UX-CLI-22", f"truecolor in the output of '{name}'")
         for idx in {int(x) for x in re.findall(rb"\x1b\[[0-9;]*[34]8;5;(\d+)", data)}:
             if idx > 15 and (name, idx) not in allow:
-                c.fail("UX-CLI-22", f"colour index {idx} in the output of '{name}' is outside the 16 ANSI slots and not on the allow file")
+                c.fail(
+                    "UX-CLI-22",
+                    f"colour index {idx} in the output of '{name}' is outside the 16 ANSI slots and not on the allow file",
+                )
 
 
 def c_act(c, a):
     if not a.inventory:
-        return c.skip("act (UX-ACT-12 to 17)", "no --inventory file")
+        c.skip("act (UX-ACT-12 to 17)", "no --inventory file")
+        return
     c.did("UX-ACT-13", "UX-ACT-15", "UX-ACT-17")
     for row in tsv(a.inventory):
-        args, tier, refuse = (row + ["", ""])[:3]
+        args, tier, refuse = ([*row, "", ""])[:3]
         argv = shlex.split(args)
         if tier not in ("T1", "T2", "T3"):
             continue
@@ -430,14 +592,24 @@ def c_act(c, a):
             if r1.code == 0 and not r1.out.strip():
                 c.fail("UX-ACT-15", f"'{args} --dry-run' exits 0 with empty stdout")
             if r1.code and CHANGE_WORDS.search(r1.out + r1.err):
-                c.fail("UX-ACT-15", f"'{args} --dry-run' exits {r1.code} and still prints a change word")
-            if r1.code == 0 and not re.search(rb"^would |nothing to do", r1.out, re.M):
-                c.notes.append(f"NOTE UX-ACT-13 (SHOULD): '{args} --dry-run' prints no 'would <verb> <target>' line")
-        if tier in ("T2", "T3") and not re.search(r"^ *Consequence: .{10,}", h, re.M):
-            c.fail("UX-ACT-13", f"'{args}' is {tier} and its help has no 'Consequence:' line", "SHOULD")
-        for m in re.finditer(r"^.*--force.*(?:\n {6,}.*)?", h, re.M):
-            if re.search(r"consent|trust|hook|prompt", m.group(0), re.I):
-                c.fail("UX-ACT-17", f"'{args}' --force help mentions consent, trust, hooks or prompts: {m.group(0).strip()[:80]}")
+                c.fail(
+                    "UX-ACT-15",
+                    f"'{args} --dry-run' exits {r1.code} and still prints a change word",
+                )
+            if r1.code == 0 and not re.search(rb"^would |nothing to do", r1.out, re.MULTILINE):
+                c.notes.append(
+                    f"NOTE UX-ACT-13 (SHOULD): '{args} --dry-run' prints no 'would <verb> <target>' line"
+                )
+        if tier in ("T2", "T3") and not re.search(r"^ *Consequence: .{10,}", h, re.MULTILINE):
+            c.fail(
+                "UX-ACT-13", f"'{args}' is {tier} and its help has no 'Consequence:' line", "SHOULD"
+            )
+        for m in re.finditer(r"^.*--force.*(?:\n {6,}.*)?", h, re.MULTILINE):
+            if re.search(r"consent|trust|hook|prompt", m.group(0), re.IGNORECASE):
+                c.fail(
+                    "UX-ACT-17",
+                    f"'{args}' --force help mentions consent, trust, hooks or prompts: {m.group(0).strip()[:80]}",
+                )
         if refuse:
             c.did("UX-ACT-12")
             ra, before = shlex.split(refuse), c.snap()
@@ -446,37 +618,78 @@ def c_act(c, a):
             tl = [i for i, x in enumerate(err) if x.startswith("Try: ")]
             ol = [i for i, x in enumerate(err) if x.startswith("Override: ")]
             if r.hung or not r.code:
-                c.fail("UX-ACT-12", f"'{refuse}' {'hung' if r.hung else 'exited 0'} instead of refusing")
-            elif len(tl) != 1 or len(ol) != 1 or tl[0] > ol[0] or re.search(r"--(force|yes)\b|\s-[fy]\b", err[tl[0]]):
-                c.fail("UX-ACT-12", f"'{refuse}' refusal needs one 'Try: ' line (safe step, no override flag) before one 'Override: ' line")
+                c.fail(
+                    "UX-ACT-12",
+                    f"'{refuse}' {'hung' if r.hung else 'exited 0'} instead of refusing",
+                )
+            elif (
+                len(tl) != 1
+                or len(ol) != 1
+                or tl[0] > ol[0]
+                or re.search(r"--(force|yes)\b|\s-[fy]\b", err[tl[0]])
+            ):
+                c.fail(
+                    "UX-ACT-12",
+                    f"'{refuse}' refusal needs one 'Try: ' line (safe step, no override flag) before one 'Override: ' line",
+                )
             if c.snap() != before:
                 c.fail("UX-ACT-12", f"'{refuse}' changed files while refusing")
             d = c.run([*ra, "--dry-run"], timeout=5)
             if d.code != r.code:
-                c.fail("UX-ACT-13", f"'{refuse} --dry-run' exits {d.code} where the real run exits {r.code}")
+                c.fail(
+                    "UX-ACT-13",
+                    f"'{refuse} --dry-run' exits {d.code} where the real run exits {r.code}",
+                )
 
 
-CHECKS = {"bare": c_bare, "help": c_help, "groups": c_groups, "shape": c_shape, "version": c_version, "net": c_net,
-          "typo": c_typo, "global": c_global, "completion": c_completion, "color": c_color, "anim": c_anim,
-          "palette": c_palette, "act": c_act}
+CHECKS = {
+    "bare": c_bare,
+    "help": c_help,
+    "groups": c_groups,
+    "shape": c_shape,
+    "version": c_version,
+    "net": c_net,
+    "typo": c_typo,
+    "global": c_global,
+    "completion": c_completion,
+    "color": c_color,
+    "anim": c_anim,
+    "palette": c_palette,
+    "act": c_act,
+}
 
 
 def parser():
-    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    p = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     p.add_argument("--bin", help="the command under test, quoted when it has arguments")
-    p.add_argument("--usage-code", type=int, default=64, help="the CLI's usage exit code (default 64)")
+    p.add_argument(
+        "--usage-code", type=int, default=64, help="the CLI's usage exit code (default 64)"
+    )
     p.add_argument("--only", help="comma-separated check names")
     p.add_argument("--headline", help="the headline command (UX-CLI-04)")
     p.add_argument("--forwarding", help="comma-separated commands that forward trailing arguments")
     p.add_argument("--flag-values", help="TSV: flag, tab, one value it accepts (UX-CLI-12)")
-    p.add_argument("--completion-cmd", help="words of the completion command, when it is not top level")
+    p.add_argument(
+        "--completion-cmd", help="words of the completion command, when it is not top level"
+    )
     p.add_argument("--log-cmd", help="a command that logs a warning on stderr (UX-CLI-20)")
     p.add_argument("--anim-cmd", help="a command that shows progress on a terminal (UX-CLI-21)")
     p.add_argument("--anim-optout", help="the animation opt-out environment variable (UX-CLI-29)")
-    p.add_argument("--probe", help="file of extra commands, one per line, run with --color=always (UX-CLI-22)")
-    p.add_argument("--decorative-allow", help="TSV: command path, tab, colour index approved by the owner")
-    p.add_argument("--inventory", help="TSV: args, tab, tier [, tab, args that hit a refusal] (UX-ACT-12 to 17)")
-    p.add_argument("--workdir", help="a directory copied to the working directory, to supply fixture state")
+    p.add_argument(
+        "--probe", help="file of extra commands, one per line, run with --color=always (UX-CLI-22)"
+    )
+    p.add_argument(
+        "--decorative-allow", help="TSV: command path, tab, colour index approved by the owner"
+    )
+    p.add_argument(
+        "--inventory",
+        help="TSV: args, tab, tier [, tab, args that hit a refusal] (UX-ACT-12 to 17)",
+    )
+    p.add_argument(
+        "--workdir", help="a directory copied to the working directory, to supply fixture state"
+    )
     p.add_argument("--must-only", action="store_true", help="exit 1 only on MUST findings")
     p.add_argument("--self-test", action="store_true")
     return p
@@ -499,10 +712,27 @@ def analyse(argv) -> Ctx:
 def self_test() -> int:
     here = Path(__file__).parent / "fixtures" / "cli"
     base = ["--bin", shlex.join([sys.executable, "-I", str(here / "fakecli.py")])]
-    full = [*base, "--headline", "run", "--forwarding", "run", "--flag-values", str(here / "flag-values.tsv"),
-            "--log-cmd", "run job.toml", "--anim-cmd", "run job.toml", "--anim-optout", "FAKECLI_NO_ANIM",
-            "--probe", str(here / "probes.txt"), "--decorative-allow", str(here / "decorative.allow"),
-            "--inventory", str(here / "inventory.tsv")]
+    full = [
+        *base,
+        "--headline",
+        "run",
+        "--forwarding",
+        "run",
+        "--flag-values",
+        str(here / "flag-values.tsv"),
+        "--log-cmd",
+        "run job.toml",
+        "--anim-cmd",
+        "run job.toml",
+        "--anim-optout",
+        "FAKECLI_NO_ANIM",
+        "--probe",
+        str(here / "probes.txt"),
+        "--decorative-allow",
+        str(here / "decorative.allow"),
+        "--inventory",
+        str(here / "inventory.tsv"),
+    ]
     bad = 0
 
     def expect(ok, what):
@@ -511,17 +741,37 @@ def self_test() -> int:
             bad += 1
             print(f"self-test FAIL: {what}")
 
-    expect(subs("Usage: x\n\nUse its flag to run\n  gh pr view  words") == [], "prose must not read as a command")
-    expect(subs("Available Commands:\n  add  A\n  rm, remove  B\n  help  C\n\nOptions:\n  foo  D") == ["add", "rm"], "layout parser")
+    expect(
+        subs("Usage: x\n\nUse its flag to run\n  gh pr view  words") == [],
+        "prose must not read as a command",
+    )
+    expect(
+        subs("Available Commands:\n  add  A\n  rm, remove  B\n  help  C\n\nOptions:\n  foo  D")
+        == ["add", "rm"],
+        "layout parser",
+    )
     expect(subs("CORE COMMANDS\n  auth:  Login\n\nFLAGS\n  x") == ["auth"], "all-caps heading")
     os.environ["FAKECLI_BAD"] = ""
     good = analyse(full)
     expect(not good.findings, f"clean fixture reported {good.findings}")
-    expect({"UX-CLI-09", "UX-CLI-21", "UX-CLI-22", "UX-ACT-12"} <= good.ran, f"clean fixture skipped checks: {sorted(good.ran)}")
-    plans = [("repl", "bare", "UX-CLI-01"), ("badversion", "version", "UX-CLI-08"), ("group2", "groups", "UX-CLI-03"),
-             ("notip", "typo", "UX-CLI-09"), ("installhint", "typo", "UX-CLI-10"), ("globalafter", "global", "UX-CLI-12"),
-             ("escerr", "color", "UX-CLI-20"), ("anim", "anim", "UX-CLI-21"), ("badpalette", "palette", "UX-CLI-22"),
-             ("dryrunwrites", "act", "UX-ACT-13"), ("dryrunpasses", "act", "UX-ACT-13"), ("forcemisuse", "act", "UX-ACT-17")]
+    expect(
+        {"UX-CLI-09", "UX-CLI-21", "UX-CLI-22", "UX-ACT-12"} <= good.ran,
+        f"clean fixture skipped checks: {sorted(good.ran)}",
+    )
+    plans = [
+        ("repl", "bare", "UX-CLI-01"),
+        ("badversion", "version", "UX-CLI-08"),
+        ("group2", "groups", "UX-CLI-03"),
+        ("notip", "typo", "UX-CLI-09"),
+        ("installhint", "typo", "UX-CLI-10"),
+        ("globalafter", "global", "UX-CLI-12"),
+        ("escerr", "color", "UX-CLI-20"),
+        ("anim", "anim", "UX-CLI-21"),
+        ("badpalette", "palette", "UX-CLI-22"),
+        ("dryrunwrites", "act", "UX-ACT-13"),
+        ("dryrunpasses", "act", "UX-ACT-13"),
+        ("forcemisuse", "act", "UX-ACT-17"),
+    ]
     for defect, group, rid in plans:
         os.environ["FAKECLI_BAD"] = defect
         found = {f[0] for f in analyse([*full, "--only", group]).findings}

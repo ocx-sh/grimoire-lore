@@ -40,12 +40,28 @@ FULL_DATE = re.compile(r"20[0-9]{2}-[0-9]{2}-[0-9]{2}")
 FENCE = re.compile(r"^\s*(```|~~~)")
 LINKED = re.compile(r"\]\(https?://|href=\"https?://")
 
-LEGAL = re.compile(r"gdpr[- ]compliant|no (cookie )?banner|consent[- ]free|cnil[- ]approved|cookieless|privacy[- ](friendly|preserving)", re.I)
-ATTRIBUTED = re.compile(r"\b(states|claims|according to)\b|decisions/measurement\.md", re.I)
+LEGAL = re.compile(
+    r"gdpr[- ]compliant|no (cookie )?banner|consent[- ]free|cnil[- ]approved|cookieless|privacy[- ](friendly|preserving)",
+    re.IGNORECASE,
+)
+ATTRIBUTED = re.compile(
+    r"\b(states|claims|according to)\b|decisions/measurement\.md", re.IGNORECASE
+)
 
 COUNT_NOUN = r"(?:downloads|stars|visits|visitors|users|clones|views|citations)"
 FIGURE = re.compile(rf"\b[0-9][0-9,.]*[kKmM]?\+?\s+(?:\S+\s+){{0,2}}?{COUNT_NOUN}\b")
-METRIC_HEADS = {"downloads", "stars", "visits", "visitors", "clones", "views", "citations", "users", "value", "count"}
+METRIC_HEADS = {
+    "downloads",
+    "stars",
+    "visits",
+    "visitors",
+    "clones",
+    "views",
+    "citations",
+    "users",
+    "value",
+    "count",
+}
 
 _N = r"[0-9][0-9,.]*[km+]*"
 _NOUN = r"(?:stars|downloads|clones|views|users|installs|developers|teams|companies)"
@@ -54,19 +70,30 @@ ADOPTION = re.compile(
     rf"(\b{_N}\s+(?:\S+\s+){{0,2}}{_NOUN}\b[^.\n]*\b{_WORD}\b)"
     rf"|(\b(?:users|installs|adopt\w*|trusted by|used by)\b[^.\n]*\b{_N}\s+(?:\S+\s+){{0,2}}{_NOUN}\b)"
     rf"|(\b{_N}\s+(?:users|installs|developers|teams|companies)\b)",
-    re.I,
+    re.IGNORECASE,
 )
 
-HDYHAU = re.compile(r"hdyhau|how did you hear|heard about us", re.I)
+HDYHAU = re.compile(r"hdyhau|how did you hear|heard about us", re.IGNORECASE)
 SHIELD = re.compile(r"img\.shields\.io/(github/stars|npm/d|pypi/d|crates/d|github/downloads)")
 
 CHURN_TRIGGER = re.compile(
     r"\b[0-9]{1,3}\s?%[^.\n]*\b(citations?|cited)\b[^.\n]*\b(gone|drop(ped)?|churn|change[sd]?|disappear\w*|stable|retain\w*|still (shared|cited)|lost|shared|overlap\w*)\b",
-    re.I,
+    re.IGNORECASE,
 )
 ENGINES = re.compile(r"ChatGPT|Gemini|Perplexity|AI Overviews|SearchGPT|Copilot|AI Mode")
-LABEL = re.compile(r"\b(vendor|preprint)\b", re.I)
-AICITE_COLUMNS = ("engine", "engine_version", "location", "run_date", "mentions", "links", "n_prompts", "n_runs", "ci_low", "ci_high")
+LABEL = re.compile(r"\b(vendor|preprint)\b", re.IGNORECASE)
+AICITE_COLUMNS = (
+    "engine",
+    "engine_version",
+    "location",
+    "run_date",
+    "mentions",
+    "links",
+    "n_prompts",
+    "n_runs",
+    "ci_low",
+    "ci_high",
+)
 
 
 def read_lines(path: Path) -> list[str]:
@@ -87,8 +114,12 @@ def cmd_legal(path: Path) -> list[str]:
     out = []
     for n, line in prose_lines(path):
         if LEGAL.search(line) and not ATTRIBUTED.search(line):
-            out.append(f"{path}:{n}: MKT-MEAS-02: unattributed legal conclusion: {line.strip()[:90]}")
-        if re.search(r"omnibus", line, re.I) and not re.search(r"propos", line, re.I):
+            out.append(
+                f"{path}:{n}: MKT-MEAS-02: unattributed legal conclusion: {line.strip()[:90]}"
+            )
+        if re.search(r"omnibus", line, re.IGNORECASE) and not re.search(
+            r"propos", line, re.IGNORECASE
+        ):
             out.append(f"{path}:{n}: MKT-MEAS-02: the Omnibus is not law; say proposed")
     return out
 
@@ -103,18 +134,30 @@ def cmd_fields(path: Path) -> list[str]:
     for i, (n, line) in enumerate(lines):
         if line.lstrip().startswith("|"):
             segments = [line]
-            if i + 1 < len(lines) and lines[i + 1][1].lstrip().startswith("|") and (i == 0 or not lines[i - 1][1].lstrip().startswith("|")):
+            if (
+                i + 1 < len(lines)
+                and lines[i + 1][1].lstrip().startswith("|")
+                and (i == 0 or not lines[i - 1][1].lstrip().startswith("|"))
+            ):
                 heads = table_cells(line)
                 if METRIC_HEADS & set(heads) and not {"source", "window", "as_of"} <= set(heads):
-                    out.append(f"{path}:{n}: MKT-MEAS-13: metric table lacks source, window and as_of columns")
+                    out.append(
+                        f"{path}:{n}: MKT-MEAS-13: metric table lacks source, window and as_of columns"
+                    )
         else:
             segments = re.split(r"(?<=[.!?])\s+", line)
         for seg in segments:
             if FIGURE.search(seg) and not DATE.search(seg):
                 out.append(f"{path}:{n}: MKT-MEAS-13: figure with no date: {seg.strip()[:90]}")
         low = line.lower()
-        if "safari" in low and re.search(r"strip|remov|utm", low) and "webkit.org/blog/15697" not in line:
-            out.append(f"{path}:{n}: MKT-MEAS-13: Safari claim without the WebKit Private Browsing post")
+        if (
+            "safari" in low
+            and re.search(r"strip|remov|utm", low)
+            and "webkit.org/blog/15697" not in line
+        ):
+            out.append(
+                f"{path}:{n}: MKT-MEAS-13: Safari claim without the WebKit Private Browsing post"
+            )
     return out
 
 
@@ -137,12 +180,14 @@ def cmd_hdyhau(path: Path) -> tuple[list[str], bool]:
         while j < len(lines) and lines[j].lstrip().startswith("|"):
             j += 1
         table = lines[i:j]
-        if HDYHAU.search(" ".join(lines[max(0, i - 3):i]) + " " + table[0]):
+        if HDYHAU.search(" ".join(lines[max(0, i - 3) : i]) + " " + table[0]):
             found = True
             heads = table_cells(table[0])
             names = ("n_shown", "n_answered", "n_blank")
             if not all(c in heads for c in names):
-                out.append(f"{path}:{i + 1}: MKT-MEAS-12: HDYHAU table lacks n_shown, n_answered or n_blank")
+                out.append(
+                    f"{path}:{i + 1}: MKT-MEAS-12: HDYHAU table lacks n_shown, n_answered or n_blank"
+                )
             else:
                 idx = [heads.index(c) for c in names]
                 for k, row in enumerate(table[2:], i + 3):
@@ -165,9 +210,11 @@ def cmd_hdyhau_form(path: Path, required_ok: bool) -> list[str]:
     out = []
     for i, line in enumerate(lines):
         if HDYHAU.search(line):
-            window = "\n".join(lines[i:i + 7])
-            if re.search(r"<select|\brequired\b", window, re.I):
-                out.append(f"{path}:{i + 1}: MKT-MEAS-12: select list or required field near an HDYHAU question")
+            window = "\n".join(lines[i : i + 7])
+            if re.search(r"<select|\brequired\b", window, re.IGNORECASE):
+                out.append(
+                    f"{path}:{i + 1}: MKT-MEAS-12: select list or required field near an HDYHAU question"
+                )
     return out
 
 
@@ -175,11 +222,16 @@ def sample_size(baseline: float, mde: float, alpha: float, power: float) -> int:
     p1, p2 = baseline, baseline * (1 + mde)
     a, b = NormalDist().inv_cdf(1 - alpha / 2), NormalDist().inv_cdf(power)
     pb = (p1 + p2) / 2
-    return math.ceil((a * math.sqrt(2 * pb * (1 - pb)) + b * math.sqrt(p1 * (1 - p1) + p2 * (1 - p2))) ** 2 / (p2 - p1) ** 2)
+    return math.ceil(
+        (a * math.sqrt(2 * pb * (1 - pb)) + b * math.sqrt(p1 * (1 - p1) + p2 * (1 - p2))) ** 2
+        / (p2 - p1) ** 2
+    )
 
 
-def cmd_abgate(baseline: float, mde: float, weekly: float, weeks: float, alpha: float, power: float) -> tuple[list[str], str]:
-    n = sample_size(baseline, mde, alpha, power)
+def cmd_abgate(
+    baseline: float, mde: float, weekly: float, weeks: float, alpha_power: tuple[float, float]
+) -> tuple[list[str], str]:
+    n = sample_size(baseline, mde, *alpha_power)
     needed = 2 * n / weekly
     line = f"n_per_arm={n} weeks_to_fill_both_arms={needed:.1f} window_weeks={weeks:g}"
     if needed > weeks:
@@ -210,7 +262,11 @@ def cmd_aicite(path: Path) -> list[str]:
             out.append(f"{path}:{n}: MKT-MEAS-19: interval is not numeric")
         if "prompt_set_hash" in row:
             hashes.setdefault(row["engine"], set()).add(row["prompt_set_hash"])
-    out += [f"{path}: MKT-MEAS-19 (SHOULD): {e} compares periods over different prompt sets" for e, h in hashes.items() if len(h) > 1]
+    out += [
+        f"{path}: MKT-MEAS-19 (SHOULD): {e} compares periods over different prompt sets"
+        for e, h in hashes.items()
+        if len(h) > 1
+    ]
     return out
 
 
@@ -218,7 +274,8 @@ def cmd_churn(path: Path) -> list[str]:
     return [
         f"{path}:{n}: MKT-MEAS-21: churn figure needs an engine, a date and a vendor or preprint label: {line.strip()[:90]}"
         for n, line in prose_lines(path)
-        if CHURN_TRIGGER.search(line) and not (ENGINES.search(line) and DATE.search(line) and LABEL.search(line))
+        if CHURN_TRIGGER.search(line)
+        and not (ENGINES.search(line) and DATE.search(line) and LABEL.search(line))
     ]
 
 
@@ -226,8 +283,12 @@ def cmd_badges(path: Path) -> list[str]:
     lines = read_lines(path)
     out = []
     for i, line in enumerate(lines):
-        if SHIELD.search(line) and not any(FULL_DATE.search(x) for x in lines[max(0, i - 1):i + 2]):
-            out.append(f"{path}:{i + 1}: MKT-MEAS-20: live count badge with no dated sentence beside it")
+        if SHIELD.search(line) and not any(
+            FULL_DATE.search(x) for x in lines[max(0, i - 1) : i + 2]
+        ):
+            out.append(
+                f"{path}:{i + 1}: MKT-MEAS-20: live count badge with no dated sentence beside it"
+            )
     return out
 
 
@@ -269,8 +330,8 @@ def self_test() -> int:
     n = sample_size(0.05, 0.10, 0.05, 0.80)
     if n != 31234:
         raise SystemExit(f"self-test abgate: want 31234, got {n}")
-    expect("abgate refuse", cmd_abgate(0.05, 0.10, 19, 8, 0.05, 0.80)[0], False, "refuse")
-    expect("abgate allow", cmd_abgate(0.05, 0.10, 100000, 8, 0.05, 0.80)[0], True)
+    expect("abgate refuse", cmd_abgate(0.05, 0.10, 19, 8, (0.05, 0.80))[0], False, "refuse")
+    expect("abgate allow", cmd_abgate(0.05, 0.10, 100000, 8, (0.05, 0.80))[0], True)
     expect("aicite pass", cmd_aicite(ok / "aicite.csv"), True)
     for needle in ("missing columns",):
         expect("aicite columns", cmd_aicite(bad / "aicite-short.csv"), False, needle)
@@ -287,7 +348,9 @@ def self_test() -> int:
 
 
 def main(argv: list[str]) -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument("--self-test", action="store_true")
     sub = parser.add_subparsers(dest="cmd")
     for name in ("legal", "fields", "adoption", "hdyhau", "churn", "badges"):
@@ -314,7 +377,9 @@ def main(argv: list[str]) -> int:
             if not (0 < args.baseline < 1 and args.mde > 0 and args.weekly > 0):
                 print("report_check: baseline in (0,1), mde and weekly above 0", file=sys.stderr)
                 return 2
-            findings, line = cmd_abgate(args.baseline, args.mde, args.weekly, args.weeks, args.alpha, args.power)
+            findings, line = cmd_abgate(
+                args.baseline, args.mde, args.weekly, args.weeks, (args.alpha, args.power)
+            )
             print(line)
             return report(findings)
         if args.cmd == "aicite":
@@ -327,12 +392,24 @@ def main(argv: list[str]) -> int:
                 if not seen:
                     print(f"{path}: no HDYHAU table found")
             elif args.cmd == "hdyhau-form":
-                required_ok = bool(args.decision and args.decision.is_file() and re.search(
-                    r"hdyhau[_ -]?required\s*:\s*yes", args.decision.read_text(encoding="utf-8"), re.I))
+                required_ok = bool(
+                    args.decision
+                    and args.decision.is_file()
+                    and re.search(
+                        r"hdyhau[_ -]?required\s*:\s*yes",
+                        args.decision.read_text(encoding="utf-8"),
+                        re.IGNORECASE,
+                    )
+                )
                 findings += cmd_hdyhau_form(path, required_ok)
             else:
-                findings += {"legal": cmd_legal, "fields": cmd_fields, "adoption": cmd_adoption,
-                             "churn": cmd_churn, "badges": cmd_badges}[args.cmd](path)
+                findings += {
+                    "legal": cmd_legal,
+                    "fields": cmd_fields,
+                    "adoption": cmd_adoption,
+                    "churn": cmd_churn,
+                    "badges": cmd_badges,
+                }[args.cmd](path)
         return report(findings)
     except OSError as err:
         print(f"report_check: {err}", file=sys.stderr)
