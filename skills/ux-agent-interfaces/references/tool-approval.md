@@ -27,7 +27,7 @@ Fetched, read or measured 2026-11-27 unless a row says otherwise. Client behavio
 | The lethal trifecta: detection at about 95% is "a failing grade" | [Willison](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/) | 2025-06-16 | 12 months |
 | Excessive agency: authorise in the downstream system, and log and monitor as damage limitation, not prevention | [OWASP LLM06:2025](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/) | 2025 edition, fetched 2026-11-27 | 12 months, or when a new edition appears |
 
-The house conventions here are **pinned**, defaults an adopter overrides once: the inventory file `docs/consequential-actions.md` and the trifecta file `docs/agent-trifecta.csv` with its header. The open decisions D1 to D4 are listed once in `SKILL.md`.
+The house conventions here are **pinned**, defaults an adopter overrides once: the inventory file `docs/consequential-actions.md` and the trifecta file `docs/agent-trifecta.csv` with its header. The open decisions D1 and D2 are listed once in `SKILL.md`.
 
 ## Tiers and Initiators
 

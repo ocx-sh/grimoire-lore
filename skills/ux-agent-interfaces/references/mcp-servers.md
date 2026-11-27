@@ -27,7 +27,7 @@ Fetched or read 2026-11-27 unless a row says otherwise. Every client limit below
 | Description-smell rates and effect sizes (97.1% of tools with a smell, 56% unclear purpose, median +5.85 points from augmentation). Usage guidance missing in 89.3% and compact descriptions equivalent, from the v1 full text. The v3 full text was not read | [arXiv 2602.14878](https://arxiv.org/abs/2602.14878), independent preprint | v1 2026-02-16, v3 2026-05-31 | 12 months, or on peer-reviewed publication |
 | GitHub's MCP server has 151 tools, passes description item 2 (when to use) on 21 of them and item 3 (sibling pointer) on 4 of them, and has a median description of 79 characters. A reading of the server's tool descriptions, with a pre-filter regex; no client was run | [github/github-mcp-server](https://github.com/github/github-mcp-server) at `7edc2dd` | read 2026-11-25, vendor source | 3 months. Re-clone, list tool names and descriptions, and recount which descriptions name a trigger or a sibling tool |
 
-The open decisions D1 to D4 are listed once in `SKILL.md`.
+The open decisions D1 and D2 are listed once in `SKILL.md`.
 
 ## Capture the Server's Output
 
