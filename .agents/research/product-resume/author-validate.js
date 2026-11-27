@@ -76,6 +76,7 @@ Then write the unit's files.
 - Keep only guidance an agent gets wrong without being told. A rule's row is: ID, the imperative, the verification. Rationale and examples go to the depth file.
 - A skill is a procedure an agent can run literally: numbered steps, each with its input, its command or check, and what "done" looks like. A platform skill keeps every dated fact in the one dated-facts file the plan names, with source URL, source date and the refresh cadence; SKILL.md refers to it and never repeats a limit.
 - A shipped script, if the plan assigns one, is small, has no dependency beyond the standard library, has a --help, exits non-zero on a finding, and carries a self-test or assert-based check.
+- The consolidations were revised after the plan was written. A rule ID that is in a source consolidation but not in the plan is yours to place when its family belongs to your unit: put it where the plan puts that family's neighbouring rows of the same severity, and name it in planDeviations. A MUST rule never goes unplaced.
 - Cross-references to other new artifacts use the names in the plan, even though other workers are writing those files right now.
 When done, run the catalog validator on what you wrote, as ${C}/references/validation.md specifies (python3 ${C}/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' <your rule and skill paths>), count body lines, and fix every finding in your own files. Return the receipt.`
 
