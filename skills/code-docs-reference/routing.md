@@ -21,7 +21,8 @@ Contents: [Dates and Defaults](#dates-and-defaults) · [Where It Goes](#where-it
 ## Dates and Defaults
 
 - Measured 2026-09-27. Tool behaviour (Claude Code rule loading, cargo-mutants,
-  Stryker, mutmut 3.8.0) is dated to that day.
+  Stryker, mutmut) was re-read 2026-11-27, against Claude Code 2.1.332,
+  cargo-mutants 27.1.0, Stryker 10.1.1 and mutmut 3.8.1.
 - `tests` stands for the repository's test roots and `origin/main` for its base
   branch; name every test root, such as `crates` in a workspace. Every grep is a
   locator: empty output is the pass unless the row says otherwise, and a
@@ -159,18 +160,23 @@ The cleanup skill never edits tests, so moving a reason onto a test's doc commen
 | RTE-06 | Use a mutation run only as supporting evidence for a guard shrink, never as its proof. `unviable`, `CompileError`, `NoCoverage` or no mutant on the guarded span proves nothing, and a surviving mutant beside the guard is a test gap to report. | Mutation never decided a guard the planted edit did not also decide. cargo-mutants generated no mutant for a bare `.min()` or `.saturating_add()` call and called a guard collapse unviable under `-D warnings`, yet the hand-applied edits turned all three tests red. What it adds is a gap beside a guard, such as a surviving `<` to `<=`. | Reading test on the report for the guarded line, against the planted-edit result. Tool notes below. | CONSIDER |
 | RTE-12 | Name a test that carries a guard after the constraint: in its name or, when one function covers several scenarios, in each parametrize id or `it()` string. A guard-to-test pairing check reads those ids and strings too. | In a parametrized test the constraint noun often appears only in the id. `id="tar-slip-parent"` sits on `test_archive_refuses_anything_but_one_regular_member`, and deleting the traversal check turns exactly that id red. | Command 9 prints nothing. Command 10 lists the strings a pairing scan reads beside `def` and `fn` names. | CONSIDER |
 
-Mutation tool notes, 2026-09-27:
+Mutation tool notes, re-read 2026-11-27:
 
 - **TypeScript:** install Stryker into the project (`npm install --no-save
-  @stryker-mutator/core @stryker-mutator/vitest-runner`); `npx --yes` fails with
-  `ERR_MODULE_NOT_FOUND: typescript`. Set `mutate` to the one source file and point
+  @stryker-mutator/core @stryker-mutator/vitest-runner`) and run
+  `./node_modules/.bin/stryker run`, because a bare `npx stryker` can resolve an
+  unrelated old package; `npx --yes` fails with `ERR_MODULE_NOT_FOUND: typescript`.
+  On TypeScript 7, Stryker 10.1.1 crashes with `ts.parseConfigFileTextToJson is
+  not a function` while a `tsconfig.json` exists: in the scratch copy, install
+  `typescript@6` with `--no-save` or move the `tsconfig.json` aside. Set `mutate`
+  to the one source file and point
   `vitest.configFile` at a config whose `include` names only the target test, since
   the dry run needs every configured test green.
 - **Rust:** run cargo-mutants with `-f` on the one file and `--in-place` in a clean
   worktree. It has no operator for a bare method call, and 34 to 65% of its mutants
   per file were unviable.
-- **Python:** mutmut 3.8.0 fails inside its sandbox on `src/`-layout packages. Use the
-  planted edit.
+- **Python:** mutmut 3.8.0 fails inside its sandbox on `src/`-layout packages, and
+  the 3.8.1 notes (2026-10-28) list no fix. Use the planted edit.
 
 ## Naming Other Code
 
@@ -195,9 +201,11 @@ git grep -n -i -e 'we considered' -e 'alternative' -e 'we chose' -e 'trade-off' 
 git grep -n -i -e 'used to' -e 'previously' -e 'historically' -- '*.rs' '*.py' '*.ts' '*.go' '*.java' '*.kt'                 # 18
 ```
 
-The RTE-08 reminder, as Claude Code behaves on 2026-09-27: path-scoped rules load
-when the agent reads a matching file, not on every tool use, and after compaction
-only once a matching file is read again. The reminder is a PostToolUse hook on
+The RTE-08 reminder, as Claude Code behaves on 2026-11-27 (2.1.288 and later):
+path-scoped rules load when the agent reads, writes or edits a matching file, or
+views it with a single-file Bash `cat`, `head`, `tail`, `sed -n` or `grep`, not on
+every tool use, and after compaction only once a matching file is touched again.
+Before 2.1.288 only Read loaded them. The reminder is a PostToolUse hook on
 Edit and Write that reads every rule's `paths:` list, matches the touched file, and
 returns the matching rule names in `hookSpecificOutput.additionalContext` with
 `hookEventName` set to `PostToolUse`. Match with a glob engine that honours `**`,
@@ -207,7 +215,7 @@ such as Python 3.13's `PurePath.full_match`: `fnmatch` needs a `/` before `*.rs`
 | ID | Rule | Rationale | Verification | Severity |
 |---|---|---|---|---|
 | RTE-07 | Move an invariant that is true verbatim at every file a path-scoped rule's glob matches into that rule, and delete the per-file copies. | Every per-file copy of a subsystem rule is one more copy that drifts, and agents consult instruction files for 60.5% of their documentation lookups against 10.6% for classical docs ([arXiv 2608.20195](https://arxiv.org/abs/2608.20195)). | Reading test: is the sentence true at every matched file? Command 13: a key phrase in 2 or more files under one rule's glob is a finding. | SHOULD |
-| RTE-08 | Build the post-edit reminder that names the rules covering a touched path from the rules' own `paths:` frontmatter, never from a hand-written table. | A Write-only edit or a compaction skips a path-scoped rule. Both hand-written reminder tables measured had drifted: one omitted 6 subsystem rules, the other omitted one and narrowed its globs. | Command 14 lists the path-scoped rules. Each line command 15 prints is a rule named by hand. Planted proof: add a rule with a `paths:` glob in a scratch copy, pipe a PostToolUse payload naming a matching file into the hook, and see the new rule named without editing the hook. | SHOULD |
+| RTE-08 | Build the post-edit reminder that names the rules covering a touched path from the rules' own `paths:` frontmatter, never from a hand-written table. | A compaction drops a path-scoped rule until a matching file is touched again, and Claude Code before 2.1.288 loaded none on a Write or Edit. From 2.1.288 the reminder only backs up the client's own loading, so a repo may drop it, never swap it for a table. Both hand-written reminder tables measured had drifted: one omitted 6 subsystem rules, the other omitted one and narrowed its globs. | Command 14 lists the path-scoped rules. Each line command 15 prints is a rule named by hand. Planted proof: add a rule with a `paths:` glob in a scratch copy, pipe a PostToolUse payload naming a matching file into the hook, and see the new rule named without editing the hook. | SHOULD |
 | RTE-09 | Once a comment carries a file-qualified pointer to a record, delete the clauses that restate that record, and keep only the clauses the record does not hold. | Agents add the pointer and keep the essay: 2 of 10 spot checks, including a 22-line module doc that cites three decisions of one record and restates them. The clauses the record lacks stay, because essays hold local constraints no record states. | Command 16 lists comments that name a record. Reading test: a block that names a record and restates 2 or more of its sentences is a finding. On a comment-only diff, command 3 fails a pointer that coexists with the paraphrase it replaced. | SHOULD |
 | RTE-10 | Move an argument that weighs alternatives into a decision record unless Henderson's filter says skip ("limited in scope and time and risk and cost, or already covered elsewhere"), and keep in the record the specifics that make the choice falsifiable. | An argument in code gets re-litigated by every reader or silently lost in a cut. A 51-line config comment weighing a preset against category floors sat in a repo with one record, and its rejected audit names are what make the choice checkable later. How few records a repo holds is not a skip condition. | Reading test, Henderson's filter per essay ([joelparkerhenderson/architecture-decision-record](https://github.com/joelparkerhenderson/architecture-decision-record)). Command 17 lists candidates. | SHOULD |
 | RTE-11 | Keep provenance only when it justifies a value still in the code, as at most 2 lines carrying a count or a named artifact. Rewrite history that still constrains an edit as a present-tense guard, and delete the rest. | Provenance blocks carried guard content in 1 of 43 sampled, and the kept exception is quantified ("12 of 18 were ordinary technical nouns"). A history-phrase regex has 37% false positives and hits live guards another 37% of the time, so phrasing never licenses a delete. | Reading test: does the sentence carry a number, a named test or a tracked artifact? Command 18 locates candidates for reading and is never a delete list. | SHOULD |
@@ -230,6 +238,6 @@ Ranked by how often each was measured to bite.
    `unviable` count, taken as protection (RTE-06).
 7. **Deleting history by its phrasing.** "Used to" and "previously" open live guards
    as often as dead ones (RTE-11).
-8. **Editing without the governing rule loaded,** after a Write-only edit or a
-   compaction (RTE-08).
+8. **Editing without the governing rule loaded,** after a compaction, or after a
+   Write-only edit on Claude Code before 2.1.288 (RTE-08).
 9. **Pointing at a commit SHA** instead of stating the reason (RTE-02).

@@ -35,6 +35,10 @@ impl Server {
     /// Rustdoc only; the description attribute wins (C-804).
     #[tool(description = "Fetch a package (C-908)")]
     async fn fetch(&self) {}
+
+    /// Summarise a package (C-920).
+    #[prompt]
+    async fn summarise(&self) {}
 }
 
 pub fn build() -> clap::Command {

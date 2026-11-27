@@ -21,11 +21,12 @@ Source mode (--source), advisory. Scans the text that a generator will copy:
   - census interface lines: doc comments on Rust items deriving clap
     Parser/Args/Subcommand/ValueEnum or schemars JsonSchema, Python click/typer
     command docstrings and pydantic model docstrings
-  - Rust #[command|arg|clap|value|group|schemars|tool(...)] string values of
+  - Rust #[command|arg|clap|value|group|schemars|tool|prompt(...)] string values of
     about, long_about, help, long_help, before/after(_long)_help, description
   - Rust clap builder calls (.about("..."), .help("..."), ...) and hand-written
     schema literals ("description": "..." in json!)
-  - rmcp's fallback: a #[tool] without description publishes the fn's ///
+  - rmcp's fallback: a #[tool] or #[prompt] without description publishes the
+    fn's ///
   - Python help=, description=, epilog=, short_help= keyword strings (argparse,
     click, typer, pydantic Field)
   - TS/JS commander .description(), .summary(), .command(name, desc),
@@ -52,7 +53,8 @@ feeds the rendered text to this scanner and asserts exit 0. Proof: plant
               own schema-export output
   MCP         the tool list serialized in-process (ToolRouter::list_all()); it
               covers description strings, the /// fallback and every
-              JsonSchema argument struct
+              JsonSchema argument struct; serialize the prompt list the same
+              way when the server has #[prompt] functions
   Python docs griffe (mkdocstrings' loader) over the public API under the docs
               build's filters, every docstring including attribute docstrings;
               never inspect.getdoc() (misses attribute docstrings) and never a
@@ -362,7 +364,7 @@ RS_LIT = r'(?:r(?P<h>#*)"(?P<raw>[\s\S]*?)"(?P=h)|"(?P<s>(?:[^"\\]|\\.)*)")'
 RS_HELP = (
     r"(?:about|long_about|help|long_help|before_help|before_long_help|after_help|after_long_help)"
 )
-RS_ATTR_RE = re.compile(r"#\[\s*(command|arg|clap|value|group|schemars|tool)\s*[(\]]")
+RS_ATTR_RE = re.compile(r"#\[\s*(command|arg|clap|value|group|schemars|tool|prompt)\s*[(\]]")
 RS_KV_RE = re.compile(rf"\b(?:{RS_HELP}|description)\s*=\s*{RS_LIT}")
 RS_CALL_RE = re.compile(rf"\.{RS_HELP}\(\s*{RS_LIT}")
 RS_JSON_RE = re.compile(rf'"(?:description|title)"\s*:\s*{RS_LIT}')
@@ -445,7 +447,11 @@ class SourceScan:
                 for m in RS_KV_RE.finditer(src, a.start(), end):
                     literal(m)
                 k = row_of(a.start())
-                if a.group(1) != "tool" or "description" in src[a.start() : end] or lines[k].test:
+                if (
+                    a.group(1) not in ("tool", "prompt")
+                    or "description" in src[a.start() : end]
+                    or lines[k].test
+                ):
                     continue
                 # rmcp falls back to the fn's /// when description is unset.
                 while k > 0 and (
