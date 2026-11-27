@@ -31,7 +31,7 @@ false. It lists the Brand partnership toggle as a manual step.
 Every limit, policy clause and reach figure comes from a dated row in
 `references/facts.md`. With no row, the draft states no number.
 
-22 rows hold the rationale and verification. 15 of them are MUST. One script,
+22 rows hold the rationale and verification. 14 of them are MUST. One script,
 `li_draft_check.py`, checks the draft file and carries `--self-test`.
 
 ## What it does not cover

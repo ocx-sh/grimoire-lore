@@ -38,9 +38,9 @@ one `ExitCode` enum per workspace.
 | 1 | `Failure` | Unclassified failure — classification fall-through only |
 | 64 | `UsageError` | Bad invocation, including every clap parse failure |
 | 65 | `DataError` | Malformed input data, manifest, or lockfile |
-| 69 | `Unavailable` | Registry or resource unreachable, non-retryable |
+| 69 | `Unavailable` | Registry or resource unavailable and an unchanged retry cannot succeed: DNS failure, TLS failure, certificate failure |
 | 74 | `IoError` | Filesystem I/O fault |
-| 75 | `TempFail` | Retryable transient failure |
+| 75 | `TempFail` | Retryable transient failure, including a refused or reset connection |
 | 77 | `PermissionDenied` | `EPERM` / insufficient permissions |
 | 78 | `ConfigError` | Bad config file or missing required field |
 | 79 | `NotFound` | Resource or explicit config path not found |
@@ -55,6 +55,13 @@ Never claimed and never reused: 2–63, 66–68, 70–73, 76, 100–255. An
 unused sysexits value stays unclaimed rather than being repurposed with a
 different meaning.
 
+A refused or reset connection is 75, not 69. It is a temporary failure: the
+service may be restarting, and a retry can succeed with no change by the
+user. A DNS failure, a TLS failure and a certificate failure stay 69,
+because only a change to the name, the config or the certificate fixes them.
+sysexits defines `EX_TEMPFAIL` as a temporary failure whose request should
+be reattempted later.
+
 ## Exit-Code Rules
 
 | ID | Rule | Verification | Severity |
@@ -68,7 +75,7 @@ different meaning.
 | EXIT-07 | The fall-through to `Failure` is locked by a test, and classification matches are exhaustive — no `_ =>` wildcard over a local error enum, so a new variant compile-errors until it is classified. | Each error enum has a fall-through test | MUST |
 | EXIT-08 | One exit-code taxonomy per workspace. A binary needing its own carries an ADR and a doc note naming the carve-out. | see block EXIT-08 — each hit outside the shared enum needs its ADR link | MUST |
 | EXIT-09 | Classification may be a free function **or** a trait implemented per error type. Pick one shape per workspace; do not mix. | Review: a workspace with both shapes is a finding | SHOULD |
-| EXIT-10 | Every code has a doc comment on the variant, a row in the tool's public docs, and a test asserting a real invocation produces it. | Public doc row count == variant count | MUST |
+| EXIT-10 | Every code has a doc comment on the variant, a row in the tool's public docs, and a test asserting a real invocation produces it. The test for 75 includes a refused or reset connection. The test for 69 uses a DNS, TLS or certificate failure and never a refused connection. | Public doc row count == variant count. A test that points the binary at a closed local port expects 75, and one at a name that does not resolve expects 69 | MUST |
 | EXIT-11 | A signal handler that exists for cleanup derives its status from the signal received — restore `SIG_DFL` and re-raise. Never hardcode 130. | The exit/raise call references the matched signal | SHOULD |
 
 ```sh
@@ -127,7 +134,7 @@ fn main() -> std::process::ExitCode {
 | CLI-01 | The result goes to stdout; logs, progress, warnings, prompts and errors go to stderr, unconditionally. | see block CLI-01 — the `\b` keeps the correct `eprint` forms out; a hit outside result formatting is a finding; restrict to added lines on a diff | MUST |
 | CLI-02 | Under `--format json`, stdout carries **only** the payload — no banner, no progress, no trailing "done". | Per JSON subcommand, an integration test parses the whole captured stdout | MUST |
 | CLI-03 | Render the error chain exactly once, at the single `main.rs` boundary, and sanitize it for control and bidi characters first — chains quote names read off wire documents (CWE-150 terminal injection). | The boundary write routes through the sanitizer; pin it with a structural test | MUST |
-| CLI-04 | Structured errors use the pinned envelope on stdout: `{"error": {"code": <slug>, "exit": <int>, "message": …, "reason"?, "retryable"?, "forceable"?}}`. Slugs are stable; changing one is breaking. | Snapshot test per exit code | MUST |
+| CLI-04 | Structured errors use the pinned envelope on stdout: `{"schema_version": <int>, "error": {"code": <slug>, "exit": <int>, "message": …, "retryable": <bool>, "reason"?, "forceable"?}}`. `retryable` is required and is sent as `false` too: a field present only when true cannot be told from one that was never computed. `schema_version` is an integer beside `error`. Slugs are stable; changing one is breaking. Adding `schema_version` and making `retryable` required is additive: no existing key, slug or exit changes meaning, and a consumer that ignores unknown fields keeps working. | Snapshot test per exit code, in which `jq -e '(.schema_version\|type=="number") and (.error.retryable\|type=="boolean")'` exits 0, so a snapshot that lacks the version or omits a `false` `retryable` fails | MUST |
 | CLI-05 | A closed downstream stdout pipe is a clean exit 0, handled once centrally — never a panic, never a propagated error. Rust sets `SIGPIPE` to `SIG_IGN` before `main`, so `println!` panics once a reader like `head` closes it. | Integration test: a reader that closes stdout after one line — exit 0, no panic, no error line | MUST |
 | CLI-06 | Any command that can emit more than a handful of lines writes through a locked `BufWriter` and flushes explicitly — `io::Stdout` is line-buffered even when piped to a file. | `println!` inside an unbounded loop is a finding | SHOULD |
 | CLI-07 | Colour comes from `anstream`/`colorchoice` plus an explicit `--color` taking `auto`, `always` or `never`, decided per destination stream. Never hand-roll the env check. | see block CLI-07 — anchored on the read rather than the word in a comment; discard hits inside the one colour module, any hit outside it is a partial reimplementation | MUST |
@@ -173,6 +180,11 @@ git ls-files -z --cached --others --exclude-standard -- ':(glob)**/*.rs' ':(excl
    child crashed hardest.
 7. Inventing a new small-integer code (3, 4, 5) for a new failure class
    instead of allocating from 83 upward.
+8. Mapping a refused or reset connection to 69 because "the service is
+   unavailable" sounds right. It is 75: a retry can succeed. Only DNS, TLS
+   and certificate failures are 69.
+9. Emitting `retryable` only when it is true, or leaving `schema_version`
+   out of an error document, because the field was optional before.
 
 ## Sources
 

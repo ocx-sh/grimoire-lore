@@ -24,7 +24,7 @@ Stop when every surface in scope has findings, each as `path-or-command: ID: mes
 ## Procedure
 
 1. **Pick the surfaces.** Input: the diff, or the named server, binary or settings file. A CLI with a JSON mode goes to step 2. An MCP server goes to step 3 and then step 4. A permission, auto-approve or approval-logic file goes to step 4. A skill or script that calls tools goes to step 5. Done: a list of surfaces, each with its step.
-2. **CLI machine mode.** Input: the binary, one command that succeeds, one that fails not-found, one usage error. Run the first command below, add `--rust-cli04` for a binary under the Rust CLI-04 envelope, then read `references/machine-output.md` and run the blocks for the rows the script does not cover (UX-AGENT-05, 06, 07, 10, 11, 12, 13). Done: the script exits 0 and every block printed what its row says.
+2. **CLI machine mode.** Input: the binary, one command that succeeds, one that fails not-found, one usage error. Run the first command below, then read `references/machine-output.md` and run the blocks for the rows the script does not cover (UX-AGENT-05, 06, 07, 10, 11, 12, 13). Done: the script exits 0 and every block printed what its row says.
 3. **MCP server.** Input: the launch command and each write flag. Capture `tools/list` once per launch configuration, and one failing `tools/call` per failure class (recipe in `references/mcp-servers.md`). Run the second and third commands below. Read each `note:` line as a prompt to read a description or a schema, never as a finding. Check the call to a gated tool that is absent (UX-ACT-18) with the fourth command, never with `--error`: `-32602` is the right answer there. Pass `--gated NAMES` to the second command so a gated tool in the default list is a finding. Done: every command exits 0 for every capture.
 4. **Approval and permissions.** Input: the saved tool lists, the repository's agent settings, and its inventory (UX-ACT-01). Confirm every tool has a tier and a trifecta row. If `docs/consequential-actions.md` or `docs/agent-trifecta.csv` is absent, report one finding `missing inventory` for it, ask the person whether to create it, and never invent tiers. Then run the blocks of UX-ACT-19, 20, 22, 25 and 28 in `references/tool-approval.md`, and check UX-ACT-18, 24 and 26 by their tests. Done: each block printed what its row says, and no T2 tool is covered by an allow rule.
 5. **Caller discipline.** When your own work calls a tool or a CLI: capture stdout and stderr apart, branch on class, exit code and `retryable`, retry at most 3 times, and read `truncated` before you conclude anything (UX-AGENT-25). Before you add an override flag to a T1+ command, run its `--dry-run`, show the output and wait for approval of the exact command (UX-ACT-21). Done: no flag was added without that approval.
@@ -49,10 +49,10 @@ Every line blocks a merge within the scope it names. IDs resolve through [Routin
 |---|---|---|
 | 1 | The machine-output flag works before and after the subcommand, with identical results. | UX-AGENT-01 |
 | 2 | In machine mode every exit path prints exactly one JSON document on stdout, usage errors included, and nothing else on stdout on failure. | UX-AGENT-03 |
-| 3 | Every JSON document, success and error, has an integer `schema_version`. A non-additive change bumps it. The error-document clause is SHOULD for a Rust CLI-04 binary until decision D4. | UX-AGENT-04 |
+| 3 | Every JSON document, success and error, has an integer `schema_version`. A non-additive change bumps it. | UX-AGENT-04 |
 | 4 | Consumers ignore unknown fields, branch on documented fields and never match `message` text. | UX-AGENT-05 |
 | 5 | List output is bounded by default and carries `total`, `truncated` and a continuation as fields. | UX-AGENT-06 |
-| 6 | Every error carries a class slug, the exit code, a boolean `retryable`, `retry_after_seconds` when known, `message` naming the input, and `hint`. Sending `retryable: false` is SHOULD until D4. | UX-AGENT-09 |
+| 6 | Every error carries a class slug, the exit code, a boolean `retryable`, `retry_after_seconds` when known, `message` naming the input, and `hint`. | UX-AGENT-09 |
 | 7 | Every network operation has a documented deadline, reported as class `timeout`, never as a rate limit. | UX-AGENT-11 |
 | 8 | Not-found and unauthorised stay separate classes, and the message says "not authorised, or it does not exist" where a 401 may hide a missing resource. | UX-AGENT-12 |
 | 9 | A conflict has its own class. Hints are runnable, put the safe step first, and label a destructive remedy "requires the owner's approval". | UX-AGENT-13 |
@@ -70,8 +70,9 @@ Every line blocks a merge within the scope it names. IDs resolve through [Routin
 | 21 | Run the lethal-trifecta check before a server joins an unattended or auto-approving session. | UX-ACT-25 |
 | 22 | The approval decision takes no input from returned tool text, and cancel, timeout and decline each leave the call unrun. | UX-ACT-26 |
 | 23 | Never collect a password, token, key or payment detail through elicitation or a tool argument. | UX-ACT-28 |
+| 24 | `retryable: true` and exit 75 only when an unchanged rerun can succeed, a refused or reset connection included. DNS, TLS and certificate failures are exit 69 with `retryable: false`. | UX-AGENT-10 |
 
-SHOULD rows: UX-AGENT-02 (the `--json` alias), 07 (JSON Lines), 10 (the retry set), 16 (error text prefix), 17 (gate named in a description), 19 (description content), 21 (`outputSchema`), 22 (at most 20 tools), 23 (pinned descriptions and a snapshot), 24 (published names are API), 25 (the caller side) and 26 (result under 40,000 bytes), and UX-ACT-27 (audit log).
+SHOULD rows: UX-AGENT-02 (the `--json` alias), 07 (JSON Lines), 16 (error text prefix), 17 (gate named in a description), 19 (description content), 21 (`outputSchema`), 22 (at most 20 tools), 23 (pinned descriptions and a snapshot), 24 (published names are API), 25 (the caller side) and 26 (result under 40,000 bytes), and UX-ACT-27 (audit log).
 
 ## Open Decisions
 
@@ -79,10 +80,8 @@ The catalog's language CLI contracts have not settled these. Each affected row s
 
 | # | Decision | Recommendation | Rows it holds at a lower severity |
 |---|---|---|---|
-| D1 | One error-envelope spelling for the family, or keep Rust CLI-04's `{"error":{"code","exit",…}}` and Swift SW-CLI-29's `{"schema_version","command","exit_code","error":{"kind",…}}`? | Keep both spellings and add the missing fields. The fields are the contract, never the spelling | none |
+| D1 | One error-envelope spelling for the family, or keep Rust CLI-04's `{"schema_version","error":{"code","exit","retryable",…}}` and Swift SW-CLI-29's `{"schema_version","command","exit_code","error":{"kind",…}}`? | Keep both spellings and add the missing fields. The fields are the contract, never the spelling | none |
 | D2 | Does `conflict` get its own exit code (the next free number under the append-only EXIT-06), or stay on 65 with its own class slug? | Slug on the existing code until decided | none |
-| D3 | The rows disagree on connection failures: the Rust table says 69 is "unreachable, non-retryable", the Go table says 69 is "not retryable", Swift says a connect failure is 75 | Refused or reset is 75. DNS not found, a TLS-to-plain-HTTP mismatch and a refused certificate are 69 | UX-AGENT-10 |
-| D4 | Revise Rust CLI-04 so `retryable` is required and `schema_version` joins its envelope | Yes. A producer that always sends `retryable` already conforms today | UX-AGENT-09 clause (c), UX-AGENT-04 error-document clause |
 
 ## Ask the Person First
 

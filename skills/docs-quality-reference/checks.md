@@ -49,9 +49,9 @@ carries no generator config, which is DOC-NAV-01.
 |---|---|---|---|
 | `strip_prose.py` | DOC-PLAIN-04 | `python3 checks/strip_prose.py --root .` | `fixtures/strip_prose/pass-clean.md`, `fail-unclosed-fence.md` |
 | `prose.py` | DOC-PLAIN-01, 02, 03, 05, 08, 10, 11, 12, 13 | `python3 checks/prose.py --root .` | `fixtures/prose/pass-clean.md`, `fail-punctuation.md`, `fail-paragraph.md`, `fail-dense.md` |
-| `doc_declaration.py` | DOC-TYPE-01, 02, 28, 29, 30, DOC-DISC-13 | `python3 checks/doc_declaration.py --root .` | `fixtures/doc_declaration/`, 9 files, 3 pass and 6 fail |
+| `doc_declaration.py` | DOC-TYPE-01, 02, 28, 29, 30, DOC-DISC-13 | `python3 checks/doc_declaration.py --root .` | `fixtures/doc_declaration/`, 12 files (5 pass and 7 fail), plus `built-pass/` and `built-fail/` for `--built` |
 | `page_type.py` | DOC-TYPE-03, 04, 07, 08, 09, 22, 32, 33, 37, 41, DOC-DISC-16, 17 | `python3 checks/page_type.py --root .` | `fixtures/page_type/`, 9 files, 2 pass and 7 fail |
-| `landing_check.py` | DOC-TYPE-10, 11, 12, 13, 14, 15 | `python3 checks/landing_check.py --root .` | `fixtures/landing_check/pass-landing.md`, `fail-landing.md`, `fail-cta.md` |
+| `landing_check.py` | DOC-TYPE-10, 11, 12, 13, 14, 15 | `python3 checks/landing_check.py --root .` | `fixtures/landing_check/`, 3 pass and 3 fail pages, plus `built-pass/` and `built-fail/` for `--built` |
 | `nav_depth.py` | DOC-NAV-01, 02, 03, 04, 05, 06 | `python3 checks/nav_depth.py --root .` | `fixtures/nav_depth/`, two page fixtures and three `mkdocs.yml` trees |
 | `doc_examples.py` | DOC-EX-01, 02, 05, 06, 07, 20, 21 | `python3 checks/doc_examples.py --root . --changed-only` | `fixtures/doc_examples/`, 7 pages plus `harness-pass/` and `harness-fail/` |
 | `links_raw.py` | DOC-OBS-02, and DOC-NAV-07's authoring half | `python3 checks/links_raw.py --root docs docs` | `fixtures/links_raw/pass-links.md`, two fail pages, `reference/cli.md`, `reference/api.md` |
@@ -66,6 +66,12 @@ The DOC-AGENT family names no script here. Its verifications are inline `diff`,
 `awk`, `grep` and `curl` commands plus two reading heuristics.
 
 ## Extra modes
+
+**`doc_declaration.py --built DIST [--need FILE] [--list VALUE]`** reads the
+`<meta name="doc-surface">` of every built page. It prints the skip count and
+exits 1 on a doubled meta or a value outside `pitch`, `home` and `offer`.
+**`doc_declaration.py --pair BUILT_HTML SOURCE`** exits 1 when a route's built
+meta and its source comment name different values.
 
 **`doc_declaration.py --seed [--root DIR]`** proposes a type per page for a
 retrofit and prints `page<TAB>type<TAB>confidence<TAB>source`. It reads
@@ -140,7 +146,9 @@ arms skip any page under 300 prose words.
 skipped count on stderr. It never guesses a type from a path, and
 `doc_declaration.py` owns the missing-declaration finding.
 **`landing_check.py`** runs DOC-TYPE-10 to DOC-TYPE-13 on `doc_type: landing`
-pages only, and DOC-TYPE-14 and DOC-TYPE-15 on every page.
+pages only, and DOC-TYPE-14 and DOC-TYPE-15 on every page. A page that also
+declares `doc_surface: pitch` skips DOC-TYPE-10 to DOC-TYPE-12 in source. Those
+three run on its built route with `landing_check.py --built dist`.
 
 ## Configs, not scripts
 

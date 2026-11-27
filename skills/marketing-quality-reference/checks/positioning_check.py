@@ -613,8 +613,10 @@ def performer(text: str) -> tuple[list[str], list[str]]:
     ]
 
 
+# docs-quality owns doc_surface (doc_declaration.py: same enum, openers and window).
+# This mirror exists so the marketing checks run without that skill installed.
 SURFACE_VALUES = {"pitch", "home", "offer"}
-SOURCE_DECL = re.compile(r"doc_surface:\s*(\w+)")
+SOURCE_DECL = re.compile(r"^\s*(?:<!--|\{/\*|\.\.|%|//)\s*doc_surface\s*:\s*([A-Za-z][\w-]*)")
 
 
 def built_surfaces(dist: Path) -> dict[str, tuple[list[str], int]]:
@@ -655,8 +657,11 @@ def source_surface(text: str) -> str | None:
     """The doc_surface source comment: first 12 lines after any front matter."""
     m = re.match(r"---\n.*?\n---\n", text, re.DOTALL)
     body = text[m.end() :] if m else text
-    d = SOURCE_DECL.search("\n".join(body.splitlines()[:12]))
-    return d.group(1) if d else None
+    for line in body.splitlines()[:12]:
+        d = SOURCE_DECL.match(line)
+        if d:
+            return d.group(1)
+    return None
 
 
 # --- self-test -------------------------------------------------------------------------
@@ -904,7 +909,9 @@ def self_test() -> int:
     ok(len(f) == 2, "a doubled meta and an unknown value fail")
     ok(
         source_surface("---\ntitle: x\n---\n<!-- doc_surface: pitch -->\nbody") == "pitch"
-        and source_surface("no declaration") is None,
+        and source_surface("no declaration") is None
+        and source_surface("prose doc_surface: pitch") is None
+        and source_surface("{/* doc_surface: home */}") == "home",
         "source comment",
     )
     print(f"self-test ok ({n} checks)")

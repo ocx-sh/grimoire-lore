@@ -2,6 +2,7 @@
 title: "CLI contract: exit codes, streams, and interface UX"
 topic: rust-cli-contract
 model: opus
+revised: 2026-11-27
 consolidates:
   - rust-cli-contract/exit-codes.md
   - rust-cli-contract/cli-ux-and-output-streams.md
@@ -36,7 +37,7 @@ date: 2026-08
    not the binary. Both shapes are sanctioned; what is mandatory is *one* taxonomy per
    workspace and a test locking the fall-through.
 5. **grim's JSON error envelope becomes the cross-tool contract, not a grim quirk.**
-   `{code, exit, message, reason?, retryable?, forceable?}` on stdout is the only structured
+   `{schema_version, error: {code, exit, message, retryable, reason?, forceable?}}` on stdout is the only structured
    error format either tool should grow ([audit §4](ocx-codebase-audit/exit-codes-and-cli.md)).
 6. **Two mitigations that exist in one tool are now required in both**: ocx's CWE-150 terminal
    sanitization of the error chain, and grim's BrokenPipe→exit-0 short-circuit.
@@ -56,9 +57,9 @@ single `ExitCode` enum per workspace.
 | 1 | `Failure` | Unclassified failure; classification fall-through **only** | **Implemented** |
 | 64 | `UsageError` | Bad CLI invocation (incl. every clap parse failure) | **Implemented** |
 | 65 | `DataError` | Malformed input data / manifest / lockfile | **Implemented** |
-| 69 | `Unavailable` | Registry or resource unreachable, non-retryable | **Implemented** |
+| 69 | `Unavailable` | Registry or resource unavailable and an unchanged retry cannot succeed: DNS failure, TLS failure, certificate failure | **Implemented** (a refused or reset connection moved to 75 on 2026-11-27) |
 | 74 | `IoError` | Filesystem I/O fault | **Implemented** |
-| 75 | `TempFail` | Retryable transient failure | **Implemented** |
+| 75 | `TempFail` | Retryable transient failure, including a refused or reset connection (a retry can succeed with no change by the user) | **Implemented** |
 | 77 | `PermissionDenied` | `EPERM` / insufficient permissions | **Implemented (ocx); newly committed name in grim** — grim code says `NoPermission`, must rename |
 | 78 | `ConfigError` | Bad config file or missing field | **Implemented** |
 | 79 | `NotFound` | Resource / config path not found | **Implemented** |
@@ -85,7 +86,7 @@ different meaning.
 | EXIT-07 | The classification fall-through to `Failure` is locked by a test, and classification matches are exhaustive — no `_ =>` wildcard over a local error enum. | A new error variant must compile-error until it is classified, not silently become exit 1. | Existing: ocx `classify.rs:661`, grim `error.rs:1009`. Require an equivalent for each new error enum. | MUST |
 | EXIT-08 | One exit-code taxonomy per workspace. A binary that needs its own must carry an ADR and a doc note naming the carve-out. | Sibling binaries with different tables break shared CI error handling. Current sanctioned carve-out: `ocx_shim` (Windows launcher constraints, ADR-justified). | `grep -rn "enum ExitCode\|ShimError"` — each hit outside the shared enum needs its ADR link. | MUST |
 | EXIT-09 | Error→code classification may be a free function *or* a trait (`ClassifyExitCode`); pick one per workspace and do not mix. | ocx's trait dispatch is production-proven and composes through nested wrappers; grim's free-function match fits its single top-level enum. The old "trait causes circular deps" ban is void — the trait lives in the lib crate. | Review: a workspace with both shapes is a finding. | SHOULD |
-| EXIT-10 | Every code in the table has (a) a doc comment on the variant, (b) a row in the tool's public docs, and (c) at least one test asserting a real invocation produces it. | An undocumented code is not a contract. 82 shipped for months with none of (b). | `grim`/`ocx` docs table row count == enum variant count; `test_exit_codes.py`-style assertions. | MUST |
+| EXIT-10 | Every code in the table has (a) a doc comment on the variant, (b) a row in the tool's public docs, and (c) at least one test asserting a real invocation produces it. The test for 75 includes a refused or reset connection. The test for 69 uses a DNS, TLS or certificate failure and never a refused connection. | An undocumented code is not a contract. 82 shipped for months with none of (b). | `grim`/`ocx` docs table row count == enum variant count; `test_exit_codes.py`-style assertions. A test that points the binary at a closed local port expects 75, and one at a name that does not resolve expects 69. | MUST |
 | EXIT-11 | If a signal is caught for cleanup, derive the reported status from the signal actually received (re-raise after restoring `SIG_DFL`); never hardcode 130. | 130 is only correct for SIGINT; a shared handler that always exits 130 lies to systemd/docker about SIGTERM. | Review the handler registration: the exit/raise call must reference the matched signal. | SHOULD |
 
 ### Stream, output and UX rules
@@ -95,7 +96,7 @@ different meaning.
 | CLI-01 | The command's result goes to stdout; logs, progress, warnings, prompts and errors go to stderr, unconditionally. | stdout is the pipe consumer's channel; registry progress leaking into `ocx add … > frag.json` corrupts it ([clig.dev](https://clig.dev/)). | `grep -rn "println!\|print!" src/ crates/` — every hit outside result-formatting code is a finding. | MUST |
 | CLI-02 | Under `--format json`/`--json`, stdout contains **only** the JSON payload — no banner, no progress, no trailing "done". | One stray line breaks every `\| jq` pipeline silently, and the failure is invisible in manual testing. | Per JSON-capable subcommand: capture stdout in an integration test and `serde_json::from_str` the whole stream. | MUST |
 | CLI-03 | Render the error chain exactly once, at the single `main.rs` boundary, and sanitize it before it reaches a terminal. | Error chains quote package/skill names read off wire documents — CWE-150 terminal injection. ocx pins this with `sanitize_for_terminal` + a structural test (`ocx_cli/main.rs:36`, `api/data.rs:164`); grim writes `{err:#}` raw (`grim/main.rs:326`, flagged HIGH in [errors-async-security.md](ocx-codebase-audit/errors-async-security.md)). | `grep -rn "writeln!(io::stderr()\|eprintln!" main.rs` — the boundary write must route through the sanitizer. | MUST |
-| CLI-04 | Structured error output is the pinned envelope `{"error": {"code": <slug>, "exit": <int>, "message": …, "reason"?, "retryable"?, "forceable"?}}` on **stdout**, with stable slugs. | Already grim's shipped 1.0 contract (`grim/exit_code.rs:64-79`, `main.rs:220-265`, `docs/src/json-interface.md`); ocx has no structured error doc and must adopt this rather than invent a second shape. | Snapshot test of the envelope per exit code; slug changes are breaking. | MUST |
+| CLI-04 | Structured error output is the pinned envelope `{"schema_version": <int>, "error": {"code": <slug>, "exit": <int>, "message": …, "retryable": <bool>, "reason"?, "forceable"?}}` on **stdout**, with stable slugs. `retryable` is required and is sent as `false` too. Adding `schema_version` and making `retryable` required is additive: no existing key, slug or exit changes meaning. | grim's shipped 1.0 contract (`grim/exit_code.rs:64-79`, `main.rs:220-265`, `docs/src/json-interface.md`) emitted `retryable` only when true and no `schema_version`; ocx has no structured error doc and must adopt this rather than invent a second shape. An agent branches on `retryable`, and a field present only when true cannot be told from "not computed" (UX-AGENT-09). Adding the version field is additive under the additive-only policy (UX-AGENT-04). | Snapshot test of the envelope per exit code, in which `jq -e '(.schema_version\|type=="number") and (.error.retryable\|type=="boolean")'` exits 0; slug changes are breaking. | MUST |
 | CLI-05 | A closed downstream stdout pipe is a clean exit 0, handled once centrally — never a panic and never a propagated error. | Rust sets SIGPIPE to `SIG_IGN` before `main`, so `println!` **panics** on `\| head`; `-Zon-broken-pipe` is still nightly-only in 2026 ([rust-lang/rust#97889](https://github.com/rust-lang/rust/issues/97889)). grim does this (`main.rs:319-320`); ocx does not. | `grep -rn "BrokenPipe\|sigpipe"` — a streaming CLI with neither is a live bug. Test: `<bin> list \| head -1` exits 0, prints no panic. | MUST |
 | CLI-06 | Any command that can emit more than a handful of lines writes through a locked `BufWriter` and flushes explicitly. | `io::Stdout` is unconditionally line-buffered even when piped to a file — one syscall per line ([rust-lang/rust#60673](https://github.com/rust-lang/rust/issues/60673)). | Review loops emitting output: `println!` inside an unbounded `for` is a finding. | SHOULD |
 | CLI-07 | Colour is decided by `anstream`/`colorchoice` plus an explicit `--color=auto\|always\|never`, per destination stream — never a hand-rolled env check. | Hand-rolled logic reliably misses one of `NO_COLOR` (presence, non-empty), `CLICOLOR=0`, `CLICOLOR_FORCE`, `TERM=dumb`, per-stream TTY ([no-color.org](https://no-color.org/), [gh manual](https://cli.github.com/manual/gh_help_environment)). | `grep -rn "NO_COLOR\|CLICOLOR"` — any hit outside a thin anstream wrapper is a partial reimplementation. | MUST |
@@ -252,3 +253,8 @@ Ranked by how often they bite in this codebase's shape.
 | [gh manual — environment](https://cli.github.com/manual/gh_help_environment) | Reference implementation of the full colour/TTY precedence stack |
 | [jsonlines.org](https://jsonlines.org/) | Line-termination/encoding rules for streaming JSON |
 | [directories crate](https://docs.rs/directories/latest/directories/) | XDG / Known Folders / macOS Standard Directories mapping |
+
+## Revision log
+
+- 2026-11-27, EXIT table rows 69 and 75, EXIT-10 (owner decision 2026-11-27): a refused or reset connection is a temporary failure and exits 75, because a retry can succeed with no change by the user. DNS, TLS and certificate failures stay 69. Row text and EXIT-10's verification changed in place, and the row for 69 no longer says "non-retryable". sysexits' `EX_TEMPFAIL` ("the request should be reattempted later") is quoted from [ux-agent-facing-interfaces/correctable-errors-and-retries.md](ux-agent-facing-interfaces/correctable-errors-and-retries.md) §sysexits. No ID added or renumbered.
+- 2026-11-27, CLI-04, Verdict 5 (owner decision 2026-11-27): `retryable` is required (was `retryable?`) and `schema_version` is added beside `error`. The change is additive. The snapshot verification now asserts both. See [ux-agent-facing-interfaces.md](ux-agent-facing-interfaces.md) UX-AGENT-04, 09 and 10.

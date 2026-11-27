@@ -58,7 +58,7 @@ class Finding(NamedTuple):
 
 FRONT_MATTER = re.compile(r"\A---[ \t]*\r?\n.*?\r?\n---[ \t]*(?:\r?\n|\Z)", re.DOTALL)
 FENCE = re.compile(r"^(\s*)(`{3,}|~{3,})")
-DECL = re.compile(r"^\s*(?:<!--|\{/\*|\.\.|%)\s*doc_(type|tier)\s*:\s*([\w-]+)")
+DECL = re.compile(r"^\s*(?:<!--|\{/\*|\.\.|%)\s*doc_(type|tier|surface)\s*:\s*([\w-]+)")
 HEADING = re.compile(r"^\s{0,3}(#{1,6})\s+(.*?)\s*#*\s*$")
 # A separator row must carry a pipe. Without that, a MkDocs grid card's own
 # `---` divider read as a table row and reported 11 table rows on one real
@@ -199,9 +199,20 @@ def iter_sentences(prose: str, start_line: int = 1) -> Iterator[tuple[int, str]]
 
 
 def declaration(text: str, limit: int = 12) -> dict[str, str]:
-    """Read doc_type and doc_tier from the file's first `limit` lines."""
+    """Read doc_type, doc_tier and doc_surface from `limit` lines.
+
+    The window opens after a leading front matter block, the same rule as
+    doc_declaration.split_front_matter, so both readers see the same line.
+    """
+    lines = text.split("\n")
+    start = 0
+    if lines and lines[0].strip() == "---":
+        for i in range(1, min(len(lines), 40)):
+            if lines[i].strip() == "---":
+                start = i + 1
+                break
     found: dict[str, str] = {}
-    for line in text.split("\n")[:limit]:
+    for line in lines[start : start + limit]:
         m = DECL.match(line)
         if m:
             found.setdefault("doc_" + m.group(1), m.group(2))
@@ -373,7 +384,30 @@ def _residue_test() -> int:
     else:
         print("residue-test ok: Contents line drops to blank and keeps its line count")
 
-    return 0 if ok else 1
+    return (0 if ok else 1) | _declaration_test()
+
+
+def _declaration_test() -> int:
+    """Prove the reader skips front matter and knows doc_surface, like doc_declaration."""
+
+    def expect(cond: bool, what: str) -> None:
+        if not cond:
+            raise SystemExit(f"declaration-test FAILED: {what}")
+
+    fm = "---\n" + "title: t\n" * 10 + "---\n"
+    expect(
+        declaration(fm + "{/* doc_type: landing */}\n{/* doc_surface: pitch */}\n")
+        == {"doc_type": "landing", "doc_surface": "pitch"},
+        "a declaration after a long front matter block is read",
+    )
+    expect(
+        declaration("<!-- doc_type: how-to -->\n<!-- doc_tier: everyday -->\n")
+        == {"doc_type": "how-to", "doc_tier": "everyday"},
+        "a page with no front matter reads as before",
+    )
+    expect(declaration("# T\n\nprose doc_surface: pitch\n") == {}, "prose is not a declaration")
+    print("declaration-test ok: front matter skipped, doc_surface read")
+    return 0
 
 
 if __name__ == "__main__":

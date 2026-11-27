@@ -9,6 +9,12 @@ Rules covered:
   DOC-TYPE-30  an .mdx file uses the {/* */} opener, never an HTML comment
   DOC-DISC-13  tutorial, how-to and landing pages also declare a doc_tier
 
+The optional doc_surface key (pitch, home, offer) says which role a page plays
+beyond its type. This script is its single reader: a source comment is read
+here, and a built page declares it with <meta name="doc-surface" content="V">
+(--built DIST). An unknown value is a DOC-TYPE-01 finding. A `//` opener is
+valid only outside a leading `---` fence, where AsciiDoc reads it.
+
 DOC-TYPE-02 holds by construction. read_declaration() and classify() take text
 and take nothing else, so no directory or file name can reach the type decision.
 The --seed mode reads a nav config, and a seed is a one-off migration proposal
@@ -17,6 +23,8 @@ that a human reviews, never a runtime source of truth.
 Usage:
   doc_declaration.py [--root DIR] [PATH ...] [--format text|json] [--self-test]
   doc_declaration.py --seed [--root DIR]
+  doc_declaration.py --built DIST [--need FILE] [--list VALUE]
+  doc_declaration.py --pair BUILT_HTML SOURCE
 
 Exit codes: 0 clean, 1 findings, 2 usage or missing input.
 """
@@ -27,6 +35,8 @@ import argparse
 import json
 import re
 import sys
+import tempfile
+from html.parser import HTMLParser
 from pathlib import Path
 
 DOC_TYPES = (
@@ -41,13 +51,16 @@ DOC_TYPES = (
     "changelog",
 )
 DOC_TIERS = ("first-steps", "everyday", "integration")
+DOC_SURFACES = ("pitch", "home", "offer")
 TIER_REQUIRED = ("tutorial", "how-to", "landing")
 
 # One comment opener per markup family, measured on MkDocs Material 9.7.7,
 # mdBook 0.5.3, VitePress 2.0.0-alpha.20 and an MDX 3.1.1 compile
 # (wave2-declaration-key.md section 1).
-DECL_RE = re.compile(r"^\s*(<!--|\{/\*|\.\.|%|//)\s*(doc_type|doc_tier)\s*:\s*([A-Za-z][\w-]*)")
-FM_KEY_RE = re.compile(r"^\s*(doc_type|doc_tier)\s*:", re.MULTILINE)
+DECL_RE = re.compile(
+    r"^\s*(<!--|\{/\*|\.\.|%|//)\s*(doc_type|doc_tier|doc_surface)\s*:\s*([A-Za-z][\w-]*)"
+)
+FM_KEY_RE = re.compile(r"^\s*(doc_type|doc_tier|doc_surface)\s*:", re.MULTILINE)
 MAX_DECL_LINE = 12  # 12 lines (wave2-declaration-key.md section 3)
 
 # Nav group label to doc_type. Measured 115 of 122 fleet nav pages, 94.3 percent
@@ -151,6 +164,15 @@ def classify(text: str, is_mdx: bool) -> list[tuple[int, str, str]]:
         )
 
     decl = read_declaration(text)
+    surface = decl.get("doc_surface")
+    if surface is not None and surface[2] not in DOC_SURFACES:
+        out.append(
+            (
+                surface[0],
+                "DOC-TYPE-01",
+                f"doc_surface '{surface[2]}' is not one of {', '.join(DOC_SURFACES)}",
+            )
+        )
     if "doc_type" not in decl:
         out.append(
             (1, "DOC-TYPE-01", f"no doc_type declaration in the first {MAX_DECL_LINE} lines")
@@ -190,6 +212,76 @@ def check_paths(paths: list[Path]) -> list[dict]:
         for line, rule, message in classify(text, page.suffix == ".mdx"):
             findings.append({"page": str(page), "line": line, "rule": rule, "message": message})
     return findings
+
+
+# --- built pages ------------------------------------------------------------
+
+
+class _Surface(HTMLParser):
+    """Collect the doc-surface meta values and the <h1> count of one built page."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.values: list[str] = []
+        self.h1 = 0
+
+    def handle_starttag(self, tag: str, attrs: list) -> None:
+        a = dict(attrs)
+        if tag == "h1":
+            self.h1 += 1
+        elif tag == "meta" and (a.get("name") or "").lower() == "doc-surface":
+            self.values.append((a.get("content") or "").strip())
+
+
+def built_surface(html: str) -> tuple[list[str], int]:
+    """(doc-surface meta values, <h1> count) of one built page."""
+    p = _Surface()
+    p.feed(html)
+    return p.values, p.h1
+
+
+def built_pages(dist: Path) -> dict[str, tuple[list[str], int]]:
+    return {
+        f.relative_to(dist).as_posix(): built_surface(
+            f.read_text(encoding="utf-8", errors="replace")
+        )
+        for f in sorted(dist.rglob("*.html"))
+    }
+
+
+def built_report(
+    pages: dict[str, tuple[list[str], int]], need: str | None = None
+) -> tuple[list[str], str]:
+    """Findings plus the one-line count. `need` is a page that must declare when it has an <h1>."""
+    out: list[str] = []
+    counts = dict.fromkeys(DOC_SURFACES, 0)
+    for path, (vals, _) in pages.items():
+        if len(vals) > 1:
+            out.append(f"{path}: DOC-TYPE-01: {len(vals)} doc-surface metas, expected 1")
+        for v in vals[:1]:
+            if v in counts:
+                counts[v] += 1
+            else:
+                out.append(
+                    f"{path}: DOC-TYPE-01: doc-surface '{v}' is not one of {', '.join(DOC_SURFACES)}"
+                )
+    skipped = sum(1 for vals, _ in pages.values() if not vals)
+    if need:
+        if need not in pages:
+            out.append(f"{need}: DOC-TYPE-01: not in the build")
+        elif pages[need][1] and not pages[need][0]:
+            out.append(f"{need}: DOC-TYPE-01: has an <h1> and no doc-surface meta")
+    summary = " ".join(f"{k}={v}" for k, v in counts.items())
+    return out, f"{summary} skipped_no_doc_surface={skipped}"
+
+
+def pair_finding(built_html: str, source: str) -> str | None:
+    """A mismatch between the built meta and the source comment of one route."""
+    vals, _ = built_surface(built_html)
+    decl = read_declaration(source).get("doc_surface")
+    if decl is None or vals == [decl[2]]:
+        return None
+    return f"built meta {vals} and source comment '{decl[2]}' differ"
 
 
 # --- seed mode -------------------------------------------------------------
@@ -320,8 +412,47 @@ def self_test() -> int:
                 f"{'findings' if want_fail else 'clean'}, got the opposite"
             )
             bad += 1
+    bad += _built_self_test(base)
     print(f"self-test: {'FAILED' if bad else 'ok'}, {bad} fixture mismatches")
     return 1 if bad else 0
+
+
+def _built_self_test(base: Path) -> int:
+    """The built-page reader over fixtures/doc_declaration/built-pass and built-fail."""
+
+    def expect(cond: bool, what: str) -> None:
+        if not cond:
+            raise SystemExit(f"self-test FAILED: {what}")
+
+    found, summary = built_report(built_pages(base / "built-pass"), "index.html")
+    expect(found == [], f"built-pass reports findings: {found}")
+    expect(
+        summary == "pitch=1 home=1 offer=0 skipped_no_doc_surface=1",
+        f"built-pass summary {summary}",
+    )
+    found, _ = built_report(built_pages(base / "built-fail"), "index.html")
+    expect(len(found) == 3, f"built-fail expects a bare /, a doubled and an unknown value: {found}")
+    expect(
+        built_report({"a.html": (["offer"], 0)})[1].startswith("pitch=0 home=0 offer=1"),
+        "the offer value is counted",
+    )
+    src = "<!-- doc_type: landing -->\n<!-- doc_surface: pitch -->\n"
+    pitch = '<meta name="doc-surface" content="pitch"/>'
+    expect(pair_finding(pitch, src) is None, "agreeing declarations pair clean")
+    expect(pair_finding(pitch.replace("pitch", "home"), src) is not None, "drift is a finding")
+    expect(
+        pair_finding(pitch, "<!-- doc_type: landing -->\n") is None, "no source value pairs clean"
+    )
+    with tempfile.TemporaryDirectory() as tmp:
+        page = Path(tmp) / "a.md"
+        page.write_text("<!-- doc_type: reference -->\n// doc_surface: pitch\n")
+        expect(check_paths([page]) == [], "a valid doc_surface is accepted")
+        page.write_text("---\ntitle: t\ndoc_surface: pitch\n---\n<!-- doc_type: reference -->\n")
+        expect(
+            any(f["rule"] == "DOC-TYPE-28" for f in check_paths([page])),
+            "doc_surface in front matter is DOC-TYPE-28",
+        )
+    return 0
 
 
 def main(argv: list[str]) -> int:
@@ -331,10 +462,42 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--format", choices=("text", "json"), default="text")
     ap.add_argument("--self-test", action="store_true")
     ap.add_argument("--seed", action="store_true")
+    ap.add_argument("--built", metavar="DIST")
+    ap.add_argument("--need", metavar="FILE", help="with --built: page that must declare")
+    ap.add_argument("--list", metavar="VALUE", help="with --built: print pages declaring VALUE")
+    ap.add_argument("--pair", nargs=2, metavar=("BUILT_HTML", "SOURCE"))
     args = ap.parse_args(argv)
 
     if args.self_test:
         return self_test()
+    if args.pair:
+        for p in args.pair:
+            if not Path(p).is_file():
+                print(f"missing input: {p}", file=sys.stderr)
+                return 2
+        msg = pair_finding(
+            Path(args.pair[0]).read_text(encoding="utf-8", errors="replace"),
+            Path(args.pair[1]).read_text(encoding="utf-8", errors="replace"),
+        )
+        if msg:
+            print(f"{args.pair[0]}:1: DOC-TYPE-01: {msg}")
+        return 1 if msg else 0
+    if args.built:
+        dist = Path(args.built)
+        if not dist.is_dir():
+            print(f"missing input: {dist}", file=sys.stderr)
+            return 2
+        pages = built_pages(dist)
+        if args.list:
+            for path, (vals, _) in pages.items():
+                if vals == [args.list]:
+                    print(dist / path)
+            return 0
+        found, summary = built_report(pages, args.need)
+        for line in found:
+            print(line)
+        print(summary)
+        return 1 if found else 0
     root = Path(args.root)
     if not root.exists():
         print(f"missing input: {root}", file=sys.stderr)

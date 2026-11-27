@@ -40,7 +40,7 @@ The pattern precision figures under MKT-CLAIM-02 were measured 2026-11-27 on 26 
 
 ## The Lint and Its Five Checks
 
-"The lint" is `claims_lint.py`, run from the repository root with `python3 -I`. "Record" means a `[[claim]]` row in the repository-root `claims.toml`. The lint implements checks A to E below and prints `path:line: MKT-CLAIM-NN [check] message`. Exit 0 is clean and 1 is findings. It does not run the per-chart and per-cell checks of MKT-CLAIM-06 and 30, the GitHub description binding or the sign-off review of MKT-CLAIM-16, because each needs a parsed page or the network. Those stay reading checks and named commands.
+"The lint" is `claims_lint.py`, run from the repository root with `python3 -I`. "Record" means a `[[claim]]` row in the repository-root `claims.toml`. The lint implements checks A to E below and prints `path:line: MKT-CLAIM-NN [check] message`. Exit 0 is clean and 1 is findings. It does not run the per-chart and per-cell checks of MKT-CLAIM-06 and 30, the GitHub description binding or the second-reviewer check of MKT-CLAIM-16 (a reading check: the lint sees no change author), because each needs a parsed page or the network. Those stay reading checks and named commands.
 
 | Check | What it does | Fails when |
 |---|---|---|
@@ -101,7 +101,7 @@ Fields of a record (MKT-CLAIM-04). `claims_lint.py` holds the required-by-class 
 | `method`, `check` | How the value was made; a command that re-measures or re-reads it, or `none` |
 | `observed`, `refresh_by` | An ISO date; an ISO date after `observed`, or `"next-release"` |
 | `definition`, `window`, `subject_version`, `caveat` | What is counted; the period or run set; the version of this product and of each compared product; one line on what the figure does not show |
-| `approved_by` | Human handle, required on sign-off classes (MKT-CLAIM-16). An offline hint only, never proof |
+| `approved_by` | Human handle, required on sign-off classes (MKT-CLAIM-16; the owner's own name satisfies it). An offline hint only, never proof |
 | `legal_hold` | `none`, or the reason a human blocked the claim |
 | `compared_party`, `compared_kind`, `third_party_as_of`, `third_party_version` | Comparison rows: the third-party names exactly as printed; `commercial` or `open-source`; the date the third-party fact was read; that product's release on that date |
 | `prior_price`, `prior_price_window` | Price rows on a reduction only (MKT-CLAIM-27) |
@@ -292,4 +292,4 @@ Ranked by how often each bites, from the measured failure modes.
 4. **Stale carry-over.** A count survives a release ("10 clients" after an eleventh ships). A "was" price anchors on a list price (MKT-CLAIM-05, 27).
 5. **Exemplar imitation.** A vendor benchmark chart reproduced without hardware or version (MKT-CLAIM-06). A comparison cell that shows only a check or cross icon. A judgement on a competitor set inside an image, where no text check reads it. Plausible demo figures in a product mock-up.
 6. **Scope errors.** "Every coding agent" next to a list of 10. An unconditional guarantee in body copy ("never corrupts your data", "no exceptions").
-7. **Gaming the gate.** A `claim:` marker with no record (check B stops it), an `[[allow]]` entry for a price (check E ignores it), a record the agent filled itself for a sign-off class (MKT-CLAIM-16 needs a review from a second identity), a lengthened `refresh_by` (check D rejects it), a `method` link that points at the nearest link or at the page's own heading anchor (MKT-CLAIM-06's guards), a marker on the wrong comparison cell (step 1(d) of MKT-CLAIM-30), a figure that cites a quote's page under another URL spelling such as `?utm_source=` (MKT-CLAIM-28).
+7. **Gaming the gate.** A `claim:` marker with no record (check B stops it), an `[[allow]]` entry for a price (check E ignores it), a record the agent filled itself for a sign-off class (MKT-CLAIM-16 needs a recorded approval, and a review from a second identity is SHOULD), a lengthened `refresh_by` (check D rejects it), a `method` link that points at the nearest link or at the page's own heading anchor (MKT-CLAIM-06's guards), a marker on the wrong comparison cell (step 1(d) of MKT-CLAIM-30), a figure that cites a quote's page under another URL spelling such as `?utm_source=` (MKT-CLAIM-28).

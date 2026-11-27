@@ -18,8 +18,8 @@ Usage:
                format flag. Example: --not-found 'describe nope/x'
   CLI          the binary and any fixed leading arguments, after `--`.
   --classes    comma list; when given, the error class must be one of them.
-  --rust-cli04 the binary follows the Rust CLI-04 envelope: a missing
-               schema_version or retryable in an error document is SHOULD, not MUST.
+  --rust-cli04 accepted and ignored. Rust CLI-04 requires `retryable` and
+               `schema_version` in an error document, so the flag softens nothing.
   --sentinel   a fake token the caller puts in a credential channel of a failing
                call (an environment variable, a header, a --password value); it
                must not appear in stdout or stderr. Never put it in the argument
@@ -105,7 +105,7 @@ def check_error_doc(doc: dict, code: int | None, classes: set[str], cli04: bool,
     if "retryable" not in err:
         add(
             "UX-AGENT-09",
-            "SHOULD" if cli04 else "MUST",
+            "MUST",
             "`retryable` is absent (send it as false too)",
         )
     elif not isinstance(err["retryable"], bool):
@@ -176,8 +176,7 @@ def check(cli: list[str], cases: dict[str, str], opts: Options) -> list[tuple[st
                 continue
             sv = doc.get("schema_version")
             if isinstance(sv, bool) or not isinstance(sv, int):
-                sev = "SHOULD" if (cli04 and not want_ok) else "MUST"
-                add("UX-AGENT-04", sev, f"no integer `schema_version` (flag {label})")
+                add("UX-AGENT-04", "MUST", f"no integer `schema_version` (flag {label})")
             if not want_ok and runs[label] is ref:
                 check_error_doc(doc, code, classes, cli04, add)
             blob = out + err
@@ -290,8 +289,9 @@ def self_test() -> int:
         Options(fmt, "", 20, cli04=True),
     )
     expect(
-        any(f[0] == "UX-AGENT-04" and f[1] == "SHOULD" for f in soft),
-        "rust-cli04 does not soften 04",
+        any(f[0] == "UX-AGENT-04" and f[1] == "MUST" for f in soft)
+        and not any(f[1] == "SHOULD" and f[0] in ("UX-AGENT-04", "UX-AGENT-09") for f in soft),
+        "rust-cli04 must not soften 04 or 09",
     )
     expect(
         one_document('{"a":1}\n') == {"a": 1} and one_document('{"a":1}\n{"b":2}') is None,

@@ -381,7 +381,7 @@ rule files hold rationale and verification. Review a row only for the target typ
   empty in the first markup; `role="alert"` for errors only; a pause control past 5 s of motion;
   no flashing over three times a second.
 - **Page, webview** (UX-A11Y-28, 32, 33, 35): `lang` and a non-empty title per template; identical
-  repeated chrome; in a webview every colour is a `--vscode-*` variable and high contrast is tested.
+  repeated chrome; in a webview high contrast is tested. A colour outside a `--vscode-*` variable is a SHOULD finding, reported, not blocking.
 - **States** (UX-STATE-01 to 05, 08, 14, 15, 17, 18): loading, empty and error branch per async
   view; empty only after the fetch settles; a failure never looks empty; the error names its class
   and one recovery; a pending flag before the first `await`; a deadline on every wait; progress

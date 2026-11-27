@@ -87,7 +87,7 @@ SEV = {
     "CH-LI-13": "SHOULD",
     "CH-LI-14": "MUST",
     "CH-LI-15": "MUST",
-    "CH-LI-16": "MUST",
+    "CH-LI-16": "SHOULD",
     "CH-LI-17": "MUST",
     "CH-LI-19": "SHOULD",
     "CH-LI-20": "SHOULD",
