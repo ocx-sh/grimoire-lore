@@ -72,8 +72,10 @@ one shared global stylesheet.
 
 ## The hash is a function of the filename
 
-`.svelte-<hash>` derives from (filename, style content). Renaming or moving a
-file rotates every hash it emits. Never pin one — see CSS-API-01.
+`.svelte-<hash>` derives from the filename alone whenever the compiler knows it
+(the default `cssHash`, since 5.38.9); only a `compile()` call with no filename
+hashes the style content. Renaming or moving a file rotates every hash it emits;
+editing its styles does not. Never pin one — see CSS-API-01.
 
 ## What a published package can assert
 

@@ -15,11 +15,13 @@ depth file is read only when the work calls for it.
 
 ## It starts by assuming your test environment is lying
 
-No DOM emulator can test a layered cascade. happy-dom 20.12.0 has zero `@layer`
-support — a layer block parses to `cssRules.length === 0`, and a bare
-`@layer a, b;` statement corrupts the parse of every rule *after* it in the same
-sheet. jsdom 30.0.1 parses `@layer` into correct CSSOM objects and then applies
-none of it: one uncontested layered rule computes identically to no CSS at all.
+No DOM emulator is ever the engine for a layered-cascade check. happy-dom
+(20.12.0 to 21.0.4) has zero `@layer` support — a layer block parses to
+`cssRules.length === 0`, and a bare `@layer a, b;` statement drops the rule that
+follows it. jsdom up to 30.1.3 parses `@layer` into correct CSSOM objects and
+then applies none of it: one uncontested layered rule computes identically to no
+CSS at all. jsdom 31.0.0 (2026-11-05) does apply layer order, but nobody has
+measured it on forced colors or shadow-DOM Context, so the policy stands.
 
 So the first instruction is not a rule about CSS. It is: read the *built*
 artifact, in an engine that can represent the feature, and watch the check go
@@ -68,7 +70,7 @@ measured in Chromium 151 with red controls that fail as designed. Where a claim
 is spec-derived rather than reproduced — the absolute `::part()` tuple, email
 client behaviour, the whole VS Code annex — the row says so in the file.
 
-A "Not Studied" section names the fifteen specific holes, including that Firefox
+A "Not Studied" section names the sixteen specific holes, including that Firefox
 and WebKit were never tested, so a reader can tell a gap from a clearance.
 
 ## What it does not cover

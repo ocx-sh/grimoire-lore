@@ -61,7 +61,9 @@ justification was wrong.
 
 `is:global` keeps the block in the asset pipeline and strips scoping.
 `is:inline` exits the pipeline entirely: unbundled, unminified, byte-for-byte
-where authored, surviving `compressHTML`. The consequence worth stating is that
+where authored, surviving `compressHTML` (measured on vite 8.2.2; vite 8.3.0
+began minifying HTML `<style>` tags, and whether that reaches `is:inline` is
+unmeasured). The consequence worth stating is that
 a relative `url()` or `@import` inside an `is:inline` block does not resolve.
 
 Neither is "the consumer entrypoint" — a layer contract is position-independent,

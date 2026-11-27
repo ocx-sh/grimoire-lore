@@ -6,8 +6,9 @@ summary: The surface with no specificity inflation, why "global" does not win a 
 # CSS Modules, Next, Nuxt and React Router
 
 Reproduced from five production builds: Vite 8.2.2, three `next build` runs at
-16.3.3, Nuxt 4.5.2, React Router 8.3.1. The webpack-path `:global` error and the
-`cssChunking` values carry over from documentation reading.
+16.3.3, Nuxt 4.5.2, React Router 8.3.1. The `cssChunking` values carry over from
+documentation reading. Next 16.4.6 was rebuilt on 2026-11-27 for the hash
+shape, both `:global` errors (webpack path included) and the `inlineCss` key.
 
 ## No specificity inflation — CSS-CAS-01's usual diagnosis is FALSE here
 
@@ -16,9 +17,10 @@ CSS Modules hash the *identifier*, not the selector:
 | Bundler | Emitted | Specificity |
 |---|---|---|
 | Vite | `._widget_1a3bt_1{color:#00f}` | (0,1,0) |
-| Next / Turbopack | `.page-module___8aEwW__page` | (0,1,0) |
+| Next ≥16.4 / Turbopack | `.BEMHdq_page` | (0,1,0) |
+| Next ≤16.3 / Turbopack, and dev builds | `.page-module___8aEwW__page` | (0,1,0) |
 
-Both bare. An author-written compound like `.widget .nested` still hashes to
+All bare. An author-written compound like `.widget .nested` still hashes to
 (0,2,0) — but that comes from your own selector, not from scoping.
 
 So the "scoped styles outrank a consumer's plain class" diagnosis does not apply.
@@ -27,8 +29,9 @@ which is *worse*, not better.
 
 ## The hash SHAPE is bundler-specific
 
-`_name_hash_n` versus `name-module___hash__name`. A regex written against one
-silently misses the other.
+`_name_hash_n` (Vite), `hash_name` (Turbopack from Next 16.4.0) and
+`name-module___hash__name` (Turbopack before 16.4, and in dev). A regex written
+against one silently misses the others.
 
 ## "Global" does not mean "wins a tie"
 
@@ -46,7 +49,7 @@ Next 16.3.3 Turbopack build, and that same build again with
 `experimental.inlineCss: true`. In all three the scoping hash landed correctly
 inside the layer body.
 
-`experimental.inlineCss` is still the exact, unmoved key at 16.3.3
+`experimental.inlineCss` is still the exact, unmoved key at 16.3.3 and 16.4.6
 (`next/dist/server/config-shared.js`, default `false`). Turning it on collapses
 every `<link>` into ONE `<style data-precedence="next">` carrying the same
 relative order — it changes delivery, not cascade semantics.
