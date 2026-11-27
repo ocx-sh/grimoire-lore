@@ -15,7 +15,8 @@ consolidates:
   - ux-a11y-authoring/followup-q0.md
   - ux-a11y-authoring/followup-q1.md
   - ux-a11y-authoring/followup-q2.md
-revision: 2
+  - ux-a11y-authoring/followup-w3-q0.md
+revision: 3
 grounding:
   - product-audit/ui-code-posture.md
   - product-audit/site-shape.md
@@ -79,7 +80,11 @@ custom widgets it must refuse to write.
    write `outline: none`" would be a false rule for this codebase. A drawn ring is not enough on
    its own: the focused control must also be visible when focus arrives (UX-A11Y-36). Wave 2
    measured five Tab stops in three containers at an effective opacity below 0.1 on the built
-   sites. A scroll position or a mouse hover fades each container in.
+   sites. A scroll position or a mouse hover fades each container in. Wave 3 (followup-w3-q0)
+   found that an opacity reading cannot be the verdict on its own. On ten held-out public pages, in
+   Chromium, Firefox and WebKit, the wave-2 0.99 threshold flagged 13 or 14 visible controls per
+   engine and caught none of the invisible ones. The invisible stops it found were zero-size boxes.
+   So UX-A11Y-36 now passes on a triaged crop review, and UX-A11Y-37 covers the zero-size box.
 7. **Targets are measured on the rendered hit box, against 24×24 CSS px (AA).** The token is not
    the measure. 44×44 is AAA, and an agent must never call it AA.
 8. **Announcements write text into a live region that already exists.** They never move focus and
@@ -96,8 +101,8 @@ custom widgets it must refuse to write.
     inside it, plus theme variables and a high-contrast test (UX-A11Y-35). The extension's webview
     holds most of the fleet's measured widget defects.
 12. **Some rules bind with no fleet measurement behind them.** These are UX-A11Y-08, -11 (the theme's
-    Zag widgets), -14, the `--vscode-focusBorder` clause of -35, -22 (copy button) and -32
-    (Material). Each is labelled *unmeasured* in "New commitments". Its severity rests on the WCAG
+    Zag widgets), -14, the `--vscode-focusBorder` clause of -35, -22 (copy button), -32
+    (Material) and -37 (measured on held-out public pages, not on the fleet). Each is labelled *unmeasured* in "New commitments". Its severity rests on the WCAG
     or APG source alone, and the first key or scroll test either confirms it or records a
     violation. No fleet count backs these rules yet.
 13. **Every check this ruleset names is either a command, or it is labelled a reading heuristic.**
@@ -108,7 +113,10 @@ custom widgets it must refuse to write.
     `colour_only.mjs` separates a pass from a fail on its own, so both are lead generators. The
     pass condition of UX-A11Y-12 is now the triaged end state: every FAIL row is fixed or carries
     a `focus-ok:` comment. Appendix A6 is replaced by the measured alpha-blending version.
-14. **Wave 2 left these gaps on record. They are findings, not open questions.**
+    Wave 3 put the visibility check in the same class. The 0.99 `focus_opacity.mjs` is replaced by
+    `focus_opacity2.mjs` (Appendix A8). It is a lead generator, and UX-A11Y-36 and -37 pass on the
+    triaged end state.
+14. **Waves 2 and 3 left these gaps on record. They are findings, not open questions.**
     - Focus checks. No oracle exists for UX-A11Y-12: no Tab-and-diff pass ran on a built Primer
       or Radix Storybook. The 82% precision of the improved check (A7) was tuned on the same
       corpora, so it is an upper bound. Three false positives remain in every selector-based
@@ -116,9 +124,24 @@ custom widgets it must refuse to write.
     - Colour checks. `colour_only_v2.mjs`, like the script it replaces, tests the state element only. A cue drawn on the parent
       (Primer NavList: tint and bar on the `li`) is reported as INFO, and the INFO text is wrong
       there. Validation state set by a `data-*` attribute on a wrapper is not seen.
-    - Visibility of focus (UX-A11Y-36). It was measured in headless Chrome only, with no Firefox,
-      no Safari, no real device and no real assistive technology. Calling an invisible focused
-      control a 2.4.7 failure is this catalog's reading. The W3C text does not name the case.
+    - Visibility of focus (UX-A11Y-36). Wave 3 ran the 0.99 opacity check in Chromium
+      159.0.8154.6, Firefox 144.0.2 and WebKit 26.0 on ten held-out pages (followup-w3-q0). WebKit
+      here is the Playwright WPE build, not Safari. The result: 0 true positives and 13 or 14 false
+      fails per engine. The invisible controls it found were zero-size boxes. The replacement check
+      (0.5 threshold, settle loop, `LEAD`, `PROXY`) was then built and run on the same pages and on
+      two fixtures. It flagged 3 stops per engine and found every invisible stop. It raised one false
+      positive per engine (two in Firefox), plus one false `FAIL` on a longer walk (`linear.app`,
+      0.2, a demo animation). The threshold and classes were chosen after seeing those pages. So
+      this is a regression check, not a validation on pages the check was not tuned on.
+    - The held-out round had no positive for the opacity-0 class that UX-A11Y-36 was written for.
+      The only positives are the wave-2 ocx.sh reading (not re-run with the new script) and the
+      synthetic `scroll.html`. The held-out pages ran at 1280 px, light, default motion only: not at
+      390 px, not in dark, not with `MOTION=reduce`. WebKit crashed on `deno.com` in every attempt.
+      No real device, no Safari, no real assistive technology, and one person's labels from crops.
+    - The W3C text names no failure for an invisible focused control. Calling it a 2.4.7 failure is
+      this catalog's reading. 2.4.11 is the second reading the text could support, but its examples
+      are overlapping content, so it is weaker for a control's own opacity or size. Only a Working
+      Group interpretation or a failure technique would settle it, and none was found.
     - Announcements (UX-A11Y-22). No real or virtual reader was run in wave 2. Neither ARIA22 nor
       ARIA19 says whether a region created together with its text is announced. The rule now
       rests on their "exists before the message" tests, not on a claim about speech.
@@ -387,9 +410,13 @@ element and a 40px frame against its blurred state with
 `PAD=40 node focus_diff.mjs <url> <theme> <width> '<regex>'` ([Appendix A5](#a5-focus_diffmjs-ux-a11y-13)). A stop
 that changes 0 pixels is a lead, not a verdict. Resolve it with two reads. (1) Read the computed
 style of the element and of its ring owner. `outline-style: none`, no `box-shadow` and no border
-change mean a missing ring, which fails this rule. (2) Read the effective opacity of the element
-and all its ancestors when focus arrives, with `focus_opacity.mjs` (UX-A11Y-36). A value below
-0.99 means an invisible stop, which fails UX-A11Y-36. Pass `clip` to the screenshot in page
+change mean a missing ring, which fails this rule. (2) Read the effective opacity and the box of
+the element when focus arrives, with `focus_opacity2.mjs` ([Appendix A8](#a8-focus_opacity2mjs-ux-a11y-36--37)). A `FAIL` row is a
+lead for UX-A11Y-36 and a `LEAD` row is a lead for UX-A11Y-37. Neither is a verdict until its crop
+is read. A low opacity alone does not prove an invisible stop: on held-out pages, controls at 0.8
+and 0.85 were plainly visible (followup-w3-q0). A box of zero width or height on a focused element
+is a third cause of a 0-pixel diff. Read the crop (`sqlite.org#13`, `zed.dev#29` in
+followup-w3-q0). Pass `clip` to the screenshot in page
 coordinates (`rect + scrollX/scrollY`), never in viewport coordinates. A stop that passes both
 reads and still shows 0 pixels is a harness artefact (followup-q0). Then compute the
 ring colour against `getComputedStyle(el).backgroundColor` (negative offset) or against the
@@ -771,35 +798,98 @@ view") is about toolbar placement, not accessibility.
 
 ### Visibility of the focused control
 
-**UX-A11Y-36 (MUST; added in revision 2).** A control that can take keyboard focus is visible
-whenever it has focus. A container that a scroll position, a hover or an animation fades,
-translates or reveals must show its focused descendants at full opacity. Use one of three fixes:
+**UX-A11Y-36 (MUST; added in revision 2; Verify replaced in revision 3).** A control that can
+take keyboard focus is visible whenever it has focus. A container that a scroll position, a hover
+or an animation fades, translates or reveals must never leave a focused descendant invisible. Use
+one of three fixes, each of which restores full opacity:
 - Add `:focus-within { opacity: 1; transform: none; }` to the container.
 - Make the visible state the default and let motion only enhance it.
 - Make the hidden controls `inert` until they are revealed.
 Never fix it by writing the scroll variable on `focusin`, because the scroll code overwrites it.
+A partial dim that leaves the control and its ring plainly visible is not a failure of this rule.
+Examples are a mock-up at 0.8 or sponsor logos at 0.85 until hover. Their contrast falls under
+UX-A11Y-13 and -15. (Revision 2 said "at full opacity", and the held-out round showed that
+wording flags visible controls.)
 *Why:* 2.4.7 (AA) requires "a mode of operation where the keyboard focus indicator is visible"
 ([WCAG 2.2](https://www.w3.org/TR/WCAG22/#focus-visible), Rec 2024-12-12). Its purpose is "to help
 a person know which element has the keyboard focus"
 ([Understanding 2.4.7](https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html), updated
 2026-10-04). A ring on a control at opacity 0 cannot do that. Calling this a 2.4.7 failure is the
-reading of this catalog and of followup-q0, not W3C text. Measured in followup-q0 on ocx.sh: the
-finale trigger takes focus at effective opacity 0 at default motion, in both themes, at 1280 and
-390 px. The `:focus-within` fix gives opacity 1 and survives a scroll away and back. The `focusin`
-fix reverts to 0 when the user scrolls back.
-*Verify (built, in a browser):* `CHR=<chrome> node focus_opacity.mjs <url> …`
-([Appendix A8](#a8-focus_opacitymjs-ux-a11y-36)) exits 0 at default motion. It Tabs through every
-stop in light and dark, at 1280 and 390 px. After each Tab it waits 300 ms, then multiplies
-`opacity` over the element and its ancestors. A product below 0.99, or `visibility: hidden` or
-`content-visibility: hidden` on the chain, is a FAIL. The output names the outermost fading
-ancestor (`low`). Run it again with `MOTION=reduce`, which must also exit 0. Exit 2 means a page
-failed to load. Static pre-check that lists candidate containers:
+reading of this catalog, of followup-q0 and of followup-w3-q0, not W3C text. Neither the 2.4.7
+page nor its failures F55 and F78 name opacity, `visibility` or a revealed container. The second
+reading the W3C text could support is 2.4.11 (AA), "the component is not entirely hidden due to
+author-created content". Its examples are sticky headers, sticky footers and non-modal dialogs,
+so it is weaker for a control's own opacity
+([Understanding 2.4.11](https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-minimum.html),
+updated 2026-06-15; both pages read 2026-11-27 in followup-w3-q0). Measured in followup-q0 on
+ocx.sh: the finale trigger takes focus at effective opacity 0 at default motion, in both themes,
+at 1280 and 390 px. The `:focus-within` fix gives opacity 1 and survives a scroll away and back.
+The `focusin` fix reverts to 0 when the user scrolls back. Severity stays MUST. That ocx.sh
+measurement still stands, and the wave-3 round found nothing against the rule. It found only that
+the old check could not separate a pass from a fail.
+*Verify (built, in a browser):* run
+`ENGINE=<chromium|firefox|webkit> SHOTS=<dir> node focus_opacity2.mjs <url> …`
+([Appendix A8](#a8-focus_opacity2mjs-ux-a11y-36--37)) at default motion, and again with
+`MOTION=reduce`. By default it Tabs through every stop in light and dark, at 1280 and 390 px.
+After each Tab it waits until the opacity product over the element and its ancestors agrees
+across two reads 150 ms apart, for at most 2 s. Then it prints one row per stop that is not a
+pass:
+- `FAIL`: the product is below 0.5, or `visibility: hidden` or `content-visibility: hidden` is on
+  the chain.
+- `LEAD`: the box is zero-width or zero-height (UX-A11Y-37).
+- `PROXY`: a radio or checkbox that would be a `FAIL` or `LEAD`, but one of its `label`s has a box
+  and a product of at least 0.99.
+- `INFO`: a product from 0.5 to 0.99.
+Exit 1 means at least one `FAIL` or `LEAD` row. Exit 2 means a page failed to load, and that run
+proves nothing. The rows are leads, not a gate. On ten held-out pages the replaced 0.99 check
+flagged 13 or 14 visible controls per engine and missed the invisible ones. The current check
+still raised one false `FAIL`: a visible control inside a scripted demo animation, `linear.app`
+at 0.2, which held that plateau across the settle reads (followup-w3-q0).
+The pass condition is the triaged end state. Every `FAIL` and `LEAD` row has the crop that
+`SHOTS` saved at the moment of focus. The author opens each crop, then fixes the stop or records
+it as visible. A record is one line in the PR: the row, the crop path, and the reason. The count of
+those lines equals the script's `rows needing triage` count. A `PROXY` row needs no action. An
+`INFO` row needs a look only when its crop shows no ring, and that look is a UX-A11Y-13 matter.
+The crop look is a reading heuristic. No command decides it.
+Before you rely on the script, run it on the fixtures in A8. `opacity.html` must print `FAIL` for
+O2 and O10, `LEAD` for O6, `PROXY` for O7 and O9, and `INFO` for O8, and exit 1. `scroll.html`
+must print one `FAIL` (S2), and `NOSETTLE=1` must add a false `FAIL` for S4.
+Static pre-check that lists candidate containers:
 `grep -rnE 'opacity:\s*(0\s*(;|!|$)|var\()|scroll-timeline|animation-timeline' src`, then check
 each container for focusable descendants. On the fleet theme it lists 66 lines, among them
-`ScrollStage.astro:117` and `ScrollFade.astro:24` (run 2026-11-27). Scope limit: `clip-path`, a zero-size clip and an off-screen
-position are not seen. A stop that passes here and still shows 0 changed pixels in
-`focus_diff.mjs` needs a reading.
-*From:* followup-q0 (new rule; it closes the default-motion branch that UX-A11Y-27 does not cover).
+`ScrollStage.astro:117` and `ScrollFade.astro:24` (run 2026-11-27). Scope limit: `clip-path` and
+an off-screen position are not seen. No `clip-path` stop on the held-out pages was invisible, and
+no off-screen stop occurred, so neither class has been observed. A stop that passes here and
+still shows 0 changed pixels in `focus_diff.mjs` needs a reading.
+*From:* followup-q0 (new rule; it closes the default-motion branch that UX-A11Y-27 does not cover);
+followup-w3-q0 (Verify replaced, rule text corrected).
+
+**UX-A11Y-37 (SHOULD; added in revision 3).** Give every focusable element a box of non-zero
+width and height, or a visible proxy that shows its focus. Never leave a focusable `a`, `button`,
+`input` or `div[tabindex]` at zero width or zero height. Examples are an empty hidden anchor, or a
+hidden checkbox whose custom box draws no ring. Take such an element out of the Tab order with
+`hidden`, `inert`, or `tabindex="-1"` plus `aria-hidden`. Or give its proxy a focus ring through
+`:has(input:focus-visible)` or a sibling selector.
+*Why:* 2.4.7 (AA): a focus indicator that cannot be seen is not visible. This is the catalog's
+reading, as for UX-A11Y-36, and the W3C text does not name the case. On ten held-out pages, these
+were the only invisible focused controls in any of the three engines (followup-w3-q0). The empty
+`a[href=…/fiddle]` on `sqlite.org` (0×0 and 0×16) appeared as `LEAD` in Chromium 159.0.8154.6,
+Firefox 144.0.2 and WebKit 26.0. It was labelled invisible from crops in all three engines for
+`#13`, and in Chromium and WebKit for `#14`. Firefox draws a bar for `#14`. The nine `zed.dev`
+file-tree inputs (`input.size-3!.[all:unset]`, 0×0) appeared as `LEAD` in all three engines.
+None of their crops shows a ring. Three Chromium crops were opened one by one, and the rest were
+read on a low-resolution sheet, which is a weaker look.
+*Severity:* SHOULD, not MUST. The W3C text does not name the case, and the box check has a false
+positive. `sqlite.org#0`, a logo anchor with a 0×0 box and a drawn ring, is a visible `LEAD`.
+*Verify (built, in a browser):* `ENGINE=<e> SHOTS=<dir> node focus_opacity2.mjs <url>` (Appendix
+A8) prints no `LEAD` row. Or every `LEAD` row passes the same triage as UX-A11Y-36: its crop was
+opened, and the stop is fixed or recorded as visible in the PR. Run on `https://sqlite.org/` on
+2026-11-27, it printed three `LEAD` rows in each engine and exited 1. The fixture `opacity.html`
+prints `LEAD` for O6 and `PROXY` for O9 in all three engines. Overlap: axe-core 4.14.1 flagged
+the same two sqlite anchors under `link-name` and the nine zed inputs under `label`. So
+UX-A11Y-03 and -04 see the same elements. Fixing the name does not draw the missing ring, and
+fixing the box does not name the control, so both rules stand.
+*From:* followup-w3-q0 (new rule).
 
 ### Dropped, with reason
 
@@ -837,7 +927,7 @@ named.
 | UX-A11Y-18 | `grimoire-rs/grim-gui/src/styles.css` declares no `color-scheme`. `.hint #555` is 2.51:1 if the webview paints dark | ui-code-posture §1, §4 |
 | UX-A11Y-20 | On the OCX team page, the sidebar links "Overview" and "Get in touch" are 236×23.6 px, stacked with gap 0 (circles overlap by 0.38 px). The Grimoire `sl-anchor-link` heading anchors at 390 px are 16.5×24 and 14.1×20.4, touching the heading link | focus-contrast §3 |
 | UX-A11Y-22 | grim-gui renders its error view with no live region. `grep -rnE 'role=\|aria-live\|aria-busy' src index.html` in `grim-gui` at `edda90d` (2026-11-26) prints nothing. The error branch is `src/view.ts:23-30`, mounted by `src/main.ts:11-23`. The webview at `grimoire-rs/vscode` `9230dcd` (2026-11-24) has 3 live elements. (1) `W:render.ts:1219`, `role="status"` with `aria-live` and `aria-busy`, added in `2c9c56c` (2026-10-18). It renders only on the paging branch (`W:render.ts:1190-1197`), so it is created in the same render that fills it. (2) `W:render.ts:1221`, `role="alert"` on the paging failure. (3) `W:settings/render.ts:522`, `role="alert"` on the add-registry error, created with its content. The page-level error states have no live region: `W:render.ts:1177` (results), `:2049` (details) and `W:settings/render.ts:656` (settings). Nor do the settings row errors `:181` and `:346`. The error-container grep in the Verify prints these 5 hits | ui-code-posture smell 1; `ux-interface-states/empty-error-notification.md`; followup-q2 (re-measured 2026-11-27) |
-| UX-A11Y-36 | `focus_opacity.mjs` (Appendix A8) on the built pages, run 2026-11-27, exit 1, 30 FAIL lines. (1) ocx.sh `index.html`: the second `ocx-cmdbar__trigger` sits in `.ocx-stage__finale` at opacity 0 (`T:components/ScrollStage.astro:111-118`, written per frame by `T:components/ui/scroll.mjs:170`). It fails in light and dark, at 1280 px (scroll y 1002) and at 390 px (y 1136). (2) ocx.sh `index.html` at 390 px only: a `button` in `.ocx-fade.lp-hero__term` has effective opacity 0.066 at scroll y 411 (`T:components/ScrollFade.astro:24`, `opacity: var(--ocx-fade-o, 1)`). (3) Grimoire docs `index.html` and `quickstart.html`, all four theme and width runs: the asciinema Play, Keyboard shortcuts and Fullscreen buttons have opacity 0. `div.ap-control-bar` is `opacity: 0` (`G:public/asciinema-player.css:171-188`) and shows only under `.ap-hud`. A probe found `ap-hud` still absent 3 s after Tab. With `MOTION=reduce`, ocx.sh `index.html` exits 0 (0 FAIL, 32 or 33 stops). `apps/` and `integrations/` give 0 FAIL. The player is vendored, and DOC-EX-16 owns player controls. The finding is listed here because the rule catches it | followup-q0 (finale, with the `:focus-within` fix verified); revision 2 (full run) |
+| UX-A11Y-36 | `focus_opacity.mjs` (revision 2's Appendix A8, replaced in revision 3) on the built pages, run 2026-11-27, exit 1, 30 FAIL lines. (1) ocx.sh `index.html`: the second `ocx-cmdbar__trigger` sits in `.ocx-stage__finale` at opacity 0 (`T:components/ScrollStage.astro:111-118`, written per frame by `T:components/ui/scroll.mjs:170`). It fails in light and dark, at 1280 px (scroll y 1002) and at 390 px (y 1136). (2) ocx.sh `index.html` at 390 px only: a `button` in `.ocx-fade.lp-hero__term` has effective opacity 0.066 at scroll y 411 (`T:components/ScrollFade.astro:24`, `opacity: var(--ocx-fade-o, 1)`). (3) Grimoire docs `index.html` and `quickstart.html`, all four theme and width runs: the asciinema Play, Keyboard shortcuts and Fullscreen buttons have opacity 0. `div.ap-control-bar` is `opacity: 0` (`G:public/asciinema-player.css:171-188`) and shows only under `.ap-hud`. A probe found `ap-hud` still absent 3 s after Tab. With `MOTION=reduce`, ocx.sh `index.html` exits 0 (0 FAIL, 32 or 33 stops). `apps/` and `integrations/` give 0 FAIL. The player is vendored, and DOC-EX-16 owns player controls. The finding is listed here because the rule catches it. These rows came from the replaced 0.99 script, and revision 3 did not re-run the fleet with `focus_opacity2.mjs`, because the built sites were not kept (followup-w3-q0). Every value listed is 0 or 0.066, below the new 0.5 threshold, so each would be a `FAIL` row under it too. That is arithmetic, not a run | followup-q0 (finale, with the `:focus-within` fix verified); revision 2 (full run); followup-w3-q0 (threshold change) |
 | UX-A11Y-24 | `T:components/ui/command-bar.mjs:128-131`: a second copy inside the 2 s window writes the same text and is not re-announced, as the source comment itself says | announcements §2 |
 | UX-A11Y-28 | The catalog home `<title>` is the bare `ocx.sh`. `site/dist/_shell/v1/<rev>/nav.html` has no `lang` | page-structure §3; ui-code-posture §3 |
 | UX-A11Y-29 (SHOULD finding) | `G:public/start.html` and `G:public/privacy.html` have no `<main>` (`grep -c '<main'` gives 0 and 0, re-run 2026-11-27) | page-structure §3 |
@@ -882,6 +972,7 @@ the rule.
 | UX-A11Y-35 (focus-colour clause; unmeasured in a rendered webview) | Revision 1 ran the colour scan in full: 0 hex outside comments. The 5 raw hits are all in the comment block `W:settings/settings.css:3-8`. `var(--vscode-focusBorder)` is used at 9 sites. Its computed value in a rendered webview has not been read. The high-contrast test is missing and is listed under Violated |
 | UX-A11Y-22 (copy button; unmeasured) | `CopyButton.astro` relies on the page toaster to announce, which was not exercised. Verify that the toaster region exists at load |
 | UX-A11Y-32 (Material; unmeasured) | The ocx-mirror, indexbot and indexer pages without a table of contents would have no skip link. Pages with one carry `.md-skip` |
+| UX-A11Y-37 (unmeasured on the fleet) | Measured only on held-out public pages (`sqlite.org`, `zed.dev`, followup-w3-q0). The first fleet run of `focus_opacity2.mjs` either finds no `LEAD` row or records each one as a violation or a triaged visible stop |
 
 ## AI-agent failure modes
 
@@ -898,6 +989,9 @@ Each is grouped by the mechanism that produces it, and the rule that catches it 
 4. Sizes a target by its glyph or token, not by its rendered box. The stacked rows are 23.6 px. [20]
 5. Lets a planned or disabled item differ from its siblings only by colour or a missing icon.
    8 entries. [19, 34]
+24. Hides a native checkbox at zero size behind a custom box, or leaves an empty anchor in the
+    Tab order, because the page looks right. Focus then lands on a box nobody can see. 9 inputs
+    on `zed.dev` and 2 anchors on `sqlite.org` in the held-out round. [37, 03, 04]
 
 **Mechanism B: training-data idioms that predate the platform features.**
 6. Writes `<a href="#">` or a `div` with a click handler for actions, then hand-writes Enter and
@@ -940,6 +1034,9 @@ Each is grouped by the mechanism that produces it, and the rule that catches it 
     second `<h1>` and `region`. The virtual reader does not model the iOS double speech. [04, 31,
     32; gate policy in UX-VERIFY]
 22. Accepts an APCA pass over a WCAG 2 fail, or calls 44 px an AA requirement. [17]
+25. Treats an opacity reading as the verdict on focus visibility. A threshold near 1 flags every
+    design-time dim, and no opacity value sees a zero-size box. Even the 0.5 threshold raised a
+    false `FAIL` on a demo animation. Only the crop decides. [36, 37]
 
 ## What an agent must ask a human
 
@@ -973,7 +1070,7 @@ Each is grouped by the mechanism that produces it, and the rule that catches it 
 | Fact a rule rests on | Rules | Source and date | Refresh | How to re-check |
 |---|---|---|---|---|
 | WebAIM prevalence figures (83.9 / 53.1 / 51 / 46.3 / 30.6 / 13.5 %; ARIA 59.1 vs 42.0) | Verdict 1-2, 01-04, 15, 28 | [WebAIM Million](https://webaim.org/projects/million/), 2026-03-30 | 12 months (annual report, February crawl) | Re-read the ranking table. Re-rank the failure modes if the order changes |
-| WCAG 2.2 criteria texts and Understanding pages (revised between 2025-09 and 2026-11) | 12-16, 19-20, 22-29, 33, 36 | [WCAG 2.2](https://www.w3.org/TR/WCAG22/), Rec 2024-12-12; Understanding pages dated per rule | 6 months | Fetch each linked Understanding page and diff the levels, thresholds and listed techniques and failures |
+| WCAG 2.2 criteria texts and Understanding pages (revised between 2025-09 and 2026-11); for 36 and 37, that neither 2.4.7 (Understanding updated 2026-10-04) nor 2.4.11 (updated 2026-06-15) names an invisible focused control | 12-16, 19-20, 22-29, 33, 36, 37 | [WCAG 2.2](https://www.w3.org/TR/WCAG22/), Rec 2024-12-12; Understanding pages dated per rule | 6 months | Fetch each linked Understanding page and diff the levels, thresholds and listed techniques and failures |
 | ARIA in HTML allowed-role table and MUST NOTs | 07, 09, 10 | [AIH](https://www.w3.org/TR/html-aria/), Rec 2026-08-11 | 12 months | Re-read the `button`, `a`, `input type=checkbox`, `summary`, `details` and `dialog` rows |
 | Accname: `title` as the last fallback (Working Draft) | Verdict 3, 04 | [Accname 1.2](https://www.w3.org/TR/accname-1.2/), WD 2026-11-04 | 6 months | Check step 2I and the document's status |
 | axe passes a title-only button; axe rule IDs and impacts | 03, 04, 05, 10, 29-32 | [axe-core rule-descriptions](https://raw.githubusercontent.com/dequelabs/axe-core/develop/doc/rule-descriptions.md) (4.14.1); [Deque button-name](https://dequeuniversity.com/rules/axe/4.14/button-name) | each axe minor release (about 6 months) | Grep the rule list for each ID. Re-run a `<button title="x"></button>` fixture through axe |
@@ -986,7 +1083,8 @@ Each is grouped by the mechanism that produces it, and the rule that catches it 
 | Flash definition and the 0.34 s derivation | 26 | [Understanding 2.3.1](https://www.w3.org/WAI/WCAG22/Understanding/three-flashes-or-below-threshold.html), updated 2025-09-17 | with WCAG | Re-read the definition of "flash". If it is no longer "a pair of opposing changes", redo the derivation |
 | Lightness counts as a cue at 3:1 | 19 (`colour_only_v2.mjs`) | [Understanding 1.4.1](https://www.w3.org/WAI/WCAG22/Understanding/use-of-color.html), updated 2025-09-16 | with WCAG | Re-read the "significant difference in lightness" paragraph |
 | ARIA22 test 1 ("before the status message occurs") and ARIA19 ("present in the DOM on page load") | 22 | [ARIA22](https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA22), updated 2026-01-12; [ARIA19](https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA19), updated 2026-04-27; both read in raw HTML 2026-11-27 | 12 months | `curl -sSL <url> \| sed 's/<[^>]*>//g' \| grep -iE 'before the status message\|present in the DOM'`. If either test text changes, re-word the Why of 22 |
-| Check scripts in the Appendix | 03, 04, 12, 13, 15, 16, 19, 20, 35, 36 | this artifact; A1 to A5 revision 1; A6 replaced and A7, A8 added in revision 2 | each Chromium, puppeteer-core or PostCSS major | Run each script's self-test or fixture (A1 `--selftest`, A6 R1 to R4, A7 F1 to F9, A8 O1 to O5). Re-run them on the fleet |
+| Check scripts in the Appendix | 03, 04, 12, 13, 15, 16, 19, 20, 35, 36, 37 | this artifact; A1 to A5 revision 1; A6 replaced and A7 added in revision 2; A8 added in revision 2 and replaced in revision 3 (Playwright 1.57.0) | each Chromium, Firefox, WebKit, puppeteer-core, Playwright or PostCSS major | Run each script's self-test or fixture (A1 `--selftest`, A6 R1 to R4, A7 F1 to F9, A8 `opacity.html` O1 to O10 and `scroll.html` S1 to S5). Re-run them on the fleet |
+| Held-out confusion tables of the A8 checks (0.99 check: 0 true positives, 13 or 14 false fails per engine; replacement: 3 flagged stops per engine, 0 missed) | Verdict 6, 13, 14; 13, 36, 37 | followup-w3-q0, 2026-11-27: ten public home pages loaded that day, Chromium 159.0.8154.6, Firefox 144.0.2, WebKit 26.0 (Playwright WPE build). Pages change daily, so the selectors and opacities are of that day | when A8 changes, and before any severity change on 36 or 37 | Re-run A8 on a fresh held-out set of at least eight pages, labelled from crops before the verdicts are read |
 | Precision and recall of the focus and colour checks on Primer and Radix | Verdict 13-14, 12, 19 | followup-q1; primer/react and primer/css at 2026-11-25, radix-ui/themes at 2026-04-11, radix-ui/website at 2026-10-07 | when a check script changes | Re-run A1, A7 and A6 on the same four repositories, and compare with followup-q1's tables |
 | Starlight `PageTitle` `id="_top"`; Material skip link only with a table of contents | 31, 32 | [Starlight overrides](https://starlight.astro.build/reference/overrides/), undated; Material `base.html` master, fetched 2026-11-27 | each major or minor framework upgrade | `grep -n 'toc | first' base.html` in the installed Material. Read the Starlight overrides page |
 | Fleet measurements in "Applied" | all rows | dists built 2026-11-16 to 11-24; sources read 2026-11-27. Wave 2 pins: `grimoire-rs/vscode` `9230dcd` (2026-11-24), `grim-gui` `edda90d` (2026-11-26). The ocx.sh `ScrollStage.astro` and `scroll.mjs` were read in the working tree of the sibling checkout, not in a release | each rebuild, at least quarterly | Re-run the commands cited in the rows |
@@ -1020,9 +1118,14 @@ reused.
    to (f), and what are its precision and recall against an oracle? The oracle is a Tab-and-diff
    pass on built Primer and Radix Storybooks and on the radix-ui/website demos. Until then the
    two scripts stay lead generators (UX-A11Y-12, Verdict 14).
-9. Does UX-A11Y-36 hold outside headless Chrome? Run `focus_opacity.mjs` in Firefox and WebKit,
-   and run the `:focus-within` fix with OS-level smooth scrolling, on every page of ocx.sh, not
-   only `index.html`.
+9. (Narrowed in revision 3. The three-engine part was answered by followup-w3-q0.) Does the
+   `:focus-within` fix of UX-A11Y-36 hold with OS-level smooth scrolling on every page of ocx.sh,
+   not only `index.html`? Run `focus_opacity2.mjs` on the rebuilt site in all three engines.
+10. Does `focus_opacity2.mjs` separate a pass from a fail on pages it was not tuned on? Use a
+    second held-out set of at least eight new pages, labelled from crops before the verdicts are
+    read, at 390 px, in dark and with `MOTION=reduce` as well as 1280 px light. Include at least
+    one page with a scroll-revealed opacity-0 container. Until this runs, UX-A11Y-36 and -37 rest
+    on the triaged crop review, and -37 stays SHOULD.
 
 **Owner decisions**
 
@@ -1060,6 +1163,10 @@ reused.
   prototypes behind Appendix A6 and A7.
 - [followup-q2.md](ux-a11y-authoring/followup-q2.md) (wave 2) re-measures the webview and grim-gui
   live regions, and corrects the ARIA22 quote in UX-A11Y-22.
+- [followup-w3-q0.md](ux-a11y-authoring/followup-w3-q0.md) (wave 3, answered partly) runs the
+  UX-A11Y-36 check in Chromium, Firefox and WebKit on ten held-out pages, with confusion tables.
+  It builds and runs the replacement `focus_opacity2.mjs`, reads the 2.4.7 and 2.4.11 text, and is
+  the source of UX-A11Y-37.
 
 ## Key sources
 
@@ -1087,7 +1194,8 @@ These are the scripts the Verify lines name. They are inlined here so that an ad
 run them without the research cache. When this topic is published as a rule plus a reference
 skill, each script ships in that skill's `checks/` directory under the name given in its heading,
 and the rule text cites it by that path. The browser scripts need Node 20 or later,
-`npm i -D puppeteer-core`, and `CHR` set to a Chromium or `chrome-headless-shell` binary. Serve a
+`npm i -D puppeteer-core`, and `CHR` set to a Chromium or `chrome-headless-shell` binary. A8 is
+the exception: it needs `npm i -D playwright@1.57.0` and runs in Chromium, Firefox or WebKit. Serve a
 built site read-only with `python3 -m http.server <port>` in its `dist`. Run Python with `-I`.
 
 ### A1. focus_outline.py (UX-A11Y-12)
@@ -1598,76 +1706,170 @@ for (const r of rules) { const rem=removes(r.d); if(!rem.length) continue;
 console.error(JSON.stringify(counts));
 ```
 
-### A8. focus_opacity.mjs (UX-A11Y-36)
+### A8. focus_opacity2.mjs (UX-A11Y-36, -37)
 
-Written in revision 2 from the `probeM.mjs` method of followup-q0. That probe was tied to one
-selector, and this version checks every Tab stop. Usage: `CHR=<chrome-headless-shell> node
-focus_opacity.mjs <url> [<url> ...]`, with optional `THEMES`, `WIDTHS`, `MOTION=reduce` and
-`STOPS`. Exit 0 means every stop is visible, 1 means at least one FAIL, 2 means a page failed to
-load. Fixture, saved as `opacity.html`. Expected: O2 FAIL, O1, O3 and O5 pass, and O4 is not a
-stop. Run in revision 2: `THEMES=light WIDTHS=1280 node focus_opacity.mjs file://$PWD/opacity.html`
-printed one FAIL line, for "O2 in opacity-0 container" with `"eff":0` and `"low":"DIV.fade"`, then
-`stops … 4` and `invisible focus stops: 1`. It exited 1. `node focus_opacity.mjs
-http://127.0.0.1:59999/` exited 2. Fleet results are in "Applied to the fleet", UX-A11Y-36.
+Written in revision 2 as the puppeteer-core `focus_opacity.mjs` (0.99 threshold, one 300 ms
+read). Replaced in revision 3 by the Playwright script that followup-w3-q0 built and ran in
+Chromium, Firefox and WebKit. The in-page `read` function, the settle loop and the verdict lines are
+that script's, verbatim. Revision 3 changed only the launch, which now takes `ENGINE` and an
+optional `BROWSER` path instead of this machine's library paths, and added the `THEMES` and
+`WIDTHS` loops and exit 2 that the revision-2 script had. Usage: `ENGINE=<chromium|firefox|webkit>
+[BROWSER=<executable>] [THEMES=light,dark] [WIDTHS=1280,390] [MOTION=reduce] [STOPS=120]
+[SHOTS=<dir>] node focus_opacity2.mjs <url> [<url> ...]`. Without `BROWSER`, Playwright uses the
+browser that `npx playwright install <engine>` installed. Exit 0 means no `FAIL` or `LEAD` row, 1
+means at least one, and 2 means a page failed to load. The rows are leads, and UX-A11Y-36 says
+how to triage them.
+
+Fixtures, saved as `opacity.html` and `scroll.html`. `scroll.html` is synthetic: S2 copies the
+ocx.sh finale mechanism, a container whose opacity a `scroll` listener writes. The radio groups in
+O7 and O10 need distinct `name`s. With a shared name, Chromium and Firefox skip O10 in the Tab
+order (followup-w3-q0).
 
 ```html
 <!doctype html><html lang="en"><title>fixture</title>
-<style>.fade{opacity:0}.fixed{opacity:0}.fixed:focus-within{opacity:1}.vh{visibility:hidden}</style>
+<style>.fade{opacity:0}.fixed{opacity:0}.fixed:focus-within{opacity:1}.vh{visibility:hidden}.dim{opacity:.8}.rd{opacity:0;position:absolute}.z{width:0;height:0;opacity:0;position:absolute}</style>
 <button>O1 visible</button>
 <div class="fade"><button>O2 in opacity-0 container</button></div>
 <div class="fixed"><button>O3 container fixed with focus-within</button></div>
 <div class="fade" inert><button>O4 inert, not a stop</button></div>
 <button>O5 visible</button>
+<a href="#"></a>
+<label><input type="radio" name="g" class="rd">O7 tab label (proxy visible)</label>
+<div class="dim"><button>O8 dimmed to 0.8</button></div>
+<label><input type="checkbox" class="z">O9 zero-size checkbox with visible label</label>
+<div class="fade"><label><input type="radio" name="h" class="rd">O10 radio inside opacity-0 container</label></div>
 </html>
 ```
 
+```html
+<!doctype html><html lang="en"><title>fixture scroll and transition</title>
+<style>body{margin:0;height:4000px}.sp{height:300px}
+#fin{opacity:0}#fix{opacity:0}#fix:focus-within{opacity:1}
+.tr{opacity:.2;transition:opacity 1s linear 0s}.tr:focus-within{opacity:1}
+.tr0{opacity:0;transition:opacity .15s}.tr0:focus-within{opacity:1}</style>
+<button>S1 visible</button>
+<div class="sp"></div>
+<!-- S2: container opacity written from scrollY, 0 until scrollY>2000 (the ocx finale mechanism); the Tab scroll is far below 2000 -->
+<div id="fin"><button>S2 scroll-linked opacity, 0 at this scroll</button></div>
+<script>addEventListener('scroll',()=>{document.getElementById('fin').style.opacity=Math.min(1,Math.max(0,(scrollY-2000)/200))})</script>
+<div class="sp"></div>
+<div id="fix"><button>S3 same container fixed with focus-within</button></div>
+<div class="sp"></div>
+<div class="tr"><button>S4 fades from 0.2 to 1 over 1 s on focus (settles to pass)</button></div>
+<div class="sp"></div>
+<div class="tr0"><button>S5 fades from 0 to 1 over 0.15 s on focus (settles to pass)</button></div>
+</html>
+```
+
+Run in revision 3, on 2026-11-27, in a scratch directory with Playwright 1.57.0. `BROWSER` pointed
+at the Chrome for Testing 159.0.8154.6 headless shell, and `LD_LIBRARY_PATH` at a scratch library
+copy. Output as printed. The light 1280 block is shown, and the three other theme and width blocks
+printed the same six rows.
+
+```
+$ ENGINE=chromium node focus_opacity2.mjs file://$PWD/opacity.html
+engine chromium 159.0.8154.6
+FAIL chromium light 1280 file #1 button "O2 in opacity-0 containe" p=0 rect=8x27x179x19 settle_ms=0
+LEAD chromium light 1280 file #4 a "" p=1 rect=94x84x0x16 settle_ms=0
+PROXY chromium light 1280 file #5 input.rd "" p=0 rect=99x87x13x13 settle_ms=0
+INFO chromium light 1280 file #6 button "O8 dimmed to 0.8" p=0.8 rect=8x103x116x19 settle_ms=0
+PROXY chromium light 1280 file #7 input.z "" p=0 rect=12x125x0x0 settle_ms=0
+FAIL chromium light 1280 file #8 input.rd "" p=0 rect=13x141x13x13 settle_ms=0
+summary chromium light 1280 file stops 9 {"FAIL":2,"LEAD":1,"PROXY":2,"INFO":1}
+…            (light 390, dark 1280 and dark 390: the same six rows and the same summary)
+rows needing triage (FAIL+LEAD): 12
+exit=1
+$ ENGINE=firefox THEMES=light WIDTHS=1280 node focus_opacity2.mjs file://$PWD/opacity.html
+engine firefox 144.0.2
+  (the same six verdicts on O2, O6, O7, O8, O9, O10; summary {"FAIL":2,"LEAD":1,"PROXY":2,"INFO":1})
+exit=1
+$ ENGINE=webkit THEMES=light WIDTHS=1280 node focus_opacity2.mjs file://$PWD/opacity.html
+engine webkit 26.0
+  (the same six verdicts; the same summary)
+exit=1
+$ ENGINE=chromium THEMES=light WIDTHS=1280 node focus_opacity2.mjs file://$PWD/scroll.html
+FAIL chromium light 1280 file #1 button "S2 scroll-linked opacity" p=0 rect=0x319x286x19 settle_ms=0
+summary chromium light 1280 file stops 5 {"FAIL":1,"LEAD":0,"PROXY":0,"INFO":0}
+exit=1
+$ NOSETTLE=1 ENGINE=chromium THEMES=light WIDTHS=1280 node focus_opacity2.mjs file://$PWD/scroll.html
+FAIL chromium light 1280 file #1 button "S2 scroll-linked opacity" p=0 rect=0x319x286x19 settle_ms=300
+FAIL chromium light 1280 file #3 button "S4 fades from 0.2 to 1 o" p=0.453 rect=0x390x370x19 settle_ms=300
+exit=1
+$ ENGINE=chromium THEMES=light WIDTHS=1280 node focus_opacity2.mjs http://127.0.0.1:59999/
+ERROR chromium light 1280 127.0.0.1:59999 page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:59999/
+exit=2
+```
+
+Expected, in every engine: `FAIL` O2 and O10, `LEAD` O6, `PROXY` O7 and O9, `INFO` O8. O1, O3
+and O5 pass, and O4 is not a stop. On `scroll.html`, `FAIL` S2 only, and S3 to S5 pass. The
+follow-up's own fixture log, `fixture_run.txt`, prints `exit=0` after each engine, which does not match
+the script's `process.exit(bad ? 1 : 0)` with 3 rows needing triage. Run directly in this
+revision, the script exits 1, as above. The held-out page results
+are in followup-w3-q0. Fleet results are in "Applied to the fleet", UX-A11Y-36. They come from
+the replaced script.
+
 ```js
-// UX-A11Y-36 check: every Tab stop is visible when it has focus (effective opacity and visibility).
-// Usage: CHR=<chrome-headless-shell> node focus_opacity.mjs <url> [<url> ...]
-//   env: THEMES=light,dark  WIDTHS=1280,390  MOTION=no-preference|reduce  STOPS=120
-// Exit 0 = every stop visible, 1 = at least one FAIL, 2 = a page failed to load.
-// shortcut: reads computed opacity, visibility and content-visibility only; clip-path, a zero-size clip and an off-screen
-// position are not seen. Upgrade with a pixel diff (focus_diff.mjs) when a stop passes here but shows 0 changed pixels.
-import puppeteer from 'puppeteer-core';
-const urls = process.argv.slice(2);
-const env = (k, d) => (process.env[k] || d).split(',');
-const b = await puppeteer.launch({ executablePath: process.env.CHR, headless: true, args: ['--no-sandbox'] });
-let fails = 0, errs = 0;
-for (const url of urls) for (const theme of env('THEMES', 'light,dark')) for (const vw of env('WIDTHS', '1280,390')) {
-  const p = await b.newPage();
-  await p.setViewport({ width: +vw, height: 800 });
-  await p.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: theme },
-    { name: 'prefers-reduced-motion', value: process.env.MOTION || 'no-preference' }]);
-  await p.evaluateOnNewDocument((t) => { try { localStorage.setItem('starlight-theme', t); localStorage.setItem('theme', t); } catch (e) {} }, theme);
-  try { await p.goto(url, { waitUntil: 'load', timeout: 30000 }); await new Promise((r) => setTimeout(r, 1500)); }
-  catch (e) { errs++; console.log('ERROR', theme, vw, url, String(e.message).split('\n')[0]); await p.close(); continue; }
-  await p.mouse.click(1, 1);
-  let n = 0;
-  for (let i = 0; i < +(process.env.STOPS || 120); i++) {
+// UX-A11Y-36 and -37 check (Appendix A8, revision 3). Playwright; runs in Chromium, Firefox and WebKit.
+// Usage: ENGINE=chromium|firefox|webkit [BROWSER=<executable>] [THEMES=light,dark] [WIDTHS=1280,390]
+//        [MOTION=reduce] [STOPS=120] [SHOTS=<dir>] node focus_opacity2.mjs <url> [<url> ...]
+// Rows: FAIL  effective opacity (product over the element and its ancestors) < 0.5, or visibility/content-visibility hidden on the chain
+//       LEAD  the focused box is zero-width or zero-height (UX-A11Y-37)
+//       PROXY a radio or checkbox that would be FAIL or LEAD, but one of its labels has a box > 0 and a product >= 0.99
+//       INFO  0.5 <= product < 0.99 (a design-time dim; look at the crop only if it shows no ring)
+// After each Tab the product is read until two reads 150 ms apart agree, at most 2 s (NOSETTLE=1: one 300 ms read).
+// Exit 0 = no FAIL or LEAD row, 1 = at least one, 2 = a page failed to load. Rows are leads: triage every FAIL and LEAD crop.
+// shortcut: clip-path and off-screen positions are not read, and a scripted demo that holds a low plateau prints a false FAIL;
+// the crop review in UX-A11Y-36 is the answer until a pixel check replaces it.
+import { chromium, firefox, webkit } from 'playwright';
+const eng = process.env.ENGINE || 'chromium';
+const list = (k, d) => (process.env[k] || d).split(',');
+const STOPS = +(process.env.STOPS || 120), SHOTS = process.env.SHOTS;
+const b = await ({ chromium, firefox, webkit })[eng].launch(process.env.BROWSER ? { executablePath: process.env.BROWSER } : {});
+console.log('engine', eng, b.version());
+const read = () => {
+  const e = document.activeElement; if (!e || e === document.body || e === document.documentElement) return null;
+  const prod = (n) => { let p = 1, hid = null; for (let a = n; a; a = a.parentElement) { const s = getComputedStyle(a); p *= parseFloat(s.opacity);
+    if (!hid && (s.visibility === 'hidden' || s.contentVisibility === 'hidden')) hid = a.tagName + '.' + String(a.className).slice(0, 30); } return { p, hid }; };
+  const m = prod(e); const r = e.getBoundingClientRect();
+  const sel = e.tagName.toLowerCase() + (e.id ? '#' + e.id : '') + (e.className && typeof e.className === 'string' ? '.' + e.className.trim().split(/\s+/).slice(0, 2).join('.') : '');
+  let proxy = false;
+  if (e.tagName === 'INPUT' && /^(radio|checkbox)$/.test(e.type)) {
+    const ls = [...(e.labels || [])]; for (const l of ls) { const lr = l.getBoundingClientRect(), lm = prod(l); if (lr.width > 0 && lr.height > 0 && lm.p >= 0.99 && !lm.hid) proxy = true; } }
+  return { sel, txt: (e.textContent || e.getAttribute('aria-label') || '').trim().replace(/\s+/g, ' ').slice(0, 24), p: +m.p.toFixed(3), hid: m.hid,
+    rect: [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)], proxy };
+};
+let bad = 0, errs = 0;
+for (const url of process.argv.slice(2)) for (const theme of list('THEMES', 'light,dark')) for (const vw of list('WIDTHS', '1280,390').map(Number)) {
+  const host = new URL(url).host || 'file', vh = 800, tag = `${eng} ${theme} ${vw} ${host}`;
+  const ctx = await b.newContext({ viewport: { width: vw, height: vh }, colorScheme: theme, reducedMotion: process.env.MOTION === 'reduce' ? 'reduce' : 'no-preference' });
+  await ctx.addInitScript((t) => { try { localStorage.setItem('starlight-theme', t); localStorage.setItem('theme', t); } catch (e) {} }, theme);
+  const p = await ctx.newPage();
+  try { await p.goto(url, { waitUntil: 'load', timeout: 45000 }); await p.waitForTimeout(2500); }
+  catch (e) { errs++; console.log('ERROR', tag, String(e.message).split('\n')[0]); await ctx.close(); continue; }
+  await p.evaluate(() => document.activeElement && document.activeElement.blur && document.activeElement.blur());
+  let n = 0; const counts = { FAIL: 0, LEAD: 0, PROXY: 0, INFO: 0 };
+  for (let i = 0; i < STOPS; i++) {
     await p.keyboard.press('Tab');
-    await new Promise((r) => setTimeout(r, 300)); // let scroll-driven styles settle
-    const o = await p.evaluate(() => {
-      const e = document.activeElement; if (!e || e === document.body) return null;
-      if (e.__fo) return { again: true }; e.__fo = 1; // back at a stop already seen: the Tab order wrapped
-      let eff = 1, hidden = null;
-      for (let a = e; a; a = a.parentElement) {
-        const s = getComputedStyle(a); eff *= parseFloat(s.opacity);
-        if (!hidden && (s.visibility === 'hidden' || s.contentVisibility === 'hidden')) hidden = a.tagName + '.' + String(a.className).slice(0, 40);
-      }
-      let low = null; // the outermost ancestor that lowers opacity, to name the container to fix
-      for (let a = e; a; a = a.parentElement) if (parseFloat(getComputedStyle(a).opacity) < 1) low = a.tagName + '.' + String(a.className).slice(0, 40);
-      return { k: e.tagName.toLowerCase() + '.' + String(e.className).slice(0, 40) + '|' + (e.textContent || e.getAttribute('aria-label') || '').trim().slice(0, 24),
-        eff: +eff.toFixed(3), hidden, low, sy: Math.round(scrollY) };
-    });
-    if (!o || o.again) break; n++;
-    if (o.eff < 0.99 || o.hidden) { fails++; console.log('FAIL', theme, vw, url, JSON.stringify(o)); }
+    let o = await p.evaluate(read), t = 0;
+    for (t = 0; o && t < (process.env.NOSETTLE ? 300 : 2000); t += 150) { await p.waitForTimeout(150); const o2 = await p.evaluate(read); if (!o2) break; const same = o2.p === o.p; o = o2; if (same && !process.env.NOSETTLE) break; }
+    if (!o) break;
+    const seen = await p.evaluate(() => { const e = document.activeElement; if (e.__fo) return true; e.__fo = 1; return false; });
+    if (seen) break; n++; // back at a stop already seen: the Tab order wrapped
+    let v = 'pass';
+    const fail = o.p < 0.5 || o.hid, lead = o.rect[2] === 0 || o.rect[3] === 0;
+    if (fail || lead) v = o.proxy ? 'PROXY' : fail ? 'FAIL' : 'LEAD'; else if (o.p < 0.99) v = 'INFO';
+    if (v === 'pass') continue;
+    counts[v]++; if (v === 'FAIL' || v === 'LEAD') bad++;
+    console.log(v, tag, '#' + i, o.sel.slice(0, 40), JSON.stringify(o.txt), 'p=' + o.p, 'rect=' + o.rect.join('x'), 'settle_ms=' + t, o.hid ? 'hidden=' + o.hid : '');
+    if (SHOTS) { const [x, y, w, h] = o.rect; const cx = Math.max(150, Math.min(vw - 150, Math.round(x + w / 2))), cy = Math.max(94, Math.min(vh - 94, Math.round(y + h / 2)));
+      try { await p.screenshot({ path: `${SHOTS}/${eng}__${theme}__${vw}__${host}__${i}__${v}.png`, clip: { x: cx - 150, y: cy - 94, width: 300, height: 188 } }); } catch (e) {} }
   }
-  console.log('stops', theme, vw, url, n);
-  await p.close();
+  console.log('summary', tag, 'stops', n, JSON.stringify(counts));
+  await ctx.close();
 }
 await b.close();
-console.log('invisible focus stops:', fails);
-process.exit(errs ? 2 : fails ? 1 : 0);
+console.log('rows needing triage (FAIL+LEAD):', bad);
+process.exit(errs ? 2 : bad ? 1 : 0);
 ```
 
 ## Revision log
@@ -1762,3 +1964,50 @@ One rule was added (36). No severity changed on an existing rule.
 - 2026-11-27, Decay: ARIA22/ARIA19 row and Primer/Radix precision row added. The scripts row
   now covers A6 to A8, the WCAG row now covers 36, and the fleet row pins the wave-2 commits.
   Frontmatter: the three follow-ups are added to `consolidates`, and `revision: 2` was added.
+
+Revision 3, 2026-11-27, folding the wave-3 follow-up `followup-w3-q0.md` (answered: partly). No
+rule was renumbered, retired or demoted. One rule was added (37). No severity changed on an
+existing rule.
+
+- 2026-11-27, UX-A11Y-36, from followup-w3-q0: the Verify was replaced. The 0.99 check gave 0 true
+  positives and 13 or 14 false fails per engine on ten held-out pages in Chromium, Firefox and
+  WebKit, so its exit code is no longer the pass. The pass is now the triaged end state of
+  `focus_opacity2.mjs`: every `FAIL` and `LEAD` crop is opened, and each stop is fixed or recorded
+  as visible in the PR, one line per row. The crop look is labelled a reading heuristic. Severity
+  stays MUST, because the wave-2 ocx.sh measurement stands and the round found nothing against
+  the rule.
+- 2026-11-27, UX-A11Y-36, from followup-w3-q0: the rule text "must show its focused descendants at
+  full opacity" overclaimed. Visible controls at 0.8 and 0.85 (`linear.app`, `vite.dev`) failed
+  it. It now reads "must never leave a focused descendant invisible", and it exempts a partial dim
+  that leaves the control and ring visible. The Why adds the 2.4.11 alternative reading and the
+  F55 and F78 note. The scope limit no longer lists a zero-size box, which UX-A11Y-37 now covers.
+- 2026-11-27, UX-A11Y-37 (new, SHOULD), from followup-w3-q0: a focusable element has a non-zero
+  box or a visible proxy that shows its focus. Evidence: the `sqlite.org` empty anchors and the
+  nine `zed.dev` file-tree inputs, flagged as `LEAD` in all three engines. It is SHOULD because
+  the W3C text does not name the case and the box check has a measured false positive
+  (`sqlite.org#0`). New commitment row, failure mode 24 and Verdict 12 entry added.
+- 2026-11-27, UX-A11Y-13, from followup-w3-q0: the second read of a 0-pixel stop no longer says
+  "a value below 0.99 means an invisible stop". It names `focus_opacity2.mjs`, treats `FAIL` and
+  `LEAD` rows as leads for 36 and 37, and adds a zero-size box as a third cause of a 0-pixel
+  diff.
+- 2026-11-27, Appendix A8, from followup-w3-q0: `focus_opacity.mjs` (puppeteer-core, 0.99, one
+  300 ms read) was replaced by `focus_opacity2.mjs` (Playwright 1.57.0, settle loop, 0.5, `LEAD`,
+  `PROXY`, `INFO`). Its fixture grew from O1 to O5 to O1 to O10, and `scroll.html` (S1 to S5) was
+  added. Revision 3 made the launch portable (`ENGINE`, `BROWSER`) and restored `THEMES`, `WIDTHS`
+  and exit 2. It re-ran the fixtures in all three engines with the outputs shown in A8. The
+  follow-up's `fixture_run.txt` prints `exit=0`, which does not match the script, and a direct
+  run exits 1.
+- 2026-11-27, UX-A11Y-36 Applied row, from followup-w3-q0: labelled as results of the replaced
+  script. The fleet was not re-run, and every listed value is below the new 0.5 threshold.
+- 2026-11-27, Verdict 6, 13 and 14, from followup-w3-q0: the single-engine gap of revision 2 was
+  replaced by the three-engine result. New gap bullets record the missing held-out opacity-0
+  positive, the tuned-on-the-same-pages caveat, the runs not made (390 px, dark, reduced motion),
+  the WebKit crash on `deno.com`, and the 2.4.7 or 2.4.11 reading. Failure mode 25 was added.
+- 2026-11-27, Open questions, from followup-w3-q0: question 9 was narrowed to the ocx.sh pages and
+  OS-level smooth scrolling, because the three-engine part is answered. Question 10 was added: does
+  A8 separate a pass from a fail on a new held-out set it was not tuned on?
+- 2026-11-27, Decay, from followup-w3-q0: the WCAG row now covers 37 and the "no W3C text names
+  the case" fact. The scripts row names Playwright and the new fixtures. A row for the held-out
+  confusion tables was added, with the engine versions and the page-load date. Frontmatter:
+  `followup-w3-q0.md` added to `consolidates`, `revision: 3`. Sub-artifacts: the follow-up is
+  listed.

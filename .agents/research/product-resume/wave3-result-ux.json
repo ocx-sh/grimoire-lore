@@ -1,0 +1,107 @@
+{
+ "topics": [
+  {
+   "slug": "ux-a11y-authoring",
+   "idFamily": "UX-A11Y",
+   "followups": 1,
+   "unanswered": 0,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/ux-a11y-authoring.md",
+   "rules": 36,
+   "must": 25,
+   "newMust": [],
+   "newIds": [
+    "UX-A11Y-37"
+   ],
+   "changedIds": [
+    "UX-A11Y-36",
+    "UX-A11Y-13"
+   ],
+   "retiredIds": [],
+   "newFailureClasses": [
+    "Focusable element with a zero-width or zero-height box (empty hidden anchor, zero-size native checkbox behind a custom box) is invisible on focus, and no opacity reading sees it (UX-A11Y-37, failure mode 24)",
+    "An opacity reading treated as the verdict on focus visibility: a threshold near 1 flags design-time dims of visible controls, and a scripted demo plateau gives a false FAIL even at 0.5 (failure mode 25)"
+   ],
+   "stillOpen": [
+    "Does focus_opacity2.mjs separate a pass from a fail on a new held-out set of at least eight pages it was not tuned on, labelled blind from crops, run at 390 px, in dark and with MOTION=reduce, and including a real scroll-revealed opacity-0 container (Open question 10)?",
+    "Is the UX-A11Y-36 MUST acceptable to publish when its final pass condition is a crop review (a reading heuristic) and its only real-page positive is the wave-2 ocx.sh reading, which was not re-run with the new script?",
+    "Does the W3C Working Group treat an opacity-0 or zero-size focused control as a 2.4.7 or a 2.4.11 failure? No W3C text names it, and that reading carries both rules."
+   ]
+  },
+  {
+   "slug": "ux-interface-states",
+   "idFamily": "UX-STATE",
+   "followups": 2,
+   "unanswered": 0,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/ux-interface-states.md",
+   "rules": 36,
+   "must": 23,
+   "newMust": [],
+   "newIds": [
+    "UX-STATE-36"
+   ],
+   "changedIds": [
+    "UX-STATE-02",
+    "UX-STATE-03",
+    "UX-STATE-17",
+    "UX-STATE-20",
+    "UX-STATE-27",
+    "UX-STATE-34"
+   ],
+   "retiredIds": [],
+   "newFailureClasses": [
+    "multi-line (prettier) opening tag invisible to single-line tag grep",
+    "capitalised component tag (<Input, <VInput) invisible to lowercase <input grep",
+    "file-level masking: any autocomplete in the file hides a field with none",
+    "camelCase JSX autoComplete false-fails a lowercase grep -L",
+    "form-level autocomplete=off inherited by fields with no own token",
+    "invalid autocomplete token value (autocomplete=\"password\")",
+    "wrapper component default token (off or wrong) not read",
+    "valid but wrong password token (current-password or username on a new-password field)",
+    "schema-driven fields defined in YAML/JSON, rendered by a generic interface",
+    "person-data kind outside the rule's list (bday, phone, backup code)",
+    "error-toast timer lives in a dependency default, not app source",
+    "empty-state guard sits outside the branch expression (route load, enclosing v-if, sibling branch, Either type)",
+    "catch handler returns null/[] so a failure reads as an empty state"
+   ],
+   "stillOpen": [
+    "Do the element-level Verify texts for MUST rules UX-STATE-20 and UX-STATE-27 (elem.pl, badtok.pl, unnamed.pl) keep their recall on fresh codebases when frozen first and scored by a second reader, given every wave-3 figure is in-sample?",
+    "How does the published rule carry the Perl reference scripts its Verify for UX-STATE-20, 27 and 36 now points to, when they live only in a research appendix?",
+    "Has the UX-STATE-02 never-resolving-fetch render step ever been run, so the MUST rests on more than static reading of 3 violators?",
+    "Which governs UX-STATE-17 when an error toast times out but stays in a reachable history: the sentence 'Never auto-dismiss an error' or the WCAG 2.2.1 'available another way' condition (owner decision)?"
+   ]
+  },
+  {
+   "slug": "ux-ai-features",
+   "idFamily": "UX-AI",
+   "followups": 1,
+   "unanswered": 0,
+   "path": "/home/mherwig/dev/ocx-sh/grimoire-lore/.agents/worktrees/product/.agents/research/ux-ai-features.md",
+   "rules": 23,
+   "must": 9,
+   "newMust": [],
+   "newIds": [
+    "UX-AI-25"
+   ],
+   "changedIds": [
+    "UX-AI-05",
+    "UX-AI-15",
+    "UX-AI-24"
+   ],
+   "retiredIds": [],
+   "newFailureClasses": [
+    "Retriever relevance or similarity score shown to end users beside a citation (percentage, bar, colour bin, decimal): 4 of 7 held-out products, outside UX-AI-15's grep (UX-AI-25)",
+    "Vacuous pass by absent companion scope record: the 'if the owner confirms' trigger let 7 of 7 products pass by silence (UX-AI-05)",
+    "Grep substitutes for behavioural companion tests: '988' and '3 hours' match SVG path data, vendored code and scheduling text (UX-AI-05)",
+    "Self-declared 'I am an adult' accepted as the age determination, which NY GBL 1804(1)(b) rules out (UX-AI-24)",
+    "UX-AI-15 screen false fails on token-logprob debug viewers, sampler tooltips and substring hits such as 'uncertainty'; and a bare-word 'calibration' grep that unrelated files pass"
+   ],
+   "stillOpen": [
+    "Does the chaptered slip law of NY Chapter 368 of 2026, or the 2026-10-28 'approval memo.6', change any UX-AI-24 text from the as-passed S9051-B, which was read only against the consolidated GBS art. 48 at summary level?",
+    "Are any NY article 45 age-assurance regulations or Attorney General rules under GBL 1803 in effect or proposed, which would end the 1804(1) interim standard UX-AI-24 now encodes?",
+    "Do UX-AI-05 behavioural tests (1) to (3) separate a pass from a fail on a real product harness? They have never been run on any product.",
+    "Will the DOC-PLAIN-08 exemption for data-ai-disclosure labels land in docs-quality in the same change that publishes ux-ai-reference (C11 publishing gate)?"
+   ]
+  }
+ ],
+ "failed": []
+}
