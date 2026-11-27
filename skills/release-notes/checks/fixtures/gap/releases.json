@@ -1,0 +1,5 @@
+[
+  {"tagName": "v2.0.0", "isLatest": true, "isPrerelease": false, "isDraft": false},
+  {"tagName": "v2.1.0-rc.1", "isLatest": false, "isPrerelease": true, "isDraft": false},
+  {"tagName": "v1.4.1", "isLatest": false, "isPrerelease": false, "isDraft": false}
+]

@@ -1,0 +1,1 @@
+window.addEventListener("popstate", function(){});

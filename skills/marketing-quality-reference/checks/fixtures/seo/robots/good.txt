@@ -1,0 +1,14 @@
+# Shared rules repeat in every named group.
+User-agent: *
+Disallow: /private/
+Allow: /
+
+User-agent: OAI-SearchBot
+Disallow: /private/
+Allow: /
+
+User-agent: ClaudeBot
+Crawl-delay: 10
+Disallow: /private/
+
+Sitemap: https://example.com/sitemap-index.xml

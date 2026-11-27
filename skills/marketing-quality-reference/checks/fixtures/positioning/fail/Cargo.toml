@@ -1,0 +1,4 @@
+[package]
+name = "mytool"
+version = "0.2.0"
+description = "The simple package manager"

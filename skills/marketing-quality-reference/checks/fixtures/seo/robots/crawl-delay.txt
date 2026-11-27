@@ -1,0 +1,6 @@
+User-agent: Bingbot
+User-agent: *
+Crawl-delay: 2
+Disallow: /private/
+
+Sitemap: https://example.com/sitemap-index.xml

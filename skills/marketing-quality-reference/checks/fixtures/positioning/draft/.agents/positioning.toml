@@ -1,0 +1,31 @@
+status      = "unreviewed"
+reviewed    = 2026-11-27
+review_by   = 2026-11-27
+owner       = "ASK-OWNER"
+style       = "ASK-OWNER"
+sentence    = "Package manager for AI-agent config."
+category    = "package manager"
+object      = "AI-agent config"
+forbidden   = ["AI artifacts"]
+audience    = "ASK-OWNER"
+non_target  = ["ASK-OWNER"]
+maturity    = "Pre-1.0: commands may change between minor releases."
+lists       = {}
+
+[sources]
+sentence = "README.md:3"
+category = "README.md:3"
+object   = "README.md:3"
+forbidden = "README.md:3"
+maturity = "README.md:3"
+
+[[alternatives]]
+name = "ASK-OWNER"
+kind = "behaviour"
+
+[[do_not_say]]
+text      = "x"
+pattern   = "x"
+reason    = "x"
+instead   = "x"
+lift_when = "x"

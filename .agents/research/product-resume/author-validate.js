@@ -73,6 +73,7 @@ You are AUTHORING this unit. Before writing, read in full:
 
 Then write the unit's files.
 - Budgets are hard: a rule body under 200 lines; a SKILL.md body under 500 lines; a table of contents in any file over 100 lines. Depth goes into the reference files the plan names, one level deep.
+- The 200-line cap applies ONLY to a file under rules/. A depth file of a skill has no 200-line cap: the pattern set's depth files run 185 to 241 lines and each ends with a "What Agents Get Wrong Here" section; aim for that size and keep that section. VALIDATOR USAGE: pass the rule file and the skill DIRECTORY to check-artifacts.py, never a single depth file (a lone .md argument is judged as a rule and reports a false 'max 200'; fixtures are only exempt inside a directory run). If your unit owns depth files but not the directory's SKILL.md and that file is not on disk yet, validate a scratch copy of the directory with a stub SKILL.md that links your files.
 - Keep only guidance an agent gets wrong without being told. A rule's row is: ID, the imperative, the verification. Rationale and examples go to the depth file.
 - A skill is a procedure an agent can run literally: numbered steps, each with its input, its command or check, and what "done" looks like. A platform skill keeps every dated fact in the one dated-facts file the plan names, with source URL, source date and the refresh cadence; SKILL.md refers to it and never repeats a limit.
 - A shipped script, if the plan assigns one, is small, has no dependency beyond the standard library, has a --help, exits non-zero on a finding, and carries a self-test or assert-based check.
@@ -90,12 +91,12 @@ You are REVIEWING this unit. You change nothing. The author reported: wrote ${a.
 Read the unit's plan section, every file the author wrote, and the source consolidations. Report as BLOCKING, one line each with file:line:
 - a MUST rule the plan assigns to this unit that is absent, renumbered, weakened in severity, or shipped without its verification (compare ID by ID; list every miss);
 - a rule or fact whose published text contradicts its consolidation, or a platform limit, law, statistic or date with no source URL and date, or one not present in the consolidation at all (check every dated fact in a dated-facts file; sample at least 20 rule rows otherwise);
-- a budget overrun (count body lines yourself: rule body under 200, SKILL.md body under 500, table of contents in a file over 100 lines);
+- a budget overrun (count body lines yourself: a file under rules/ under 200 body lines, SKILL.md body under 500, table of contents in a file over 100 lines; a skill's depth file has NO 200-line cap);
 - any mention of /home/mherwig, .agents/research, the research program, waves, workers, or this fleet's repository names in a published file (run /usr/bin/grep -rn);
 - frontmatter that differs in shape from ${W}/rules/go-quality.md or ${W}/skills/go-quality-reference/SKILL.md; a skill description that does not say when to use it; a paths glob that differs from the plan;
 - a relative link that resolves to no file among this unit's files or the plan's artifact list;
 - a skill step an agent could not execute literally (no command, no check, no stated done condition), or a shipped script that fails its own self-test or --help (run it);
-- a non-zero exit of: python3 ${C}/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' <the unit's rule and skill paths> (run it; quote the findings that concern this unit's files).
+- a non-zero exit of: python3 ${C}/scripts/check-artifacts.py --forbid '/home/mherwig' --forbid '.agents/research' <the unit's rule and skill paths> (run it; quote the findings that concern this unit's files). Pass the rule file and the skill DIRECTORY, never a single depth or fixture file: a lone .md argument is judged as a rule and yields a false 'max 200' or a false broken-link finding. If the directory has no SKILL.md yet because another unit owns it, validate a scratch copy with a stub SKILL.md that links the unit's files.
 - any breach of the plan's "Authoring contract for every unit".
 A file or check script that another unit owns and that is not on disk yet is NOT a finding: other units are still writing. Everything else is a nit. ok=true only with zero blocking lines.`
 

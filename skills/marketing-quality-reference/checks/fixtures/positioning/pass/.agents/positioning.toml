@@ -1,0 +1,31 @@
+status      = "reviewed"
+reviewed    = 2026-11-27
+review_by   = 2027-05-27
+owner       = "Docs owner"
+product     = "mytool"
+style       = "big-fish-small-pond"
+
+sentence    = "Package manager for AI-agent config, installed into each coding agent in the format it reads."
+category    = "package manager"
+object      = "AI-agent config"
+forbidden   = ["AI artifacts", "AI-config packages"]
+trend_words = { hero = "banned", list = ["agentic", "AI-native"] }
+
+audience    = "Platform engineers who pin CLI tools across CI and laptops"
+non_target  = ["You need a portable POSIX tool: use grep"]
+maturity    = "Pre-1.0: commands may change between minor releases."
+
+[[alternatives]]
+name = "hand-copied files per client"
+kind = "behaviour"
+
+[lists.kinds]
+source  = "kinds.txt"
+extract = "cat kinds.txt"
+
+[[do_not_say]]
+text      = "drift detection"
+pattern   = "(?i)drift (detection|check)"
+reason    = "the status command is a report, not a gate"
+instead   = "the status command reports differences"
+lift_when = "the status command exits non-zero on drift"
